@@ -6,22 +6,16 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "9.2.4";
+$OL = "10.5.0";
 
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
-<style>
-.map {
-    width: 100%;
-    height: 400px;
-    float: left;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="search.css" />
 EOM;
 $t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
 
@@ -49,22 +43,70 @@ table.</p>
         <br />
         <input type="checkbox" id="last" name="last" value="1">
     List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
-        <br />Select Outlook: <input type="radio" name="day" value="1" checked id="d1">
-        <label for="d1">Day 1</label> &nbsp;
-        <input type="radio" name="day" value="2" id="d2">
-        <label for="d2">Day 2</label> &nbsp;
-        <input type="radio" name="day" value="3" id="d3">
-        <label for="d3">Day 3</label>
+        <br />
+        <div class="form-group outlook-days">
+            <label><strong>Select Outlook Day:</strong></label>
+            <div class="day-grid">
+                <div class="day-item">
+                    <input type="radio" name="day" value="1" checked id="d1">
+                    <label for="d1">Day 1</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="2" id="d2">
+                    <label for="d2">Day 2</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="3" id="d3">
+                    <label for="d3">Day 3</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="4" id="d4">
+                    <label for="d4">Day 4</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="5" id="d5">
+                    <label for="d5">Day 5</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="6" id="d6">
+                    <label for="d6">Day 6</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="7" id="d7">
+                    <label for="d7">Day 7</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="8" id="d8">
+                    <label for="d8">Day 8</label>
+                </div>
+            </div>
+        </div>
 
-        <br />Select Category:<br/>
-        <input type="radio" name="cat" value="categorical" checked id="categorical">
-        <label for="categorical">Categorical</label> &nbsp;
-        <input type="radio" name="cat" value="hail" id="hail">
-        <label for="hail">Hail</label> &nbsp;
-        <input type="radio" name="cat" value="tornado" id="tornado">
-        <label for="tornado">Tornado</label> &nbsp;
-        <input type="radio" name="cat" value="wind" id="wind">
-        <label for="wind">Wind</label>
+        <div class="form-group category-select">
+            <label><strong>Select Category:</strong></label>
+            <div class="category-grid">
+                <div class="day-item">
+                    <input type="radio" name="cat" value="categorical" checked id="categorical">
+                    <label for="categorical">Categorical</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="cat" value="any severe" id="anysevere">
+                    <label for="anysevere">Any Severe</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="cat" value="hail" id="hail">
+                    <label for="hail">Hail</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="cat" value="tornado" id="tornado">
+                    <label for="tornado">Tornado</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="cat" value="wind" id="wind">
+                    <label for="wind">Wind</label>
+                </div>
+            </div>
+        </div>
 
         <br /><button class="btn btn-default" id="manualpt">Update</button>
         </p>

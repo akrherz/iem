@@ -1,4 +1,3 @@
-
 /* global $, ol, olSelectLonLat */
 let marker = null;
 
@@ -27,6 +26,24 @@ function workflow() {
     updateTableTitle(lon, lat);
 }
 
+function updateURLParams(params = {}) {
+    const url = new URL(window.location.href);
+    // Update provided parameters
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== null) {
+            url.searchParams.set(key, value);
+        }
+    });
+    window.history.replaceState({}, '', url);
+}
+
+function updateMarkerPosition(lon, lat) {
+    $("#lat").val(lat.toFixed(4));
+    $("#lon").val(lon.toFixed(4));
+    updateURLParams({lon, lat});
+    workflow();
+}
+
 function buildUI() {
     $("#manualpt").click(() => {
         const la = parseFloat($("#lat").val());
@@ -39,30 +56,24 @@ function buildUI() {
     });
     $('#events').change(() => {
         workflow();
-
     });
     $('input[type=radio][name=day]').change(() => {
+        const day = $("input[name='day']:checked").val();
+        updateURLParams({day});
         workflow();
-
     });
     $('input[type=radio][name=cat]').change(() => {
+        const cat = $("input[name='cat']:checked").val();
+        updateURLParams({cat});
         workflow();
-
     });
 }
 
 function updateTableTitle(lon, lat) {
-    const txt = `Lon: ${lon} Lat: ${lat}`;
+    const txt = `Lon: ${lon} Lat: ${lat} Day: ${$("input[name='day']:checked").val()} Category: ${$("input[name='cat']:checked").val()}`;
     $('#watches').find("caption").text(`Convective Watches for ${txt}`);
     $('#outlooks').find("caption").text(`Convective Outlooks for ${txt}`);
     $('#mcds').find("caption").text(`Mesoscale Convective Discussions for ${txt}`);
-}
-
-function updateMarkerPosition(lon, lat) {
-    $("#lat").val(lat.toFixed(4));
-    $("#lon").val(lon.toFixed(4));
-    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
-    workflow();
 }
 
 function doOutlook(lon, lat) {
@@ -156,11 +167,7 @@ function doWatch(lon, lat) {
     });
 }
 
-$(document).ready(() => {
-    buildUI();
-    const res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
-    marker = res.marker;
-
+function convertLegacyHashLink() {
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
     if (tokens.length === 2) {
@@ -173,6 +180,42 @@ $(document).ready(() => {
                 updateMarkerPosition(lon, lat);
             }
         }
+        // Remove the hash from the URL
+        window.history.replaceState({}, '', tokens[0]);
     }
+}
+
+function readURLParams(){
+    // Read the URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const lon = parseFloat(urlParams.get('lon'));
+    const lat = parseFloat(urlParams.get('lat'));
+    if (!isNaN(lon) && !isNaN(lat)) {
+        marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+        updateMarkerPosition(lon, lat);
+    }
+    // Set the day selection if provided in URL
+    const day = urlParams.get('day');
+    if (day) {
+        $(`input[name='day'][value='${escapeHTML(day)}']`).prop('checked', true);
+    }
+    // Set the category selection if provided in URL
+    const cat = urlParams.get('cat');
+    if (cat) {
+        $(`input[name='cat'][value='${escapeHTML(cat)}']`).prop('checked', true);
+    }
+    if (day || cat) {
+        workflow();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    buildUI();
+    const res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
+    marker = res.marker;
+
+    // Legacy URLs used anchor tags, which we want to migrate to url parameters
+    convertLegacyHashLink();
+    readURLParams();
 
 });
