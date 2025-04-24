@@ -115,7 +115,8 @@ def main(year: int, ci: bool) -> None:
     fn = init_year(datetime(year, 1, 1), ci)
     if ci and fn is not None:
         with ncopen(fn, "a") as nc:
-            nc.variables["p01d_12z"][:] = 0
+            for i in range(2):
+                nc.variables["p01d_12z"][i] = (i + 1) * 24.0
 
 
 if __name__ == "__main__":
