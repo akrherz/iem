@@ -137,7 +137,8 @@ def main(year: int, ci: bool):
     fn = init_year(datetime(year, 1, 1), ci)
     if ci and fn is not None:
         with ncopen(fn, "a") as nc:
-            nc.variables["p01m"][:] = 0
+            for i in range(48):
+                nc.variables["p01m"][i] = i / 2.0
             nc.variables["p01m_status"][:] = 1
 
 
