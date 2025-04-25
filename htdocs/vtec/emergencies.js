@@ -183,8 +183,8 @@ function createPopup(content, coordinates) {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         popup.style.position = 'absolute';
-        popup.style.left = (mapRect.left + point[0] - (popup.offsetWidth / 2) + scrollLeft) + 'px';
-        popup.style.top = (mapRect.top + point[1] - popup.offsetHeight - 15 + scrollTop) + 'px';
+        popup.style.left = `${(mapRect.left + point[0] - (popup.offsetWidth / 2) + scrollLeft)}px`;
+        popup.style.top = `${(mapRect.top + point[1] - popup.offsetHeight - 15 + scrollTop)}px`;
     } else {
         // Fallback positioning if point calculation fails
         popup.style.position = 'fixed';
@@ -255,8 +255,8 @@ function makeDraggable(element) {
         pos4 = e.clientY;
         
         // Set the element's new position
-        element.style.top = (element.offsetTop - pos2) + "px";
-        element.style.left = (element.offsetLeft - pos1) + "px";
+        element.style.top = `${element.offsetTop - pos2}px`;
+        element.style.left = `${element.offsetLeft - pos1}px`;
     }
     
     function closeDragElement() {
