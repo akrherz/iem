@@ -6,7 +6,7 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "10.4.0";
+$OL = "10.5.0";
 
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
@@ -64,7 +64,7 @@ products have a polygon, so this interface <strong>does not show them</strong>.
         <button type="button" class="btn btn-default" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
-        <div id="map" class="map"></div>
+        <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
     </div>
     <div class="col-md-8">
     <h4 id="table1title"></h4>

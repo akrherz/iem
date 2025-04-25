@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
-$OL = "9.1.0";
+$OL = "10.5.0";
 $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;
@@ -88,14 +88,8 @@ $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 EOM;
 $t->jsextra = <<<EOM
-<script>
-var CONFIG = {
-    lat: {$lat},
-    lon: {$lon}
-};
-</script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script type="text/javascript" src="/js/olselect-lonlat.js"></script>\
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script src="site.js" type="text/javascript"></script>
 EOM;
 $t->sites_current = "base";
@@ -229,7 +223,8 @@ $t->content = <<<EOM
 </div>
 <div class="col-md-8">
 
-  <div id="mymap" style="height: 400px; width: 100%;"></div>
+  <div id="mymap" style="height: 400px; width: 100%;" data-lat="{$lat}" data-lon="{$lon}"
+  data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
  <div>
  <strong>Is the location shown for this station wrong?</strong>
  <br />If so, please consider submitting a location submission by moving the marker

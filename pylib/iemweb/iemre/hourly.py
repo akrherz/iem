@@ -11,11 +11,13 @@ Changelog
 """
 
 import json
+import os
 from datetime import date as datetype
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from pydantic import Field, PrivateAttr, model_validator
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import DOMAINS, get_domain, get_hourly_ncname, hourly_offset
 from pyiem.util import convert_value, ncopen, utc
@@ -97,6 +99,10 @@ def workflow(
 
     now = sts
     for fn, tslice in zip(fns, tslices):
+        if not os.path.isfile(fn):
+            raise IncompleteWebRequest(
+                f"File {fn} does not exist, please try again later"
+            )
         with ncopen(fn) as nc:
             skyc = nc.variables["skyc"][tslice, j, i]
             dwpf = convert_value(

@@ -27,12 +27,16 @@ function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
     const vectorLayer = new ol.layer.Vector({
         source: vectorSource
     });
-
+    const bingMapsApiKey = document.getElementById(div).dataset.bingmapsapikey;
     const map = new ol.Map({
         target: div,
         layers: [
             new ol.layer.Tile({
-                source: new ol.source.OSM()
+                title: 'Global Imagery',
+                source: new ol.source.BingMaps({
+                    key: bingMapsApiKey,
+                    imagerySet: 'AerialWithLabelsOnDemand'
+                })
             }),
             vectorLayer
         ],

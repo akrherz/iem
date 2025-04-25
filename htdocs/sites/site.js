@@ -1,13 +1,16 @@
-/* global CONFIG, olSelectLonLat */
+/* global olSelectLonLat */
 
-//callback on when the marker is done moving    		
 function displayCoordinates(lon, lat) {
-    $("#newlat").val(lat.toFixed(8));
-    $("#newlon").val(lon.toFixed(8));
+    document.getElementById('newlat').value = lat.toFixed(8);
+    document.getElementById('newlon').value = lon.toFixed(8);
 }
 
-$(document).ready(() => {
-    const res = olSelectLonLat("mymap", CONFIG.lon, CONFIG.lat, displayCoordinates);
+document.addEventListener('DOMContentLoaded', () => {
+    const mapEl = document.getElementById("mymap");
+    const lon = parseFloat(mapEl.dataset.lon);
+    const lat = parseFloat(mapEl.dataset.lat);
+    
+    const res = olSelectLonLat("mymap", lon, lat, displayCoordinates);
     // zoom in
     res.map.getView().setZoom(14);
 });

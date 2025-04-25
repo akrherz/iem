@@ -15,7 +15,7 @@ import pygrib
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import masked_array, units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
 from pyiem.iemre import (
@@ -25,7 +25,6 @@ from pyiem.iemre import (
     reproject2iemre,
 )
 from pyiem.util import archive_fetch, logger, ncopen
-from sqlalchemy import text
 
 # Prevent invalid value encountered in cast
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -201,7 +200,7 @@ def grid_hour(ts, domain):
     gridnav = get_nav("iemre", domain)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
+            sql_helper("""SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
     max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end)
         as max_tmpf,
     max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,

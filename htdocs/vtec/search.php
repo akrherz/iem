@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $t = new MyView();
 $DT = "2.0.2";
-$OL = "10.4.0";
+$OL = "10.5.0";
 $t->iemselect2 = TRUE;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
@@ -66,7 +66,7 @@ grid will update and provide a listing of storm based warnings found.
         <button type="button" class="btn btn-default" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
-        <div id="map" class="map"></div>
+        <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
     </div>
     <div class="col-md-8">
     <h4 id="table1title"></h4>
@@ -148,7 +148,7 @@ an office that did not exist at the time.
         <div class="well">
         <strong>2c.</strong> or drag marker to select coordinate:
         <br />
-        <div id="map2" class="map"></div>
+        <div id="map2" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
         <br clear="all" />
         </div>
     </div>

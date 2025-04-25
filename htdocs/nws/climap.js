@@ -127,7 +127,7 @@ $(document).ready(() => {
     });
 
     vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()));
-    const key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+    const key = document.getElementById('map').dataset.bingmapsapikey;
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
