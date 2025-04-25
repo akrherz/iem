@@ -2,5 +2,4 @@
 
 from iemweb.json.nwstext_center_date import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

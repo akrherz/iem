@@ -2,5 +2,4 @@
 
 from iemweb.json.ridge_current import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

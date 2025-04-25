@@ -2,5 +2,4 @@
 
 from iemweb.geojson.agclimate import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

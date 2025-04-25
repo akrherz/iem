@@ -1,3 +1,6 @@
-"""implemented in /pylib/iemweb/request/raster2netcdf.py"""
+"""Implementation at https://github.com/akrherz/iem/blob/main/pylib/iemweb/request/raster2netcdf.py
+User documentation available at https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?help"""
 
-from iemweb.request.raster2netcdf import application  # noqa: F401
+from iemweb.request.raster2netcdf import application
+
+__all__ = ["application"]
