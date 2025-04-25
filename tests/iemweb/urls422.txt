@@ -16,7 +16,9 @@
 /cgi-bin/request/hourlyprecip.py
 /cgi-bin/request/hourlyprecip.py?station=DSM
 /cgi-bin/request/hourlyprecip.py?tz=Etc
+/cgi-bin/request/other.py?station=AAA
 /cgi-bin/request/scan.py?stations=A,B,C,D,E,F,G,H,I,J,K,L&sts=2022-02-01&ets=2025-01-01
+/cgi-bin/request/talltowers.py?station=MCAI4&var=nw_ws&z=100&agg=std&sts=2024-01-01T00:00:00Z&ets=2024-01-02T00:00:00Z
 /geojson/station_neighbors.py?station=XXX&network=IA_ASOS
 /geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
 /geojson/sbw.geojson?sts=200809130559&wfos=HGX

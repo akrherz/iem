@@ -29,7 +29,7 @@ from datetime import timedelta
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
@@ -80,6 +80,13 @@ class Schema(CGIModel):
     month2: int = Field(None, description="End Month, if ets not provided")
     day2: int = Field(None, description="End Day, if ets not provided")
     hour2: int = Field(None, description="End Hour, if ets not provided")
+
+    @model_validator(mode="after")
+    def validate_dates(self):
+        """ensure we have sts and ets set."""
+        if self.sts is None or self.ets is None:
+            raise ValueError("Must provide sts and ets")
+        return self
 
 
 def get_stations(environ):
