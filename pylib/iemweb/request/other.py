@@ -20,7 +20,7 @@ station=DSM&sts=2024-01-01&ets=2024-01-02
 from datetime import date
 from io import StringIO
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pyiem.database import get_dbconnc
 from pyiem.webutil import CGIModel, iemapp
 
@@ -39,6 +39,13 @@ class Schema(CGIModel):
     year2: int = Field(None, description="Year 2")
     month2: int = Field(None, description="Month 2")
     day2: int = Field(None, description="Day 2")
+
+    @model_validator(mode="after")
+    def validate_time(self):
+        """Ensure we have sts and ets set."""
+        if self.sts is None or self.ets is None:
+            raise ValueError("Must provide start and end time")
+        return self
 
 
 def fetcher(station: str, sts: date, ets: date):

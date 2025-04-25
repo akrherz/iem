@@ -1,8 +1,8 @@
 /* global moment, ol, $ */
 let olmap = null;
 let elayer = null;
-let tornadoFeatures = [];
-let flashFloodFeatures = [];
+const tornadoFeatures = [];
+const flashFloodFeatures = [];
 
 const sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
@@ -290,7 +290,7 @@ function applyDateFilter() {
     const source = elayer.getSource();
     source.clear();
     const addFeatureIfValid = function(feature, type) {
-        let issue = moment.utc(feature.get('utc_issue'));
+        const issue = moment.utc(feature.get('utc_issue'));
         let valid = true;
         if (start && issue.isBefore(start)) valid = false;
         if (end && issue.isAfter(end)) valid = false;

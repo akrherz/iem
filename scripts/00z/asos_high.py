@@ -6,10 +6,9 @@ run from RUN_0Z.sh
 from datetime import timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
 from pyiem.util import logger, utc
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -20,7 +19,7 @@ def main():
     sts = now - timedelta(hours=12)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         WITH highs as (
         SELECT c.iemid,

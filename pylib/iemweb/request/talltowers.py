@@ -133,7 +133,11 @@ def application(environ, start_response):
             if colname not in columns:
                 continue
             for agg in aggs:
-                tokens.append(f"{agg}({colname}) as {colname}_{agg}")  # noqa
+                if agg not in ["avg", "max", "min", "sum", "stddev"]:
+                    raise IncompleteWebRequest(f"Invalid agg {agg}")
+                tokens.append(f"{agg}({colname}) as {colname}_{agg}")
+    if not tokens:
+        raise IncompleteWebRequest("No variables selected")
 
     tw = environ["window"]
 

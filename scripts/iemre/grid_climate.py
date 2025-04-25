@@ -7,10 +7,9 @@ import click
 import numpy as np
 import pandas as pd
 from pyiem import iemre
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -45,7 +44,7 @@ def grid_solar(nc, ts):
     with get_sqlalchemy_conn("coop") as conn:
         # Look for stations with data back to 1979 for merra
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             with data as (
                 select station, count(*), avg(merra_srad) from alldata
