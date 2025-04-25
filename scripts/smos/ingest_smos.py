@@ -27,7 +27,9 @@ def consume(scursor, fn, ts, grid_ids):
     bad = 0
     good = 0
     data = StringIO()
-    for gpid, sm, od, chi2pd in zip(gpids, sms, optdepths, chi2pds):
+    for gpid, sm, od, chi2pd in zip(
+        gpids, sms, optdepths, chi2pds, strict=True
+    ):
         if int(gpid) not in grid_ids:
             continue
         # changed 1 Feb 2018 as per guidance from Victoria

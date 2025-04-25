@@ -258,7 +258,7 @@ def plotter(ctx: dict):
             )
             yloc -= 0.035
     ax.text(xloc, yloc, f"n={len(df2.index)}", transform=ax.transAxes)
-    for x0, y0, y02 in zip(x, y, y2):
+    for x0, y0, y02 in zip(x, y, y2, strict=False):
         ax.plot([x0, x0], [y0, y02], color="k")
     rdf = pd.DataFrame({"level": x, "avg": y, f"d{highlightyear}": y2})
     x = np.array(x, dtype=np.float64)

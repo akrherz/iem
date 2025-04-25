@@ -127,6 +127,7 @@ def run(conn, environ: dict):
                         zip(
                             row["attrs"].split("____"),
                             row["attr_values"].split("____"),
+                            strict=False,
                         )
                     ),
                 ),

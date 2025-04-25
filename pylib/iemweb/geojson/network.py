@@ -140,6 +140,7 @@ def run(conn, network, only_online):
                         zip(
                             row["attrs"].split("____"),
                             row["attr_values"].split("____"),
+                            strict=False,
                         )
                     ),
                 ),

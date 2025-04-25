@@ -9,7 +9,6 @@ Run from RUN_2AM.sh looking for missing data to estimate.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import geopandas as gpd
@@ -117,7 +116,7 @@ def do(dt: date):
 
 @click.command()
 @click.option("--date", "valid", type=click.DateTime())
-def main(valid: Optional[datetime]):
+def main(valid: datetime | None):
     """Go Main Go"""
     if valid is not None:
         do(valid.date())

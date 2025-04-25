@@ -350,7 +350,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.86, 0.1, 0.1, 0.8))
     gdf = df[["year", "doy"]].groupby("year").count()
     ax.barh(gdf.index.values, gdf["doy"].values, fc="blue", align="center")
-    for year, val in zip(gdf.index.values, gdf["doy"].values):
+    for year, val in zip(gdf.index.values, gdf["doy"].values, strict=False):
         ax.annotate(
             f"{val}",
             xy=(1.01, year),

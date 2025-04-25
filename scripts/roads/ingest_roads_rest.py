@@ -119,7 +119,7 @@ def export_shapefile(txn, valid):
     )
     for row in txn:
         multiline = loads(row["geom"], hex=True)
-        shp.line([zip(*multiline.geoms[0].xy)])
+        shp.line([zip(*multiline.geoms[0].xy, strict=False)])
         shp.record(
             row["segid"],
             row["major"],

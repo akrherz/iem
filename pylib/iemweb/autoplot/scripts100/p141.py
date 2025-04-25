@@ -134,12 +134,12 @@ def plotter(ctx: dict):
     resdf = resdf.reset_index().set_index("doy")
 
     # write current year data back to resdf
-    for _v, _u in zip(["gddcum", "raincum"], ["F", "in"]):
+    for _v, _u in zip(["gddcum", "raincum"], ["F", "in"], strict=False):
         resdf[f"{_v}[{_u}]"] = thisyear[_v]
     for _v in ["mint", "maxt"]:
         resdf[f"{_v}[F]"] = c2f(thisyear[_v].values)
     resdf["rain[in]"] = mm2inch(thisyear["rain"])
-    for _ptype, unit in zip(["gdd", "rain"], ["F", "in"]):
+    for _ptype, unit in zip(["gdd", "rain"], ["F", "in"], strict=False):
         resdf[f"{_ptype}cum_climo[{unit}]"] = cdf.groupby("doy")[
             _ptype + "cum"
         ].mean()

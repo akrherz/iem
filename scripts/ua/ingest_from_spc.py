@@ -6,7 +6,6 @@ called from RUN_10_AFTER.sh for 00z and 12z
 
 import sys
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import click
 import httpx
@@ -239,7 +238,7 @@ def main(valid, station):
 @click.command()
 @click.option("--valid", type=click.DateTime(), required=True)
 @click.option("--station", type=str, default=None)
-def frontend(valid: datetime, station: Optional[str]):
+def frontend(valid: datetime, station: str | None):
     """Figure out what we need to do here!"""
     valid = valid.replace(tzinfo=timezone.utc)
     main(valid, station)

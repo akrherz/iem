@@ -9,7 +9,6 @@ import sys
 import tempfile
 import warnings
 from datetime import datetime, timedelta
-from typing import Optional
 
 import cdsapi
 import click
@@ -79,7 +78,7 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
     tidx = hourly_offset(valid)
     dd = "" if domain == "" else f"_{domain}"
 
-    for islice_in, islice_out in zip(islices, islices_out):
+    for islice_in, islice_out in zip(islices, islices_out, strict=False):
         for ekey, key in VERBATIM.items():
             nc.variables[key][tidx, :, islice_out] = np.flipud(
                 ncin.variables[ekey][0, jslice, islice_in]
@@ -222,7 +221,7 @@ def archive(fn: str, valid: datetime):
         LOG.error("Failed to copy %s to remote", fn)
 
 
-def run(valid: datetime, justdomain: Optional[str], checkcache: bool):
+def run(valid: datetime, justdomain: str | None, checkcache: bool):
     """Run for the given valid time."""
     fetch(valid, checkcache)
     for domain in DOMAINS if justdomain is None else [justdomain]:
@@ -239,7 +238,7 @@ def run(valid: datetime, justdomain: Optional[str], checkcache: bool):
 @click.option("--date", "valid", required=True, type=click.DateTime())
 @click.option("--domain")
 @click.option("--checkcache", is_flag=True, default=False)
-def main(valid: datetime, domain: Optional[str], checkcache: bool):
+def main(valid: datetime, domain: str | None, checkcache: bool):
     """Go!"""
     valid = utc(valid.year, valid.month, valid.day)
     with tempfile.TemporaryDirectory() as tmpdir:

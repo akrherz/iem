@@ -7,7 +7,6 @@ run once per week from RUN_2AM.sh on Mondays.
 import os
 import subprocess
 import tempfile
-from typing import Optional
 
 import click
 import httpx
@@ -22,7 +21,7 @@ LOG = logger()
 @click.command()
 @click.option("--overwrite", is_flag=True, help="Overwrite existing data")
 @click.option("--icao", help="Specific ICAO to ingest")
-def main(overwrite: bool, icao: Optional[str]):
+def main(overwrite: bool, icao: str | None):
     """Go Main."""
     pgconn, cursor = get_dbconnc("raob")
     # meh

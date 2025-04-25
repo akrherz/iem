@@ -4,7 +4,6 @@ RUN_10MIN.sh
 """
 
 from datetime import date
-from typing import Optional
 
 import click
 from pyiem.util import web2ldm
@@ -14,7 +13,7 @@ from pyiem.util import web2ldm
 @click.option(
     "--date", "dt", type=click.DateTime(), default=None, help="Date to plot"
 )
-def main(dt: Optional[date]):
+def main(dt: date | None):
     """Go Main Go"""
     if dt is None:
         dt = date.today()

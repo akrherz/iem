@@ -242,7 +242,7 @@ def get_data(conn, ts, fmt):
     for feat in data["features"]:
         for col in cols.split(","):
             val = feat["properties"][col]
-            if isinstance(val, (list, tuple)):
+            if isinstance(val, list | tuple):
                 res += f"{' '.join([str(s) for s in val])},"
             else:
                 res += f"{val},"

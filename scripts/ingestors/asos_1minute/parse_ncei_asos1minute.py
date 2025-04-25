@@ -16,7 +16,6 @@ import sys
 import tarfile
 from datetime import datetime, timedelta
 from io import StringIO
-from typing import Optional
 
 import click
 import httpx
@@ -302,10 +301,10 @@ def runner(pgconn, metadata, station):
 
 
 def init_dataframes(
-    year: Optional[int],
-    month: Optional[int],
-    station: Optional[str],
-    dt: Optional[datetime],
+    year: int | None,
+    month: int | None,
+    station: str | None,
+    dt: datetime | None,
 ) -> list:
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
@@ -426,10 +425,10 @@ def cleanup(df):
     help="NCEI hidden file date",
 )
 def main(
-    year: Optional[int],
-    month: Optional[int],
-    station: Optional[str],
-    dt: Optional[datetime],
+    year: int | None,
+    month: int | None,
+    station: str | None,
+    dt: datetime | None,
 ):
     """Go Main Go"""
     cronjob = not sys.stdout.isatty()

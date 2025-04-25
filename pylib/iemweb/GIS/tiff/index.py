@@ -149,19 +149,19 @@ def application(environ, start_response):
             "ys": make_select(
                 "year",
                 valid.year,
-                dict(zip(range(2000, 2024), range(2000, 2024))),
+                dict(zip(range(2000, 2024), range(2000, 2024), strict=False)),
                 showvalue=False,
             ),
             "ms": make_select(
                 "month",
                 valid.month,
-                dict(zip(range(1, 13), month_abbr[1:])),
+                dict(zip(range(1, 13), month_abbr[1:], strict=False)),
                 showvalue=False,
             ),
             "ds": make_select(
                 "day",
                 valid.day,
-                dict(zip(range(1, 32), range(1, 32))),
+                dict(zip(range(1, 32), range(1, 32), strict=False)),
                 showvalue=False,
             ),
         },

@@ -7,7 +7,6 @@ Called from RUN_40_AFTER.sh
 
 import sys
 from datetime import datetime, timedelta
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -114,7 +113,7 @@ def load_times(icursor):
 @click.option("--reprocess", is_flag=True, help="Reprocess all data")
 @click.option("--date", "dt", type=click.DateTime(), help="Specific date")
 @click.option("--station", help="Specific station to process")
-def main(reprocess: bool, dt: Optional[datetime], station: Optional[str]):
+def main(reprocess: bool, dt: datetime | None, station: str | None):
     """Go Main Go"""
     nt = NetworkTable("SCAN", only_online=False)
     SCAN, scursor = get_dbconnc("scan")

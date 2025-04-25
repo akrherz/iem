@@ -100,14 +100,14 @@ def gentext(sio, row, grversion):
                 f"-{row['eventid']})\\n"
                 f'{drct:.0f}/{row["tml_sknt"]:.0f}"\n'
             )
-            for lon, lat in zip(lons, lats):
+            for lon, lat in zip(lons, lats, strict=False):
                 lon2, lat2 = extrapolate(lon, lat, seconds * smps, drct)
                 sio.write(f"{lat2:.4f},{lon2:.4f}\n")
             sio.write("End:\n")
 
     # Now we place places along the track.
     sio.write("Color: 255 255 255\nThreshold:10\n\n")
-    for lon, lat in zip(lons, lats):
+    for lon, lat in zip(lons, lats, strict=False):
         for minute in range(int(duration / 60.0) + 1):
             valid = tml_valid + timedelta(minutes=minute)
             ts = valid.strftime("%H%Mz")

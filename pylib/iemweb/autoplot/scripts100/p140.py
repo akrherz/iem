@@ -285,7 +285,7 @@ def plotter(ctx: dict):
         df.index, df[dfcol], facecolor="r", edgecolor="r", align="center"
     )
     thisvalue = "M"
-    for mybar, x, y in zip(bars, df.index.values, df[dfcol]):
+    for mybar, x, y in zip(bars, df.index.values, df[dfcol], strict=False):
         if x == year:
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")

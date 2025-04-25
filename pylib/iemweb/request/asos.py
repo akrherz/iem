@@ -603,7 +603,7 @@ def application(environ, start_response):
             rD.join(
                 [
                     func(val, missing, trace, tzinfo)
-                    for func, val in zip(formatters, row[5:])
+                    for func, val in zip(formatters, row[5:], strict=False)
                 ]
             )
             + "\n"

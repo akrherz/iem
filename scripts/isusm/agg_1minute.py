@@ -5,7 +5,6 @@ RUN_20_AFTER.sh
 """
 
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import numpy as np
@@ -121,7 +120,7 @@ def do_date_ops(df):
 @click.option(
     "--date", "dt", type=click.DateTime(), default=None, help="Date to process"
 )
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Do things."""
     pgconn = get_dbconn("isuag")
     # We need to collect up data for periods representing CST dates, this

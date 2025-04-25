@@ -13,7 +13,6 @@ import subprocess
 import tempfile
 from datetime import date, datetime, timedelta
 from io import StringIO
-from typing import Optional
 
 import click
 import numpy as np
@@ -458,7 +457,7 @@ def do(location):
 
 @click.command()
 @click.option("--location", help="Run for isolated location")
-def main(location: Optional[str]):
+def main(location: str | None):
     """Do Something"""
     if location:
         do(location)

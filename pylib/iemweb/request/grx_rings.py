@@ -176,7 +176,7 @@ def application(environ, start_response):
             f"Color: {r} {g} {b} {a}\n"
             f'Line: 2, 0, "{t}{ll}{distanceInMiles:.1f} miles from {loc}" \n'
         )
-        for x, y in zip(X, Y):
+        for x, y in zip(X, Y, strict=False):
             sio.write(f" {y}, {x}\n")
         sio.write("End:\n\n")
     return [sio.getvalue().encode("utf-8")]

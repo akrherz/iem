@@ -2,7 +2,6 @@
 
 import os
 from datetime import datetime
-from typing import Optional
 
 import click
 import numpy as np
@@ -13,7 +12,7 @@ LOG = logger()
 BASEDIR = "/mesonet/data/stage4"
 
 
-def init_year(ts: datetime, ci: bool) -> Optional[str]:
+def init_year(ts: datetime, ci: bool) -> str | None:
     """Create a new NetCDF file for a year of our specification!"""
     # Get existing stageIV netcdf file to copy its cordinates from
     tmplnc = ncopen(f"{BASEDIR}/{ts.year}_stage4_hourly.nc", "r")

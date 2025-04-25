@@ -6,7 +6,6 @@ Called from RUN_20_AFTER.sh
 import glob
 import os
 from datetime import datetime
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -236,7 +235,7 @@ def download(year, reprocess=False) -> list:
 
 @click.command()
 @click.option("--year", type=int, required=False, help="Year to process")
-def main(year: Optional[int]):
+def main(year: int | None):
     """Go Main Go"""
     iem_pgconn = get_dbconn("iem")
     pgconn = get_dbconn("uscrn")

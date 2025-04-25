@@ -4,7 +4,6 @@ Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 """
 
 from datetime import date
-from typing import Optional
 
 import click
 import pandas as pd
@@ -29,7 +28,7 @@ def comp(old, new):
     return True
 
 
-def get_data(dt: Optional[date]) -> pd.DataFrame:
+def get_data(dt: date | None) -> pd.DataFrame:
     """Figure out what data we want."""
     params = {}
     lmt = "updated > (now() - '48 hours'::interval)"
@@ -150,7 +149,7 @@ def update_iemaccess(cf6df, valid):
             continue
         work = []
         params = []
-        for ocol, ccol in zip(obscols, cf6cols):
+        for ocol, ccol in zip(obscols, cf6cols, strict=False):
             if not comp(row[ocol], row[ccol]):
                 continue
             uvals += 1
@@ -202,7 +201,7 @@ def build_xref():
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Specific date")
-def main(dt: Optional[date]):
+def main(dt: date | None):
     """Go Main Go."""
     cf6 = get_data(dt)
     xref = build_xref()

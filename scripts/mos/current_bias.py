@@ -1,7 +1,6 @@
 """Analysis of current MOS temperature bias."""
 
 from datetime import datetime, timezone
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -97,7 +96,7 @@ def doit(now, model):
 @click.command()
 @click.option("--model", required=True)
 @click.option("--valid", type=click.DateTime())
-def main(model: str, valid: Optional[datetime]):
+def main(model: str, valid: datetime | None):
     """Go main go"""
     ts = utc()
     if valid is not None:

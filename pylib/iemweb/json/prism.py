@@ -104,7 +104,7 @@ def dowork(environ: dict):
             tmin = nc.variables["tmin"][sidx:eidx, j, i]
             ppt = nc.variables["ppt"][sidx:eidx, j, i]
 
-        for mt, nt, pt, valid in zip(tmax, tmin, ppt, dates):
+        for mt, nt, pt, valid in zip(tmax, tmin, ppt, dates, strict=False):
             res["data"].append(
                 {
                     "valid": valid.strftime("%Y-%m-%dT12:00:00Z"),

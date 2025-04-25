@@ -4,7 +4,6 @@ Called from RUN_MIDNIGHT.sh
 """
 
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import numpy as np
@@ -49,7 +48,7 @@ def do_month(year, month, routes):
 @click.command()
 @click.option("--year", type=int)
 @click.option("--month", type=int)
-def main(year: Optional[int], month: Optional[int]) -> None:
+def main(year: int | None, month: int | None) -> None:
     """Go Main Go"""
     if year and month:
         do_month(year, month, "m")

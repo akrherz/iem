@@ -2,7 +2,6 @@
 
 import json
 from datetime import datetime
-from typing import Optional
 
 import click
 import httpx
@@ -140,7 +139,7 @@ def fix_nulls():
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), required=False)
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Go Main Go."""
     # if we are given an argument, run for that date
     if dt is not None:

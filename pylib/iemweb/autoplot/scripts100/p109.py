@@ -371,7 +371,7 @@ def plotter(ctx: dict):
     pstr = []
     subtitle = ""
     title = ""
-    for p, s in zip(phenomena, significance):
+    for p, s in zip(phenomena, significance, strict=False):
         pstr.append(f"(phenomena = '{p}' and significance = '{s}')")
         subtitle += f"{p}.{s} "
         title += vtec.get_ps_string(p, s)

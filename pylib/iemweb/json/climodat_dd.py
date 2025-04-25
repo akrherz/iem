@@ -84,7 +84,7 @@ def compute(taxis, highs, lows, gddbase, gddceil):
     vals = calc_gdd(
         units("degF") * highs, units("degF") * lows, gddbase, gddceil
     )
-    for dt, val, high, low in zip(taxis, vals, highs, lows):
+    for dt, val, high, low in zip(taxis, vals, highs, lows, strict=False):
         if np.ma.is_masked(val):
             continue
         total += val

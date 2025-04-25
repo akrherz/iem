@@ -6,7 +6,6 @@ called from RUN_10_AFTER.sh
 
 import sys
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import click
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
@@ -226,7 +225,7 @@ def process_obs(first_updated, last_updated):
 
 @click.command()
 @click.option("--minutes", type=int, help="Specify the size of the window")
-def main(minutes: Optional[int]):
+def main(minutes: int | None):
     """Go main"""
     first_updated = get_first_updated()
     if minutes is not None:

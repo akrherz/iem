@@ -4,7 +4,6 @@ called from windrose/daily_drive_network.py
 """
 
 from datetime import date
-from typing import Optional
 
 import click
 from pyiem.database import get_dbconn
@@ -85,7 +84,7 @@ def do_network(network: str):
 
 @click.command()
 @click.option("--network", required=False)
-def main(network: Optional[str]):
+def main(network: str | None):
     """Go main Go"""
     if network is None:
         # If we run without args, we pick a "random" DCP network!

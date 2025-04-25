@@ -204,7 +204,7 @@ def get_data(conn, station, year, fmt):
     for feat in data["results"]:
         for col in cols.split(","):
             val = feat[col]
-            if isinstance(val, (list, tuple)):
+            if isinstance(val, list | tuple):
                 res += f"{' '.join([str(s) for s in val])},"
             else:
                 res += f"{val},"

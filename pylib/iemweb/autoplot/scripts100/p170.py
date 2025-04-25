@@ -150,7 +150,7 @@ def plotter(ctx: dict):
             ec="r",
             label=f"{year}",
         )
-        for x, y in zip(df2["month"].values, df2["count"].values):
+        for x, y in zip(df2["month"].values, df2["count"].values, strict=True):
             ax.text(x - 0.2, y + 0.2, f"{y:.0f}", ha="center")
     df2 = df.groupby("month").sum()
     years = (date.today().year - syear) + 1
@@ -158,7 +158,7 @@ def plotter(ctx: dict):
     ax.bar(
         df2.index.values + 0.2, yvals, width=0.4, fc="b", ec="b", label="Avg"
     )
-    for x, y in zip(df2.index.values, yvals):
+    for x, y in zip(df2.index.values, yvals, strict=True):
         ax.text(x + 0.2, y + 0.2, f"{y:.1f}", ha="center")
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))

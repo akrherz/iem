@@ -243,6 +243,7 @@ def main():
             for cvar, ivar in zip(
                 ["solarrad_w_avg", "rh_hmp_avg", "wnd_dir_compass"],
                 ["srad", "rh", "drct"],
+                strict=False,
             ):
                 if cvar in df.columns:
                     iemob.data[ivar] = row[cvar]

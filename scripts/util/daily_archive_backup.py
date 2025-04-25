@@ -6,7 +6,6 @@ Lets run at 12z for the previous date
 import os
 import subprocess
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 from pyiem.util import logger
@@ -46,7 +45,7 @@ def run(dt: date):
     "--date", "dt", type=click.DateTime(), help="Specify a date to process"
 )
 @click.option("--year", type=int, help="Specify a year to process")
-def main(dt: Optional[datetime], year: Optional[int]):
+def main(dt: datetime | None, year: int | None):
     """Go Main Go"""
     if year:
         now = date(year, 1, 1)

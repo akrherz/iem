@@ -9,7 +9,6 @@ import os
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import click
 import httpx
@@ -94,7 +93,7 @@ def fetch(valid):
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
-def main(valid: Optional[datetime]):
+def main(valid: datetime | None):
     """Go Main Go"""
     times = []
     if valid is not None:

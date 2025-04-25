@@ -56,7 +56,7 @@ def vsbyfmt(val):
 def process_sky(data, skycs, skyls):
     """Process the sky cover"""
     mtr = ""
-    for i, (skyc, skyl) in enumerate(zip(skycs, skyls), start=1):
+    for i, (skyc, skyl) in enumerate(zip(skycs, skyls, strict=False), start=1):
         if skyc == "":
             continue
         data[f"skyc{i}"] = skyc

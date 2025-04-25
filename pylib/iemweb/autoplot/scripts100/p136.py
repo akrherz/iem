@@ -80,6 +80,7 @@ def get_highcharts(ctx: dict) -> str:
                     for a in zip(
                         ctx["lines"]["season"]["x"],
                         ctx["lines"]["season"]["y"],
+                        strict=False,
                     )
                 ]
             )
@@ -90,25 +91,35 @@ def get_highcharts(ctx: dict) -> str:
     d25 = str(
         [
             list(a)
-            for a in zip(ctx["lines"]["25%"]["x"], ctx["lines"]["25%"]["y"])
+            for a in zip(
+                ctx["lines"]["25%"]["x"], ctx["lines"]["25%"]["y"], strict=True
+            )
         ]
     )
     dmean = str(
         [
             list(a)
-            for a in zip(ctx["lines"]["mean"]["x"], ctx["lines"]["mean"]["y"])
+            for a in zip(
+                ctx["lines"]["mean"]["x"],
+                ctx["lines"]["mean"]["y"],
+                strict=True,
+            )
         ]
     )
     d75 = str(
         [
             list(a)
-            for a in zip(ctx["lines"]["75%"]["x"], ctx["lines"]["75%"]["y"])
+            for a in zip(
+                ctx["lines"]["75%"]["x"], ctx["lines"]["75%"]["y"], strict=True
+            )
         ]
     )
     dmax = str(
         [
             list(a)
-            for a in zip(ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"])
+            for a in zip(
+                ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"], strict=True
+            )
         ]
     )
     containername = ctx["_e"]
@@ -249,7 +260,7 @@ def add_ctx(ctx):
         }
     lbls = ["25%", "mean", "75%", "max"]
     colors = ["g", "k", "r", "orange"]
-    for color, lbl in zip(colors, lbls):
+    for color, lbl in zip(colors, lbls, strict=False):
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
         if s[lbl].isnull().all():
             continue

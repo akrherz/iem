@@ -4,7 +4,6 @@ Called from SYNC_STATIONS.sh
 """
 
 import time
-from typing import Optional
 
 import click
 import httpx
@@ -14,7 +13,7 @@ from pyiem.util import logger
 LOG = logger()
 
 
-def get_elevation(lon: float, lat: float) -> Optional[float]:
+def get_elevation(lon: float, lat: float) -> float | None:
     """Use arcgisonline"""
     resp = httpx.get(
         f"https://api.opentopodata.org/v1/mapzen?locations={lat},{lon}",
@@ -62,7 +61,7 @@ def workflow():
 @click.command()
 @click.option("--lon", type=float, help="Longitude")
 @click.option("--lat", type=float, help="Latitude")
-def main(lon: Optional[float], lat: Optional[float]):
+def main(lon: float | None, lat: float | None):
     """Go Main Go"""
     if lon is not None and lat is not None:
         print(get_elevation(lon, lat))
