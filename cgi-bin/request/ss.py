@@ -1,3 +1,5 @@
 """implemented in /pylib/iemweb/request/ss.py"""
 
-from iemweb.request.ss import application  # noqa: F401
+from iemweb.request.ss import application
+
+__all__ = ["application"]

@@ -13,7 +13,6 @@ RUN from RUN_40_AFTER.sh
 
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -93,7 +92,7 @@ def run(ts, routes):
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
-def main(valid: Optional[datetime]):
+def main(valid: datetime | None):
     """Main()"""
     if valid is not None:
         now = valid.replace(tzinfo=timezone.utc)

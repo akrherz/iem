@@ -2,5 +2,4 @@
 
 from iemweb.json.spcmcd import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

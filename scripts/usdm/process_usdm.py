@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 import zipfile
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import fiona
@@ -88,7 +87,7 @@ def workflow(dt: date, routes):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Specific date")
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Go Main Go"""
     if dt is None:
         # Run for most recent Tuesday

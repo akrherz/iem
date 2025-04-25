@@ -19,7 +19,6 @@ SWGDNCLR    surface incoming shortwave flux assuming clear sky
 import os
 import subprocess
 from datetime import datetime, timedelta
-from typing import Optional
 
 import click
 import netCDF4
@@ -95,7 +94,7 @@ def do_month(sts):
 @click.command()
 @click.option("--year", type=int, help="Year to process")
 @click.option("--month", type=int, help="Month to process")
-def main(year: Optional[int], month: Optional[int]):
+def main(year: int | None, month: int | None):
     """Run for last month month"""
     now = datetime.now()
     if year and month:

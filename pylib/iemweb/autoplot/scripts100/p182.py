@@ -188,7 +188,7 @@ def plotter(ctx: dict):
         width=0.4,
         label=f"{dt:%-d %b %Y} Coverage ({sum(x2):.1f}% Tot)",
     )
-    for i, (_x1, _x2) in enumerate(zip(x, x2)):
+    for i, (_x1, _x2) in enumerate(zip(x, x2, strict=False)):
         ax.text(i - 0.2, _x1 + 1, f"{_x1:.1f}", ha="center")
         ax.text(i + 0.2, _x2 + 1, f"{_x2:.1f}", ha="center")
     ax.set_xticks(np.arange(8))

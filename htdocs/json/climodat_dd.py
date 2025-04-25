@@ -2,5 +2,4 @@
 
 from iemweb.json.climodat_dd import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

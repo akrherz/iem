@@ -372,7 +372,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
         phenom = environ["phenomena"]
         sig = environ["significance"]
         parts = []
-        for _i, (p, s) in enumerate(zip(phenom, sig)):
+        for _i, (p, s) in enumerate(zip(phenom, sig, strict=False)):
             parts.append(f"(phenomena = :p{_i} and significance = :s{_i}) ")
             params[f"p{_i}"] = p[:2]
             params[f"s{_i}"] = s[:1]

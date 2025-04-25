@@ -121,6 +121,7 @@ def main(days: int):
     for col, newcol in zip(
         ["t4_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
+        strict=False,
     ):
         df[newcol] = c2f(df[col].values)
         df = df.drop(columns=col)

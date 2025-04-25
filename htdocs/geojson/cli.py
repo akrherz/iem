@@ -2,5 +2,4 @@
 
 from iemweb.geojson.cli import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

@@ -8,7 +8,6 @@
 
 import time
 from datetime import date, datetime
-from typing import Optional
 
 import click
 import httpx
@@ -268,9 +267,7 @@ def do(meta, station, acis_station) -> int:
 @click.option("--state", help="Two character state identifier")
 @click.option("--station", help="IEM Station Identifier")
 @click.option("--acis_station", help="ACIS Station Identifier")
-def main(
-    state: Optional[str], station: Optional[str], acis_station: Optional[str]
-):
+def main(state: str | None, station: str | None, acis_station: str | None):
     """Do what is asked."""
     # Only run cron job for online sites
     nt = NetworkTable(

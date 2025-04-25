@@ -12,3 +12,8 @@ Limited integration testing is done on Github Actions: [![Build Status](https://
 
 See [@akrherz Github Profile](https://github.com/akrherz) for an overview of
 repositories found here and how the fit together.
+
+## Requirements
+
+    - Python 3.10+ (CI tests with 3.11)
+    - PHP 8

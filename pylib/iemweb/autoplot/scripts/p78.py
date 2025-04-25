@@ -156,7 +156,7 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     means = qtiles[qtiles["level_1"] == 0.5]
     for l0, l1, color in zip(
-        [0.05, 0.25], [0.95, 0.75], ["lightgreen", "violet"]
+        [0.05, 0.25], [0.95, 0.75], ["lightgreen", "violet"], strict=False
     ):
         ax.fill_between(
             qtiles[qtiles["level_1"] == l0]["tmpf"].values,

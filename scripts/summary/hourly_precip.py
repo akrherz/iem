@@ -7,7 +7,6 @@ Called from RUN_10_AFTER.sh
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import click
 from pyiem.database import get_dbconnc
@@ -79,7 +78,7 @@ def realtime(ts):
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), help="UTC Timestamp")
-def main(valid: Optional[datetime]):
+def main(valid: datetime | None):
     """Do things"""
     if valid:
         # Run for a custom hour

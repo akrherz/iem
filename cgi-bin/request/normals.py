@@ -1,6 +1,6 @@
-"""implemented in /pylib/iemweb/request/normals.py"""
+"""Implementation at https://github.com/akrherz/iem/blob/main/pylib/iemweb/request/normals.py
+User documentation available at https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py?help"""
 
 from iemweb.request.normals import application
 
-# appease linters
-_ = application
+__all__ = ["application"]

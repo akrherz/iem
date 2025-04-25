@@ -49,7 +49,6 @@ sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import geopandas as gpd
 from pydantic import Field, field_validator, model_validator
@@ -299,7 +298,7 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
             lsrdf.at[idx, "prodlinks"] = products
 
 
-def get_mckey(environ: dict) -> Optional[str]:
+def get_mckey(environ: dict) -> str | None:
     """Figure out the key for this request."""
     if environ["hours"] is None or environ["ets"] is not None:
         return None

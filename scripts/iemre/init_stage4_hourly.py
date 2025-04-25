@@ -2,7 +2,6 @@
 
 import os
 from datetime import datetime
-from typing import Optional
 
 import click
 import numpy as np
@@ -14,7 +13,7 @@ BASEDIR = "/mesonet/data/stage4"
 LOG = logger()
 
 
-def init_year(ts: datetime, ci: bool) -> Optional[str]:
+def init_year(ts: datetime, ci: bool) -> str | None:
     """
     Create a new NetCDF file for a year of our specification!
     """

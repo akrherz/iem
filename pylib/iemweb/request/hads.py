@@ -35,7 +35,6 @@ threshold=0.5&thresholdvar=RG
 
 from datetime import timedelta
 from io import BytesIO, StringIO
-from typing import Optional
 
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
@@ -60,7 +59,7 @@ class Schema(CGIModel):
     network: str = Field(None, description="Network Identifier")
     stations: ListOrCSVType = Field(..., description="Station Identifier(s)")
     sts: AwareDatetime = Field(None, description="Start Time for request")
-    threshold: Optional[float] = Field(
+    threshold: float | None = Field(
         None, description="Threshold Value for Searching"
     )
     thresholdvar: str = Field(
@@ -78,11 +77,11 @@ class Schema(CGIModel):
             "time."
         ),
     )
-    year1: Optional[int] = Field(
+    year1: int | None = Field(
         None,
         description="Start year for request, when sts not set.",
     )
-    year2: Optional[int] = Field(
+    year2: int | None = Field(
         None,
         description="End year for request, when ets not set.",
     )

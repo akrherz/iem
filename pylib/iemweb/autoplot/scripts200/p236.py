@@ -175,7 +175,7 @@ def plotter(ctx: dict):
         "icing_count",
     ]
     colors = ["orange", "green", "red", "blue"]
-    for i, (ax, col) in enumerate(zip(axes, cols)):
+    for i, (ax, col) in enumerate(zip(axes, cols, strict=False)):
         axes[i].bar(
             df.index.values,
             df[col],

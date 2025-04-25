@@ -58,7 +58,6 @@ lat=41.99&lon=-93.61&buffer=0.5
 import json
 from datetime import date, datetime
 from io import BytesIO, StringIO
-from typing import Optional
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -108,7 +107,7 @@ def make_url(row):
     )
 
 
-def get_df(lon, lat, sdate, edate, buffer: float, at: Optional[datetime]):
+def get_df(lon, lat, sdate, edate, buffer: float, at: datetime | None):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:

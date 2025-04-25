@@ -33,7 +33,7 @@ def process(tarfn):
         dt = radgrb["dataDate"]
         hr = int(radgrb["dataTime"]) / 100.0
         ts = datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
-        for prefix, grb in zip(["rad", "apcp"], [radgrb, pcpgrb]):
+        for prefix, grb in zip(["rad", "apcp"], [radgrb, pcpgrb], strict=True):
             fn = f"{prefix}_{ts:%Y%m%d%H%M}.grib"
             with open(fn, "wb") as fh:
                 fh.write(grb.tostring())

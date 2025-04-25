@@ -1,7 +1,6 @@
 """Grid climate for netcdf usage"""
 
 from datetime import datetime
-from typing import Optional
 
 import click
 import numpy as np
@@ -114,7 +113,7 @@ def workflow(ts):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Specific date")
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Go Main!"""
     if dt:
         workflow(dt)

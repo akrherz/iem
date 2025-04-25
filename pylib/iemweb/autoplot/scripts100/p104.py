@@ -141,7 +141,7 @@ def plotter(ctx: dict):
         zorder=1,
         color="tan",
     )
-    for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
+    for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns, strict=False):
         ax.text(t, p, lbl, va=a, zorder=2)
 
     tmax = max([abs(np.min(tsigma)), abs(np.max(tsigma))]) + 0.5
@@ -171,7 +171,7 @@ def plotter(ctx: dict):
         fontsize=10,
         ha="right",
     )
-    for lbl, t, p in zip(lbls, tsigma, psigma):
+    for lbl, t, p in zip(lbls, tsigma, psigma, strict=False):
         ax.text(pos[0], y, f"{lbl}", transform=ax.transAxes, fontsize=10)
         ax.text(
             pos[1],

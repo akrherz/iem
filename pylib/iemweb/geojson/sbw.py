@@ -40,7 +40,6 @@ https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
 
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -111,7 +110,7 @@ class Schema(CGIModel):
         return self
 
 
-def df(val: Optional[datetime]):
+def df(val: datetime | None):
     """Format a datetime object"""
     return None if val is None else val.strftime(ISO8601)
 

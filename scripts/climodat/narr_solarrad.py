@@ -26,7 +26,6 @@ Called from dl/download_narr.py
 """
 
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import geopandas as gpd
@@ -184,7 +183,7 @@ def do(dt: date):
 @click.option(
     "--date", "dt", type=click.DateTime(), default=None, help="Date to process"
 )
-def main(year: Optional[int], month: Optional[int], dt: Optional[datetime]):
+def main(year: int | None, month: int | None, dt: datetime | None):
     """Go Main Go"""
     if dt is not None:
         do(dt.date())

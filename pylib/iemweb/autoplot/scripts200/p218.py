@@ -115,7 +115,7 @@ def gauge(ax, row, col, params):
         positive_delta = 0.01
     if negative_delta == 0:
         negative_delta = 0.01
-    for val, color, label in zip(bar_ends, colors, labels):
+    for val, color, label in zip(bar_ends, colors, labels, strict=False):
         if val > params.avgval:
             ha = "left"
             if val > params.maxval:

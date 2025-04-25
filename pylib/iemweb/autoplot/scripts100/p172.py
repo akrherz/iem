@@ -211,6 +211,7 @@ def plotter(ctx: dict):
             year3,
         ],
         ["b", "brown", "r", "g", "purple"],
+        strict=False,
     ):
         if year is None or year in plotted:
             continue

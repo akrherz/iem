@@ -2,5 +2,4 @@
 
 from iemweb.json.vtec_events_bypoint import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

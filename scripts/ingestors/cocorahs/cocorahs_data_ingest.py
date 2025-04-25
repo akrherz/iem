@@ -7,7 +7,6 @@ Called from RUN_20MIN.sh
 
 from datetime import date, datetime, timedelta, timezone
 from io import StringIO
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -30,7 +29,7 @@ def safeP(v):
     return float(v)
 
 
-def main(conn, dt: Optional[date]) -> None:
+def main(conn, dt: date | None) -> None:
     """Go Main Go"""
     stations = pd.read_sql(
         sql_helper(
@@ -133,7 +132,7 @@ def main(conn, dt: Optional[date]) -> None:
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime())
-def frontend(dt: Optional[datetime]):
+def frontend(dt: datetime | None):
     """Do Logic."""
     if dt is not None:
         dt = dt.date()

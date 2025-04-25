@@ -11,7 +11,6 @@ RUN_MIDNIGHT.sh every 28th of the month.
 
 import os
 from datetime import datetime, timedelta
-from typing import Optional
 
 import click
 import geopandas as gpd
@@ -63,7 +62,7 @@ def get_gp(xc, yc, x, y):
         movey = 1
     gridx = [xidx, xidx + movex, xidx + movex, xidx]
     gridy = [yidx, yidx, yidx + movey, yidx + movey]
-    for myx, myy in zip(gridx, gridy):
+    for myx, myy in zip(gridx, gridy, strict=False):
         d = ((y - yc[myy]) ** 2 + (x - xc[myx]) ** 2) ** 0.5
         distance.append(d)
     return gridx, gridy, distance
@@ -169,7 +168,7 @@ def do(dt: datetime):
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
 @click.option("--year", type=int, help="Year to process")
 @click.option("--month", type=int, help="Month to process")
-def main(dt: Optional[datetime], year: Optional[int], month: Optional[int]):
+def main(dt: datetime | None, year: int | None, month: int | None):
     """Go Main Go"""
     queue = []
     if dt is not None:

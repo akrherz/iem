@@ -1,3 +1,6 @@
-"""implemented in /pylib/iemweb/json/vtec_event.py"""
+"""Implementation at https://github.com/akrherz/iem/blob/main/pylib/iemweb/json/vtec_event.py
+User documentation available at https://mesonet.agron.iastate.edu/json/vtec_event.py?help"""
 
-from iemweb.json.vtec_event import application  # noqa
+from iemweb.json.vtec_event import application
+
+__all__ = ["application"]

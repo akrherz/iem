@@ -155,7 +155,7 @@ def plotter(ctx: dict):
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
     params["sts"] = sts - timedelta(days=2)
     params["ets"] = ets + timedelta(days=2)
-    for i, (p, s) in enumerate(zip(phenomena, significance)):
+    for i, (p, s) in enumerate(zip(phenomena, significance, strict=False)):
         pstr.append(f"(phenomena = :ph{i} and significance = :sig{i})")
         params[f"ph{i}"] = p
         params[f"sig{i}"] = s

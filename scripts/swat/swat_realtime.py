@@ -113,7 +113,7 @@ def workflow(page, huc12s):
             # write the year, date
             tfh.write(f"{now.year:>4}{int(now.strftime('%j')):>3}")
             pfh.write(f"{now.year:>4}{int(now.strftime('%j')):>3}")
-            for p, h, ll in zip(pdata, hdata, ldata):
+            for p, h, ll in zip(pdata, hdata, ldata, strict=False):
                 pfh.write(f"{p:5.1f}")
                 tfh.write(f"{h:5.1f}{ll:5.1f}")
             tfh.write("\n")

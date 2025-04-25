@@ -74,7 +74,6 @@ import re
 import zipfile
 from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
-from typing import Optional, Union
 
 from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -110,7 +109,7 @@ class MyModel(CGIModel):
             "If set to 1, the returned data will be downloaded as a file"
         ),
     )
-    edate: Optional[Union[None, datetime]] = Field(
+    edate: None | datetime = Field(
         None,
         description=(
             "The ending timestamp in UTC to limit the database search. This "
@@ -146,7 +145,7 @@ class MyModel(CGIModel):
             f"of ``WAR`` will return {', '.join(WARPIL)} products."
         ),
     )
-    sdate: Optional[Union[None, datetime]] = Field(
+    sdate: None | datetime = Field(
         None,
         description=(
             "The starting timestamp in UTC to limit the database search. This "
@@ -232,7 +231,7 @@ def special_metar_logic(conn, pils, limit, fmt, sio, order):
     return [sio.getvalue().encode("ascii", "ignore")]
 
 
-def get_mckey(environ: dict) -> Optional[str]:
+def get_mckey(environ: dict) -> str | None:
     """Cache a specific request."""
     # limit=9999&pil=DSMDEN&fmt=text&sdate=2025-01-07&edate=2025-01-09
     if environ["pil"][0].startswith("DSM") and environ["fmt"] == "text":

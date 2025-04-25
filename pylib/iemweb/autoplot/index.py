@@ -283,19 +283,20 @@ def datetypes_handler(arg, value):
     except ValueError as exp:
         LOG.info(exp)
     if arg["type"] == "month":
-        items = zip(range(1, 13), calendar.month_name[1:])
+        items = zip(range(1, 13), calendar.month_name[1:], strict=False)
     elif arg["type"] in ["zhour", "hour"]:
         fmt = "%I %p" if arg["type"] == "hour" else "%H Z"
         items = zip(
             range(24),
             [utc(2000, 1, 1, hr).strftime(fmt) for hr in range(24)],
+            strict=True,
         )
     elif arg["type"] == "day":
-        items = zip(range(1, 32), range(1, 32))
+        items = zip(range(1, 32), range(1, 32), strict=False)
     else:
         vmin = arg.get("min", 1893)
         vmax = arg.get("max", utc().year)
-        items = zip(range(vmin, vmax + 1), range(vmin, vmax + 1))
+        items = zip(range(vmin, vmax + 1), range(vmin, vmax + 1), strict=False)
     return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
@@ -394,7 +395,7 @@ def add_to_plotvars(value, fdict, arg, res):
         return
     if arg["type"] == "cmap":
         return
-    if isinstance(value, (str, int, float)):
+    if isinstance(value, str | int | float):
         res["pltvars"].append(f"{arg['name']}:{value}")
     elif isinstance(value, date):
         res["pltvars"].append(f"{arg['name']}:{value.strftime('%Y-%m-%d')}")

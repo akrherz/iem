@@ -12,7 +12,6 @@ Called from:
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -32,7 +31,7 @@ P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
+def try_era5land(ts: datetime, domain: str) -> np.ndarray | None:
     """Attempt to use ERA5Land data."""
     dd = "" if domain == "" else f"_{domain}"
     # inbound `ts` represents noon local time, we want values from 1 AM
@@ -77,7 +76,7 @@ def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
     return vals
 
 
-def do_gfs(ts: datetime, domain: str) -> Optional[np.ndarray]:
+def do_gfs(ts: datetime, domain: str) -> np.ndarray | None:
     """Attempt to use the GFS."""
     # Major complications with GFS 6 hour data being averaged and which
     # time period to use to get a "daily" value.
@@ -109,7 +108,7 @@ def do_gfs(ts: datetime, domain: str) -> Optional[np.ndarray]:
     return None
 
 
-def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
+def do_hrrr(ts: datetime) -> np.ndarray | None:
     """Convert the hourly HRRR data to IEMRE grid"""
     LCC = pyproj.Proj(
         "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0 "
@@ -237,7 +236,7 @@ def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
 @click.option("--date", "dt", required=False, type=click.DateTime())
 @click.option("--year", required=False, type=int, help="Run for Year,month")
 @click.option("--month", required=False, type=int, help="Run for Year,month")
-def main(dt: Optional[datetime], year, month):
+def main(dt: datetime | None, year, month):
     """Go Main Go"""
     queue = []
     if year is not None and month is not None:

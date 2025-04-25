@@ -80,7 +80,7 @@ def print_top(fig, events: pd.DataFrame):
     uts = "Mins"
     if events["max"].max() > 120:
         uts = "Hours"
-    for typ, bpoint in zip(["Longest", "Shortest"], [0.5, 0.1]):
+    for typ, bpoint in zip(["Longest", "Shortest"], [0.5, 0.1], strict=False):
         fig.text(
             x,
             y,

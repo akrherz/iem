@@ -6,7 +6,6 @@
 
 import warnings
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import click
 import numpy as np
@@ -141,7 +140,7 @@ def workflow(valid, force_copy):
 @click.command()
 @click.option("--valid", "ts", type=click.DateTime(), help="Specific UTC")
 @click.option("--valid12z", "ets", type=click.DateTime(), help="12z UTC")
-def main(ts: Optional[datetime], ets: Optional[datetime]):
+def main(ts: datetime | None, ets: datetime | None):
     """Go Main"""
     if ts is not None:
         ts = ts.replace(tzinfo=timezone.utc)

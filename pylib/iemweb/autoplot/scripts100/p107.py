@@ -343,7 +343,7 @@ def plotter(ctx: dict):
 
     bars = ax[0].bar(df.index, df[varname], facecolor="r", edgecolor="r")
     thisvalue = "M"
-    for mybar, x, y in zip(bars, df.index, df[varname]):
+    for mybar, x, y in zip(bars, df.index, df[varname], strict=False):
         if x == year:
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")

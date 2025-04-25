@@ -135,7 +135,7 @@ def handle_error(exp, fmt, environ: dict):
             f"method:{tb[2]} lineno:{tb[1]} {exp}",
         )
     if not isinstance(
-        exp, (IncompleteWebRequest, NoDataFound, UnknownStationException)
+        exp, IncompleteWebRequest | NoDataFound | UnknownStationException
     ):
         traceback.print_exc()
     del (exc_type, exc_value, exc_traceback, tb)
@@ -181,7 +181,7 @@ def get_res_by_fmt(p, fmt, fdict):
     else:
         res = mod.plotter(ctx)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
-    if not isinstance(res, (list, tuple)):
+    if not isinstance(res, list | tuple):
         res = [res, None, None]
     if len(res) == 2:
         res = [res[0], res[1], None]

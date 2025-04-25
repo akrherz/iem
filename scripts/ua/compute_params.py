@@ -6,7 +6,6 @@ Run from RUN_10AFTER.sh
 import sys
 import warnings
 from datetime import datetime, timezone
-from typing import Optional
 
 import click
 import numpy as np
@@ -314,9 +313,7 @@ def do_profile(cursor, fid, gdf: pd.DataFrame, nt):
 @click.option("--year", required=False, type=int)
 @click.option("--station", help="Specific station to process")
 @click.option("--valid", type=click.DateTime(), help="UTC time")
-def main(
-    year: Optional[int], station: Optional[str], valid: Optional[datetime]
-):
+def main(year: int | None, station: str | None, valid: datetime | None):
     """Go Main Go."""
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()

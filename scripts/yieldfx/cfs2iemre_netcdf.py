@@ -6,7 +6,6 @@ This will allow for downstream usage by PSIMS/Drydown. Run from RUN_NOON.sh
 import os
 import sys
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import numpy as np
@@ -169,7 +168,7 @@ def finalize(nc):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Specific date")
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Go Main Go"""
     if dt is not None:
         today = dt.date()
@@ -185,6 +184,7 @@ def main(dt: Optional[datetime]):
         for gribname, vname in zip(
             ["dswsfc", "tmax", "tmin", "prate"],
             ["srad", "high_tmpk", "low_tmpk", "p01d"],
+            strict=False,
         ):
             merge(nc, valid, gribname, vname)
         # profit

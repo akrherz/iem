@@ -2,5 +2,4 @@
 
 from iemweb.json.current import application
 
-# appease linters
-_ = application
+__all__ = ["application"]

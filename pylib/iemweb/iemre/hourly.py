@@ -98,7 +98,7 @@ def workflow(
         tslices[0] = slice(tidx0, None)
 
     now = sts
-    for fn, tslice in zip(fns, tslices):
+    for fn, tslice in zip(fns, tslices, strict=False):
         if not os.path.isfile(fn):
             raise IncompleteWebRequest(
                 f"File {fn} does not exist, please try again later"

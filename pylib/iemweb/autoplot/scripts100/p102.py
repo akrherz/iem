@@ -26,7 +26,7 @@ def get_description():
     today = date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
-    ev = dict(zip(ltypes, ltypes))
+    ev = dict(zip(ltypes, ltypes, strict=False))
     desc["arguments"] = [
         dict(
             type="networkselect",

@@ -10,7 +10,6 @@ import os
 import subprocess
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -662,7 +661,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
 
 @click.command()
 @click.option("--station", help="Specific station to process")
-def main(station: Optional[str]):
+def main(station: str | None):
     """Go main Go"""
     stations = STATIONS if station is None else [station]
     for nwsli in stations:

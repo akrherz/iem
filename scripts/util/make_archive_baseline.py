@@ -12,7 +12,6 @@ called from RUN_0Z.sh
 import os
 import subprocess
 from datetime import datetime
-from typing import Optional
 
 import click
 from pyiem.network import Table as NetworkTable
@@ -30,7 +29,7 @@ PILS = (
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime())
-def main(dt: Optional[datetime]):
+def main(dt: datetime | None):
     """Go Main Go"""
     if dt is None:
         ts = utc()
