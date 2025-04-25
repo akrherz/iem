@@ -22,6 +22,7 @@ from io import StringIO
 
 from pydantic import Field
 from pyiem.database import get_dbconnc
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -90,6 +91,8 @@ def application(environ, start_response):
     """
     Do something!
     """
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing start or end time")
     station = environ["station"]
     start_response("200 OK", [("Content-type", "text/plain")])
     return [fetcher(station, environ["sts"], environ["ets"])]
