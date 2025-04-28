@@ -97,6 +97,13 @@ RewriteRule ^/search /search.py [QSA]
     ErrorDocument 404 /images/missing-320x240.jpg
   </LocationMatch>
 
+  <LocationMatch "^/one(/index\.html)?$">
+    # Prevent caching of index.html
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </LocationMatch>
+
   # BUFKIT Warehouse
   # Include /opt/bufkit_warehouse/config/apache_config.inc
 
