@@ -15,7 +15,7 @@ from metpy.units import units
 from psycopg.rows import dict_row
 from pyiem.database import get_dbconn
 from pyiem.observation import Observation
-from pyiem.util import exponential_backoff, logger
+from pyiem.util import logger
 
 LOG = logger()
 BASE = "/mesonet/tmp/uscrn"
@@ -204,30 +204,35 @@ def download(year, reprocess=False) -> list:
         LOG.warning("uscrn_ingest %s has no files", year)
         return []
     queue = []
+    dlerrors = 0
     for filename in files:
+        if dlerrors > 5:
+            return queue
         size = os.stat(filename).st_size
-        req = exponential_backoff(
-            httpx.get,
-            f"{URI}/{year}/{filename}",
-            headers={"Range": f"bytes={size}-{size + 16000000}"},
-            timeout=30,
-        )
-        # No new data
-        if req is None or req.status_code == 416:
+        try:
+            resp = httpx.get(
+                f"{URI}/{year}/{filename}",
+                headers={"Range": f"bytes={size}-{size + 16000000}"},
+                timeout=30,
+            )
+            # No new data
+            if resp.status_code == 416:
+                continue
+            # Helene Failure
+            if resp.status_code == 200 and resp.text.startswith("Access"):
+                continue
+            if resp.status_code in [404, 403]:
+                LOG.info("uscrn_ingest %s is %s", filename, resp.status_code)
+                continue
+            if resp.status_code < 400:
+                with open(filename, "a") as fh:
+                    fh.write(resp.content.decode("utf-8"))
+            if resp.status_code < 400 or reprocess:
+                queue.append([filename, len(resp.content)])
+        except Exception as exp:
+            dlerrors += 1
+            LOG.warning("uscrn_ingest %s traceback: %s", filename, exp)
             continue
-        # Helene Failure
-        if req.status_code == 200 and req.text.startswith("Access"):
-            continue
-        if req.status_code in [404, 403]:
-            LOG.info("uscrn_ingest %s is %s", filename, req.status_code)
-            continue
-        if req.status_code < 400:
-            with open(filename, "a") as fh:
-                fh.write(req.content.decode("utf-8"))
-        if req.status_code < 400 or reprocess:
-            queue.append([filename, len(req.content)])
-        else:
-            print("Got status code %s %s" % (req.status_code, req.content))
     if reprocess:
         return [(fn, -1) for fn in files]
     return queue
