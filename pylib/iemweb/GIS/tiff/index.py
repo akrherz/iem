@@ -107,7 +107,7 @@ def workflow(key, tmpdir, ts):
         stderr=subprocess.PIPE,
     ) as cmd:
         cmd.stdout.read()
-    with open(f"{tmpdir}/test.tiff", "rb") as fh:
+    with open(f"{tmpdir}/test.tiff", "rb") as fh:  # skipcq
         return fh.read()
 
 

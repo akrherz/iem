@@ -79,17 +79,22 @@ def compute_slots(outlook_type: str, valid: date) -> list:
 
 def plotter(ctx: dict):
     """Go"""
-    jdata = httpx.get(
-        "http://iem.local/json/outlook_progression.py",
-        params={
-            "lat": ctx["lat"],
-            "lon": ctx["lon"],
-            "valid": ctx["valid"].strftime("%Y-%m-%d"),
-            "outlook_type": ctx["outlook_type"],
-            "fmt": "json",
-        },
-    ).json()
-    outlooks = pd.DataFrame(jdata["outlooks"])
+    try:
+        resp = httpx.get(
+            "http://iem.local/json/outlook_progression.py",
+            params={
+                "lat": ctx["lat"],
+                "lon": ctx["lon"],
+                "valid": ctx["valid"].strftime("%Y-%m-%d"),
+                "outlook_type": ctx["outlook_type"],
+                "fmt": "json",
+            },
+        )
+        resp.raise_for_status()
+        jdata = resp.json()
+        outlooks = pd.DataFrame(jdata["outlooks"])
+    except Exception as exp:
+        raise NoDataFound("Error retrieving data") from exp
     if outlooks.empty:
         raise NoDataFound("No outlooks found for this point and date.")
 

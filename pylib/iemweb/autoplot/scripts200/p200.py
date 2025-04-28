@@ -67,6 +67,7 @@ ISSUANCE = {
     "2.E.A": "Day 2 Excessive Rainfall",
     "2.E.20": "Day 2 Excessive Rainfall @20z",
     "2.E.8": "Day 2 Excessive Rainfall @8z",
+    "3.C.A": "Day 3 Convective",
     "3.C.20": "Day 3 Convective @20z",
     "3.C.8": "Day 3 Convective @8z",
     "3.F.21": "Day 3 Fire Weather @21z",
