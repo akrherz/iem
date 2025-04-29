@@ -1,7 +1,10 @@
 """
 This autoplot maps out the issued NWS Watch/Warning/Advisory events over a
 given time period of your choice.  The displayed events are <strong>only
-spatially filtered</strong> in the case of a per WFO or per State Map.</p>
+spatially filtered</strong> in the case of a per WFO or per State Map. The
+spatial filter for the state level isn't necessarily straight forward and
+an arbitrary choice was made to require 5% of the polygon area to reside
+within the state for it to count.</p>
 
 <p><a href="/plotting/auto/?q=90">Autoplot 90</a> is similar to this app, but
 produces heatmaps and other summary maps.</p>
@@ -12,6 +15,7 @@ from typing import TYPE_CHECKING
 
 import geopandas as gpd
 import pyiem.nws.vtec as vtec
+from matplotlib.patches import Rectangle
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -153,10 +157,12 @@ def plotter(ctx: dict):
         if len(csector) == 2:
             if ctx["geo"] == "sbw":
                 gdf = load_geodf("us_states")
-                wfo_limiter = (
-                    " and ST_Intersects(geom, "
-                    "ST_SetSRID(ST_GeomFromEWKT(:wkt), 4326)) "
-                )
+                # Require at least 5% of the area to be within the state
+                wfo_limiter = """
+    and ST_Intersects(geom, ST_SetSRID(ST_GeomFromEWKT(:wkt), 4326)) and
+    (ST_area(st_intersection(geom, ST_SetSRID(ST_GeomFromEWKT(:wkt), 4326))) /
+     ST_area(geom)) > 0.05
+                """
                 params["wkt"] = gdf.at[csector, "geom"].wkt
             else:
                 wfo_limiter = " and substr(w.ugc, 1, 2) = :state "
@@ -203,8 +209,20 @@ def plotter(ctx: dict):
 
     subtitle = "Counts: "
     st = []
+    legend_items = []
     for (ph, sig), gdf in wwadf.groupby(["phenomena", "significance"]):
         st.append(f"{len(gdf)} {vtec.get_ps_string(ph, sig)} ({ph}.{sig})")
+        legend_items.append(
+            Rectangle(
+                (0, 0),
+                1,
+                1,
+                fc=NWS_COLORS.get(f"{ph}.{sig}", "k"),
+                ec="k",
+                lw=1,
+                label=vtec.get_ps_string(ph, sig),
+            )
+        )
     subtitle += ", ".join(st)
 
     title = (
@@ -249,6 +267,11 @@ def plotter(ctx: dict):
         lw=2,
         aspect=None,
         zorder=Z_OVERLAY2,
+    )
+    mp.ax.legend(
+        handles=legend_items,
+        loc="upper right",
+        fontsize=8,
     )
 
     return mp.fig, wwadf.drop(columns="geom")
