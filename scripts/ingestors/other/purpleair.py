@@ -4,10 +4,9 @@ Called from RUN_1MIN.sh
 """
 
 import httpx
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.observation import Observation
 from pyiem.util import utc
-from sqlalchemy import text
 
 XREF = {
     "pm2_5_aqi_b": "pm2.5_aqi_b",
@@ -24,7 +23,7 @@ def save_other(data):
     with get_sqlalchemy_conn("other") as conn:
         # retrieve all the columns within the purpleair table
         res = conn.execute(
-            text(
+            sql_helper(
                 "SELECT column_name FROM information_schema.columns "
                 "WHERE table_name = 'purpleair' and table_schema = 'public'"
             )
@@ -33,7 +32,7 @@ def save_other(data):
         # do a bulk insert
         vals = [f":{x}" for x in columns]
         conn.execute(
-            text(
+            sql_helper(
                 f"insert into purpleair ({','.join(columns)}) "
                 f"values ({','.join(vals)}) "
             ),

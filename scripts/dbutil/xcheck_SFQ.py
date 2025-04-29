@@ -4,10 +4,9 @@ Run from RUN_0Z.sh
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import StationAttributes as SA
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -16,7 +15,7 @@ def load_sites() -> pd.DataFrame:
     """Figure out what we have."""
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
     SELECT id, value as snow_src from stations s JOIN station_attributes a ON
     (s.iemid = a.iemid) WHERE a.attr = :attr
             """),
@@ -31,7 +30,7 @@ def load_obs() -> pd.DataFrame:
     """Figure out who has HML data."""
     with get_sqlalchemy_conn("hads") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
     select distinct station from raw where
     valid > now() - '7 days'::interval and substr(key, 1, 3) = 'SFQ'
                  """),

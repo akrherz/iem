@@ -14,11 +14,10 @@ import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import AFFINE, daily_offset, get_daily_ncname
 from pyiem.util import logger, ncopen
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -123,7 +122,7 @@ def main(valid: datetime | None):
         return
     with get_sqlalchemy_conn("coop") as conn:
         days = pd.read_sql(
-            text("""
+            sql_helper("""
                 SELECT day from alldata_ia where station = 'IATAME'
                 and power_srad is null and day >= '1984-01-01'
                 ORDER by day ASC LIMIT 100

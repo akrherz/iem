@@ -3,5 +3,4 @@ User documentation available at https://mesonet.agron.iastate.edu/cgi-bin/precip
 
 from iemweb.precip.snetRates import application
 
-# Appease linter
-_ = application
+__all__ = ["application"]

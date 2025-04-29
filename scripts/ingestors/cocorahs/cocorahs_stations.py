@@ -9,9 +9,8 @@ from io import StringIO
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -22,7 +21,7 @@ def main(newerthan: datetime):
     """Go Main Go"""
     with get_sqlalchemy_conn("mesosite") as conn:
         current = pd.read_sql(
-            text("""
+            sql_helper("""
     select id, name, st_x(geom) as lon, st_y(geom) as lat, elevation, iemid
     from stations where network ~* '_COCORAHS' order by id
             """),

@@ -6,10 +6,9 @@ Called from RUN_2AM.sh for yesterday and ten days ago.
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -43,7 +42,7 @@ def check_date(dt):
     nt = NetworkTable("ISUSM", only_online=False)
     with get_sqlalchemy_conn("isuag") as conn:
         obs = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 select station, tair_c_avg_qc, tair_c_max_qc,
                 tair_c_min_qc from sm_daily where valid = :date

@@ -2,4 +2,4 @@
 
 from iemweb.agclimate.ames_precip import application
 
-_ = application
+__all__ = ["application"]
