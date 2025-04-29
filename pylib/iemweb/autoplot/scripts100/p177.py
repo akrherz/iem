@@ -803,13 +803,18 @@ def plot_at(ctx):
     """One minute temperatures."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT valid, tair_c_avg_qc, rh_avg_qc, slrkj_tot_qc,
             ws_mph_qc, ws_mph_max_qc from sm_minute WHERE
-            station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-            """,
+            station = :station and valid BETWEEN :sts and :ets
+            ORDER by valid ASC
+            """),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col="valid",
         )
     if df.empty:
@@ -823,37 +828,48 @@ def plot_at(ctx):
             f"{ctx['ets']:%-d %b %Y %-I:%M %p} Central Time"
         ),
     )
-    ax = fig.subplots(2, 1, sharex=True)
-    ax[0].plot(df.index, c2f(df["tair_c_avg_qc"]), color="r")
-    ax[0].set_ylabel(r"Air Temperature [$^\circ$F]", color="r")
+    if df["ws_mph_max_qc"].max() > 0.1:
+        ax = fig.subplots(2, 1, sharex=True)
+    else:
+        ax = [fig.add_axes([0.1, 0.1, 0.8, 0.8])]
+    ax[0].plot(df.index, c2f(df["tair_c_avg_qc"]), color="r", label="Air Temp")
+    ax[0].set_ylabel(r"Temperature [$^\circ$F]")
+    dwpf = dewpoint_from_relative_humidity(
+        units("degC") * df["tair_c_avg_qc"].values,
+        units("percent") * df["rh_avg_qc"].values,
+    )
+    ax[0].plot(df.index, dwpf.to(units("degF")), color="g", label="Dew Point")
+
     ax[0].grid(True)
     if ax[0].get_ylim()[0] < 40:
         ax[0].axhline(32, linestyle="--", lw=2, color="tan")
+    ax[0].legend(loc="best")
 
     ax2 = ax[0].twinx()
     ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
     ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
     apply_xaxis_formatting(ax[0], ctx)
 
-    ax[1].bar(
-        df.index,
-        df["ws_mph_max_qc"],
-        width=1 / 1440.0,
-        zorder=3,
-        color="r",
-        label="Gust",
-    )
-    ax[1].bar(
-        df.index,
-        df["ws_mph_qc"],
-        width=1 / 1440.0,
-        zorder=4,
-        color="b",
-        label="Avg",
-    )
-    ax[1].grid(True)
-    ax[1].set_ylabel("Wind Speed [MPH]")
-    ax[1].legend(loc="best", ncol=2)
+    if df["ws_mph_max_qc"].max() > 0.1:
+        ax[1].bar(
+            df.index,
+            df["ws_mph_max_qc"],
+            width=1 / 1440.0,
+            zorder=3,
+            color="r",
+            label="Gust",
+        )
+        ax[1].bar(
+            df.index,
+            df["ws_mph_qc"],
+            width=1 / 1440.0,
+            zorder=4,
+            color="b",
+            label="Avg",
+        )
+        ax[1].grid(True)
+        ax[1].set_ylabel("Wind Speed [MPH]")
+        ax[1].legend(loc="best", ncol=2)
 
     return fig, df
 
