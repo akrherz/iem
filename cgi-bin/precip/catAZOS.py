@@ -3,5 +3,4 @@ User documentation available at https://mesonet.agron.iastate.edu/cgi-bin/precip
 
 from iemweb.precip.catAZOS import application
 
-# Appease linter
-_ = application
+__all__ = ["application"]
