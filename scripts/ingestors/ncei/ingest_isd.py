@@ -12,11 +12,10 @@ import click
 import httpx
 import pandas as pd
 import tqdm
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.ncei import ds3505
 from pyiem.nws.products.metarcollect import normid, to_iemaccess, to_metar
 from pyiem.util import c2f, logger, utc
-from sqlalchemy import text
 
 LOG = logger()
 TMPDIR = "/mesonet/tmp"
@@ -86,7 +85,7 @@ def main(airforce, wban, faa, year1, year2):
         with get_sqlalchemy_conn("asos") as asosconn:
             # build out our current obs
             obsdf = pd.read_sql(
-                text("""
+                sql_helper("""
             SELECT valid, tmpf, metar, editable from alldata where
             station = :station and valid >= :sts and valid < :ets
             ORDER by valid ASC

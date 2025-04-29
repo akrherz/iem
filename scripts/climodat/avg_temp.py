@@ -8,10 +8,9 @@ from datetime import datetime
 
 import click
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from sqlalchemy import text
 
 
 @click.command()
@@ -24,7 +23,7 @@ def main(year: int):
     nt.sts["IA5992"]["lat"] = 41.65
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT station, avg(high) as avg_high, avg(low) as avg_low,
             avg( (high+low)/2 ) as avg_tmp, max(day)
             from alldata_ia WHERE year = :year and station != 'IA0000' and

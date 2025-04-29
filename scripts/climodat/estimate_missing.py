@@ -11,10 +11,9 @@ Called from RUN_CLIMODAT_STATE.sh
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 URI = (
@@ -111,12 +110,15 @@ def main(state: str):
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             SELECT station, year, day, high, low, precip, temp_estimated,
-            precip_estimated from alldata_{state}
+            precip_estimated from {table}
             WHERE (high is null or low is null or precip is null)
             and year >= 1893 and day < 'TODAY' ORDER by station, day
-            """),
+            """,
+                table=f"alldata_{state.lower()}",
+            ),
             conn,
             index_col=None,
         )

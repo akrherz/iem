@@ -4,9 +4,9 @@ run from RUN_SUMMARY.sh
 """
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn, logger, utc
-from sqlalchemy import text
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -17,7 +17,7 @@ def main():
 
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         WITH lows as (
         SELECT c.iemid,

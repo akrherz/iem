@@ -21,13 +21,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import IEMRE
 from pyiem.iemre import get_grids
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import logger, mm2inch
-from sqlalchemy import text
 
 pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
@@ -94,13 +93,14 @@ def load_current(df: pd.DataFrame, state: str, dt: date):
     # Load up any available observations
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT station, high, low, precip, snow, snowd, temp_hour,
                 precip_hour, temp_estimated, precip_estimated,
-                true as dbhas from alldata_{state} WHERE day = :date
+                true as dbhas from {table} WHERE day = :date
                 and station = ANY(:stations)
-                """
+                """,
+                table=f"alldata_{state.lower()}",
             ),
             conn,
             params={"date": dt, "stations": df.index.values.tolist()},
@@ -246,7 +246,7 @@ def merge_obs(df: pd.DataFrame, state, ts):
     networks = [f"{state}_COOP", f"{state}_ASOS", f"{state}_DCP"]
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT t.id || '|' || t.network as tracks,
             round(max_tmpf::numeric, 0) as high,

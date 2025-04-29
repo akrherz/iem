@@ -10,11 +10,10 @@ import tempfile
 from datetime import timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
 from pyiem.util import utc
-from sqlalchemy import text
 
 JOBS = [
     {
@@ -41,7 +40,7 @@ def fix_isusm(df, yesterday, today):
     """Manually correct this."""
     with get_sqlalchemy_conn("isuag") as conn:
         corrected = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT station, sum(rain_in_tot_qc) from sm_hourly where
             valid > :yesterday and valid <= :today and
@@ -80,7 +79,7 @@ def do_dvn_coop(fh):
     )
     with get_sqlalchemy_conn("iem") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 """
                 select id, name, max_tmpf, min_tmpf, pday, snow, snowd,
                 coop_valid from
@@ -124,16 +123,17 @@ def main(job):
     with get_sqlalchemy_conn("iem") as conn:
         # 6z to 6z high temperature
         data = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT id, round(
             max(greatest(max_tmpf_6hr, tmpf))::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
         WHERE t.iemid = c.iemid and t.network = ANY(:networks) and
-        valid >= :yesterday6z and valid < :today6z and {job["limiter"]}
+        valid >= :yesterday6z and valid < :today6z and {limiter}
         and tmpf > -99 and not id = ANY(:badtemps)
         GROUP by id
-                 """
+                 """,
+                limiter=job["limiter"],
             ),
             conn,
             params=job,
@@ -141,16 +141,17 @@ def main(job):
         )
         # 0z to 12z low temperature
         lows = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT id, round(
             min(least(min_tmpf_6hr, tmpf))::numeric,0) as min_tmpf,
         count(tmpf) as obs FROM
         current_log c JOIN stations t on (t.iemid = c.iemid)
         WHERE t.network = ANY(:networks) and valid >= :today0z
         and valid < :now12z and tmpf > -99 and not
-        id = ANY(:badtemps) and {job["limiter"]} GROUP by id
-                """
+        id = ANY(:badtemps) and {limiter} GROUP by id
+                """,
+                limiter=job["limiter"],
             ),
             conn,
             params=job,
@@ -160,17 +161,18 @@ def main(job):
 
         # 12z to 12z precip
         pcpn = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         select id as station, sum(precip) from
         (select id, extract(hour from valid) as hour,
         max(phour) as precip from current_log c, stations t
         WHERE t.network = ANY(:networks) and t.iemid = c.iemid
         and valid >= :yesterday12z and valid < :now12z
-        and not id = ANY(:badprecip) and {job["limiter"]}
+        and not id = ANY(:badprecip) and {limiter}
         GROUP by id, hour) as foo
         GROUP by id
-    """
+    """,
+                limiter=job["limiter"],
             ),
             conn,
             params=job,

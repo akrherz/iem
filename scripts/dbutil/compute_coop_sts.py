@@ -7,10 +7,9 @@ from datetime import date
 
 import click
 from psycopg import Connection
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 TODAY = date.today()
@@ -21,7 +20,7 @@ def do_network(conn: Connection, network: str):
     nt = NetworkTable(network, only_online=False)
     for sid in nt.sts:
         res = conn.execute(
-            text("""
+            sql_helper("""
         select min(day), max(day) from summary WHERE iemid = :iemid and
         (max_tmpf is not null or min_tmpf is not null or pday is not null)
             """),

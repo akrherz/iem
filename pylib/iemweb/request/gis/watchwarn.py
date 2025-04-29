@@ -119,6 +119,7 @@ class Schema(CGIModel):
         None,
         description="The end timestamp in UTC. The format is ISO8601, e.g. "
         "2010-06-01T00:00Z.",
+        ge=utc(1986, 1, 1),
     )
     limit0: str = Field(
         "no",
@@ -179,6 +180,7 @@ class Schema(CGIModel):
         None,
         description="The start timestamp in UTC. The format is ISO8601, e.g. "
         "2010-06-01T00:00Z.",
+        ge=utc(1986, 1, 1),
     )
     timeopt: int = Field(
         1,

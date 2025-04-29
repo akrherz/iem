@@ -9,9 +9,8 @@ called from RUN_MIDNIGHT.sh
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -22,7 +21,7 @@ def main():
 
     with get_sqlalchemy_conn("postgis") as conn:
         missingdf = pd.read_sql(
-            text(
+            sql_helper(
                 "select wfo || '.'|| phenomena ||'.'|| significance ||'.'|| "
                 "eventid as key from vtec_missing_events WHERE year = :year"
             ),
@@ -30,7 +29,7 @@ def main():
             params={"year": year},
         )
         eventsdf = pd.read_sql(
-            text(
+            sql_helper(
                 "select distinct wfo, phenomena, significance, eventid "
                 "from warnings where vtec_year = :year and "
                 "phenomena not in ('TR', 'HU', 'SS') ORDER by "
@@ -73,7 +72,7 @@ def main():
         return
     with get_sqlalchemy_conn("postgis") as conn:
         conn.execute(
-            text(
+            sql_helper(
                 "INSERT into vtec_missing_events(year, wfo, phenomena, "
                 "significance, eventid) VALUES (:year,:wfo,:phenomena,"
                 ":significance,:eventid)"
