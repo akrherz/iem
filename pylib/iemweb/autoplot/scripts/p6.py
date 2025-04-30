@@ -11,10 +11,11 @@ from datetime import date
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy.stats import norm
+from sqlalchemy.engine import Connection
 
 PDICT = {
     "sum-precip": "Total Precipitation [inch]",
@@ -51,7 +52,8 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection) -> tuple:
     """Go"""
     state = ctx["state"]
     year = ctx["year"]
@@ -60,62 +62,66 @@ def plotter(ctx: dict):
     ptype_climo = ptype.split("-")[1]
 
     # Compute the bulk statistics for climatology
-    with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            f"""
-        WITH yearly as (
-            SELECT station, year, sum(precip) as sum_precip,
-            avg(high) as avg_high, avg(low) as avg_low,
-            avg(era5land_srad) as avg_era5land_srad,
-            avg((high+low)/2.) as avg_temp from alldata_{state}
-            WHERE month = %s GROUP by station, year)
+    df = pd.read_sql(
+        sql_helper(
+            """
+    WITH yearly as (
+        SELECT station, year, sum(precip) as sum_precip,
+        avg(high) as avg_high, avg(low) as avg_low,
+        avg(era5land_srad) as avg_era5land_srad,
+        avg((high+low)/2.) as avg_temp from {table}
+        WHERE month = :month GROUP by station, year)
 
-        SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
-        avg(avg_high) as avg_high, stddev(avg_high) as std_high,
-        avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
-        avg(avg_low) as avg_low, stddev(avg_low) as std_low,
-        avg(avg_era5land_srad) as avg_era5land_srad,
-        stddev(avg_era5land_srad) as std_era5land_srad
-        from yearly
+    SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
+    avg(avg_high) as avg_high, stddev(avg_high) as std_high,
+    avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
+    avg(avg_low) as avg_low, stddev(avg_low) as std_low,
+    avg(avg_era5land_srad) as avg_era5land_srad,
+    stddev(avg_era5land_srad) as std_era5land_srad
+    from yearly
     """,
-            conn,
-            params=(month,),
-            index_col=None,
-        )
+            table=f"alldata_{state.lower()}",
+        ),
+        conn,
+        params={"month": month},
+        index_col=None,
+    )
     if df.empty:
         raise NoDataFound("No Data Found")
     climo_avg = df.at[0, "avg_" + ptype_climo]
     climo_std = df.at[0, "std_" + ptype_climo]
-    with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            f"""
-        WITH yearly as (
-            SELECT station, year, sum(precip) as sum_precip,
-            avg(high) as avg_high, avg(low) as avg_low,
-            avg(era5land_srad) as avg_era5land_srad,
-            avg((high+low)/2.) as avg_temp from alldata_{state}
-            WHERE month = %s GROUP by station, year),
-        agg1 as (
-            SELECT station, avg(sum_precip) as precip,
-            avg(avg_high) as high, avg(avg_low) as low,
-            avg(avg_era5land_srad) as era5land_srad,
-            avg(avg_temp) as temp from yearly GROUP by station),
-        thisyear as (
-            SELECT station, sum_precip, avg_high, avg_low, avg_temp,
-            avg_era5land_srad from yearly WHERE year = %s)
+    df = pd.read_sql(
+        sql_helper(
+            """
+    WITH yearly as (
+        SELECT station, year, sum(precip) as sum_precip,
+        avg(high) as avg_high, avg(low) as avg_low,
+        avg(era5land_srad) as avg_era5land_srad,
+        avg((high+low)/2.) as avg_temp from {table}
+        WHERE month = :month GROUP by station, year),
+    agg1 as (
+        SELECT station, avg(sum_precip) as precip,
+        avg(avg_high) as high, avg(avg_low) as low,
+        avg(avg_era5land_srad) as era5land_srad,
+        avg(avg_temp) as temp from yearly GROUP by station),
+    thisyear as (
+        SELECT station, sum_precip, avg_high, avg_low, avg_temp,
+        avg_era5land_srad from yearly WHERE year = :year)
 
-        SELECT a.station, a.precip as climo_precip, a.high as climo_high,
-        a.low as climo_low, a.temp as climo_t,
-        t.sum_precip as "sum-precip", t.avg_high as "avg-high",
-        t.avg_low as "avg-low", t.avg_temp as "avg-t",
-        t.avg_era5land_srad as "avg-era5land_srad",
-        a.era5land_srad as "climo_era5land_srad"
-        FROM agg1 a JOIN thisyear t on (a.station = t.station)
-        """,
-            conn,
-            params=(month, year),
-            index_col="station",
-        )
+    SELECT a.station, a.precip as climo_precip, a.high as climo_high,
+    a.low as climo_low, a.temp as climo_t,
+    t.sum_precip as "sum-precip", t.avg_high as "avg-high",
+    t.avg_low as "avg-low", t.avg_temp as "avg-t",
+    t.avg_era5land_srad as "avg-era5land_srad",
+    a.era5land_srad as "climo_era5land_srad"
+    FROM agg1 a JOIN thisyear t on (a.station = t.station)
+    """,
+            table=f"alldata_{state.lower()}",
+        ),
+        conn,
+        params={"year": year, "month": month},
+        index_col="station",
+    )
     if f"{state}0000" not in df.index:
         raise NoDataFound("No Data Found")
     stateavg = df.at[f"{state}0000", ptype]

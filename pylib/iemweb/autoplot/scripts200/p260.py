@@ -163,6 +163,8 @@ def plotter(ctx: dict):
     (ST_area(st_intersection(geom, ST_SetSRID(ST_GeomFromEWKT(:wkt), 4326))) /
      ST_area(geom)) > 0.05
                 """
+                if not gdf.at[csector, "geom"].is_valid:
+                    gdf.at[csector, "geom"] = gdf.at[csector, "geom"].buffer(0)
                 params["wkt"] = gdf.at[csector, "geom"].wkt
             else:
                 wfo_limiter = " and substr(w.ugc, 1, 2) = :state "
