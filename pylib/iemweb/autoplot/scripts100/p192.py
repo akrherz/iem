@@ -182,6 +182,8 @@ def plotter(ctx: dict):
         df = df[df[varname] < ctx["above"]]
     if ctx.get("below"):
         df = df[df[varname] > ctx["below"]]
+    if df.empty:
+        raise NoDataFound("No data found after applying thresholds")
     # with QC done, we compute ramps
     if varname != "vsby":
         ramp = np.linspace(
