@@ -264,7 +264,10 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             coopdf[USEME] = True
             coopdf["plotme"] = True
             coopdf["source"] = "COOP"
-            df = pd.concat([df, coopdf], ignore_index=True, sort=False)
+            if df.empty:
+                df = coopdf
+            else:
+                df = pd.concat([df, coopdf], ignore_index=True, sort=False)
     if ctx["cocorahs"] == "yes" and ctx["v"] != "ice":
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
@@ -301,7 +304,10 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             cocodf[USEME] = True
             cocodf["plotme"] = True
             cocodf["source"] = "COCORAHS"
-            df = pd.concat([df, cocodf], ignore_index=True, sort=False)
+            if df.empty:
+                df = cocodf
+            else:
+                df = pd.concat([df, cocodf], ignore_index=True, sort=False)
     return df
 
 
