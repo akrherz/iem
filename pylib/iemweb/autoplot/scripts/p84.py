@@ -31,7 +31,7 @@ from metpy.units import masked_array, units
 from pyiem import iemre, util
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
-from pyiem.grid.nav import IEMRE, IFC, MRMS_IEMRE, PRISM, STAGE4
+from pyiem.grid.nav import IEMRE, IFC, MRMS_IEMRE, PRISM800, STAGE4
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
@@ -50,7 +50,7 @@ NAV_XREF = {
     "iemre": IEMRE,
     "ifc": IFC,
     "mrms": MRMS_IEMRE,
-    "prism": PRISM,
+    "prism": PRISM800,
     "stage4": STAGE4,
 }
 PDICT3 = {

@@ -6,13 +6,13 @@ from datetime import datetime
 
 import click
 import numpy as np
-from pyiem.grid.nav import PRISM
+from pyiem.grid.nav import PRISM800
 from pyiem.util import logger, ncopen
 
 LOG = logger()
 
 
-def init_year(ts: datetime):
+def init_year(ts: datetime, ci: bool):
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -24,7 +24,7 @@ def init_year(ts: datetime):
     nc = ncopen(fn, "w")
     nc.title = f"PRISM Daily Data for {ts:%Y}"
     nc.platform = "Grided Observations"
-    nc.description = "PRISM Data on a 0.04 degree grid"
+    nc.description = "PRISM Data on a 30 arc second grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -35,9 +35,9 @@ def init_year(ts: datetime):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", PRISM.ny)
-    nc.createDimension("lon", PRISM.nx)
-    days = ((ts.replace(year=ts.year + 1)) - ts).days
+    nc.createDimension("lat", PRISM800.ny)
+    nc.createDimension("lon", PRISM800.nx)
+    days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
     nc.createDimension("bnds", 2)
 
@@ -49,11 +49,11 @@ def init_year(ts: datetime):
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
     # We want to store the center of the grid cell
-    lat[:] = PRISM.y_points
+    lat[:] = PRISM800.y_points
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
-    lat_bnds[:, 0] = PRISM.y_edges[:-1]
-    lat_bnds[:, 1] = PRISM.y_edges[1:]
+    lat_bnds[:, 0] = PRISM800.y_edges[:-1]
+    lat_bnds[:, 1] = PRISM800.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -61,11 +61,11 @@ def init_year(ts: datetime):
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon.bounds = "lon_bnds"
-    lon[:] = PRISM.x_points
+    lon[:] = PRISM800.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
-    lon_bnds[:, 0] = PRISM.x_edges[:-1]
-    lon_bnds[:, 1] = PRISM.x_edges[1:]
+    lon_bnds[:, 0] = PRISM800.x_edges[:-1]
+    lon_bnds[:, 1] = PRISM800.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts:%Y}-01-01 00:00:0.0"
@@ -75,26 +75,35 @@ def init_year(ts: datetime):
     tm.calendar = "gregorian"
     tm[:] = np.arange(0, int(days))
 
-    # Tracked variables
+    # We have 256 levels of temperature
+    # So 0.5 C between -60C and 68C
     high = nc.createVariable(
-        "tmax", float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmax", np.uint8, ("time", "lat", "lon"), fill_value=255
     )
+    high.scale_factor = 0.5
+    high.add_offset = -60.0
     high.units = "C"
     high.long_name = "2m Air Temperature Daily High"
     high.standard_name = "2m Air Temperature"
     high.coordinates = "lon lat"
 
     low = nc.createVariable(
-        "tmin", float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmin", np.uint8, ("time", "lat", "lon"), fill_value=255
     )
+    low.scale_factor = 0.5
+    low.add_offset = -60.0
     low.units = "C"
     low.long_name = "2m Air Temperature Daily High"
     low.standard_name = "2m Air Temperature"
     low.coordinates = "lon lat"
 
+    # 256 levels is not enough for precipitation, so we use ushort
+    # 65536 levels from 0 to 655.35mm every 0.01mm
     p01d = nc.createVariable(
-        "ppt", float, ("time", "lat", "lon"), fill_value=-9999.0
+        "ppt", np.ushort, ("time", "lat", "lon"), fill_value=65535
     )
+    p01d.scale_factor = 0.01
+    p01d.add_offset = 0.0
     p01d.units = "mm"
     p01d.long_name = "Precipitation"
     p01d.standard_name = "Precipitation"
@@ -106,10 +115,17 @@ def init_year(ts: datetime):
 
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
-def main(year):
+@click.option("--ci", is_flag=True, help="Continuous Integration mode")
+def main(year: int, ci: bool):
     """Run for the year."""
     os.makedirs("/mesonet/data/prism", exist_ok=True)
-    init_year(datetime(year, 1, 1))
+    init_year(datetime(year, 1, 1), ci)
+    if ci:
+        # CI mode, so we want to remove the file
+        fn = f"/mesonet/data/prism/{year}_daily.nc"
+        with ncopen(fn, "a") as nc:
+            for varname in ["tmax", "tmin", "ppt"]:
+                nc.variables[varname][0] = 10
 
 
 if __name__ == "__main__":

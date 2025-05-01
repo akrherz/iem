@@ -27,7 +27,7 @@ from datetime import date as dateobj
 
 import numpy as np
 from pydantic import Field
-from pyiem.grid.nav import MRMS_IEMRE, PRISM, get_nav
+from pyiem.grid.nav import MRMS_IEMRE, PRISM800, get_nav
 from pyiem.iemre import (
     daily_offset,
     get_daily_mrms_ncname,
@@ -107,7 +107,7 @@ def application(environ, start_response):
         if not os.path.isfile(ncfn):
             prism_precip = None
         else:
-            i2, j2 = PRISM.find_ij(lon, lat)  # type: ignore
+            i2, j2 = PRISM800.find_ij(lon, lat)  # type: ignore
             with ncopen(ncfn) as nc:
                 prism_precip = nc.variables["ppt"][offset, j2, i2] / 25.4
     else:
