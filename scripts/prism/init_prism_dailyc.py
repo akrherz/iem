@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 import numpy as np
-from pyiem.grid.nav import PRISM
+from pyiem.grid.nav import PRISM800
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -37,12 +37,12 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", PRISM.ny)
-    nc.createDimension("lon", PRISM.nx)
+    nc.createDimension("lat", PRISM800.ny)
+    nc.createDimension("lon", PRISM800.nx)
     ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
-    nc.createDimension("nv", 2)
+    nc.createDimension("bnds", 2)
 
     # Setup Coordinate Variables
     lat = nc.createVariable("lat", float, ("lat",))
@@ -52,11 +52,11 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = PRISM.y_points
+    lat[:] = PRISM800.y_points
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
-    lat_bnds[:, 0] = PRISM.y_edges[:-1]
-    lat_bnds[:, 1] = PRISM.y_edges[1:]
+    lat_bnds[:, 0] = PRISM800.y_edges[:-1]
+    lat_bnds[:, 1] = PRISM800.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -64,11 +64,11 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = PRISM.x_points
+    lon[:] = PRISM800.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
-    lon_bnds[:, 0] = PRISM.x_edges[:-1]
-    lon_bnds[:, 1] = PRISM.x_edges[1:]
+    lon_bnds[:, 0] = PRISM800.x_edges[:-1]
+    lon_bnds[:, 1] = PRISM800.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -79,8 +79,10 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days))
 
     p01d = nc.createVariable(
-        "ppt", float, ("time", "lat", "lon"), fill_value=1.0e20
+        "ppt", np.ushort, ("time", "lat", "lon"), fill_value=65535
     )
+    p01d.scale_factor = 0.01
+    p01d.add_offset = 0.0
     p01d.units = "mm"
     p01d.long_name = "Precipitation"
     p01d.standard_name = "Precipitation"
@@ -88,16 +90,20 @@ def init_year(ts):
     p01d.description = "Precipitation accumulation for the day"
 
     high = nc.createVariable(
-        "tmax", float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmax", np.uint8, ("time", "lat", "lon"), fill_value=255
     )
+    high.scale_factor = 0.5
+    high.add_offset = -60.0
     high.units = "C"
     high.long_name = "2m Air Temperature Daily High"
     high.standard_name = "2m Air Temperature"
     high.coordinates = "lon lat"
 
     low = nc.createVariable(
-        "tmin", float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmin", np.uint8, ("time", "lat", "lon"), fill_value=255
     )
+    low.scale_factor = 0.5
+    low.add_offset = -60.0
     low.units = "C"
     low.long_name = "2m Air Temperature Daily High"
     low.standard_name = "2m Air Temperature"

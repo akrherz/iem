@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import click
 import numpy as np
 import pandas as pd
-from pyiem.grid.nav import PRISM, STAGE4
+from pyiem.grid.nav import PRISM800, STAGE4
 from pyiem.iemre import daily_offset, hourly_offset
 from pyiem.util import logger, ncopen, utc
 from rasterio.warp import reproject
@@ -60,7 +60,7 @@ def workflow(valid: datetime):
     with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r") as nc:
         # rasterio freaks out if we have masked arrays
         ppt = nc.variables["ppt"][tidx].filled(0)
-    (pi, pj) = PRISM.find_ij(DEBUGLON, DEBUGLAT)
+    (pi, pj) = PRISM800.find_ij(DEBUGLON, DEBUGLAT)
 
     s4total = compute_s4total(valid)
     (si, sj) = STAGE4.find_ij(DEBUGLON, DEBUGLAT)
@@ -72,7 +72,7 @@ def workflow(valid: datetime):
     reproject(
         ppt,
         prism_on_s4grid,
-        src_transform=PRISM.affine,
+        src_transform=PRISM800.affine,
         src_crs="EPSG:4326",
         dst_transform=STAGE4.affine,
         dst_crs=STAGE4.crs,

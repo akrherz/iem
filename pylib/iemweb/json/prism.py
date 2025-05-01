@@ -35,7 +35,7 @@ import numpy as np
 import pandas as pd
 from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.grid.nav import PRISM
+from pyiem.grid.nav import PRISM800
 from pyiem.iemre import daily_offset
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
@@ -80,7 +80,7 @@ def dowork(environ: dict):
     else:
         raise IncompleteWebRequest("Need valid or sdate/edate")
 
-    i, j = PRISM.find_ij(environ["lon"], environ["lat"])
+    i, j = PRISM800.find_ij(environ["lon"], environ["lat"])  # type: ignore
     if i is None or j is None:
         raise IncompleteWebRequest("Coordinates outside of domain")
 

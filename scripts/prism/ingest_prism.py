@@ -7,71 +7,66 @@ RUN_NOON.sh for 1 day ago
 import glob
 import os
 import subprocess
+import warnings
 from datetime import datetime
 
 import click
+import httpx
 import numpy as np
 import rasterio
 from pyiem.iemre import daily_offset
 from pyiem.util import get_properties, logger, ncopen, set_property
 
+# unavoidable warnings
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    message=".*?invalid value encountered in cast.*?",
+)
+
 LOG = logger()
 PROPNAME = "prism.archive_end"
 
 
-def do_process(valid, fn):
-    """Process this file, please"""
-    # shape of data is (1, 621, 1405)
-    LOG.info("Processing %s", fn)
-    data = rasterio.open(fn).read()
-    varname = fn.split("_")[1]
-    idx = daily_offset(valid)
-    with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "a") as nc:
-        nc.variables[varname][idx] = np.flipud(data[0])
-
-
-def do_download(valid):
+def process(valid: datetime):
     """Make the download happen!"""
-    files = []
+    idx = daily_offset(valid)
     for varname in ["ppt", "tmax", "tmin"]:
-        d = "2"  # if varname == "ppt" else "1"
-        for classify in ["stable", "provisional", "early"]:
-            localfn = valid.strftime(
-                f"PRISM_{varname}_{classify}_4kmD{d}_%Y%m%d_bil"
-            )
-            for fn in glob.glob("{localfn}*"):
-                os.unlink(fn)
-
-            uri = valid.strftime(
-                f"ftp://prism.nacse.org/daily/{varname}/%Y/{localfn}.zip"
-            )
+        uri = (
+            f"https://services.nacse.org/prism/data/get/us/800m/{varname}/"
+            f"{valid:%Y%m%d}"
+        )
+        try:
+            resp = httpx.get(uri, timeout=120)
+            resp.raise_for_status()
+            with open(f"{valid:%Y%m%d}.zip", "wb") as fh:
+                fh.write(resp.content)
             subprocess.call(
                 [
-                    "wget",
+                    "unzip",
                     "-q",
-                    "--timeout=120",
-                    "-O",
-                    f"{localfn}.zip",
-                    uri,
-                ],
+                    f"{valid:%Y%m%d}.zip",
+                ]
             )
-            # a failed download is a 0-byte file :/
-            if os.stat(f"{localfn}.zip").st_size == 0:
-                os.unlink(f"{localfn}.zip")
-                continue
-            LOG.info("Worked %s", localfn)
-            break
-
-        subprocess.call(["unzip", "-q", f"{localfn}.zip"])
-        files.append(f"{localfn}.bil")
-
-    return files
-
-
-def do_cleanup(valid):
-    """do cleanup"""
-    for fn in glob.glob(f"PRISM*{valid:%Y%m%d}*"):
-        os.unlink(fn)
+            os.remove(f"{valid:%Y%m%d}.zip")
+        except Exception as exp:
+            LOG.error("Failed to download %s: %s", uri, exp)
+            continue
+        tifffn = f"prism_{varname}_us_30s_{valid:%Y%m%d}.tif"
+        with rasterio.open(tifffn) as src:
+            # raster is top down, netcdf is bottom up
+            data = np.flipud(src.read(1))
+            # values of -9999 are nodata
+            data = np.ma.masked_array(
+                data, mask=(data < -9000), fill_value=np.nan
+            )
+            LOG.info(
+                "%s min: %s max: %s", varname, np.nanmin(data), np.nanmax(data)
+            )
+        with ncopen(f"/mesonet/data/prism/{valid:%Y}_daily.nc", "a") as nc:
+            nc.variables[varname][idx] = data
+        for fn in glob.glob(f"prism_{varname}_us_30s_{valid:%Y%m%d}*"):
+            os.remove(fn)
 
 
 def update_properties(valid):
@@ -94,11 +89,7 @@ def main(dt: datetime):
     """Do Something"""
     os.chdir("/mesonet/tmp")
     dt = dt.date()
-    files = do_download(dt)
-    for fn in files:
-        do_process(dt, fn)
-
-    do_cleanup(dt)
+    process(dt)
     update_properties(dt)
 
 
