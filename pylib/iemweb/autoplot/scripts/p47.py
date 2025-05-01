@@ -11,7 +11,7 @@ import calendar
 
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
@@ -50,13 +50,13 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("coop") as conn:
         # beat month
         df = pd.read_sql(
-            """
+            sql_helper("""
         SELECT year, sum(precip) as precip, sum(snow) as snow from
-        alldata WHERE station = %s and month = %s and
+        alldata WHERE station = :station and month = :month and
         precip >= 0 and snow >= 0 GROUP by year ORDER by year ASC
-        """,
+        """),
             conn,
-            params=(station, month),
+            params={"station": station, "month": month},
             index_col="year",
         )
     if df.empty:

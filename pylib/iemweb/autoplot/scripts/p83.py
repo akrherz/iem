@@ -10,7 +10,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
@@ -70,55 +70,48 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         with data as (
             SELECT day, year,
             count(*) OVER
-                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                (ORDER by day ASC ROWS BETWEEN :days PRECEDING AND 1 PRECEDING)
                 as cb,
             avg(high) OVER
-                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                (ORDER by day ASC ROWS BETWEEN :days PRECEDING AND 1 PRECEDING)
                 as hb,
             avg(low) OVER
-                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                (ORDER by day ASC ROWS BETWEEN :days PRECEDING AND 1 PRECEDING)
                 as lb,
             sum(precip) OVER
-                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                (ORDER by day ASC ROWS BETWEEN :days PRECEDING AND 1 PRECEDING)
                 as pb,
             count(*) OVER
-                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND :days FOLLOWING)
                 as ca,
             avg(high) OVER
-                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND :days FOLLOWING)
                 as ha,
             avg(low)OVER
-                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND :days FOLLOWING)
                 as la,
             sum(precip) OVER
-                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND :days FOLLOWING)
                 as pa
-            from alldata WHERE station = %s)
+            from alldata WHERE station = :station)
 
         SELECT year, hb as high_before, lb as low_before, pb as precip_before,
         ha as high_after, la as low_after, pa as precip_after from
         data where cb = ca and
-        cb = %s and extract(month from day) = %s and extract(day from day) = %s
-        """,
+        cb = :days and extract(month from day) = :month
+        and extract(day from day) = :day
+        """),
             conn,
-            params=(
-                days,
-                days,
-                days,
-                days,
-                days,
-                days,
-                days,
-                days,
-                station,
-                days,
-                month,
-                day,
-            ),
+            params={
+                "days": days,
+                "station": station,
+                "month": month,
+                "day": day,
+            },
             index_col="year",
         )
     if df.empty:
@@ -135,14 +128,14 @@ def plotter(ctx: dict):
     if year in df.index:
         row = df.loc[year]
         ax.scatter(
-            row[varname + "_before"],
-            row[varname + "_after"],
+            row[f"{varname}_before"],
+            row[f"{varname}_after"],
             color="r",
             zorder=3,
         )
         ax.text(
-            row[varname + "_before"],
-            row[varname + "_after"],
+            row[f"{varname}_before"],
+            row[f"{varname}_after"],
             f"{year}",
             ha="right",
             va="bottom",

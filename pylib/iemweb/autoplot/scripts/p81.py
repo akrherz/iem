@@ -8,7 +8,7 @@ of the day to day changes in temperature.
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -41,11 +41,12 @@ def plotter(ctx: dict):
         raise NoDataFound("Failed to find data.")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         with data as (
             select extract(doy from day) as doy,
             day, {varname} as v from alldata WHERE
-            station = %s),
+            station = :station),
         doyagg as (
             SELECT doy, stddev(v) from data GROUP by doy),
         deltas as (
@@ -57,8 +58,10 @@ def plotter(ctx: dict):
         y.stddev as doy_stddev from deltaagg d JOIN doyagg y ON
         (y.doy = d.doy) WHERE d.doy < 366 ORDER by d.doy ASC
         """,
+                varname=varname,
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="doy",
         )
 
