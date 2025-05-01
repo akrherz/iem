@@ -496,7 +496,8 @@ def do_ahps_obs(nwsli):
         p.value as primary_value, s.value as secondary_value,
         'O' as type
         from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
-        WHERE p.valid > (now() - '72 hours'::interval)
+        WHERE p.valid > (now() - '72 hours'::interval) and p.value is not null
+        and s.value is not null
         ORDER by p.valid DESC
         """
             ),

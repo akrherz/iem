@@ -335,26 +335,25 @@ def plotter(ctx: dict):
         bins = pretty_bins(ctx["df"][pvar].min(), ctx["df"][pvar].max())
     else:  # dep
         bins = centered_bins(ctx["df"][pvar].abs().max())
+    pltargs = {
+        "ilabel": True,
+        "plotmissing": False,
+        "lblformat": fmt,
+        "bins": bins,
+        "cmap": cmap,
+        "units": units,
+        "extend": "both" if ctx["w"] != "rank" else "max",
+    }
     if ctx["which"] == "st":
         ctx["df"].index = ctx["df"].index.str.slice(0, 2)
         mp.fill_states(
             ctx["df"][pvar],
-            ilabel=True,
-            plotmissing=False,
-            lblformat=fmt,
-            bins=bins,
-            cmap=cmap,
-            units=units,
+            **pltargs,
         )
     else:
         mp.fill_climdiv(
             ctx["df"][pvar],
-            ilabel=True,
-            plotmissing=False,
-            lblformat=fmt,
-            bins=bins,
-            cmap=cmap,
-            units=units,
+            **pltargs,
         )
 
     return mp.fig, ctx["df"]

@@ -20,7 +20,7 @@ metric for the user.
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -77,10 +77,14 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"select day, sday, {varname} from alldata where station = %s "
-            "ORDER by day ASC",
+            sql_helper(
+                """
+    select day, sday, {varname} from alldata where station = :station
+    ORDER by day ASC""",
+                varname=varname,
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="day",
             parse_dates="day",
         )
