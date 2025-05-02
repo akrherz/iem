@@ -18,7 +18,10 @@ $metadata = $ctx->metadata;
 // Switch this page to DCP, if necessary
 if (strpos($network, "COOP") > 0) {
     $dbconn = iemdb("mesosite");
-    $stname = iem_pg_prepare($dbconn, "SELECT network from stations where id = $1 and network = $2");
+    $stname = iem_pg_prepare(
+        $dbconn,
+        "SELECT network from stations where id = $1 and network = $2",
+    );
     $rs = pg_execute(
         $dbconn,
         $stname,
@@ -138,8 +141,13 @@ The last bin represents the last value to infinity.
 These images and data are in the public domain,
 the <a href="/disclaimer.php">disclaimer page</a> contains more details.</p>
 
-<p><a href="/cgi-bin/mywindrose.py?help"><i class="fa fa-file"></i> Backend Documentation</a>
-exists for those that wish to script against the windrose image/data service.</p>
+<p><a href="/cgi-bin/mywindrose.py?help" class="btn btn-primary">
+<i class="fa fa-file"></i> Backend Documentation
+</a>
+exists for those that wish to script against the windrose image/data service.
+Additionally, <a href="/plotting/auto/?q=16" class="btn btn-primary">
+<i class="fa fa-line-chart"></i> Autoplot 16</a> allows for custom wind roses
+based on thresholds being met.</p>
 
 <form method="GET" name="windrose">
 <input type="hidden" name="station" value="{$station}">
