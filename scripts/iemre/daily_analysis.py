@@ -147,15 +147,14 @@ def copy_iemre_hourly(ts, ds, domain):
             uwnd = nc.variables["uwnd"]
             vwnd = nc.variables["vwnd"]
             for offset in range(tidx1, tidx2 + 1):
-                val = (uwnd[offset] ** 2 + vwnd[offset] ** 2) ** 0.5
-                if val.mask.all():
-                    LOG.info("No wind for offset: %s", offset)
-                    continue
+                # For better or worse, assume zero in the face of missing data
+                val = np.hypot(uwnd[offset], vwnd[offset]).filled(0.0)
                 if runningsum is None:
                     runningsum = val
                 else:
                     runningsum += val
-                hours += 1
+                if np.max(val) > 0:
+                    hours += 1
     if hours > 0:
         ds["wind_speed"].values = runningsum / hours
     # -----------------------------------------------------------------
