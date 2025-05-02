@@ -11,6 +11,7 @@ Statements (SPS) that contain polygons.
 Changelog
 ---------
 
+- 2025-05-02: Bring all available SPS attributes along for the ride.
 - 2024-06-30: Initial documentation release.
 
 Example Usage
@@ -52,7 +53,8 @@ def run(valid):
             sql_helper("""
             SELECT ST_asGeoJson(geom) as geojson, product_id,
             issue at time zone 'UTC' as utc_issue,
-            expire at time zone 'UTC' as utc_expire
+            expire at time zone 'UTC' as utc_expire, landspout, waterspout,
+            max_hail_size, max_wind_gust, segmentnum, wfo
             from sps WHERE issue <= :valid and expire > :valid
             and not ST_IsEmpty(geom) and geom is not null
         """),
@@ -74,7 +76,17 @@ def run(valid):
                 dict(
                     type="Feature",
                     id=row["product_id"],
-                    properties=dict(href=href, issue=sts, expire=ets),
+                    properties={
+                        "href": href,
+                        "issue": sts,
+                        "expire": ets,
+                        "landspout": row["landspout"],
+                        "waterspout": row["waterspout"],
+                        "max_hail_size": row["max_hail_size"],
+                        "max_wind_gust": row["max_wind_gust"],
+                        "segmentnum": row["segmentnum"],
+                        "wfo": row["wfo"],
+                    },
                     geometry=json.loads(row["geojson"]),
                 )
             )
