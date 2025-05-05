@@ -171,6 +171,7 @@ def get_ct(environ):
     help=__doc__,
     schema=Schema,
     memcachekey=get_mckey,
+    memcacheexpire=60,
     content_type=get_ct,
 )
 def application(environ, start_response):
