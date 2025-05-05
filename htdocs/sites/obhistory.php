@@ -114,6 +114,36 @@ function asos_formatter($i, $row)
         $row["raw"]
     );
 }
+function pavement_formatter($row, $sensor)
+{
+    $tmp = $row["tfs{$sensor}"];
+    $text = $row["tfs{$sensor}_text"];
+    return sprintf(
+        "%s %s",
+        is_null($tmp) ? "" : temp_formatter($tmp),
+        is_null($text) ? "" : "($text)"
+    );
+}
+function rwis_formatter($i, $row)
+{
+    $ts = strtotime(substr($row["local_valid"], 0, 16));
+    return sprintf(
+        "<tr style=\"background: %s;\">" .
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        date("g:i A", $ts),
+        wind_formatter($row),
+        temp_formatter($row["tmpf"]),
+        temp_formatter($row["dwpf"]),
+        temp_formatter($row["feel"]),
+        temp_formatter($row["relh"]),
+        pavement_formatter($row, 0),
+        pavement_formatter($row, 1),
+        pavement_formatter($row, 2),
+        pavement_formatter($row, 3)
+    );
+}
 function formatter($i, $row)
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -400,6 +430,26 @@ EOM;
     {$shefextra}
     </tr>
 EOM;
+} else if (preg_match("/RWIS/", $network)) {
+    $header = <<<EOM
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="2">Time</th>
+    <th rowspan="2">Wind<br>(mph)</th>
+    <th colspan="3">Temperature (&ordm;F)</th>
+    <th rowspan="2">Relative<br>Humidity</th>
+    <th colspan="4">Pavement Sensors: Temperature (&ordm;F) (Condition)</th>
+    </tr>
+
+    <tr align="center" bgcolor="#b0c4de">
+    <th>Air</th>
+    <th>Dwpt</th>
+    <th>Feels Like</th>
+    <th>Sensor 1</th>
+    <th>Sensor 2</th>
+    <th>Sensor 3</th>
+    <th>Sensor 4</th>
+    </tr>
+EOM;
 } else if ($network == "SCAN") {
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
@@ -456,6 +506,8 @@ foreach ($data as $bogus => $row) {
         $table .= asos_formatter($i, $row);
     } else if (preg_match("/DCP|COOP/", $network)) {
         $table .= hads_formatter($i, $row, $shefcols);
+    } else if (preg_match("/RWIS/", $network)) {
+        $table .= rwis_formatter($i, $row);
     } else if ($network == "SCAN") {
         $table .= scan_formatter($i, $row);
     } else {
@@ -477,7 +529,7 @@ $content .= <<<EOM
 {$buttons}
 
 <table class="table table-striped table-bordered" id="datatable">
-<thead>
+<thead class="sticky">
 {$header}
 </thead>
 <tbody>
