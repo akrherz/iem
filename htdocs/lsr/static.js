@@ -504,10 +504,7 @@ function initUI() {
         format: "L LT",
         step: 1,
         maxDate: '+1970/01/03',
-        minDate: '2003/01/01',
-        onClose() {
-            setTimeout(loadData, 0);
-        }
+        minDate: '2003/01/01'
     });
     const sts = moment().subtract(1, 'day');
     const ets = moment();
