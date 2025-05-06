@@ -8,7 +8,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import pyproj
@@ -93,14 +93,19 @@ def process_features(features):
             tzinfo=timezone.utc
         )
         if label not in current:
-            LOG.info("Label %s is unknown", label)
-            continue
+            # This is not actually right, but close enough
+            newid = feat["attributes"]["PHOTO_UID"]
+            current[label] = {
+                "idnum": newid,
+                "valid": valid - timedelta(minutes=1),
+            }
+            LOG.warning("Label %s is new, assigning id %s", label, newid)
         idnum = current[label]["idnum"]
         if valid <= current[label]["valid"]:
             LOG.debug("valid: %s current: %s", valid, current[label]["valid"])
             continue
         current[label]["valid"] = valid
-        LOG.debug(
+        LOG.info(
             "label: %s current: %s new: %s",
             label,
             current[label]["valid"],
