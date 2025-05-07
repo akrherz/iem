@@ -164,7 +164,11 @@ if (is_null($rs) || pg_num_rows($rs) < 1) {
                 die();
             }
         }
+        // Try to be even more helpful
+        $rs = locate_product($conn, $e, $pil, "prev");
     }
+}
+if (is_null($rs) || pg_num_rows($rs) < 1) {
     $content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 if (pg_num_rows($rs) > 1) {
