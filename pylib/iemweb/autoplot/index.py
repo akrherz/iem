@@ -278,10 +278,7 @@ $(".cmapselect").select2({
 
 def datetypes_handler(arg, value):
     """Handle simple forms."""
-    try:
-        value = int(value)
-    except ValueError as exp:
-        LOG.info(exp)
+    value = int(value)
     if arg["type"] == "month":
         items = zip(range(1, 13), calendar.month_name[1:], strict=False)
     elif arg["type"] in ["zhour", "hour"]:
@@ -296,7 +293,9 @@ def datetypes_handler(arg, value):
     else:
         vmin = arg.get("min", 1893)
         vmax = arg.get("max", utc().year)
-        items = zip(range(vmin, vmax + 1), range(vmin, vmax + 1), strict=False)
+        if value > (vmax + 1) or value < vmin:
+            raise ValueError("Year value out of range")
+        items = zip(range(vmin, vmax + 1), range(vmin, vmax + 1), strict=True)
     return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
