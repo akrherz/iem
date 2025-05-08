@@ -27,7 +27,7 @@ URI = (
     "returnGeometry=true&multipatchOption=xyFootprint&"
     "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
     "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
-    "orderByFields=PHOTO_UID"
+    "orderByFields=PHOTO_FILEDATE"
     "&returnZ=false&returnM=false&"
     "returnExceededLimitFeatures=true&quantizationParameters=&"
     "sqlFormat=none&f=json"
