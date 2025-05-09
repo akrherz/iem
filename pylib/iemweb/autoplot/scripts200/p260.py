@@ -239,7 +239,8 @@ def plotter(ctx: dict):
             title += f"for {SECTORS[csector]}"
     elif opt == "wfo":
         title += f"by {ctx['_sname']}"
-        bnds = wfo_bounds[wfo]
+        xref = {"TJSJ": "SJU"}
+        bnds = wfo_bounds[xref.get(wfo, wfo[-3:])]
     elif opt == "fema":
         title += f"for FEMA {FEMA_REGIONS[ctx['fema']]}"
         bnds = fema_region_bounds[int(ctx["fema"])]
