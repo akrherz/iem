@@ -16,6 +16,7 @@ services found at
 Changelog
 ---------
 
+- 2025-05-09: Fixed issue with ``ETN`` DBF column allways being (null).
 - 2024-10-28: The service default for parameter ``simple`` was set back to
   ``yes``.  It was mistakenly set to ``no`` when this was migrated to pydantic.
 - 2024-10-28: Optimize the zipfile response by streaming the result.
@@ -632,7 +633,7 @@ def application(environ, start_response):
                         "PHENOM": "str:2",
                         "GTYPE": "str:1",
                         "SIG": "str:1",
-                        "ETN": "str:4",
+                        "ETN": "int:4",
                         "STATUS": "str:3",
                         "NWS_UGC": "str:6",
                         "AREA_KM2": "float",
