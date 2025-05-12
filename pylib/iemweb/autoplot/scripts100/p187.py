@@ -10,7 +10,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {
     "precip": "Total Precipitation",
@@ -91,7 +91,7 @@ def plotter(ctx: dict):
     undercolor = "r" if varname == "precip" else "b"
     df["color"] = overcolor
     df.loc[df["percentile"] < 50, "color"] = undercolor
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig,
         df,
         "percentile",

@@ -19,7 +19,7 @@ def _gen_celltext(data, column, labelformat):
     return cell_text
 
 
-def barchar_with_top10(
+def barchart_with_top10(
     fig: Figure,
     data: DataFrame,
     column: str,

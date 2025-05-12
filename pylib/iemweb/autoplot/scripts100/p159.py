@@ -22,7 +22,7 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -251,7 +251,7 @@ def set_fig(ctx):
     quorum = ydf[ydf["obs"] > obscount]
     if quorum.empty:
         raise NoDataFound("Error, no results returned!")
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         ctx["fig"],
         quorum,
         "hits",

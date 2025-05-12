@@ -8,7 +8,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {
     "avg_high": "Average High Temperature",
@@ -108,7 +108,7 @@ def plotter(ctx: dict):
     df["color"] = color_above
     df.loc[df[f"diff_{varname}"] < 0, "color"] = color_below
 
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig,
         df,
         f"diff_{varname}",

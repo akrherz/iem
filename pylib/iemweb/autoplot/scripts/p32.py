@@ -18,7 +18,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
 from iemweb.autoplot import ARG_STATION
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {
     "avg": "Daily Average Temperature (F)",
@@ -220,7 +220,7 @@ def plotter(ctx: dict):
             thisyear["color"] = abovecolor
             thisyear.loc[values < 0, "color"] = belowcolor
             ax.set_position([0.1, 0.1, 0.7, 0.8])
-            ax = barchar_with_top10(
+            ax = barchart_with_top10(
                 fig,
                 thisyear.rename(columns={f"{varname}_{how}": "Diff"}),
                 "Diff",

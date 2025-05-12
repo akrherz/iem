@@ -22,7 +22,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 
 def get_description():
@@ -178,7 +178,7 @@ def plotter(ctx: dict):
         .reindex(range(int(df["year"].min()), int(df["year"].max()) + 1))
         .fillna(0)
     )
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig,
         yearlyzeros,
         "precip",
