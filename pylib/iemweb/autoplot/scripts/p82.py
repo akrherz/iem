@@ -64,14 +64,14 @@ def get_description():
             name="sdate",
             default=m90.strftime("%Y/%m/%d"),
             label="Start Date:",
-            min="1929/01/01",
+            min="1900/01/01",
         ),
         dict(
             type="date",
             name="edate",
             default=today.strftime("%Y/%m/%d"),
             label="End Date:",
-            min="1929/01/01",
+            min="1900/01/01",
         ),
     ]
     return desc

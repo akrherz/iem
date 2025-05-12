@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import BadWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 
 warnings.simplefilter("ignore", UserWarning)
@@ -58,8 +58,8 @@ def common(ctx):
     """Do things common to both plots."""
     station = ctx["station"]
     year = ctx["year"]
-    if not ctx["network"].endswith("CLIMATE") and year < 1929:
-        raise NoDataFound("No data available for year before 1929.")
+    if not ctx["network"].endswith("CLIMATE") and year < 1900:
+        raise BadWebRequest("No data available for year before 1900.")
     month = ctx["month"]
 
     sts = date(year, month, 1)
