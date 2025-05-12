@@ -41,6 +41,7 @@ def get_description():
             default=yr,
             label="Select Year",
             min=1850,
+            max=today.year,
         ),
         dict(
             type="select",
