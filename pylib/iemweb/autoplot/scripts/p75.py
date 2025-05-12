@@ -12,7 +12,7 @@ from pyiem.plot import figure
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT2 = {
     "winter": "Winter (Dec, Jan, Feb)",
@@ -100,7 +100,7 @@ def plotter(ctx: dict):
     colorabove = "seagreen"
     colorbelow = "lightsalmon"
     df["color"] = np.where(df["value"] < avgv, colorbelow, colorabove)
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig, df, "value", color=df["color"].to_list(), labelformat="%.2f"
     )
     ax.axhline(avgv, lw=2, color="k", zorder=2, label="Average")

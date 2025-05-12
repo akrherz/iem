@@ -2,7 +2,7 @@
 
 import pandas as pd
 import pytest
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 from pyiem.plot import figure
 
 
@@ -16,5 +16,5 @@ def test_barchart_simple():
         },
         index=pd.Index(list(range(2000, 2020)), name="Year"),
     )
-    barchar_with_top10(fig, df, "a")
+    barchart_with_top10(fig, df, "a")
     return fig

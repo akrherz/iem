@@ -11,7 +11,7 @@ from pyiem.plot import figure
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -118,7 +118,7 @@ def plotter(ctx: dict):
         colorbelow = "r"
     df["color"] = np.where(df[season] < avgv, colorbelow, colorabove)
 
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig,
         df,
         season,

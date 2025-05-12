@@ -18,7 +18,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
-from iemweb.autoplot.barchart import barchar_with_top10
+from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {
     "easter": "Easter (Western Church Dates)",
@@ -262,7 +262,7 @@ def plotter(ctx: dict):
     fig = figure(
         title=ctx["title"], subtitle=f"on {ctx['subtitle']}", apctx=ctx
     )
-    ax = barchar_with_top10(
+    ax = barchart_with_top10(
         fig,
         ctx["df"],
         ctx["varname"],
