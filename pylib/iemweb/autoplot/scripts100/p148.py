@@ -15,9 +15,10 @@ from matplotlib.patches import Patch
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.barchart import barchar_with_top10
 
 PDICT = {
     "easter": "Easter (Western Church Dates)",
@@ -34,6 +35,13 @@ PDICT2 = {
     "precip": "Precipitation [inch]",
     "snow": "Snowfall [inch]",
     "snowd": "Snow Depth [inch]",
+}
+VARFORMAT = {
+    "high": "%d",
+    "low": "%d",
+    "precip": "%.2f",
+    "snow": "%.1f",
+    "snowd": "%.1f",
 }
 
 
@@ -251,17 +259,14 @@ def plotter(ctx: dict):
     """Go"""
     add_context(ctx)
 
-    (fig, ax) = figure_axes(
+    fig = figure(
         title=ctx["title"], subtitle=f"on {ctx['subtitle']}", apctx=ctx
     )
-
-    ax.bar(
-        ctx["df"].index.values,
-        ctx["df"][ctx["varname"]],
-        fc="r",
-        ec="r",
-        align="center",
-        zorder=3,
+    ax = barchar_with_top10(
+        fig,
+        ctx["df"],
+        ctx["varname"],
+        labelformat=VARFORMAT[ctx["varname"]],
     )
     mean = ctx["df"][ctx["varname"]].mean()
     ax.axhline(mean)
@@ -310,16 +315,16 @@ def plotter(ctx: dict):
             alpha=0.2,
             zorder=2,
         )
-
-    legend_elements = [
-        Patch(
-            facecolor="#0000ff",
-            edgecolor="none",
-            alpha=0.2,
-            label="Morning Observations",
-        )
-    ]
-    ax.legend(handles=legend_elements, loc="upper left")
+    if contiguous_groups:
+        legend_elements = [
+            Patch(
+                facecolor="#0000ff",
+                edgecolor="none",
+                alpha=0.2,
+                label="Morning Observations",
+            )
+        ]
+        ax.legend(handles=legend_elements, loc="upper left")
 
     if ctx["varname"] == "snowd":
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
