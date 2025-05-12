@@ -65,14 +65,14 @@ def get_description():
             "name": "sts",
             "default": utc().strftime("%Y/%m/%d 0000"),
             "label": "Start Time (UTC):",
-            "min": "1929/01/01 0000",
+            "min": "1900/01/01 0000",
         },
         {
             "type": "datetime",
             "name": "ets",
             "default": utc().strftime("%Y/%m/%d 2300"),
             "label": "End Time (UTC):",
-            "min": "1929/01/01 0000",
+            "min": "1900/01/01 0000",
             "max": utc().strftime("%Y/%m/%d 2359"),
         },
         {

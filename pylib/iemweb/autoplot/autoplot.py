@@ -16,6 +16,7 @@ import rasterio
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
 from pyiem.exceptions import (
+    BadWebRequest,
     IncompleteWebRequest,
     NoDataFound,
     UnknownStationException,
@@ -135,7 +136,8 @@ def handle_error(exp, fmt, environ: dict):
             f"method:{tb[2]} lineno:{tb[1]} {exp}",
         )
     if not isinstance(
-        exp, IncompleteWebRequest | NoDataFound | UnknownStationException
+        exp,
+        IncompleteWebRequest | NoDataFound | UnknownStationException,
     ):
         traceback.print_exc()
     del (exc_type, exc_value, exc_traceback, tb)
@@ -246,6 +248,8 @@ def workflow(mc, environ, fmt):
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
     except (IncompleteWebRequest, NoDataFound, UnknownStationException) as exp:
         return HTTP400, handle_error(exp, fmt, environ)
+    except BadWebRequest as exp:
+        raise BadWebRequest("") from exp
     except Exception as exp:
         # Log this so that my review scripts see it.
         write_telemetry(
@@ -396,6 +400,8 @@ def application(environ, start_response):
     try:
         # do the work!
         status, output = workflow(mc, environ, fmt)
+    except BadWebRequest as exp:
+        raise BadWebRequest("") from exp
     except Exception as exp:
         status = HTTP500
         output = handle_error(exp, fmt, environ)
