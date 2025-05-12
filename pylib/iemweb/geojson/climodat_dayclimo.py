@@ -41,7 +41,7 @@ class Schema(CGIModel):
     network: str = Field(
         default="IACLIMATE",
         title="Network Identifier",
-        pattern="^[A-Z][A-Z][A-Z_0-9]{2,30}$",
+        pattern="^[A-Z][A-Z]CLIMATE$",
     )
 
 
