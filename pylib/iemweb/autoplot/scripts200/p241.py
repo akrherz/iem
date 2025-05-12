@@ -94,7 +94,7 @@ def get_description():
 
 def get_data(ctx):
     """Do the computation!"""
-    if ctx["csector"] in ["AK", "HI"]:
+    if ctx["csector"] in ["AK", "HI", "PR"]:
         raise NoDataFound("Sector not available for this plot.")
     sts = ctx["sts"]
     ets = ctx["ets"]

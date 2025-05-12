@@ -39,7 +39,7 @@ def process(valid: datetime):
         try:
             resp = httpx.get(uri, timeout=120)
             resp.raise_for_status()
-            with open(f"{valid:%Y%m%d}.zip", "wb") as fh:
+            with open(f"{valid:%Y%m%d}.zip", "wb") as fh:  # skipcq
                 fh.write(resp.content)
             subprocess.call(
                 [
