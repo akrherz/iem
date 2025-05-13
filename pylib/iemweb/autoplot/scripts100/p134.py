@@ -1,8 +1,8 @@
 """
 This plot displays the period of consecutive days
 each year with the extreme criterion meet. In the case of a tie, the
-first period of the season is used for the analysis.  For a season to
-count within the analysis, it must have had at least 200 days with data.
+first period of the season is used for the analysis. If you select any of the
+warmest options, the year must have at least 200 days of data.
 
 <p>The dew point and feels like option only works for ASOS networks
 and does a simple arthimetic mean of dew point temperatures.</p>
@@ -79,7 +79,7 @@ def get_description():
     return desc
 
 
-def get_data(ctx):
+def get_data(ctx: dict) -> pd.DataFrame:
     """Get the data"""
     days = ctx["days"]
     varname = ctx["var"]
@@ -179,7 +179,7 @@ def get_data(ctx):
         extract(doy from day - ':days days'::interval)::int as doy,
         avg_temp, avg_hitemp, avg_lotemp, avg_hidwpf, avg_lodwpf,
         avg_lofeel, avg_hifeel,
-        sum_precip from agg1 where {varname}_rank = 1 and count > 200
+        sum_precip from agg1 where {varname}_rank = 1 and count > :quorum
         """,
                 highcol=highcol,
                 lowcol=lowcol,
@@ -193,9 +193,17 @@ def get_data(ctx):
                 varname=varname,
             ),
             conn,
-            params={"days": days - 1, "offset": offset, "station": station},
+            params={
+                "days": days - 1,
+                "offset": offset,
+                "station": station,
+                "quorum": 200 if varname.startswith("coldest") else days,
+            },
             index_col="season",
         )
+        if df.empty or df[XREF[varname]].isnull().all():
+            raise NoDataFound("Error, no results returned!")
+
     if varname.startswith("coldest") or varname == "driest":
         df.loc[df["doy"] < 183, "doy"] += 365.0
     return df
@@ -206,8 +214,6 @@ def plotter(ctx: dict):
     days = ctx["days"]
     varname = ctx["var"]
     df = get_data(ctx)
-    if df.empty or df[XREF[varname]].isnull().all():
-        raise NoDataFound("Error, no results returned!")
 
     # Don't plot zeros for precip
     if varname == "wettest":
@@ -267,7 +273,7 @@ def plotter(ctx: dict):
 
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     lax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
-    ax.yaxis.set_major_locator(MaxNLocator(prune="lower"))
+    ax.yaxis.set_major_locator(MaxNLocator(prune="lower", integer=True))
 
     # Plot per year
     series = df[XREF[varname]]
