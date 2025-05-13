@@ -67,9 +67,12 @@ class Schema(CGIModel):
             raise ValueError("If you set sts, you must also set ets")
         if self.ets and not self.sts:
             raise ValueError("If you set ets, you must also set sts")
-        if self.sts and self.ets:
-            if (self.ets - self.sts) > timedelta(days=32):
-                raise ValueError("Time filter needs to be less than 32 days")
+        if (
+            self.sts
+            and self.ets
+            and ((self.ets - self.sts) > timedelta(days=32))
+        ):
+            raise ValueError("Time filter needs to be less than 32 days")
         return self
 
 
