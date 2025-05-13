@@ -84,8 +84,8 @@ def run(ctx, start_response):
                 sigmet_type as type,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire, geom,
-                product_id as PROD_ID
-                from sigmets_archive WHERE issue >= :sts and
+                product_id as PROD_ID, narrative as TEXT
+                from alldata_sigmets WHERE issue >= :sts and
                 issue < :ets ORDER by issue ASC
                  """),
             conn,
@@ -141,6 +141,7 @@ def run(ctx, start_response):
             "ISSUE": "str:20",
             "EXPIRE": "str:20",
             "PROD_ID": "str:36",
+            "TEXT": "str:255",
         },
     }
     with tempfile.TemporaryDirectory() as tmpdir:

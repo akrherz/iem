@@ -90,8 +90,8 @@ def run(environ: dict, conn: Connection = None) -> str:
         SELECT *, ST_asGeoJson(geom) as geojson,
         issue at time zone 'UTC' as utc_issue,
         expire at time zone 'UTC' as utc_expire,
-        label, product_id
-        FROM sigmets_archive WHERE {timefilter} and sigmet_type = 'C'
+        label, product_id, narrative
+        FROM alldata_sigmets WHERE {timefilter} and sigmet_type = 'C'
         """,
             timefilter=timefilter,
         ),
@@ -113,6 +113,7 @@ def run(environ: dict, conn: Connection = None) -> str:
                     "expire": row["utc_expire"].strftime(ISO8601),
                     "label": row["label"],
                     "product_id": row["product_id"],
+                    "narrative": row["narrative"],
                 },
                 geometry=json.loads(row["geojson"]),
             )
