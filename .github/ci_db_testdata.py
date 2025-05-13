@@ -10,17 +10,6 @@ from pyiem.database import sql_helper, with_sqlalchemy_conn
 from sqlalchemy.engine import Connection
 
 
-@with_sqlalchemy_conn("postgis")
-def sigmets_current(conn: Connection = None) -> None:
-    """Update these to the future."""
-    conn.execute(
-        sql_helper("""
-        update sigmets_current SET issue = now() + '1 hour'::interval,
-        expire = now() + '2 hours'::interval""")
-    )
-    conn.commit()
-
-
 @with_sqlalchemy_conn("id3b")
 def ldm_product_log(conn: Connection = None) -> None:
     """Update these to the future."""
@@ -40,7 +29,6 @@ def ldm_product_log(conn: Connection = None) -> None:
 
 def main():
     """Go Main."""
-    sigmets_current()
     ldm_product_log()
 
 
