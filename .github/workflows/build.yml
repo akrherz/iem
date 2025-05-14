@@ -133,7 +133,6 @@ jobs:
       if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
       uses: codecov/codecov-action@v5
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
         files: coverage.xml
 
     - name: View Apache Logs
