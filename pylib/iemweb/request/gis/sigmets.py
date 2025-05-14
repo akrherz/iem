@@ -11,6 +11,7 @@ This service emits SIGMET data for a given time period.
 Changelog
 ---------
 
+- 2025-05-14: The raw SIGMET text was added to the outputs.
 - 2024-07-11: Migration to pydantic validation and added CSV,Excel format
   options.
 

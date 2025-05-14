@@ -38,7 +38,7 @@ for those wishing to script against this download portal.</p>
 EOM;
 $content .= "<th>Start:</th>
     <td>
-     ". yearSelect2(2015, date("Y"), "year1") ."
+     ". yearSelect2(2005, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(0,"month1") ."
@@ -57,7 +57,7 @@ $content .= "<th>Start:</th>
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2015, date("Y"), "year2") ."
+     ". yearSelect2(2005, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(date("m"), "month2") ."
@@ -98,11 +98,14 @@ Field 2: Type=C/String, Title='TYPE', One Character SIGMET type, always `C` at
 Field 3: Type=C/String, Title='ISSUE', Issuance UTC Time
 Field 4: Type=C/String, Title='EXPIRE', Expiration UTC Time
 Field 5: Type=C/String, Title='PROD_ID', IEM NWS Text Product Identifier, which
-         can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service.
+	 can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service.
+Field 6: Type=C/String, Title='TEXT', The SIGMET raw text
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
 <ol>
+  <li><strong>14 May 2025</strong>: A number of location processing fixes were implemented
+  with archive corrections made. Tthe archive was backfilled to the start of 2005 as well.</li>
 </ol>
 </form>
 EOM;
