@@ -79,7 +79,11 @@ class Schema(CGIModel):
 @with_sqlalchemy_conn("postgis")
 def run(environ: dict, conn: Connection = None) -> str:
     """Actually do the hard work of getting the current SBW in geojson"""
-    timefilter = "issue <= :valid and expire > :valid"
+    # Database index only on issue, so we make a safe assumption
+    timefilter = (
+        "issue > :valid - '4 days'::interval and issue <= :valid "
+        "and expire > :valid"
+    )
     if environ["sts"]:
         timefilter = "issue >= :sts and issue < :ets"
     environ["valid"] = environ["at"] or utc()
