@@ -2,5 +2,4 @@
 
 from iemweb.request.grx.time_mot_loc import application
 
-# appease the linter
-_ = application
+__all__ = ["application"]

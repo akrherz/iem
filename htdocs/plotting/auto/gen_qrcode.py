@@ -2,5 +2,4 @@
 
 from iemweb.autoplot.gen_qrcode import application
 
-# Appease linter
-_ = application
+__all__ = ["application"]

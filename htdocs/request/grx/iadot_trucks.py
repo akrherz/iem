@@ -2,5 +2,4 @@
 
 from iemweb.request.grx.iadot_trucks import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

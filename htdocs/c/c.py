@@ -2,4 +2,4 @@
 
 from iemweb.c.tile import application
 
-_ = application
+__all__ = ["application"]
