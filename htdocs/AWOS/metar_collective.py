@@ -2,5 +2,4 @@
 
 from iemweb.AWOS.metar_collective import application
 
-# Appease the linter
-_ = application
+__all__ = ["application"]

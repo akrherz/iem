@@ -38,7 +38,7 @@ VARCONV = {
     "vwc_avg12in": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
     "vwc_avg24in": "vwc_24_avg",
-    "vwc_avg30in": "calcvwc30_avg",  # TODO
+    "vwc_avg30in": "calcvwc30_avg",
     "vwc_avg40in": "calcvwc40_avg",
     "vwc50_avg": "vwc_50_avg",
     "calcvwc12_avg": "vwc12",
@@ -256,7 +256,7 @@ def minute_iemaccess(df):
     pgconn.commit()
 
 
-def process(fullfn):
+def process(fullfn: str):
     """Attempt to do something with the file we found."""
     tokens = os.path.basename(fullfn).split("_", 2)
     tabletype = tokens[1]

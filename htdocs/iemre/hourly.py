@@ -2,5 +2,4 @@
 
 from iemweb.iemre.hourly import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

@@ -2,5 +2,4 @@
 
 from iemweb.current.live import application
 
-# appease the linter
-_ = application
+__all__ = ["application"]

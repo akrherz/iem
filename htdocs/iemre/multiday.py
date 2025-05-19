@@ -2,5 +2,4 @@
 
 from iemweb.iemre.multiday import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

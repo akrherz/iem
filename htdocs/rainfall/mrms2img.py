@@ -2,5 +2,4 @@
 
 from iemweb.rainfall.mrms2img import application
 
-# appease the linter
-_ = application
+__all__ = ["application"]

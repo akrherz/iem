@@ -2,5 +2,4 @@
 
 from iemweb.vtec.index import application
 
-# appease linter
-_ = application
+__all__ = ["application"]

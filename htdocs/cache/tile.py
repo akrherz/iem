@@ -2,4 +2,4 @@
 
 from iemweb.cache.tile import application
 
-_ = application
+__all__ = ["application"]
