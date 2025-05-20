@@ -18,7 +18,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
-REPOS = "iem pyiem iemone pywwa iem-database iem-web-services".split()
+REPOS = "iem pyiem iemone iemlsr pywwa iem-database iem-web-services".split()
 GITHUB_API_BASE = "https://api.github.com/repos/akrherz"
 URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE)
 
