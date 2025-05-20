@@ -53,6 +53,7 @@ NASS_CROP_PROGRESS_LOOKUP = {
 PDICT = {
     "six": "Plot all six states",
     "one": "Plot just state #1",
+    "two": "Plot just state #1 and #2",
 }
 PDICT2 = {
     "all": "Plot all available years",
@@ -188,6 +189,15 @@ def plotter(ctx: dict):
     if ctx["w"] == "one":
         axes = [
             [fig.add_axes((x0, 0.12, 0.9, 0.75)), None, None],
+            [None, None, None],
+        ]
+    elif ctx["w"] == "two":
+        axes = [
+            [
+                fig.add_axes((x0, 0.12, 0.42, 0.75)),
+                fig.add_axes((x0 + 0.47, 0.12, 0.42, 0.75)),
+                None,
+            ],
             [None, None, None],
         ]
     else:
