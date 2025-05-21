@@ -62,13 +62,15 @@ def plotter(ctx: dict):
             sql_helper(
                 """
         WITH ranks as (
-            SELECT month, day, high, low, precip, snow,
+            SELECT month, day, high, low, precip, snow, temp_estimated,
+            precip_estimated,
             rank() OVER (
                 PARTITION by month ORDER by {orderer} NULLS LAST)
             from alldata WHERE station = :station)
 
         select month, day, to_char(day, 'Mon dd, YYYY') as dd, high, low,
-        precip, snow, (high - low) as range from ranks
+        precip, snow, (high - low) as range, temp_estimated, precip_estimated
+        from ranks
         WHERE rank = 1 ORDER by month ASC, day DESC
         """,
                 orderer=orderer,
@@ -81,6 +83,11 @@ def plotter(ctx: dict):
     labels = []
     ranges = []
     months = []
+    estcol = (
+        "precip_estimated"
+        if tokens[1] in ["precip", "snowfall"]
+        else "temp_estimated"
+    )
     for _, row in df.iterrows():
         if row["month"] in months:
             if labels[-1].endswith("*"):
@@ -88,12 +95,14 @@ def plotter(ctx: dict):
             labels[-1] += " *"
             continue
         months.append(row["month"])
+        est = " (E)" if row[estcol] else ""
         if tokens[1] == "range":
             labels.append(
-                f"{row[tokens[1]]} ({row['high']}/{row['low']}) - {row['dd']}"
+                f"{row[tokens[1]]}{est} "
+                f"({row['high']}/{row['low']}) - {row['dd']}"
             )
         else:
-            labels.append(f"{row[tokens[1]]} - {row['dd']}")
+            labels.append(f"{row[tokens[1]]}{est} - {row['dd']}")
         ranges.append(row[tokens[1]])
 
     syear = "n/a"
@@ -112,6 +121,7 @@ def plotter(ctx: dict):
     ax.set_ylim(0, 13)
     ax.set_xlabel(
         "Date most recently set/tied shown, * indicates ties are present"
+        ", (E) indicates IEM estimated value"
     )
     ax.grid(True)
     for i, label in enumerate(labels, start=1):
@@ -119,7 +129,7 @@ def plotter(ctx: dict):
             label,
             xy=(1.01, i),
             xycoords=("axes fraction", "data"),
-            va="center",
+            va="bottom",
         )
 
     # Create another axis for a cartoon for each month entry to denote the
