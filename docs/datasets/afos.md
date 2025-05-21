@@ -20,7 +20,7 @@ While the Internet provides many places to view current NWS Text Products, archi
 
 ### Other Sources of Information
 
-The [NCEI Site](https://www.ncei.noaa.gov) would be an authoritative source, but their archives of this data are very painful to work with.  There are a number of other sites that have per-UTC day files with some text products included.  For example [Oklahoma Mesonet](http://www.mesonet.org/data/public/noaa/text/archive/).
+The [NCEI Site](https://www.ncei.noaa.gov) would be an authoritative source, but their archives of this data are very painful to work with.  There are a number of other sites that have per-UTC day files with some text products included.  For example [Oklahoma Mesonet](https:/mesonet.org/data/public/noaa/text/archive/).
 
 ### Processing and Quality Control
 

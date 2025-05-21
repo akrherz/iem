@@ -3,8 +3,9 @@
 import json
 
 import httpx
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, get_dbconn, logger
+from pyiem.util import convert_value, logger
 
 LOG = logger()
 

@@ -38,16 +38,16 @@ def main():
     pgconn.close()
 
     mp = MapPlot(
-        title=("Average High + Low Temperature [F] (1893-%s)") % (today.year,),
-        subtitle="For Date: %s" % (now.strftime("%d %b"),),
+        title=f"Average High + Low Temperature [F] (1893-{today:%Y})",
+        subtitle=f"For Date: {now:%-d %b}",
         axisbg="white",
     )
     mp.drawcounties()
     mp.plot_station(obs)
     pqstr = (
-        "plot ac %s0000 climate/iowa_today_avg_hilo_pt.png "
+        f"plot ac {today:%Y%m%D}0000 climate/iowa_today_avg_hilo_pt.png "
         "coop_avg_temp.png png"
-    ) % (today.strftime("%Y%m%d"),)
+    )
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 

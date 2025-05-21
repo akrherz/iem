@@ -5,8 +5,9 @@ Run from RUN_0Z.sh
 
 import httpx
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.reference import ncei_state_codes
-from pyiem.util import get_dbconn, get_properties, logger, set_property
+from pyiem.util import get_properties, logger, set_property
 
 LOG = logger()
 ELEMENT2IEM = {

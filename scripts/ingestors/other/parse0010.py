@@ -7,8 +7,9 @@ from zoneinfo import ZoneInfo
 
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconnc, logger, utc
+from pyiem.util import convert_value, logger, utc
 
 LOG = logger()
 
