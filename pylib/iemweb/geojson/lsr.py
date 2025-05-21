@@ -7,14 +7,13 @@ This service does a number of different things with Local Storm Reports.
 Changelog
 ---------
 
+- 2025-05-21: Added `product_id` to output attributes.
 - 2024-12-22: Added `hours` parameter to allow for a set time window prior
   to the `ets` parameter, which defaults to now.
 - 2024-10-24: Added crude spatial bounds based parameters of ``east``,
   ``west``, ``north``, and ``south``.
 - 2024-09-23: Added `qualifier` to output attributes, this represents the
   Measured, Estimated, or Unknonw qualifier for the report.
-- 2024-07-14: This service was migrated from a PHP based script to python. An
-  attempt was made to not break the attribute names and types.
 
 Example Requests
 ----------------
@@ -208,7 +207,8 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
             l.state, l.remark, l.city, l.source, l.unit, l.geom,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
                 as valid,
-            ST_x(l.geom) as lon, ST_y(l.geom) as lat, qualifier
+            ST_x(l.geom) as lon, ST_y(l.geom) as lat, qualifier,
+            coalesce(l.product_id_summary, l.product_id) as product_id
             FROM lsrs l, states s WHERE
             valid BETWEEN :sts and :ets and state_abbr = ANY(:states)
             and ST_Intersects(l.geom, s.the_geom)
@@ -244,7 +244,8 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
             county, typetext, state, remark, city, source, unit,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
                 as valid,
-            ST_x(geom) as lon, ST_y(geom) as lat, qualifier, geom
+            ST_x(geom) as lon, ST_y(geom) as lat, qualifier, geom,
+            coalesce(product_id_summary, product_id) as product_id
             FROM lsrs WHERE
             valid BETWEEN :sts and :ets {wfo_limiter}
             LIMIT 10000

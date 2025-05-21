@@ -82,7 +82,7 @@ def generic_gridder(df, idx, domain: str):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def copy_iemre_hourly(ts, ds, domain):
+def copy_iemre_hourly(ts: datetime, ds, domain):
     """Lots of work to do here..."""
     # tricky
     if domain == "":

@@ -193,6 +193,7 @@ def replace_forecast(df, location):
         SELECT day, high, low, precip from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'NDFD'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
+        and high is not null and low is not null and precip is not null
     """,
         (coop, today),
     )

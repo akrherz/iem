@@ -15,9 +15,10 @@ import numpy as np
 import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconnc, logger, utc
+from pyiem.util import convert_value, logger, utc
 from tqdm import tqdm
 
 LOG = logger()

@@ -4,9 +4,9 @@ import os
 import warnings
 from datetime import timedelta
 
+import pandas as pd
 from netCDF4 import chartostring
-from pandas import read_sql
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -15,11 +15,11 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 def main():
     """Go Main Go!"""
     with get_sqlalchemy_conn("hads") as conn:
-        udf = read_sql(
-            """
+        udf = pd.read_sql(
+            sql_helper("""
             SELECT distinct nwsli, 1 as col from unknown
             WHERE length(nwsli) = 5 ORDER by nwsli
-        """,
+        """),
             conn,
             index_col="nwsli",
         )

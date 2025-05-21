@@ -3,50 +3,51 @@
 import re
 
 import httpx
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.util import logger
+from sqlalchemy.engine import Connection
 
 LOG = logger()
 
 
-def main():
+@with_sqlalchemy_conn("squaw")
+def main(conn: Connection = None) -> None:
     """Squaw"""
-    mydb = get_dbconn("squaw")
-    cursor = mydb.cursor()
-
     uri = (
-        "http://waterdata.usgs.gov/ia/nwis/uv?dd_cd=01&format=rdb&"
+        "https://waterdata.usgs.gov/ia/nwis/uv?dd_cd=01&format=rdb&"
         "period=2&site_no=05470500"
     )
-
-    req = exponential_backoff(httpx.get, uri, timeout=30)
-    if req is None or req.status_code != 200:
-        LOG.info("failed to fetch %s", uri)
+    try:
+        resp = httpx.get(uri, timeout=30)
+        resp.raise_for_status()
+    except httpx.RequestError as err:
+        LOG.info("failed to fetch %s: %s", uri, err)
         return
-    data = req.text
+    data = resp.text
 
     tokens = re.findall(
         "USGS\t([0-9]*)\t(....-..-.. ..:..)\t([CSDT]+)\t([0-9]*)", data
     )
 
+    inserts = 0
     for ob in tokens:
-        sql = "SELECT * from real_flow WHERE valid = '%s'" % (ob[1],)
-        cursor.execute(sql)
-        if cursor.rowcount > 0:
+        sql = "SELECT * from real_flow WHERE valid = :valid"
+        rs = conn.execute(sql_helper(sql), {"valid": ob[1]})
+        if rs.rowcount > 0:
             continue
         if ob[3] != "":
             sql = """
                 INSERT into real_flow(gauge_id, valid, cfs)
-                VALUES (%s, '%s', %s)
-            """ % (
-                ob[0],
-                ob[1],
-                ob[3],
+                VALUES (:gauge_id, :valid, :cfs)
+            """
+            conn.execute(
+                sql_helper(sql),
+                {"gauge_id": ob[0], "valid": ob[1], "cfs": ob[3]},
             )
-            cursor.execute(sql)
+            inserts += 1
 
-    cursor.close()
-    mydb.commit()
-    mydb.close()
+    conn.commit()
+    LOG.info("Inserted %s records", inserts)
 
 
 if __name__ == "__main__":

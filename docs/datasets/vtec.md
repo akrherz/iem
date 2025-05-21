@@ -109,7 +109,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 
 1. What are the VTEC phenomena and significance codes?
 
-    The phenomena code (two characters) and significance code (one character) denote the particular WWA hazzard at play with the product. The [NWS VTEC Site](http://www.nws.noaa.gov/om/vtec/) contains a one pager PDF that documents these codes.  The NWS uses these codes to color encode their WAWA Map found on their homepage.  You can find a lookup reference table of these codes and colors [here](https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/vtec.py).
+    The phenomena code (two characters) and significance code (one character) denote the particular WWA hazzard at play with the product. The [NWS VTEC Site](https://www.weather.gov/vtec/) contains a one pager PDF that documents these codes.  The NWS uses these codes to color encode their WAWA Map found on their homepage.  You can find a lookup reference table of these codes and colors [here](https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/vtec.py).
 
 1. How do polygon warnings exist in the IEM archive prior to being official?
 
