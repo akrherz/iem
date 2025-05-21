@@ -10,7 +10,7 @@ if (sizeof($mywfos) == 0 && $wfo != "") {
     $mywfos[] = $wfo;
 }
 $url = sprintf(
-    "/lsr/#%s/%s/%s",
+    "/lsr/?by=wfo&wfo=%s&sts=%s&ets=%s",
     implode(",", $mywfos),
     date("YmdHi", $ts),
     date("YmdHi", $ts2)
