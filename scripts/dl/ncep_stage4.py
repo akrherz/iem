@@ -35,9 +35,9 @@ def download(now: datetime, offset: int):
             f"{hr:02.0f}h.grb2"
         )
         response = None
-        for center in ["nomads.ncep.noaa.gov/pub", "ftpprd.ncep.noaa.gov"]:
+        for _ in range(3):
             try:
-                url = f"https://{center}{upath}"
+                url = f"https://nomads.ncep.noaa.gov/pub{upath}"
                 LOG.info("fetching %s", url)
                 response = httpx.get(url, timeout=60)
                 response.raise_for_status()
