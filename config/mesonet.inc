@@ -307,12 +307,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule roadcond_v2.kml roadcond.php?linewidth=6&maxtype=2
   </Directory>
 
-  <Directory "/opt/iem/htdocs/lsr">
-    # This looks odd, but I think it happens for some poor clients that encode
-    # the hash link somehow
-    RewriteRule #(.*)$ /lsr/#$1 [R=301,NE]
-  </Directory>
-
   <Directory "/opt/iem/htdocs/nws">
     RewriteRule days_since_([A-Z][A-Z])_([A-Z]).png /plotting/auto/plot/92/phenomena:$1::significance:$2::dpi:100.png
   </Directory>
