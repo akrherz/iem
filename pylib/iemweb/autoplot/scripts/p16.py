@@ -2,7 +2,12 @@
 This application generates a wind rose for a given
 criterion being meet. A wind rose plot is a convenient way of summarizing
 wind speed and direction.
+
+<p>You can select a year range to limit the considered data to, but the station
+may not have data for the entire range you select.
 """
+
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -64,17 +69,33 @@ def get_description():
         ),
         dict(
             type="select",
-            name="opt",
-            default="ts",
-            label="Which metric to plot?",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
             name="month",
             default="all",
             label="Month Limiter",
             options=MDICT,
+        ),
+        {
+            "type": "year",
+            "default": 1900,
+            "name": "syear",
+            "label": "Start Year Limit (inclusive):",
+            "min": 1900,
+            "max": date.today().year,
+        },
+        {
+            "type": "year",
+            "default": date.today().year,
+            "name": "eyear",
+            "label": "End Year Limit (inclusive):",
+            "min": 1900,
+            "max": date.today().year,
+        },
+        dict(
+            type="select",
+            name="opt",
+            default="ts",
+            label="Which metric to plot?",
+            options=PDICT,
         ),
         dict(
             type="int",
@@ -222,6 +243,8 @@ def add_ctx(ctx):
         "thres": ctx["threshold"],
         "station": ctx["station"],
         "months": months,
+        "sdate": date(ctx["syear"], 1, 1),
+        "edate": date(ctx["eyear"] + 1, 1, 1),
     }
     if ctx["opt"] == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
@@ -250,6 +273,7 @@ def add_ctx(ctx):
             where station = :station and {limiter} and sknt > 0
             and drct >= 0 and
             drct <= 360 and extract(month from valid) = ANY(:months)
+            and valid >= :sdate and valid <= :edate
             """,
                 limiter=limiter,
             ),
