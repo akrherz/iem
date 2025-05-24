@@ -46,7 +46,7 @@ function olSelectLonLat(div, initialLon, initialLat, callback, suggestedLon = nu
 
     // Create a vector source and add the marker(s) to it
     const vectorSource = new ol.source.Vector({
-        features: features
+        features
     });
 
     // Create a vector layer with the vector source and add it to the map
