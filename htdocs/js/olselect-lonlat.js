@@ -3,7 +3,7 @@
 // that is dragable, which then callbacks a given function with the lat/lon
 // values of the marker.
 
-function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
+function olSelectLonLat(div, initialLon, initialLat, callback, suggestedLon = null, suggestedLat = null) { // skipcq
 
     const marker = new ol.Feature({
         geometry: new ol.geom.Point(ol.proj.fromLonLat([initialLon, initialLat]))
@@ -18,9 +18,35 @@ function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
     // Set the style for the marker
     marker.setStyle(style);
 
-    // Create a vector source and add the marker to it
+    const features = [marker];
+    
+    // Add suggested marker if coordinates are provided
+    let suggestedMarker = null;
+    if (suggestedLon !== null && suggestedLat !== null) {
+        suggestedMarker = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.fromLonLat([suggestedLon, suggestedLat]))
+        });
+        
+        const suggestedStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 10,
+                fill: new ol.style.Fill({
+                    color: '#ff0000'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#000000',
+                    width: 2
+                })
+            })
+        });
+        
+        suggestedMarker.setStyle(suggestedStyle);
+        features.push(suggestedMarker);
+    }
+
+    // Create a vector source and add the marker(s) to it
     const vectorSource = new ol.source.Vector({
-        features: [marker]
+        features
     });
 
     // Create a vector layer with the vector source and add it to the map
@@ -48,7 +74,8 @@ function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
 
     const modify = new ol.interaction.Modify({
         hitDetection: vectorLayer,
-        source: vectorSource
+        source: vectorSource,
+        features: new ol.Collection([marker]) // Only the original marker is modifiable
     });
     map.addInteraction(modify);
 
@@ -63,5 +90,5 @@ function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
         }
     });
 
-    return { map, marker };
+    return { map, marker, suggestedMarker };
 }

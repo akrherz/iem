@@ -63,24 +63,48 @@ IEM Sites Move Request
 > LAT:         {$newlat} OLD: {$metadata["lat"]}
 > EMAIL:       {$email}
 
-{$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
+Review with suggested location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}&suggested_lat={$newlat}&suggested_lon={$newlon}
+Original location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
 EOM;
     if (($delta < 0.5) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }
     // We are doing a GET request, so we don't want folks to bookmark this
-    header("Location: site.php?station={$station}&network={$network}&moved=1");
+    header("Location: site.php?station={$station}&network={$network}&moved=1&suggested_lat={$newlat}&suggested_lon={$newlon}");
     exit();
 }
 if (isset($_GET["moved"])) {
+    $moved_lat = isset($_GET["suggested_lat"]) ? sprintf("%.5f", floatval($_GET["suggested_lat"])) : null;
+    $moved_lon = isset($_GET["suggested_lon"]) ? sprintf("%.5f", floatval($_GET["suggested_lon"])) : null;
+    
+    $coord_info = "";
+    if ($moved_lat && $moved_lon) {
+        $coord_info = " The red circle on the map shows your suggested location (Lat: {$moved_lat}, Lon: {$moved_lon}).";
+    }
+    
     $alertmsg = <<<EOM
-<div class="alert alert-danger">Thanks! Your suggested move was submitted for
-evaluation.</div>
+<div class="alert alert-success">Thanks! Your suggested move was submitted for
+evaluation.{$coord_info}</div>
 EOM;
 }
 
 $lat = sprintf("%.5f", $metadata["lat"]);
 $lon = sprintf("%.5f", $metadata["lon"]);
+
+// Check for suggested coordinates
+$suggested_lat = isset($_GET["suggested_lat"]) ? sprintf("%.5f", floatval($_GET["suggested_lat"])) : null;
+$suggested_lon = isset($_GET["suggested_lon"]) ? sprintf("%.5f", floatval($_GET["suggested_lon"])) : null;
+
+$suggested_coordinates_info = "";
+if ($suggested_lat && $suggested_lon) {
+    $suggested_coordinates_info = <<<EOM
+<div class="alert alert-info">
+<strong>Suggested Location Review:</strong> The blue marker shows the current database location, 
+and the red circle shows a suggested new location (Lat: {$suggested_lat}, Lon: {$suggested_lon}) 
+submitted for review.
+</div>
+EOM;
+}
 
 $t = new MyView();
 $t->title = sprintf("Site Info: %s %s", $station, $metadata["name"]);
@@ -224,11 +248,13 @@ $t->content = <<<EOM
 <div class="col-md-8">
 
   <div id="mymap" style="height: 400px; width: 100%;" data-lat="{$lat}" data-lon="{$lon}"
+  data-suggested-lat="{$suggested_lat}" data-suggested-lon="{$suggested_lon}"
   data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
  <div>
  <strong>Is the location shown for this station wrong?</strong>
  <br />If so, please consider submitting a location submission by moving the marker
  on the map and completing this form below.<br />
+{$suggested_coordinates_info}
     <form name="updatecoords" method="GET">
     <input type="hidden" value="{$network}" name="network">
     <input type="hidden" value="{$station}" name="station">
