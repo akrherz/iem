@@ -79,10 +79,10 @@ def process_features(features):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    cursor.execute("SELECT label, idnum, valid from idot_dashcam_current")
+    cursor.execute("SELECT label, valid from idot_dashcam_current")
     current = {}
     for row in cursor:
-        current[row[0]] = {"idnum": row[1], "valid": row[2]}
+        current[row[0]] = row[1]
 
     for feat in features:
         # Major hack until upstream fixes the attributes
@@ -93,22 +93,16 @@ def process_features(features):
             tzinfo=timezone.utc
         )
         if label not in current:
-            # This is not actually right, but close enough
-            newid = feat["attributes"]["PHOTO_UID"]
-            current[label] = {
-                "idnum": newid,
-                "valid": valid - timedelta(minutes=1),
-            }
-            LOG.warning("Label %s is new, assigning id %s", label, newid)
-        idnum = current[label]["idnum"]
-        if valid <= current[label]["valid"]:
-            LOG.debug("valid: %s current: %s", valid, current[label]["valid"])
+            current[label] = valid - timedelta(minutes=1)
+            LOG.warning("Label %s is new", label)
+        if valid <= current[label]:
+            LOG.debug("valid: %s current: %s", valid, current[label])
             continue
-        current[label]["valid"] = valid
+        current[label] = valid
         LOG.info(
             "label: %s current: %s new: %s",
             label,
-            current[label]["valid"],
+            current[label],
             valid,
         )
         req = exponential_backoff(httpx.get, url, timeout=15)
@@ -135,9 +129,9 @@ def process_features(features):
         pt = P3857(feat["geometry"]["x"], feat["geometry"]["y"], inverse=True)
         # This table has an insert trigger that logs the entry as well
         cursor.execute(
-            "INSERT into idot_dashcam_current(label, valid, idnum, "
-            "geom) VALUES (%s, %s, %s, ST_Point(%s, %s, 4326))",
-            (label, valid, idnum, pt[0], pt[1]),
+            "INSERT into idot_dashcam_current(label, valid, "
+            "geom) VALUES (%s, %s, ST_Point(%s, %s, 4326))",
+            (label, valid, pt[0], pt[1]),
         )
 
     cursor.close()
