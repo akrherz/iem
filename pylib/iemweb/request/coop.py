@@ -484,7 +484,8 @@ def do_daycent(cursor, ctx):
             f"""
             SELECT day, high, low, precip
             from alldata WHERE station = %s
-            and day >= %s and day <= %s {sdaylimit}
+            and day >= %s and day <= %s {sdaylimit} and high is not null
+            and low is not null and precip is not null
             """,
             (ctx["stations"][0], sts, ets),
         )
@@ -500,7 +501,8 @@ def do_daycent(cursor, ctx):
         SELECT day, high, low, precip,
         extract(doy from day) as doy
         from alldata WHERE station = %s
-        and day >= %s and day <= %s ORDER by day ASC
+        and day >= %s and day <= %s and high is not null and low is not null
+        and precip is not null ORDER by day ASC
     """,
         (ctx["stations"][0], ctx["sts"], ctx["ets"]),
     )
@@ -697,7 +699,8 @@ def do_salus(cursor, ctx):
         UNION SELECT *, extract(doy from day) as doy from scenario
     )
 
-    SELECT * from total ORDER by day ASC
+    SELECT * from total where high is not null and low is not null and
+    precip is not null ORDER by day ASC
     """,
         (station, asts, scenario_year, station, ctx["sts"], ctx["ets"]),
     )
@@ -757,7 +760,8 @@ def do_dndc(cursor, ctx):
             SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
         )
-        SELECT * from total ORDER by day ASC
+        SELECT * from total where high is not null and low is not null
+        and precip is not null ORDER by day ASC
     """,
         (
             ctx["stations"],

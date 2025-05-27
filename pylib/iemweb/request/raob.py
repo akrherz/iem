@@ -27,6 +27,7 @@ from io import StringIO
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.exceptions import BadWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
@@ -60,6 +61,9 @@ def fetcher(station, sts, ets, conn: Connection = None):
     stations = [station]
     if station.startswith("_"):
         nt = NetworkTable("RAOB", only_online=False)
+        if station not in nt.sts:
+            msg = f"Unknown RAOB network station: {station}"
+            raise BadWebRequest(msg)
         stations = nt.sts[station]["name"].split("--")[1].strip().split(",")
 
     res = conn.execute(
