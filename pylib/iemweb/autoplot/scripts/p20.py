@@ -76,7 +76,11 @@ def plotter(ctx: dict):
         f"{ctx['_sname']} :: Number of Hours with "
         "*Measurable* Precipitation Reported"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    subtitle = (
+        "Period of Record: "
+        f"{ctx['_nt'].sts[station]['archive_begin']:%-d %B %Y} -"
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     monthly = df["avg"].values.tolist()
     bars = ax.bar(
         df["month"] - 0.2,
