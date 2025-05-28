@@ -5,6 +5,9 @@ year for a given METAR code to appear in the present weather. If your
 favorite METAR code is not available in the listing, please let us know!
 If multiple reports occurred within the same hour during one day/week,
 it would only count as one in this analysis.
+
+The plot title will contain the time period found with the given present
+weather code present.
 """
 
 import calendar
@@ -19,7 +22,7 @@ from pyiem.plot.use_agg import plt
 
 PDICT = {
     "BLSN": "Blowing Snow (BLSN)",
-    "BD": "Blowing Dust (BD)",
+    "BLDU": "Blowing Dust (BLDU)",
     "DS": "Duststorm (DS)",
     "FG": "Fog (FG)",
     "FU": "Smoke (FU)",
