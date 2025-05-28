@@ -19,7 +19,11 @@ from pyiem.plot.use_agg import plt
 
 PDICT = {
     "BLSN": "Blowing Snow (BLSN)",
+    "BD": "Blowing Dust (BD)",
+    "DS": "Duststorm (DS)",
     "FG": "Fog (FG)",
+    "FU": "Smoke (FU)",
+    "HZ": "Haze (HZ)",
     "FZFG": "Freezing Fog (FZFG)",
     "FZRA": "Freezing Rain (FZRA)",
     "PSN": "Heavy Snow (+SN)",  # +SN causes CGI issues

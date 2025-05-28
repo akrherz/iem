@@ -766,8 +766,8 @@ def do_uvi():
         r"(?P<c2>[A-Z\s]+)\s+(?P<s2>[A-Z][A-Z])\s+(?P<u2>\d+)",
     )
     URL = (
-        "https://www.cpc.ncep.noaa.gov/"
-        "products/stratosphere/uv_index/bulletin.txt"
+        "https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py"
+        "?pil=UVICAC&fmt=text"
     )
     resp = httpx.get(URL, timeout=20)
     rows = []
