@@ -13,6 +13,8 @@ for new applications.
 Changelog
 ---------
 
+- 2025-05-29: Implemented a `states` parameter to limit results to a list of
+  given two-letter state identifiers.
 - 2024-12-31: Five additional metadata fields are added with lifetime max
   values for windtag, hailtag, is_pds, is_emergency, and floodtag_damage. These
   fields are prefixed with `max_`.
@@ -35,6 +37,11 @@ Provide all SBW polygons on 26 May 2024 CDT.
 
 https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
 ?sts=2024-05-26T05:00:00Z&ets=2024-05-27T05:00:00Z
+
+Provide all SBW polygons on 26 May 2025 CDF for Iowa.
+
+https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
+?sts=2024-05-26T05:00:00Z&ets=2024-05-27T05:00:00Z&states=IA
 
 """
 
@@ -62,6 +69,13 @@ class Schema(CGIModel):
         default=None,
         description=(
             "Legacy UTC end timestamp parameter in the form of YYYYmmddHHMM"
+        ),
+    )
+    states: ListOrCSVType = Field(
+        default=None,
+        description=(
+            "Optional CSV list of two-letter state identifiers to limit the "
+            "results to."
         ),
     )
     sts: AwareDatetime = Field(
@@ -153,6 +167,14 @@ def run(environ: dict):
         params["ets"] = environ["ts"]
         res["valid_at"] = environ["ts"].strftime(ISO8601)
 
+    if environ["states"] is not None and environ["states"]:
+        ss1 = ", states t "
+        ss2 = (
+            " and ST_Intersects(s.geom, t.the_geom) and "
+            " t.state_abbr = ANY(:states) "
+        )
+        params["states"] = environ["states"]
+
     # NOTE: we dropped checking for products valid in the future (FL.W)
     # NOTE: we have an arb offset check for child table exclusion
     with get_sqlalchemy_conn("postgis") as conn:
@@ -169,7 +191,8 @@ def run(environ: dict):
                 as floodtag_damage_catastrophic,
         bool_or(floodtag_damage = 'CONSIDERABLE')
                 as floodtag_damage_considerable
-        from sbw s WHERE s.expire > :sts and s.issue < :ets {wfo_limiter}
+        from sbw s {ss1} WHERE s.expire > :sts and s.issue < :ets {wfo_limiter}
+        {ss2}
         GROUP by wfo, phenomena, vtec_year, eventid, significance
     )
             SELECT ST_asGeoJson(geom) as geojson, s.phenomena, s.eventid,
@@ -195,6 +218,8 @@ def run(environ: dict):
                 wfo_limiter=wfo_limiter,
                 time_limiter=time_limiter,
                 status_limiter=status_limiter,
+                ss1=ss1,
+                ss2=ss2,
             ),
             params,
         )
@@ -272,13 +297,17 @@ def get_mckey(environ):
         wfos = [environ["wfo"]]
     if wfos is None:
         wfos = []
+    states = [] if environ["states"] is None else environ["states"]
     ts = environ["ts"]
     if environ["sts"] is not None:
         ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
     else:
         ts = ts.strftime(ISO8601)
 
-    return f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}"
+    return (
+        f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}|"
+        f"{','.join(states)[:100]}"
+    )
 
 
 @iemapp(
