@@ -167,6 +167,8 @@ def run(environ: dict):
         params["ets"] = environ["ts"]
         res["valid_at"] = environ["ts"].strftime(ISO8601)
 
+    ss1 = ""
+    ss2 = ""
     if environ["states"] is not None and environ["states"]:
         ss1 = ", states t "
         ss2 = (
