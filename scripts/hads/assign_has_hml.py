@@ -37,6 +37,14 @@ def deal_with_unknown(station: str, conn: Connection = None):
         LOG.warning("Station %s does not exist in NWPS", station)
         return
     meta = resp.json()
+    if -3 < meta["longitude"] < 3:
+        LOG.warning(
+            "Station %s has lon: %s lat: %s, skipping",
+            station,
+            meta["longitude"],
+            meta["latitude"],
+        )
+        return
     state = meta["state"]["abbreviation"]
     res = conn.execute(
         sql_helper("""
@@ -48,7 +56,7 @@ def deal_with_unknown(station: str, conn: Connection = None):
         """),
         {
             "station": station,
-            "name": meta["name"].replace(",", " "),  # no commas in db plz
+            "name": meta["name"].replace(",", " ")[:64],
             "state": state,
             "network": f"{state}_DCP",
             "lon": meta["longitude"],
