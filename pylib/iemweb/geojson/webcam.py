@@ -11,6 +11,8 @@ active at the given timestamp/now.
 Changelog
 ---------
 
+- 2025-06-02: Added property `utc_valid` and `imgurl` to align with other
+  services.
 - 2024-06-30: Initial documentation release. Parameter `valid` added for
   consistency with other services.
 
@@ -103,12 +105,14 @@ def run(valid, network):
                     id=row["id"],
                     properties={
                         "valid": cv.strftime(ISO8601),
+                        "utc_valid": cv.strftime(ISO8601),
                         "cid": row["id"],
                         "name": row["name"],
                         "county": row["county"],
                         "state": row["state"],
                         "angle": row["drct"],
                         "url": url,
+                        "imgurl": url,
                     },
                     geometry={
                         "type": "Point",
