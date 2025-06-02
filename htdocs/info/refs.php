@@ -26,6 +26,7 @@ $XREF = array(
     "MOSAIC" => "/docs/nexrad_mosaic",
     "NWSTEXT" => "/nws/text.php",
     "PIREPS" => "/request/gis/pireps.php",
+    "RAOB" => "/archive/raob/",
     "RWIS" => "/request/rwis/fe.phtml",
     "VTEC" => "/request/gis/watchwarn.phtml",
     "WINDROSE" => "/archive/",
