@@ -689,21 +689,15 @@ def main(station: str | None):
         LOG.info("Calling fix_temps.py with no args")
         subprocess.call(["python", "../isuag/fix_temps.py"])
     for day in EVENTS["days"]:
-        LOG.info("Calling fix_{solar,precip}.py for %s", day)
-        subprocess.call(
-            [
-                "python",
-                "../isusm/fix_precip.py",
-                f"--date={day:%Y-%m-%d}",
-            ]
-        )
-        subprocess.call(
-            [
-                "python",
-                "../isusm/fix_solar.py",
-                f"--date={day:%Y-%m-%d}",
-            ]
-        )
+        LOG.info("Calling fix_{solar,precip,soil4t}.py for %s", day)
+        for script in ["fix_solar", "fix_precip", "fix_soil4t"]:
+            subprocess.call(
+                [
+                    "python",
+                    f"../isusm/{script}.py",
+                    f"--date={day:%Y-%m-%d}",
+                ]
+            )
 
 
 def test_make_tstamp():

@@ -15,6 +15,8 @@ $ar = explode("x", $imgsz);
 $width = $ar[0];
 $height = $ar[1];
 
+$OL = "10.5.0";
+
 // Make sure our edate is not too late
 $today = time() - 86400;
 $edate = mktime(0, 0, 0, $emonth, $eday, $year);
@@ -64,70 +66,14 @@ $wsuri = sprintf(
     86
 );
 
-$imgurl = sprintf(
-    "gsplot.php?var=%s&amp;year=%s&amp;smonth=%s&amp;" .
-        "emonth=%s&amp;eday=%s&amp;sday=%s&amp;imgsz=%s",
-    $var,
-    $year,
-    $smonth,
-    $emonth,
-    $eday,
-    $sday,
-    $imgsz
-);
-
-$round = array("precip" => 2, "gdd" => 0, "sgdd" => 0, "et" => 2, "srad" => 0);
-
-
-$jdata = file_get_contents($INTERNAL_BASEURL . $wsuri);
-$jobj = json_decode($jdata, $assoc = TRUE);
-
-$tr = "# " . $year . " " . $varDef[$var] . " ({$smonth}/{$sday} - {$emonth}/{$eday})\n";
-$tr .= "#-----------------------snip------------------\n";
-$tr .= sprintf(
-    "%-5s,%-40s,%-15s,%-10s,%-10s,%-10s,climate_%s\n",
-    'ID',
-    'StationName',
-    'City',
-    'Latitude',
-    'Longitude',
-    $var,
-    $var
-);
-
-$climovar = "climo_" . $datavar;
-foreach ($jobj["features"] as $bogus => $value) {
-    $props = $value["properties"];
-    if ($props[$datavar] === null) {
-        continue;
-    }
-    $climo = "M";
-    if (array_key_exists($climovar, $props)) {
-        $climo = round($props["climo_" . $datavar], $round[$datavar]);
-    }
-
-    $tr .= sprintf(
-        "%s,%-40.40s,%-15.15s,%10.4f,%10.4f,%10s,%10s\n",
-        $props["station"],
-        $props['name'],
-        $props["city"],
-        $props['lat'],
-        $props['lon'],
-        round($props[$datavar], $round[$datavar]),
-        $climo
-    );
-}
+// Table will be populated by JavaScript to avoid redundant web service calls
 
 $t = new MyView();
 $t->title = "ISUAG Growing Season Data";
 $t->headextra = <<<EOM
-<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
-    link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
-}
-//END Script-->
-</script>
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
+<link rel="stylesheet" href="gsplot.css" type="text/css">
 EOM;
 
 $vselect = make_select("var", $var, $varDef);
@@ -154,7 +100,7 @@ $t->content = <<<EOM
 
 <p>This application will plot an accumulated variable for a time period of your 
 selection.  Data is based on the automated sensors from the ISU AG Climate
-network.  A <a href="/GIS/apps/coop/gsplot.phtml">similiar application</a> 
+network.  A <a href="/GIS/apps/coop/gsplot.phtml">similar application</a> 
 exists based on the COOP network data, which
 is of higher quality for temperature and precipitation.
 
@@ -166,7 +112,7 @@ is of higher quality for temperature and precipitation.
    <th>Year</th>
    <th>Month</th>
    <th>Day</th>
-   <th>Image Size</th>
+   <th>Image Size (Legacy)</th>
    <td></td>
   </tr>
 </thead>
@@ -178,46 +124,62 @@ is of higher quality for temperature and precipitation.
 <td rowspan=2>
 {$iselect}
 </td>
-  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  <td rowspan=2><input type="submit" value="Update Map"></td>
   </tr>
  <tr>
   <td>{$emselect}</td>
   <td>{$edselect}</td>
   </tr>
 </table>
+</form>
 
 <div class="row">
-<div class="col-sm-3">
+<div class="col-sm-12">
+
+<h3>Interactive Map</h3>
+{$h3}
+<p>Click on any station marker to view detailed information. Use mouse wheel to zoom, drag to pan.</p>
+<div id="map" 
+     data-wsuri="{$wsuri}" 
+     data-var="{$var}" 
+     data-datavar="{$datavar}" 
+     data-vardisplay="{$varDef[$var]}" 
+     data-period="{$smonth}/{$sday} - {$emonth}/{$eday}"
+     data-year="{$year}"
+     role="application"
+     aria-label="Interactive weather station map showing {$varDef[$var]} data"></div>
 
 <h3>Dynamic Historical Data:</h3>
 <a href="/plotting/auto/?q=199">Daily Data Plots</a>
 <br /><b>Growing Season Plots</b>
 
-<p>Open this plot in a <a href="javascript:new_window('{$imgurl}');">new window</a> 
-for comparison with other plots. Once the
-image is loaded up in another window, you can modify this plots 
-parameters.
 
 <p><b>*Note:</b> Precipitation recorded from this network is not reliable.
  You should use precipitation obs from the <a href="/COOP/">COOP</a> network.
 
- </div><div class="col-sm-9">
- 
-{$h3}
-  <img src="{$imgurl}" class="img img-responsive">
-<p><strong>Note:</strong> Some stations are slightly moved on the map to
-improve readability.</p>
-  </div></div>
-  
+</div></div>
+
+<div class="row">
+<div class="col-sm-12">
+<h3>Station Data Table</h3>
+<p>This table contains the raw data for all weather stations shown on the map above.</p>
 <p>
-<button type="button" role="button" id="save" class="btn btn-primary">Download CSV Text</button>
+<button type="button" role="button" id="save" class="btn btn-primary" 
+        aria-describedby="download-help">Download CSV Text</button>
+<span id="download-help" class="sr-only">Downloads the station data as a CSV file for use in spreadsheet applications</span>
 <br />
-<pre id="datatable">{$tr}</pre>
+<pre id="datatable" aria-live="polite" aria-label="Weather station data table">Loading data...</pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
+</div>
+</div>
 EOM;
-$t->jsextra = '<script type="text/javascript" src="gsplot.js"></script>';
+$t->jsextra = <<<EOM
+<script src="/vendor/openlayers/{$OL}/ol.js"></script>
+<script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
+<script src="gsplot.js?v=7"></script>
+EOM;
 $t->render('single.phtml');
