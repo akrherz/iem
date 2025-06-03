@@ -13,9 +13,11 @@ import seaborn as sns
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from pyiem.reference import state_names
 
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
+    "state": "Select by State",
 }
 
 
@@ -30,6 +32,12 @@ def get_description():
             options=PDICT,
             label="How to summarize the data?",
         ),
+        {
+            "type": "state",
+            "name": "state",
+            "default": "IA",
+            "label": "Select State:",
+        },
         dict(
             type="networkselect",
             name="station",
@@ -49,11 +57,23 @@ def plotter(ctx: dict):
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
     params = {}
-    wfo_limiter = " and wfo = :wfo "
+    limiter = " and wfo = :wfo "
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
-        wfo_limiter = ""
+        limiter = ""
         ctx["_sname"] = "All Offices"
+    geo_table = ""
+    title = f"NWS {ctx['_sname']} :: Polygon Special Weather Statements"
+    if ctx["opt"] == "state":
+        geo_table = ", states t"
+        limiter = (
+            " and ST_Intersects(t.the_geom, s.geom) and t.state_abbr = :state "
+        )
+        params["state"] = ctx["state"]
+        title = (
+            "NWS Polygon Special Weather Statements intersecting "
+            f"{state_names[ctx['state']]} "
+        )
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -62,10 +82,11 @@ def plotter(ctx: dict):
                 SELECT
                 extract(year from issue)::int as yr,
                 extract(month from issue)::int as mo, count(*)
-                from sps WHERE not ST_IsEmpty(geom) {wfo_limiter}
+                from sps s {geo_table} WHERE not ST_IsEmpty(geom) {limiter}
                 GROUP by yr, mo ORDER by yr, mo ASC
         """,
-                wfo_limiter=wfo_limiter,
+                limiter=limiter,
+                geo_table=geo_table,
             ),
             conn,
             params=params,
@@ -80,7 +101,6 @@ def plotter(ctx: dict):
         columns=range(1, 13),
     )
 
-    title = f"NWS {ctx['_sname']} :: Polygon Special Weather Statements"
     subtitle = "Number of issued products by year and month."
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     sns.heatmap(
