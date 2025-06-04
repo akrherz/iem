@@ -17,8 +17,16 @@ from sqlalchemy.engine import Connection
 LOG = logger()
 
 
-def setval(conn: Connection, station, col: str, ob, dt: date, newval):
+def setval(
+    conn: Connection,
+    station: str,
+    col: str,
+    ob: float | None,
+    dt: date,
+    newval: float,
+):
     """We have something to set."""
+    delta = 0 if ob is None else (newval - ob)
     LOG.warning(
         "%s %s %s %.1f -> %.1f (%.1f) [E]",
         station,
@@ -26,7 +34,7 @@ def setval(conn: Connection, station, col: str, ob, dt: date, newval):
         col,
         ob,
         newval,
-        newval - ob,
+        delta,
     )
     conn.execute(
         sql_helper(
