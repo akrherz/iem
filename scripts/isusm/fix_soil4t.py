@@ -80,7 +80,7 @@ def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
 def check_date(dt: date, conn: Connection = None):
     """Look this date over and compare with IEMRE."""
 
-    nt = NetworkTable("ISUSM")
+    nt = NetworkTable("ISUSM", only_online=False)
     res = conn.execute(
         sql_helper("""
     SELECT station, t4_c_avg, t4_c_min, t4_c_max from sm_daily where
