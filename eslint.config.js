@@ -190,7 +190,8 @@ module.exports = [
             }
         },
         rules: {
-            "no-console": "off"  // Console output is essential for test feedback
+            "no-console": "off",  // Console output is essential for test feedback
+            "require-await": "off"  // Test runners often have async functions with await in loops
         }
     }
 ];

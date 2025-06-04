@@ -16,7 +16,7 @@ const tests = [
     { name: 'Export Tests', script: 'test:exports' }
 ];
 
-async function runTest(testName, script) {
+function runTest(testName, script) {
     return new Promise((resolve, reject) => {
         console.log(`🔄 Running: ${testName}...`);
         
