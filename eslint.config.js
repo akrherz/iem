@@ -73,6 +73,7 @@ export default [
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
+            "one-var": ["error", "never"], // Require one variable declaration per line
             
             // Variable shadowing detection
             "no-shadow": ["error", { 
@@ -163,6 +164,7 @@ export default [
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
+            "one-var": ["error", "never"], // Require one variable declaration per line
             
             // Variable shadowing detection  
             "no-shadow": ["error", { 

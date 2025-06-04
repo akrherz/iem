@@ -216,7 +216,10 @@ function createPopup(content, coordinates) {
 
 // Draggable functionality
 function makeDraggable(element) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let pos1 = 0;
+    let pos2 = 0;
+    let pos3 = 0;
+    let pos4 = 0;
     
     element.onmousedown = dragMouseDown;
     

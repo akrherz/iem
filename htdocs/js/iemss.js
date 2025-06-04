@@ -89,7 +89,8 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {  // this
 
 function sortListing(option) {
     $("#stations_in").append($("#stations_in option").remove().sort((a, b) => {
-        let at = $(a).text(), bt = $(b).text();
+        let at = $(a).text();
+        let bt = $(b).text();
         if (option === 'name') {
             at = at.slice(at.indexOf(' ') + 1);
             bt = bt.slice(bt.indexOf(' ') + 1);
