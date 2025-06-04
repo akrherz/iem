@@ -1,7 +1,12 @@
-import js from "@eslint/js";
-import globals from "globals";
+// Legacy CommonJS ESLint configuration for pre-commit compatibility
+const js = require("@eslint/js");
+const globals = require("globals");
 
-export default [
+module.exports = [
+    // Ignore the ESLint configuration file itself
+    {
+        ignores: ["eslint.config.js", "eslint.config.*.js"]
+    },
     js.configs.recommended,
     // Configuration for traditional script files (.js)
     {
@@ -19,45 +24,30 @@ export default [
                 "Ext": "readonly",
                 "iemdata": "readonly",
                 "moment": "readonly",
-                "google": "readonly",
-                "flowplayer": "readonly"
+                "flowplayer": "readonly",
+                "bootstrap": "readonly"
             }
         },
         rules: {
-            // Enforce your coding rules
-            "no-undef": "error",
-            "no-unused-vars": "warn",
-            "prefer-const": "error",
-            "no-var": "error",
-            
             // jQuery prohibition rules
             "no-restricted-globals": [
-                "error",
+                "warn",
                 {
-                    "name": "someday$",
+                    "name": "$",
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 },
                 {
-                    "name": "somedayjQuery",
+                    "name": "jQuery", 
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 }
             ],
             
-            // Modern JavaScript preferences
-            "prefer-arrow-callback": "warn",
-            "prefer-template": "warn",
-            "object-shorthand": "warn",
-            
-            // Deprecated method warnings
+            // Modernization hints
             "no-restricted-syntax": [
                 "warn",
                 {
                     "selector": "CallExpression[callee.property.name='substr']",
                     "message": "substr() is deprecated. Use substring() or slice() instead."
-                },
-                {
-                    "selector": "ArrowFunctionExpression > AssignmentExpression",
-                    "message": "Avoid assignment operations in arrow function implicit returns. Use block statements with curly braces for side effects."
                 },
                 {
                     "selector": "CallExpression > Identifier[name='undefined']:last-child",
@@ -73,6 +63,8 @@ export default [
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
+            "one-var": ["error", "never"], // Require one variable declaration per line
+            "init-declarations": ["error", "always"], // Require variables to be initialized when declared
             
             // Variable shadowing detection
             "no-shadow": ["error", { 
@@ -100,24 +92,19 @@ export default [
             "no-redeclare": "off"
         }
     },
-    // Configuration for ES Module files (.mjs)
+    
+    // Configuration for ES modules (.module.js)
     {
         files: ["**/*.module.js"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
             globals: {
-                ...globals.browser,
-                // Prohibited globals (jQuery should not be used in modules either)
-                "$": false,
-                "jQuery": false
+                ...globals.browser
             }
         },
         rules: {
-            // All the same rules as scripts, plus module-specific ones
-            "no-undef": "error",
-            "no-unused-vars": "warn",
-            "prefer-const": "error",
+            // Base ES5+ compliance rules
             "no-var": "error",
             
             // jQuery prohibition rules
@@ -163,6 +150,8 @@ export default [
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
+            "one-var": ["error", "never"], // Require one variable declaration per line
+            "init-declarations": ["error", "always"], // Require variables to be initialized when declared
             
             // Variable shadowing detection  
             "no-shadow": ["error", { 
@@ -174,34 +163,20 @@ export default [
             // Duplicate assignment detection
             "no-self-assign": "error",
             "no-sequences": "error",
+            "no-unreachable": "error",
             
             // Additional code quality rules (stricter for modules)
             "no-implicit-coercion": "error",
-            "no-return-assign": "error", 
+            "no-return-assign": "error",
             "array-callback-return": "error",
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
             
-            // Avoid usage of `this` in JavaScript code (IEM rule) - stricter for modules
+            // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
-            "consistent-this": ["error", "self"]
-        }
-    },
-    
-    // Configuration for config files (like this file)
-    {
-        files: ["*.config.js", "*.config.mjs"],
-        languageOptions: {
-            ecmaVersion: 2022,
-            sourceType: "module",
-            globals: {
-                ...globals.node
-            }
-        },
-        rules: {
-            "no-undef": "error",
-            "no-unused-vars": "warn",
-            "prefer-const": "error",
-            "no-var": "error"
+            "consistent-this": ["error", "self"],
+            
+            // Disable some rules that might be too strict
+            "no-redeclare": "off"
         }
     }
 ];

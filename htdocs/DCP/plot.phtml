@@ -3,13 +3,8 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-EOM;
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
-<script type="text/javascript" src="plot.js?v=3"></script>
+<script type="module" src="plot.module.js"></script>
 EOM;
 
 $t->content = <<<EOM
@@ -26,13 +21,42 @@ to reveal available variables for that station.  You may also wish to
 <br clear="all" />
 
 <div class="row">
-        <div class="col-md-6 col-sm-6">
-<div id="myform" style="float: left;"></div>
-</div>
-        <div class="col-md-6 col-sm-6">
+    <div class="col-md-6 col-sm-6">
+        <div id="myform" style="float: left;">
+            <h4>Make Plot Selections Below...</h4>
+            <div class="form-group">
+                <label for="state-select">Select State:</label>
+                <select id="state-select" class="form-control">
+                    <option value="">Select State...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="station-select">Station:</label>
+                <select id="station-select" class="form-control">
+                    <option value="">Select Station...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="variable-select">Variable:</label>
+                <select id="variable-select" class="form-control">
+                    <option value="">Select Variable...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date-input">Start Date:</label>
+                <input type="date" id="date-input" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="day-interval">Number of Days:</label>
+                <input type="number" id="day-interval" class="form-control" min="1" max="31" value="5" />
+            </div>
+            <button id="plot-button" class="btn btn-primary">Create Graph</button>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6">
         <div id="msg"></div><br />
-<img src="" id="imagedisplay" class="img img-responsive"/>
-</div>
+        <img src="" id="imagedisplay" class="img img-responsive"/>
+    </div>
 </div>
 
 EOM;

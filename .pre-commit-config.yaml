@@ -5,6 +5,16 @@ repos:
     rev: 'v9.28.0'
     hooks:
       - id: eslint
+        additional_dependencies:
+          - "eslint@^9.28.0"
+          - "@eslint/js@^9.28.0"
+          - "globals@^16.2.0"
+        files: \.js?$
+        types: [file]
+        args:
+        - --fix
+        language_version: 'system'  # Use system Node.js which should support ES modules
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.11.12"
     hooks:
