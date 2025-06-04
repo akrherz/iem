@@ -202,7 +202,7 @@ $(document).ready(() => {
             const tpart = escapeHTML(tokens[0]);
             renderattr = escapeHTML(tokens[1]);
             $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
-            const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
+            const dstr = `${tpart.substring(4, 2)}/${tpart.substring(6, 2)}/${tpart.substring(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));
             updateDate();
         }

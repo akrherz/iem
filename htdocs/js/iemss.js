@@ -60,7 +60,7 @@ let network = null;
 //http://www.lessanvaezi.com/filter-select-list-options/
 jQuery.fn.filterByText = function (textbox, selectSingleMatch) {  // this
     return this.each(function () {
-        const select = this;
+        const select = this; // eslint-disable-line
         const options = [];
         $(select).find('option').each(function () {
             options.push({ value: $(this).val(), text: $(this).text() });

@@ -97,9 +97,9 @@ $(document).ready(() => {
             const tpart = tokens[1];
             /* Set camera ID */
             $(`select[name=cid] option[value=${cid}]`).attr("selected", "selected");
-            const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
+            const dstr = `${tpart.substring(4, 2)}/${tpart.substring(6, 2)}/${tpart.substring(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr)); // mm/dd/yyyy
-            const isotime = `${tpart.substr(0, 4)}-${tpart.substr(4, 2)}-${tpart.substr(6, 2)}T${tpart.substr(8, 2)}:${tpart.substr(10, 2)}:00Z`;
+            const isotime = `${tpart.substring(0, 4)}-${tpart.substring(4, 2)}-${tpart.substring(6, 2)}T${tpart.substring(8, 2)}:${tpart.substring(10, 2)}:00Z`;
             fetchtimes(isotime);
         } else {
             fetchtimes(false);

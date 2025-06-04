@@ -15,7 +15,6 @@ function generateASCIITable(features) {
     if (!mapDiv) return '';
     
     const varname = mapDiv.dataset.var;
-    const datavar = mapDiv.dataset.datavar;
     if (!varname || !datavar) return '';
     const vardisplay = mapDiv.dataset.vardisplay;
     const period = mapDiv.dataset.period;
@@ -58,8 +57,9 @@ function createPopupContent(feature) {
     const mapDiv = document.getElementById('map');
     if (!mapDiv) return '';
     
-    const datavar = mapDiv.dataset.datavar;
-    if (!datavar || !props.hasOwnProperty(datavar)) return '';
+    if (!datavar) {
+        return '';
+    }
     const vardisplay = mapDiv.dataset.vardisplay;
     
     let value = props[datavar];
@@ -85,7 +85,7 @@ function initMap() {
     const mapDiv = document.getElementById('map');
     if (!mapDiv) return;
     const wsuri = mapDiv.dataset.wsuri;
-    const datavar = mapDiv.dataset.datavar;
+    datavar = mapDiv.dataset.datavar;
     if (!wsuri || !datavar) return;
 
     // Create data layer
@@ -96,9 +96,9 @@ function initMap() {
             format: new ol.format.GeoJSON(),
             projection: 'EPSG:4326'
         }),
-        style: function(feature) {
+        style: (feature) => {
             const props = feature.getProperties();
-            let value = props[datavar];
+            const value = props[datavar];
             
             if (value === null || value === undefined) {
                 // Missing data - gray circle
@@ -189,8 +189,8 @@ function initMap() {
     map.addOverlay(popup);
 
     // Handle map clicks
-    map.on('click', function(evt) {
-        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+    map.on('click', (evt) => {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature) => {
             return feature;
         });
         
@@ -204,7 +204,7 @@ function initMap() {
     });
 
     // Handle data loading
-    dataLayer.getSource().on('change', function() {
+    dataLayer.getSource().on('change', () => {
         const state = dataLayer.getSource().getState();
         const tableElement = document.getElementById('datatable');
         if (!tableElement) return;
@@ -225,18 +225,16 @@ function initMap() {
                     maxZoom: 10
                 });
                 
-                console.log(`Loaded ${features.length} weather stations`);
             } else {
                 tableElement.textContent = 'No data available for the selected period.';
             }
         } else if (state === 'error') {
             tableElement.textContent = 'Error loading data. Please try refreshing the page or selecting a different time period.';
-            console.error('Error loading weather station data');
         }
     });
 
     // Handle cursor changes on hover
-    map.on('pointermove', function(evt) {
+    map.on('pointermove', (evt) => {
         const pixel = map.getEventPixel(evt.originalEvent);
         const hit = map.hasFeatureAtPixel(pixel);
         const target = map.getTarget();

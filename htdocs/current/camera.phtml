@@ -57,7 +57,7 @@ foreach ($cameras as $id => $val) {
 reset($cameras);
 
 $t->title = "Web Cameras";
-$t->jsextra = '<script type="module" src="camera.js"></script>';
+$t->jsextra = '<script type="module" src="camera.module.js"></script>';
 
 if (!$isarchive && isset($camera_refresh))
     $t->refresh = $camera_refresh;
@@ -71,12 +71,11 @@ $selback = array(
 $selback[$network] = "#ffcc99";
 
 $isarchived = ($isarchive) ? " CHECKED=CHECKED" : "";
-$jsextra = 'onChange="javascript: switchToArchiveMode();"';
-$ys = yearSelect2(2003, $year, "year", $jsextra);
-$month_select = monthSelect2($month, "month", $jsextra);
-$ds = daySelect2($day, "day", $jsextra);
-$hs = hourSelect($hour, "hour", $jsextra);
-$ms = minuteSelect($minute, "minute", 1, $jsextra);
+$ys = yearSelect2(2003, $year, "year");
+$month_select = monthSelect2($month, "month");
+$ds = daySelect2($day, "day");
+$hs = hourSelect($hour, "hour");
+$ms = minuteSelect($minute, "minute", 1);
 $dd = date("YmdHi", $radts);
 
 $misstxt = "Cameras Missing: ";

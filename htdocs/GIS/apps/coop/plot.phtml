@@ -27,15 +27,6 @@ $ndate = $ts->format("Y-m-d");
 
 $t = new MyView();
 $t->title = "NWS COOP Daily Plotter";
-$t->headextra = <<<EOM
-<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
-    link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
-} 
-//END Script-->
-</script>
-EOM;
 
 $ar = array(
     "0" => "All Available",
@@ -343,10 +334,6 @@ choice.
 </table>
 
 <br /><img src="{$url}">
-
-<p>Open this plot in a <a href="javascript:new_window('{$url}');">new window</a> for comparison with other plots. Once the
-image is loaded up in another window, you can modify this plots 
-parameters.
 
 <p><input type="checkbox" name="labels"{$showlabelson}>Show point labels
 

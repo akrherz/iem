@@ -333,7 +333,7 @@ function formatLSR(data) {
 }
 
 function revisedRandId() {
-    return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+    return Math.random().toString(36).replace(/[^a-z]+/g, '').substring(2, 10);
 }
 function lsrHTML(feature) {
     const lines = [];

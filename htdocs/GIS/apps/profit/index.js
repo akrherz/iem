@@ -1,4 +1,4 @@
-/* global *, ol */
+/* global ol */
 let map = null;
 let player = null;
 $(document).ready(() => {

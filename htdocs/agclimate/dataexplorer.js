@@ -53,7 +53,7 @@ function updateTitle() {
 }
 
 function updateMap() {
-    if (currentdt && typeof currentdt != "string") {
+    if (currentdt && typeof currentdt !== "string") {
         const dt = toISOString(currentdt);
         const uristamp = timeChanged ? `dt=${dt}` : "";
         gj.setSource(new ol.source.Vector({

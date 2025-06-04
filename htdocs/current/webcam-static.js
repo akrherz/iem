@@ -79,7 +79,7 @@ Ext.onReady(() => {
         Ext.each(records, (record) => {
             const checked = (disableStore.find('cid', record.get("cid")) === -1);
             data.push({
-                boxLabel: `${Number(record.get("cid").substr(5, 3))} ${record.get("name")}`,
+                boxLabel: `${Number(record.get("cid").substring(5, 3))} ${record.get("name")}`,
                 name: record.get("cid"),
                 checked,
                 listeners: {

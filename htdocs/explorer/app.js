@@ -127,12 +127,12 @@ function stationLayerStyleFunc(feature){
         return isusmStyle.enabled ? isusmStyle: null;
     }
     const sid = feature.get("sid");
-    if (sid.substr(2, 1) === "C"){
-        climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
+    if (sid.substring(2, 1) === "C"){
+        climodistrictStyle.getText().setText(sid.substring(0, 2) + parseInt(sid.substring(3, 3)));
         return climodistrictStyle.enabled ? climodistrictStyle: null;
     }
-    if (sid.substr(2, 4) === "0000"){
-        stateStyle.getText().setText(sid.substr(0, 2));
+    if (sid.substring(2, 4) === "0000"){
+        stateStyle.getText().setText(sid.substring(0, 2));
         return stateStyle.enabled ? stateStyle: null;
     }
     return climateStyle.enabled ? climateStyle: null;

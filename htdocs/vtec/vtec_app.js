@@ -194,7 +194,7 @@ function urlencode() {
 /**
  * https://stackoverflow.com/questions/2044616
  */
-function selectElementContents(elid) {  // skipcq
+function selectElementContents(elid) {
     const el = document.getElementById(elid);
     const body = document.body;
     let range = null;
@@ -218,6 +218,8 @@ function selectElementContents(elid) {  // skipcq
         range.execCommand("Copy");
     }
 }
+
+window.se = selectElementContents;
 
 /**
  * Generate a commonly used VTEC string in the form of
@@ -309,7 +311,7 @@ function handleURLChange(url) {
 /**
  * Listen for user hitting the back and forward buttons
  */
-window.addEventListener('popstate', (_event) => {
+window.addEventListener('popstate', () => {
     handleURLChange(document.location.pathname);
 });
 
@@ -904,10 +906,12 @@ function makeLSRTable(div) {
  * called from HTML tag
  * @param {String} val
  */
-function setUpdate(val){  // skipcq
+function setUpdate(val){
     CONFIG.activeUpdate = val;
     updateURL();
 }
+
+window.se = setUpdate;
 
 function buildUI() {
     // One time build up of UI and handlers

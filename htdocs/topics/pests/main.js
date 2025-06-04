@@ -126,7 +126,7 @@ function setupUI() {
         changeYear: true,
         minDate: new Date(1893, 0, 1),
         maxDate: 0,
-        onSelect(_dateText, _inst) {
+        onSelect() {
             updateImage();
         }
     });
@@ -136,7 +136,7 @@ function setupUI() {
         changeYear: true,
         minDate: new Date(1893, 0, 1),
         maxDate: 0,
-        onSelect(_dateText, _inst) {
+        onSelect() {
             updateImage();
         }
     });
@@ -145,11 +145,13 @@ function setupUI() {
         updateStationForecast();
     });
 }
-function updatePest() { // skipcq: JS-0128
+function updatePest() {
     const pest = escapeHTML($("select[name='pest']").val());
     rectify_start_date(pest);
     updateImage();
 }
+
+window.up = updatePest;
 
 $(document).ready(() => {
     updateImage();

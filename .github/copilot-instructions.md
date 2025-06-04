@@ -2,6 +2,18 @@
 
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
 
+## Rules
+
+- Jquery should not be used and any instances of it should be replaced
+  with vanilla JavaScript.
+- Code comments should explain functionality, not detail why the code was
+  added.
+- JavaScript code should not be embedded in HTML files.
+- Jquery-UI should not be used and any instances of it should be replaced
+  with vanilla JavaScript.
+- Avoid usage of `this` in JavaScript code, as it can lead to confusion
+  and bugs. Use arrow functions or bind methods to the correct context instead.
+
 ## Project Context
 
 This repo does a lot of different things with weather data modification.
