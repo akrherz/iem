@@ -11,6 +11,7 @@ module.exports = [
     // Configuration for traditional script files (.js)
     {
         files: ["**/*.js"],
+        ignores: ["src/iemjs/**/*.js"],
         languageOptions: {
             ecmaVersion: 2020,
             sourceType: "script",
@@ -93,9 +94,9 @@ module.exports = [
         }
     },
     
-    // Configuration for ES modules (.module.js)
+    // Configuration for ES modules (.module.js and IEM utilities)
     {
-        files: ["**/*.module.js"],
+        files: ["**/*.module.js", "src/iemjs/**/*.js"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
@@ -177,6 +178,19 @@ module.exports = [
             
             // Disable some rules that might be too strict
             "no-redeclare": "off"
+        }
+    },
+    
+    // Configuration for test files - allow console usage for test output
+    {
+        files: ["**/tests/**/*.js", "**/*.test.js", "**/*.spec.js"],
+        languageOptions: {
+            globals: {
+                ...globals.node  // Add Node.js globals like process, Buffer, etc.
+            }
+        },
+        rules: {
+            "no-console": "off"  // Console output is essential for test feedback
         }
     }
 ];
