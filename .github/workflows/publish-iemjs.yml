@@ -27,11 +27,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Publishing version: $VERSION"
           
-      - name: Update package.json version
-        run: |
-          cd src/iemjs
-          npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
-          
       - name: Validate package
         run: |
           cd src/iemjs
