@@ -54,6 +54,18 @@ export default [
                 {
                     "selector": "CallExpression[callee.property.name='substr']",
                     "message": "substr() is deprecated. Use substring() or slice() instead."
+                },
+                {
+                    "selector": "ArrowFunctionExpression > AssignmentExpression",
+                    "message": "Avoid assignment operations in arrow function implicit returns. Use block statements with curly braces for side effects."
+                },
+                {
+                    "selector": "CallExpression > Identifier[name='undefined']:last-child",
+                    "message": "Avoid explicitly passing 'undefined' as the last argument. Omit the argument instead - it defaults to undefined."
+                },
+                {
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && for null checks before property access."
                 }
             ],
             
@@ -62,61 +74,29 @@ export default [
             "no-console": "warn",
             "no-debugger": "error",
             
+            // Variable shadowing detection
+            "no-shadow": ["error", { 
+                "builtinGlobals": false,
+                "hoist": "functions",
+                "allow": ["err", "error", "resolve", "reject", "cb", "callback", "done"]
+            }],
+            
+            // Duplicate assignment detection
+            "no-self-assign": "error",
+            "no-sequences": "error",
+            "no-unreachable": "error",
+            
+            // Additional code quality rules to catch common issues
+            "no-implicit-coercion": "warn",
+            "no-return-assign": "error",
+            "array-callback-return": "error",
+            "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+            
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
             "consistent-this": ["error", "self"],
             
             // Disable some rules that might be too strict for legacy code
-            "no-redeclare": "off"
-        }
-    },
-    // Special configuration for ExtJS files
-    {
-        files: ["**/DCP/plot.js", "**/*extjs*.js", "**/*ext*.js"],
-        languageOptions: {
-            ecmaVersion: 2020,
-            sourceType: "script",
-            globals: {
-                ...globals.browser,
-                // Prohibited globals
-                "$": false,
-                "jQuery": false,
-                // Allowed globals for ExtJS
-                "Ext": "readonly",
-                "ol": "readonly"
-            }
-        },
-        rules: {
-            // Basic rules still apply
-            "no-undef": "error",
-            "no-unused-vars": "warn",
-            "prefer-const": "error",
-            "no-var": "error",
-            "eqeqeq": "error",
-            "no-console": "warn",
-            "no-debugger": "error",
-            
-            // jQuery prohibition still applies
-            "no-restricted-globals": [
-                "error",
-                {
-                    "name": "$",
-                    "message": "jQuery should not be used. Use vanilla JavaScript instead."
-                },
-                {
-                    "name": "jQuery",
-                    "message": "jQuery should not be used. Use vanilla JavaScript instead."
-                }
-            ],
-            
-            // ALLOW `this` usage in ExtJS files - framework requires it
-            "no-invalid-this": "off",
-            "consistent-this": "off",
-            
-            // ExtJS uses function declarations extensively
-            "prefer-arrow-callback": "off",
-            
-            // ExtJS has its own patterns that may conflict with modern rules
             "no-redeclare": "off"
         }
     },
@@ -158,10 +138,48 @@ export default [
             "prefer-template": "error",
             "object-shorthand": "error",
             
+            // Deprecated method warnings for modules too
+            "no-restricted-syntax": [
+                "warn",
+                {
+                    "selector": "CallExpression[callee.property.name='substr']",
+                    "message": "substr() is deprecated. Use substring() or slice() instead."
+                },
+                {
+                    "selector": "ArrowFunctionExpression > AssignmentExpression",
+                    "message": "Avoid assignment operations in arrow function implicit returns. Use block statements with curly braces for side effects."
+                },
+                {
+                    "selector": "CallExpression > Identifier[name='undefined']:last-child",
+                    "message": "Avoid explicitly passing 'undefined' as the last argument. Omit the argument instead - it defaults to undefined."
+                },
+                {
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && for null checks before property access."
+                }
+            ],
+            
             // Code quality
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
+            
+            // Variable shadowing detection  
+            "no-shadow": ["error", { 
+                "builtinGlobals": false,
+                "hoist": "functions",
+                "allow": ["err", "error", "resolve", "reject", "cb", "callback", "done"]
+            }],
+            
+            // Duplicate assignment detection
+            "no-self-assign": "error",
+            "no-sequences": "error",
+            
+            // Additional code quality rules (stricter for modules)
+            "no-implicit-coercion": "error",
+            "no-return-assign": "error", 
+            "array-callback-return": "error",
+            "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
             
             // Avoid usage of `this` in JavaScript code (IEM rule) - stricter for modules
             "no-invalid-this": "error",

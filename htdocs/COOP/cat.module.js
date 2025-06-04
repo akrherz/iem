@@ -9,12 +9,16 @@ function hiderows() {
     const rowShower = document.getElementById('rowshower');
     
     if (currentmode) {
-        noDataRows.forEach(row => row.style.display = 'none');
+        noDataRows.forEach(row => {
+            row.style.display = 'none';
+        });
         if (rowShower) {
             rowShower.value = 'Show rows without data';
         }
     } else {
-        noDataRows.forEach(row => row.style.display = '');
+        noDataRows.forEach(row => {
+            row.style.display = '';
+        });
         if (rowShower) {
             rowShower.value = 'Hide rows without data';
         }

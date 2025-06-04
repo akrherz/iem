@@ -4,7 +4,6 @@ function fetchData() {
     const tableBody = document.querySelector('#datatable tbody');
     if (!tableBody) return;
 
-    tableBody.innerHTML = '';
     tableBody.innerHTML = '<tr><th colspan="5">Querying server, one moment</th></tr>';
 
     fetch(`/geojson/recent_metar.py?q=${report}`)

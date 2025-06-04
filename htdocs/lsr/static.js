@@ -248,7 +248,7 @@ lsrLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
         feat.hidden = false;
     });
     // Filter out the map too
-    lsrtable.rows({ "search": "removed" }).every(function () { // this
+    lsrtable.rows({ "search": "removed" }).every(function () {  // eslint-disable-line
         lsrLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     lsrLayer.changed();
@@ -305,7 +305,7 @@ sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
         feat.hidden = false;
     });
     // Filter out the map too
-    sbwtable.rows({ "search": "removed" }).every(function() {  // this
+    sbwtable.rows({ "search": "removed" }).every(function() { // eslint-disable-line
         sbwLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     sbwLayer.changed();

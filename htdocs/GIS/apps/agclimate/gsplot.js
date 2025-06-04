@@ -190,8 +190,8 @@ function initMap() {
 
     // Handle map clicks
     map.on('click', (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature) => {
-            return feature;
+        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature2) => {
+            return feature2;
         });
         
         if (feature) {
@@ -199,7 +199,7 @@ function initMap() {
             popup.setPosition(coordinates);
             popupElement.innerHTML = createPopupContent(feature);
         } else {
-            popup.setPosition(undefined);
+            popup.setPosition();
         }
     });
 
@@ -238,7 +238,7 @@ function initMap() {
         const pixel = map.getEventPixel(evt.originalEvent);
         const hit = map.hasFeatureAtPixel(pixel);
         const target = map.getTarget();
-        if (target && target.style) {
+        if (target?.style) {
             target.style.cursor = hit ? 'pointer' : '';
         }
     });
