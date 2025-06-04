@@ -1,0 +1,71 @@
+name: Publish iemjs to npm
+
+on:
+  push:
+    tags:
+      - 'iemjs-v*'  # Triggers on tags like iemjs-v1.0.0, iemjs-v1.2.3, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # Extract version from tag (iemjs-v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF#refs/tags/iemjs-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+          
+      - name: Update package.json version
+        run: |
+          cd src/iemjs
+          npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
+          
+      - name: Validate package
+        run: |
+          cd src/iemjs
+          npm pack --dry-run
+          
+      - name: Run basic syntax check
+        run: |
+          cd src/iemjs
+          node -c src/domUtils.js
+          node -c src/iemdata.js
+          node -c src/index.js
+          
+      - name: Publish to npm
+        run: |
+          cd src/iemjs
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: iemjs v${{ steps.extract_version.outputs.version }}
+          body: |
+            ## iemjs v${{ steps.extract_version.outputs.version }}
+            
+            Published to npm: https://www.npmjs.com/package/iemjs
+            
+            ### Installation
+            ```bash
+            npm install iemjs@${{ steps.extract_version.outputs.version }}
+            ```
+          draft: false
+          prerelease: false

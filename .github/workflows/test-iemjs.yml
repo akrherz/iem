@@ -1,0 +1,69 @@
+name: Test iemjs package
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/iemjs/**'
+      - '.github/workflows/test-iemjs.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'src/iemjs/**'
+      - '.github/workflows/test-iemjs.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: Run iemjs tests
+        run: |
+          cd src/iemjs
+          npm test
+          
+      - name: Test npm pack (dry run)
+        run: |
+          cd src/iemjs
+          npm pack --dry-run
+          echo "✅ npm pack simulation successful"
+          
+      - name: Run ESLint on iemjs files
+        run: |
+          # Check ESLint against our iemjs files
+          npx eslint src/iemjs/src/*.js --format=compact || echo "⚠️  ESLint warnings found (not failing build)"
+          
+  # Test on different operating systems
+  cross-platform:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: Test basic functionality
+        run: |
+          cd src/iemjs
+          npm run test:syntax
+        shell: bash

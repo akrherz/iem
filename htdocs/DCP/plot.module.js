@@ -1,7 +1,7 @@
 // ES Module for DCP plotting application
 
-import { escapeHTML, requireSelectElement } from '/js/iem/domUtils.module.js';
-import { iemdata } from '/js/iem/iemdata.module.js';
+import { escapeHTML, requireSelectElement } from '/js/iemjs/domUtils.js';
+import { iemdata } from '/js/iemjs/iemdata.js';
 
 // DOM element references
 let stateSelect = null;

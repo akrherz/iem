@@ -1,0 +1,52 @@
+{
+  "name": "iemjs",
+  "version": "0.0.1",
+  "description": "Iowa Environmental Mesonet JavaScript utilities for weather data applications",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./domUtils": "./src/domUtils.js",
+    "./iemdata": "./src/iemdata.js"
+  },
+  "files": [
+    "src/**/*.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepack": "echo 'Preparing iemjs package for publishing...'",
+    "test": "npm run test:syntax && npm run test:imports && npm run test:exports",
+    "test:syntax": "node -c src/domUtils.js && node -c src/iemdata.js && node -c src/index.js && echo '✅ Syntax validation passed'",
+    "test:imports": "node tests/test-imports.js",
+    "test:exports": "node tests/test-exports.js",
+    "version": "echo 'Version updated to' $npm_package_version"
+  },
+  "keywords": [
+    "weather",
+    "meteorology",
+    "data-visualization",
+    "iowa",
+    "mesonet",
+    "javascript",
+    "es-modules"
+  ],
+  "author": "Iowa State University - Iowa Environmental Mesonet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akrherz/iem.git",
+    "directory": "src/iemjs"
+  },
+  "homepage": "https://mesonet.agron.iastate.edu",
+  "bugs": {
+    "url": "https://github.com/akrherz/iem/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ]
+}
