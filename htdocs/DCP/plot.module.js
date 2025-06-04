@@ -4,13 +4,13 @@ import { escapeHTML, requireSelectElement } from '/js/iem/domUtils.module.js';
 import { iemdata } from '/js/iem/iemdata.module.js';
 
 // DOM element references
-let stateSelect;
-let stationSelect; 
-let variableSelect;
-let dateInput;
-let dayIntervalInput;
-let imageDisplay;
-let messageDiv;
+let stateSelect = null;
+let stationSelect = null; 
+let variableSelect = null;
+let dateInput = null;
+let dayIntervalInput = null;
+let imageDisplay = null;
+let messageDiv = null;
 
 /**
  * Initialize the form elements and event handlers
