@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/akrherz/iem#readme",
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@types/ol": "^6.5.3",
     "eslint": "^9.0.0",
     "eslint-plugin-jsdoc": "^50.7.1",
@@ -34,8 +35,5 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
-  },
-  "dependencies": {
-    "@eslint/js": "^9.28.0"
   }
 }

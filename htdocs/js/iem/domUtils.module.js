@@ -23,7 +23,6 @@ export function escapeHTML(val) {
 export function getElement(id, ElementType) {
     const element = document.getElementById(id);
     if (!element) {
-        console.warn(`Element with id '${id}' not found`);
         return null;
     }
     
@@ -33,7 +32,6 @@ export function getElement(id, ElementType) {
     }
     
     if (!(element instanceof ElementType)) {
-        console.warn(`Element with id '${id}' is not of expected type ${ElementType.name}`);
         return null;
     }
     return element;
