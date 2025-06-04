@@ -33,8 +33,13 @@ class Schema(CGIModel):
     )
 
 
+def get_mckey(environ):
+    """Return the memcache key for this request."""
+    return f"json_network_{environ['network']}"
+
+
 @iemapp(
-    memcachekey="/json/network",
+    memcachekey=get_mckey,
     content_type="application/json",
     help=__doc__,
     schema=Schema,
