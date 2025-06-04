@@ -85,10 +85,12 @@ function olSelectLonLat(div, initialLon, initialLat, callback, suggestedLon = nu
         const lonLat = ol.proj.toLonLat(coords);
         try {
             callback(lonLat[0], lonLat[1]);
-        } catch (exp) {
-            console.log(exp);
+        } catch {
+            // pass
         }
     });
 
     return { map, marker, suggestedMarker };
 }
+
+window.ols = olSelectLonLat;

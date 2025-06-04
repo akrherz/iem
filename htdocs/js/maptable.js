@@ -113,7 +113,7 @@ function init_map(idx, inst) {
     });
     inst.map.on('click', (evt) => {
         const feature = inst.map.forEachFeatureAtPixel(evt.pixel,
-            (feature2, _layer) => {
+            (feature2) => {
                 return feature2;
             });
         if (!feature) {
@@ -123,7 +123,7 @@ function init_map(idx, inst) {
         const id = feature.getId();
         inst.table.rows().deselect();
         inst.table.row(
-            inst.table.rows((idx2, data, _node) => {
+            inst.table.rows((idx2, data) => {
                 if (data.id === id) {
                     inst.table.row(idx2).select();
                     return true;
@@ -134,7 +134,7 @@ function init_map(idx, inst) {
 
     });
 
-    inst.vectorLayer.getSource().on('change', (_e2) => {
+    inst.vectorLayer.getSource().on('change', () => {
         if (inst.vectorLayer.getSource().getState() === 'ready' && inst.zoomReset === false) {
             inst.map.getView().fit(
                 inst.vectorLayer.getSource().getExtent(),
@@ -240,7 +240,7 @@ function init(idx, div) {
 // https://learn.jquery.com/plugins/basic-plugin-creation/
 (function ($) {
 
-    $.fn.MapTable = function (_options) { // this
+    $.fn.MapTable = function () { // this
         const res = [];
         this.each((idx, item) => {
             res.push(init(idx, item));

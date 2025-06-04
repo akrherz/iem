@@ -341,7 +341,7 @@ function buildUI(){
             success: (data2) => {
                 ugcSelect.empty();
                 $.map(data2.ugcs, (obj) => {
-                    const extra = (obj.ugc.substr(2, 1) === "Z") ? " (Zone)": "";
+                    const extra = (obj.ugc.substring(2, 1) === "Z") ? " (Zone)": "";
                     ugcSelect.append(new Option(`[${obj.ugc}] ${obj.name}${extra}`, obj.ugc, false, false));
                 });
                 ugcSelect.val('').trigger("change");
@@ -438,12 +438,12 @@ function process_hash(hash){
             const aTag = $("a[name='byugc']");
             $('html,body').animate({scrollTop: aTag.offset().top},'slow');
             hashlinkUGC = tokens2[1];
-            stateSelect.val(tokens2[1].substr(0, 2)).trigger("change");
-            stateSelect.val(tokens2[1].substr(0, 2)).trigger({
+            stateSelect.val(tokens2[1].substring(0, 2)).trigger("change");
+            stateSelect.val(tokens2[1].substring(0, 2)).trigger({
                 type: "select2:select",
                 params: {
                     data: {
-                        id: tokens2[1].substr(0, 2)
+                        id: tokens2[1].substring(0, 2)
                     }
                 }
             });

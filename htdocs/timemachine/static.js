@@ -1,4 +1,4 @@
-/* global moment, $, noUiSlider */
+/* global moment, noUiSlider */
 let dt = moment(); // Current application time
 let irealtime = true; // Is our application in realtime mode or not
 let isUpdating = false; // Prevent recursive calls

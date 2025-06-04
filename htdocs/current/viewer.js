@@ -123,9 +123,11 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
-function handleRWISClick(img) {  // skipcq
+function handleRWISClick(img) {
     $("#rwismain").attr('src', $(img).attr("src"));
 }
+
+window.hrs = handleRWISClick;
 
 function doRWISView() {
     // Do the magic that is the multi-view RWIS data...

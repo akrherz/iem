@@ -1,49 +1,7 @@
 /* global Ext */
 Ext.BLANK_IMAGE_URL = '/vendor/ext/3.4.1/resources/images/default/s.gif';
 
-Ext.override(Ext.form.ComboBox, {
-    doQuery: function(q, forceAll) {  // skipcq
-        if (q === undefined || q === null) {
-            q = '';
-        }
-        const qe = {
-            query: q,
-            forceAll,
-            combo: this,
-            cancel: false
-        };
-        if (this.fireEvent('beforequery', qe) === false || qe.cancel) {
-            return false;
-        }
-        q = qe.query;
-        forceAll = qe.forceAll;
-        if (forceAll === true || (q.length >= this.minChars)) {
-            if (this.lastQuery !== q) {
-                this.lastQuery = q;
-                if (this.mode === 'local') {
-                    this.selectedIndex = -1;
-                    if (forceAll) {
-                        this.store.clearFilter();
-                    } else {
-                        this.store.filter(this.displayField, q, true);
-                    }
-                    this.onLoad();
-                } else {
-                    this.store.baseParams[this.queryParam] = q;
-                    this.store.load({
-                        params: this.getParams(q)
-                    });
-                    this.expand();
-                }
-            } else {
-                this.selectedIndex = -1;
-                this.onLoad();
-            }
-        }
-        return true;
-    }
-});
-
+// Ext override on doQuery was removed
 
 Ext.onReady(() => {
 
@@ -174,7 +132,7 @@ Ext.onReady(() => {
         lazyRender: true,
         id: 'stateselector',
         listeners: {
-            select: (_cb, record, _idx) => {
+            select: (_cb, record) => {
                 stationStore.load({ add: false, params: { network: `${record.data.abbr}_DCP` } });
                 return false;
             }
@@ -200,7 +158,7 @@ Ext.onReady(() => {
         itemSelector: 'div.search-item',
         hideTrigger: false,
         listeners: {
-            select(_cb, record, _idx) {
+            select(_cb, record) {
                 varStore.load({ add: false, params: { station: record.id } });
                 return false;
             }

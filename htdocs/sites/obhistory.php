@@ -259,7 +259,7 @@ $savevars = array(
     "month" => date("m", $date),
     "day" => date("d", $date)
 );
-$t->jsextra = '<script type="module" src="obhistory.js"></script>';
+$t->jsextra = '<script type="module" src="obhistory.module.js"></script>';
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
 

@@ -10,10 +10,6 @@ $smonth = get_int404("smonth", 5);
 $emonth = get_int404("emonth", 9);
 $sday = get_int404("sday", 1);
 $eday = get_int404("eday", 30);
-$imgsz = isset($_GET["imgsz"]) ? xssafe($_GET["imgsz"]) : "640x480";
-$ar = explode("x", $imgsz);
-$width = $ar[0];
-$height = $ar[1];
 
 $OL = "10.5.0";
 
@@ -66,8 +62,6 @@ $wsuri = sprintf(
     86
 );
 
-// Table will be populated by JavaScript to avoid redundant web service calls
-
 $t = new MyView();
 $t->title = "ISUAG Growing Season Data";
 $t->headextra = <<<EOM
@@ -88,13 +82,6 @@ $sdselect = daySelect2($sday, 'sday');
 $emselect = monthSelect2($emonth, 'emonth');
 $edselect = daySelect2($eday, 'eday');
 
-$ar = array(
-    "640x480" => "640x480",
-    "720x496" => "720x496",
-    "1024x768" => "1024x768"
-);
-$iselect = make_select("imgsz", $imgsz, $ar);
-
 $t->content = <<<EOM
 <h3>Growing Season Maps</h3>
 
@@ -112,7 +99,6 @@ is of higher quality for temperature and precipitation.
    <th>Year</th>
    <th>Month</th>
    <th>Day</th>
-   <th>Image Size (Legacy)</th>
    <td></td>
   </tr>
 </thead>
@@ -121,9 +107,6 @@ is of higher quality for temperature and precipitation.
   <td rowspan=2>{$yselect}</td>
   <td>{$smselect}</td>
   <td>{$sdselect}</td>
-<td rowspan=2>
-{$iselect}
-</td>
   <td rowspan=2><input type="submit" value="Update Map"></td>
   </tr>
  <tr>

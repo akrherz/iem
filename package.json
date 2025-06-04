@@ -2,9 +2,16 @@
   "name": "iem",
   "version": "1.0.0",
   "description": "If using this code causes your server to have kittens, it is your own fault.",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .js --ignore-path .gitignore ."
+    "lint": "eslint . --ext .js,.mjs",
+    "lint:fix": "eslint . --ext .js,.mjs --fix",
+    "format": "prettier --write \"htdocs/**/*.{js,mjs,css,html}\"",
+    "format:check": "prettier --check \"htdocs/**/*.{js,mjs,css,html}\"",
+    "type-check": "tsc --noEmit",
+    "dev": "npm run lint && npm run type-check",
+    "modernize": "echo 'Running jQuery to vanilla JS conversion checks'"
   },
   "repository": {
     "type": "git",
@@ -17,8 +24,16 @@
   },
   "homepage": "https://github.com/akrherz/iem#readme",
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@eslint/js": "^9.28.0",
+    "@types/ol": "^6.5.3",
     "eslint": "^9.0.0",
-    "globals": "^15.0.0"
+    "eslint-plugin-jsdoc": "^48.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }

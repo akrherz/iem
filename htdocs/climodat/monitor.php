@@ -144,27 +144,14 @@ if (isset($_GET['map'])) {
     $showmap = "";
 }
 $t->title = "Climodat Station Monitor";
-$t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-EOM;
 
 $sdatestr = date("m/d/Y", $sdate);
 $edatestr = date("m/d/Y", $edate);
+// Convert to HTML5 date format (YYYY-MM-DD) for date inputs
+$sdateiso = date("Y-m-d", $sdate);
+$edateiso = date("Y-m-d", $edate);
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-    sdate = $("#sdate").datepicker({altFormat:"yymmdd"});
-    sdate.datepicker('setDate', "$sdatestr");
-    edate = $("#edate").datepicker({altFormat:"yymmdd"});
-    edate.datepicker('setDate', "$edatestr");
-
-    //Make into more PHP friendly
-    $('#addmapstations').on('click', function(){
-        $('#stations_out').attr('name', 's[]');
-    });
-});
-</script>
+<script type="text/javascript" src="monitor.js"></script>
 EOM;
 
 $sselect = selectNetworkType("CLIMATE", $network);
@@ -257,8 +244,8 @@ for a bias assessment of these values.</p>
  ceiling: <input type="text" name="gddceil" size="4" value="{$gddceil}">
  </td></tr>
 
-<tr><th>Period</th><td>start: <input type="text" id="sdate" name="sdate">
-    end: <input type="text" id="edate" name="edate"> (inclusive)</td></tr>
+<tr><th>Period</th><td>start: <input type="date" id="sdate" name="sdate" value="{$sdateiso}">
+    end: <input type="date" id="edate" name="edate" value="{$edateiso}"> (inclusive)</td></tr>
 
 <tr><td colspan="2">
 <input type="submit" value="Apply Table Options">

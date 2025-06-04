@@ -119,13 +119,7 @@ if ($refresh > 0) {
 }
 $t->title = "IEM Freeze";
 $t->jsextra = <<<EOM
-<script Language="JavaScript">
- function resetButtons(){
-   document.panButton.src = "/images/button_pan_off.png";
-   document.zoominButton.src = "/images/button_zoomin_off.png";
-   document.zoomoutButton.src = "/images/button_zoomout_off.png";
- }
-</script>
+<script type="text/javascript" src="freeze.js"></script>
 EOM;
 
 $ar = array("1" => "Show", "0" => "Hide");
@@ -134,7 +128,7 @@ $rselect = make_select("radar", $radar, $ar);
 $ar = array("0" => "Never", "300" => "5 minutes", "600" => "10 minutes");
 $reselect = make_select("refresh", $refresh, $ar);
 
-$sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
+$sselect = "<select name=\"ba\">";
 $sselect .= "<option value=\"#\"> -- User Defined -- </option>";
 $ar = array(
     "A" => "Midwest US",
@@ -198,12 +192,9 @@ $t->content = <<<EOM
 <div class="row">
 
 <div class="col-md-3"><b>Map Controls:</b><br />
-<img src="/images/button_zoomin_off.png" name="zoominButton" alt="Zoom In"
-  onClick="javascript: resetButtons(); document.zoominButton.src = '/images/button_zoomin_on.png'; document.myform.zoom.value = -2;">
-<img src="/images/button_pan_on.png" name="panButton" alt="Pan"
-  onClick="javascript: resetButtons(); document.panButton.src = '/images/button_pan_on.png'; document.myform.zoom.value = 1;">
-<img src="/images/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out"
-  onClick="javascript: resetButtons(); document.zoomoutButton.src = '/images/button_zoomout_on.png'; document.myform.zoom.value = 2;">
+<img src="/images/button_zoomin_off.png" name="zoominButton" alt="Zoom In">
+<img src="/images/button_pan_on.png" name="panButton" alt="Pan">
+<img src="/images/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out">
 <a href="{$uri}">Reset</a>
 </div>
 
@@ -222,7 +213,7 @@ $t->content = <<<EOM
 </div>
 </div>
 </form>
-        
+
 <b>Preset Views:</b><br />
 <form name="ba">
 {$sselect}
