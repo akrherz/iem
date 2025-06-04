@@ -13,6 +13,8 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
   with vanilla JavaScript.
 - Avoid usage of `this` in JavaScript code, as it can lead to confusion
   and bugs. Use arrow functions or bind methods to the correct context instead.
+- When you suggest URLs to open for testing, you should use the domain name
+  of `iem.local` instead of `localhost`.
 
 ## Project Context
 
