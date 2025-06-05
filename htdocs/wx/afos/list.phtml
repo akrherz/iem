@@ -13,17 +13,9 @@ require_once "../../../include/mlib.php";
 $t = new MyView();
 $t->iemselect2 = TRUE;
 $t->title = "NWS Text Product by Issuing Center by Date";
-$t->headextra = <<<EOM
-<style>
-.col-md-2 {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    max-height: 350px;
-}
-</style>
-EOM;
+$t->headextra = '<link rel="stylesheet" href="list.css" />';
 $t->jsextra = <<<EOM
-<script src="list.js"></script>
+<script src="list.module.js" type="module"></script>
 EOM;
 
 // A dance here to get a 4-char and 3-char identifier
@@ -315,7 +307,7 @@ and a brief associated product name on the NWS website.</p>
   <strong>For UTC Date:</strong>
   <br />{$yselect} {$mselect} {$dselect}
   <br /><input id="drange" type="checkbox" name="drange" value="yes" id="drange" 
-  onClick="showHide()" {$drangecheck}/>
+  {$drangecheck}/>
   <label for="drange">List over UTC date range through (max 10 days)</label>
   <br /><div id="d2" style="display: {$d2display}">
   {$y2select} {$m2select} {$d2select}</div>

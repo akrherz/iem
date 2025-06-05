@@ -6,12 +6,7 @@ define("IEM_APPID", 146);
 $t = new MyView();
 $t->iem_resource = "RAOB";
 $t->jsextra=<<<EOM
-<script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script src="index.js?v=2"></script>
-EOM;
-$t->headextra= <<<EOM
-<link rel="stylesheet" type="text/css"
-href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
+<script type="module" src="index.module.js"></script>
 EOM;
 $t->title = "Rawinsonde Data Archive";
 $nselect = networkSelect("RAOB", "OAX");
@@ -79,8 +74,8 @@ range_sm     Ballon range from launch in statute miles, not always available
 <form method="GET" action="/cgi-bin/request/raob.py">
 <table class="table table-bordered">
 <tr><th>Select Site: {$nselect}</th>
-<td>Start Time: <input type="text" name="sts" class="fdp" width="20"/></td>
-<td>End Time: <input type="text" name="ets" class="fdp" width="20" /></td>
+<td>Start UTC Time: <input type="text" name="sts" width="20"/></td>
+<td>End UTC Time: <input type="text" name="ets" width="20" /></td>
 <td><input type="checkbox" name="dl" id="dd">
 <label for="dd">Download to disk</label></td>
 <td><input type="submit" value="Giveme Data!"></td>

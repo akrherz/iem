@@ -164,11 +164,12 @@ function networkSelect(
     $selected,
     $extra = array(),
     $selectName = "station",
-    $only_online = FALSE
+    $only_online = FALSE,
+    $clsname = "iemselect2"
 ) {
     $nt = new NetworkTable($network, FALSE, $only_online);
     $cities = $nt->table;
-    $s = "<select class=\"iemselect2\" name=\"$selectName\">\n";
+    $s = "<select class=\"{$clsname}\" name=\"$selectName\">\n";
     foreach ($cities as $sid => $tbl) {
         $s .= "<option value=\"$sid\" ";
         $sname = make_sname($tbl);

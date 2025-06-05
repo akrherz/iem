@@ -33,22 +33,10 @@ $sselect = selectNetworkType("CLIMATE", $network);
 $t = new MyView();
 $t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
-<script type="text/javascript" src="main.js?v2"></script>
+<script type="module" src="index.module.js"></script>
 EOM;
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
-<style>
-#theimage {
-  display: block;
-  background-image: url("/images/wait24trans.gif");
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-size: 80px 80px;
-  min-height: 100px;
-  min-width: 400px;
-}
-</style>
+<link rel="stylesheet" href="index.css" />
 EOM;
 
 // Compute a good fall Year
@@ -64,7 +52,7 @@ $ar = array(
     "european_corn_borer" => "European Corn Borer (Ostrinia nubilalis)",
 );
 $pselect = make_select("pest", $pest, $ar, "updatePest", "form-control");
-$nselect = networkSelect($network, $station, array(), "station", TRUE);
+$nselect = networkSelect($network, $station, array(), "station", TRUE, "bogus");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
