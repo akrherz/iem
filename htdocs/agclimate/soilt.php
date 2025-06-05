@@ -8,7 +8,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="soilt.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="soilt.js"></script>
+<script type="module" src="soilt.module.js"></script>
 EOM;
 $t->content = <<<EOM
 <ol class="breadcrumb">

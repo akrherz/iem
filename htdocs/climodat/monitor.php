@@ -151,7 +151,7 @@ $edatestr = date("m/d/Y", $edate);
 $sdateiso = date("Y-m-d", $sdate);
 $edateiso = date("Y-m-d", $edate);
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="monitor.js"></script>
+<script type="module" src="monitor.module.js"></script>
 EOM;
 
 $sselect = selectNetworkType("CLIMATE", $network);

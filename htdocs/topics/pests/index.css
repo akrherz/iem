@@ -1,0 +1,9 @@
+#theimage {
+  display: block;
+  background-image: url("/images/wait24trans.gif");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 80px 80px;
+  min-height: 100px;
+  min-width: 400px;
+}

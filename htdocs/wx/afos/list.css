@@ -1,0 +1,5 @@
+.col-md-2 {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 350px;
+}

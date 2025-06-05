@@ -1,16 +1,13 @@
-/* global $, ol */
+/* global ol */
 let physical_code = "EP";
 let duration = "D";
 let days = 2;
 let vectorLayer = null;
 let map = null;
-let element = null;
 let fontSize = 14;
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
- * @returns string converted string
  */
 function escapeHTML(val) {
     return val.replace(/&/g, '&amp;')
@@ -20,14 +17,42 @@ function escapeHTML(val) {
               .replace(/'/g, '&#039;');
 }
 
+/**
+ * Update the URL with current parameters using URLSearchParams
+ */
 function updateURL() {
-    window.location.href = `#${physical_code}.${duration}.${days}`;
+    const url = new URL(window.location);
+    url.searchParams.set('pe', physical_code);
+    url.searchParams.set('duration', duration);
+    url.searchParams.set('days', days);
+    // Clear any legacy hash
+    url.hash = '';
+    window.history.replaceState({}, '', url);
 }
 
+/**
+ * Update the map with current form values
+ */
 function updateMap() {
-    physical_code = escapeHTML($('#pe').val());
-    duration = escapeHTML($('#duration').val());
-    days = escapeHTML($('#days').val());
+    const peSelect = document.getElementById('pe');
+    const durationSelect = document.getElementById('duration');
+    const daysInput = document.getElementById('days');
+    
+    // Validate that all required fields have values
+    if (!peSelect.value || !durationSelect.value || !daysInput.value.trim()) {
+        return; // Don't update if any field is empty
+    }
+    
+    // Validate that days is a positive number
+    const daysValue = parseInt(daysInput.value.trim(), 10);
+    if (isNaN(daysValue) || daysValue <= 0) {
+        return; // Don't update if days is not a valid positive number
+    }
+    
+    physical_code = escapeHTML(peSelect.value);
+    duration = escapeHTML(durationSelect.value);
+    days = daysValue; // Use the validated number
+    
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer();
     map.addLayer(vectorLayer);
@@ -79,6 +104,9 @@ const vectorStyleFunction = (feature) => {
     return style;
 };
 
+/**
+ * Create and return a vector layer with current parameters
+ */
 function makeVectorLayer() {
     const vs = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
@@ -96,8 +124,65 @@ function makeVectorLayer() {
     });
 }
 
-$(document).ready(() => {
+/**
+ * Show a popup with station information
+ */
+function showPopup(coord, content) {
+    // Create a simple popup div if it doesn't exist
+    let popupDiv = document.getElementById('simple-popup');
+    if (!popupDiv) {
+        popupDiv = document.createElement('div');
+        popupDiv.id = 'simple-popup';
+        popupDiv.className = 'simple-popup';
+        document.body.appendChild(popupDiv);
+    }
+    
+    // Create close button element
+    const closeButton = document.createElement('div');
+    closeButton.innerHTML = '×';
+    closeButton.className = 'popup-close-button';
+    closeButton.addEventListener('click', hidePopup);
+    
+    // Set content with close button
+    popupDiv.innerHTML = '';
+    popupDiv.appendChild(closeButton);
+    const contentDiv = document.createElement('div');
+    contentDiv.innerHTML = content;
+    popupDiv.appendChild(contentDiv);
+    
+    popupDiv.style.display = 'block';
+    
+    // Position the popup near the click location
+    const pixel = map.getPixelFromCoordinate(coord);
+    const mapElement = document.getElementById('map');
+    const rect = mapElement.getBoundingClientRect();
+    
+    // Add scroll offsets to handle page scrolling
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Calculate popup position with proper offsets
+    const left = rect.left + scrollLeft + pixel[0] + 10;
+    const top = rect.top + scrollTop + pixel[1] - 60;
+    
+    popupDiv.style.left = `${left}px`;
+    popupDiv.style.top = `${top}px`;
+}
 
+/**
+ * Hide the popup
+ */
+function hidePopup() {
+    const popupDiv = document.getElementById('simple-popup');
+    if (popupDiv) {
+        popupDiv.style.display = 'none';
+    }
+}
+
+/**
+ * Initialize the map and UI components
+ */
+function initializeMap() {
     vectorLayer = makeVectorLayer();
     const key = document.getElementById('map').dataset.bingmapsapikey;
     map = new ol.Map({
@@ -124,22 +209,7 @@ $(document).ready(() => {
     const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    element = document.getElementById('popup');
-
-    const popup = new ol.Overlay({
-        element,
-        positioning: 'bottom-center',
-        stopEvent: false
-    });
-    map.addOverlay(popup);
-
-    $(element).popover({
-        'placement': 'top',
-        'html': true,
-        content() { return $('#popover-content').html(); }
-    });
-
-    // display popup on click
+    // Handle map clicks for popup display
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
             (feature2) => {
@@ -148,40 +218,137 @@ $(document).ready(() => {
         if (feature) {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
-            popup.setPosition(coord);
             const content = `<p><strong>ID:</strong> ${feature.get('station')}<br /><strong>Value:</strong> ${feature.get('value')}<br /><strong>UTC Valid:</strong> ${feature.get('utc_valid')}</p>`;
-            $('#popover-content').html(content);
-            $(element).popover('show');
-
+            showPopup(coord, content);
         } else {
-            $(element).popover('hide');
+            hidePopup();
         }
-
     });
+}
 
-    // Figure out if we have anything specified from the window.location
-    let tokens = window.location.href.split("#");
-    if (tokens.length === 2) {
-        // #YYYYmmdd/variable
-        tokens = tokens[1].split(".");
-        if (tokens.length === 3) {
-            physical_code = escapeHTML(tokens[0]);
-            duration = escapeHTML(tokens[1]);
-            days = escapeHTML(tokens[2]);
+/**
+ * Parse URL parameters and set form values, handling legacy hash format
+ */
+function parseURLParams() {
+    const url = new URL(window.location);
+    let migrated = false;
+    
+    // First check for legacy hash format
+    if (url.hash?.includes('.')) {
+        const hashTokens = url.hash.substring(1).split('.');
+        if (hashTokens.length === 3) {
+            physical_code = escapeHTML(hashTokens[0]);
+            duration = escapeHTML(hashTokens[1]);
+            const daysParam = parseInt(hashTokens[2], 10);
+            if (!isNaN(daysParam) && daysParam > 0) {
+                days = daysParam;
+                migrated = true;
+            }
         }
     }
-    $(`select[id=pe] option[value=${physical_code}]`).attr("selected", "selected");
-    $(`select[id=duration] option[value=${duration}]`).attr("selected", "selected");
-    $("#days").val(days);
-    updateMap();
+    
+    // Check for modern URL parameters (these override hash if both exist)
+    if (url.searchParams.has('pe')) {
+        physical_code = escapeHTML(url.searchParams.get('pe'));
+        migrated = false; // Don't migrate if modern params exist
+    }
+    if (url.searchParams.has('duration')) {
+        duration = escapeHTML(url.searchParams.get('duration'));
+        migrated = false;
+    }
+    if (url.searchParams.has('days')) {
+        const daysParam = parseInt(url.searchParams.get('days'), 10);
+        if (!isNaN(daysParam) && daysParam > 0) {
+            days = daysParam;
+            migrated = false;
+        }
+    }
+    
+    // If we migrated from hash, update URL to modern format
+    if (migrated) {
+        updateURL();
+    }
+    
+    // Set form values based on parsed or default values
+    const peSelect = document.getElementById('pe');
+    const durationSelect = document.getElementById('duration');
+    const daysInput = document.getElementById('days');
+    
+    if (peSelect) {
+        peSelect.value = physical_code;
+    }
+    if (durationSelect) {
+        durationSelect.value = duration;
+    }
+    if (daysInput) {
+        daysInput.value = days;
+    }
+}
 
-    // Font size buttons
-    $('#fplus').click(() => {
-        fontSize += 2;
-        vectorLayer.setStyle(vectorStyleFunction);
-    });
-    $('#fminus').click(() => {
-        fontSize -= 2;
-        vectorLayer.setStyle(vectorStyleFunction);
-    });
-});
+/**
+ * Initialize font size controls
+ */
+function initializeFontControls() {
+    const fplusButton = document.getElementById('fplus');
+    const fminusButton = document.getElementById('fminus');
+    
+    if (fplusButton) {
+        fplusButton.addEventListener('click', () => {
+            fontSize += 2;
+            vectorLayer.setStyle(vectorStyleFunction);
+        });
+    }
+    
+    if (fminusButton) {
+        fminusButton.addEventListener('click', () => {
+            fontSize -= 2;
+            vectorLayer.setStyle(vectorStyleFunction);
+        });
+    }
+}
+
+/**
+ * Initialize the application
+ */
+function init() {
+    initializeMap();
+    parseURLParams();
+    initializeFontControls();
+    initializeFormHandlers();
+    updateMap();
+}
+
+/**
+ * Initialize form event handlers for real-time updates
+ */
+function initializeFormHandlers() {
+    const peSelect = document.getElementById('pe');
+    const durationSelect = document.getElementById('duration');
+    const daysInput = document.getElementById('days');
+    
+    let inputTimeout = null;
+    
+    if (peSelect) {
+        peSelect.addEventListener('change', updateMap);
+    }
+    if (durationSelect) {
+        durationSelect.addEventListener('change', updateMap);
+    }
+    if (daysInput) {
+        // Use debounced input to prevent updates while user is typing
+        daysInput.addEventListener('input', () => {
+            clearTimeout(inputTimeout);
+            inputTimeout = setTimeout(updateMap, 500); // Wait 500ms after user stops typing
+        });
+        
+        // Also update on blur (when user clicks away)
+        daysInput.addEventListener('blur', updateMap);
+    }
+}
+
+// Initialize when DOM is loaded
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+} else {
+    init();
+}

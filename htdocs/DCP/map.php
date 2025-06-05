@@ -12,22 +12,11 @@ $t->title = "SHEF Physical Code Map";
 $OL = '10.5.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-<style>
-.map {
-    height: 400px;
-    width: 100%;
-    background-color: #D2B48C;
-}
-.popover {
-    width: 300px;
-}
-</style>
+<link type="text/css" href="map.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src='map.js?v=3'></script>
 EOM;
@@ -61,7 +50,7 @@ given number of days.  This is a work-in-progress here and <a href="/info/contac
 be wonderful.</p>
 
 <form name='bah'><p><strong>Select Physical Code:</strong> 
-<select onChange="javascript: updateMap();" id="pe">
+<select id="pe">
 <option value="AD">[AD] Reserved</option>
 <option value="AF">[AF] Surface frost intensity (coded, see Table 20)</option>
 <option value="AG">[AG] Percent of green vegetation (%)</option>
@@ -321,13 +310,13 @@ be wonderful.</p>
 </select>
 
 &nbsp; &nbsp; <strong>Duration:</strong>
-<select onChange="javascript: updateMap();" id="duration">
+<select id="duration">
     <option value="D">D Day (24 Hour)</option>
     <option value="I">I Instantaneous</option>
     <option value="Q">Q 6 Hour</option>
 </select>
 
-&nbsp; <strong>Within # of Days:</strong> <input id="days" onChange="javascript: updateMap();" type="text" size="5" name="days" value="2">
+&nbsp; <strong>Within # of Days:</strong> <input id="days" type="text" size="5" name="days" value="2">
 
 </form>
 </div></div>

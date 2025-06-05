@@ -6,13 +6,10 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-<link rel="stylesheet" href="static.css" />
+<link rel="stylesheet" href="index.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="/vendor/js-cookie/2.1.4/js.cookie.min.js"></script>
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="static.js"></script>
+<script type="module" src="index.module.js"></script>
 EOM;
 $t->title = "NWS Text Product Finder";
 
@@ -31,6 +28,10 @@ for the center.
 <p>Update <strong>29 Mar 2024:</strong> <a href="/cgi-bin/afos/retrieve.py?help"
 class="btn btn-primary"><i class="fa fa-file"></i> Backend documentation</a> exists
 for those wishing to script against this service.</p>
+
+<p>Update <strong>5 June 2025:</strong> The app was mostly rewritten and now
+uses a URL Parameters pil= style page reference.  Any previous bookmarks should
+continue to work, but you may want to update them to the new style.</p>
 
 <br />&nbsp;
 <p>If you don't like this app, <a href="old.phtml">here is the old one</a>.</p>
@@ -123,10 +124,10 @@ $theform = <<<EOM
 <label for="asc">Oldest First</label></p>
 
 <p><label for="sdate">Start Date @ 00 UTC</label>
-<br /><input id="sdate" type="text" name="sdate" value="No Limit"></p>
+<br /><input id="sdate" type="date" name="sdate" min="1983-01-01"></p>
 
 <p><label for="edate">End Date @ 00 UTC</label>
-<br /><input id="edate" type="text" name="edate" value="No Limit"></p>
+<br /><input id="edate" type="date" name="edate" min="1983-01-02"></p>
 
 <p><button type="button" id="myform-submit" class="btn btn-default"><i class="fa fa-search"></i> Load Product</button></p>
 
