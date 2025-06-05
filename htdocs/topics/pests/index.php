@@ -52,7 +52,7 @@ $ar = array(
     "european_corn_borer" => "European Corn Borer (Ostrinia nubilalis)",
 );
 $pselect = make_select("pest", $pest, $ar, "updatePest", "form-control");
-$nselect = networkSelect($network, $station, array(), "station", TRUE, "bogus");
+$nselect = networkSelect($network, $station, array(), "station", TRUE);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

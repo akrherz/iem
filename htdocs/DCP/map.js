@@ -165,8 +165,8 @@ function showPopup(coord, content) {
     const left = rect.left + scrollLeft + pixel[0] + 10;
     const top = rect.top + scrollTop + pixel[1] - 60;
     
-    popupDiv.style.left = left + 'px';
-    popupDiv.style.top = top + 'px';
+    popupDiv.style.left = `${left}px`;
+    popupDiv.style.top = `${top}px`;
 }
 
 /**
@@ -234,7 +234,7 @@ function parseURLParams() {
     let migrated = false;
     
     // First check for legacy hash format
-    if (url.hash && url.hash.includes('.')) {
+    if (url.hash?.includes('.')) {
         const hashTokens = url.hash.substring(1).split('.');
         if (hashTokens.length === 3) {
             physical_code = escapeHTML(hashTokens[0]);

@@ -121,28 +121,46 @@ function networkMultiSelect(
     $extra = array(),
     $label = "station"
 ) {
-    $s = "";
     $nt = new NetworkTable($network);
-    $cities = $nt->table;
-    $s .= "<select name=\"{$label}\" size=\"5\" MULTIPLE >\n";
+    
+    // Create DOM document
+    $dom = new DOMDocument('1.0', 'UTF-8');
+    $dom->formatOutput = false; // Keep compact for web output
+    
+    // Create select element
+    $select = $dom->createElement('select');
+    $select->setAttribute('name', $label);
+    $select->setAttribute('size', '5');
+    $select->setAttribute('multiple', 'multiple');
 
+    // Add extra options first
     foreach ($extra as $idx => $sid) {
-        $s .= "<option value=\"$idx\" ";
+        $option = $dom->createElement('option');
+        $option->setAttribute('value', $idx);
+        $option->textContent = "[$idx] $sid";
+        
         if ($selected == $idx) {
-            $s .= "SELECTED";
+            $option->setAttribute('selected', 'selected');
         }
-        $s .= ">[$idx] $sid </option>\n";
+        
+        $select->appendChild($option);
     }
 
-    foreach ($cities as $sid => $tbl) {
-        $s .= "<option value=\"$sid\" ";
+    // Add options from network table
+    foreach ($nt->table as $sid => $tbl) {
+        $option = $dom->createElement('option');
+        $option->setAttribute('value', $sid);
+        $option->textContent = "[$sid] " . $tbl["name"];
+        
         if ($selected == $sid) {
-            $s .= "SELECTED";
+            $option->setAttribute('selected', 'selected');
         }
-        $s .= ">[$sid] " . $tbl["name"] . "</option>\n";
+        
+        $select->appendChild($option);
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    $dom->appendChild($select);
+    return $dom->saveHTML($select);
 }
 
 function make_sname($tbl)
@@ -168,16 +186,30 @@ function networkSelect(
     $clsname = "iemselect2"
 ) {
     $nt = new NetworkTable($network, FALSE, $only_online);
-    $cities = $nt->table;
-    $s = "<select class=\"{$clsname}\" name=\"$selectName\">\n";
-    foreach ($cities as $sid => $tbl) {
-        $s .= "<option value=\"$sid\" ";
-        $sname = make_sname($tbl);
+    
+    // Create DOM document
+    $dom = new DOMDocument('1.0', 'UTF-8');
+    $dom->formatOutput = false; // Keep compact for web output
+    
+    // Create select element
+    $select = $dom->createElement('select');
+    $select->setAttribute('name', $selectName);
+    $select->setAttribute('class', $clsname);
+    
+    // Add options from network table
+    foreach ($nt->table as $sid => $tbl) {
+        $option = $dom->createElement('option');
+        $option->setAttribute('value', $sid);
+        $option->textContent = make_sname($tbl);
+        
         if ($selected === $sid) {
-            $s .= "SELECTED";
+            $option->setAttribute('selected', 'selected');
         }
-        $s .= ">{$sname}</option>\n";
+        
+        $select->appendChild($option);
     }
+    
+    // Add extra options
     foreach ($extra as $idx => $sid) {
         if (is_array($sid)) {
             $tbl = $sid;
@@ -186,15 +218,20 @@ function networkSelect(
             $nt->loadStation($sid);
             $tbl = $nt->table[$sid];
         }
-        $sname = make_sname($tbl);
-        $s .= "<option value=\"$sid\" ";
+        
+        $option = $dom->createElement('option');
+        $option->setAttribute('value', $sid);
+        $option->textContent = make_sname($tbl);
+        
         if ($selected === $sid) {
-            $s .= "SELECTED";
+            $option->setAttribute('selected', 'selected');
         }
-        $s .= ">{$sname}</option>\n";
+        
+        $select->appendChild($option);
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    $dom->appendChild($select);
+    return $dom->saveHTML($select);
 }
 
 
