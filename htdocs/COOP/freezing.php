@@ -6,7 +6,6 @@ require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
-require_once "../../include/imagemaps.php";
 
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";

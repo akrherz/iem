@@ -4,7 +4,6 @@ define("IEM_APPID", 136);
 
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-require_once "../../include/imagemaps.php";
 
 $uri = "{$INTERNAL_BASEURL}/json/watches.py?is_pds=1";
 $data = file_get_contents($uri);

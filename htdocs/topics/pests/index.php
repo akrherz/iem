@@ -7,7 +7,6 @@ define("IEM_APPID", 135);
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 // defaults
 $year = date("Y");

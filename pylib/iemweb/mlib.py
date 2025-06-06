@@ -1,4 +1,4 @@
-"""Comparables to include/imagemaps.php"""
+"""Comparables to include/mlib.php"""
 
 
 def rectify_wfo(wfo3):

@@ -4,7 +4,6 @@ define("IEM_APPID", 137);
 
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-require_once "../../include/imagemaps.php";
 
 $year = get_int404("year", date("Y"));
 $uri = sprintf("%s/json/watches.py?year=%s", $INTERNAL_BASEURL, $year);

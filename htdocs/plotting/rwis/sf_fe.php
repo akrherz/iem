@@ -4,7 +4,6 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 $ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";

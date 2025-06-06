@@ -5,7 +5,6 @@ define("IEM_APPID", 113);
 require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-require_once "../../include/imagemaps.php";
 $t = new MyView();
 
 $dbconn = iemdb("iem");

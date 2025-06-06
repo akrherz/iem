@@ -6,7 +6,6 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
-require_once "../../include/imagemaps.php";
 
 $t = new MyView();
 

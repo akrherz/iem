@@ -1,6 +1,5 @@
 <?php 
 require_once "../../../config/settings.inc.php";
-require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 include_once "../../../include/myview.php";
 $t = new MyView();

@@ -16,7 +16,6 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/imagemaps.php";
 require_once "../../include/myview.php";
 
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";

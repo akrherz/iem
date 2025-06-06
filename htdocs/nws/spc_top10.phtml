@@ -13,7 +13,6 @@ $category = $tokens[0];
 $threshold = $tokens[1];
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
-require_once "../../include/imagemaps.php";
 
 $url = sprintf(
     "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s&sort=desc",

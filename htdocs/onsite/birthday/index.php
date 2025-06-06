@@ -4,7 +4,6 @@ require_once "../../../include/myview.php";
 $t = new MyView();
   $t->title = "Birthday Weather";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 $startYear = isset($_GET['startYear']) ? intval($_GET['startYear']): 1951;
 
