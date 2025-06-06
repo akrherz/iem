@@ -48,7 +48,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.imagemaps import rectify_wfo
+from iemweb.mlib import rectify_wfo
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

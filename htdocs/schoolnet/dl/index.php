@@ -5,7 +5,6 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Network Data Download";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 $nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
     'station[]');

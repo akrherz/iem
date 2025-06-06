@@ -18,7 +18,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.imagemaps import rectify_wfo
+from iemweb.mlib import rectify_wfo
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 IEM = "https://mesonet.agron.iastate.edu"

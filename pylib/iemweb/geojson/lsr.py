@@ -56,7 +56,7 @@ from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.imagemaps import rectify_wfo
+from iemweb.mlib import rectify_wfo
 
 
 class Schema(CGIModel):

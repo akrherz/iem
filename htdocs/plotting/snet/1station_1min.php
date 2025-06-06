@@ -3,7 +3,6 @@ $OL = "7.2.2";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "KCCI";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");

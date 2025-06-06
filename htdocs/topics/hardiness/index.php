@@ -5,7 +5,6 @@ define("IEM_APPID", 160);
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 // Get things set via CGI
 $state = isset($_GET["state"]) ? substr(xssafe($_GET["state"]), 0, 2) : "IA";

@@ -19,7 +19,7 @@ from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.util import utc
 
-from iemweb.imagemaps import rectify_wfo
+from iemweb.mlib import rectify_wfo
 
 PDICT = {
     "W": "By Issuance Center",

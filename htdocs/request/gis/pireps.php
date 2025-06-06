@@ -2,7 +2,6 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();

@@ -4,7 +4,6 @@ define("IEM_APPID", 85);
 require_once "../../include/myview.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
-require_once "../../include/imagemaps.php";
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : 'DMX';

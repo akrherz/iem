@@ -4,7 +4,6 @@ require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
-require_once "../../../include/imagemaps.php";
 
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 $year = get_int404("year", date("Y"));
