@@ -26,15 +26,14 @@ def setval(
     newval: float,
 ):
     """We have something to set."""
-    delta = 0 if ob is None else (newval - ob)
     LOG.warning(
-        "%s %s %s %.1f -> %.1f (%.1f) [E]",
+        "%s %s %s %s -> %.1f (%s) [E]",
         station,
         dt,
         col,
-        ob,
+        None if ob is None else f"{ob:.1f}",
         newval,
-        delta,
+        None if ob is None else f"{(ob - newval):.1f}",
     )
     conn.execute(
         sql_helper(
