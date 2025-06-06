@@ -15,6 +15,10 @@ people expect to see.</p>
 days that had "hatched"/"SIGNificant" risk.  Note that this isn't an exact
 science as the hatched and probability risk are not checked to see if they
 spatially/temporally overlap each other.</p>
+
+<p><strong>Updated 6 June 2025</strong>: The CSV/Excel output was updated
+to include a `None` value for days without an outlook spatially coincident.
+Additionally, the `date` column is now formatted as `YYYY-MM-DD`.</p>
 """
 
 import calendar
@@ -404,5 +408,11 @@ def plotter(ctx: dict):
         ax.set_xticklabels(calendar.month_abbr[1:])
         ax.grid()
         ax.yaxis.set_major_locator(MaxNLocator(min_n_ticks=1, integer=True))
+
+    # Condition the dataframe
+    df = df.reindex(
+        pd.date_range(sts, ets, freq="D", name="date"), fill_value="NONE"
+    ).reset_index()
+    df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
     return fig, df
