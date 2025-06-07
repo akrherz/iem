@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from pyiem.database import get_sqlalchemy_conn, sql_helper
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
+
+from iemweb import error_log
 
 
 def tms_handler(environ: dict, start_response: callable, service: dict):
@@ -12,29 +13,18 @@ def tms_handler(environ: dict, start_response: callable, service: dict):
     try:
         return wsgiHandler(environ, start_response, service)
     except InvalidTMSRequest:
-        with get_sqlalchemy_conn("mesosite") as conn:
-            conn.execute(
-                sql_helper("""
-                insert into weblog(client_addr, uri, referer, http_status,
-                x_forwarded_for, domain)
-                VALUES (:addr, :uri, :ref, :status, :for, :domain)
-                """),
-                {
-                    "addr": environ.get(
-                        "HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR")
-                    )
-                    .split(",")[0]
-                    .strip(),
-                    "uri": environ.get("PATH_INFO"),
-                    "ref": environ.get("HTTP_REFERER"),
-                    "status": 404,
-                    "for": environ.get("HTTP_X_FORWARDED_FOR"),
-                    "domain": environ.get("HTTP_HOST"),
-                },
-            )
-            conn.commit()
-        start_response("404 Not Found", [("Content-Type", "text/plain")])
-        return [b"Invalid TMS request"]
+        # Previously, we would tee these requests up for app firewall
+        # now we just log them and send back a customized image
+        # indicating that the request was invalid.
+        error_log(
+            environ,
+            f"InvalidTMS  "
+            f"'{environ.get('PATH_INFO')}' "
+            f"Ref: {environ.get('HTTP_REFERER')}",
+        )
+        start_response("200 OK", [("Content-Type", "image/png")])
+        with open("/opt/iem/htdocs/images/tms_error.png", "rb") as fh:
+            return [fh.read()]
 
 
 def month2months(month: str) -> list[int]:
