@@ -7,12 +7,8 @@ $t = new MyView();
 define("IEM_APPID", 145);
 
 $t->title = "RWIS Archived Webcam Imagery";
-$t->headextra = <<<EOM
- <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
-EOM;
 $t->jsextra = <<<EOM
- <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
- <script src="camera.js"></script>
+ <script src="camera.module.js" type="module"></script>
 EOM;
 
 $conn = iemdb("mesosite");
@@ -36,8 +32,17 @@ $t->content = <<<EOM
 with a webcam has a number of preset views that are each queried about once
 per 10 minutes.  Please select the webcam view you wish to see and then 
 select a date of interest.  The left hand menu will automatically populate with
-a listing of images available for that date. <strong>Hint:</strong> Once you
-select a time, use the up/down keyboard arrow to create a quasi-timelapse.</p>
+a listing of images available for that date.</p>
+
+<div class="alert alert-info" style="margin: 10px 0;">
+  <strong>Navigation Tips:</strong>
+  <ul style="margin-bottom: 0;">
+    <li>Use arrow keys (↑↓ or ←→) to navigate between images</li>
+    <li>Press spacebar to start/stop auto-play mode</li>
+    <li>Click on the image to focus it for keyboard navigation</li>
+    <li>Use the Previous/Next buttons for manual control</li>
+  </ul>
+</div>
 
 <p>Archiving started back on 19 Dec 2009.  The start date of invidual webcams
 is shown in the select menu. The <a href="/current/viewer.phtml">IEM Webcam Viewer</a>
@@ -47,23 +52,27 @@ is another tool that allows viewing the RWIS webcam archive.</p>
 
 <div class="row">
   <div class="col-md-8 col-sm-12">
-  <span style="font-weight: bold;">1. Select Webcam View:</span>{$sform}
+  <span style="font-weight: bold;">1. Select Webcam View:</span>
+  <br>{$sform}
   </div>
   <div class="col-md-4 col-sm-12">
-  <span style="font-weight: bold;">2. Date:</span> <input type="text" id="datepicker" />
-
+  <span style="font-weight: bold;">2. Date:</span> 
+  <br><input type="text" id="datepicker" class="form-control" style="max-width: 200px;" />
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-2 col-sm-12">
-  <strong>3. Select Time:</sstrong>
+<div class="row" style="margin-top: 15px;">
+  <div class="col-md-3 col-sm-12">
+  <strong>3. Select Time:</strong>
   <br />
-  <select size="30" name="times">
+  <select size="25" name="times" class="form-control" style="font-family: monospace; font-size: 12px;">
+    <option value='-1'>Select a camera first...</option>
   </select> 
   </div>
-  <div class="col-md-8 col-sm-12">
-  <img id="theimage" src="camera_instructions.png" class="img img-responsive">
+  <div class="col-md-9 col-sm-12">
+  <div style="text-align: center; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">
+    <img id="theimage" src="camera_instructions.png" class="img img-responsive" style="max-width: 100%; height: auto;">
+  </div>
   </div>
 </div>
 

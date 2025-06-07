@@ -1,7 +1,6 @@
 <?php
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 96);
-$JQUERYUI = "1.12.1";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/reference.php";
 require_once "../../../../include/network.php";
@@ -148,9 +147,8 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
 }
 
 $t->title = "RADAR &amp; NWS Warnings";
-$t->iemselect2 = TRUE;
 $t->jsextra = <<<EOM
-<script src="warnings.js?v=2"></script>
+<script src="warnings.module.js" type="module"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="warnings.css" />
@@ -213,7 +211,7 @@ foreach ($ll as $key => $val) {
     );
 }
 
-$wselect = '<select name="site" class="iemselect2" style="width: 100%">';
+$wselect = '<select name="site" style="width: 100%">';
 foreach ($nt->table as $key => $value) {
     $wselect .= "<option value=\"$key\" ";
     if ($site == $key) $wselect .= "SELECTED";
@@ -448,13 +446,18 @@ EOM;
     $content .= "</form>";
 }
 $content .= <<<EOM
-<!-- Warnings Key! -->
-<br />
-<img src="static/warnings_legend.png">
 </div>
 EOM;
 
 $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
+
+// Position legend outside datawindow to prevent layout conflicts
+$content .= <<<EOM
+<!-- Warnings Key positioned outside datawindow -->
+<div class="legend-container">
+<img src="static/warnings_legend.png" alt="Warnings Legend">
+</div>
+EOM;
 
 $connection = iemdb("postgis");
 
