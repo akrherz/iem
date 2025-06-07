@@ -22,14 +22,14 @@ class SitesContext
         $filename = "/mesonet/share/pics/{$this->station}/{$this->station}_{$instr}.jpg";
         if (file_exists($filename)) {
             if ($instr == $selected) {
-                $s .= '<td align="center" style="background: #ee0;">{$instr}</td>';
+                $s .= '<td align="center" style="background: #ee0;">'. $instr .'</td>';
                 $s .= "\n";
             } else {
                 $s .= '<td align="center"><a href="pics.php?network=' . $this->network . '&station=' . $this->station . '&dir=' . $instr . '">' . $instr . '</a></td>';
                 $s .= "\n";
             }
         } else {
-            $s .= '<td align="center">{$instr}</td>';
+            $s .= '<td align="center">'. $instr .'</td>';
             $s .= "\n";
         }
         return $s;
