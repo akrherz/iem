@@ -1,7 +1,7 @@
 // ES Module for DCP plotting application
 
 import { escapeHTML, requireSelectElement } from '/js/iemjs/domUtils.js';
-import { iemdata } from '/js/iemjs/iemdata.js';
+import { states } from '/js/iemjs/iemdata.js';
 
 // DOM element references
 let stateSelect = null;
@@ -64,7 +64,7 @@ function populateStateSelect() {
     // Clear existing options except the first placeholder
     stateSelect.innerHTML = '<option value="">Select State...</option>';
     
-    iemdata.states.forEach(([abbr, name]) => {
+    states.forEach(([abbr, name]) => {
         const option = document.createElement('option');
         option.value = abbr;
         option.textContent = `[${abbr}] ${name}`;

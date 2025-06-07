@@ -21,15 +21,10 @@ async function testImports() {
         // Test iemdata imports
         const iemdata = await import('../src/iemdata.js');
         console.log('✅ iemdata.js imported successfully');
-        
-        // Verify iemdata structure
-        if (!iemdata.iemdata || typeof iemdata.iemdata !== 'object') {
-            throw new Error('iemdata.iemdata is not an object');
-        }
-        
+                
         const expectedData = ['states', 'vtec_phenomena_dict', 'vtec_sig_dict'];
         for (const key of expectedData) {
-            if (!Array.isArray(iemdata.iemdata[key])) {
+            if (!Array.isArray(iemdata[key])) {
                 throw new Error(`Missing or invalid data array: ${key}`);
             }
         }
@@ -43,11 +38,6 @@ async function testImports() {
         if (typeof main.escapeHTML !== 'function') {
             throw new Error('escapeHTML not re-exported from index.js');
         }
-        if (!main.iemdata || typeof main.iemdata !== 'object') {
-            throw new Error('iemdata not re-exported from index.js');
-        }
-        console.log('✅ index.js re-exports work correctly');
-        
         console.log('🎉 All import tests passed!');
         
     } catch (error) {
