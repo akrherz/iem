@@ -56,3 +56,16 @@ div.wwaA {
     padding: 5px;
     width: 30px;
 }
+
+/* Legend container styling to prevent layout conflicts */
+.legend-container {
+    clear: both;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.legend-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}

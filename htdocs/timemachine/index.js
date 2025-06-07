@@ -202,14 +202,30 @@ function update() {
 
     // Show or hide sliders based on interval
     if (opt.getAttribute('data-interval') >= 60) {
-        document.getElementById('minute_slider').style.display = 'none';
+        // Hide the entire minute column container
+        const minuteSliderElement = document.getElementById('minute_slider');
+        if (minuteSliderElement?.parentElement) {
+            minuteSliderElement.parentElement.style.display = 'none';
+        }
     } else {
-        document.getElementById('minute_slider').style.display = 'block';
+        // Show the entire minute column container
+        const minuteSliderElement = document.getElementById('minute_slider');
+        if (minuteSliderElement?.parentElement) {
+            minuteSliderElement.parentElement.style.display = 'block';
+        }
     }
     if (opt.getAttribute('data-interval') >= 1440) {
-        document.getElementById('hour_slider').style.display = 'none';
+        // Hide the entire hour column container
+        const hourSliderElement = document.getElementById('hour_slider');
+        if (hourSliderElement?.parentElement) {
+            hourSliderElement.parentElement.style.display = 'none';
+        }
     } else {
-        document.getElementById('hour_slider').style.display = 'block';
+        // Show the entire hour column container
+        const hourSliderElement = document.getElementById('hour_slider');
+        if (hourSliderElement?.parentElement) {
+            hourSliderElement.parentElement.style.display = 'block';
+        }
     }
 
     // Update image display with loading indicator

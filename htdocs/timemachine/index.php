@@ -7,12 +7,12 @@ $t = new MyView();
 $t->title = "Time Machine";
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/nouislider/15.8.1/nouislider.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="index.css">
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/nouislider/15.8.1/nouislider.min.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script type="text/javascript" src="static.js"></script>
+<script type="text/javascript" src="index.js"></script>
 EOM;
 
 $t->content = <<<EOM
