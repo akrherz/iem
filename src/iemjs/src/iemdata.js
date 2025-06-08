@@ -1,7 +1,4 @@
-
-export const iemdata = {};
-
-iemdata.vtec_phenomena_dict = [
+export const vtec_phenomena = [
     ['SV', 'Severe Thunderstorm'],
     ['TO', 'Tornado'],
     ['MA', 'Marine'],
@@ -72,7 +69,7 @@ iemdata.vtec_phenomena_dict = [
     ['ZR', 'Freezing Rain'],
 ];
 
-iemdata.vtec_sig_dict = [
+export const vtec_significance = [
     ['W', 'Warning'],
     ['Y', 'Advisory'],
     ['A', 'Watch'],
@@ -82,7 +79,7 @@ iemdata.vtec_sig_dict = [
     ['N', 'Synopsis'],
 ];
 
-iemdata.wfos = [
+export const wfos = [
     ['PAAQ', 'National Tsunami Warning Center'],
     ['KABQ', 'ALBUQUERQUE'],
     ['KABR', 'ABERDEEN'],
@@ -210,7 +207,7 @@ iemdata.wfos = [
     ['KVEF', 'LAS_VEGAS'],
 ];
 
-iemdata.states =[
+export const states = [
     ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
     ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
     ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
@@ -223,4 +220,5 @@ iemdata.states =[
     ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"], ["SC", "South Carolina"],
     ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"], ["UT", "Utah"],
     ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"], ["WV", "West Virginia"],
-    ["WI", "Wisconsin"], ["WY", "Wyoming"]];
+    ["WI", "Wisconsin"], ["WY", "Wyoming"]
+];

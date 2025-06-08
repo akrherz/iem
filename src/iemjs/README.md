@@ -15,18 +15,16 @@ npm install iemjs
 ```javascript
 // Import specific utilities
 import { escapeHTML, requireSelectElement } from 'iemjs/domUtils';
-import { iemdata } from 'iemjs/iemdata';
 
 // Or import everything
 import * as IEM from 'iemjs';
 ```
 
-### Browser ES Modules (direct import)
+### Browser ES Modules (direct import from this repo)
 
 ```javascript
 // Import from web-accessible location
 import { escapeHTML, requireSelectElement } from '/js/iemjs/domUtils.js';
-import { iemdata } from '/js/iemjs/iemdata.js';
 ```
 
 ## Modules
@@ -51,19 +49,9 @@ Utilities for safe DOM manipulation:
 Weather and climate data constants:
 
 - `iemdata.states` - US states list
-- `iemdata.vtec_phenomena_dict` - Weather event phenomena
-- `iemdata.vtec_significance_dict` - Weather event significance levels
-- Plus many other meteorological constants and lookup tables
-
-## Development
-
-This package follows IEM coding standards:
-
-- No jQuery dependencies
-- Vanilla JavaScript ES modules
-- Avoids usage of `this` keyword
-- Comprehensive JSDoc documentation
+- `iemdata.vtec_phenomena` - Weather event phenomena
+- `iemdata.vtec_significance` - Weather event significance levels
 
 ## License
 
-Apache-2.0
+MIT

@@ -46,6 +46,25 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          cd src/iemjs
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract changelog section for this version
+            VERSION=${{ steps.extract_version.outputs.version }}
+            CHANGELOG_SECTION=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | head -n -1)
+            if [ -z "$CHANGELOG_SECTION" ]; then
+              CHANGELOG_SECTION="See CHANGELOG.md for details."
+            fi
+            # Save to output, escaping newlines
+            echo "content<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGELOG_SECTION" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "content=No changelog available." >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
@@ -57,6 +76,9 @@ jobs:
             ## iemjs v${{ steps.extract_version.outputs.version }}
             
             Published to npm: https://www.npmjs.com/package/iemjs
+            
+            ### Changes
+            ${{ steps.changelog.outputs.content }}
             
             ### Installation
             ```bash
