@@ -34,12 +34,27 @@ function testExports() {
         }
         
         console.log('🔍 Checking exports...');
-        for (const [exportName, exportPath] of Object.entries(packageJson.exports)) {
+        for (const [exportName, exportConfig] of Object.entries(packageJson.exports)) {
+            // Handle both string and object export formats
+            const exportPath = typeof exportConfig === 'string' ? exportConfig : exportConfig.import;
+            if (!exportPath) {
+                throw new Error(`No import path found for export: ${exportName}`);
+            }
+            
             const fullExportPath = path.join(__dirname, '..', exportPath);
             if (!fs.existsSync(fullExportPath)) {
                 throw new Error(`Export path does not exist: ${exportPath} (for export: ${exportName})`);
             }
             console.log(`  ✅ ${exportName} -> ${exportPath}`);
+            
+            // Also check types if defined
+            if (typeof exportConfig === 'object' && exportConfig.types) {
+                const fullTypesPath = path.join(__dirname, '..', exportConfig.types);
+                if (!fs.existsSync(fullTypesPath)) {
+                    throw new Error(`Types path does not exist: ${exportConfig.types} (for export: ${exportName})`);
+                }
+                console.log(`  ✅ ${exportName} types -> ${exportConfig.types}`);
+            }
         }
         
         // Check files array

@@ -1,23 +1,35 @@
 {
   "name": "iemjs",
-  "version": "0.0.4",
+  "version": "0.0.5-dev",
   "description": "Iowa Environmental Mesonet JavaScript utilities for weather data applications",
   "type": "module",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./domUtils": "./src/domUtils.js",
-    "./iemdata": "./src/iemdata.js"
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./domUtils": {
+      "import": "./src/domUtils.js",
+      "types": "./src/domUtils.d.ts"
+    },
+    "./iemdata": {
+      "import": "./src/iemdata.js",
+      "types": "./src/iemdata.d.ts"
+    }
   },
   "files": [
     "src/**/*.js",
+    "src/**/*.d.ts",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "prepack": "echo 'Preparing iemjs package for publishing...'",
-    "test": "npm run test:syntax && npm run test:imports && npm run test:exports",
+    "test": "npm run test:syntax && npm run test:imports && npm run test:exports && npm run test:types",
     "test:syntax": "node -c src/domUtils.js && node -c src/iemdata.js && node -c src/index.js && echo '✅ Syntax validation passed'",
+    "test:types": "echo '✅ TypeScript declarations exist' && ls src/*.d.ts",
     "test:imports": "node tests/test-imports.js",
     "test:exports": "node tests/test-exports.js",
     "version": "echo 'Version updated to' $npm_package_version"
