@@ -1,4 +1,4 @@
-export const vtec_phenomena_dict = [
+export const vtec_phenomena = [
     ['SV', 'Severe Thunderstorm'],
     ['TO', 'Tornado'],
     ['MA', 'Marine'],
@@ -69,7 +69,7 @@ export const vtec_phenomena_dict = [
     ['ZR', 'Freezing Rain'],
 ];
 
-export const vtec_sig_dict = [
+export const vtec_significance = [
     ['W', 'Warning'],
     ['Y', 'Advisory'],
     ['A', 'Watch'],

@@ -22,7 +22,7 @@ async function testImports() {
         const iemdata = await import('../src/iemdata.js');
         console.log('✅ iemdata.js imported successfully');
                 
-        const expectedData = ['states', 'vtec_phenomena_dict', 'vtec_sig_dict'];
+        const expectedData = ['states', 'vtec_phenomena', 'vtec_significance'];
         for (const key of expectedData) {
             if (!Array.isArray(iemdata[key])) {
                 throw new Error(`Missing or invalid data array: ${key}`);

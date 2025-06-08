@@ -8,8 +8,8 @@ export * from './domUtils.js';
 
 // Re-export iemdata - both individual exports and legacy object
 export { 
-    vtec_phenomena_dict,
-    vtec_sig_dict, 
+    vtec_phenomena,
+    vtec_significance,
     wfos,
     states
 } from './iemdata.js';
