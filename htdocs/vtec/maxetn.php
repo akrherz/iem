@@ -54,6 +54,6 @@ see presented on this page<br />
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="maxetn.js">
+<script src="maxetn.js"></script>
 EOM;
 $t->render("full.phtml");

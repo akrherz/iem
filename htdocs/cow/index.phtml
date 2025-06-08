@@ -192,37 +192,12 @@ $content = <<<EOM
 <table class="table table-condensed">
 <tr><th>Warning Type:</th>
 <td>
-<script type="text/javascript">
-function wtypeSelect()
-{
-    document.getElementById("TO").checked = true;
-    document.getElementById("SV").checked = true;
-    document.getElementById("MA").checked = true;
-    document.getElementById("FF").checked = true;
-    document.getElementById("DS").checked = true;
-    document.getElementById("SQ").checked = true;
-    return false;
-}
-</script>
-<button onclick="return wtypeSelect()">Select All</button> {$tselect}
+<button>Select All</button> {$tselect}
 </td></tr>
 
 <tr><th>LSR Type:</th><td>
-<script type="text/javascript">
-function ltypeSelect()
-{
-    document.getElementById("T").checked = true;
-    document.getElementById("D").checked = true;
-    document.getElementById("H").checked = true;
-    document.getElementById("G").checked = true;
-    document.getElementById("FF2").checked = true;
-    document.getElementById("MA2").checked = true;
-    document.getElementById("DS2").checked = true;
-    document.getElementById("SQ").checked = true;
-    return false;
-}
-</script>
-<button onclick="return ltypeSelect()">Select All</button> {$ltselect}
+
+<button>Select All</button> {$ltselect}
 </td></tr>
 
  <tr><td colspan="2">
@@ -548,11 +523,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-        $(".iemselect2").select2();
-});
-</script>
+<script type="module" src="index.module.js"></script>
 EOM;
 $t->content = $content;
 $t->render('full.phtml');
