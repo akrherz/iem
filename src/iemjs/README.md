@@ -49,8 +49,8 @@ Utilities for safe DOM manipulation:
 Weather and climate data constants:
 
 - `iemdata.states` - US states list
-- `iemdata.vtec_phenomena_dict` - Weather event phenomena
-- `iemdata.vtec_significance_dict` - Weather event significance levels
+- `iemdata.vtec_phenomena` - Weather event phenomena
+- `iemdata.vtec_significance` - Weather event significance levels
 
 ## License
 
