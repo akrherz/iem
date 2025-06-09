@@ -136,7 +136,8 @@ def run(environ: dict):
         wfos = None
     if wfos is None and environ["wfo"] is not None:
         wfos = [environ["wfo"]]
-    wfos = [unrectify_wfo(wfo) for wfo in wfos]
+    if wfos:
+        wfos = [unrectify_wfo(wfo) for wfo in wfos]
 
     params = {
         "wfos": wfos,
