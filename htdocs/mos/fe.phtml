@@ -17,12 +17,12 @@ $station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW
 
 $t->title = "NWS MOS Download Interface";
 
-$ys1 = yearSelect2(2000,$year1, "year1");
+$ys1 = yearSelect(2000,$year1, "year1");
 $ms1 = monthSelect($month1, "month1");
-$ds1 = daySelect2($day1, "day1");
-$ys2 = yearSelect2(2000,$year1, "year2");
+$ds1 = daySelect($day1, "day1");
+$ys2 = yearSelect(2000,$year1, "year2");
 $ms2 = monthSelect($month1, "month2");
-$ds2 = daySelect2($day1, "day2");
+$ds2 = daySelect($day1, "day2");
 
 $table = "";
 foreach($mosvars as $k => $v){

@@ -9,13 +9,13 @@ $nt = new NetworkTable("NSTLFLUX");
 $t = new MyView();
 $t->title = "NLAE Flux Sites";
 
-$ys = yearSelect2(2002, date("Y"), "syear");
+$ys = yearSelect(2002, date("Y"), "syear");
 $ms = monthSelect(1, "smonth");
-$ds = daySelect2(1, "sday");
+$ds = daySelect(1, "sday");
 
-$ys2 = yearSelect2(2002, date("Y"), "eyear");
+$ys2 = yearSelect(2002, date("Y"), "eyear");
 $ms2 = monthSelect(date("m"), "emonth");
-$ds2 = daySelect2(date("d"), "eday");
+$ds2 = daySelect(date("d"), "eday");
 
 $rows = "";
 $pg_conn = iemdb("other");

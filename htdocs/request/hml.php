@@ -11,13 +11,13 @@ $t->iemss = True;
 $t->title = "Hydrological Markup Language (HML) Processed Data Download";
 
 $bogus = 0;
-$y1select = yearSelect2(2012, date("Y"), "year1");
+$y1select = yearSelect(2012, date("Y"), "year1");
 $m1select = monthSelect(1, "month1");
-$d1select = daySelect2(1, "day1");
+$d1select = daySelect(1, "day1");
 
-$y2select = yearSelect2(2012, date("Y"), "year2");
+$y2select = yearSelect(2012, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
-$d2select = daySelect2(date("d"), "day2");
+$d2select = daySelect(date("d"), "day2");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

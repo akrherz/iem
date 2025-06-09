@@ -112,13 +112,13 @@ EOM;
 $content .= "
     <th>Start:</th>
     <td>
-     ". yearSelect2(2000, date("Y"), "year1") ."
+     ". yearSelect(2000, date("Y"), "year1") ."
     </td>
     <td>
-     ". monthSelect2(1, "month1") ."
+     ". monthSelect(1, "month1") ."
     </td>
     <td>
-     ". daySelect2(1, "day1") ."
+     ". daySelect(1, "day1") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour1") ."
@@ -131,13 +131,13 @@ $content .= "
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2000, date("Y"), "year2") ."
+     ". yearSelect(2000, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(date("m"), "month2") ."
+     ". monthSelect(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(date("d"), "day2") ."
+     ". daySelect(date("d"), "day2") ."
     </td>
     <td>
      ". gmtHourSelect(23, "hour2") ."

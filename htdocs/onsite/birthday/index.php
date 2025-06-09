@@ -8,8 +8,8 @@ require_once "../../../include/forms.php";
 $startYear = isset($_GET['startYear']) ? intval($_GET['startYear']): 1951;
 
 $cselect = networkSelect("IACLIMATE", "IA0200", Array(), "city");
-$mselect = monthSelect2("1", "month");
-$dselect = daySelect2("1", "day");
+$mselect = monthSelect("1", "month");
+$dselect = daySelect("1", "day");
 
 $t->content = <<<EOM
 <h3>The Weather on your Birthday!!</h3>

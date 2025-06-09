@@ -171,10 +171,10 @@ $ar = array(
 );
 $vselect = make_select("var", $var, $ar);
 $yselect = yearselect(1893, $year);
-$m1select = monthSelect2($smonth, 'smonth');
-$d1select = daySelect2($sday, 'sday');
-$m2select = monthSelect2($emonth, 'emonth');
-$d2select = daySelect2($eday, 'eday');
+$m1select = monthSelect($smonth, 'smonth');
+$d1select = daySelect($sday, 'sday');
+$m2select = monthSelect($emonth, 'emonth');
+$d2select = daySelect($eday, 'eday');
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

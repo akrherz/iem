@@ -9,14 +9,14 @@ $t = new MyView();
 
 $t->title = "Download TallTowers 1 minute aggregate data";
 
-$y1select = yearSelect2(2016, date("Y"), "year1", '', 2021);
-$y2select = yearSelect2(2016, date("Y"), "year2", '', 2021);
+$y1select = yearSelect(2016, date("Y"), "year1", '', 2021);
+$y2select = yearSelect(2016, date("Y"), "year2", '', 2021);
 
-$m1select = monthSelect2(1, "month1");
-$m2select = monthSelect2(date("m"), "month2");
+$m1select = monthSelect(1, "month1");
+$m2select = monthSelect(date("m"), "month2");
 
-$d1select = daySelect2(1, "day1");
-$d2select = daySelect2(date("d"), "day2");
+$d1select = daySelect(1, "day1");
+$d2select = daySelect(date("d"), "day2");
 
 $h1select = hourSelect(0, "hour1");
 $h2select = hourSelect(0, "hour2");

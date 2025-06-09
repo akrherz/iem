@@ -19,9 +19,9 @@ $dataurl = "/archive/data/$dirRef/text/ot/ot0010.dat";
 
 $station = "isumet";
 
-$ys = yearSelect2(2011, $year, "year");
-$ms = monthSelect2($month, "month");
-$ds = daySelect2($day, "day");
+$ys = yearSelect(2011, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day, "day");
 $ymd = sprintf("year=%s&month=%s&day=%s", $year, $month, $day);
 
 $t->content = <<< EOM

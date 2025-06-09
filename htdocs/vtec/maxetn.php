@@ -20,7 +20,7 @@ $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
 
-$yselect = yearSelect2(2005, $year, 'year');
+$yselect = yearSelect(2005, $year, 'year');
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

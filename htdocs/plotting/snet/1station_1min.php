@@ -26,7 +26,7 @@ EOM;
 $t->title = "SchoolNet One Minute Time Series";
 
 $nselect = networkSelect($network, $station);
-$ys = yearSelect2(2002, $year, "year");
+$ys = yearSelect(2002, $year, "year");
 $ms = monthSelect($month);
 $ds = daySelect($day);
 

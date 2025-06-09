@@ -9,7 +9,7 @@ $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 $year = get_int404("year", date("Y"));
 
 $netselect = selectNetworkType("ASOS", $network);
-$yselect = yearSelect2(2004, $year, "year");
+$yselect = yearSelect(2004, $year, "year");
 
 define("IEM_APPID", 29);
 $t = new MyView();

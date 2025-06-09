@@ -194,7 +194,7 @@ $smwtable .= "</tbody></table>";
 
 $tselect = make_select("damagetag", $damagetag, $damagetags);
 
-$yselect = yearSelect2(2002, $year, 'year');
+$yselect = yearSelect(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $gentime = $json["gentime"];
 

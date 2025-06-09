@@ -10,12 +10,12 @@ $t = new MyView();
 $t->iem_resource = "ISUSM";
 $t->title = "ISU AgClimate Legacy Hourly Data Request";
 
-$ys = yearSelect2(1986, date("Y"), "startYear", '', 2014);
+$ys = yearSelect(1986, date("Y"), "startYear", '', 2014);
 $ms = monthSelect(1, "startMonth");
-$ds = daySelect2(1, "startDay");
-$ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014);
+$ds = daySelect(1, "startDay");
+$ys2 = yearSelect(1986, date("Y"), "endYear", '', 2014);
 $ms2 = monthSelect(date("m"), "endMonth");
-$ds2 = daySelect2(date("d"), "endDay");
+$ds2 = daySelect(date("d"), "endDay");
 
 $t->content = <<<EOM
  <ol class="breadcrumb">

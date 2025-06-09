@@ -222,7 +222,7 @@ $graph->AddY2($lineplot);
 $fp2 = sprintf("jpg-%s.png", time());
 $graph->Stroke("/var/webtmp/$fp2");
 
-$ys = yearSelect2(2003, $year, "year");
+$ys = yearSelect(2003, $year, "year");
 $ms = monthSelect($month);
 $ds = daySelect($day);
 

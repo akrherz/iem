@@ -17,14 +17,14 @@ $t->title = "Download ASOS/AWOS/METAR Data";
 
 $netselect = selectNetworkType("ASOS", $network);
 
-$y1select = yearSelect2(1900, date("Y"), "year1"); 
-$y2select = yearSelect2(1900, date("Y"), "year2"); 
+$y1select = yearSelect(1900, date("Y"), "year1"); 
+$y2select = yearSelect(1900, date("Y"), "year2"); 
 
-$m1select = monthSelect2(1, "month1"); 
-$m2select = monthSelect2(date("m"), "month2"); 
+$m1select = monthSelect(1, "month1"); 
+$m2select = monthSelect(date("m"), "month2"); 
 
-$d1select = daySelect2(1, "day1"); 
-$d2select = daySelect2(date("d"), "day2");
+$d1select = daySelect(1, "day1"); 
+$d2select = daySelect(date("d"), "day2");
 
 $ar = Array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",

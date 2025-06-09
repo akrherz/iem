@@ -253,8 +253,8 @@ $sourceselect = make_select("source", $source, $ar);
 $varselect = make_select("var", $var, $vardef);
 
 $yselect = yearselect(1893, $year);
-$mselect = monthSelect2($month, 'month');
-$dselect = daySelect2($day, 'day');
+$mselect = monthSelect($month, 'month');
+$dselect = daySelect($day, 'day');
 
 $ar = array(
     "640x480" => "640x480",

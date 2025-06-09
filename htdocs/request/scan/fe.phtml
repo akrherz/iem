@@ -6,13 +6,13 @@ $t = new MyView();
 $t->iemss = True;
 $t->title = "SCAN Data Download";
 
-$ys = yearSelect2(1983, date("Y"), "year1");
+$ys = yearSelect(1983, date("Y"), "year1");
 $ms = monthSelect(1, "month1");
-$ds = daySelect2(1, "day1");
+$ds = daySelect(1, "day1");
 $hs = gmtHourSelect(0, "hour1");
-$ys2 = yearSelect2(1983, date("Y"), "year2");
+$ys2 = yearSelect(1983, date("Y"), "year2");
 $ms2 = monthSelect(12, "month2");
-$ds2 = daySelect2(31, "day2");
+$ds2 = daySelect(31, "day2");
 $hs2 = gmtHourSelect(0, "hour2");
 
 $t->content = <<<EOM

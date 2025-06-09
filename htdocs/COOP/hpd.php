@@ -11,9 +11,9 @@ $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 
-$yselect = yearSelect2(2008, $year, "year");
-$mselect = monthSelect2($month, "month");
-$dselect = daySelect2($day, "day");
+$yselect = yearSelect(2008, $year, "year");
+$mselect = monthSelect($month, "month");
+$dselect = daySelect($day, "day");
 
 $table = "<p>Please select a station and date.</p>";
 if ($station) {

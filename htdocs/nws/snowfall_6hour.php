@@ -36,7 +36,7 @@ $t->title = "NWS Six Hour Snowfall Reports";
 $t->refresh = 360;
 
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
-$yselect = yearSelect2(2010, $year, "year");
+$yselect = yearSelect(2010, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day);
 

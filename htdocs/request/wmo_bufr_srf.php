@@ -10,13 +10,13 @@ define("IEM_APPID", 162);
 
 $t->title = "WMO BUFR Surface Station Data Download";
 
-$ys1 = yearSelect2(2024, date("Y"), "year1");
+$ys1 = yearSelect(2024, date("Y"), "year1");
 $ms1 = monthSelect("1", "month1");
-$ds1 = daySelect2("1", "day1");
+$ds1 = daySelect("1", "day1");
 $hs1 = gmtHourSelect("0", "hour1");
-$ys2 = yearSelect2(2024, date("Y"), "year2");
+$ys2 = yearSelect(2024, date("Y"), "year2");
 $ms2 = monthSelect(date("m"), "month2");
-$ds2 = daySelect2(date("d"), "day2");
+$ds2 = daySelect(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
 
 $t->content = <<<EOM
