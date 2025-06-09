@@ -6,7 +6,7 @@ All notable changes to the iemjs package will be documented in this file.
 
 ### Added
 
-- Initial changelog setup
+- Typescript definitions
 
 ### Changed
 

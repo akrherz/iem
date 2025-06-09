@@ -9,14 +9,14 @@ require_once "../../../include/forms.php";
 $nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
     'station[]');
 
-$y1 = yearSelect2(2002, date("Y"), "year1");
+$y1 = yearSelect(2002, date("Y"), "year1");
 $m1 = monthSelect(date("m"), "month1");
-$d1 = daySelect2(date("d"), "day1");
+$d1 = daySelect(date("d"), "day1");
 $h1 = hourSelect(0, "hour1");
 
-$y2 = yearSelect2(2002, date("Y"), "year2");
+$y2 = yearSelect(2002, date("Y"), "year2");
 $m2 = monthSelect(date("m"), "month2");
-$d2 = daySelect2(date("d"), "day2");
+$d2 = daySelect(date("d"), "day2");
 $h2 = hourSelect(0, "hour2");
 
 $t->content = <<<EOM

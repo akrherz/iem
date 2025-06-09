@@ -24,12 +24,12 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 }
 $nselect = make_select("network", $network, $ar);
 
-$y1 = yearSelect2(1900, date("Y"), "year1");
+$y1 = yearSelect(1900, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
-$d1 = daySelect2("", "day1");
-$y2 = yearSelect2(1900, date("Y"), "year2");
+$d1 = daySelect("", "day1");
+$y2 = yearSelect(1900, date("Y"), "year2");
 $m2 = monthSelect(date("m"), "month2");
-$d2 = daySelect2(date("d"), "day2");
+$d2 = daySelect(date("d"), "day2");
 
 $ar = Array(
     "None" => "Text string 'None'",

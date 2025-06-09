@@ -24,12 +24,12 @@ $content = <<<EOM
 EOM;
 
 $nselect = selectNetworkType("COOP", $network);
-$y1 = yearSelect2(2010, date("Y"), "year1");
+$y1 = yearSelect(2010, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
-$d1 = daySelect2("", "day1");
-$y2 = yearSelect2(2010, date("Y"), "year2");
+$d1 = daySelect("", "day1");
+$y2 = yearSelect(2010, date("Y"), "year2");
 $m2 = monthSelect("", "month2");
-$d2 = daySelect2("", "day2");
+$d2 = daySelect("", "day2");
 
 $west = <<<EOM
 <form method="GET" name="chstate">

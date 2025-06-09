@@ -11,15 +11,15 @@ $t->iemss = True;
 $t->title = "Terminal Aerodome Forecast (TAF) Data Download";
 
 $bogus = 0;
-$y1select = yearSelect2(1996, date("Y"), "year1");
+$y1select = yearSelect(1996, date("Y"), "year1");
 $m1select = monthSelect(1, "month1");
-$d1select = daySelect2(1, "day1");
+$d1select = daySelect(1, "day1");
 $min1select = minuteSelect(0, "minute1");
 $hour1select = hourSelect(0, "hour1");
 
-$y2select = yearSelect2(1996, date("Y"), "year2");
+$y2select = yearSelect(1996, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
-$d2select = daySelect2(date("d"), "day2");
+$d2select = daySelect(date("d"), "day2");
 $min2select = minuteSelect(0, "minute2");
 $hour2select = hourSelect(0, "hour2");
 

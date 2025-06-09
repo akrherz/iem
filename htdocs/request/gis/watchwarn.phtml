@@ -75,21 +75,21 @@ $location_select_html = array(
     'wfo' => $wselect
 );
 
-$y1select = yearSelect2(1986, date("Y"), "year1");
-$m1select = monthSelect2(1, "month1");
-$d1select = daySelect2(1, "day1");
+$y1select = yearSelect(1986, date("Y"), "year1");
+$m1select = monthSelect(1, "month1");
+$d1select = daySelect(1, "day1");
 $h1select = gmtHourSelect(0, "hour1");
 $mi1select = minuteSelect(0, "minute1");
 
-$y2select = yearSelect2(1986, date("Y"), "year2");
-$m2select = monthSelect2(date("m"), "month2");
-$d2select = daySelect2(date("d"), "day2");
+$y2select = yearSelect(1986, date("Y"), "year2");
+$m2select = monthSelect(date("m"), "month2");
+$d2select = daySelect(date("d"), "day2");
 $h2select = gmtHourSelect(0, "hour2");
 $mi2select = minuteSelect(0, "minute2");
 
-$y3select = yearSelect2(1986, date("Y"), "year3");
-$m3select = monthSelect2(date("m"), "month3");
-$d3select = daySelect2(date("d"), "day3");
+$y3select = yearSelect(1986, date("Y"), "year3");
+$m3select = monthSelect(date("m"), "month3");
+$d3select = daySelect(date("d"), "day3");
 $h3select = gmtHourSelect(0, "hour3");
 $mi3select = minuteSelect(0, "minute3");
 
@@ -236,21 +236,11 @@ phenomena and significance below.</label>
 statements. [<sup>1</sup>]</label></p>
 
 
-<script type="text/javascript">
-function kmlsub(f, url){
-    f.action = url;
-    f.submit();
-}
-function set_accept(f, val){
-    $("#accept").val(val);
-    f.submit();
-}
-</script>
 <p>
-<input type="submit" value="Request Shapefile" onclick="kmlsub(this.form, '/cgi-bin/request/gis/watchwarn.py');"/>
-<input type="submit" value="Request CSV" onclick="set_accept(this.form, 'csv');"/>
-<input type="submit" value="Request Excel" onclick="set_accept(this.form, 'excel');"/>
-<input type="submit" value="Request KML (*)" onclick="kmlsub(this.form, '/kml/sbw_interval.php');" />
+<input type="submit" value="Request Shapefile" />
+<input type="submit" value="Request CSV" />
+<input type="submit" value="Request Excel" />
+<input type="submit" value="Request KML (*)" />
  <input type="reset" />
 <br />* Only Storm Based Warnings are available via KML.
 <br />[1] By default, only the issuance polygon is included.
@@ -333,4 +323,5 @@ when they were generated.</p>
 
 EOM;
 $t->content = $content;
+$t->jsextra = '<script type="module" src="watchwarn.module.js"></script>';
 $t->render('full.phtml');

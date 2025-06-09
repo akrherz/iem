@@ -118,16 +118,6 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 }
 
 $t->title = "NWS CCOOP Current Sortables";
-$t->headextra = <<<EOM
- <script language="JavaScript" type="text/javascript">
-    <!--//BEGIN Script
-    function new_window(url) {
-     link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-    }
-    //END Script-->
-    </script>
-EOM;
-
 $cols = array(
     "ts" => "Valid", "county" => "County",
     "sid" => "Site ID", "name" => "Station Name",

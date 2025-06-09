@@ -11,12 +11,12 @@ $t->title = "ISU Soil Moisture Minute/Hourly Data Request";
 $nt = new NetworkTable("ISUSM");
 require_once "boxinc.phtml";
 
-$yselect = yearSelect2(2013, 2013, "year1");
+$yselect = yearSelect(2013, 2013, "year1");
 $mselect = monthSelect(1, "month1");
-$dselect = daySelect2(1, "day1");
-$yselect2 = yearSelect2(2013, date("Y"), "year2");
+$dselect = daySelect(1, "day1");
+$yselect2 = yearSelect(2013, date("Y"), "year2");
 $mselect2 = monthSelect(date("m"), "month2");
-$dselect2 = daySelect2(date("d"), "day2");
+$dselect2 = daySelect(date("d"), "day2");
 
 $sselect = "";
 foreach ($nt->table as $key => $val) {

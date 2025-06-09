@@ -24,13 +24,13 @@ $t->jsextra = <<<EOM
 </style>
 EOM;
 
-$y1select = yearSelect2(2010, 2010, "year1");
-$m1select = monthSelect2(1, "month1");
-$d1select = daySelect2(1, "day1");
+$y1select = yearSelect(2010, 2010, "year1");
+$m1select = monthSelect(1, "month1");
+$d1select = daySelect(1, "day1");
 
-$y2select = yearSelect2(date("Y"), 2010, "year2");
-$m2select = monthSelect2(1, "month2");
-$d2select = daySelect2(1, "day2");
+$y2select = yearSelect(date("Y"), 2010, "year2");
+$m2select = monthSelect(1, "month2");
+$d2select = daySelect(1, "day2");
 
 $t->content = <<<EOM
 <h3>Soil Moisture &amp; Ocean Salinity (SMOS) Satellite Data</h3>

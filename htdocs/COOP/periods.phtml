@@ -68,9 +68,9 @@ EOM;
 }
 
 $smonthselect = monthSelect($smonth, "smonth");
-$sdayselect = daySelect2($sday, "sday");
+$sdayselect = daySelect($sday, "sday");
 $emonthselect = monthSelect($emonth, "emonth");
-$edayselect = daySelect2($eday, "eday");
+$edayselect = daySelect($eday, "eday");
 $nselect = networkSelect($network, $station);
 $sselect = selectNetworkType("CLIMATE", $network);
 $t->content = <<<EOM

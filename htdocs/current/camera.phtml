@@ -71,9 +71,9 @@ $selback = array(
 $selback[$network] = "#ffcc99";
 
 $isarchived = ($isarchive) ? " CHECKED=CHECKED" : "";
-$ys = yearSelect2(2003, $year, "year");
-$month_select = monthSelect2($month, "month");
-$ds = daySelect2($day, "day");
+$ys = yearSelect(2003, $year, "year");
+$month_select = monthSelect($month, "month");
+$ds = daySelect($day, "day");
 $hs = hourSelect($hour, "hour");
 $ms = minuteSelect($minute, "minute", 1);
 $dd = date("YmdHi", $radts);

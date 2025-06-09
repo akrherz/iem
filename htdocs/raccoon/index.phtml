@@ -88,12 +88,12 @@ foreach ($ar as $p => $n) {
 
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $nselect = networkSelect("NEXRAD", $radar, array(), "radar");
-$yselect = yearSelect2(2002, $year, "year");
-$m1select = monthSelect2($month1, "month1");
-$d1select = daySelect2($day1, "day1");
+$yselect = yearSelect(2002, $year, "year");
+$m1select = monthSelect($month1, "month1");
+$d1select = daySelect($day1, "day1");
 $h1select = gmtHourSelect($hour1, "hour1");
-$m2select = monthSelect2($month2, "month2");
-$d2select = daySelect2($day2, "day2");
+$m2select = monthSelect($month2, "month2");
+$d2select = daySelect($day2, "day2");
 $h2select = gmtHourSelect($hour2, "hour2");
 $t->content = <<<EOM
 {$e}

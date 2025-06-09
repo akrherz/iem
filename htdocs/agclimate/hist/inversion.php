@@ -9,12 +9,12 @@ $nt = new NetworkTable("ISUSM");
 require_once "../../../include/forms.php";
 require_once "boxinc.phtml";
 
-$yselect = yearSelect2(2021, 2021, "year1");
+$yselect = yearSelect(2021, 2021, "year1");
 $mselect = monthSelect(1, "month1");
-$dselect = daySelect2(1, "day1");
-$yselect2 = yearSelect2(2021, date("Y"), "year2");
+$dselect = daySelect(1, "day1");
+$yselect2 = yearSelect(2021, date("Y"), "year2");
 $mselect2 = monthSelect(date("m"), "month2");
-$dselect2 = daySelect2(date("d"), "day2");
+$dselect2 = daySelect(date("d"), "day2");
 
 $sselect = "";
 $sites = array("BOOI4", "CAMI4", "CRFI4");

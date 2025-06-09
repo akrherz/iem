@@ -9,10 +9,10 @@ $t->title = "GIS-Ready Rainfall Data";
 $mselect = monthSelect(date("m", time() - 86400));
 $dselect = daySelect(date("d", time() - 86400));
 $yselect = yearSelect(1997, date("Y", time() - 86400), "year");
-$ys = yearSelect2(1997, date("Y"), "syear");
-$ye = yearSelect2(1997, date("Y"), "eyear");
+$ys = yearSelect(1997, date("Y"), "syear");
+$ye = yearSelect(1997, date("Y"), "eyear");
 
-$y2select = yearSelect2(2014, date("Y"), "year");
+$y2select = yearSelect(2014, date("Y"), "year");
 $m2select = monthSelect(date("m"));
 $d2select = daySelect(date("d"));
 $h2select = gmtHourSelect(0, "hour");

@@ -77,10 +77,10 @@ if ($datavar == "gdd" ||  $var == "precip") {
     $h3 = "Departure from climatology is shown below the accumulated value.";
 }
 $yselect = yearSelect(1986, $year, "year");
-$smselect = monthSelect2($smonth, 'smonth');
-$sdselect = daySelect2($sday, 'sday');
-$emselect = monthSelect2($emonth, 'emonth');
-$edselect = daySelect2($eday, 'eday');
+$smselect = monthSelect($smonth, 'smonth');
+$sdselect = daySelect($sday, 'sday');
+$emselect = monthSelect($emonth, 'emonth');
+$edselect = daySelect($eday, 'eday');
 
 $t->content = <<<EOM
 <h3>Growing Season Maps</h3>

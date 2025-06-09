@@ -32,13 +32,13 @@ if ($ets <= $sts) {
 }
 
 $sselect = networkSelect("ISUSM", $station);
-$y1 = yearSelect2(2012, $year1, "year1");
+$y1 = yearSelect(2012, $year1, "year1");
 $m1 = monthSelect($month1, "month1");
-$d1 = daySelect2($day1, "day1");
+$d1 = daySelect($day1, "day1");
 $h1 = hourSelect($hour1, "hour1");
-$y2 = yearSelect2(2012, $year2, "year2");
+$y2 = yearSelect(2012, $year2, "year2");
 $m2 = monthSelect($month2, "month2");
-$d2 = daySelect2($day2, "day2");
+$d2 = daySelect($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
 // Retreive the autoplot description JSON

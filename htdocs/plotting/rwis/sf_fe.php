@@ -68,10 +68,10 @@ for which time period in the archive.</p>
 <input type="hidden" name="network" value="{$network}">
 EOM;
 if (strlen($station) > 0) {
-    $ys = yearSelect2(1995, $syear, "syear");
-    $ms =  monthSelect2($smonth, "smonth");
-    $ds = daySelect2($sday, "sday");
-    $ds2 = daySelect2($days, "days");
+    $ys = yearSelect(1995, $syear, "syear");
+    $ms =  monthSelect($smonth, "smonth");
+    $ds = daySelect($sday, "sday");
+    $ds2 = daySelect($days, "days");
     $nselect = networkSelect($network, $station);
 
     $c0 = iemdb('rwis');

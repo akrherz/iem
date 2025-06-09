@@ -67,9 +67,9 @@ if (strlen($station) > 0) {
 
     $yselect = yearSelect(2004, $year, "year");
     $smselect =  monthSelect($smonth, "smonth");
-    $sdselect = daySelect2($sday, "sday");
+    $sdselect = daySelect($sday, "sday");
     $emselect =  monthSelect($emonth, "emonth");
-    $edselect = daySelect2($eday, "eday");
+    $edselect = daySelect($eday, "eday");
     $content .= <<<EOM
 <form name="ds" action="fe.phtml" method="GET">
 <input type="hidden" name="network" value="{$network}">

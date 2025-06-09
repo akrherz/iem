@@ -70,13 +70,13 @@ $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL',
           Array("ALL"=>"ALL"), "radar") ."</td>
     <th>Start:</th>
     <td>
-     ". yearSelect2(2005, date("Y"), "year1") ."
+     ". yearSelect(2005, date("Y"), "year1") ."
     </td>
     <td>
-     ". monthSelect2(0,"month1") ."
+     ". monthSelect(0,"month1") ."
     </td>
     <td>
-     ". daySelect2(0, "day1") ."
+     ". daySelect(0, "day1") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour1") ."
@@ -89,13 +89,13 @@ $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL',
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2005, date("Y"), "year2") ."
+     ". yearSelect(2005, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect(0,"month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect(0, "day2") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour2") ."

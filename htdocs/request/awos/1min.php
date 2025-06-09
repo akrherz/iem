@@ -12,15 +12,15 @@ $t->title = "AWOS One Minute Data Download";
 $awos_archive_end = strtotime( get_iemprop("awos.1min.end") );
 $bogus = 0;
 
-$ys1 = yearSelect2(1995, date("Y"), "year1");
+$ys1 = yearSelect(1995, date("Y"), "year1");
 $ms1 = monthSelect($bogus, "month1");
-$ds1 = daySelect2($bogus, "day1");
+$ds1 = daySelect($bogus, "day1");
 $mi1 = minuteSelect($bogus, "minute1"); 
 $hs1 = hour24Select($bogus, "hour1");
 
-$ys2 = yearSelect2(1995, date("Y"), "year2");
+$ys2 = yearSelect(1995, date("Y"), "year2");
 $ms2 = monthSelect($bogus, "month2");
-$ds2 = daySelect2($bogus, "day2");
+$ds2 = daySelect($bogus, "day2");
 $mi2 = minuteSelect($bogus, "minute2");
 $hs2 = hour24Select($bogus, "hour2");
 

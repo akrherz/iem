@@ -3,6 +3,23 @@
 require_once dirname(__FILE__) . "/database.inc.php";
 require_once dirname(__FILE__) . "/network.php";
 
+/**
+ * Generate a UGC (Universal Geographic Code) selection dropdown for a state
+ * 
+ * Creates a select element containing counties and zones for the specified state,
+ * fetched from the ugcs database table. Each option displays the UGC code,
+ * name, and type (County/Zone).
+ * 
+ * @param string $state Two-letter state code (case-insensitive)
+ * @param string $selected Currently selected UGC code
+ * @return string Complete HTML select element with UGC options
+ * 
+ * @example Basic usage:
+ *   echo ugcStateSelect('IA', 'IAC001');
+ * 
+ * @example With zone selection:
+ *   echo ugcStateSelect('mn', 'MNZ001');
+ */
 function ugcStateSelect($state, $selected)
 {
     $state = substr(strtoupper($state), 0, 2);
@@ -10,25 +27,23 @@ function ugcStateSelect($state, $selected)
     $stname = iem_pg_prepare($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
         . " and substr(ugc,1,2) = $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($state));
-    $s = "<select name=\"ugc\">\n";
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    
+    // Build options array from database results
+    $options = array();
+    while ($row = pg_fetch_assoc($rs)) {
         $z = (substr($row["ugc"], 2, 1) == "Z") ? "Zone" : "County";
-        $s .= "<option value=\"" . $row["ugc"] . "\" ";
-        if ($row["ugc"] == $selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">[" . $row["ugc"] . "] " . $row["name"] . " ($z)</option>\n";
+        $options[$row["ugc"]] = "[" . $row["ugc"] . "] " . $row["name"] . " ($z)";
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    return make_select("ugc", $selected, $options);
 }
 
 
 /**
  * Select a network type
- * @param nettype the network type
- * @param selected the selected network id
- * @return the select box
+ * @param string $nettype the network type pattern to match
+ * @param string $selected the selected network id
+ * @return string the select box HTML
  */
 function selectNetworkType($nettype, $selected)
 {
@@ -38,46 +53,67 @@ function selectNetworkType($nettype, $selected)
         $dbconn,
         "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($nettype));
-    $s = "<select class=\"iemselect2\" name=\"network\">\n";
+    
+    // Build options array from database results
+    $options = array();
     while ($row = pg_fetch_assoc($rs)) {
-        $s .= "<option value=\"" . $row["id"] . "\" ";
-        if ($row["id"] == $selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">" . $row["name"] . "</option>\n";
+        $options[$row["id"]] = $row["name"];
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    return make_select("network", $selected, $options, "", "iemselect2");
 }
 
 
+/**
+ * Create a network selection dropdown
+ * 
+ * Generates a select element containing all available networks from the database,
+ * with optional extra options. Uses the modernized make_select function for 
+ * proper HTML generation and escaping.
+ * 
+ * @param string $selected The currently selected network ID (case-insensitive)
+ * @param array $extra Additional options to include at the top of the list.
+ *                     Array keys are option values, array values are option labels
+ * @return string Complete HTML select element with network options
+ * 
+ * @example Basic usage:
+ *   echo selectNetwork('IA_ASOS');
+ * 
+ * @example With extra options:
+ *   $extras = array('_ALL_' => 'All Networks', 'CUSTOM' => 'Custom Selection');
+ *   echo selectNetwork('IA_ASOS', $extras);
+ */
 function selectNetwork($selected, $extra = array())
 {
     $selected = strtoupper($selected);
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
-    $s = "<select class=\"iemselect2\" name=\"network\">\n";
+    
+    // Build options array starting with extra options
+    $options = array();
     foreach ($extra as $idx => $sid) {
-        $s .= "<option value=\"$idx\" ";
-        if ($selected == $idx) {
-            $s .= "SELECTED";
-        }
-        $s .= ">[{$idx}] {$sid}</option>\n";
+        $options[$idx] = "[{$idx}] {$sid}";
     }
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-        $s .= "<option value=\"" . $row["id"] . "\" ";
-        if ($row["id"] == $selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">[{$row['id']}] {$row['name']}</option>\n";
+    
+    // Add database results to options array
+    while ($row = pg_fetch_assoc($rs)) {
+        $options[$row["id"]] = "[{$row['id']}] {$row['name']}";
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    return make_select("network", $selected, $options, "", "iemselect2");
 }
 
-/*
- * Generate a select box that allows multiple selections!
- * @param extra is an array of extra values for this box
+/**
+ * Generate a multiple selection box for network stations
+ * 
+ * Creates a select element with multiple selection capability containing
+ * network stations and optional extra entries.
+ * 
+ * @param string|array $network Network identifier(s) 
+ * @param string $selected Currently selected value
+ * @param array $extra Additional options to include (key => value pairs)
+ * @param string $label Name attribute for the select element
+ * @return string HTML select element with multiple selection enabled
  */
 function networkMultiSelect(
     $network,
@@ -86,45 +122,30 @@ function networkMultiSelect(
     $label = "station"
 ) {
     $nt = new NetworkTable($network);
+    $options = array();
     
-    // Create DOM document
-    $dom = new DOMDocument('1.0', 'UTF-8');
-    $dom->formatOutput = false; // Keep compact for web output
-    
-    // Create select element
-    $select = $dom->createElement('select');
-    $select->setAttribute('name', $label);
-    $select->setAttribute('size', '5');
-    $select->setAttribute('multiple', 'multiple');
-
     // Add extra options first
     foreach ($extra as $idx => $sid) {
-        $option = $dom->createElement('option');
-        $option->setAttribute('value', $idx);
-        $option->textContent = "[$idx] $sid";
-        
-        if ($selected == $idx) {
-            $option->setAttribute('selected', 'selected');
-        }
-        
-        $select->appendChild($option);
-    }
-
-    // Add options from network table
-    foreach ($nt->table as $sid => $tbl) {
-        $option = $dom->createElement('option');
-        $option->setAttribute('value', $sid);
-        $option->textContent = "[$sid] " . $tbl["name"];
-        
-        if ($selected == $sid) {
-            $option->setAttribute('selected', 'selected');
-        }
-        
-        $select->appendChild($option);
+        $options[$idx] = "[$idx] $sid";
     }
     
-    $dom->appendChild($select);
-    return $dom->saveHTML($select);
+    // Add options from network table
+    foreach ($nt->table as $sid => $tbl) {
+        $options[$sid] = "[$sid] " . $tbl["name"];
+    }
+    
+    // Use standardized make_select with multiple selection and size attributes
+    return make_select(
+        $label,           // name
+        $selected,        // selected value
+        $options,         // options array
+        "",               // jscallback
+        "",               // cssclass
+        TRUE,             // multiple
+        FALSE,            // showvalue
+        TRUE,             // appendbrackets
+        array('size' => 5) // extra attributes for size
+    );
 }
 
 function make_sname($tbl)
@@ -147,30 +168,15 @@ function networkSelect(
     $extra = array(),
     $selectName = "station",
     $only_online = FALSE,
-    $clsname = "iemselect2"
+    $clsname = "iemselect2",
+    $size = 1,
 ) {
     $nt = new NetworkTable($network, FALSE, $only_online);
     
-    // Create DOM document
-    $dom = new DOMDocument('1.0', 'UTF-8');
-    $dom->formatOutput = false; // Keep compact for web output
-    
-    // Create select element
-    $select = $dom->createElement('select');
-    $select->setAttribute('name', $selectName);
-    $select->setAttribute('class', $clsname);
-    
-    // Add options from network table
+    // Build options array from network table
+    $options = array();
     foreach ($nt->table as $sid => $tbl) {
-        $option = $dom->createElement('option');
-        $option->setAttribute('value', $sid);
-        $option->textContent = make_sname($tbl);
-        
-        if ($selected === $sid) {
-            $option->setAttribute('selected', 'selected');
-        }
-        
-        $select->appendChild($option);
+        $options[$sid] = make_sname($tbl);
     }
     
     // Add extra options
@@ -182,73 +188,72 @@ function networkSelect(
             $nt->loadStation($sid);
             $tbl = $nt->table[$sid];
         }
-        
-        $option = $dom->createElement('option');
-        $option->setAttribute('value', $sid);
-        $option->textContent = make_sname($tbl);
-        
-        if ($selected === $sid) {
-            $option->setAttribute('selected', 'selected');
-        }
-        
-        $select->appendChild($option);
+        $options[$sid] = make_sname($tbl);
     }
     
-    $dom->appendChild($select);
-    return $dom->saveHTML($select);
+    return make_select(
+        $selectName,
+        $selected,
+        $options,
+        "",
+        $clsname,
+        FALSE,          // multiple selection
+        FALSE,          // showvalue
+        FALSE,          // appendbrackets
+        array('size' => $size) // extra attributes for size
+    );
 }
 
 
+/**
+ * Generate a network station selection dropdown with auto-submit on change
+ * 
+ * Creates a select element for stations within a specific network that 
+ * automatically submits the form when selection changes. Includes support
+ * for extra station entries.
+ * 
+ * @param string $network Network identifier (case-insensitive)
+ * @param string $selected Currently selected station ID
+ * @param array $extra Additional station entries to include (station_id => value pairs)
+ * @return string Complete HTML select element with auto-submit functionality
+ * 
+ * @example Basic usage:
+ *   echo networkSelectAuto('IA_ASOS', 'KAMW');
+ * 
+ * @example With extra stations:
+ *   $extras = array('CUSTOM1' => 'Custom Station 1');
+ *   echo networkSelectAuto('IA_ASOS', 'KAMW', $extras);
+ */
 function networkSelectAuto($network, $selected, $extra = array())
 {
     $network = strtoupper($network);
-    $s = "";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    $s .= "<select class=\"iemselect2\" name=\"station\" onChange=\"this.form.submit()\">\n";
+    
+    // Build options array from network table
+    $options = array();
     foreach ($cities as $sid => $tbl) {
-        $sname = make_sname($tbl);
         if ($tbl["network"] != $network) continue;
-        $s .= "<option value=\"$sid\" ";
-        if ($selected == $sid) {
-            $s .= "SELECTED";
-        }
-        $s .= ">{$sname}</option>\n";
+        $sname = make_sname($tbl);
+        $options[$sid] = $sname;
     }
+    
+    // Add extra station entries
     foreach ($extra as $idx => $sid) {
         $nt->loadStation($sid);
         $tbl = $nt->table[$sid];
         $sname = make_sname($tbl);
-        $s .= "<option value=\"$sid\" ";
-        if ($selected == $sid) {
-            $s .= "SELECTED";
-        }
-        $s .= ">{$sname}</option>\n";
+        $options[$sid] = $sname;
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    return make_select(
+        "station",                    // name
+        $selected,                   // selected value
+        $options,                    // options array
+        "this.form.submit",          // onchange callback
+        "iemselect2"                 // CSS class
+    );
 }
-
-function rwisMultiSelect($selected, $size)
-{
-    include_once dirname(__FILE__) . "/network.php";
-    $nt = new NetworkTable("IA_RWIS");
-    $cities = $nt->table;
-    $s = "<select name=\"stations\" size=\"" . $size . "\" MULTIPLE>\n";
-    $s .= "<option value=\"_ALL\">Select All</option>\n";
-    foreach ($cities as $key => $val) {
-        if ($val["network"] != "IA_RWIS") continue;
-        $s .= "<option value=\"" . $key . "\"";
-        if ($selected == $key) {
-            $s .= " SELECTED ";
-        }
-        $s .= " >" . $val["name"] . " (" . $key . ")\n";
-    }
-
-    $s .= "</select>\n";
-    return $s;
-}
-
 
 //xss mitigation functions
 //https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
@@ -296,17 +301,6 @@ function get_int404($name, $default = null)
     return intval($val);
 }
 
-// https://stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php
-function endsWith($haystack, $needle)
-{
-    $length = strlen($needle);
-    if ($length == 0) {
-        return true;
-    }
-
-    return (substr($haystack, -$length) === $needle);
-}
-
 function make_checkboxes($name, $selected, $ar)
 {
     $myselected = $selected;
@@ -331,6 +325,43 @@ function make_checkboxes($name, $selected, $ar)
     return $s;
 }
 
+/**
+ * Create a HTML select element with options using modern DOM generation
+ * 
+ * This function generates a complete HTML select element with proper escaping
+ * and attribute handling. Supports single/multiple selection, optgroups,
+ * JavaScript callbacks, and CSS styling.
+ * 
+ * @param string $name The name attribute for the select element
+ * @param string|array $selected The selected value(s). Can be a single value 
+ *                               or array for multiple selections
+ * @param array $ar The options array. Simple key=>value pairs create options.
+ *                  Nested arrays create optgroups with the key as group label
+ * @param string $jscallback Optional JavaScript function name to call on change.
+ *                           Will be called with selected value as parameter
+ * @param string $cssclass Optional CSS class(es) to add to the select element
+ * @param bool $multiple Whether to allow multiple selections (adds 'multiple' attribute)
+ * @param bool $showvalue Whether to display option values in brackets before labels
+ * @param bool $appendbrackets Whether to append '[]' to name for multiple selects
+ * @param array $extraAttrs Optional additional HTML attributes as key=>value pairs
+ * 
+ * @return string Complete HTML select element as string
+ * 
+ * @example Basic usage:
+ *   $options = array('val1' => 'Label 1', 'val2' => 'Label 2');
+ *   echo make_select('myselect', 'val1', $options);
+ * 
+ * @example With optgroups:
+ *   $options = array(
+ *       'Group 1' => array('g1v1' => 'Group 1 Value 1'),
+ *       'Group 2' => array('g2v1' => 'Group 2 Value 1')
+ *   );
+ *   echo make_select('grouped', 'g1v1', $options);
+ * 
+ * @example Multiple selection with callback:
+ *   echo make_select('multi', array('val1', 'val3'), $options, 
+ *                    'handleChange', 'form-control', TRUE);
+ */
 function make_select(
     $name,
     $selected,
@@ -340,49 +371,106 @@ function make_select(
     $multiple = FALSE,
     $showvalue = FALSE,
     $appendbrackets = TRUE,
+    $extraAttrs = array()
 ) {
-    // Create a simple HTML select box
-    // If multiple, then we arb append [] onto the $name
+    // Create a simple HTML select box using DOMDocument
     $myselected = $selected;
     if (!is_array($selected)) {
         $myselected = array($selected);
     }
-    reset($ar);
-    $s = sprintf(
-        "<select name=\"%s%s\"%s%s%s>\n",
-        $name,
-        ($multiple === FALSE || $appendbrackets === FALSE) ? '' : '[]',
-        ($jscallback != "") ? " onChange=\"$jscallback(this.value)\"" : "",
-        ($cssclass != "") ? " class=\"$cssclass\"" : "",
-        ($multiple === FALSE) ? '' : ' MULTIPLE'
-    );
+    
+    // Create DOM document
+    $dom = new DOMDocument('1.0', 'UTF-8');
+    $dom->formatOutput = false; // Keep compact for web output
+    
+    // Create select element
+    $select = $dom->createElement('select');
+    
+    // Set name attribute with optional brackets for multiple selection
+    $nameAttr = $name;
+    if ($multiple !== FALSE && $appendbrackets !== FALSE) {
+        $nameAttr .= '[]';
+    }
+    $select->setAttribute('name', $nameAttr);
+    
+    // Set additional attributes
+    if ($jscallback !== "") {
+        $select->setAttribute('onChange', $jscallback . '(this.value)');
+    }
+    if ($cssclass !== '') {
+        $select->setAttribute('class', $cssclass);
+    }
+    if ($multiple !== FALSE) {
+        $select->setAttribute('multiple', 'multiple');
+    }
+    
+    // Set any extra attributes
+    foreach ($extraAttrs as $attr => $value) {
+        $select->setAttribute($attr, $value);
+    }
+    
+    // Process array options
     foreach ($ar as $key => $val) {
         if (is_array($val)) {
-            $s .= "<optgroup label=\"$key\">\n";
+            // Create optgroup for nested arrays
+            $optgroup = $dom->createElement('optgroup');
+            $optgroup->setAttribute('label', $key);
+            
             foreach ($val as $k2 => $v2) {
-                $vv = ($showvalue) ? sprintf("[%s] %s", $k2, $v2) : $v2;
-                $s .= sprintf(
-                    "<option value=\"%s\"%s>%s</option>\n",
-                    $k2,
-                    in_array($k2, $myselected) ? " SELECTED" : "",
-                    $vv
-                );
+                $option = $dom->createElement('option');
+                $option->setAttribute('value', $k2);
+                
+                $displayText = $showvalue ? "[$k2] $v2" : $v2;
+                $option->textContent = $displayText;
+                
+                if (in_array($k2, $myselected)) {
+                    $option->setAttribute('selected', 'selected');
+                }
+                
+                $optgroup->appendChild($option);
             }
-            $s .= "</optgroup>";
+            
+            $select->appendChild($optgroup);
         } else {
-            $vv = ($showvalue) ? sprintf("[%s] %s", $key, $val) : $val;
-            $s .= sprintf(
-                "<option value=\"%s\"%s>%s</option>\n",
-                $key,
-                in_array($key, $myselected) ? " SELECTED" : "",
-                $vv
-            );
+            // Create regular option
+            $option = $dom->createElement('option');
+            $option->setAttribute('value', $key);
+            
+            $displayText = $showvalue ? "[$key] $val" : $val;
+            $option->textContent = $displayText;
+            
+            if (in_array($key, $myselected)) {
+                $option->setAttribute('selected', 'selected');
+            }
+            
+            $select->appendChild($option);
         }
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    $dom->appendChild($select);
+    return $dom->saveHTML($select);
 }
 
+/**
+ * Generate a US state and territory selection dropdown
+ * 
+ * Creates a select element containing all US states, territories, and districts.
+ * Each option displays the state code and full name. Optionally includes an
+ * "All Available" option. Uses the standardized make_select() function.
+ * 
+ * @param string $selected Currently selected state code
+ * @param string $jscallback JavaScript function to call on change (optional)
+ * @param string $name HTML name attribute for the select element
+ * @param int $size Number of visible options (HTML size attribute)
+ * @param bool $multiple Whether to allow multiple selections
+ * @param bool $all Whether to include "All Available" option at top
+ * @return string Complete HTML select element with state options
+ * 
+ * @example Basic usage:
+ *   echo stateSelect('IA');  // Iowa selected
+ * @example With callback:
+ *   echo stateSelect('CA', 'updateDisplay', 'state_code', 5, true, true);
+ */
 function stateSelect(
     $selected,
     $jscallback = '',
@@ -391,7 +479,7 @@ function stateSelect(
     $multiple = false,
     $all = false
 ) {
-    // Create pull down for selecting a state
+    // US states, territories, and districts
     $states = array(
         "AL" => "Alabama",
         "AK" => "Alaska",
@@ -449,179 +537,333 @@ function stateSelect(
         "WI" => "Wisconsin",
         "WY" => "Wyoming",
     );
-    $s = sprintf(
-        "<select name=\"%s\"%s\n",
-        $name,
-        ($jscallback != "") ? " onChange=\"$jscallback(this.value)\"" : ""
-    );
-    if ($size > 1) {
-        $s .= ' size="' . $size . '"';
-    }
-    if ($multiple) {
-        $s .= ' MULTIPLE';
-    }
-    $s .= '>';
+    
+    // Build options array
+    $options = array();
     if ($all) {
-        $s .= sprintf(
-            "<option value=\"_ALL\"%s>All Available</option>",
-            ($selected == "_ALL") ? " SELECTED" : ""
-        );
+        $options["_ALL"] = "All Available";
     }
+    
     foreach ($states as $key => $val) {
-        $s .= "<option value=\"$key\"";
-        if ($selected == $key) $s .= " SELECTED";
-        $s .= ">[" . $key . "] " . $val . "</option>";
+        $options[$key] = "[$key] $val";
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    // Additional attributes for size
+    $extraAttrs = array();
+    if ($size > 1) {
+        $extraAttrs['size'] = $size;
+    }
+    
+    return make_select(
+        $name,
+        $selected,
+        $options,
+        $jscallback,
+        '',        // cssclass
+        $multiple,
+        FALSE,     // showvalue (options are already formatted with [CODE])
+        FALSE,     // appendbrackets (let caller control name format)
+        $extraAttrs
+    );
 }
 
+/**
+ * Generate a Weather Forecast Office (WFO) selection dropdown
+ * 
+ * Creates a select element containing all Weather Forecast Offices using
+ * the global $wfos array. Each option displays the WFO code and city name.
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param string $selected Currently selected WFO code
+ * @return string Complete HTML select element with WFO options
+ * 
+ * @example Basic usage:
+ *   echo wfoSelect('DMX');  // Des Moines WFO
+ */
 function wfoSelect($selected)
 {
     global $wfos;
     reset($wfos);
-    $s = "<select name=\"wfo\" style=\"width: 195px;\">\n";
+    
+    // Build options array from global $wfos
+    $options = array();
     foreach ($wfos as $key => $value) {
-        $s .= "<option value=\"$key\" ";
-        if ($selected == $key) $s .= "SELECTED";
-        $s .= ">[" . $key . "] " . $value["city"] . "</option>";
+        $options[$key] = "[$key] " . $value["city"];
     }
-    $s .= "</select>";
-    return $s;
+    
+    return make_select(
+        'wfo',           // name
+        $selected,       // selected value 
+        $options         // options array
+    );
 }
 
-/* Select minute of the hour */
-function minuteSelect($selected, $name, $skip = 1, $jsextra = '')
+/**
+ * Generate a minute selection dropdown with custom interval
+ * 
+ * Creates a select element for selecting minutes with customizable skip interval.
+ * Supports JavaScript/HTML attributes for enhanced functionality.
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param int $selected Currently selected minute value (0-59)
+ * @param string $name Name attribute for the select element
+ * @param int $skip Interval between minute options (default: 1)
+ * @return string Complete HTML select element with minute options
+ * 
+ * @example Basic usage:
+ *   echo minuteSelect(30, 'start_minute');  // 30 selected, every minute
+ * @example With 5-minute intervals:
+ *   echo minuteSelect(15, 'minute', 5);  // 15 selected, 5-minute intervals
+ * @example With JavaScript:
+ *   echo minuteSelect(0, 'minute', 1, 'onchange="updateTime()"');
+ */
+function minuteSelect($selected, $name, $skip = 1)
 {
-    $s = "<select name=\"{$name}\" {$jsextra}>\n";
+    // Build options array with skip interval
+    $options = array();
     for ($i = 0; $i < 60; $i = $i + $skip) {
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . "</option>";
+        $options[$i] = (string)$i;
     }
-    $s .= "</select>\n";
-    return $s;
+        
+    return make_select(
+        $name,          // name
+        $selected,      // selected value
+        $options,       // options array
+    );
 }
 
 
+/**
+ * Generate a 24-hour selection dropdown (0-23)
+ * 
+ * Creates a select element for selecting hours of the day in 24-hour format.
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param int $selected Currently selected hour value (0-23)
+ * @param string $name Name attribute for the select element
+ * @return string Complete HTML select element with 24-hour options
+ * 
+ * @example Basic usage:
+ *   echo hour24Select(14, 'start_hour');  // 14 (2 PM) selected
+ */
 function hour24Select($selected, $name)
 {
-    $s = "<select name='" . $name . "'>\n";
+    // Build options array for 24-hour format (0-23)
+    $options = array();
     for ($i = 0; $i < 24; $i++) {
-        $ts = mktime($i, 0, 0, 1, 1, 0);
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . "</option>";
+        $options[$i] = (string)$i;
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    return make_select(
+        $name,      // name
+        $selected,  // selected value
+        $options    // options array
+    );
 }
 
-function hourSelect($selected, $name, $jsextra = '')
+/**
+ * Generate a 12-hour format hour selection dropdown with AM/PM
+ * 
+ * Creates a select element for selecting hours of the day in 12-hour format
+ * with AM/PM display. Uses the standardized make_select() function with support
+ * for additional JavaScript attributes via $extraAttrs.
+ * 
+ * @param int $selected Currently selected hour value (0-23)
+ * @param string $name Name attribute for the select element
+ * @return string Complete HTML select element with 12-hour format options
+ * 
+ * @example Basic usage:
+ *   echo hourSelect(14, 'hour');  // 2 PM selected
+ */
+function hourSelect($selected, $name)
 {
-    $s = "<select name=\"{$name}\" {$jsextra}>\n";
+    // Build options array for 12-hour format with AM/PM
+    $options = array();
     for ($i = 0; $i < 24; $i++) {
         $ts = new DateTime("2000-01-01 $i:00");
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $ts->format("h A") . "</option>";
+        $options[$i] = $ts->format("h A");
     }
-    return $s . "</select>\n";
+    
+    return make_select(
+        $name,          // name
+        $selected,      // selected value
+        $options,       // options array
+    );
 }
 
+/**
+ * Generate a GMT/UTC hour selection dropdown (0-23)
+ * 
+ * Creates a select element for selecting hours of the day in 24-hour GMT/UTC format.
+ * Each option displays the hour followed by "UTC" (e.g., "0 UTC", "14 UTC").
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param int $selected Currently selected hour value (0-23)
+ * @param string $name Name attribute for the select element
+ * @return string Complete HTML select element with GMT/UTC hour options
+ * 
+ * @example Basic usage:
+ *   echo gmtHourSelect(14, 'gmt_hour');  // 14 UTC selected
+ * @example With custom name:
+ *   echo gmtHourSelect(0, 'start_hour_utc');  // 0 UTC selected
+ */
 function gmtHourSelect($selected, $name)
 {
-    $s = "<select name='" . $name . "'>\n";
+    // Build options array for 24-hour GMT/UTC format
+    $options = array();
     for ($i = 0; $i < 24; $i++) {
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . " UTC</option>";
+        $options[$i] = $i . " UTC";
     }
-    return $s . "</select>\n";
+    
+    return make_select(
+        $name,      // name
+        $selected,  // selected value
+        $options    // options array
+    );
 }
 
 
-function monthSelect($selected, $name = "month", $fmt = "M")
+/**
+ * Generate a month selection dropdown with customizable format
+ * 
+ * Creates a select element for selecting months using customizable date format.
+ * Supports custom name attributes, date formatting, and JavaScript/HTML attributes.
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param int $selected Currently selected month value (1-12)
+ * @param string $name Name attribute for the select element (default: "month")
+ * @param string $fmt Date format for month display (default: "M" for 3-letter abbreviation)
+ * @param string $jsextra Additional JavaScript/HTML attributes (default: "")
+ * @return string Complete HTML select element with month options
+ * 
+ * @example Basic usage (backwards compatible):
+ *   echo monthSelect(6);  // June selected, name="month", format="M"
+ * @example Custom name and format:
+ *   echo monthSelect(3, 'birth_month', 'F');  // Full month name
+ * @example With JavaScript:
+ *   echo monthSelect(12, 'month', 'M', 'onchange="updateDays()"');
+ */
+function monthSelect($selected, $name = "month", $fmt = "M", $jsextra = '')
 {
-    $s = "<select name='$name'>\n";
+    // Build options array for months (1-12) with specified format
+    $options = array();
     for ($i = 1; $i <= 12; $i++) {
         $ts = new DateTime("2000-$i-01");
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $ts->format($fmt) . "</option>";
+        $options[$i] = $ts->format($fmt);
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    // Parse jsextra for additional attributes
+    $extraAttrs = array();
+    $jscallback = '';
+    $cssclass = '';
+    
+    if (!empty($jsextra)) {
+        // Parse onchange callback
+        if (preg_match('/onchange\s*=\s*["\']([^"\']*)["\']/', $jsextra, $matches)) {
+            $jscallback = $matches[1];
+        }
+    }
+    
+    return make_select(
+        $name,          // name
+        $selected,      // selected value
+        $options,       // options array
+        $jscallback,    // JavaScript callback
+        $cssclass,      // CSS class
+        FALSE,          // multiple
+        FALSE,          // showvalue
+        FALSE,          // appendbrackets
+        $extraAttrs     // extra attributes
+    );
 }
 
-function yearSelect($start, $selected)
+/**
+ * Generate a year selection dropdown from start year to end year
+ * 
+ * Creates a select element for selecting years from a specified start year
+ * up to an end year (defaults to current year). Supports custom name attributes
+ * and JavaScript/HTML attributes. Uses the standardized make_select() function.
+ * 
+ * @param int $start Starting year for the range
+ * @param int $selected Currently selected year value
+ * @param string $fname Name attribute for the select element (default: "year")
+ * @param string $jsextra Additional JavaScript/HTML attributes (default: "")
+ * @param int|null $endyear Ending year for the range (default: current year)
+ * @return string Complete HTML select element with year options
+ * 
+ * @example Basic usage (backwards compatible):
+ *   echo yearSelect(2000, 2023);  // Years 2000-current, 2023 selected, name="year"
+ * @example Custom name and end year:
+ *   echo yearSelect(1950, 1995, 'birth_year', '', 2000);  // Years 1950-2000
+ * @example With JavaScript:
+ *   echo yearSelect(2010, 2020, 'start_year', 'onchange="updateRange()"');
+ */
+function yearSelect($start, $selected, $fname = 'year', $jsextra = '', $endyear = null)
 {
     $start = intval($start);
     $now = new DateTime();
-    $tyear = $now->format("Y");
-    $s = "<select name='year'>\n";
+    $tyear = ($endyear !== null) ? intval($endyear) : intval($now->format("Y"));
+    
+    // Build options array for year range
+    $options = array();
     for ($i = $start; $i <= $tyear; $i++) {
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . "</option>";
+        $options[$i] = (string)$i;
     }
-    $s .= "</select>\n";
-    return $s;
+    
+    // Parse jsextra for additional attributes
+    $extraAttrs = array();
+    $jscallback = '';
+    $cssclass = '';
+    
+    if (!empty($jsextra)) {
+        // Parse onchange callback
+        if (preg_match('/onchange\s*=\s*["\']([^"\']*)["\']/', $jsextra, $matches)) {
+            $jscallback = $matches[1];
+        }
+    }
+    
+    return make_select(
+        $fname,         // name
+        $selected,      // selected value
+        $options,       // options array
+        $jscallback,    // JavaScript callback
+        $cssclass,      // CSS class
+        FALSE,          // multiple
+        FALSE,          // showvalue
+        FALSE,          // appendbrackets
+        $extraAttrs     // extra attributes
+    );
 }
 
-function yearSelect2($start, $selected, $fname, $jsextra = '', $endyear = null)
+/**
+ * Generate a day selection dropdown (1-31)
+ * 
+ * Creates a select element for selecting day of month from 1 to 31.
+ * Supports custom name attributes and JavaScript/HTML attributes for enhanced functionality.
+ * Uses the standardized make_select() function for consistency.
+ * 
+ * @param int $selected Currently selected day value (1-31)
+ * @param string $name Name attribute for the select element (default: "day")
+ * @return string Complete HTML select element with day options
+ * 
+ * @example Basic usage (backwards compatible):
+ *   echo daySelect(15);  // Day 15 selected, name="day"
+ * @example Custom name:
+ *   echo daySelect(20, 'birth_day');  // Day 20 selected, name="birth_day"
+ */
+function daySelect($selected, $name = 'day')
 {
-    $start = intval($start);
-    $now = new DateTime();
-    $tyear = ($endyear != null) ? $endyear : $now->format("Y");
-    $s = "<select name='$fname' {$jsextra}>\n";
-    for ($i = $start; $i <= $tyear; $i++) {
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . "</option>";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
-
-function monthSelect2($selected, $name, $jsextra = '')
-{
-    $s = "<select name='$name' {$jsextra}>\n";
-    for ($i = 1; $i <= 12; $i++) {
-        $ts = new DateTime("2000-$i-01");
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $ts->format("M") . "</option>";
-    }
-    return $s . "</select>\n";
-}
-
-function daySelect($selected)
-{
-    $s = "<select name=\"day\">\n";
+    // Build options array for days 1-31
+    $options = array();
     for ($k = 1; $k < 32; $k++) {
-        $s .= sprintf(
-            '<option value="%s"%s>%s</option>',
-            $k,
-            ($k == intval($selected)) ? " SELECTED" : "",
-            $k,
-        );
+        $options[$k] = (string)$k;
     }
-    $s .= "</select>\n";
-    return $s;
+        
+    return make_select(
+        $name,          // name
+        $selected,      // selected value
+        $options,       // options array
+    );
 } // End of daySelect
 
-function daySelect2($selected, $name, $jsextra = '')
-{
-    $s = "<select name='$name' {$jsextra}>\n";
-    for ($k = 1; $k < 32; $k++) {
-        $s .= sprintf(
-            '<option value="%s"%s>%s</option>',
-            $k,
-            ($k == intval($selected)) ? " SELECTED" : "",
-            $k,
-        );
-    }
-    $s .= "</select>\n";
-    return $s;
-} // End 
+ 

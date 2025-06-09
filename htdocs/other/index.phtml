@@ -8,18 +8,18 @@ require_once "../../include/mlib.php";
 
 $t->title = "Other Data Networks";
 
-$y1select = yearSelect2(2012, 2012, "year1");
+$y1select = yearSelect(2012, 2012, "year1");
 $m1select = monthSelect(1, "month1");
-$d1select = daySelect2(1, "day1");
-$y2select = yearSelect2(2012, date("Y"), "year2");
-$y242select = yearSelect2(2024, 2024, "year1");
+$d1select = daySelect(1, "day1");
+$y2select = yearSelect(2012, date("Y"), "year2");
+$y242select = yearSelect(2024, 2024, "year1");
 $m2select = monthSelect(date("m"), "month2");
-$d2select = daySelect2(date("d"), "day2");
-$y12select = yearSelect2(2003, 2003, "year1");
-$y22select = yearSelect2(2003, date("Y"), "year2");
-$y24select = yearSelect2(2024, date("Y"), "year2");
-$y13select = yearSelect2(2013, 2013, "year1");
-$y23select = yearSelect2(2013, date("Y"), "year2");
+$d2select = daySelect(date("d"), "day2");
+$y12select = yearSelect(2003, 2003, "year1");
+$y22select = yearSelect(2003, date("Y"), "year2");
+$y24select = yearSelect(2024, date("Y"), "year2");
+$y13select = yearSelect(2013, 2013, "year1");
+$y23select = yearSelect(2013, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
 
 $t->content = <<<EOM

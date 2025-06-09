@@ -39,7 +39,7 @@ $t->jsextra = <<<EOM
 EOM;
 
 $segselect = segmentSelect($dbconn, $year, $month, strval($segid));
-$ys = yearSelect2(2006, $year, "year");
+$ys = yearSelect(2006, $year, "year");
 $ms = monthSelect($month);
 
 $content = <<<EOM

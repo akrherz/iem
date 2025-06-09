@@ -13,13 +13,13 @@ $t->iemss = True;
 $t->title = "RWIS Data Download";
 
 $startyr = ($network == 'IA_RWIS') ? 1995 : 2009;
-$ys1 = yearSelect2($startyr, date("Y"), "year1");
+$ys1 = yearSelect($startyr, date("Y"), "year1");
 $ms1 = monthSelect("", "month1");
-$ds1 = daySelect2("", "day1");
+$ds1 = daySelect("", "day1");
 $hs1 = hourSelect("", "hour1");
-$ys2 = yearSelect2($startyr, date("Y"), "year2");
+$ys2 = yearSelect($startyr, date("Y"), "year2");
 $ms2 = monthSelect("", "month2");
-$ds2 = daySelect2("", "day2");
+$ds2 = daySelect("", "day2");
 $hs2 = hourSelect("", "hour2");
 
 $ar = array(

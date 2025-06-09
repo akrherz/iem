@@ -92,7 +92,7 @@ $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script src="events.js"></script>
 EOM;
-$yselect = yearSelect2(2005, $year, 'year');
+$yselect = yearSelect(2005, $year, 'year');
 $wfoselect = networkSelect("WFO", $wfo, array(), "wfo");
 $stselect = stateSelect($state);
 $pselect = make_select("p", $phenomena, $vtec_phenomena);
