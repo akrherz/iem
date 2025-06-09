@@ -55,7 +55,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.mlib import rectify_wfo
+from iemweb.mlib import rectify_wfo, unrectify_wfo
 
 
 class Schema(CGIModel):
@@ -136,6 +136,7 @@ def run(environ: dict):
         wfos = None
     if wfos is None and environ["wfo"] is not None:
         wfos = [environ["wfo"]]
+    wfos = [unrectify_wfo(wfo) for wfo in wfos]
 
     params = {
         "wfos": wfos,

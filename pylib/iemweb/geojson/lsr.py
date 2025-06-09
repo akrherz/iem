@@ -56,7 +56,7 @@ from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.mlib import rectify_wfo
+from iemweb.mlib import rectify_wfo, unrectify_wfo
 
 
 class Schema(CGIModel):
@@ -320,7 +320,8 @@ def get_mckey(environ: dict) -> str | None:
 def application(environ, start_response):
     """Do Something"""
     # Quirk unhandled properly yet
-    environ["wfos"] = list(filter(lambda x: len(x) == 3, environ["wfos"]))
+    environ["wfos"] = list(filter(lambda x: len(x) <= 4, environ["wfos"]))
+    environ["wfos"] = [unrectify_wfo(x) for x in environ["wfos"]]
     environ["states"] = list(filter(lambda x: len(x) == 2, environ["states"]))
     if environ["hours"] is not None:
         if environ["ets"] is None:
