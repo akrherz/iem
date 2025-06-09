@@ -68,7 +68,7 @@ directly access it here:
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead><tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
 <th>Event</th><th>Issue</th><th>Expire</th></tr>
 </thead>

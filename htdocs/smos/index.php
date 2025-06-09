@@ -93,19 +93,19 @@ to request a point outside of the domain.  Data is available since
 
 <div class="row">
 <div class="col-md-6">
-<a href="/timemachine/?product=56"><img src="/data/smos_iowa_sm00.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=56"><img src="/data/smos_iowa_sm00.png" class="img-fluid" /></a>
 </div>
 <div class="col-md-6">
-<a href="/timemachine/?product=55"><img src="/data/smos_iowa_od00.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=55"><img src="/data/smos_iowa_od00.png" class="img-fluid" /></a>
 </div>
 </div>
 
 <div class="row">
 <div class="col-md-6">
-<a href="/timemachine/?product=53"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=53"><img src="/data/smos_midwest_sm00.png" class="img-fluid" /></a>
 </div>
 <div class="col-md-6">
-<a href="/timemachine/?product=54"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=54"><img src="/data/smos_midwest_od00.png" class="img-fluid" /></a>
 </div>
 </div>
 
@@ -113,19 +113,19 @@ to request a point outside of the domain.  Data is available since
 
 <div class="row">
 <div class="col-md-6">
-<a href="/timemachine/?product=56"><img src="/data/smos_iowa_sm12.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=56"><img src="/data/smos_iowa_sm12.png" class="img-fluid" /></a>
 </div>
 <div class="col-md-6">
-<a href="/timemachine/?product=55"><img src="/data/smos_iowa_od12.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=55"><img src="/data/smos_iowa_od12.png" class="img-fluid" /></a>
 </div>
 </div>
 
 <div class="row">
 <div class="col-md-6">
-<a href="/timemachine/?product=53"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=53"><img src="/data/smos_midwest_sm12.png" class="img-fluid" /></a>
 </div>
 <div class="col-md-6">
-<a href="/timemachine/?product=54"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
+<a href="/timemachine/?product=54"><img src="/data/smos_midwest_od12.png" class="img-fluid" /></a>
 </div>
 </div>
 

@@ -263,7 +263,7 @@ if (!$nohtml || $format == 'shapefile') {
     $t->content = <<<EOM
 <h3>Network Location Tables</h3>
 
-<div class="well pull-right">
+<div class="card float-end">
 <a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
 added stations.
 

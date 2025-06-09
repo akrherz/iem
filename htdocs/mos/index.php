@@ -18,7 +18,7 @@ NWS's website.  The IEM maintains an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
 <p><strong>Archive Status:</strong> 
-<table class="table table-condensed table-striped">
+<table class="table table-striped">
 <thead><tr><th>Model</th><th>Start</th><th>End</th></tr></thead>
 <tbody>
 <tr><th>AVN</th><td>1 June 2000</td><td>16 Dec 2003</td></tr>
@@ -81,17 +81,17 @@ multiplied by 10 for its true value.
 
 <div class="col-md-4">
 <a href="/timemachine/?product=51"><img src="/data/conus_gfs_mos_T_bias.png" 
- class="img img-responsive" border="1"/></a>
+ class="img-fluid" border="1"/></a>
 </div>
 
 <div class="col-md-4">
 <a href="/timemachine/?product=52"><img src="/data/conus_nam_mos_T_bias.png" 
- class="img img-responsive" border="1"/></a>
+ class="img-fluid" border="1"/></a>
 </div>
 
 <div class="col-md-4">
 <a href="/timemachine/?product=50"><img src="/data/conus_nbs_mos_T_bias.png" 
- class="img img-responsive" border="1"/></a>
+ class="img-fluid" border="1"/></a>
 </div>
 
 </div>

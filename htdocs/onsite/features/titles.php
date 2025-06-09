@@ -42,7 +42,7 @@ titles.  For some unknown reason, the author of these posts decided to make each
 unique.  The uniqueness is case sensitive!  The numbers listed next to the title
 are good votes, bad votes, and abstains.
 
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 {$table}
 </tr></table>
 

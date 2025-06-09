@@ -58,7 +58,7 @@ $table = <<<EOM
 }
 </style>
 <h3>{$title}</h3>
-<table id="thetable" class="table table-condensed table-striped table-bordered table-hover"
+<table id="thetable" class="table table-sm table-striped table-bordered table-hover"
  data-column-defs='[{"sortable": false, "targets": [7,14,21]}]'>
 <thead class="sticky">
 <tr class="small">

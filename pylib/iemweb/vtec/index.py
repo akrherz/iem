@@ -106,22 +106,22 @@ def get_context(script_url: str) -> dict:
         "title": "NWS Valid Time Event Code (VTEC) Browser",
         "headextra": """
 <link rel="stylesheet"
- href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
+ href="/vendor/jquery-datatables/2.0.2/datatables.min.css" />
 <link rel="stylesheet"
  href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
-<link rel='stylesheet' href="/vendor/openlayers/10.1.0/ol.css" type='text/css'>
-<link type="text/css" href="/vendor/openlayers/10.1.0/ol-layerswitcher.css"
+<link rel='stylesheet' href="/vendor/openlayers/10.5.0/ol.css" type='text/css'>
+<link type="text/css" href="/vendor/openlayers/10.5.0/ol-layerswitcher.css"
  rel="stylesheet" />
 <link rel="stylesheet" href="/vtec/vtec_static.css" />
 """,
         "jsextra": """
-<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
+<script src="/vendor/jquery-datatables/2.0.2/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script src='/vendor/openlayers/10.1.0/ol.js'></script>
-<script src='/vendor/openlayers/10.1.0/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="/vtec/vtec_static.js?20241205"></script>
-<script type="text/javascript" src="/vtec/vtec_app.js?20241113"></script>
+<script src='/vendor/openlayers/10.5.0/ol.js'></script>
+<script src='/vendor/openlayers/10.5.0/ol-layerswitcher.js'></script>
+<script type="text/javascript" src="/vtec/vtec_static.js?v2"></script>
+<script type="text/javascript" src="/vtec/vtec_app.js?v2"></script>
 """,
     }
     # /vtec/event/2019-O-NEW-KDMX-SV-W-0001

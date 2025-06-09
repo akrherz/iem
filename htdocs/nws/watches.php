@@ -73,7 +73,7 @@ directly access it here:
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Year</th><th>Watch Num</th><th>State(s)</th><th>Issued</th>
 <th>Expired</th><th>Prob EF2+ Tor</th><th>Prob Hail 2+in</th><th>Max Hail Size</th>

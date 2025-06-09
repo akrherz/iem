@@ -11,10 +11,12 @@ $t->jsextra = <<<EOM
 <script type="module" src="soilt.module.js"></script>
 EOM;
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
- <li class="active">County 4 inch Soil Temperature Maps</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+    <li class="breadcrumb-item active" aria-current="page">County 4 inch Soil Temperature Maps</li>
+  </ol>
+</nav>
 
 <p>This page presents daily soil temperature analysis maps.  The left hand
 column plots combine ISU Soil Moisture Network observations and bias corrected
@@ -24,9 +26,9 @@ daily high and low value and the NAM Model representing an average of six hour
 interval data. The right
 hand plots are simple GFS forecast model outputs without any bias correction.</p>
 
-<p><strong>Links:</strong> <a class="btn btn-default" href="/timemachine/?product=57">Archive of This Map</a>
-<a class="btn btn-default" href="/agclimate/hist/daily.php">Observation Download</a>
-<a class="btn btn-default" href="/agclimate/#soil04t">Real-time Map</a>
+<p><strong>Links:</strong> <a class="btn btn-outline-secondary" href="/timemachine/?product=57">Archive of This Map</a>
+<a class="btn btn-outline-secondary" href="/agclimate/hist/daily.php">Observation Download</a>
+<a class="btn btn-outline-secondary" href="/agclimate/#soil04t">Real-time Map</a>
 </p>
 
 <!-- The Modal -->
@@ -45,28 +47,28 @@ hand plots are simple GFS forecast model outputs without any bias correction.</p
 <div class="row clickme">
 <div class="col-md-6">
     <h3>Past Three Day Observations</h3>
-    <p><img src="/data/soilt_day1.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/soilt_day2.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/soilt_day3.png?{$nounce}" class="img img-responsive"></p>
+    <p><img src="/data/soilt_day1.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/soilt_day2.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/soilt_day3.png?{$nounce}" class="img img-fluid"></p>
 </div>
 <div class="col-md-6">
     <h3>GFS Forecast</h3>
-    <p><img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f1.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f2.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f3.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f4.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f5.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f6.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f7.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f8.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f9.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f10.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f11.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f12.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f13.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f14.png?{$nounce}" class="img img-responsive"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f15.png?{$nounce}" class="img img-responsive"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f1.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f2.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f3.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f4.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f5.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f6.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f7.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f8.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f9.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f10.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f11.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f12.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f13.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f14.png?{$nounce}" class="img img-fluid"></p>
+    <p><img src="/data/forecast/gfs_soilt_day_f15.png?{$nounce}" class="img img-fluid"></p>
 </div>
 </div>
 

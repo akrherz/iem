@@ -277,7 +277,7 @@ $buttons = sprintf(
     "<a id=\"prevbutton\" " .
         "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
         "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-        "class=\"btn btn-default\"><i class=\"fa fa-arrow-left\"></i> " .
+        "class=\"btn btn-secondary\"><i class=\"fa fa-arrow-left\"></i> " .
         "Previous Day</a>",
     date("Y", $yesterday),
     date("m", $yesterday),
@@ -294,7 +294,7 @@ if ($tomorrow) {
         "<a id=\"nextbutton\" " .
             "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
             "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-            "class=\"btn btn-default\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
+            "class=\"btn btn-secondary\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
         date("Y", $tomorrow),
         date("m", $tomorrow),
         date("d", $tomorrow),

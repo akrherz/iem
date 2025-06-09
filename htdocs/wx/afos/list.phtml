@@ -153,7 +153,7 @@ foreach ($datequeue as $dt) {
                 }
                 $lasthour = gmdate("H", $ts);
                 $atags .= sprintf(
-                    "<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
+                    "<a class=\"btn btn-secondary btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
                     $lasthour,
                     $lasthour
                 );
@@ -164,7 +164,7 @@ foreach ($datequeue as $dt) {
                     }
                     $table .= "<div class=\"container\"><div class=\"row\">\n";
                 }
-                $table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">";
+                $table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-4\"><div class=\"card card-body\">";
                 $table .= sprintf("<strong>%s UTC</strong><br />", gmdate('d M Y : H', $ts));
                 $colnum += 1;
             }
@@ -183,7 +183,7 @@ foreach ($datequeue as $dt) {
 if ($view == "prod") {
     $keys = array_keys($prods);
     asort($keys);
-    $table .= "<table class=\"table table-condensed table-striped\"><tr><th>Source</th><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
+    $table .= "<table class=\"table table-sm table-striped\"><tr><th>Source</th><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
     foreach ($keys as $i => $k) {
         $table .= sprintf("%s", $prods[$k]);
     }
@@ -195,7 +195,7 @@ if ($view == "prod") {
     $atags .= '<div class="clearfix"></div><strong>Skip to ' . $antiby . ':</strong> ';
     foreach ($keys as $i => $k) {
         $atags .= sprintf(
-            "<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
+            "<a class=\"btn btn-secondary btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
             $k,
             $k
         );
@@ -206,7 +206,7 @@ if ($view == "prod") {
             $table .= "<div class=\"row\">\n";
         }
         $table .= sprintf(
-            "<div id=\"sect$k\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">%s</div>\n",
+            "<div id=\"sect$k\" class=\"col-lg-2 col-md-2 col-sm-2 col-4\"><div class=\"card card-body\">%s</div></div>\n",
             $columns[$k]
         );
     }
@@ -293,7 +293,8 @@ and a brief associated product name on the NWS website.</p>
 <p>This data presentation is powered by a <a href="/api/1/docs#/nws/service_nws_afos_list__fmt__get">IEM API Web Service</a>.</p>
 
 <form name="selector" method="GET">
-<div class="row well">
+<div class="row">
+<div class="card card-body">
 <div class="col-md-5">
   <input type="radio" name="by" value="cccc" id="bycccc"{$bycccc}>
     <label for="bycccc">By Center</label>

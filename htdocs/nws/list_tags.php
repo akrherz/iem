@@ -146,7 +146,7 @@ function do_row_ffw($row)
 }
 
 $svrtable = <<<EOM
- <table id='svr' class="table table-condensed table-striped table-bordered">
+ <table id='svr' class="table table-sm table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
@@ -155,7 +155,7 @@ $svrtable = <<<EOM
 EOM;
 $tortable = str_replace('svr', 'tor', $svrtable);
 $smwtable = <<<EOM
- <table id='svr' class="table table-condensed table-striped table-bordered">
+ <table id='svr' class="table table-sm table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Waterspout Tag</th>
@@ -163,7 +163,7 @@ $smwtable = <<<EOM
  <tbody>
 EOM;
 $ffwtable = <<<EOM
- <table id='ffw' class="table table-condensed table-striped table-bordered">
+ <table id='ffw' class="table table-sm table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Flash Flood Tag</th><th>Damage Tag</th>

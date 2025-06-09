@@ -516,7 +516,7 @@ if ($pathinfo) {
         $sectionlabel = $arr[1];
         $section = $cfg[$arr[1]];
         $maincontent .= sprintf("<p><a href=\"/current/index.phtml\"" .
-            " class=\"btn btn-default\">Back to Current Weather</a></p>");
+            " class=\"btn btn-outline-secondary\">Back to Current Weather</a></p>");
         $maincontent .= "<div class=\"row\">\n";
         $i = 0;
         foreach ($section["prods"] as $path => $product) {
@@ -525,10 +525,10 @@ if ($pathinfo) {
             }
             if (array_key_exists("link", $product)) {
                 $maincontent .= sprintf(
-                    "<div class=\"col-md-4 well well-sm\">" .
+                    "<div class=\"col-md-4 bg-light border rounded p-3\">" .
                         "<a href=\"%s\">" .
-                        "<h4><i class=\"fa fa-link\"></i> %s</h4>" .
-                        "<img src=\"%s\" class=\"img img-responsive\">" .
+                        "<h4><i class=\"bi bi-link-45deg\"></i> %s</h4>" .
+                        "<img src=\"%s\" class=\"img img-fluid\">" .
                         "</a></div>",
                     $product["link"],
                     $product["label"],
@@ -536,10 +536,10 @@ if ($pathinfo) {
                 );
             } else {
                 $maincontent .= sprintf(
-                    "<div class=\"col-md-4 well well-sm\">" .
+                    "<div class=\"col-md-4 bg-light border rounded p-3\">" .
                         "<a href=\"/current/index.phtml/%s/%s\">" .
                         "<h4>%s</h4>" .
-                        "<img src=\"%s\" class=\"img img-responsive\">" .
+                        "<img src=\"%s\" class=\"img img-fluid\">" .
                         "</a></div>",
                     $arr[1],
                     $path,
@@ -556,7 +556,7 @@ if ($pathinfo) {
         $section = $cfg[$arr[1]];
         $maincontent .= sprintf(
             "<p><a href=\"/current/index.phtml/%s\"" .
-                " class=\"btn btn-default\">Back to %s</a></p>",
+                " class=\"btn btn-outline-secondary\">Back to %s</a></p>",
             $arr[1],
             $section["name"]
         );
@@ -565,14 +565,14 @@ if ($pathinfo) {
         if ($product["timemachine"]) {
             $tm = sprintf(
                 "<p>An archive of this image is in the <a href=\"/timemachine/%s\" " .
-                    "class=\"btn btn-success\"><i class=\"fa fa-clock-o\"></i> IEM Time Machine</a></p>",
+                    "class=\"btn btn-success\"><i class=\"bi bi-clock\"></i> IEM Time Machine</a></p>",
                 $product["timemachine"]
             );
         }
         $maincontent .= sprintf(
             "<h4>%s</h4>" .
                 "%s" .
-                "<img src=\"%s\" class=\"img img-responsive\">" .
+                "<img src=\"%s\" class=\"img img-fluid\">" .
                 "<br /><p>%s</p>",
             $product["label"],
             $tm,
@@ -583,12 +583,12 @@ if ($pathinfo) {
 }
 // Build left hand menu
 reset($cfg);
-$menuhidden = ($showmenu) ? "" : " hidden-xs hidden-sm";
+$menuhidden = ($showmenu) ? "" : " d-none d-md-block";
 $menu = "";
 foreach ($cfg as $path => $section) {
     $menu .= sprintf(
         "<li><a href=\"/current/index.phtml/%s\"" .
-            " class=\"btn btn-default btn-block%s\">%s</a></li>",
+            " class=\"btn btn-outline-secondary w-100 mb-2%s\">%s</a></li>",
         $path,
         ($path == $sectionlabel) ? " btn-primary" : "",
         $section["name"]
@@ -612,9 +612,9 @@ $t->content = <<<EOM
 <div class="row">
  <div class="col-md-3{$menuhidden}">
 
-<div class="panel panel-default">
-  <div class="panel-heading">Current Weather</div>
-  <div class="panel-body">
+<div class="card">
+  <div class="card-header">Current Weather</div>
+  <div class="card-body">
     <ul class="list-unstyled">
      {$menu}
     </ul>

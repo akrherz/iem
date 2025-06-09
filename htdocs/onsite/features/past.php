@@ -37,13 +37,13 @@ $rs = pg_execute($c, $stname, Array("{$year}-{$month}-01", "{$nyear}-{$nmonth}-0
 $num = pg_num_rows($rs);
 
 $linkbar = <<<EOM
-<div class="row well">
+<div class="row">
     <div class="col-md-4 col-sm-4">
-<a href="{$plink}" class="btn btn-default btn-lg"><i class="fa fa-arrow-left"></i> Previous Month</a> 
+<a href="{$plink}" class="btn btn-secondary btn-lg"><i class="fa fa-arrow-left"></i> Previous Month</a> 
     </div>
     <div class="col-md-4 col-sm-4"><h4>Features for {$mstr}</h4></div>
     <div class="col-md-4 col-sm-4">
-  <a href="{$nlink}" class="btn btn-default btn-lg">Next Month  <i class="fa fa-arrow-right"></i></a> 
+  <a href="{$nlink}" class="btn btn-secondary btn-lg">Next Month  <i class="fa fa-arrow-right"></i></a> 
     </div>
 </div>
 EOM;
@@ -59,20 +59,20 @@ while ($row = pg_fetch_assoc($rs)) {
     $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
     if ($row["mediasuffix"] == 'mp4') {
         $media = <<<EOM
-        <video class="img img-responsive" controls>
+        <video class="img-fluid" controls>
           <source src="{$big}" type="video/mp4">
           Your browser does not support the video tag.
       </video>
 EOM;
     } else {
         $media = <<<EOM
-      <a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+      <a href="{$big}"><img src="{$big}" class="img-fluid"></a>
       <br /><a href="{$big}">View larger image</a>
 EOM;
     }
     $table .= <<<EOM
 <div class="row">
-  <div class="col-md-12 well well-sm">{$row["calhead"]}</large></div>
+  <div class="col-md-12"><div class="card card-body p-2">{$row["calhead"]}</large></div></div>
 </div>
 
 <div class="row">

@@ -177,7 +177,7 @@ $t->content = <<<EOM
 
 <div class="row">
 <div class="col-md-5"><u>Temperature Key:</u><br />
-<img src="freeze_legend.png" class="img img-responsive">
+<img src="freeze_legend.png" class="img img-fluid">
 </div>
 <div class="col-md-7"><h3>IEM Freeze</h3></div>
 </div>
@@ -201,7 +201,7 @@ $t->content = <<<EOM
 <div class="col-md-3"><b>Radar Layer?</b> {$rselect}</div>
 <div class="col-md-2"><b>Map Refresh?</b> {$reselect}</div>
 <div class="col-md-2"><b>Map Size?</b> {$imgsizeselect}</div>
-<div class="col-md-2"><input type="submit" value="View"></div>
+<div class="col-md-2"><input type="submit" value="View" class="btn btn-primary"></div>
 
 </div>
 
@@ -209,7 +209,7 @@ $t->content = <<<EOM
 <div class="row">
 <div class="col-sm-12">
 
-<input class="img img-responsive" type="image" name="img" src="{$imgurl}">
+<input class="img img-fluid" type="image" name="img" src="{$imgurl}">
 </div>
 </div>
 </form>

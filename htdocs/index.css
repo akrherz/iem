@@ -1,0 +1,59 @@
+/* Custom styles for IEM homepage */
+
+/* Button icons */
+a.book {
+    background: url(/images/book.png) no-repeat 10px center;
+    background-size: 24px 24px;
+    padding-left: 40px;
+}
+
+a.agweather {
+    background: url(/images/tractor.png) no-repeat 10px center;
+    background-size: 24px 24px;
+    padding-left: 40px;
+}
+
+a.nws {
+    background: url(/images/nws.png) no-repeat 10px center;
+    background-size: 24px 24px;
+    padding-left: 40px;
+}
+
+/* Card improvements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    font-weight: 500;
+}
+
+/* List group in cards */
+.list-group-flush .list-group-item {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+/* Feature sections */
+.feature-section {
+    margin: 2rem 0;
+}
+
+/* Partner logos responsive improvements */
+@media (max-width: 768px) {
+    .partners-section {
+        text-align: center;
+    }
+    
+    .partners-section .col-6 {
+        margin-bottom: 1rem;
+    }
+}

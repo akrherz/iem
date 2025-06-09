@@ -184,7 +184,7 @@ message from posting twice to your account.</p>
 warranty.  <strong>The service could fail</strong> with an EF-5 tornado approaching your
 city, so you have been warned!</div>
 
-<div class="well">
+<div class="card card-body">
 <h4>Add Channel Subscription</h4>
  <form method="POST" action="twitter.php">
  <input type="hidden" name="add" value="yes"/>
@@ -197,7 +197,7 @@ city, so you have been warned!</div>
  </form>
 </div>
 
-<div class="well">
+<div class="card card-body">
 <h4>Current Subscriptions</h4>
  <table class="table table-striped">
  <thead><tr><th>Page</th><th>Channel</th><th></th></tr></thead>
@@ -205,7 +205,7 @@ city, so you have been warned!</div>
  </table>
 </div> 		
 
-<div class="well">
+<div class="card card-body">
 <h4>Delete IEMBot from my account</h4>
 
 <p><strong>WARNING:</strong> This will delete all of your IEMBot subscriptions

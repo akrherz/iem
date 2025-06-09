@@ -92,7 +92,7 @@ document these RASTER images and provide the lookup table of PNG index to an
 actual value. Click on the item in the "Label" column to get the lookup 
 table below.</p>
 
-<p><table class="table table-condensed table-striped">
+<p><table class="table table-sm table-striped">
 <thead><tr><th>Label</th><th>Description</th><th>Units</th></tr></thead>
 <tbody>
 {$table}
@@ -128,7 +128,7 @@ in a different format?  Please <a class="alert-link"
 href="/info/contacts.php">contact us <i class="fa fa-comment"></i></a> 
 if so!</div>
 
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <thead><tr><th>Color Index</th><th>Value ({$runits})</th><th>Red</th><th>Green</th>
 <th>Blue</th><th>HEX</th></tr></thead>
 <tbody>

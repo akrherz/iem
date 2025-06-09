@@ -52,7 +52,8 @@ the Stuart Smith Park in Ames.  These data are used by the Geology 100 class, bu
 are freely available to others.
 
 <div class="row">
-<div class="col-md-6 well">
+<div class="col-md-6">
+<div class="card card-body">
 
 <h4>Download Stream Gage Data ("Bubbler")</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="bubbler">
@@ -75,7 +76,9 @@ are freely available to others.
 <br /><input type="submit" value="Request Data" />
 </form>
 
-</div><div class="col-md-6 well">
+</div>
+</div><div class="col-md-6">
+<div class="card card-body">
 
 <h4><i class="fa fa-download"></i> Download Ground Monitoring Well Data</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="gage">
@@ -159,7 +162,7 @@ two minute average.</p>
 
 <h3>Raw Data Download!</h3>
 <form name="dl" action="/cgi-bin/request/other.py">
-<table class="table table-condensed table-bordered">
+<table class="table table-sm table-bordered">
 <tr><th rowspan="2">Select Location: {$nselect}</th>
  <th>Start Date:</th> 
   <td>{$y12select}</td>

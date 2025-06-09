@@ -37,7 +37,7 @@ $t->content = <<<EOM
 
 <p>This interface provides a download of one minute aggregates of available
 one second data from the "analog" sensors found on the Tall Towers.
-<a href="/cgi-bin/request/talltowers.py?help" class="btn btn-default">
+<a href="/cgi-bin/request/talltowers.py?help" class="btn btn-secondary">
 <i class="fa fa-file"></i> Backend documentation</a> exists for those who
 wish to script against the backend service.</p>
 
@@ -68,7 +68,7 @@ Science Foundation grant #1701278.</p>
 <p>Due to processing constraints, up to 31 days of data is only allowed per
 request. Data exists between approximately 5 April 2016 and 21 Sept 2021.</p>
 
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select} {$h1select}</td></tr>
 <tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select} {$h2select}</td></tr>
 </table>

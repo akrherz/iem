@@ -84,18 +84,18 @@ function featureHTML(features, lalo) {
     // Only add title if there's more than one feature
     if (features.length > 1) {
         html.push(
-            '<div class="panel panel-default">',
-            '<div class="panel-heading">',
-            `<h3 class="panel-title">Emergencies List @${lalo[0].toFixed(3)}E ${lalo[1].toFixed(3)}N</h3>`,
+            '<div class="card">',
+            '<div class="card-header">',
+            `<h3 class="card-title">Emergencies List @${lalo[0].toFixed(3)}E ${lalo[1].toFixed(3)}N</h3>`,
             '</div>'
         );
     } else {
         html.push(
-            '<div class="panel panel-default">'
+            '<div class="card">'
         );
     }
     
-    html.push('<div class="panel-body"><ul>');
+    html.push('<div class="card-body"><ul>');
     
     $.each(features, (_i, feature) => {
         const utcTime = moment.utc(feature.get('utc_issue'));

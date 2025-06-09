@@ -57,21 +57,26 @@ $control =  $hrefs;
 $t->content = <<<EOM
 <h3>IEM Product Looper</h3>
 
-<div style="padding: 10px; border: 2px solid #000;">
+<div class="bg-light border p-3">
 
 <form method="GET" action="loop.phtml">
-<table style="padding: 2px; border:0px; margin: 2px;">
-<tr>
- <th>Loop Mode:</th>
- <th>Select Product:</th>
- <th>Frames:</th>
- <td rowspan="2"><input type="submit" value="Generate Loop"></td></tr>
-
-<tr>
- <td>{$loopselect}</td>
- <td>{$prodselect}</td>
-<td><input type="text" name="frames" value="{$frames}" size="3"></tr></table>
-
+<div class="row mb-3">
+<div class="col-md-3">
+ <label class="form-label">Loop Mode:</label>
+ {$loopselect}
+</div>
+<div class="col-md-3">
+ <label class="form-label">Select Product:</label>
+ {$prodselect}
+</div>
+<div class="col-md-3">
+ <label class="form-label">Frames:</label>
+ <input type="text" name="frames" value="{$frames}" size="3" class="form-control">
+</div>
+<div class="col-md-3">
+ <input type="submit" value="Generate Loop" class="btn btn-primary mt-4">
+</div>
+</div>
 </form>
 
 {$control}

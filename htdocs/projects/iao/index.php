@@ -75,7 +75,7 @@ The east-west roads at the top and bottom of the image are 1 mile apart.</p>
 
 </div>
 <div class="col-md-6">
-<p><img src="figures/figure1.png" class="img img-responsive">
+<p><img src="figures/figure1.png" class="img-fluid">
 <br /><strong>Figure 1:</strong> Arial photo of A2 tower site.  Image courtesy of R. Doorenbos.
 Photo source:  Iowa NAIP 2017 Orthophotos.  USDA-FSA-APFO Aerial Photography Field Office</p>
 </div>
@@ -106,7 +106,7 @@ each tower and the proximity of the A1 tower to nearby rows of turbines.</p>
 </div>
 <div class="col-md-6">
 
-<p><a href="figures/figure2.png"><img src="figures/figure2.png" class="img img-responsive"></a>
+<p><a href="figures/figure2.png"><img src="figures/figure2.png" class="img-fluid"></a>
 <br /><strong>Figure 2:</strong> Profile of instruments
 on each tall tower.  Image courtesy of S. Purdy. Note: image is not to scale
 and does not reflect actual setup of booms and instruments.</p>
@@ -198,17 +198,17 @@ sensor on 16 August 2016, <sup>‡</sup> sensor at A2 replaced previous sensor o
 16 February 2017, <sup>*</sup> rotor cup assembly at A2 replaced 23 May 2016.</p>
 
 
-<p><img src="figures/figure3.png" class="img img-responsive">
+<p><img src="figures/figure3.png" class="img-fluid">
 <br /><strong>Figure 3:</strong> Diagram of boom orientation, length, and
 placement of sensors on each tower.  Image courtesy of S. Purdy,
  D. Rajewski, and E. Takle.  Note: image not to scale.</p>
 
 <div class="row">
 <div class="col-md-6">
-<img src="figures/figure4a.png" class="img img-responsive">
+<img src="figures/figure4a.png" class="img-fluid">
 </div>
 <div class="col-md-6">
-<img src="figures/figure4b.png" class="img img-responsive">
+<img src="figures/figure4b.png" class="img-fluid">
 </div>
 </div>
 <p><strong>Figure 4:</strong> Orientation of sensors along booms at the A1 
@@ -218,12 +218,12 @@ tower (a) looking south from tower base and b) looking up from tower base.
 
 <div class="row">
 <div class="col-md-6">
-<img src="figures/figure5a.png" class="img img-responsive">
+<img src="figures/figure5a.png" class="img-fluid">
 <br /><strong>Figure 5a:</strong> 10-m wind rose at A2 tower
 from June 2016-May 2017. Image courtesy of: D. Rajewski
 </div>
 <div class="col-md-6">
-<img src="figures/figure5b.png" class="img img-responsive">
+<img src="figures/figure5b.png" class="img-fluid">
 <br /><strong>Figure 5b:</strong> 80-m wind rose at A2 tower
 from June 2016-May 2017. Image courtesy of: D. Rajewski
 </div>
@@ -231,10 +231,10 @@ from June 2016-May 2017. Image courtesy of: D. Rajewski
 
 <div class="row">
 <div class="col-md-6">
-<img src="figures/figure6a.png" class="img img-responsive">
+<img src="figures/figure6a.png" class="img-fluid">
 </div>
 <div class="col-md-6">
-<img src="figures/figure6b.png" class="img img-responsive">
+<img src="figures/figure6b.png" class="img-fluid">
 </div>
 </div>
 
@@ -275,7 +275,7 @@ for easterly wind which we attribute to the flow interference from the
 2.5-m tall equipment shed.  At 20 m and above the tower shadow is the 
 dominant influence on the waked region.</p>
 
-<p><img src="figures/figure7.png" class="img img-responsive">
+<p><img src="figures/figure7.png" class="img-fluid">
 <br /><strong>Figure 7:</strong> Detection of tower wake at all tower levels
 from normalized wind
 speed ratios from the WNW and S booms. Median ratios are represented with
@@ -305,12 +305,12 @@ crop water use and plant photosynthetic activity. A surface met station
 relative humidity, 2 m wind speed and wind direction, 2 m pressure, 
 incoming solar radiation, and precipitation.</p>
 
-<p><img src="figures/figure8.png" class="img img-responsive">
+<p><img src="figures/figure8.png" class="img-fluid">
 <br /><strong>Figure 8:</strong> Sodar wind profiler in the vicinity of the A2 
 tower during the 2018 growing season (a) and after harvest (b). 
 Images courtesy of S. Purdy.</p>
 
-<p><img src="figures/figure9.png" class="img img-responsive">
+<p><img src="figures/figure9.png" class="img-fluid">
 <br /><strong>Figure 9:</strong> Surface meteorology station near the A2 
 tower base after the 2018 growing season. Image courtesy of S. Purdy.</p>
 

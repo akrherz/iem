@@ -54,10 +54,12 @@ $pselect = make_select("pest", $pest, $ar, "updatePest", "form-control");
 $nselect = networkSelect($network, $station, array(), "station", TRUE);
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/agweather/">Ag Weather</a></li>
- <li class="active">Pest Forecasting Maps</li>
+ <li class="breadcrumb-item"><a href="/agweather/">Ag Weather</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Pest Forecasting Maps</li>
  </ol>
+</nav>
 
 <p>This page generates degree day maps for a selected pest. The pest provides
 the base and ceiling values used in the degree day calculation. The IEM's
@@ -176,8 +178,8 @@ the backend that generates the maps/data here.</p>
 <p><span class="fa fa-arrow-down"></span>
 This application takes about 10 seconds to generate a map.
 Hold on for the map is generating now!</p>
-<div class="progress progress-striped active">
-    <div id="timingbar" class="progress-bar progress-bar-warning" role="progressbar"
+<div class="progress">
+    <div id="timingbar" class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar"
         aria-valuenow="0" aria-valuemin="0" aria-valuemax="10"
         style="width: 0%;"></div>
 </div>
@@ -186,7 +188,7 @@ Hold on for the map is generating now!</p>
 
 <div class="row">
 <div class="col-md-9">
-<img id="theimage" src="/images/pixel.gif" class="img img-responsive">
+<img id="theimage" src="/images/pixel.gif" class="img-fluid">
 <div id="thedata"></div>
 </div>
 

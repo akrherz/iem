@@ -34,7 +34,7 @@ $t->content = <<<EOM
 <p>The IEM has two base endpoints for its TMS services. They are partitioned
 by their cache header settings.</p>
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead><tr><th>Endpoint</th><th>Cache Header</th></tr></thead>
 <tbody>
 <tr><td><a href="/c/tile.py/1.0.0">/c/tile.py/1.0.0</a></td><td>14 days</td></tr>
@@ -50,7 +50,8 @@ including timestamp information in the layer name.</p>
 libraries.</p>
 
 <div class="row">
-<div class="col-md-3 well">
+<div class="col-md-3">
+<div class="card card-body">
 <h4>Bing Maps</h4>
 
 <p>The Microsoft Bing Maps group kindly provided these two examples.</p>
@@ -61,37 +62,44 @@ libraries.</p>
 <p><strong>Animated Tile Layer:</strong>
 <a href="https://www.bing.com/api/maps/sdk/mapcontrol/isdk#weatherRadarMap+JS">example</a></p>
 </div>
+</div>
 
-<div class="col-md-3 well">
+<div class="col-md-3">
+<div class="card card-body">
 <h4>ESRI JS API</h4>
 <p>Here is an <a href="arcgis_wtms.html">example</a> using the ESRI JS API. This
 was contributed by Derek Swingley.
 </div>
+</div>
 
-<div class="col-md-3 well">
+<div class="col-md-3">
+<div class="card card-body">
 <h4>Google Maps</h4>
 <p>Here is <a href="googlemaps_v3.html">an example for Google Maps v3</a>. 
 </div>
+</div>
 
-<div class="col-md-3 well">
+<div class="col-md-3">
+<div class="card card-body">
 <h4>OpenLayers</h4>
 <p><a href="openlayers_example.html">Example</a> for OpenLayers v2.</p>
 
 <p><a href="ol3_example.html">Example</a> for OpenLayers v3 and higher.</p>
 </div>
+</div>
 
 </div><!-- ./row -->
 
-<div class="panel panel-primary">
-<div class="panel-heading">Tile Map Services at both <code>/c/tile.py/1.0.0/</code>
+<div class="card border-primary">
+<div class="card-header">Tile Map Services at both <code>/c/tile.py/1.0.0/</code>
 and <code>/cache/tile.py/1.0.0/</code></div>
-<div class="panel-body">
+<div class="card-body">
 
 <p><strong>Why both?</strong> If you are using stable layer names (ie with a
 umabiguous timestamp), you likely want to use the <code>/c/</code> service so to
 have better client side caching.</p>
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
 </thead>
@@ -106,14 +114,14 @@ have better client side caching.</p>
 </tbody>
 </table>
 
-</div><!-- ./panel-body -->
-</div><!-- ./panel -->
+</div><!-- ./card-body -->
+</div><!-- ./card -->
 
-<div class="panel panel-primary">
-<div class="panel-heading">Tile Map Services only at <code>/c/tile.py/1.0.0/</code></div>
-<div class="panel-body">
+<div class="card border-primary">
+<div class="card-header">Tile Map Services only at <code>/c/tile.py/1.0.0/</code></div>
+<div class="card-body">
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
 </thead>
@@ -126,14 +134,14 @@ for HUC12s that are not modelled.</td><td></td></tr>
 </tbody>
 </table>
 
-</div><!-- ./panel-body -->
-</div><!-- ./panel -->
+</div><!-- ./card-body -->
+</div><!-- ./card -->
 
-<div class="panel panel-primary">
-<div class="panel-heading">Tile Map Services only at <code>/cache/tile.py/1.0.0/</code></div>
-<div class="panel-body">
+<div class="card border-primary">
+<div class="card-header">Tile Map Services only at <code>/cache/tile.py/1.0.0/</code></div>
+<div class="card-body">
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
 </thead>
@@ -250,8 +258,8 @@ Example: goes_east_conus_ch02
 </tbody>
 </table>
 
-</div><!-- ./panel-body -->
-</div><!-- ./panel -->
+</div><!-- ./card-body -->
+</div><!-- ./card -->
 
 <h4>Web Map Service (WMS)</h4>
 

@@ -1,4 +1,29 @@
 /* global $, ol, moment */
+
+/**
+ * Format date for datetime-local input (YYYY-MM-DDTHH:MM)
+ * @param {Date} date - Date to format
+ * @returns {string} Formatted date string
+ */
+function formatDateTimeLocal(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+/**
+ * Parse datetime-local input value to Date object
+ * @param {string} dateTimeStr - Datetime string from input
+ * @returns {Date} Parsed date object
+ */
+function parseDateTimeLocal(dateTimeStr) {
+    return new Date(dateTimeStr);
+}
+
+
 let map = null;
 let n0q = null;
 let webcamGeoJsonLayer = null;
@@ -92,7 +117,14 @@ function updateHashLink() {
     if (!currentCameraFeature) {
         return;
     }
-    const extra = realtimeMode ? "" : `/${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+    let extra = "";
+    if (!realtimeMode) {
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            const dt = moment(parseDateTimeLocal(dtpicker.value));
+            extra = `/${dt.utc().format(ISOFMT)}`;
+        }
+    }
     window.location.href = `#${currentCameraFeature.get("cid")}${extra}`;
 }
 
@@ -144,7 +176,7 @@ function doRWISView() {
                 hit = true;
                 continue;
             }
-            $("#rwislist").append(`<div class="col-md-2"><img onclick="handleRWISClick(this);" src="${url}" class="img img-responsive"></div>`);
+            $("#rwislist").append(`<div class="col-md-2"><img onclick="handleRWISClick(this);" src="${url}" class="img img-fluid"></div>`);
         }
         i += 1;
     }
@@ -201,7 +233,12 @@ function cronMinute() {
 
 function getRADARSource() {
     let dt = moment();
-    if (!realtimeMode) dt = $('#dtpicker').data('DateTimePicker').date();
+    if (!realtimeMode) {
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            dt = moment(parseDateTimeLocal(dtpicker.value));
+        }
+    }
     dt.subtract(dt.minutes() % 5, 'minutes');
     const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     $("#radar_title").html(`US Base Reflectivity @ ${dt.format("h:mm A")}`);
@@ -219,7 +256,11 @@ function refreshJSON() {
     let url = "/geojson/webcam.geojson?network=TV";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += `&valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            const dt = moment(parseDateTimeLocal(dtpicker.value));
+            url += `&valid=${dt.utc().format(ISOFMT)}`;
+        }
     }
     let newsource = new ol.source.Vector({
         url,
@@ -234,7 +275,11 @@ function refreshJSON() {
     url = "/api/1/idot_dashcam.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += `?valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            const dt = moment(parseDateTimeLocal(dtpicker.value));
+            url += `?valid=${dt.utc().format(ISOFMT)}`;
+        }
     }
     newsource = new ol.source.Vector({
         url,
@@ -249,7 +294,11 @@ function refreshJSON() {
     url = "/api/1/idot_rwiscam.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += `?valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            const dt = moment(parseDateTimeLocal(dtpicker.value));
+            url += `?valid=${dt.utc().format(ISOFMT)}`;
+        }
     }
     newsource = new ol.source.Vector({
         url,
@@ -263,7 +312,11 @@ function refreshJSON() {
     url = "/geojson/sbw.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += `?ts=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+        const dtpicker = document.getElementById('dtpicker');
+        if (dtpicker?.value) {
+            const dt = moment(parseDateTimeLocal(dtpicker.value));
+            url += `?ts=${dt.utc().format(ISOFMT)}`;
+        }
     }
     sbwlayer.setSource(new ol.source.Vector({
         url,
@@ -280,7 +333,11 @@ function parseURI() {
         } else {
             cameraID = escapeHTML(tokens2[0]);
             $('#toggle_event_mode button').eq(1).click();
-            $('#dtpicker').data('DateTimePicker').date(moment(escapeHTML(tokens2[1])));
+            const dtpicker = document.getElementById('dtpicker');
+            if (dtpicker) {
+                const momentDate = moment(escapeHTML(tokens2[1]));
+                dtpicker.value = formatDateTimeLocal(momentDate.toDate());
+            }
         }
     }
 }
@@ -292,13 +349,20 @@ function buildUI() {
     });
 
     // Time increment and decrement buttons
-    $("button.timecontrol").click((evt) => {
-        const offset = parseInt($(evt.target).data('offset'));
-        const dt = $('#dtpicker').data('DateTimePicker').date();
-        dt.add(offset, 'minutes');
-        $('#dtpicker').data('DateTimePicker').date(dt);
-        // unblur the button
-        $(evt.target).blur();
+    document.querySelectorAll("button.timecontrol").forEach(button => {
+        button.addEventListener('click', (evt) => {
+            const offset = parseInt(evt.target.dataset.offset);
+            const dtpicker = document.getElementById('dtpicker');
+            if (dtpicker?.value) {
+                const currentDate = parseDateTimeLocal(dtpicker.value);
+                const newDate = new Date(currentDate.getTime() + (offset * 60000)); // offset in minutes
+                dtpicker.value = formatDateTimeLocal(newDate);
+                // Trigger change event manually
+                dtpicker.dispatchEvent(new Event('change'));
+            }
+            // unblur the button
+            evt.target.blur();
+        });
     });
 
     // Thanks to http://jsfiddle.net/hmgyu371/
@@ -315,23 +379,24 @@ function buildUI() {
             cronMinute();
         }
 
-        $('#toggle_event_mode button').eq(0).toggleClass('locked_inactive locked_active btn-default btn-info');
-        $('#toggle_event_mode button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-default');
+        $('#toggle_event_mode button').eq(0).toggleClass('locked_inactive locked_active btn-secondary btn-info');
+        $('#toggle_event_mode button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-secondary');
     });
 
-    $('#dtpicker').datetimepicker({
-        defaultDate: new Date(),
-        icons: {
-            time: "fa fa-clock-o",
-            date: "fa fa-calendar"
-        }
-    });
-    $('#dtpicker').on('dp.change', () => {
-        if (!realtimeMode) {
-            refreshJSON();
-            refreshRADAR();
-        }
-    });
+    // Initialize native datetime picker
+    const dtpicker = document.getElementById('dtpicker');
+    if (dtpicker) {
+        // Set default value to current date/time
+        dtpicker.value = formatDateTimeLocal(new Date());
+        
+        // Add change event listener
+        dtpicker.addEventListener('change', () => {
+            if (!realtimeMode) {
+                refreshJSON();
+                refreshRADAR();
+            }
+        });
+    }
 }
 
 /**

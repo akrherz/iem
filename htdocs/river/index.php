@@ -118,7 +118,7 @@ Documentation on this webservice is
 
 <p>
 
-<table class="table table-condensed table-bordered">
+<table class="table table-sm table-bordered">
 <tr>
  <th>Key:</th>
  <td style="background: #ff0;">Near Flood Stage</td>
@@ -129,7 +129,7 @@ Documentation on this webservice is
 </table>
 EOM;
 
-$content .= '<p><table class="table table-condensed table-bordered">';
+$content .= '<p><table class="table table-sm table-bordered">';
 $rvs = array_keys($rivers);
 asort($rvs);
 

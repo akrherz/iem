@@ -58,7 +58,7 @@ $table = <<<EOM
 }
 </style>
 <h3>{$title}</h3>
-<table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
+<table id="thetable" class="table table-striped table-bordered table-hover">
 <thead class="sticky">
 <tr class="small">
     <th rowspan="2">{$col1label}</th>
@@ -168,10 +168,12 @@ $t->iemselect2 = TRUE;
 $t->title = "Tabular CF6 Report Data";
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-    <li><a href="/climate/">Climate Data</a></li>
-    <li class="active">Tabular CF6 Report Data</li>		
+    <li class="breadcrumb-item"><a href="/climate/">Climate Data</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Tabular CF6 Report Data</li>		
 </ol>
+</nav>
 
 <div class="row">
     <div class="col-md-3">This application lists out parsed data from 
@@ -180,7 +182,7 @@ $t->content = <<<EOM
     This means that during daylight saving time, this period is from 1 AM to 
     1 AM local daylight time!
     </div>
-    <div class="col-md-6 well">
+    <div class="col-md-6 bg-light p-3 rounded">
     <h4>Option 1: One Station for One Year</h4>
 <form method="GET" name="one">
 <input type="hidden" name="opt" value="bystation" />
@@ -192,7 +194,7 @@ $t->content = <<<EOM
 </form>
 
     </div>
-    <div class="col-md-3 well">
+    <div class="col-md-3 bg-light p-3 rounded">
 
 <h4>Option 2: One Day for Stations</h4>
 <form method="GET" name="two">
@@ -218,7 +220,7 @@ conditions.  The table presented on this page converts these codes into
 perhaps a slightly more human readable format.  The codes are as follows:
 
 <br />
-<table class="table table-condensed table-striped table-bordered table-hover">
+<table class="table table-striped table-bordered table-hover">
 <thead>
 <tr><th>CF6 Code</th><th>Abbrev</th><th>Meaning</th></tr>
 </thead>

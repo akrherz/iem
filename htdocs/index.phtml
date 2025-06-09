@@ -16,6 +16,7 @@ $t->headextra = <<<EOM
 <link rel="alternate" type="application/rss+xml" 
   title="IEM News + Notes Feed" 
   href="/rss.php" />
+<link rel="stylesheet" href="index.css" />
 EOM;
 if (date("md") == "0911" || isset($_GET["911"])){
     $feature = <<<EOM
@@ -29,7 +30,7 @@ students and younger.  May we all not forget the ultimate sacrifice many made
 that day and the years that followed.</p> 
 </div>
 <div class="col-md-6">
-<img src="/images/911.jpg" class="img img-responsive">
+<img src="/images/911.jpg" class="img-fluid">
 <br />&copy; Gordon Donovan/Yahoo News
 </div>
 </div>
@@ -59,11 +60,11 @@ $lsrsnow = "";
 $nunce = time();
 if ($lsr_snow == 'true'){
     $lsrsnow =  <<<EOM
-<div class="panel panel-default">
-<div class="panel-heading">NWS Snowfall Reports:</div>
-  <div class="panel-body">
+<div class="card mb-3">
+<div class="card-header">NWS Snowfall Reports:</div>
+  <div class="card-body">
 <a href="/data/lsr_snowfall.png">
-<img src="/data/lsr_snowfall.png?{$nunce}" border="0" alt="LSR Snowfall" class="img img-responsive"/></a>
+<img src="/data/lsr_snowfall.png?{$nunce}" border="0" alt="LSR Snowfall" class="img-fluid"/></a>
   <a href="/lsr/?by=wfo&wfo=DMX,DVN,ARX,FSD,OAX&seconds=43200">View Snowfall Reports on Map</a>
   </div>
 </div>
@@ -76,62 +77,63 @@ $nounce = time();
 $t->content = <<<EOM
       <div class="row">
 
-        <div class="col-sm-9">
+        <div class="col-md-9">
        
  <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
  cooperating members with observing networks. The data are stored and made 
  available on this website.</p>
 
 
- <div class="row">
-<div class="col-xs-12 col-sm-4">
-<a href="/agweather/" class="btn btn-default btn-block agweather">Ag Weather</a>
+<div class="row">
+<div class="col-12 col-md-4 mb-2">
+<a href="/agweather/" class="btn btn-outline-secondary w-100 agweather">Ag Weather</a>
 </div>
-<div class="col-xs-12 col-sm-4">
-<a href="/nws/" class="btn btn-default btn-block nws">NWS Users</a>
+<div class="col-12 col-md-4 mb-2">
+<a href="/nws/" class="btn btn-outline-secondary w-100 nws">NWS Users</a>
 </div>
-<div class="col-xs-12 col-sm-4">
-<a href="/archive/" class="btn btn-default btn-block book">Researchers</a>
+<div class="col-12 col-md-4 mb-2">
+<a href="/archive/" class="btn btn-outline-secondary w-100 book">Researchers</a>
 </div>
 </div>
 
 {$feature}
-        </div><!--/col-sm-9-->
-        <div class="col-sm-3">
+        </div><!--/col-md-9-->
+        <div class="col-md-3">
 
 {$lsrsnow}
 
-<div class="panel panel-default">
-  <div class="panel-heading">{$cameras[$rancam]["name"]}, {$cameras[$rancam]["state"]} Webcam:</div>
-  <div class="panel-body">
-<a href="/current/webcam.php#{$cameras[$rancam]["network"]}-0"><img src="/data/camera/stills/{$rancam}.jpg?{$nunce}" border="0" alt="Webcam" class="img-responsive"/></a>
+<div class="card mb-3">
+  <div class="card-header">{$cameras[$rancam]["name"]}, {$cameras[$rancam]["state"]} Webcam:</div>
+  <div class="card-body">
+<a href="/current/webcam.php#{$cameras[$rancam]["network"]}-0"><img src="/data/camera/stills/{$rancam}.jpg?{$nunce}" border="0" alt="Webcam" class="img-fluid"/></a>
+<div class="mt-2">
 <a href="/current/webcam.php#{$cameras[$rancam]["network"]}-0">View other webcams</a>
-  
+</div>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Most Popular (<a href="/apps.php">List Apps</a>)</div>
-  <div class="panel-body">
-<a href="/plotting/auto/">Automated Data Plotting</a>
-<br /><a href="/climodat/">Climodat Reports</a>
-<br /><a href="/timemachine/?product=1">Iowa Mesonet Plot</a>
-  [<a href="/current/loop.phtml?prod=mesonet">Loop</a>]
-<br /><a href="/one/">IEM One</a> (RADAR + Warnings)
-<br /><a href="/rainfall/">IEM GIS Rainfall</a>
-<br /><a href="/my/current.phtml">Sortable Currents</a>
-<br /><a href="/onsite/features/tags/winter2425.html">Winter Storms of 2024-2025</a>
-
+<div class="card mb-3">
+  <div class="card-header">Most Popular (<a href="/apps.php">List Apps</a>)</div>
+  <div class="card-body">
+<div class="list-group list-group-flush">
+<a href="/plotting/auto/" class="list-group-item list-group-item-action">Automated Data Plotting</a>
+<a href="/climodat/" class="list-group-item list-group-item-action">Climodat Reports</a>
+<a href="/timemachine/?product=1" class="list-group-item list-group-item-action">Iowa Mesonet Plot</a>
+<a href="/one/" class="list-group-item list-group-item-action">IEM One <small class="text-muted">(RADAR + Warnings)</small></a>
+<a href="/rainfall/" class="list-group-item list-group-item-action">IEM GIS Rainfall</a>
+<a href="/my/current.phtml" class="list-group-item list-group-item-action">Sortable Currents</a>
+<a href="/onsite/features/tags/winter2425.html" class="list-group-item list-group-item-action">Winter Storms of 2024-2025</a>
+</div>
     </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">News Items &nbsp; <a href="/rss.php"><img src="/images/rss.gif" /></a></div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">News Items &nbsp; <a href="/rss.php"><img src="/images/rss.gif" /></a></div>
+  <div class="card-body">
 
 {$news}
 
-<p><b class='fa fa-envelope'></b>
+<p><i class="bi bi-envelope"></i>
 <a href="https://groups.google.com/g/iem-dailyb">Sign up</a> for the 
 <a href="/data/iemdb.html">Daily Bulletin</a></p>
 
@@ -143,47 +145,52 @@ $t->content = <<<EOM
         </div><!--/span-->
       </div><!--/row-->
 
-<!-- Three columns highlighting stuff -->
-<div class="row">
-    <div class="col-sm-4">
-        <h3>Soil Temperatures</h3>
-        <a href="/agclimate/soilt.php"><img src="/data/soilt_day1.png?{$nounce}" class="img-responsive" /></a>
-        <p>Data from the <a href="/agclimate">Iowa State Soil Moisture Network</a>
-        is found on this website
-        and daily soil temperature averages are used to produce the highlighted
-        analysis.</p>
+<div class="row g-4 mt-4">
+    <div class="col-md-4">
+        <div class="text-center">
+            <h3>Soil Temperatures</h3>
+            <a href="/agclimate/soilt.php"><img src="/data/soilt_day1.png?{$nounce}" class="img-fluid rounded shadow-sm" /></a>
+            <p class="mt-3">Data from the <a href="/agclimate">Iowa State Soil Moisture Network</a>
+            is found on this website
+            and daily soil temperature averages are used to produce the highlighted
+            analysis.</p>
+        </div>
     </div>
-    <div class="col-sm-4">
-        <h3>Precipitation</h3>
-        <a href="/timemachine/?product=82"><img src="/data/iowa_ifc_1d.png" class="img-responsive" /></a>
-        <p><a href="/current/index.phtml/precipitation">More Precipitation Maps</a></p>
+    <div class="col-md-4">
+        <div class="text-center">
+            <h3>Precipitation</h3>
+            <a href="/timemachine/?product=82"><img src="/data/iowa_ifc_1d.png" class="img-fluid rounded shadow-sm" /></a>
+            <p class="mt-3"><a href="/current/index.phtml/precipitation">More Precipitation Maps</a></p>
+        </div>
     </div>
-    <div class="col-sm-4">
-        <h3>Current Data</h3>
-        <a href="/timemachine/?product=1"><img src="/data/mesonet.gif" class="img-responsive" /></a>
-        <p>The IEM combines data from participating networks into products
-        like maps shown above and web applications to analyze the data.</p>
-        <p><a href="/current/">More current products &raquo;</a></p>
+    <div class="col-md-4">
+        <div class="text-center">
+            <h3>Current Data</h3>
+            <a href="/timemachine/?product=1"><img src="/data/mesonet.gif" class="img-fluid rounded shadow-sm" /></a>
+            <p class="mt-3">The IEM combines data from participating networks into products
+            like maps shown above and web applications to analyze the data.</p>
+            <p><a href="/current/">More current products &raquo;</a></p>
+        </div>
     </div>
 </div><!--/row-->
 
-<div class="row clearfix well">
-<div class="col-sm-2"><h4>Partners:</h4></div>
-<div class='col-sm-4'>
+<div class="row bg-light border rounded p-4 mb-4 align-items-center">
+<div class="col-md-2"><h4 class="mb-3 mb-md-0">Partners:</h4></div>
+<div class='col-6 col-md-2'>
 <a href="http://www.agron.iastate.edu/"><img
-src="/images/agronomy.png" alt="ISU Agronomy" class="img img-responsive"></a>
+src="/images/agronomy.png" alt="ISU Agronomy" class="img-fluid"></a>
 </div>
-<div class='col-sm-2'>
+<div class='col-6 col-md-2'>
 <a href="http://www.iihr.uiowa.edu"><img src="/images/iihrlogo.jpg"
-  alt="IIHR - University of Iowa" class="img img-responsive" /></a>
+  alt="IIHR - University of Iowa" class="img-fluid" /></a>
 </div>
-<div class='col-sm-3'>
+<div class='col-6 col-md-2'>
  <a href="http://www.iowadot.gov"><img src="/images/iowadot.png"
- alt="DOT" class="img img-responsive" style="max-height: 50px;"/></a>
+ alt="DOT" class="img-fluid" style="max-height: 50px;"/></a>
 </div>
-<div class='col-sm-1'>
+<div class='col-6 col-md-2'>
   <a href="http://www.weather.gov/dmx/"><img src="/images/nws.gif"
-  alt="NWS" class="img img-responsive" /></a>
+  alt="NWS" class="img-fluid" /></a>
 </div>
 
 </div>

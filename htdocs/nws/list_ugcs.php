@@ -73,7 +73,7 @@ you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <form method="GET" name="changeme">
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr>
 <td>
 <input type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
@@ -92,7 +92,7 @@ you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p
 <h3>UGCs listing {$title}</h3>
 
 <div id="thetable">
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-sm table-bordered">
 <thead class="sticky">
 <tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr>
 </thead>

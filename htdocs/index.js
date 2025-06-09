@@ -1,17 +1,52 @@
-/* global $ */
+// Vanilla JavaScript - no jQuery
 function onFeatureData(data) {
-    $("#feature_good_votes").html(data.good);
-    $("#feature_bad_votes").html(data.bad);
-    $("#feature_abstain_votes").html(data.abstain);
+    const goodVotes = document.getElementById("feature_good_votes");
+    const badVotes = document.getElementById("feature_bad_votes");
+    const abstainVotes = document.getElementById("feature_abstain_votes");
+    const featureMsg = document.getElementById("feature_msg");
+    const featureBtns = document.querySelectorAll("button.feature_btn");
+    
+    if (goodVotes) goodVotes.textContent = data.good;
+    if (badVotes) badVotes.textContent = data.bad;
+    if (abstainVotes) abstainVotes.textContent = data.abstain;
+    
     if (!data.can_vote) {
-        $("#feature_msg").html("<i class=\"fa fa-ok\"></i> Thanks for voting!");
-        $("button.feature_btn").prop("disabled", true);
+        if (featureMsg) {
+            featureMsg.innerHTML = '<i class="fa fa-check"></i> Thanks for voting!';
+        }
+        featureBtns.forEach(btn => {
+            btn.disabled = true;
+        });
     }
 }
-$("button.feature_btn").click((event) => {
-    const btn = $(event.target);
-    $.get(`/onsite/features/vote/${btn.data('voting')}.json`, onFeatureData);
-});
-$(document).ready(() => {
-    $.get("/onsite/features/vote.json", onFeatureData);
+
+// Fetch data using modern fetch API
+async function fetchFeatureData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        onFeatureData(data);
+    } catch (error) {
+        console.error('Error fetching feature data:', error);
+    }
+}
+
+// Add event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Add click handlers to feature buttons
+    const featureBtns = document.querySelectorAll("button.feature_btn");
+    featureBtns.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const voting = event.target.dataset.voting;
+            if (voting) {
+                fetchFeatureData(`/onsite/features/vote/${voting}.json`);
+            }
+        });
+    });
+    
+    // Load initial vote data
+    fetchFeatureData("/onsite/features/vote.json");
 });

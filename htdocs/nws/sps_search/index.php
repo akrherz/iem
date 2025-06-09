@@ -31,12 +31,12 @@ EOM;
 $t->title = "Special Weather Statement (SPS) Search by Point";
 
 $t->content = <<<EOM
-<p>
+<nav aria-label="breadcrumb">
 <ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">SPS Search by Point</li>
+<li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+<li class="breadcrumb-item active" aria-current="page">SPS Search by Point</li>
 </ul>
-</p>
+</nav>
 
 <p>This page allows a point based search of NWS Special Weather Statements
 (SPS) that <strong>contained a polygon</strong>.  These polygons provide a
@@ -61,15 +61,15 @@ products have a polygon, so this interface <strong>does not show them</strong>.
             <br /><label for="edate">End Date:
             <input name="edate" type="text" id="edate"></label>
     
-        <button type="button" class="btn btn-default" id="manualpt">Update</button>
+        <button type="button" class="btn btn-secondary" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
         <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
     </div>
     <div class="col-md-8">
     <h4 id="table1title"></h4>
-    <button type="button" data-table="1" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
-    <button type="button" data-table="1" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+    <button type="button" data-table="1" data-opt="excel" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="1" data-opt="csv" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
 
     <table id="table1" data-order='[[ 1, "desc" ]]'>
     <thead><tr>

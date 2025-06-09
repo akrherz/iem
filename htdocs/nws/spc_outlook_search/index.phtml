@@ -20,10 +20,12 @@ EOM;
 $t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-  <li><a href="/nws/">NWS Mainpage</a></li>
-  <li class="active">SPC Convective Outlook + Discussion + Watch Search by Point</li>
+  <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+  <li class="breadcrumb-item active" aria-current="page">SPC Convective Outlook + Discussion + Watch Search by Point</li>
 </ol>
+</nav>
 <p>This application allows you to search an archive of Storm Prediction Center (SPC)
 Convective Outlooks, Mesoscale Convective Discussions (MCD)s, and Convective Watches.
 This archive is <strong>unofficial</strong> and based on IEM's processing of text products issued by
@@ -34,7 +36,7 @@ table.</p>
 <div class="clearfix"></div>
 
 <div class="row">
-    <div class="col-md-4 well">
+    <div class="col-md-4 bg-light p-3 rounded">
     <h3>Search by Point</h3>
         <p><strong>Either enter coordinates manually:</strong><br />
         <i>Latitude (deg N):</i> <input size="8" id="lat"><br />
@@ -44,7 +46,7 @@ table.</p>
         <input type="checkbox" id="last" name="last" value="1">
     List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
         <br />
-        <div class="form-group outlook-days">
+        <div class="mb-3 outlook-days">
             <label><strong>Select Outlook Day:</strong></label>
             <div class="day-grid">
                 <div class="day-item">
@@ -82,7 +84,7 @@ table.</p>
             </div>
         </div>
 
-        <div class="form-group category-select">
+        <div class="mb-3 category-select">
             <label><strong>Select Category:</strong></label>
             <div class="category-grid">
                 <div class="day-item">
@@ -108,7 +110,7 @@ table.</p>
             </div>
         </div>
 
-        <br /><button class="btn btn-default" id="manualpt">Update</button>
+        <br /><button class="btn btn-secondary" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
         <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
@@ -116,10 +118,16 @@ table.</p>
     <div class="col-md-8">
     <h3>Results of Point Search</h3>
 <div id="thetabs">	
-    <ul class="nav nav-pills">
-        <li class="active"><a href="#1a" data-toggle="tab">Convective Outlooks</a></li>
-        <li><a href="#2a" data-toggle="tab">Mesoscale Convective Discussions</a></li>
-        <li><a href="#3a" data-toggle="tab">Watch Polygons</a></li>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#1a" data-bs-toggle="tab">Convective Outlooks</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#2a" data-bs-toggle="tab">Mesoscale Convective Discussions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#3a" data-bs-toggle="tab">Watch Polygons</a>
+        </li>
     </ul>
 
     <div class="tab-content clearfix">
@@ -127,16 +135,16 @@ table.</p>
 
 <p>This archive dates back until <strong>1987</strong>.</p>
 
-<div class="pull-right">
-    <a class="btn btn-default" href="/" target="_blank" id="outlooks_excel">
+<div class="float-end">
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_excel">
     <i class="fa fa-table"></i> Download as Excel</a>
-    <a class="btn btn-default" href="/" target="_blank" id="outlooks_csv">
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_csv">
     <i class="fa fa-table"></i> Download as CSV</a>
-    <a class="btn btn-default" href="/" target="_blank" id="outlooks_link">
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_link">
     <i class="fa fa-link"></i> JSON-P Webservice</a>
 </div>
 
-<table id="outlooks" class="table table-condensed table-bordered table-striped">
+<table id="outlooks" class="table table-bordered table-striped">
 <caption></caption>
 <thead>
 <tr><th>Day</th><th>Threshold</th><th>Outlook Issued At (UTC)</th><th>Outlook Begins (UTC)</th>
@@ -154,17 +162,17 @@ table.</p>
 <p>This archive dates back until <strong>20 October 2008</strong> and is based
 on the MCD polygon included within the text.</p>
 
-<div class="pull-right">
-    <a class="btn btn-default" href="/" target="_blank" id="mcds_excel">
+<div class="float-end">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_excel">
     <i class="fa fa-table"></i> Download as Excel</a>
-    <a class="btn btn-default" href="/" target="_blank" id="mcds_csv">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_csv">
     <i class="fa fa-table"></i> Download as CSV</a>
-    <a class="btn btn-default" href="/" target="_blank" id="mcds_link">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_link">
     <i class="fa fa-link"></i> JSON-P Webservice</a>
 </div>
 
 
-<table id="mcds" class="table table-condensed table-bordered table-striped">
+<table id="mcds" class="table table-bordered table-striped">
 <caption></caption>
 <thead>
 <tr><th>Discussion Number</th>
@@ -190,16 +198,16 @@ polygon included in the SAW product.  <strong>These polygons are not the officia
 watches!</strong>  You should use the <a href="/vtec/search.php">VTEC Search</a>
 tool to get more accurate results for the watch-by-county era.</p>
 
-<div class="pull-right">
-    <a class="btn btn-default" href="/" target="_blank" id="watches_excel">
+<div class="float-end">
+    <a class="btn btn-secondary" href="/" target="_blank" id="watches_excel">
     <i class="fa fa-table"></i> Download as Excel</a>
-    <a class="btn btn-default" href="/" target="_blank" id="watches_csv">
+    <a class="btn btn-secondary" href="/" target="_blank" id="watches_csv">
     <i class="fa fa-table"></i> Download as CSV</a>
-    <a class="btn btn-default" href="/" target="_blank" id="watches_link">
+    <a class="btn btn-secondary" href="/" target="_blank" id="watches_link">
     <i class="fa fa-link"></i> GeoJSON-P Webservice</a>
 </div>
 
-<table id="watches" class="table table-condensed table-bordered table-striped">
+<table id="watches" class="table table-bordered table-striped">
 <caption></caption>
 <thead>
 <tr><th>Watch Number</th><th>Type</th><th>UTC Valid</th><th>UTC Expire</th>

@@ -39,10 +39,12 @@ $bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
     <meta name="description" content="Iowa State University, Iowa Environmental Mesonet">
     <meta name="author" content="daryl herzmann akrherz@iastate.edu">
 
-    <!-- NB: we are stuck with FA 4.7.0 due to iastate theme -->
-    <link href="/vendor/fa/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/vendor/iastate-v2.0.13/css/iastate.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-override.css" rel="stylesheet">
+    <link href="/vendor/bootstrap/5.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons for UI and navigation -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Font Awesome 6 for social media and specialized icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="/css/iastate-iem.css" rel="stylesheet">
 
     <!-- Any page specific headextra content here -->
     <?php echo $headextra; ?>

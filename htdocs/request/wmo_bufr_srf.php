@@ -26,7 +26,7 @@ $t->content = <<<EOM
 </ol>
 <h3>WMO BUFR Surface Data Download</h3>
 
-<p><a class="btn btn-default" href="/cgi-bin/request/wmo_bufr_srf.py?help"><i class="fa fa-file-text"></i> Backend Documentation</a> exists for those that
+<p><a class="btn btn-secondary" href="/cgi-bin/request/wmo_bufr_srf.py?help"><i class="fa fa-file-text"></i> Backend Documentation</a> exists for those that
 wish to script against this service.</p>
 
 <form target="_blank" method="GET" action="/cgi-bin/request/wmo_bufr_srf.py" name="iemss">
@@ -44,7 +44,7 @@ wish to script against this service.</p>
 
 <h3>2. Select Start/End Time:</h3>
 
-<table class="table table-condensed">
+<table class="table table-sm">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>

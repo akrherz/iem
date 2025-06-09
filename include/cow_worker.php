@@ -282,11 +282,11 @@ $content .= <<<EOF
 
 <div class="row">
   <div class="col-sm-2">
-      <img src="cow.jpg" class="img img-responsive" /><br />
-      <img src="{$charturl}"  class="img img-responsive"/>
+      <img src="cow.jpg" class="img-fluid" /><br />
+      <img src="{$charturl}"  class="img-fluid"/>
   </div>
     <div class="col-sm-5">
- <table class="table table-condensed">
+ <table class="table">
  <tr><th>Listed Warnings:</th><th>{$wsz}</th></tr>
  <tr><th>Verified: (A<sub>w</sub>)</th><th>{$aw}</th></tr>
  <tr><th>% Verified</th><th>{$pv}%</th></tr>
@@ -300,7 +300,7 @@ $content .= <<<EOF
  </table>
     </div>
     <div class="col-sm-5">
- <table class="table table-condensed">
+ <table class="table">
  <tr><th>SVRs with Tornado Possible Tag</th><th>{$stats["svr_with_torpossible_total"]}</th></tr>
  <tr><th>SVRs with Tornado Possible Tag and Tor LSR</th><th>{$stats["svr_with_torpossible_verified"]}</th></tr>
  <tr><th>FAR == C / (A<sub>w</sub>+C)</th><th>{$far}</th></tr>
@@ -361,7 +361,7 @@ $content .= <<<EOF
 </table>
 
 <h3>Storm Reports without warning:</h3> 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered">
 <tr>
     <th>lsr</th>
     <th>Valid</th>

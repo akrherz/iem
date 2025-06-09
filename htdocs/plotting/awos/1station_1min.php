@@ -16,10 +16,12 @@ $yselect = yearSelect(1995, 2011, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
 $content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/AWOS/">AWOS Network</a></li>
- <li class="active">One minute time series</li>
+ <li class="breadcrumb-item"><a href="/AWOS/">AWOS Network</a></li>
+ <li class="breadcrumb-item active" aria-current="page">One minute time series</li>
 </ol>
+</nav>
 
 <p><b>Note:</b>The archive currently contains data from 1 Jan 1995 
 till <strong>1 April 2011</strong>. 
@@ -42,13 +44,13 @@ if (strlen($station) > 0 ) {
 $content .= <<<EOM
 
 <br />
-<img class="img img-responsive" src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img-fluid" src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 <br />
-<img class="img img-responsive" src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img-fluid" src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 <br>
-<img class="img img-responsive" src="1min_P.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img-fluid" src="1min_P.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 
 <p><b>Note:</b> The wind speeds are indicated every minute by the red line. 

@@ -146,7 +146,7 @@ if (sizeof($metadata["attributes"]) > 0) {
     $attrtable .= <<<EOM
     <h3>Station Attributes:</h3>
     <p><i>These are key value pairs used by the IEM to do data management.</i></p>
-    <table class="table table-condensed table-striped">
+    <table class="table table-sm table-striped">
     <thead><tr><th>Key / Description</th><th>Value</th></tr></thead>
     <tbody>
 EOM;
@@ -175,7 +175,7 @@ if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
 <h3>Station Threading:</h3>
 <p>This station threads together data from multiple stations to provide a
 long term record for the location.</p>
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <thead><tr><th>Station</th><th>Begin Date</th><th>End Date</th></tr></thead>
 <tbody>
 EOM;
@@ -222,7 +222,7 @@ $t->content = <<<EOM
 <div class="row">
 <div class="col-md-4">
 
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <tr><th>IEM Internal ID:</th><td>{$metadata["iemid"]}</td></tr>
 {$wigos}
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>

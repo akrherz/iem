@@ -46,7 +46,7 @@ you may find useful.</p>
 
 <p>
 <form name="switcher">
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <tr>
  <th>Select By Network:</th>
  <td>{$nselect}</td>
@@ -57,7 +57,7 @@ you may find useful.</p>
 
 <form name="olselect">
 <input type="hidden" name="network" value="{$network}">
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <tr><th>Select By Station:</th>
 <td>{$n2select}</td>
 <td><input type="submit" value="Select Station"></td>

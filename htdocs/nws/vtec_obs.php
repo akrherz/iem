@@ -206,7 +206,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             "station in $stations and report_type != 1 " .
             "ORDER by station, valid ASC"
     );
-    $table .= "<table class=\"table table-condensed\">";
+    $table .= "<table class=\"table table-sm\">";
     $ostation = "";
     $stfound = 0;
     for ($j = 0; $row2 = pg_fetch_assoc($rs2); $j++) {
@@ -260,7 +260,7 @@ $t->content = <<<EOM
   <form method="GET" name="theform">
   
   <p>
-  <table class="table table-condensed">
+  <table class="table table-sm">
   <tr>
     <th>WWA Type:</th>
     <th>Start Event ID:</th>
@@ -277,7 +277,7 @@ $t->content = <<<EOM
     </tr>
     </table>
   
-  <table class="table table-condensed">
+  <table class="table table-sm">
   <tr>	
       <th>Relative Humidity Threshold (%):</th>
       <th>Wind Speed Threshold (kts):</th>

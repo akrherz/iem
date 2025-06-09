@@ -50,8 +50,8 @@ $content = <<<EOM
         }
 </style>
 <ol class="breadcrumb">
-    <li><a href="/RWIS/">RWIS Homepage</a></li>
-    <li class="current">RWIS Temperature Time Series Plots</li>
+    <li class="breadcrumb-item"><a href="/RWIS/">RWIS Homepage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">RWIS Temperature Time Series Plots</li>
 </ol>
 
 <form method="GET" action="sf_fe.php" name="sts">
@@ -161,8 +161,8 @@ if (strlen($station) > 0) {
     $plots = "<p>No Soil/Traffic data for non-Iowa RWIS sites</p>";
     if ($network == "IA_RWIS"){
         $plots = <<<EOM
-<br><img src="plot_traffic.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
-<br><img src="plot_soil.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+<br><img src="plot_traffic.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
+<br><img src="plot_soil.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
 EOM; 
     }
 
@@ -194,7 +194,7 @@ EOM;
   <input type="submit" value="Generate Plot">
   </form>
 
- <br><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+ <br><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
  $plots
 EOM;
 } else {

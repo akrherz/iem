@@ -6,10 +6,9 @@ $t->title = "NWS Related Information";
 
 $t->content = <<<EOM
 
-<br />
 <ol class="breadcrumb">
- <li><a href="/">IEM Homepage</a></li>
- <li class="active">NWS User's Mainpage</li>
+ <li class="breadcrumb-item"><a href="/">IEM Homepage</a></li>
+ <li class="breadcrumb-item active" aria-current="page">NWS User's Mainpage</li>
 </ol>
 
 
@@ -27,7 +26,7 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
 
 </div><div class="col-md-6">
 
-<div class="well">
+<div class="card card-body">
 <strong>Did you see an image posted to social media with the IEM logo on it?</strong><br />
     Daryl posts some interesting graphics to his 
     <a href="https://bsky.app/profile/akrherz.bsky.social">akrherz.bsky.social</a> page.  Generally,
@@ -43,9 +42,9 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
 
 <h3>Interest Areas</h3>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Aviation Weather Products</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Aviation Weather Products</div>
+  <div class="card-body">
 
   <ul>
 <li><a href="/request/gis/cwas.phtml">Center Weather Advisories (CWA) in Shapefile/KML format</a>
@@ -60,9 +59,9 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">Flash Flooding / Hydrology</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Flash Flooding / Hydrology</div>
+  <div class="card-body">
 <p><strong>Precipitation Estimates/Observations</strong></p>
 <ul>
   <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
@@ -103,9 +102,9 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Severe Weather / VTEC</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Severe Weather / VTEC</div>
+  <div class="card-body">
 
 <p>The <a href="/current/severe.phtml">Severe Weather Mainpage</a> has more
 options listed.</p>
@@ -200,9 +199,9 @@ events.</li>
 
 <h3>NWS Processed Datasets</h3>
 
-<div class="panel panel-default">
-  <div class="panel-heading">ASOS/AWOS METAR</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">ASOS/AWOS METAR</div>
+  <div class="card-body">
 <ul>
   <li><a href="obs.php">Sortable Currents by WFO</a></li>
 </ul>
@@ -219,9 +218,9 @@ them.</p>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Cooperative Observer Program - COOP</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Cooperative Observer Program - COOP</div>
+  <div class="card-body">
 <ul>
  <li><a href="/nws/coop-cnts.php">Monthly COOP Frequency Reports</a>
   <br />Quantity of observations received by variable for the COOP network</li>
@@ -233,9 +232,9 @@ them.</p>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">HADS / DCP / GOES</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">HADS / DCP / GOES</div>
+  <div class="card-body">
 <ul>
  <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
@@ -244,9 +243,9 @@ them.</p>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Local Storm Reports (LSR)</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Local Storm Reports (LSR)</div>
+  <div class="card-body">
 <p>The IEM processes LSRs issued by the NWS in real-time. A number of
     applications on this website utilize this source of reports.</p>
 <ul>
@@ -277,9 +276,9 @@ them.</p>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">NEXRAD RADAR</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">NEXRAD RADAR</div>
+  <div class="card-body">
 <ul>
  <li><a href="/request/gis/nexrad_storm_attrs.php">NEXRAD Storm Attributes</a>
  <br />Download shapefiles of NEXRAD storm attribute data and view histogram 
@@ -288,9 +287,9 @@ them.</p>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Snowfall</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Snowfall</div>
+  <div class="card-body">
 <ul>
  <li><a href="/nws/snowfall_6hour.php">Six Hour Snowfall Totals</a>
  <br />Simple table of available 6 hour snowfall total reports.</li>
@@ -299,9 +298,9 @@ them.</p>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">Storm Prediction Center Products</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Storm Prediction Center Products</div>
+  <div class="card-body">
 <ul>
 <li><a href="/request/gis/spc_mcd.phtml">
 <i class="fa fa-download"></i> SPC Mesoscale Discussion Shapefile Download</a></li>
@@ -334,9 +333,9 @@ some convective outlook or the number of outlooks for a given point.</li>
  </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Weather Prediction Center Products</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Weather Prediction Center Products</div>
+  <div class="card-body">
 <ul>
 <li><a href="/request/gis/wpc_mpd.phtml">
 <i class="fa fa-download"></i> WPC Precipitation Discussion Shapefile Download</a></li>
@@ -347,9 +346,9 @@ some convective outlook or the number of outlooks for a given point.</li>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">Numerical Model Data</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Numerical Model Data</div>
+  <div class="card-body">
 <ul>
  <li><a href="/mos/">Model Output Statistics</a>
  <br />Archive of MOS back to 3 May 2007.</li>
@@ -361,9 +360,9 @@ some convective outlook or the number of outlooks for a given point.</li>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Text Product Archives</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Text Product Archives</div>
+  <div class="card-body">
 
 <p>Please visit this <a href="text.php">dedicated page</a> for information
 about the IEM's text product archives.</p>

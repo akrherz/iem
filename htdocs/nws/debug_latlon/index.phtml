@@ -7,10 +7,12 @@ $t->title = "Debug + Create Simple Graphic from LAT...LON text";
 $imgurl = "/images/wait24trans.gif";
 $t->content = <<<EOM
 
-<ol class="breadcrumb">
- <li><a href="/nws/">IEM NWS Homepage</a></li>
- <li class="active">Debug / Create Simple Graphic from LAT...LON</li>
-</ol>
+<nav aria-label="breadcrumb">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="/nws/">IEM NWS Homepage</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Debug / Create Simple Graphic from LAT...LON</li>
+ </ol>
+</nav>
 
 <p>This page generates a simple diagnostic plot of a parsed polygon from a
 NWS Text Product.</p>
@@ -24,7 +26,7 @@ Title: <input id="thetitle" type="text" maxlength="220" size="100" value="My Tit
 <input id="thebutton" type="button" role="button" value="Create Graphic Now, Please!">
 
 <h4>Image will appear here:</h4>
-<p><img id="theimage" src="{$imgurl}" class="img img-responsive"></p>
+<p><img id="theimage" src="{$imgurl}" class="img-fluid"></p>
 
 <h4>GeoJSON representation here:</h4>
 <pre id="thegeojson">

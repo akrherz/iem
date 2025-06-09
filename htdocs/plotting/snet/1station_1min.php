@@ -44,7 +44,9 @@ if (strlen($station) > 0) {
 
 <p>or select from this map...<p>
 
-<div class="row well">
+<div class="row">
+<div class="card">
+<div class="card-body">
  <div class="col-md-4 col-sm-4">
 <a href="?network=KCCI" style="text-decoration: none;">
    <img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a>

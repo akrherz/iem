@@ -71,7 +71,7 @@ This listing was generated at: <code>{$json['generated_at']}</code> and is
 regenerated hourly. <button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
 <th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>

@@ -36,7 +36,7 @@ $table = sprintf(
     $ctx->printtd("N", $dir),
     $ctx->printtd("NE", $dir),
     $ctx->printtd("W", $dir),
-    "<td><img src=\"{$puri}\" alt=\"{$station} {$dir}\" class=\"img img-responsive\" /></td>",
+    "<td><img src=\"{$puri}\" alt=\"{$station} {$dir}\" class=\"img-fluid\" /></td>",
     $ctx->printtd("E", $dir),
     $ctx->printtd("SW", $dir),
     $ctx->printtd("S", $dir),

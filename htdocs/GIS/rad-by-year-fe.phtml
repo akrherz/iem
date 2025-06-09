@@ -62,10 +62,12 @@ $hrselect =  hourSelect($hour, "hour");
 $minselect = minuteSelect($minute, "minute", 5);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/GIS/">GIS Mainpage</a></li>
- <li class="active">IEM NEXRAD Mosaic by Year</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/GIS/">GIS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">IEM NEXRAD Mosaic by Year</li>
+  </ol>
+</nav>
 
 <h3>IEM NEXRAD Mosiac of Base Reflectivity by Year</h3>
 
@@ -88,10 +90,10 @@ You can click on the map to move the desired location.</p>
 <tr><td>Day:</td><td>{$dayselect}</td></tr>
 <tr><td>Hour:</td><td>{$hrselect}</td></tr>
 <tr><td>Minute:</td><td>{$minselect}</td></tr>
-<tr><td colspan='2'><input type='submit' value='Generate Image'></td></tr>
+<tr><td colspan='2'><input type='submit' value='Generate Image' class='btn btn-primary'></td></tr>
 </table>
 </form>
 <p><i>The image below may take a few moments to appear...</i><br />
-<img src='$image_url' class='img-responsive'>
+<img src='$image_url' class='img-fluid'>
 EOM;
 $t->render('single.phtml');

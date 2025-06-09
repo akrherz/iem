@@ -325,7 +325,11 @@ function setUpdateTab(tab) {
         return;
     }
     CONFIG.activeUpdate = escapeHTML(tab);
-    $(`#text_tabs a[data-update='${tab}']`).click();
+    const triggerEl = document.querySelector(`#text_tabs button[data-update='${tab}']`);
+    if (triggerEl) {
+        const tabInstance = new bootstrap.Tab(triggerEl);
+        tabInstance.show();
+    }
 }
 
 /**
@@ -338,7 +342,12 @@ function setActiveTab(tab) {
         return;
     }
     CONFIG.activeTab = escapeHTML(tab);
-    $(`#thetabs_tabs a[href='#${tab}']`).click();
+    // Use Bootstrap 5 tab API
+    const triggerEl = document.querySelector(`#${tab}-tab`);
+    if (triggerEl) {
+        const tabInstance = new bootstrap.Tab(triggerEl);
+        tabInstance.show();
+    }
 }
 
 
@@ -518,11 +527,11 @@ function buildMap() {
 }
 function lsrFeatureHTML(feature) {
     // Make a pretty HTML feature
-    const html = ['<div class="panel panel-default">',
-        '<div class="panel-heading">',
-        '<h3 class="panel-title">Local Storm Report</h3>',
+    const html = ['<div class="card">',
+        '<div class="card-header">',
+        '<h3 class="card-title">Local Storm Report</h3>',
         '</div>',
-        '<div class="panel-body">',
+        '<div class="card-body">',
         `<strong>Event</strong>: ${feature.get('event')}<br />`,
         `<strong>Location</strong>: ${feature.get('city')}<br />`,
         `<strong>Time</strong>: ${moment.utc(feature.get('utc_valid')).format('MMM Do, h:mm a')}<br />`,
@@ -767,8 +776,8 @@ function loadTabs() {
     loadedVTEC = vtecString();
     const vstring = vtecString();
     const vstring2 = `${getYear()}.${getWFO()}.${getPhenomena()}.${getSignificance()}.${String(getETN()).padStart(4, '0')}`;
-    $("#radarmap").html(`<img src="/GIS/radmap.php?layers[]=nexrad&layers[]=sbw&layers[]=sbwh&layers[]=uscounties&vtec=${vstring}" class="img img-responsive">`);
-    $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
+    $("#radarmap").html(`<img src="/GIS/radmap.php?layers[]=nexrad&layers[]=sbw&layers[]=sbwh&layers[]=uscounties&vtec=${vstring}" class="img-fluid">`);
+    $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img-fluid">`);
 
     $("#vtec_label").html(
         `${getYear()} ${escapeHTML($("#wfo option:selected").text())}
@@ -793,25 +802,25 @@ function loadTabs() {
             const tabcontent = $("#textdata div.tab-content");
             tabs.empty();
             tabcontent.empty();
-            tabs.append('<li><a href="#tall" data-toggle="tab">All</a></li>');
+            tabs.append('<li class="nav-item" role="presentation"><button class="nav-link" id="tall-tab" data-bs-toggle="tab" data-bs-target="#tall" type="button" role="tab" aria-controls="tall" aria-selected="false">All</button></li>');
             const stamp = moment.utc(data.report.valid).local().format("DD/h:mm A");
             const update = moment.utc(data.report.valid).format("YYYYMMDDHHmm");
-            tabs.append(`<li class="active"><a href="#t0" data-update="${update}" onclick="setUpdate('${update}');" data-toggle="tab">Issue ${stamp}</a></li>`);
+            tabs.append(`<li class="nav-item" role="presentation"><button class="nav-link active" id="t0-tab" data-update="${update}" onclick="setUpdate('${update}');" data-bs-toggle="tab" data-bs-target="#t0" type="button" role="tab" aria-controls="t0" aria-selected="true">Issue ${stamp}</button></li>`);
             const plink = `<a href="/p.php?pid=${data.report.product_id}" target="_new">Permalink to ${data.report.product_id}</a><br />`;
-            tabcontent.append(`<div class="tab-pane" id="tall"><pre>${data.report.text}</pre></div>`);
-            tabcontent.append(`<div class="tab-pane active" id="t0">${plink}<pre>${data.report.text}</pre></div>`);
+            tabcontent.append(`<div class="tab-pane fade" id="tall" role="tabpanel" aria-labelledby="tall-tab"><pre>${data.report.text}</pre></div>`);
+            tabcontent.append(`<div class="tab-pane fade show active" id="t0" role="tabpanel" aria-labelledby="t0-tab">${plink}<pre>${data.report.text}</pre></div>`);
             let tidx = 1;
             $.each(data.svs, (_idx, svs) => {
                 const splink = `<a href="/p.php?pid=${svs.product_id}" target="_new">Permalink to ${svs.product_id}</a><br />`;
                 const sstamp = moment.utc(svs.valid).local().format("DD/h:mm A");
                 const supdate = moment.utc(svs.valid).format("YYYYMMDDHHmm");
-                tabs.append(`<li><a href="#t${tidx}" data-update="${supdate}" onclick="setUpdate('${supdate}');" data-toggle="tab">U${tidx}: ${sstamp}</a></li>`);
-                tabcontent.append(`<div class="tab-pane" id="t${tidx}">${splink}<pre>${svs.text}</pre></div>`);
+                tabs.append(`<li class="nav-item" role="presentation"><button class="nav-link" id="t${tidx}-tab" data-update="${supdate}" onclick="setUpdate('${supdate}');" data-bs-toggle="tab" data-bs-target="#t${tidx}" type="button" role="tab" aria-controls="t${tidx}" aria-selected="false">U${tidx}: ${sstamp}</button></li>`);
+                tabcontent.append(`<div class="tab-pane fade" id="t${tidx}" role="tabpanel" aria-labelledby="t${tidx}-tab">${splink}<pre>${svs.text}</pre></div>`);
                 $("#tall").append(`<pre>${svs.text}</pre>`);
                 tidx += 1;
             });
             if (CONFIG.activeUpdate !== null) {
-                $(`#textdata a[data-update="${CONFIG.activeUpdate}"]`).click();
+                $(`#textdata button[data-update="${CONFIG.activeUpdate}"]`).click();
             }
             ugcTable.clear();
             $.each(data.ugcs, (_idx, ugc) => {
@@ -841,8 +850,21 @@ function loadTabs() {
         }
     });
     // Set the active tab to 'Event Info' if we are on the first tab
-    if ($("#thetabs_tabs a").attr("href") === "#help") {
-        $("#thetabs_tabs a[href='#info']").click();
+    const helpTab = document.querySelector('#help-tab');
+    const infoTab = document.querySelector('#info-tab');
+    
+    // In Bootstrap 5, check if help tab is active using multiple indicators
+    if (helpTab && (helpTab.classList.contains('active') || 
+                   helpTab.getAttribute('aria-selected') === 'true' || 
+                   helpTab.getAttribute('data-bs-target') === '#help')) {
+        if (infoTab) {
+            const tabInstance = new bootstrap.Tab(infoTab);
+            tabInstance.show();
+        }
+    } else if (infoTab && CONFIG.activeTab === 'info') {
+        // If the URL indicates info tab should be active, ensure it's shown
+        const tabInstance = new bootstrap.Tab(infoTab);
+        tabInstance.show();
     }
 }
 function remarkformat(d) {
@@ -916,10 +938,12 @@ window.se = setUpdate;
 function buildUI() {
     // One time build up of UI and handlers
 
-    // When tabs are clicked
-    $("#thetabs_tabs a").click(function () { // this
-        CONFIG.activeTab = this.href.split('#')[1];
-        updateURL();
+    // When tabs are clicked - use Bootstrap 5 event listeners
+    document.querySelectorAll('#thetabs_tabs button[data-bs-toggle="tab"]').forEach(tabTrigger => {
+        tabTrigger.addEventListener('click', function () {
+            CONFIG.activeTab = this.getAttribute('aria-controls');
+            updateURL();
+        });
     });
 
     let html = "";
@@ -978,12 +1002,17 @@ function buildUI() {
         if (parseInt(data[0], 10) === getETN()) return;
         setETN(data[0]);
         // Switch to the details tab, which will trigger update
-        $("#thetabs_tabs a[href='#info']").trigger('click');
+        const infoTab = document.querySelector('#info-tab');
+        if (infoTab) {
+            const tabInstance = new bootstrap.Tab(infoTab);
+            tabInstance.show();
+        }
     });
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', (e) => {
-        const target = $(e.target).attr("href") // activated tab
-        if (target === "#themap") {
+    // Listen for Bootstrap 5 tab events
+    document.addEventListener('shown.bs.tab', (e) => {
+        const target = e.target.getAttribute('aria-controls');
+        if (target === "themap") {
             olmap.updateSize();
         }
     });
@@ -1041,9 +1070,12 @@ function buildUI() {
 
     $("#toolbar-print").click(function () { // this
         $(this).blur();
-        const tabid = $("#textdata .nav-tabs li.active a").attr('href');
+        const activeButton = document.querySelector("#textdata .nav-tabs button.active");
+        if (!activeButton) return;
+        const tabid = activeButton.getAttribute('data-bs-target');
         // https://stackoverflow.com/questions/33732739
-        const divToPrint = $(tabid)[0];
+        const divToPrint = document.querySelector(tabid);
+        if (!divToPrint) return;
         const newWin = window.open('', 'Print-Window');
         newWin.document.open();
         newWin.document.write(`<html><body onload="window.print()">${divToPrint.innerHTML}</body></html>`);

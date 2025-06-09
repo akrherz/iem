@@ -304,13 +304,13 @@ function addNavigationControls() {
     // Previous/Next buttons
     const prevBtn = document.createElement('button');
     prevBtn.textContent = '← Previous';
-    prevBtn.className = 'btn btn-sm btn-default';
+    prevBtn.className = 'btn btn-sm btn-secondary';
     prevBtn.style.marginRight = '10px';
     prevBtn.onclick = () => navigateImage(-1);
     
     const nextBtn = document.createElement('button');
     nextBtn.textContent = 'Next →';
-    nextBtn.className = 'btn btn-sm btn-default';
+    nextBtn.className = 'btn btn-sm btn-secondary';
     nextBtn.onclick = () => navigateImage(1);
     
     // Auto-play toggle

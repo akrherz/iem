@@ -45,7 +45,7 @@ page presents some of the options available for this dataset. A
 <p>IEM <a href="/plotting/auto/?q=219&station={$station4}">Autoplot 219</a> produced
 this visualization:</p>
 
-<p><img src="/plotting/auto/plot/219/station:{$station4}.png" class="img img-responsive"></p>
+<p><img src="/plotting/auto/plot/219/station:{$station4}.png" class="img-fluid"></p>
 
 
 EOM;

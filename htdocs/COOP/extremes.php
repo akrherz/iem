@@ -227,7 +227,7 @@ for that date.</p>
 
 <br />
 
-<table class="table table-bordered table-condensed table-striped">
+<table class="table table-bordered table-sm table-striped">
 <thead class="sticky">
   <tr>
    <th rowspan='2' class='subtitle' valign='top'>

@@ -71,7 +71,7 @@ if ($row["mediasuffix"] == 'mp4') {
     $t->twitter_video_height = $row["media_height"];
     $t->twitter_video_width = $row["media_width"];
     $media = <<<EOM
-  <video class="img img-responsive" controls>
+  <video class="img-fluid" controls>
     <source src="{$big}" type="video/mp4">
     Your browser does not support the video tag.
 </video>
@@ -79,26 +79,26 @@ EOM;
 } else {
     $t->twitter_image = $big;
     $media = <<<EOM
-<a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+<a href="{$big}"><img src="{$big}" class="img-fluid"></a>
 <br /><a href="{$big}">View larger image</a>
 EOM;
 }
 
 $content = <<<EOM
 
-<div class="row well">
+<div class="row">
     <div class="col-md-4">
 
-<button type="button" class="btn btn-default btn-lg">
-  <span class="fa fa-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1">Previous Feature by Date</a> 
+<button type="button" class="btn btn-secondary btn-lg">
+  <span class="fa fa-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1" class="text-white text-decoration-none">Previous Feature by Date</a> 
 </button>
     </div>
     <div class="col-md-4">
 <strong>IEM Daily Feature<br />{$prettyday}</strong>
     </div>
     <div class="col-md-4">
-<button type="button" class="btn btn-default btn-lg">
-  <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
+<button type="button" class="btn btn-secondary btn-lg">
+  <a href="cat.php?day={$day}&offset=1" class="text-white text-decoration-none">Next Feature by Date</a> 
   <span class="fa fa-arrow-right"></span> 
 </button>
     </div>
@@ -116,7 +116,7 @@ $content = <<<EOM
 <br />{$row["caption"]}
 {$linktext}
 </div>
-<div class='col-md-6 well'>{$row["story"]}
+<div class='col-md-6 bg-light p-3 rounded'>{$row["story"]}
 EOM;
 if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0)) {
     $content .= "<br /><br /><b>Voting:</b>

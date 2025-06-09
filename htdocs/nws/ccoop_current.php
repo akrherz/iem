@@ -150,7 +150,7 @@ information on the site. Click on the column heading to sort the column, clickin
 again will reverse the sort.
  
 <form name="st" action="/my/current.phtml" method="GET">
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-sm table-bordered">
 <thead class="sticky">
 <tr>
   <th rowspan=2>Add:</th><th rowspan=2>Raw:</th>

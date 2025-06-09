@@ -26,9 +26,9 @@ elseif ($uri == '/agclimate/hist/inversion.php'){
 $box = <<<EOM
 <div class="row">
     <div class="col-sm-6">
-<div class="panel panel-default">
-  <div class="panel-heading">Legacy "ISU AgClimate" 1986-~2013</div>
-  <div class="panel-body">
+<div class="card">
+  <div class="card-header">Legacy "ISU AgClimate" 1986-~2013</div>
+  <div class="card-body">
         <div class="row">
             <div class="col-sm-6">{$lh}<a href="hourlyRequest.php">Hourly Data</a></div>
             <div class="col-sm-6">{$ld}<a href="dailyRequest.php">Daily Data</a></div>
@@ -37,9 +37,9 @@ $box = <<<EOM
 </div>
     </div>
     <div class="col-sm-6">
-<div class="panel panel-default">
-  <div class="panel-heading">"ISU Soil Moisture Network" ~2013-present</div>
-  <div class="panel-body">
+<div class="card">
+  <div class="card-header">"ISU Soil Moisture Network" ~2013-present</div>
+  <div class="card-body">
         <div class="row">
             <div class="col-sm-4">{$ch}<a href="hourly.php">Hourly Data</a></div>
             <div class="col-sm-4">{$ci}<a href="inversion.php">Inversion Data</a></div>

@@ -28,13 +28,13 @@ if (isset($_REQUEST["day"])){
 ?>
 <input type="hidden" name="network" value="<?php echo $network; ?>">
 <ol class="breadcrumb">
-<li><a href="/sites/locate.php">Station Data &amp; Metadata</a></li>
-<li><a href="/sites/locate.php?network=<?php echo $network; ?>"><?php echo $network; ?></a></li>
-<li class="active"><?php echo networkSelectAuto($network, $station); ?> or <a href="locate.php?network=<?php echo $network; ?>">select from map</a></li>
+<li class="breadcrumb-item"><a href="/sites/locate.php">Station Data &amp; Metadata</a></li>
+<li class="breadcrumb-item"><a href="/sites/locate.php?network=<?php echo $network; ?>"><?php echo $network; ?></a></li>
+<li class="breadcrumb-item active" aria-current="page"><?php echo networkSelectAuto($network, $station); ?> or <a href="locate.php?network=<?php echo $network; ?>">select from map</a></li>
 </ol>
 </form>
 
-<p>
+<div class="d-flex flex-wrap gap-2 mb-3">
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?",
@@ -95,33 +95,33 @@ foreach($o as $key => $val)
     }
       $uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
       $active = ($this->sites_current == $key) ? " active": "";
-      echo sprintf("<a href=\"%s\" class=\"btn btn-default%s\">".
-              "<span class=\"fa fa-%s\"></span> %s</a>",
+      echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary%s\">".
+              "<i class=\"fa fa-%s me-1\"></i>%s</a> ",
               $uri, $active, $val["icon"], $val["name"]);
 }
 
 if (preg_match('/ASOS/', $network) > 0){
     if ($metadata["country"] == "US") {
         $uri = sprintf("/sites/scp.php?station=%s&amp;network=%s", $station, $network);
-        echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-cloud\"></span> Satellite Cloud Product</a>", 
+        echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"fa fa-cloud me-1\"></i>Satellite Cloud Product</a> ", 
                 $uri);
     }
     $uri = sprintf("/request/download.phtml?network=%s", $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
+    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"fa fa-download me-1\"></i>Download</a> ", 
             $uri);
     // TAF
     if (array_key_exists("HASTAF", $metadata["attributes"])){
         echo sprintf(
             '<a href="/sites/taf.php?station=%s&amp;network=%s" '.
-            'class="btn btn-default"><span class="fa fa-cloud"></span> Terminal Aerodome Forecast</a>', 
+            'class="btn btn-outline-primary"><i class="fa fa-cloud me-1"></i>Terminal Aerodome Forecast</a> ', 
             $station, $network);            
     }
 }elseif (preg_match('/DCP/', $network) > 0){
     $uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
+    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"fa fa-download me-1\"></i>Download</a> ", 
             $uri);
     
 }
 ?>
-</p>
+</div>
 </div>

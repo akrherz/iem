@@ -59,7 +59,7 @@ foreach ($thresholds as $k => $thres) {
         }
     }
 }
-$spring = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
+$spring = "<table class=\"table table-sm table-striped table-bordered\">$row1</tr>";
 /* Print webpage */
 for ($i = 0; $i < 182; $i = $i + 5) {
     $ts = mktime(0, 0, 0, 1, 1, 2000) + ($i * 86400);
@@ -101,7 +101,7 @@ foreach ($thresholds as $k => $thres) {
         }
     }
 }
-$fall = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
+$fall = "<table class=\"table table-sm table-striped table-bordered\">$row1</tr>";
 /* Print webpage */
 for ($i = 182; $i < 366; $i = $i + 5) {
     $ts = mktime(0, 0, 0, 1, 1, 2000) + ($i * 86400);

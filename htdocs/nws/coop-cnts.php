@@ -130,7 +130,7 @@ on a per month and per WFO basis.  Errors do occur and perhaps the IEM's ingesto
 is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</a> of any errors you may suspect!
 
 <form method="GET" name="changeme">
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr>
 <td><strong>Select WFO:</strong> {$wselect} </td>
 <td><strong>Aggregate By:</strong> {$bselect} </td>
@@ -144,7 +144,7 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 
 <h3>COOP Report for wfo: {$wfo}, {$tlabel}</h3>
 
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-sm table-bordered">
 <thead class="sticky">
 <tr>{$header}<th>Possible</th>
 <th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th>

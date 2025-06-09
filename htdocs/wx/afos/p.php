@@ -251,7 +251,7 @@ EOM;
                     date("Hi", strtotime($row2["issue"])),
                 );
                 $img = sprintf(
-                    '<p><img src="%s" class="img img-responsive"></p>',
+                    '<p><img src="%s" class="img-fluid"></p>',
                     $t->twitter_image,
                 );
             }
@@ -264,7 +264,7 @@ EOM;
 generated the following image below.  You may find more customization options
 for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
- class="img img-responsive"></p>
+ class="img-fluid"></p>
 EOM;
         } else if (substr($pil, 0, 3) == "SPS") {
             // Account for multi-segment SPS by counting $$ occurrences
@@ -277,12 +277,12 @@ EOM;
 generated the following image below.  You may find more customization options
 , like removal of RADAR, for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/217/pid:{$product_id}::segnum:0.png"
- class="img img-responsive"></p>
+ class="img-fluid"></p>
 EOM;
             for ($segnum = 1; $segnum < $segments; $segnum++) {
                 $img .= sprintf(
                     '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:%s.png" ' .
-                        'class="img img-responsive"></p>',
+                        'class="img-fluid"></p>',
                     $product_id,
                     $segnum,
                 );
@@ -292,7 +292,7 @@ EOM;
             $t->twitter_image = "/plotting/auto/plot/242/pid:{$product_id}.png";
             $img = sprintf(
                 '<p><img src="/plotting/auto/plot/242/pid:%s.png" ' .
-                    'class="img img-responsive"></p>',
+                    'class="img-fluid"></p>',
                 $product_id,
             );
         } else {
@@ -320,7 +320,7 @@ EOM;
         $year2 = intval($year) + 1;
         $content .= <<<EOM
 <div class="row">
-<div class="col-sm-7 col-md-7">
+<div class="col-md-7">
 <p>Displaying AFOS PIL: <strong>$pil</strong> 
 Product Timestamp: <strong>{$dstamp} UTC</strong>
 
@@ -343,7 +343,7 @@ Product Timestamp: <strong>{$dstamp} UTC</strong>
 {$extratools}
 
 </div>
-<div class="col-sm-5 col-md-5 well">
+<div class="col-md-5 border rounded p-3">
 <form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk">
 <input type="hidden" name="dl" value="1">
 <input type="hidden" name="limit" value="9999">

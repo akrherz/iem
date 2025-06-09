@@ -223,12 +223,12 @@ function loadImage(elem){
     ahref.target = "_blank";
     ahref.text = "IEM Website Link";
     ahref.classList.add("btn");
-    ahref.classList.add("btn-default");
+    ahref.classList.add("btn-secondary");
     pp.appendChild(ahref);
     div.appendChild(pp);
     const img = document.createElement("img");
     img.classList.add("img");
-    img.classList.add("img-responsive");
+    img.classList.add("img-fluid");
     img.src = elem.src;
     div.appendChild(img);
     const dlg = $(div).dialog({
@@ -278,7 +278,7 @@ function loadAutoplot(container, uri, divid){
     ahref.target = "_blank";
     ahref.text = "IEM Website Link";
     ahref.classList.add("btn");
-    ahref.classList.add("btn-default");
+    ahref.classList.add("btn-secondary");
     pp.appendChild(ahref);
     $(pp).appendTo($target);
     if (uri.endsWith("js")){
@@ -291,7 +291,7 @@ function loadAutoplot(container, uri, divid){
     } else {
         const img = document.createElement("img");
         img.classList.add("img");
-        img.classList.add("img-responsive");
+        img.classList.add("img-fluid");
         img.src = uri;
         $(img).appendTo($target);
     }
