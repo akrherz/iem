@@ -28,6 +28,37 @@ const setAcceptAndSubmit = (form, acceptValue) => {
 };
 
 /**
+ * Initialize location group radio button functionality
+ * Shows/hides appropriate select boxes based on radio button selection
+ */
+const initializeLocationGroups = () => {
+    const locationRadios = document.querySelectorAll('input[name="location_group"]');
+    const locationContainers = document.querySelectorAll('.location_group');
+
+    // Function to update visibility based on selected radio
+    const updateLocationVisibility = () => {
+        const selectedValue = document.querySelector('input[name="location_group"]:checked')?.value;
+        
+        locationContainers.forEach(container => {
+            const containerId = container.id;
+            const shouldShow = containerId.endsWith(`-${selectedValue}`);
+            
+            // Show/hide with smooth transition
+            container.style.display = shouldShow ? 'block' : 'none';
+            container.style.opacity = shouldShow ? '1' : '0.5';
+        });
+    };
+
+    // Add change listeners to radio buttons
+    locationRadios.forEach(radio => {
+        radio.addEventListener('change', updateLocationVisibility);
+    });
+
+    // Initialize visibility on page load
+    updateLocationVisibility();
+};
+
+/**
  * Initialize event handlers when DOM is loaded
  * Sets up click handlers for form submission buttons and location group toggles
  */
@@ -76,36 +107,7 @@ const init = () => {
     initializeLocationGroups();
 };
 
-/**
- * Initialize location group radio button functionality
- * Shows/hides appropriate select boxes based on radio button selection
- */
-const initializeLocationGroups = () => {
-    const locationRadios = document.querySelectorAll('input[name="location_group"]');
-    const locationContainers = document.querySelectorAll('.location_group');
 
-    // Function to update visibility based on selected radio
-    const updateLocationVisibility = () => {
-        const selectedValue = document.querySelector('input[name="location_group"]:checked')?.value;
-        
-        locationContainers.forEach(container => {
-            const containerId = container.id;
-            const shouldShow = containerId.endsWith(`-${selectedValue}`);
-            
-            // Show/hide with smooth transition
-            container.style.display = shouldShow ? 'block' : 'none';
-            container.style.opacity = shouldShow ? '1' : '0.5';
-        });
-    };
-
-    // Add change listeners to radio buttons
-    locationRadios.forEach(radio => {
-        radio.addEventListener('change', updateLocationVisibility);
-    });
-
-    // Initialize visibility on page load
-    updateLocationVisibility();
-};
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
