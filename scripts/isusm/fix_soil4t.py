@@ -24,21 +24,23 @@ def setval(
     ob: float | None,
     dt: date,
     newval: float,
+    flag: str,
 ):
     """We have something to set."""
-    LOG.warning(
-        "%s %s %s %s -> %.1f (%s) [E]",
+    (LOG.warning if flag == "E" else LOG.info)(
+        "%s %s %s %s -> %.1f (%s) [%s]",
         station,
         dt,
         col,
         None if ob is None else f"{ob:.1f}",
         newval,
         None if ob is None else f"{(ob - newval):.1f}",
+        flag,
     )
     conn.execute(
         sql_helper(
             """
-        UPDATE sm_daily SET {col}_qc = :newval, {col}_f = 'E' WHERE
+        UPDATE sm_daily SET {col}_qc = :newval, {col}_f = :flag WHERE
         station = :station and valid = :valid
         """,
             col=col,
@@ -47,6 +49,7 @@ def setval(
             "station": station,
             "valid": dt,
             "newval": newval,
+            "flag": flag,
         },
     )
 
@@ -57,7 +60,7 @@ def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
     for station, row in qcdf[qcdf["useme"]].iterrows():
         # If Ob is None, we have no choice
         if row[obcol] is None:
-            setval(conn, station, col, row[obcol], dt, row[col])
+            setval(conn, station, col, row[obcol], dt, row[col], "E")
             continue
         # Passes if value within 2 C of IEMRE
         if abs(row[obcol] - row[col]) <= 2:
@@ -68,6 +71,8 @@ def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
                 row[obcol],
                 row[col],
             )
+            # Set the QC value to observed value
+            setval(conn, station, col, row[obcol], dt, row[obcol], "P")
             continue
         # Passes if within bounds of Iowa values
         if qcdf[col].min() <= row[obcol] <= qcdf[col].max():
@@ -78,9 +83,11 @@ def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
                 row[obcol],
                 row[col],
             )
+            # Set the QC value to observed value
+            setval(conn, station, col, row[obcol], dt, row[obcol], "P")
             continue
         # We fail
-        setval(conn, station, col, row[obcol], dt, row[col])
+        setval(conn, station, col, row[obcol], dt, row[col], "E")
 
 
 @with_sqlalchemy_conn("isuag")
@@ -90,8 +97,11 @@ def check_date(dt: date, conn: Connection = None):
     nt = NetworkTable("ISUSM", only_online=False)
     res = conn.execute(
         sql_helper("""
-    SELECT station, t4_c_avg, t4_c_min, t4_c_max from sm_daily where
-    valid = :valid ORDER by station ASC"""),
+    SELECT station,
+    t4_c_min, t4_c_min_f, t4_c_min_qc,
+    t4_c_avg, t4_c_avg_f, t4_c_avg_qc,
+    t4_c_max, t4_c_max_f, t4_c_max_qc
+    from sm_daily where valid = :valid ORDER by station ASC"""),
         {"valid": dt},
     )
     qcrows = []
@@ -122,6 +132,12 @@ def check_date(dt: date, conn: Connection = None):
                 "ob_t4_c_avg": row["t4_c_avg"],
                 "ob_t4_c_min": row["t4_c_min"],
                 "ob_t4_c_max": row["t4_c_max"],
+                "ob_t4_c_avg_f": row["t4_c_avg_f"],
+                "ob_t4_c_min_f": row["t4_c_min_f"],
+                "ob_t4_c_max_f": row["t4_c_max_f"],
+                "ob_t4_c_avg_qc": row["t4_c_avg_qc"],
+                "ob_t4_c_min_qc": row["t4_c_min_qc"],
+                "ob_t4_c_max_qc": row["t4_c_max_qc"],
                 "useme": useme,
                 "t4_c_avg": iemre_avg,
                 "t4_c_min": iemre_low,
