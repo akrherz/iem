@@ -320,7 +320,7 @@ def get_mckey(environ: dict) -> str | None:
 def application(environ, start_response):
     """Do Something"""
     # Quirk unhandled properly yet
-    environ["wfos"] = list(filter(lambda x: len(x) <= 4, environ["wfos"]))
+    environ["wfos"] = list(filter(lambda x: 2 < len(x) < 5, environ["wfos"]))
     if environ["wfos"]:
         environ["wfos"] = [unrectify_wfo(x) for x in environ["wfos"]]
     environ["states"] = list(filter(lambda x: len(x) == 2, environ["states"]))
