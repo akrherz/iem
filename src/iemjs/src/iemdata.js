@@ -69,6 +69,8 @@ export const vtec_phenomena = [
     ['ZR', 'Freezing Rain'],
 ];
 
+export const vtec_phenomena_dict = Object.fromEntries(vtec_phenomena);
+
 export const vtec_significance = [
     ['W', 'Warning'],
     ['Y', 'Advisory'],
@@ -78,6 +80,8 @@ export const vtec_significance = [
     ['O', 'Outlook'],
     ['N', 'Synopsis'],
 ];
+
+export const vtec_significance_dict = Object.fromEntries(vtec_significance);
 
 export const wfos = [
     ['PAAQ', 'National Tsunami Warning Center'],
@@ -207,6 +211,8 @@ export const wfos = [
     ['KVEF', 'LAS_VEGAS'],
 ];
 
+export const wfos_dict = Object.fromEntries(wfos);
+
 export const states = [
     ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
     ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
@@ -222,3 +228,5 @@ export const states = [
     ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"], ["WV", "West Virginia"],
     ["WI", "Wisconsin"], ["WY", "Wyoming"]
 ];
+
+export const states_dict = Object.fromEntries(states);

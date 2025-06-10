@@ -2,10 +2,11 @@
 
 All notable changes to the iemjs package will be documented in this file.
 
-## [Unreleased]
+## [0.0.5] - 2025-06-09
 
 ### Added
 
+- Conversion of iemdata arrays into dict variants.
 - Typescript definitions
 
 ### Changed
