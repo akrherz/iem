@@ -6,10 +6,5 @@
 // Re-export all utilities for convenient importing
 export * from './domUtils.js';
 
-// Re-export iemdata - both individual exports and legacy object
-export { 
-    vtec_phenomena,
-    vtec_significance,
-    wfos,
-    states
-} from './iemdata.js';
+// Re-export all iemdata exports
+export * from './iemdata.js';

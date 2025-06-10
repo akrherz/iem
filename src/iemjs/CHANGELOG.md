@@ -2,6 +2,10 @@
 
 All notable changes to the iemjs package will be documented in this file.
 
+## [0.0.7] - 2025-06-09
+
+Fix iemdata exports. Le Sigh.
+
 ## [0.0.6] - 2025-06-09
 
 Version 0.0.5 was an incomplete misfire.
