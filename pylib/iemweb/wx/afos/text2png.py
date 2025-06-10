@@ -1,7 +1,21 @@
-"""Convert a NWS Text Product into a PNG
+"""..title :: Convert a NWS Text Product into a PNG
 
-/wx/afos/201612141916_ADMNFD.png
-Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
+URLs like so: `/wx/afos/201612141916_ADMNFD.png` are rewritten to this app
+like so: `text2png?e=201612141916&pil=ADMNFD`
+
+Changelog
+---------
+
+- 2025-06-10: Migration to pydantic validation
+
+Example Requests
+----------------
+
+View the Des Moines NWS Area Forecast Discussion as a PNG:
+
+https://mesonet.agron.iastate.edu/wx/afos/text2png.py\
+?e=202407100904&pil=AFDDMX
+
 """
 
 from datetime import datetime, timezone
@@ -10,9 +24,26 @@ from io import BytesIO
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
+from pydantic import Field
 from pyiem.database import get_dbconn
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """Schema for the CGI app"""
+
+    e: str = Field(
+        default="201612141916",
+        description="The valid time of the product in YYYYMMDDHHMM format",
+        max_length=12,
+        min_length=12,
+        pattern=r"^[12][90]\d\d[01]\d[0-3]\d[0-2]\d[0-5]\d$",
+    )
+    pil: str = Field(
+        default="ADMNFD",
+        description="The AFOS Product Identifier, e.g., ADMNFD",
+        max_length=6,
+    )
 
 
 def text_image(content):
@@ -80,17 +111,23 @@ def make_image(e, pil):
     return text_image(content)
 
 
-@iemapp()
-def application(environ, start_response):
+def get_mckey(environ: dict) -> str:
+    """Return the memcached key for this request"""
+    e = environ["e"]
+    pil = environ["pil"].replace(" ", "")
+    return f"text2png_{e}_{pil}.png"
+
+
+@iemapp(
+    schema=Schema,
+    help=__doc__,
+    memcachekey=get_mckey,
+    content_type="image/png",
+)
+def application(environ: dict, start_response):
     """Go Main Go"""
-    e = environ.get("e", "201612141916")[:12]
-    pil = environ.get("pil", "ADMNFD")[:6].replace(" ", "")
-    key = f"{e}_{pil}.png"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(key)
-    if not res:
-        res = make_image(e, pil)
-        mc.set(key, res, 3600)
-    mc.close()
+    e = environ["e"]
+    pil = environ["pil"].replace(" ", "")
+    res = make_image(e, pil)
     start_response("200 OK", [("Content-type", "image/png")])
-    return [res]
+    return res

@@ -37,8 +37,7 @@ product.</p>
 Most products go back to October 2005.</p>
 """
 
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta, timezone
 
 import numpy as np
 import pandas as pd
@@ -354,8 +353,8 @@ def get_count_bins(df, varname):
 
 def plotter(ctx: dict):
     """Go"""
-    sts = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
-    ets = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
+    sts = ctx["sdate"].replace(tzinfo=timezone.utc)
+    ets = ctx["edate"].replace(tzinfo=timezone.utc)
     p1 = ctx["phenomenav1"]
     p2 = ctx["phenomenav2"]
     p3 = ctx["phenomenav3"]

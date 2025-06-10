@@ -62,7 +62,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     )
 
 
-def daily_process(cursor, station, dt, df, ddf):
+def daily_process(cursor, station, dt, df: pd.DataFrame, ddf):
     """Process this date's dataframe."""
     mindf = df.min(numeric_only=True)
     maxdf = df.max(numeric_only=True)
