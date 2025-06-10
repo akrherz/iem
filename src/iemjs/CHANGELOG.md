@@ -2,7 +2,9 @@
 
 All notable changes to the iemjs package will be documented in this file.
 
-## [0.0.5] - 2025-06-09
+## [0.0.6] - 2025-06-09
+
+Version 0.0.5 was an incomplete misfire.
 
 ### Added
 
