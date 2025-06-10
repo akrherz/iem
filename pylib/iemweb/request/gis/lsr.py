@@ -39,6 +39,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 ?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&fmt=shp
 
+Return all the LSRs issued by the Des Moines WFO in CSV format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?wfo=DMX&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&fmt=csv
+
 Provide all LSRs for 2024 for a lat/lon bounding box approximating Iowa and
 return as a CSV file.
 
@@ -61,6 +66,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.mlib import unrectify_wfo
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -285,10 +292,11 @@ def application(environ, start_response):
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [b"Allow: GET,POST,OPTIONS"]
 
-    params = {}
+    params = {"wfos": []}
     params["sts"], params["ets"] = get_time_domain(environ)
     params["states"] = environ["state"]
-    params["wfos"] = environ["wfo"]
+    if environ["wfo"]:
+        params["wfos"] = [unrectify_wfo(x) for x in environ["wfo"]]
     params["types"] = environ["type"]
 
     sql_filters = ""
