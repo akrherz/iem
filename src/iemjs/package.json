@@ -1,6 +1,6 @@
 {
   "name": "iemjs",
-  "version": "0.0.5-dev",
+  "version": "0.0.5",
   "description": "Iowa Environmental Mesonet JavaScript utilities for weather data applications",
   "type": "module",
   "main": "src/index.js",
