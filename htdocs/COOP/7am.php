@@ -10,16 +10,7 @@ $t->title = "Iowa Daily COOP Reports and Comparisons";
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-<style>
-.map {
-    height: 400px;
-    width: 100%;
-    background-color: #FFFFFF;
-}
-.popover {
-    width: 300px;
-}
-</style>
+<link rel="stylesheet" href="7am.css" type="text/css">
 EOM;
 
 $t->jsextra = <<<EOM
@@ -53,9 +44,9 @@ $t->content = <<<EOM
 </div>
 <div class="col-md-6">
     <strong>View Date:</strong>
-    <button role="button" id="minusday">-1 Day</button>
+    <button type="button" id="minusday">-1 Day</button>
     <input type="text" id="datepicker" size="30">
-    <button role="button" id="plusday">+1 Day</button>
+    <button type="button" id="plusday">+1 Day</button>
 </div>
 </div>
 </form>

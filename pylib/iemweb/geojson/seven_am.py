@@ -2,6 +2,12 @@
 
 Return to `API Services </api/#json>`_
 
+Documentation for /geojson/7am.py
+=================================
+
+This service returns some data valid around 7 AM for a given date. This
+is currently Iowa centric.
+
 Changelog
 ---------
 
@@ -25,7 +31,7 @@ https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=azos
 """
 
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -88,7 +94,7 @@ def router(group, ts):
     return run_cocorahs(ts)
 
 
-def run_azos(ts):
+def run_azos(ts: datetime):
     """Get the data please"""
     pgconn, cursor = get_dbconnc("iem")
 
@@ -113,17 +119,23 @@ def run_azos(ts):
         "generation_time": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
+    tstamp = ts1.astimezone(timezone.utc).strftime(ISO8601)
     for row in cursor:
         res["features"].append(
             dict(
                 type="Feature",
                 id=row["id"],
                 properties=dict(
+                    hour=7,
+                    valid=tstamp,
                     pday=p(row["sum"]),
                     snow=None,
                     snowd=None,
+                    high=None,
+                    low=None,
                     name=row["name"],
                     network=row["network"],
+                    coop_tmpf=None,
                 ),
                 geometry=dict(
                     type="Point", coordinates=[row["st_x"], row["st_y"]]
@@ -142,7 +154,7 @@ def run(ts, networks):
         """
         select id, ST_x(geom), ST_y(geom), coop_valid, pday, snow, snowd,
         extract(hour from coop_valid)::int as hour, max_tmpf as high,
-        min_tmpf as low, coop_tmpf, name, network
+        min_tmpf as low, coop_tmpf, name, network, coop_valid
         from summary s JOIN stations t ON (t.iemid = s.iemid)
         WHERE s.day = %s and t.network = ANY(%s) and pday >= 0
         and extract(hour from coop_valid) between 5 and 10
@@ -162,6 +174,9 @@ def run(ts, networks):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
+                    valid=row["coop_valid"]
+                    .astimezone(timezone.utc)
+                    .strftime(ISO8601),
                     pday=p(row["pday"]),
                     snow=p(row["snow"], 1),
                     snowd=p(row["snowd"], 1),
@@ -190,7 +205,7 @@ def run_cocorahs(ts: datetime):
         select id, ST_x(geom), ST_y(geom), obvalid, precip as pday,
         snow, snowd,
         extract(hour from obvalid)::int as hour, null as high,
-        null as low, null as coop_tmpf, name, network
+        null as low, null as coop_tmpf, name, network, obvalid
         from alldata_cocorahs s JOIN stations t ON (t.iemid = s.iemid)
         WHERE s.day = %s and t.network ~* '_COCORAHS' and precip >= 0
         and extract(hour from obvalid) between 5 and 10
@@ -210,6 +225,9 @@ def run_cocorahs(ts: datetime):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
+                    valid=row["obvalid"]
+                    .astimezone(timezone.utc)
+                    .strftime(ISO8601),
                     pday=p(row["pday"]),
                     snow=p(row["snow"], 1),
                     snowd=p(row["snowd"], 1),
@@ -239,7 +257,7 @@ def run_cocorahs(ts: datetime):
 def application(environ, start_response):
     """Do Workflow"""
     group = environ["group"]
-    dt = environ["dt"]
+    dt: datetime = environ["dt"]
     ts = utc(dt.year, dt.month, dt.day, 12)
 
     res = router(group, ts)

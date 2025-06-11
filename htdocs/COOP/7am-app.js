@@ -81,32 +81,91 @@ function addDaysToDateString(dateStr, days) {
     return formatDateISO(date);
 }
 
-function parseHashlink() {
-    // Figure out what was set from the hash links
-    const tokens = window.location.href.split('#');
-    if (tokens.length < 2) return;
-    const subtokens = tokens[1].split('/');
-    if (subtokens.length > 1) {
-        renderattr = escapeHTML(subtokens[1]);
+/**
+ * Migrate legacy hash URLs to URLSearchParams
+ * This maintains backward compatibility with old bookmarked URLs
+ * Legacy format: #240610/pday
+ * New format: ?date=240610&attr=pday
+ */
+function migrateLegacyHashURLs() {
+    const hash = window.location.hash;
+    if (hash && hash.length > 1) {
+        const hashContent = hash.substring(1); // Remove the # character
+        const subtokens = hashContent.split('/');
+        
+        if (subtokens.length >= 1) {
+            const url = new URL(window.location);
+            
+            // Clear the hash and set as URL parameters
+            url.hash = '';
+            url.searchParams.set('date', subtokens[0]);
+            
+            if (subtokens.length > 1) {
+                url.searchParams.set('attr', subtokens[1]);
+            }
+            
+            // Replace the URL without adding to history
+            window.history.replaceState({}, '', url);
+            
+            return {
+                date: subtokens[0],
+                attr: subtokens.length > 1 ? subtokens[1] : null
+            };
+        }
+    }
+    return null;
+}
+
+/**
+ * Parse URL parameters to set initial state
+ * Handles both URLSearchParams and legacy hash URLs (with migration)
+ */
+function parseURLParams() {
+    // First, check for legacy hash URLs and migrate them
+    const migrated = migrateLegacyHashURLs();
+    
+    // Get current URL parameters (either from migration or existing params)
+    const params = new URLSearchParams(window.location.search);
+    const dateParam = params.get('date') || (migrated?.date);
+    const attrParam = params.get('attr') || (migrated?.attr);
+    
+    if (attrParam) {
+        renderattr = escapeHTML(attrParam);
         const renderAttrElement = document.getElementById('renderattr');
         if (renderAttrElement instanceof HTMLSelectElement) {
             renderAttrElement.value = renderattr;
         }
     }
-    const dt = parseDateYYMMDD(escapeHTML(subtokens[0]));
-    const datepickerElement = document.getElementById('datepicker');
-    if (datepickerElement instanceof HTMLInputElement) {
-        datepickerElement.value = formatDateISO(dt);
+    
+    if (dateParam) {
+        const dt = parseDateYYMMDD(escapeHTML(dateParam));
+        const datepickerElement = document.getElementById('datepicker');
+        if (datepickerElement instanceof HTMLInputElement) {
+            datepickerElement.value = formatDateISO(dt);
+        }
     }
 }
 
+/**
+ * Update URL with current parameters using URLSearchParams
+ */
 function updateURL() {
     const datepickerElement = document.getElementById('datepicker');
     if (!(datepickerElement instanceof HTMLInputElement)) return;
 
-    const selectedDate = new Date(datepickerElement.value);
+    // Use parseDateISO to avoid timezone issues instead of new Date()
+    const selectedDate = parseDateISO(datepickerElement.value);
     const tt = formatDateYYMMDD(selectedDate);
-    window.location.href = `#${tt}/${renderattr}`;
+    
+    const url = new URL(window.location);
+    url.searchParams.set('date', tt);
+    url.searchParams.set('attr', renderattr);
+    
+    // Clear any legacy hash
+    url.hash = '';
+    
+    // Update URL without page reload
+    window.history.replaceState({}, '', url);
 }
 
 function updateMap() {
@@ -124,20 +183,29 @@ function updateDate() {
     const datepickerElement = document.getElementById('datepicker');
     if (!(datepickerElement instanceof HTMLInputElement)) return;
 
-    const selectedDate = new Date(datepickerElement.value);
+    // Use parseDateISO to avoid timezone issues instead of new Date()
+    const selectedDate = parseDateISO(datepickerElement.value);
     const fullDate = formatDateISO(selectedDate);
 
-    map.removeLayer(cocorahsLayer);
-    cocorahsLayer = makeVectorLayer(fullDate, 'IA CoCoRaHS Reports', 'cocorahs');
-    map.addLayer(cocorahsLayer);
-
-    map.removeLayer(coopLayer);
-    coopLayer = makeVectorLayer(fullDate, 'NWS COOP Reports', 'coop');
-    map.addLayer(coopLayer);
-
-    map.removeLayer(azosLayer);
-    azosLayer = makeVectorLayer(fullDate, 'ASOS/AWOS Reports', 'azos');
-    map.addLayer(azosLayer);
+    // Create new sources with updated URLs to force refresh
+    // This ensures OpenLayers actually fetches new data
+    cocorahsLayer.setSource(new ol.source.Vector({
+        format: new ol.format.GeoJSON(),
+        projection: ol.proj.get('EPSG:3857'),
+        url: `/geojson/7am.py?group=cocorahs&dt=${fullDate}`,
+    }));
+    
+    coopLayer.setSource(new ol.source.Vector({
+        format: new ol.format.GeoJSON(),
+        projection: ol.proj.get('EPSG:3857'),
+        url: `/geojson/7am.py?group=coop&dt=${fullDate}`,
+    }));
+    
+    azosLayer.setSource(new ol.source.Vector({
+        format: new ol.format.GeoJSON(),
+        projection: ol.proj.get('EPSG:3857'),
+        url: `/geojson/7am.py?group=azos&dt=${fullDate}`,
+    }));
 
     mrmsLayer.setSource(
         new ol.source.XYZ({
@@ -187,9 +255,10 @@ function get_tms_url() {
     const datepickerElement = document.getElementById('datepicker');
     if (!(datepickerElement instanceof HTMLInputElement)) return '';
 
-    const selectedDate = new Date(datepickerElement.value);
+    // Use parseDateISO to avoid timezone issues instead of new Date()
+    const selectedDate = parseDateISO(datepickerElement.value);
     const dateStr = formatDateISO(selectedDate);
-    return `/cache/tile.py/1.0.0/idep0::mrms-12z24h::${dateStr}/{z}/{x}/{y}.png`;
+    return `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/idep0::mrms-12z24h::${dateStr}/{z}/{x}/{y}.png`;
 }
 
 function buildUI() {
@@ -214,7 +283,8 @@ function buildUI() {
 
     const minusDayElement = document.getElementById('minusday');
     if (minusDayElement) {
-        minusDayElement.addEventListener('click', () => {
+        minusDayElement.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent form submission
             const datepicker = document.getElementById('datepicker');
             if (datepicker instanceof HTMLInputElement && datepicker.value) {
                 datepicker.value = addDaysToDateString(datepicker.value, -1);
@@ -225,7 +295,8 @@ function buildUI() {
 
     const plusDayElement = document.getElementById('plusday');
     if (plusDayElement) {
-        plusDayElement.addEventListener('click', () => {
+        plusDayElement.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent form submission
             const datepicker = document.getElementById('datepicker');
             if (datepicker instanceof HTMLInputElement && datepicker.value) {
                 datepicker.value = addDaysToDateString(datepicker.value, 1);
@@ -236,9 +307,15 @@ function buildUI() {
 }
 document.addEventListener('DOMContentLoaded', () => {
     buildUI();
-    parseHashlink();
+    parseURLParams();
 
-    const currentDate = formatDateISO(new Date());
+    // Get the date from the datepicker after parseURLParams() has run
+    // This will be either the URL date or today's date (set by buildUI)
+    const datepickerElement = document.getElementById('datepicker');
+    const currentDate = datepickerElement instanceof HTMLInputElement && datepickerElement.value 
+        ? datepickerElement.value 
+        : formatDateISO(new Date());
+    
     cocorahsLayer = makeVectorLayer(currentDate, 'IA CoCoRaHS Reports', 'cocorahs');
     coopLayer = makeVectorLayer(currentDate, 'NWS COOP Reports', 'coop');
     azosLayer = makeVectorLayer(currentDate, 'ASOS/AWOS Reports', 'azos');
@@ -303,26 +380,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Put content directly in the popup element
             element.innerHTML = content;
 
-            // Style the popup element to look like a popover
-            element.style.display = 'block';
-            element.style.backgroundColor = 'white';
-            element.style.border = '1px solid #ccc';
-            element.style.padding = '10px';
-            element.style.borderRadius = '5px';
-            element.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-            element.style.fontSize = '12px';
-            element.style.lineHeight = '1.4';
-            element.style.minWidth = '200px';
-            element.style.maxWidth = '300px';
-            element.style.position = 'relative';
-
+            // Use CSS classes instead of inline styles
+            element.classList.add('popup-visible');
             popoverVisible = true;
         }
     }
 
     function hidePopover() {
         if (element && popoverVisible) {
-            element.style.display = 'none';
+            element.classList.remove('popup-visible');
             element.innerHTML = '';
             popoverVisible = false;
         }
@@ -338,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const coord = geometry.getCoordinates();
             popup.setPosition(coord);
             const link = `/sites/site.php?station=${feature.getId()}&network=${feature.get('network')}`;
+            const dt = new Date(feature.get('valid'));
             const content = [
                 `<p><strong><a href="${link}" target="_new">${feature.getId()}</a> ${feature.get('name')}</strong>`,
                 `<br />Hour of Ob: ${feature.get('hour')}`,
@@ -347,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `<br />Precip: ${pretty(feature.get('pday'))}`,
                 `<br />Snow: ${pretty(feature.get('snow'))}`,
                 `<br />Snow Depth: ${pretty(feature.get('snowd'))}`,
+                `<br />Valid: ${dt}`,
                 '</p>',
             ];
             showPopover(content.join(''));
