@@ -1,4 +1,4 @@
-/* global iemdata, moment, ol */
+/* global iemdata, moment, ol, bootstrap */
 
 const CONFIG = {
     radar: null,

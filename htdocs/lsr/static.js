@@ -1,4 +1,4 @@
-/* global $, moment, ol, iemdata */
+/* global $, moment, ol, iemdata, bootstrap */
 let dragPan = null;
 let olmap = null; // Openlayers map
 let lsrtable = null; // LSR DataTable
