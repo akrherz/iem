@@ -1,19 +1,23 @@
 """Comparables to include/mlib.php"""
 
 
-def rectify_wfo(wfo3):
+def rectify_wfo(wfo: str):
     """Convert three char to four char WFO."""
-    if wfo3 in ["GUM", "HFO", "AFG", "AJK", "AFC"]:
-        return f"P{wfo3}"
-    if wfo3 in ["JSJ", "SJU"]:
+    if len(wfo) == 4:
+        return wfo
+    if wfo in ["GUM", "HFO", "AFG", "AJK", "AFC"]:
+        return f"P{wfo}"
+    if wfo in ["JSJ", "SJU"]:
         return "TJSJ"
-    return f"K{wfo3}"
+    return f"K{wfo}"
 
 
-def unrectify_wfo(wfo4):
+def unrectify_wfo(wfo: str):
     """Convert four char to three char WFO."""
-    if wfo4 in ["PGUM", "PHFO", "PAFG", "PAJK", "PAFC"]:
-        return wfo4[1:]
-    if wfo4 in ["TJSJ", "TSJU"]:
+    if len(wfo) == 3:
+        return wfo
+    if wfo in ["PGUM", "PHFO", "PAFG", "PAJK", "PAFC"]:
+        return wfo[1:]
+    if wfo in ["TJSJ", "TSJU"]:
         return "JSJ"
-    return wfo4[1:]
+    return wfo[1:]
