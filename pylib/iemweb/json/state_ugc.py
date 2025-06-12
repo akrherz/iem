@@ -57,8 +57,8 @@ def application(environ, start_response):
         res = conn.execute(
             sql_helper(
                 """
-            SELECT ugc, name from ugcs WHERE substr(ugc,1,2) = :state and
-            ugc is not null and end_ts is null and name is not null
+            SELECT distinct ugc, name from ugcs WHERE substr(ugc,1,2) = :state
+            and ugc is not null and end_ts is null and name is not null
             ORDER by name ASC
         """
             ),
