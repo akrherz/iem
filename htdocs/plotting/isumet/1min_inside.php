@@ -27,7 +27,11 @@ $dwpf = array();
 $relh = array();
 
 if ($station == null) {
-    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+    $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat";
+    if (!file_exists($fn)){
+        die("File not found");
+    }
+    $fcontents = file($fn);
     foreach ($fcontents as $line_num => $line) {
         $parts = preg_split("/\s+/", $line);
         $valid[] = strtotime(substr($line, 0, 26));

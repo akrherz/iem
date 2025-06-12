@@ -8,8 +8,8 @@ $t->title = "Agricultural Weather/Climate Information";
 $y = date("Y");
 $t->content = <<<EOM
 <ol class="breadcrumb">
-  <li><a href="/">IEM Homepage</a></li>
-  <li class="active">IEM Ag Weather/Climate Information</li>
+  <li class="breadcrumb-item"><a href="/">IEM Homepage</a></li>
+  <li class="breadcrumb-item active" aria-current="page">IEM Ag Weather/Climate Information</li>
 </ol>
 
 <p>The IEM website contains data from many <a href="/sites/locate.php">different observation networks</a>. While 
@@ -19,11 +19,11 @@ need.  Please do <a href="/info/contacts.php">contact us</a> with your
 questions!</p>
 
 <p>IEM's most popular applications:
-<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="fa fa-signal"></i> Automated Data Plotting</a>
-<a role="button" class="btn btn-success" href="/climodat/"><i class="fa fa-list-alt"></i> Climodat</a>
-<a role="button" class="btn btn-success" href="/explorer/"><i class="fa fa-map"></i> IEM Explorer</a>
-<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-signal"></i> Single Site Graphs</a>
-<a role="button" class="btn btn-success" href="#nass"><i class="fa fa-list-alt"></i> USDA NASS Products</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/"><i class="fa fa-signal me-1"></i>Automated Data Plotting</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/climodat/"><i class="fa fa-list-alt me-1"></i>Climodat</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/explorer/"><i class="fa fa-map me-1"></i>IEM Explorer</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/?q=108"><i class="fa fa-signal me-1"></i>Single Site Graphs</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="#nass"><i class="fa fa-list-alt me-1"></i>USDA NASS Products</a>
 </p>
 
 
@@ -264,7 +264,7 @@ are available for this data (search for NASS in the dropdown menu).</p>
 <p>The IEM also attempts to glean the Iowa Ag Reporting District data found in the
 weekly <a href="https://www.nass.usda.gov/Statistics_by_State/Iowa/Publications/Crop_Progress_&_Condition/">weekly crop progress</a>
 PDF reports.  You can download the IEM's entire database as this
-<a href="/cgi-bin/request/nass_iowa.py"><i class="fa fa-download"></i> Excel file</a>.</p>
+<a href="/cgi-bin/request/nass_iowa.py"><i class="fa fa-download me-1"></i>Excel file</a>.</p>
 
 <h4>Historical Freeze Risk</h4>
 

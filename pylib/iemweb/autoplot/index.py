@@ -143,7 +143,7 @@ onClick="mapFactory('{network}', '{name}');">Show Map</button>
 <img src="/images/red_dot.svg" style="height: 15px;"> Offline<br />
 <div style="width: 100%; height: 600px;" id="map_{network}_{name}"></div>
 </div>
-<div class="popup" id="popup_{network}_{name}"></div>
+<div class="popup" id="popup_{network}_{name}" style="display: none;"></div>
 """
 
 
@@ -644,8 +644,14 @@ def generate_form(apid, fdict, headers, cookies):
         else:
             add_to_plotvars(value, fdict, arg, res)
         formhtml += (
-            f'<div class="row apdiv"><div class="col-md-3">{arg["label"]}'
-            f'</div><div class="col-md-9">{form}</div></div>'
+            f'<div class="row align-items-center apdiv">'
+            f'<div class="col-sm-4">'
+            f'<label class="form-label fw-semibold mb-0">'
+            f"{arg['label']}</label>"
+            f"</div>"
+            f'<div class="col-sm-8">'
+            f"{form}"
+            f"</div></div>"
             "\n"
         )
     if fdict.get("_cb") == "1":
@@ -696,32 +702,47 @@ $(document).ready(function(){{
         elif fmt in ["png", "svg"]:
             timing_secs = get_timing(apid) + 1
             res["image"] = f"""
-<div id="willload" style="height: 200px;">
-        <p><span class="fa fa-arrow-down"></span>
-        Based on a sampling of recent timings for this application, plot
-        generation
- time has averaged {timing_secs} seconds. Hold on for the plot is generating
- now!</p>
-        <div class="progress progress-striped active">
-                <div id="timingbar" class="progress-bar progress-bar-warning"
-                role="progressbar"
-             aria-valuenow="0" aria-valuemin="0" aria-valuemax="{timing_secs}"
-                 style="width: 0%;"></div>
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title mb-0">
+            <span class="badge bg-primary me-2">3</span>
+            Generated Chart
+        </h4>
+    </div>
+    <div class="card-body">
+        <div id="willload" class="text-center p-4">
+            <div class="mb-3">
+                <i class="fa fa-chart-line fa-2x text-muted mb-2"></i>
+                <p class="mb-2">Based on recent timings, plot generation
+                averages {timing_secs} seconds. Please wait while your
+                chart is being generated...</p>
+            </div>
+            <div class="progress" style="height: 8px;">
+<div id="timingbar"
+    class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+    role="progressbar" aria-valuenow="0"
+    aria-valuemin="0" aria-valuemax="{timing_secs}"
+    style="width: 0%;"></div>
+            </div>
         </div>
+        <div class="text-center">
+            <img src="{res["imguri"]}.{fmt}" class="img-fluid"
+                 id="theimage" alt="Generated chart" />
+        </div>
+    </div>
 </div>
-<br clear="all" />
-        <img src="{res["imguri"]}.{fmt}" class="img img-responsive"
-         id="theimage" />
             """
             res["jsextra"] += f"""
-var timing = 0;
-var progressBar = setInterval(function (){{
+let timing = 0;
+const progressBar = setInterval(function () {{
         if (timing >= {timing_secs} ||
-            $('#willload').css('display') == 'none'){{
+            document.getElementById('willload').style.display === 'none') {{
                 clearInterval(progressBar);
         }}
-        var width = (timing / {timing_secs}) * 100.;
-        $("#timingbar").css('width', width +'%').attr('aria-valuenow', width);
+        const width = (timing / {timing_secs}) * 100;
+        const timingBar = document.getElementById('timingbar');
+        timingBar.style.width = width + '%';
+        timingBar.setAttribute('aria-valuenow', width);
         timing = timing + 0.2;
 }}, 200);
             """
@@ -746,96 +767,161 @@ var progressBar = setInterval(function (){{
         opts["maptable"] = "Interactive Map + Table"
     sel = make_select("_fmt", fmt, opts, showvalue=False)
     formhtml += (
-        '<div class="row apdiv"><div class="col-md-3">Select Output Format:'
-        f'</div><div class="col-md-9">{sel}</div></div>'
+        '<div class="row align-items-center apdiv">'
+        '<div class="col-sm-4">'
+        '<label class="form-label fw-semibold mb-0">'
+        "Select Output Format:</label></div>"
+        f'<div class="col-sm-8">{sel}</div></div>'
     )
 
     res["formhtml"] = f"""
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <span class="badge bg-primary me-2">2</span>
+                    Configure Chart Options
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="GET" name="s" id="myForm">
+                    <input type="hidden" name="_wait" value="no" id="_wait">
+                    <input type="hidden" name="q" value="{apid}">
+                    <div class="apopts">
+                        {formhtml}
+                    </div>
+                    <div class="mt-4 d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-chart-line me-1"></i>
+                            Generate Plot
+                        </button>
+                        <button type="submit" name="_cb" value="1"
+                                class="btn btn-outline-warning">
+                            <i class="fa fa-refresh me-1"></i>
+                            Force Update (bypass cache)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <style>
-.apopts .row:nth-of-type(odd) {{
-  background-color: #EEEEEE;
+.apopts .apdiv:nth-of-type(odd) {{
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  margin: 0.25rem 0;
 }}
-.apopts .row:nth-of-type(even) {{
-  background-color: #FFFFFF;
+.apopts .apdiv:nth-of-type(even) {{
+  background-color: #ffffff;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  border: 1px solid #e9ecef;
 }}
 .apdiv {{
-    margin-top: 3px;
-    margin-bottom: 3px;
+  margin-bottom: 0.5rem;
+}}
+.apdiv label {{
+  text-align: right;
+  padding-right: 1rem;
+}}
+@media (max-width: 576px) {{
+  .apdiv label {{
+    text-align: left;
+    padding-right: 0;
+    margin-bottom: 0.5rem;
+  }}
 }}
 .optcontrol {{
-  float: left;
-  margin-right: 10px !important;
+  margin-right: 0.75rem;
 }}
-.ui-datepicker-year {{
+.ui-datepicker-year, .ui-datepicker-month {{
   color: #000;
 }}
 .sday .ui-datepicker-year {{
   display: none;
-}}
-.ui-datepicker-month {{
-  color: #000;
 }}
 .popup {{
     background-color: rgba(0, 0, 0, 0.75);
     color: #FFF;
     font-weight: bold;
     font-size: 1.2em;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 1.25rem;
     z-index: 10002;
+    border-radius: 0.375rem;
 }}
 .highcharts-root {{
   font-size: 16px !important;
 }}
 </style>
 <script>
-function onNetworkChange(newnetwork){{
-    $("#_wait").val("yes");
-    $('form#myForm').submit();
+function onNetworkChange(newnetwork) {{
+    const waitInput = document.getElementById('_wait');
+    if (waitInput) {{
+        waitInput.value = 'yes';
+    }}
+    const myForm = document.getElementById('myForm');
+    if (myForm) {{
+        myForm.submit();
+    }}
 }}
 </script>
-        <h4><span class="fa fa-arrow-right"></span>
-        Second, select specific chart options::</h4>
-        <form method="GET" name="s" id="myForm">
-        <input type="hidden" name="_wait" value="no" id="_wait">
-        <input type="hidden" name="q" value="{apid}">
-        <div class="container-fluid apopts">
-        {formhtml}
-        </div>
-        <button type="submit">Make Plot with Options</button>
-        <button type="submit" name="_cb" value="1">
-        Force Updated Plot (no caching)</button>
-</form>
-    {res["nassmsg"]}
+{res["nassmsg"]}
     """
     if meta.get("report"):
         res["dataextra"] = f"""
-<a href="{res["imguri"]}.txt" class="btn btn-primary">
-<i class="fa fa-table"></i> Direct/Stable Link to Text</a> &nbsp;
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title mb-0">
+            <span class="badge bg-success me-2">4</span>
+            Download Options
+        </h4>
+    </div>
+    <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{res["imguri"]}.txt" class="btn btn-primary">
+                <i class="fa fa-file-text me-1"></i>Direct Text Link
+            </a>
         """
     if meta.get("data"):
         res["dataextra"] += f"""
-<a href="{res["imguri"]}.csv" class="btn btn-primary">
-<i class="fa fa-table"></i> View Data (as csv)</a> &nbsp;
-<a href="{res["imguri"]}.xlsx" class="btn btn-primary">
-<i class="fa fa-table"></i> Download as Excel</a> &nbsp;
+            <a href="{res["imguri"]}.csv" class="btn btn-primary">
+                <i class="fa fa-download me-1"></i>CSV Data
+            </a>
+            <a href="{res["imguri"]}.xlsx" class="btn btn-success">
+                <i class="fa fa-file-excel me-1"></i>Excel Download
+            </a>
         """
     if meta["maptable"]:
         res["dataextra"] += f"""
-<a href="{res["imguri"]}.geojson" class="btn btn-primary">
-<i class="fa fa-map"></i> Download as GeoJSON</a> &nbsp;
+            <a href="{res["imguri"]}.geojson" class="btn btn-info">
+                <i class="fa fa-map me-1"></i>GeoJSON
+            </a>
         """
     if meta.get("raster"):
         res["dataextra"] += f"""
-<a href="{res["imguri"]}.geotiff" class="btn btn-primary">
-<i class="fa fa-map"></i> Download as GeoTIFF</a> &nbsp;
+            <a href="{res["imguri"]}.geotiff" class="btn btn-warning">
+                <i class="fa fa-globe me-1"></i>GeoTIFF
+            </a>
+        """
+
+    # Close the download options card if we have any data extras
+    if res["dataextra"]:
+        res["dataextra"] += """
+        </div>
+    </div>
+</div>
         """
     res["issues"] = """
-    <div><span class="fa fa-info"></span>
+<div class="alert alert-info">
+    <i class="fa fa-info-circle me-2"></i>
     If you notice plotting issues with the image above, please
-    do <a class="alert-link" href="/info/contacts.php">let us know</a>
-    by providing the
-    URL address currently shown by your web browser.</div>
+    <a class="alert-link" href="/info/contacts.php">contact us</a>
+    and provide the URL address currently shown by your web browser.
+</div>
     """
     return res
 
@@ -966,36 +1052,79 @@ def generate(fdict, headers, cookies):
         apid = 0
     res = generate_form(apid, fdict, headers, cookies)
     content = f"""
-<h3>Automated Data Plotter</h3>
-
-<p>This application dynamically generates many types of graphs.  These graphs
-are derived from processing of various data sources done by the IEM.  Please
-feel free to use these generated graphics in whatever way you wish.
-<a href="/plotting/auto/">Reset App</a>. The
-<a href="/explorer/">IEM Explorer</a> application offers a simplified frontend
-to some of these autoplots.</p>
-
-<br /><form method="GET" name="t">
-<div class="form-group">
-<h4><span class="fa fa-arrow-right"></span> First, select a chart type::</h4>
-{generate_autoplot_list(apid)}
-<input type="submit" value="Select Plot Type" />
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fa fa-chart-line me-2"></i>Automated Data Plotter
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">This application dynamically generates many
+                types of graphs derived from various IEM data sources.
+                Feel free to use these generated graphics in whatever way
+                you wish.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/plotting/auto/"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-refresh me-1"></i>Reset App
+                    </a>
+                    <a href="/explorer/"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fa fa-map me-1"></i>IEM Explorer (Simplified)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-</form>
 
-<hr />
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <span class="badge bg-primary me-2">1</span>
+                    Select a Chart Type
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="GET" name="t">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-lg-8">
+                            <label for="chart-select" class="form-label">
+                                Choose from available chart types:
+                            </label>
+                            {generate_autoplot_list(apid)}
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <button type="submit"
+                                    class="btn btn-primary w-100">
+                                <i class="fa fa-arrow-right me-1"></i>
+                                Select Plot Type
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {res["formhtml"]}
 
 {res["description"]}
 
-<hr>
+<div class="row">
+    <div class="col-12">
+        {res["image"]}
 
-{res["image"]}
+        {res["dataextra"]}
 
-{res["dataextra"]}
-
-{res["issues"]}
+        {res["issues"]}
+    </div>
+</div>
 
 {features_for_id(res, apid)}
 
@@ -1016,31 +1145,42 @@ to some of these autoplots.</p>
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
 <script>
-function hideImageLoad(){{
-        // console.log("load() fired...");
-        $('#willload').css('display', 'none');
+function hideImageLoad() {{
+    const willload = document.getElementById('willload');
+    if (willload) {{
+        willload.style.display = 'none';
+    }}
 }}
-$(document).ready(function(){{
+
+document.addEventListener('DOMContentLoaded', function() {{
     {res["jsextra"]}
-    $('.optcontrol').change(function(){{
-        if (this.checked){{
-                $("#"+ this.name).css('display', 'block');
-        }} else {{
-                $("#"+ this.name).css('display', 'none');
-        }}
+
+    // Handle optional controls
+    document.querySelectorAll('.optcontrol').forEach(function(control) {{
+        control.addEventListener('change', function() {{
+            const targetEl = document.getElementById(this.name);
+            if (targetEl) {{
+                targetEl.style.display = this.checked ? 'block' : 'none';
+            }}
+        }});
     }});
-        $('#theimage').on('load', function(){{
-                hideImageLoad();
-        }});
-        $('#theimage').on('error', function(){{
-                hideImageLoad();
-        }});
-    // The image may be cached and return to the user before this javascript
-    // is hit, so we do a check to see if it is indeed loaded now
-        if ($("#theimage").get(0) && $("#theimage").get(0).complete){{
-                hideImageLoad();
+
+    // Handle image load events
+    const theImage = document.getElementById('theimage');
+    if (theImage) {{
+        theImage.addEventListener('load', hideImageLoad);
+        theImage.addEventListener('error', hideImageLoad);
+
+        // Check if image is already loaded (cached)
+        if (theImage.complete) {{
+            hideImageLoad();
         }}
-    $(".iemselect2").select2();
+    }}
+
+    // Initialize select2 (still uses jQuery)
+    if (typeof $ !== 'undefined') {{
+        $(".iemselect2").select2();
+    }}
 }});
 </script>
         """,

@@ -26,14 +26,14 @@ $c1 = "";
 $c2 = "";
 $c3 = "";
 if (isset($_REQUEST["state"])) {
-    $c2 = " well";
+    $c2 = " bg-light border rounded p-3";
     $url .= "?state={$state}";
     $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
 } else if (isset($_REQUEST["all"])) {
-    $c3 = " well";
+    $c3 = " bg-light border rounded p-3";
     $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
 } else {
-    $c1 = " well";
+    $c1 = " bg-light border rounded p-3";
     $url .= "?wfo={$wfo}";
     $ptitle = "<h3>River Forecast Point Monitor by NWS WFO</h3>";
 }
@@ -100,13 +100,13 @@ Documentation on this webservice is
   <div class="col-md-4{$c1}">
     <h4>1. By NWS Forecast Office</h4>
 <form method="GET" name="wfo">
-{$nselect} <input type="submit" value="Select by WFO">
+{$nselect} <input type="submit" value="Select by WFO" class="btn btn-primary">
 </form>
   </div>
   <div class="col-md-4{$c2}">
     <h4>2. By State</h4>
 <form method='GET' name='state'>
-{$sselect} <input type="submit" value="Select by State">
+{$sselect} <input type="submit" value="Select by State" class="btn btn-primary">
 </form>
   </div>
   <div class="col-md-4{$c3}">

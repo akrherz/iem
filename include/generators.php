@@ -134,7 +134,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   <div class="card-body">
 
   <div class="mb-2">
-    <span class="fw-bold">Bandwidth: {$label}</span>
+    <span>Bandwidth: {$label}</span>
     <div class="progress">
         <div class="progress-bar bg-{$bcolor}" role="progressbar" aria-valuenow="{$bpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$bpercent}%;">
         </div>
@@ -142,7 +142,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   </div>
 
   <div class="mb-2">
-    <span class="fw-bold">Total Website: {$rlabel}</span>
+    <span>Total Website: {$rlabel}</span>
     <div class="progress">
         <div class="progress-bar bg-{$rcolor}" role="progressbar" aria-valuenow="{$rpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$rpercent}%;">
         </div>
@@ -150,7 +150,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   </div>
 
   <div class="mb-2">
-    <span class="fw-bold">API/Data Services: {$alabel}</span>
+    <span>API/Data Services: {$alabel}</span>
     <div class="progress">
         <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
         </div>
@@ -158,7 +158,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   </div>
 
   <div class="mb-2">
-    <span class="fw-bold">API Success: {$olabel}</span>
+    <span>API Success: {$olabel}</span>
     <div class="progress">
         <div class="progress-bar bg-{$ocolor}" role="progressbar"
         aria-valuenow="{$opercent}" aria-valuemin="0" aria-valuemax="100"
@@ -221,13 +221,13 @@ function gen_feature($t)
     $jsextra = "";
     if ($row["mediasuffix"] == 'mp4') {
         $imgiface = <<<EOM
-<video class="img img-fluid" controls>
+<video class="img-fluid" controls>
     <source src="{$imghref}" type="video/mp4">
     Your browser does not support the video tag.
 </video>
 EOM;
     } else {
-        $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-fluid\" /></a>";
+        $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img-fluid\" /></a>";
     }
     if ($row["javascripturl"]) {
         $imgiface = <<<EOF
@@ -235,7 +235,7 @@ EOM;
 <div id="ap_container" style="width:100%;height:400px;"></div>
 </div>
 <div class="d-md-none">
-<a href="$imghref"><img src="$imghref" alt="Feature" class="img img-fluid" /></a>
+<a href="$imghref"><img src="$imghref" alt="Feature" class="img-fluid" /></a>
 </div>
 EOF;
         $HC = "8.2.0";
@@ -266,24 +266,25 @@ EOM;
     
     </div>
     <div class="card-body">
-
-    
-        <div class="col-12 col-sm-7 float-end">
-            <div class="card">
-                <div class="card-img-top">
-                    {$imgiface}
+        <div class="row">
+            <div class="col-12 col-md-5">
+                <h4>{$row["title"]}</h4>
+                <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
+                {$tagtext}
+                <div class="mt-2">{$row["story"]}</div>
+            </div>
+            <div class="col-12 col-md-7">
+                <div class="card">
+                    <div class="card-img-top">
+                        {$imgiface}
+                    </div>
+                    <div class="card-body">
+                        <span>{$row["caption"]}</span>
+                        {$linktext}
+                    </div>
                 </div>
-                <div class="card-body"><span>{$row["caption"]}</span>{$linktext}</div>
             </div>
         </div>
-
-        <h4 style="display: inline;">{$row["title"]}</h4>
-        
-            <br /><small>Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
-            {$tagtext}
-            <br />{$row["story"]}
-
-        <div class="clearfix"></div>
 
 EOF;
 
@@ -325,35 +326,43 @@ EOF;
         <br /><strong>Previous Years' Features</strong>
             
 EOF;
-    /* Now, lets look for older features! */
-    $sql = "select *, extract(year from valid) as yr from feature 
-            WHERE extract(month from valid) = extract(month from now()) 
-            and extract(day from valid) = extract(day from now()) and 
-            extract(year from valid) != extract(year from now()) ORDER by yr DESC";
-    $result = pg_exec($connection, $sql);
-
-    for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
-        // Start a new row
-        if ($i % 2 == 0) {
-            $s .= "\n<div class=\"row\">";
-        }
-        $s .= sprintf(
-            "\n<div class=\"col-6\">%s: %s" .
-                "<a href=\"onsite/features/cat.php?day=%s\">" .
-                "%s</a></div>",
-            $row["yr"],
-            $row["appurl"] ? "<i class=\"bi bi-bar-chart\"></i> " : "",
-            substr($row["valid"], 0, 10),
-            $row["title"]
+    // Find previous years' features
+    $stname = iem_pg_prepare(
+        $connection,
+        "select *, extract(year from valid) as yr from feature ".
+        "WHERE to_char(valid, 'mmdd') = $1 and valid < 'TODAY'::date ".
+        "ORDER by yr DESC"
         );
-        // End the row
-        if ($i % 2 != 0) {
-            $s .= "\n</div>\n";
-        }
+    $result = pg_execute($connection, $stname, array(
+        date("md")
+    ));
+
+    // Check if we have any previous years' features
+    $features = [];
+    while ($row = pg_fetch_assoc($result)) {
+        $features[] = $row;
     }
 
-    if ($i > 0 && $i % 2 != 0) {
-        $s .= "\n<div class=\"col-6\">&nbsp;</div>\n</div>";
+    if (count($features) > 0) {
+        $s .= '<div class="row g-2 mt-2">';
+        foreach ($features as $row) {
+            $icon = $row["appurl"] ? '<i class="bi bi-bar-chart text-primary me-1"></i>' : '';
+            $s .= sprintf(
+                '<div class="col-md-6 col-xl-4">' .
+                '<div class="card card-body py-2 px-3">' .
+                '<div class="d-flex align-items-center">' .
+                '<span class="badge bg-primary me-2 flex-shrink-0">%s</span>' .
+                '<small class="text-truncate">' .
+                '<a href="onsite/features/cat.php?day=%s" class="text-decoration-none">%s%s</a>' .
+                '</small>' .
+                '</div></div></div>',
+                $row["yr"],
+                substr($row["valid"], 0, 10),
+                $icon,
+                htmlspecialchars($row["title"])
+            );
+        }
+        $s .= '</div>';
     }
 
     $s .= "</div><!--  end of card body -->";

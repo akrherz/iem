@@ -26,7 +26,11 @@ $relh = array();
 $valid = array();
 
 if ($station == null){
-    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+    $fpath = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat";
+    if (!file_exists($fpath)){
+        die("File not found");
+    }
+    $fcontents = file($fpath);
     foreach($fcontents as $line_num => $line){
         $parts = preg_split ("/\s+/", $line);
         $v = strtotime( substr($line, 0, 26) );
