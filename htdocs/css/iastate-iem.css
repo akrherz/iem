@@ -28,7 +28,19 @@ body {
 thead.sticky {
     position: sticky;
     top: 0;
-    background:#FFF;
+    background: #FFF;
+    z-index: 10;
+}
+
+/* Fix for dark tables with sticky headers */
+thead.sticky.table-dark {
+    background: #212529;
+}
+
+.table-responsive thead.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 /* === Header === */

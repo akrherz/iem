@@ -110,50 +110,82 @@ $nselect = selectNetworkType("COCORAHS", $network);
 $ys =  yearSelect(2000, $year, "year");
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
- <li class="active">CoCoRaHS Obs by Date or Station</li>
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">CoCoRaHS Obs by Date or Station</li>
+    </ol>
+</nav>
 
 <p>This page allows you to explore CoCoRaHS observations for a given
 state by date or by single station for a given year.
 You can then click on stations and dates to update
 the data presentation.</p>
 
-<form method="GET" name="switchnet">
-<p><strong>Option 1: Select State and Date:</strong><br />
-State: {$nselect} Date:
-<input type="date" name="date" value="{$datestr}">
-<input type="submit"></p>
-</form>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Option 1: Select State and Date</h5>
+                <form method="GET" name="switchnet">
+                    <div class="mb-3">
+                        <label class="form-label">State:</label>
+                        {$nselect}
+                    </div>
+                    <div class="mb-3">
+                        <label for="date-input" class="form-label">Date:</label>
+                        <input type="date" id="date-input" name="date" value="{$datestr}" class="form-control">
+                    </div>
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Option 2: Select Station and Year</h5>
+                <form method="GET" name="switchnet2">
+                    <div class="mb-3">
+                        <label class="form-label">Station:</label>
+                        {$ss}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Year:</label>
+                        {$ys}
+                    </div>
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-<form method="GET" name="switchnet2">
-<p><strong>Option 2: Select Station and Year:</strong><br />
-Station: {$ss} Year: {$ys}
-<input type="submit"></p>
-</form>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead class="sticky">
+        <tr>
+          <th><a href="{$link}station">ID #:</a></th>
+          <th>Site Name:</th>
+          <th>County:</th>
+          <th><a href="{$link}day">Date:</a></th>
+          <th><a href="{$link}precip">Precip</a></th>
+          <th><a href="{$link}snow">Snowfall</a></th>
+          <th><a href="{$link}snowd">Snow Depth</a></th>
+        </tr>
+        </thead>
+        <tbody>
+        {$table}
+        </tbody>
+    </table>
+</div>
 
-<p><table class="table table-striped table-bordered">
-<thead class="sticky">
-<tr>
-  <th><a href="{$link}station">ID #:</a></th>
-  <th>Site Name:</th>
-  <th>County:</th>
-  <th><a href="{$link}day">Date:</a></th>
-  <th><a href="{$link}precip">Precip</a></th>
-  <th><a href="{$link}snow">Snowfall</a></th>
-  <th><a href="{$link}snowd">Snow Depth</a></th></tr>
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
-
-<p>Theoretically, you should be able to highlight the entire table with 
-your cursor and then copy-paste it into a spreadsheet program if you 
-like.
-
-<p>Errors exist in this dataset and you should evaluate the observations
-before using...</div>
+<div class="alert alert-info mt-3">
+    <p><strong>Usage Tips:</strong></p>
+    <ul class="mb-0">
+        <li>You can highlight the entire table with your cursor and copy-paste it into a spreadsheet program.</li>
+        <li>Errors exist in this dataset and you should evaluate the observations before using.</li>
+    </ul>
+</div>
 EOM;
 $t->render('full.phtml');

@@ -10,99 +10,74 @@ $stationselect = networkselect("RAOB", "_OAX");
 $year = date("Y");
 $yearselect = yearSelect(1947, $year);
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
 EOM;
 $t->content = <<<EOM
-<ol class="breadcrumb">
-    <li><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
-    <li class="active">List Soundings by Year</li>
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">List Soundings by Year</li>
+    </ol>
+</nav>
 <p>This page presents a yearly listing of sounding parameters computed by the
 IEM using <a href="https://unidata.github.io/MetPy/latest/index.html">Unidata's MetPy</a>.
 <strong>Please use caution</strong> when using these parameters directly as they
 can struggle with GIGO. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
 
-<p>
- <form name="local">
- <div class="row">
- <div class="col-md-4">
- <strong>Select Site:</strong>
-     {$stationselect}
- </div>
- <div class="col-md-4">
- <!--
- <input type="checkbox" name="filter_year" id="filter_year" checked="checked" />
- <label for="filter_year">Filter by Year:</label>
- -->
-<strong>Select Year:</strong> {$yearselect}
+<div class="card mb-4">
+    <div class="card-body">
+        <form name="local">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Select Site:</label>
+                    {$stationselect}
+                </div>
+                <div class="col-md-4">
+                    <!--
+                    <input type="checkbox" name="filter_year" id="filter_year" checked="checked" />
+                    <label for="filter_year">Filter by Year:</label>
+                    -->
+                    <label class="form-label fw-bold">Select Year:</label> {$yearselect}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">View Top 100 by Parameter:</label>
+                    <select name="sortby" id="sortby" class="form-select mb-2">
+                        <option value="-">Select Parameter...</option>
+                        <option value="sbcape_jkg">Surface Based CAPE (J/kg)</option>
+                        <option value="sbcin_jkg">Surface Based CIN (J/kg)</option>
+                        <option value="mucape_jkg">Most Unstable CAPE (J/kg)</option>
+                        <option value="mucin_jkg">Most Unstable CIN (J/kg)</option>
+                        <option value="pwater_mm">Precipitable Water (mm)</option>
+                        <option value="lcl_agl_m">LCL Height (m AGL)</option>
+                        <option value="lfc_agl_m">LFC Height (m AGL)</option>
+                        <option value="el_agl_m">EL Height (m AGL)</option>
+                        <option value="total_totals">Total Totals Index</option>
+                        <option value="sweat_index">Sweat Index</option>
+                        <option value="srh_sfc_1km_total">Surface to 1km Storm Relative Helicity (m^2/s^2)</option>
+                        <option value="srh_sfc_3km_total">Surface to 3km Storm Relative Helicity (m^2/s^2)</option>
+                        <option value="shear_sfc_6km_smps">Surface to 6km Shear (m/s)</option>
+                    </select>
+                    <select name="asc" id="asc" class="form-select">
+                        <option value="desc">Descending</option>
+                        <option value="asc">Ascending</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-<div class="col-md-4">
-<strong>View Top 100 by Parameter:</strong>
-<select name="sortby" id="sortby">
-    <option value="-">Select Parameter...</option>
-    <option value="sbcape_jkg">Surface Based CAPE (J/kg)</option>
-    <option value="sbcin_jkg">Surface Based CIN (J/kg)</option>
-    <option value="mucape_jkg">Most Unstable CAPE (J/kg)</option>
-    <option value="mucin_jkg">Most Unstable CIN (J/kg)</option>
-    <option value="pwater_mm">Precipitable Water (mm)</option>
-    <option value="lcl_agl_m">LCL Height (m AGL)</option>
-    <option value="lfc_agl_m">LFC Height (m AGL)</option>
-    <option value="el_agl_m">EL Height (m AGL)</option>
-    <option value="total_totals">Total Totals Index</option>
-    <option value="sweat_index">Sweat Index</option>
-    <option value="srh_sfc_1km_total">Surface to 1km Storm Relative Helicity (m^2/s^2)</option>
-    <option value="srh_sfc_3km_total">Surface to 3km Storm Relative Helicity (m^2/s^2)</option>
-    <option value="shear_sfc_6km_smps">Surface to 6km Shear (m/s)</option>
-</select>
-<select name="asc" id="asc">
-    <option value="desc">Descending</option>
-    <option value="asc">Ascending</option>
-</select>
-</div>
-</form>
-</p>
 
-<br />
-<p>
-<button id="makefancy" type="button">Make Table Interactive</button>
-&nbsp;
-<button id="download" type="button">Download all data as CSV</button>
-</p>
-<br />
-
-<p>
- <div id="thetable">
-<table class="table table-bordered table-striped" id="datatable">
-<caption>Viewing: Table of Sounding Parameters</caption>
-<thead class="sticky">
-<tr>
-<th>ID</th>
-<th>Valid</th>
-<th>SBCAPE J/kg</th>
-<th>MUCAPE J/kg</th>
-<th>SBCIN J/kg</th>
-<th>MUCIN J/kg</th>
-<th>PrecipWater mm</th>
-<th>LCL m</th>
-<th>LFC m</th>
-<th>EL m</th>
-<th>Total Totals</th>
-<th>SWEAT</th>
-<th>SRH 0-3 km m2/s2</th>
-<th>SRH 0-1 km m2/s2</th>
-<th>SHR 0-6 km mps</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
+<div class="d-flex gap-2 mb-4">
+    <button id="download" type="button" class="btn btn-success">Download all data as CSV</button>
 </div>
-</p>
+
+<div class="table-responsive">
+    <div id="datatable"></div>
+</div>
 
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="list.js?v=3"></script>
+<script src="list.module.js?v=5" type="module"></script>
 EOM;
 
 $t->render('full.phtml');

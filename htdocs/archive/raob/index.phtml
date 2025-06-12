@@ -14,11 +14,11 @@ $t->content = <<<EOM
 <h3>Rawinsonde (RAOB) Data Archive</h3>
 
 <p>For many moons, the IEM archived the soundings provided by the now defunct
-NOAA rucsoundings website.  This website was shutdown during September 2024, so
+NOAA rucsoundings website. This website was shutdown during September 2024, so
 the IEM started to ingest what was provided by the
 <a href="https://www.spc.noaa.gov/exper/soundings/">Storm Prediction Center</a>
 website. This source was found to be missing many sounding locations that the
-IEM previous archived.  So the IEM started to ingest what is provided by
+IEM previous archived. So the IEM started to ingest what is provided by
 <a href="https://www.ncei.noaa.gov/data/integrated-global-radiosonde-archive/">
 NCEI Integrated Global Radiosonde Archive</a>, but this archive is not in real-time.
 So as of March 2025, this website contains near real-time data from SPC and is
@@ -28,36 +28,64 @@ backfilled eventually with data from the NCEI archive.</p>
  data are vertical profiles of the atmosphere taken from weather balloons released
  twice daily.</p>
 
- <h4>Available Tools:</h4>
-<ul>
-    <li><a href="list.phtml">List Sounding Parameters per Year</a></li>
-    <li><a href="/plotting/auto/?q=150">View Sounding Percentiles</a> (Autoplot 150)</li>
-    <li><a href="/plotting/auto/?q=198">Sounding Monthly Min/Max values</a> (Autoplot 198)</li>
-    <li><a href="/plotting/auto/?q=212">Sounding Yearly Timeseries</a> (Autoplot 212)</li>
-    <li><a href="https://www.spc.noaa.gov/exper/soundingclimo/">SPC Sounding Climatology Page</a></li>
-</ul>
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Available Tools</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li><a href="list.phtml">List Sounding Parameters per Year</a></li>
+                    <li><a href="/plotting/auto/?q=150">View Sounding Percentiles</a> (Autoplot 150)</li>
+                    <li><a href="/plotting/auto/?q=198">Sounding Monthly Min/Max values</a> (Autoplot 198)</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul>
+                    <li><a href="/plotting/auto/?q=212">Sounding Yearly Timeseries</a> (Autoplot 212)</li>
+                    <li><a href="https://www.spc.noaa.gov/exper/soundingclimo/">SPC Sounding Climatology Page</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h4>Download Data</h4>
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Download Data</h4>
+    </div>
+    <div class="card-body">
+        <p>This form provides a simple comma delimited file of RAOB data, the columns
+         should be self-explanatory except the 'levelcode' column. Those values 
+         provide metadata on that level of data. The start time is inclusive and
+         end time is exclusive. Special soundings should be in this archive as well.</p>
 
-<p>This form provides a simple comma delimited file of RAOB data, the columns
- should be self-explainatory except the 'levelcode' column.  Those values 
- provide metadata on that level of data.  The start time is inclusive and
- end time is exclusive.  Special soundings should be in this archive as well.
-
-<table><tr><td valign="top">
-<strong>Level Codes</strong><br />
-<ul>
-   <li>4 = mandatory level</li>
-   <li>5 = significant level</li>
-   <li>6 = wind level (PPBB)</li> 
-   <li>7 = tropopause level</li>
-   <li>8 = maximum wind level</li>
-   <li>9 = surface level</li>
-</ul>
-</td><td>
-<strong>Output Datafile Columns</strong>
-<br /><pre>
-station      3 or 4 character station identifier
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Level Codes</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                           <li>4 = mandatory level</li>
+                           <li>5 = significant level</li>
+                           <li>6 = wind level (PPBB)</li> 
+                           <li>7 = tropopause level</li>
+                           <li>8 = maximum wind level</li>
+                           <li>9 = surface level</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Output Datafile Columns</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0">station      3 or 4 character station identifier
 validUTC     RAOB Launch Cycle Time in UTC
 levelcode    Level Code for this observation, not always available
 pressure_mb  Pressure of data in millibar
@@ -67,26 +95,64 @@ dwpc         Dew Point Temperature in C
 drct         Wind Direction in deg from North
 speed_kts    Wind Speed in knots
 bearing      Balloon bearing in degree, not always available
-range_sm     Ballon range from launch in statute miles, not always available
-</pre>
-</td>
-</table>
-<form method="GET" action="/cgi-bin/request/raob.py">
-<table class="table table-bordered">
-<tr><th>Select Site: {$nselect}</th>
-<td>Start UTC Time: <input type="text" name="sts" width="20"/></td>
-<td>End UTC Time: <input type="text" name="ets" width="20" /></td>
-<td><input type="checkbox" name="dl" id="dd">
-<label for="dd">Download to disk</label></td>
-<td><input type="submit" value="Giveme Data!"></td>
-</tr>
-</table>
-</form>
+range_sm     Ballon range from launch in statute miles, not always available</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<h4>JSON(P) Webservice</h4>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Data Request Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="/cgi-bin/request/raob.py">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Select Site:</label>
+                            {$nselect}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input type="checkbox" name="dl" id="dd" class="form-check-input">
+                                <label for="dd" class="form-check-label">Download to disk</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="sts" class="form-label">Start UTC Time:</label>
+                            <input type="datetime-local" id="sts" name="sts" class="form-control" 
+                                   title="Select start date and time in UTC"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ets" class="form-label">End UTC Time:</label>
+                            <input type="datetime-local" id="ets" name="ets" class="form-control"
+                                   title="Select end date and time in UTC"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa fa-download"></i> Get Data
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-<p>A JSON webservice exists for more programatic access, more information is
-<a href="/json/raob.py?help">here</a>.</p>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">JSON(P) Webservice</h4>
+    </div>
+    <div class="card-body">
+        <p class="mb-0">A JSON webservice exists for more programatic access, more information is
+        <a href="/json/raob.py?help">here</a>.</p>
+    </div>
+</div>
 
 EOM;
 $t->render('single.phtml');
