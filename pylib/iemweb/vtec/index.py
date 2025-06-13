@@ -106,7 +106,7 @@ def as_html(vtecinfo: dict):
 
 def get_context(environ: dict) -> dict:
     """Figure out how we were called."""
-    script_url = environ.get("SCRIPT_URL", "")
+    script_uri = environ.get("SCRIPT_URI", "")
     ctx = {
         "title": "NWS Valid Time Event Code (VTEC) Browser",
         "headextra": """
@@ -134,17 +134,17 @@ def get_context(environ: dict) -> dict:
         try:
             with open(assetfn) as fh:
                 assets = json.load(fh)["content.js"]
-                ctx["headextra"] = f"""
+            ctx["headextra"] = f"""
 <link rel="stylesheet" href="/vtec/{assets["css"][0]}">
 """
-                ctx["jsextra"] = f"""
+            ctx["jsextra"] = f"""
 <script src="/vtec/{assets["file"]}" type="module"></script>
 """
         except Exception as exp:
             error_log(environ, f"Failed to load assets.json: {exp}")
 
     # /vtec/event/2019-O-NEW-KDMX-SV-W-0001
-    m = VTEC_IN_URL_RE.search(script_url)
+    m = VTEC_IN_URL_RE.search(script_uri)
 
     if m:
         vtecinfo = m.groupdict()
