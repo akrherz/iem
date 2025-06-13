@@ -162,7 +162,7 @@ function setupEventListeners() {
     // Download button
     const downloadBtn = requireElement('download');
     downloadBtn.addEventListener('click', () => {
-        const service = `/api/1/raobs_by_year.txt?station=${station}`;
+        const service = `/api/1/raobs_by_year.txt?station=${encodeURIComponent(station)}`;
         window.location.href = service;
     });
 }
