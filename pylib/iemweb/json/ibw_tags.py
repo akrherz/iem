@@ -115,9 +115,9 @@ def run(wfo, damagetag, year):
         for row in cursor.mappings():
             # TODO the wfo here is a bug without it being 4 char
             href = (
-                f"{IEM}/vtec/event/{year}-O-{row['status']}-"
-                f"{rectify_wfo(row['wfo'])}-"
-                f"{row['ph']}-W-{row['eventid']:04.0f}"
+                f"{IEM}/vtec/?year={year}&wfo={rectify_wfo(row['wfo'])}&"
+                f"phenomena={row['ph']}&significance=W&"
+                f"eventid={row['eventid']:04.0f}"
             )
             data = dict(
                 eventid=row["eventid"],

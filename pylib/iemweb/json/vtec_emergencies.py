@@ -50,9 +50,9 @@ def run(conn: Connection = None):
     )
     for row in res.mappings():
         uri = (
-            f"/vtec/event/{row['vtec_year']}-O-NEW-"
-            f"{rectify_wfo(row['wfo'])}-{row['phenomena']}-"
-            f"{row['significance']}-{row['eventid']:04.0f}"
+            f"/vtec/?year={row['vtec_year']}&wfo={rectify_wfo(row['wfo'])}&"
+            f"phenomena={row['phenomena']}&significance={row['significance']}&"
+            f"eventid={row['eventid']:04.0f}"
         )
         data["events"].append(
             dict(

@@ -50,12 +50,10 @@ foreach ($jobj["data"] as $bogus => $row) {
     $used[] = $row["nwsli"];
     $river = $row["river_name"];
     $uri = sprintf(
-        "/vtec/event/%s-O-%s-%s-%s-%s-%04d",
+        "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=W&eventid=%s",
         date("Y"),
-        "NEW",
         rectify_wfo($row["wfo"]),
         $row["phenomena"],
-        "W",
         $row["eventid"]
     );
     if (!array_key_exists($river, $rivers)) {

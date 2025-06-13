@@ -1,86 +1,82 @@
 <div class="clearfix">&nbsp;</div>
 
 <div class="row">
-  <div class="col-md-3 card card-body">
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
 <form name="control" id="myform">
 
 <p><strong>Find VTEC Product:</strong></p>
 
 <div class="mb-3">
-<label for="wfo">Select Forecast Office</label>
-<select name="wfo" id="wfo" class="form-control"></select>
+<label for="wfo" class="form-label">Select Forecast Office</label>
+<select name="wfo" id="wfo" class="form-select"></select>
 </div>
 
 <div class="mb-3">
-<label for="phenomena">Phenomena</label>
-<select name="phenomena" id="phenomena" class="form-control"></select>
+<label for="phenomena" class="form-label">Phenomena</label>
+<select name="phenomena" id="phenomena" class="form-select"></select>
 </div>
 
 <div class="mb-3">
-<label for="significance">Significance</label>
-<select name="significance" id="significance" class="form-control"></select>
+<label for="significance" class="form-label">Significance</label>
+<select name="significance" id="significance" class="form-select"></select>
 </div>
 
 <div class="mb-3">
-<button type="button" id="etn-prev" class="btn btn-secondary">
-<i class="fa fa-arrow-left"></i></button>
-<label for="etn">Event Number</label>
-<button type="button" id="etn-next" class="btn btn-secondary">
-<i class="fa fa-arrow-right"></i></button>
+<button type="button" id="etn-prev" class="btn btn-primary">
+<i class="bi bi-arrow-left"></i></button>
+<label for="etn" class="form-label">Event Number</label>
+<button type="button" id="etn-next" class="btn btn-primary">
+<i class="bi bi-arrow-right"></i></button>
 <input type="text" name="etn" id="etn" class="form-control" maxlength="4">
 </div>
 
 <div class="mb-3">
-<label for="year">Event Year</label>
-<select name="year" id="year" class="form-control"></select>
+<label for="year" class="form-label">Event Year</label>
+<select name="year" id="year" class="form-select"></select>
 </div>
 
 <p>
-<button type="button" id="myform-submit" class="btn btn-secondary">
-<i class="fa fa-search"></i> Load Product</button>
+<button type="button" id="myform-submit" class="btn btn-primary">
+<i class="bi bi-search"></i> Load Product</button>
 </p>
 
 </form>
+      </div><!-- ./card-body -->
+    </div><!-- ./card -->
   </div><!-- ./col-md-3 -->
+  
   <div class="col-md-9">
 
 <div class="card" id="thetabs">
     <div class="card-header">
-      <ul class="nav nav-tabs" id="thetabs_tabs" role="tablist">
-         <li class="nav-item" role="presentation">
-           <button class="nav-link active" id="help-tab" data-bs-toggle="tab" data-bs-target="#help" type="button" role="tab" aria-controls="help" aria-selected="true">Help</button>
-         </li>
-         <li class="nav-item" role="presentation">
-           <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="false">Event Info</button>
-         </li>
-         <li class="nav-item" role="presentation">
-           <button class="nav-link" id="textdata-tab" data-bs-toggle="tab" data-bs-target="#textdata" type="button" role="tab" aria-controls="textdata" aria-selected="false">Text Data</button>
-         </li>
-         <li class="nav-item" role="presentation">
-           <button class="nav-link" id="themap-tab" data-bs-toggle="tab" data-bs-target="#themap" type="button" role="tab" aria-controls="themap" aria-selected="false">Interactive Map</button>
-         </li>
-         <li class="nav-item" role="presentation">
-           <button class="nav-link" id="stormreports-tab" data-bs-toggle="tab" data-bs-target="#stormreports" type="button" role="tab" aria-controls="stormreports" aria-selected="false">Storm Reports</button>
-         </li>
-         <li class="nav-item" role="presentation">
-           <button class="nav-link" id="listevents-tab" data-bs-toggle="tab" data-bs-target="#listevents" type="button" role="tab" aria-controls="listevents" aria-selected="false">List Events</button>
-         </li>
+      <ul class="nav nav-tabs card-header-tabs" id="thetabs_tabs">
+         <li class="nav-item"><a class="nav-link active" href="#help" data-bs-toggle="tab" data-bs-target="#help">Help</a></li>
+         <li class="nav-item"><a class="nav-link" href="#info" data-bs-toggle="tab" data-bs-target="#info">Event Info</a></li>
+         <li class="nav-item"><a class="nav-link" href="#textdata" data-bs-toggle="tab" data-bs-target="#textdata">Text Data</a></li>
+         <li class="nav-item"><a class="nav-link" href="#themap" data-bs-toggle="tab" data-bs-target="#themap">Interactive Map</a></li>
+         <li class="nav-item"><a class="nav-link" href="#stormreports" data-bs-toggle="tab" data-bs-target="#stormreports">Storm Reports</a></li>
+         <li class="nav-item"><a class="nav-link" href="#listevents" data-bs-toggle="tab" data-bs-target="#listevents">List Events</a></li>
       </ul>
     </div><!-- ./card-header -->
     <div class="card-body">
-     <div class="tab-content clearfix" id="thetabs-content">
+     <div class="tab-content clearfix">
 
-       <div class="tab-pane fade show active" id="help" role="tabpanel" aria-labelledby="help-tab">
-       <div id="help">
+       <div class="tab-pane active" id="help">
  <h2>IEM VTEC Product Browser</h2>
 
 <p>This application allows easy navigation of National Weather Service
 issued products with Valid Time Event Coding (VTEC).</p>
 
-<p><strong>13 Nov 2024 Update:</strong> The tool was updated to use non-hash
+<ol>
+    <li><strong>13 June 2025 Update:</strong> As a part of a broader IEM website
+    update, this tool was rewritten.  Please let me know of any bugs.</li>
+<li><strong>13 Nov 2024 Update:</strong> The tool was updated to use non-hash
 link style URLs.  A shim is in place to translate the old URLs to the new
 ones, so nothing should be broken (famous last words). This was done to
-allow the HTML5 History API to provide a better user experience.</p>
+allow the HTML5 History API to provide a better user experience.</li>
+</ol>
 
 <p><strong>Tab Functionality:</strong>
 <br /><i>Above this section, you will notice six selectable tabs. Click on 
@@ -99,9 +95,8 @@ the tab to show the information.</i>
 <br />This application is fully driven by IEM <a href="/api/">web services</a>.
 </p>
 
-</div>
        </div>
-       <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+       <div class="tab-pane" id="info">
 <p><strong><span id="vtec_label"></span></strong></p>
 
 <div id="info_event_not_found" style="display: none;">
@@ -109,17 +104,17 @@ the tab to show the information.</i>
 </div>
 
 <div id="info_event_found" style="display: block;">
-<button type="button" id="lsr_kml_button" class="btn btn-secondary"><i class="fa fa-search"></i> LSR KML Source</button>
-<button type="button" id="warn_kml_button" class="btn btn-secondary"><i class="fa fa-search"></i> Warning KML Source</button>
-<button type="button" id="ci_kml_button" class="btn btn-secondary"><i class="fa fa-search"></i> County Intersection KML Source</button>
-<button type="button" id="gr_button" class="btn btn-secondary"><i class="fa fa-search"></i> Gibson Ridge Placefile</button>
+<button type="button" id="lsr_kml_button" class="btn btn-primary"><i class="bi bi-search"></i> LSR KML Source</button>
+<button type="button" id="warn_kml_button" class="btn btn-primary"><i class="bi bi-search"></i> Warning KML Source</button>
+<button type="button" id="ci_kml_button" class="btn btn-primary"><i class="bi bi-search"></i> County Intersection KML Source</button>
+<button type="button" id="gr_button" class="btn btn-primary"><i class="bi bi-search"></i> Gibson Ridge Placefile</button>
 
 <h3>Listing of Counties/Parishes/Zones Included in Product</h3>
 
 <div class="float-end">
-    <button class="btn btn-secondary"
+    <button class="btn btn-primary"
     onclick="selectElementContents('ugctable');">
-    <i class="fa fa-clipboard"></i> Copy Table to Clipboard
+    <i class="bi bi-clipboard"></i> Copy Table to Clipboard
     </button>
 </div>
 
@@ -152,44 +147,40 @@ the tab to show the information.</i>
 
 </div><!-- ./info_event_found -->
        </div><!-- ./info -->
+       <div class="tab-pane" id="textdata">
+       <button type="button" id="toolbar-print" class="btn btn-primary">
+<i class="bi bi-printer"></i> Send Text to Printer</button>
 
-<div class="tab-pane fade" id="textdata" role="tabpanel" aria-labelledby="textdata-tab">
-       <button type="button" id="toolbar-print" class="btn btn-secondary">
-<i class="fa fa-print"></i> Send Text to Printer</button>
-
-<ul class="nav nav-tabs" id="text_tabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="t0-tab" data-bs-toggle="tab" data-bs-target="#t0" type="button" role="tab" aria-controls="t0" aria-selected="true">Issuance</button>
-    </li>
+<ul class="nav nav-tabs" id="text_tabs">
+    <li class="nav-item"><a class="nav-link active" href="#t0" data-bs-toggle="tab" data-bs-target="#t0">Issuance</a></li>
 </ul>
 <div class="tab-content clearfix">
-    <div class="tab-pane fade show active" id="t0" role="tabpanel" aria-labelledby="t0-tab">Text Product Issuance</div>
+    <div class="tab-pane active" id="t0">Text Product Issuance</div>
 </div>
-</div><!-- ./textdata -->
-
-<div class="tab-pane fade" id="themap" role="tabpanel" aria-labelledby="themap-tab">
+       </div>
+       <div class="tab-pane" id="themap">
        <div class="row">
   <div class="col-md-3">
     <div class="mb-3">
-        <label for="radarsource">RADAR Source</label>
-        <select id="radarsource" class="form-control"></select>
+        <label for="radarsource" class="form-label">RADAR Source</label>
+        <select id="radarsource" class="form-select"></select>
     </div>
   </div>
   <div class="col-md-3">
     <div class="mb-3">
-        <label for="radarproduct">RADAR Product</label>
-        <select id="radarproduct" class="form-control"></select>
+        <label for="radarproduct" class="form-label">RADAR Product</label>
+        <select id="radarproduct" class="form-select"></select>
     </div>
   </div>
   <div class="col-md-3">
     <div class="mb-3">
-        <label for="radaropacity">RADAR Opacity</label>
+        <label for="radaropacity" class="form-label">RADAR Opacity</label>
         <div id="radaropacity" class="form-control"></div>
     </div>
   </div>
   <div class="col-md-3">
     <div class="mb-3">
-        <label for="timeslider">Time <span id="radartime"></span></label>
+        <label for="timeslider" class="form-label">Time <span id="radartime"></span></label>
         <div id="timeslider" class="form-control"></div>
     </div>
   </div>
@@ -198,13 +189,13 @@ the tab to show the information.</i>
 <div id="map"></div>
 <div id="popup" class="ol-popup"></div>
        </div>
-       <div class="tab-pane fade" id="stormreports" role="tabpanel" aria-labelledby="stormreports-tab">
+       <div class="tab-pane" id="stormreports">
        <p><h3>All Storm Reports within Event Political Coverage</h3></p>
 
 <div class="float-end">
-    <button class="btn btn-secondary"
+    <button class="btn btn-primary"
     onclick="selectElementContents('lsrtable');">
-    <i class="fa fa-clipboard"></i> Copy LSRs to Clipboard
+    <i class="bi bi-clipboard"></i> Copy LSRs to Clipboard
     </button>
 </div>
 
@@ -228,9 +219,9 @@ the tab to show the information.</i>
 <p><h3>Storm Reports within Product Polygon</h3></p>
 
 <div class="float-end">
-    <button class="btn btn-secondary"
+    <button class="btn btn-primary"
     onclick="selectElementContents('sbwlsrtable');">
-    <i class="fa fa-clipboard"></i> Copy LSRs to Clipboard
+    <i class="bi bi-clipboard"></i> Copy LSRs to Clipboard
     </button>
 </div>
 
@@ -252,14 +243,14 @@ the tab to show the information.</i>
 </table>
 
        </div>
-       <div class="tab-pane fade" id="listevents" role="tabpanel" aria-labelledby="listevents-tab">
+       <div class="tab-pane" id="listevents">
        <p>This table lists other events issued by the selected office for the
 selected year.  Click on the row to select that event.</p>
 
 <div class="float-end">
-    <button class="btn btn-secondary"
+    <button class="btn btn-primary"
     onclick="selectElementContents('eventtable');">
-    <i class="fa fa-clipboard"></i> Copy Events to Clipboard
+    <i class="bi bi-clipboard"></i> Copy Events to Clipboard
     </button>
 </div>
 
@@ -281,7 +272,7 @@ selected year.  Click on the row to select that event.</p>
 </tbody>
 </table>
        </div>
-    </div><!-- ./tab-content -->
     </div><!-- ./card-body -->
+</div><!-- ./card -->
   </div><!-- ./col-md-9 -->
 </div><!-- ./row -->

@@ -58,8 +58,9 @@ def get_data(ctx):
 def as_html(ctx):
     """Generate the HTML page."""
     ctx["v"] = (
-        "%(year)s-%(op)s-%(status)s-%(wfo4)s-%(phenomena)s-"
-        "%(significance)s-%(eventid)s"
+        "year=%(year)s&wfo=%(wfo4)s"
+        "&phenomena=%(phenomena)s&"
+        "significance=%(significance)s&eventid=%(eventid)s"
     ) % ctx
     ctx["ogtitle"] = "%s %s%s %s #%s" % (
         ctx["wfo4"],
@@ -97,7 +98,7 @@ def as_html(ctx):
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="refresh" content="0; URL=/vtec/event/%(v)s">
+<meta http-equiv="refresh" content="0; URL=/vtec/?%(v)s">
 <title>%(ogtitle)s</title>
 <meta property="og:title" content="%(ogtitle)s">
 <meta property="og:description" content="%(desc)s">

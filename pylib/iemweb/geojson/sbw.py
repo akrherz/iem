@@ -236,10 +236,11 @@ def run(environ: dict):
             sts = row["utc_polygon_begin"].strftime(ISO8601)
             sid += "." + sts
             href = (
-                "https://mesonet.agron.iastate.edu/vtec/event/"
-                f"{row['vtec_year']}-0-{row['status']}-"
-                f"{rectify_wfo(row['wfo'])}-{row['phenomena']}-"
-                f"{row['significance']}-{row['eventid']:04.0f}"
+                "https://mesonet.agron.iastate.edu/vtec/"
+                f"?year={row['vtec_year']}&wfo={rectify_wfo(row['wfo'])}&"
+                f"phenomena={row['phenomena']}"
+                f"&significance={row['significance']}&"
+                f"eventid={row['eventid']:04.0f}"
             )
             label = get_ps_string(row["phenomena"], row["significance"])
             link = f"<a href='{href}'>{label} {row['eventid']}</a> &nbsp; "
