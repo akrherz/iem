@@ -4,6 +4,8 @@ TBW.
 
 """
 
+import json
+import os
 import re
 
 from pydantic import Field
@@ -12,6 +14,8 @@ from pyiem.nws import vtec
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.util import error_log
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_FORM = (
@@ -100,8 +104,9 @@ def as_html(vtecinfo: dict):
     )
 
 
-def get_context(script_url: str) -> dict:
+def get_context(environ: dict) -> dict:
     """Figure out how we were called."""
+    script_url = environ.get("SCRIPT_URL", "")
     ctx = {
         "title": "NWS Valid Time Event Code (VTEC) Browser",
         "headextra": """
@@ -124,6 +129,20 @@ def get_context(script_url: str) -> dict:
 <script type="text/javascript" src="/vtec/vtec_app.js?v2"></script>
 """,
     }
+    assetfn = "/opt/iem/htdocs/vtec/assets.json"
+    if os.path.isfile(assetfn):
+        try:
+            with open(assetfn) as fh:
+                assets = json.load(fh)["content.js"]
+                ctx["headextra"] = f"""
+<link rel="stylesheet" href="/vtec/{assets["css"][0]}">
+"""
+                ctx["jsextra"] = f"""
+<script src="/vtec/{assets["file"]}" type="module"></script>
+"""
+        except Exception as exp:
+            error_log(environ, f"Failed to load assets.json: {exp}")
+
     # /vtec/event/2019-O-NEW-KDMX-SV-W-0001
     m = VTEC_IN_URL_RE.search(script_url)
 
@@ -164,6 +183,6 @@ def application(environ, start_response):
         url = f"/vtec/event/{environ['vtec']}"
         start_response("301 Moved Permanently", [("Location", url)])
         return [b"Redirecting"]
-    ctx = get_context(environ.get("SCRIPT_URI", ""))
+    ctx = get_context(environ)
     start_response("200 OK", [("Content-type", "text/html")])
     return TEMPLATE.render(ctx).encode("utf-8")
