@@ -64,6 +64,7 @@ class Schema(CGIModel):
     )
 
     @field_validator("wfo", mode="before")
+    @classmethod
     def rectify_wfo(cls, value: str) -> str:
         """Ensure WFO is 4 characters."""
         return rectify_wfo(value)
