@@ -11,7 +11,7 @@ import re
 
 from pydantic import Field, field_validator
 from pyiem.database import get_dbconn
-from pyiem.nws import vtec
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
@@ -108,12 +108,12 @@ def as_html(vtecinfo: dict):
     """Generate the HTML page."""
     vtecinfo["ogtitle"] = "%s %s%s %s #%s" % (
         vtecinfo["wfo"],
-        vtec.VTEC_PHENOMENA.get(vtecinfo["phenomena"]),
+        VTEC_PHENOMENA.get(vtecinfo["phenomena"]),
         " (Particularly Dangerous Situation) " if vtecinfo["is_pds"] else "",
         (
             "Emergency"
             if vtecinfo["is_emergency"]
-            else vtec.VTEC_SIGNIFICANCE.get(vtecinfo["significance"])
+            else VTEC_SIGNIFICANCE.get(vtecinfo["significance"])
         ),
         int(vtecinfo["eventid"]),
     )
