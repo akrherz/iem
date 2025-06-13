@@ -245,11 +245,11 @@ if (array_key_exists($station, $SPECIAL)) {
     $interface = <<<EOM
 <h4>New Way Weather Network</h4>
 
-<a class="btn btn-default" href="/sites/current.php?station=OT0013&network=OT">Scranton</a>
+<a class="btn btn-secondary" href="/sites/current.php?station=OT0013&network=OT">Scranton</a>
 &nbsp;
-<a class="btn btn-default" href="/sites/current.php?station=OT0014&network=OT">Carroll</a>
+<a class="btn btn-secondary" href="/sites/current.php?station=OT0014&network=OT">Carroll</a>
 &nbsp;
-<a class="btn btn-default" href="/sites/current.php?station=OT0015&network=OT">Jefferson</a>
+<a class="btn btn-secondary" href="/sites/current.php?station=OT0015&network=OT">Jefferson</a>
 
 <div class="row">
   <div class="col-md-6">
@@ -258,7 +258,7 @@ if (array_key_exists($station, $SPECIAL)) {
   <div class="col-md-6">
     <h3>Latest Webcam Image</h3>
     <img src="/data/camera/stills/{$SPECIAL[$station]}.jpg"
-     class="img img-responsive">
+     class="img-fluid">
     <br />View Recent Time Lapses:<br />
     <a href="/current/camlapse/#{$LOOKUP[$station]}_sunrise">Sunrise</a>,
     <a href="/current/camlapse/#{$LOOKUP[$station]}_morning">Morning</a>,

@@ -56,7 +56,7 @@ This is simply based off of whatever daily data exists without any adjustments,
 etc. The raw data is available as a 
 <a href="/api/1/climodat/por_daily_climo.txt?station={$station}">CSV</a>.</p>
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Day</th>
 <th>Min High</th><th>Min High Year(s)</th><th>Avg High</th><th>Max High</th><th>Max High Year(s)</th>

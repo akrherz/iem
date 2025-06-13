@@ -67,24 +67,25 @@ $title = "News and Notes";
 while ($row = pg_fetch_assoc($result)) {
     $id = $row["id"];
     $title = $row["title"];
-    $content .= '<div class="panel panel-success">';
-    $content .= "<div class=\"panel-heading\"><span class=\"badge\">{$row["views"]} Views</span> " . $row["title"] . "</div>";
+    $content .= '<div class="card border-success">';
+    $content .= "<div class=\"card-header bg-success text-white\"><span class=\"badge bg-light text-dark\">{$row["views"]} Views</span> " . $row["title"] . "</div>";
+    $content .= "<div class=\"card-body\">";
     $link = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
-    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: {$link}</button>";
-    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Date: " . $row["webdate"] . "</button>";
-    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Author: " . $row["author"] . "</button>";
+    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Permalink: {$link}</button>";
+    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Date: " . $row["webdate"] . "</button>";
+    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Author: " . $row["author"] . "</button>";
     if (!is_null($row["tags"])) {
-        $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Tags: " . print_tags($row["tags"]) . "</button>";
+        $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Tags: " . print_tags($row["tags"]) . "</button>";
     }
     if (strlen($row["url"]) > 0) {
         $content .= "<br /><i>Link:</i> <a href=\"{$row["url"]}\">{$row["url"]}</a>\n";
     }
     $content .= "<p>{$row["body"]}<p>";
     $content .= "</div>";
+    $content .= "</div>";
 } // End of for
 
 if (pg_num_rows($result) == 1) {
-    $content .= "</div>";
     $t->title = $title;
 } else {
     $t->title = "News and Notes";

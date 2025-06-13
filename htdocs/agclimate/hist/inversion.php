@@ -23,8 +23,10 @@ foreach ($nt->table as $key => $val) {
         continue;
     }
     $sselect .= sprintf(
-        '<br /><input type="checkbox" name="station" value="%s" id="%s"> ' .
-            '<label for="%s">[%s] %s (%s County) (2021-%s)</label>',
+        '<div class="form-check">' .
+            '<input class="form-check-input" type="checkbox" name="station" value="%s" id="%s"> ' .
+            '<label class="form-check-label" for="%s">[%s] %s (%s County) (2021-%s)</label>' .
+        '</div>',
         $key,
         $key,
         $key,
@@ -36,96 +38,145 @@ foreach ($nt->table as $key => $val) {
 }
 
 $t->content = <<<EOM
- <ol class="breadcrumb">
-  <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
-  <li class="active">Inversion Download</li>
- </ol>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/agclimate">ISU Soil Moisture Network</a></li>
+<li class="breadcrumb-item active" aria-current="page">Inversion Download</li>
+</ol>
+</nav>
 
 {$box}
 
-<h3>Minute/Hourly Data:</h3>
+<div class="card mb-4">
+<div class="card-header">
+<h3 class="mb-0">Minute/Hourly Data</h3>
+</div>
+<div class="card-body">
 
 <p>The ISU Soil Moisture Network includes three sites that attempt to measure
 temperature inversions.  This is accomplished by a temperature sensor at heights
 of 1.5, 5, and 10 feet above the ground.</p>
 
-<div class="row">
-<div class="col-md-7">
-
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="inversion" />
 
-<h4>Select station(s):</h4>
-<a href="/sites/networks.php?network=ISUSM">View station metadata</a><br />
+<div class="row">
+<div class="col-md-7">
+
+<div class="mb-4">
+<h5>Select station(s):</h5>
+<p><a href="/sites/networks.php?network=ISUSM">View station metadata</a></p>
 
 {$sselect}
+</div>
 
-</div><div class="col-md-5">
+</div>
+<div class="col-md-5">
 
-<h4>Select the time interval:</h4>
-<table>
-  <tr><th></th><th>Year:</th><th>Month:</th><th>Day:</th></tr>
-  <tr><th>Starting On:</th>
- <td>{$yselect}</td>
- <td>{$mselect}</td>
- <td>{$dselect}</td>
- </tr>
+<div class="mb-4">
+<h5>Select the time interval:</h5>
+<div class="table-responsive">
+<table class="table table-bordered">
+<thead class="table-light">
+<tr><th></th><th>Year:</th><th>Month:</th><th>Day:</th></tr>
+</thead>
+<tbody>
+<tr><th>Starting On:</th>
+<td>{$yselect}</td>
+<td>{$mselect}</td>
+<td>{$dselect}</td>
 </tr>
 <tr><th>Ending On:</th>
- <td>{$yselect2}</td>
- <td>{$mselect2}</td>
- <td>{$dselect2}</td>
+<td>{$yselect2}</td>
+<td>{$mselect2}</td>
+<td>{$dselect2}</td>
 </tr>
+</tbody>
 </table>
+</div>
+</div>
 
-<p>
-<input type="checkbox" name="todisk" value="yes" id="dd">
-<label for="dd">Download directly to disk</label>
-</p>
+<div class="card mb-4">
+<div class="card-header">
+<h5 class="mb-0">Options</h5>
+</div>
+<div class="card-body">
 
- <p><strong>How should the data be formatted?:</strong> &nbsp; 
-<select name="format">
-    <option value="excel">Microsoft Excel (xlsx)</option>
-    <option value="comma">Comma Delimited Text File</option>
-      <option value="tab">Tab Delimited Text File</option>
+<div class="form-check mb-3">
+<input class="form-check-input" type="checkbox" name="todisk" value="yes" id="dd">
+<label class="form-check-label" for="dd">Download directly to disk</label>
+</div>
+
+<div class="mb-3">
+<label for="format" class="form-label"><strong>How should the data be formatted?:</strong></label>
+<select name="format" id="format" class="form-select">
+<option value="excel">Microsoft Excel (xlsx)</option>
+<option value="comma">Comma Delimited Text File</option>
+<option value="tab">Tab Delimited Text File</option>
 </select>
+</div>
 
-<p><strong>How should missing values be represented?:</strong>
-<br /> 
-<select name="missing">
-    <option value="-99">-99</option>
-    <option value="M">M</option>
-      <option value="">(blank, empty space)</option>
+<div class="mb-3">
+<label for="missing" class="form-label"><strong>How should missing values be represented?:</strong></label>
+<select name="missing" id="missing" class="form-select">
+<option value="-99">-99</option>
+<option value="M">M</option>
+<option value="">(blank, empty space)</option>
 </select>
+</div>
 
-<p><strong>Timezone for Data:</strong>
-<br />
-<select name="tz">
-    <option value="America/Chicago">Central Standard/Daylight Time</option>
-    <option value="UTC">UTC</option>
-</select></p>
+<div class="mb-3">
+<label for="tz" class="form-label"><strong>Timezone for Data:</strong></label>
+<select name="tz" id="tz" class="form-select">
+<option value="America/Chicago">Central Standard/Daylight Time</option>
+<option value="UTC">UTC</option>
+</select>
+</div>
 
-<p><strong>Submit your request:</strong>
-<br />
-    <input type="submit" value="Submit">
-    <input type="reset">
+<div class="mb-3">
+<h6><strong>Submit your request:</strong></h6>
+<div class="d-flex gap-2">
+<input type="submit" value="Submit" class="btn btn-primary">
+<input type="reset" value="Reset Form" class="btn btn-secondary">
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
 
 </form>
+</div>
+</div>
 
-</div></div>
+<div class="card">
+<div class="card-header">
+<h4 class="mb-0">Description of variables in download</h4>
+</div>
+<div class="card-body">
 
-<h4>Description of variables in download</h4>
-
-<dl>
-<dt>station</dt><dd>National Weather Service Location Identifier for the
-site.  this is a five character identifier.</dd>
-<dt>valid</dt><dd>Timestamp of the observation/dd>
-<dt>tair_15</dt><dd>Air Temperature (F) at 1.5ft above the ground</dd>
-<dt>tair_5</dt><dd>Air Temperature (F) at 5ft above the ground</dd>
-<dt>tair_10</dt><dd>Air Temperature (F) at 10ft above the ground</dd>
-<dt>speed</dt><dd>Wind Speed (mph) at 10ft above the ground</dd>
-<dt>gust</dt><dd>Wind Gust (mph) at 10ft above the ground</dd>
+<dl class="row">
+<dt class="col-sm-3">station</dt>
+<dd class="col-sm-9">National Weather Service Location Identifier for the
+site. This is a five character identifier.</dd>
+<dt class="col-sm-3">valid</dt>
+<dd class="col-sm-9">Timestamp of the observation</dd>
+<dt class="col-sm-3">tair_15</dt>
+<dd class="col-sm-9">Air Temperature (F) at 1.5ft above the ground</dd>
+<dt class="col-sm-3">tair_5</dt>
+<dd class="col-sm-9">Air Temperature (F) at 5ft above the ground</dd>
+<dt class="col-sm-3">tair_10</dt>
+<dd class="col-sm-9">Air Temperature (F) at 10ft above the ground</dd>
+<dt class="col-sm-3">speed</dt>
+<dd class="col-sm-9">Wind Speed (mph) at 10ft above the ground</dd>
+<dt class="col-sm-3">gust</dt>
+<dd class="col-sm-9">Wind Gust (mph) at 10ft above the ground</dd>
 </dl>
+
+</div>
+</div>
 
 EOM;
 $t->render("full.phtml");

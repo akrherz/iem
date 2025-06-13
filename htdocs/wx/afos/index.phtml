@@ -129,7 +129,7 @@ $theform = <<<EOM
 <p><label for="edate">End Date @ 00 UTC</label>
 <br /><input id="edate" type="date" name="edate" min="1983-01-02"></p>
 
-<p><button type="button" id="myform-submit" class="btn btn-default"><i class="fa fa-search"></i> Load Product</button></p>
+<p><button type="button" id="myform-submit" class="btn btn-secondary"><i class="fa fa-search"></i> Load Product</button></p>
 
 </form>
 EOM;
@@ -138,24 +138,26 @@ $t->content = <<<EOM
 <div class="clearfix">&nbsp;</div>
 
 <div class="row">
-  <div class="col-md-3 well">
+  <div class="col-md-3">
+<div class="card card-body">
     {$theform}
+</div>
   </div><!-- ./col-md-3 -->
   <div class="col-md-9">
 
-<div class="panel with-nav-tabs panel-default" id="thetabs">
-    <div class="panel-heading">
-      <ul class="nav nav-tabs">
-         <li class="active"><a href="#help" data-toggle="tab">Help</a></li>
+<div class="card" id="thetabs">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+         <li class="nav-item active"><a class="nav-link" href="#help" data-bs-toggle="tab">Help</a></li>
       </ul>
-    </div><!-- ./panel-heading -->
-    <div class="panel-body">
+    </div><!-- ./card-header -->
+    <div class="card-body">
     <div id="thetabs-toolbar">
-        <button type="button" id="toolbar-refresh" class="btn btn-default"><i class="fa fa-refresh"></i> Refresh</button>
-        <button type="button" id="toolbar-download" class="btn btn-default"><i class="fa fa-download"></i> Download Text</button>
-        <button type="button" id="toolbar-zip" class="btn btn-default"><i class="fa fa-file-archive-o"></i> Download Zipfile</button>
-        <button type="button" id="toolbar-print" class="btn btn-default"><i class="fa fa-print"></i> Send Text to Printer</button>
-        <button type="button" id="toolbar-close" class="btn btn-default"><i class="fa fa-close"></i> Close Tab</button>
+        <button type="button" id="toolbar-refresh" class="btn btn-secondary"><i class="fa fa-refresh"></i> Refresh</button>
+        <button type="button" id="toolbar-download" class="btn btn-secondary"><i class="fa fa-download"></i> Download Text</button>
+        <button type="button" id="toolbar-zip" class="btn btn-secondary"><i class="fa fa-file-archive-o"></i> Download Zipfile</button>
+        <button type="button" id="toolbar-print" class="btn btn-secondary"><i class="fa fa-print"></i> Send Text to Printer</button>
+        <button type="button" id="toolbar-close" class="btn btn-secondary"><i class="fa fa-close"></i> Close Tab</button>
     </div>
      <div class="tab-content clearfix">
 
@@ -163,7 +165,8 @@ $t->content = <<<EOM
         {$helpdiv}
        </div><!-- ./help -->
     </div><!-- ./tab-content -->
-    </div><!-- ./panel-body -->
+    </div><!-- ./card-body -->
+  </div><!-- ./card -->
   </div><!-- ./col-md-9 -->
 </div><!-- ./row -->
 

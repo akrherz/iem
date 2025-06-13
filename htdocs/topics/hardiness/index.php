@@ -52,10 +52,12 @@ $imgn40 = sprintf(
         
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/agweather/">Ag Weather</a></li>
- <li class="active">State Hardiness Maps</li>
+ <li class="breadcrumb-item"><a href="/agweather/">Ag Weather</a></li>
+ <li class="breadcrumb-item active" aria-current="page">State Hardiness Maps</li>
  </ol>
+</nav>
 
 <p>This page generates maps showing yearly frequency of having at least one
 day with a low temperature below a given threshold.  These types of maps
@@ -84,7 +86,7 @@ The IEM plotting backend is <a href="/plotting/auto/?q=252">autoplot 252</a>.</p
 <p>Buckwheat, Cowpea, Millets, Mungbean, Sorghum Forage, Sorghum-Sundangrass,
 Sundangrass, Sunn Hemp, Teff</p>
 
-<img src="$img32" class="img img-responsive" alt="Low Temperature below 32F" />
+<img src="$img32" class="img-fluid" alt="Low Temperature below 32F" />
 
 <!-- ................................. -->
 
@@ -92,7 +94,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Barley Spring, Flax, Oats, Sunflower, Wheat Spring</p>
 
-<img src="$img25" class="img img-responsive" alt="Low Temperature below 32F" />
+<img src="$img25" class="img-fluid" alt="Low Temperature below 32F" />
 
 <!-- ................................. -->
 
@@ -100,7 +102,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <pClover Berseem, Kale, Mustard, Radish</p>
 
-<img src="$img15" class="img img-responsive" alt="Low Temperature below 32F" />
+<img src="$img15" class="img-fluid" alt="Low Temperature below 32F" />
 
 <!-- ................................. -->
 
@@ -108,7 +110,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Clover Crimson, Turnip, Vetch Common</p>
 
-<img src="$img10" class="img img-responsive" alt="Low Temperature below 10F" />
+<img src="$img10" class="img-fluid" alt="Low Temperature below 10F" />
 
 <!-- ................................. -->
 
@@ -116,7 +118,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Barley Winter, Rapeseed, Ryegrass Annual</p>
 
-<img src="$img0" class="img img-responsive" alt="Low Temperature below 0F" />
+<img src="$img0" class="img-fluid" alt="Low Temperature below 0F" />
 
 <!-- ................................. -->
 
@@ -124,7 +126,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Pea Winter/Field</p>
 
-<img src="$imgn10" class="img img-responsive" alt="Low Temperature below -10F" />
+<img src="$imgn10" class="img-fluid" alt="Low Temperature below -10F" />
 
 <!-- ................................. -->
 
@@ -132,7 +134,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Vetch Hairy, Wheat Winter</p>
 
-<img src="$imgn15" class="img img-responsive" alt="Low Temperature below -10F" />
+<img src="$imgn15" class="img-fluid" alt="Low Temperature below -10F" />
 
 <!-- ................................. -->
 
@@ -140,7 +142,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Camelina Winter, Triticale Winter</p>
 
-<img src="$imgn20" class="img img-responsive" alt="Low Temperature below -10F" />
+<img src="$imgn20" class="img-fluid" alt="Low Temperature below -10F" />
 
 
 <!-- ................................. -->
@@ -149,7 +151,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Cereal Rye, Clover Red</p>
 
-<img src="$imgn30" class="img img-responsive" alt="Low Temperature below -10F" />
+<img src="$imgn30" class="img-fluid" alt="Low Temperature below -10F" />
 
 <!-- ................................. -->
 
@@ -157,7 +159,7 @@ Sundangrass, Sunn Hemp, Teff</p>
 
 <p>Clover White</p>
 
-<img src="$imgn40" class="img img-responsive" alt="Low Temperature below -10F" />
+<img src="$imgn40" class="img-fluid" alt="Low Temperature below -10F" />
 
 EOM;
 $t->render("full.phtml");

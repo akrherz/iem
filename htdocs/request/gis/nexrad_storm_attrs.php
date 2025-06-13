@@ -43,7 +43,7 @@ $content = <<<EOM
  class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a> exists
  for those wishing to script against this service.</p>
 
-<p><a class="btn btn-default" href="#histograms" role="button">
+<p><a class="btn btn-secondary" href="#histograms" role="button">
         <i class="fa fa-stats"></i> View Histograms</a>
  
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">

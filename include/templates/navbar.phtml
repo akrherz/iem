@@ -1,140 +1,89 @@
 <header>
-<nav class="navbar-iastate">
+<!-- Mobile navbar: Simple single row with logo, search, and hamburger -->
+<nav class="navbar-site d-block d-lg-none">
 	<div class="container">
-		<!-- navbar-iastate-left -->
-		<ul class="nav navbar-nav navbar-iastate-left">
-			<li><a href='https://www.iastate.edu'>iastate.edu</a></li>
-			<li class="dropdown dropdown-hover isu-index">
-				<a href="https://www.iastate.edu/index/A" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false">Index</a>
-				<ul class="dropdown-menu isu-index-alpha">
-					<li><a href="https://www.iastate.edu/index/A/">A</a></li>
-					<li><a href="https://www.iastate.edu/index/B/">B</a></li>
-					<li><a href="https://www.iastate.edu/index/C/">C</a></li>
-					<li><a href="https://www.iastate.edu/index/D/">D</a></li>
-					<li><a href="https://www.iastate.edu/index/E/">E</a></li>
-					<li><a href="https://www.iastate.edu/index/F/">F</a></li>
-					<li><a href="https://www.iastate.edu/index/G/">G</a></li>
-					<li><a href="https://www.iastate.edu/index/H/">H</a></li>
-					<li><a href="https://www.iastate.edu/index/I/">I</a></li>
-					<li><a href="https://www.iastate.edu/index/J/">J</a></li>
-					<li><a href="https://www.iastate.edu/index/K/">K</a></li>
-					<li><a href="https://www.iastate.edu/index/L/">L</a></li>
-					<li><a href="https://www.iastate.edu/index/M/">M</a></li>
-					<li><a href="https://www.iastate.edu/index/N/">N</a></li>
-					<li><a href="https://www.iastate.edu/index/O/">O</a></li>
-					<li><a href="https://www.iastate.edu/index/P/">P</a></li>
-					<li><a href="https://www.iastate.edu/index/Q/">Q</a></li>
-					<li><a href="https://www.iastate.edu/index/R/">R</a></li>
-					<li><a href="https://www.iastate.edu/index/S/">S</a></li>
-					<li><a href="https://www.iastate.edu/index/T/">T</a></li>
-					<li><a href="https://www.iastate.edu/index/U/">U</a></li>
-					<li><a href="https://www.iastate.edu/index/V/">V</a></li>
-					<li><a href="https://www.iastate.edu/index/W/">W</a></li>
-					<li><a href="https://www.iastate.edu/index/X/">X</a></li>
-					<li><a href="https://www.iastate.edu/index/Y/">Y</a></li>
-					<li><a href="https://www.iastate.edu/index/Z/">Z</a></li>
-				</ul>
-			</li>
-		</ul>
-		<!-- /navbar-iastate-left -->
-
-		<!-- navbar-iastate-right -->
-		<ul class="nav navbar-nav navbar-right navbar-iastate-right">
-			<li><a href="https://info.iastate.edu/">Directory</a></li>
-			<li><a href="https://www.fpm.iastate.edu/maps/">Maps</a></li>
-			<li><a href="https://web.iastate.edu/safety/">Safety</a></li>
-			<li class="dropdown dropdown-hover">
-				<a href="//web.iastate.edu/signons/" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false">Sign Ons</a>
-				<ul class="dropdown-menu">
-					<li><a href="https://accessplus.iastate.edu/">AccessPlus</a></li>
-					<li><a href="https://bb.its.iastate.edu/">Blackboard</a></li>
-					<li><a href="https://iastate.box.com/">CyBox</a></li>
-					<li><a href="https://cymail.iastate.edu/">CyMail</a></li>
-					<li><a href="https://outlook.iastate.edu/">Outlook</a></li>
-					<li><a href="https://web.iastate.edu/signons/">More Sign Ons...</a></li>
-				</ul>
-			</li>
-		</ul>
-		<!-- /navbar-iastate-right -->
-
-	</div>
-</nav>
-<!-- /navbar-iastate -->
-
-<nav class="navbar-site">
-	<div class="container">
-
-		<div class="navbar-site-wordmark">
-			<a href="/" title="Home" class="wordmark-unit">
-				<span class="wordmark-isu">Iowa State University</span>
-				<span class="wordmark-unit-title">Iowa Environmental Mesonet</span>
-			</a>
+		<div class="mobile-navbar-row">
+			<div class="mobile-logo">
+				<a href="/" title="Home">
+					<img src="/images/logo_small.png" alt="IEM" height="30">
+				</a>
+			</div>
+			
+			<div class="mobile-search">
+				<form action="/search" method="GET" role="search">
+					<input name="q" aria-label="Search" title="Search" placeholder="Search 'DSM' 'autoplot 100' 'street address'" type="text" class="form-control form-control-sm">
+				</form>
+			</div>
+			
+			<div class="mobile-menu">
+				<button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-menu-collapse, #mobile-site-links" aria-expanded="false">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+			</div>
 		</div>
- 
-		<div class="navbar-header visible-xs visible-sm">
-			<button id="navbar-menu-button" type="button" class="navbar-toggle navbar-toggle-left collapsed" data-toggle="collapse" data-target="#navbar-menu-collapse, #navbar-site-links-collapse" aria-expanded="false">
-				<span class="navbar-toggle-icon menu-icon">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</span>
-				<span class="navbar-toggle-label">
-					Menu <span class="sr-only">Toggle</span>
-				</span>
-			</button>
-			<button id="navbar-search-button" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-site-search-collapse" aria-expanded="false">
-				<span class="navbar-toggle-icon search-icon"></span>
-				<span class="navbar-toggle-label">
-					Search <span class="sr-only">Toggle</span>
-				</span>
-			</button>
-		</div>
-
-		<div class="navbar-site-info collapse navbar-collapse" id="navbar-site-search-collapse">
-			<form action="/search" class="navbar-site-search" method="GET" role="search">
-				<label for="search-input" class="sr-only">Search</label>
-				<input name="q" id="search-input" aria-label="Text input for search" title="Search" placeholder="Search 'DSM' 'autoplot 100' 'street address'" tabindex="0" type="text" class="form-control">
-				<input class="hidden" title="Submit" type="submit" value="Search">
-				<span class="search-icon"></span>
-			</form>
-		</div>
-
-		<div class="navbar-site-info collapse navbar-collapse navbar-caps" id="navbar-site-links-collapse">
-			<ul class="nav navbar-nav navbar-right">
-				<!-- Site-wide links. Customized for your site -->
-				<li><a href="/info/contacts.php">contact us</a></li>
-				<li><a href="/disclaimer.php">disclaimer</a></li>
-				<li><a href="/apps.php">apps</a></li>
+		
+		<!-- Mobile site links (contact, disclaimer, apps) -->
+		<div class="collapse" id="mobile-site-links">
+			<ul class="nav navbar-nav mobile-site-nav">
+				<li class="nav-item"><a class="nav-link" href="/info/contacts.php">contact us</a></li>
+				<li class="nav-item"><a class="nav-link" href="/disclaimer.php">disclaimer</a></li>
+				<li class="nav-item"><a class="nav-link" href="/apps.php">apps</a></li>
 			</ul>
 		</div>
+	</div>
+</nav>
 
+<!-- Desktop navbar: ISU wordmark on left, search and links stacked on right -->
+<nav class="navbar-site d-none d-lg-block">
+	<div class="container">
+		<div class="desktop-navbar-row">
+			<div class="desktop-wordmark">
+				<a href="/" title="Home" class="wordmark-unit">
+					<span class="wordmark-isu">Iowa State University</span>
+					<span class="wordmark-unit-title">Iowa Environmental Mesonet</span>
+				</a>
+			</div>
+			
+			<div class="desktop-right">
+				<div class="desktop-search">
+					<form action="/search" method="GET" role="search">
+						<input name="q" aria-label="Search" title="Search" placeholder="Search 'DSM' 'autoplot 100' 'street address'" type="text" class="form-control">
+					</form>
+				</div>
+				
+				<div class="desktop-links">
+					<ul class="nav navbar-nav">
+						<li class="nav-item"><a class="nav-link" href="/info/contacts.php">contact us</a></li>
+						<li class="nav-item"><a class="nav-link" href="/disclaimer.php">disclaimer</a></li>
+						<li class="nav-item"><a class="nav-link" href="/apps.php">apps</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
 	</div>
 </nav>
 </header>
 
-<div class="container">
-<div class="navbar navbar-default">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-        </button>
-	</div>
-    <div class="navbar-collapse collapse">
-    	<div class="hidden-xs hidden-sm">
-        <a href="/"><img style="height: 50px;" alt="IEM" class="img-responsive pull-left" src="/images/logo_small.png" /></a>
-		</div>
-        <ul class="nav navbar-nav">
+<!-- Main navigation menu navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container">
+        <!-- Desktop IEM logo (visible in main nav on desktop) -->
+        <div class="d-none d-lg-block">
+            <a href="/"><img style="height: 50px;" alt="IEM" class="img-fluid float-start" src="/images/logo_small.png" /></a>
+        </div>
         
-<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" 
-	href="#"> <span class="fa fa-home"></span> </a>
+        <!-- Main navigation menu (collapsible on mobile) -->
+        <div class="navbar-collapse collapse" id="navbar-menu-collapse">
+            <ul class="nav navbar-nav">
+        
+<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" 
+	href="#"> <i class="bi bi-house-fill"></i> </a>
 	<ul class="dropdown-menu">
-        <li><a href="/projects/iao/">Iowa Atmospheric Observatory</a></li>
-		<li><a href="/">Iowa Environmental Mesonet</a></li>
-		<li><a href="https://cocorahs.org">CoCoRaHS</a></li>
-		<li><a href="https://dailyerosion.org">Daily Erosion Project</a></li>
-		<li><a href="https://weather.im">Weather.IM Project</a></li>
+        <li><a class="dropdown-item" href="/projects/iao/">Iowa Atmospheric Observatory</a></li>
+		<li><a class="dropdown-item" href="/">Iowa Environmental Mesonet</a></li>
+		<li><a class="dropdown-item" href="https://cocorahs.org">CoCoRaHS</a></li>
+		<li><a class="dropdown-item" href="https://dailyerosion.org">Daily Erosion Project</a></li>
+		<li><a class="dropdown-item" href="https://weather.im">Weather.IM Project</a></li>
 	</ul></li>
         
 <?php
@@ -152,13 +101,14 @@ foreach($_pages["tabs"] as $bogus => $tab)
         if ($lookfor == $sub["url"]){
             $hit = TRUE;
         }
-        $s .= sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
-         ($lookfor == $sub["url"]) ? " class=\"active\"" : "",
+        $s .= sprintf("<li><a%s class=\"dropdown-item%s\" href=\"%s\">%s</a></li>\n", 
+         "",
+         ($lookfor == $sub["url"]) ? " active" : "",
            $sub["url"],  $sub["title"] );
     }
     echo sprintf(
-        "<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" ".
-        "data-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
+        "<li class=\"nav-item dropdown%s\">\n<a class=\"nav-link dropdown-toggle\" ".
+        "data-bs-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
         ($hit) ? " active" : "", $tab["title"]);
     echo $s;
     echo "</ul>\n</li>\n";
@@ -166,6 +116,5 @@ foreach($_pages["tabs"] as $bogus => $tab)
   ?>
 </ul>
         </div>
-      </div>
     </div>
-</div>
+</nav>

@@ -51,10 +51,12 @@ $u3 = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s", $pvar3, $year, $month,
 $u4 = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s", $pvar4, $year, $month, $day);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/nstl_flux/">NLAE Flux Stations</a></li>
-<li class="active">Time Series Plots</li>
-</ol>
+<nav aria-label="breadcrumb">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="/nstl_flux/">NLAE Flux Stations</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Time Series Plots</li>
+ </ol>
+</nav>
 
 <p>This page generates 4 plots of your choice.  Select the date and variables
 you wish to plot and then click on the 'Generate Plots' button.
@@ -62,7 +64,7 @@ you wish to plot and then click on the 'Generate Plots' button.
 
 <form method="GET" name="selector">
 
-<table class="table table-condensed table-bordered">
+<table class="table table-bordered">
 <thead>
 <tr>
  <th colspan="3">Select Date:</th>
@@ -83,9 +85,9 @@ you wish to plot and then click on the 'Generate Plots' button.
 </table>
 <input type="submit" value="Generate Plots">
 <p>
-<br /><img src="{$u1}" class="img img-responsive">
-<br /><img src="{$u2}" class="img img-responsive">
-<br /><img src="{$u3}" class="img img-responsive">
-<br /><img src="{$u4}" class="img img-responsive">
+<br /><img src="{$u1}" class="img-fluid">
+<br /><img src="{$u2}" class="img-fluid">
+<br /><img src="{$u3}" class="img-fluid">
+<br /><img src="{$u4}" class="img-fluid">
 EOM;
 $t->render('single.phtml');

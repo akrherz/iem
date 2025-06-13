@@ -112,7 +112,7 @@ thresholds are surpassed in the fall.
   </div>
 </form>
 
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <thead class="sticky">
   <tr>
     <th rowspan='3'><a href='freezing.php?sortcol=station'>COOP Site:</a></th>

@@ -58,7 +58,7 @@ $table = <<<EOM
 }
 </style>
 <h3>{$title}</h3>
-<table id="thetable" class="table table-condensed table-striped table-bordered table-hover"
+<table id="thetable" class="table table-sm table-striped table-bordered table-hover"
  data-column-defs='[{"sortable": false, "targets": [7,14,21]}]'>
 <thead class="sticky">
 <tr class="small">
@@ -239,10 +239,12 @@ $t->iemselect2 = TRUE;
 $t->title = "Tabular CLI Report Data";
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
-    <li><a href="/climate/">Climate Data</a></li>
-    <li class="active">Tabular CLI Report Data</li>		
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/climate/">Climate Data</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Tabular CLI Report Data</li>		
+    </ol>
+</nav>
 
 <div class="row">
     <div class="col-md-3">This application lists out parsed data from 
@@ -251,27 +253,38 @@ $t->content = <<<EOM
     This means that during daylight saving time, this period is from 1 AM to 
     1 AM local daylight time!
     </div>
-    <div class="col-md-6 well">
-    <h4>Option 1: One Station for One Year</h4>
-<form method="GET" name="one">
-<input type="hidden" name="opt" value="bystation" />
-<p><strong>Select Station:</strong>
-    <br />{$sselect}
-    <br /><strong>Year:</strong>
-    <br />{$ys}
-    <br /><input type="submit" value="Generate Table" />
-</form>
-
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Option 1: One Station for One Year</h4>
+                <form method="GET" name="one">
+                    <input type="hidden" name="opt" value="bystation" />
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Select Station:</strong></label>
+                        {$sselect}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Year:</strong></label>
+                        {$ys}
+                    </div>
+                    <input type="submit" value="Generate Table" class="btn btn-primary" />
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="col-md-3 well">
-
-<h4>Option 2: One Day for Stations</h4>
-<form method="GET" name="two">
-<input type="hidden" name="opt" value="bydate" />
-    {$ys} {$ms} {$ds}
-    <br /><input type="submit" value="Generate Table" />
-</form>
-
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Option 2: One Day for Stations</h4>
+                <form method="GET" name="two">
+                    <input type="hidden" name="opt" value="bydate" />
+                    <div class="mb-3">
+                        {$ys} {$ms} {$ds}
+                    </div>
+                    <input type="submit" value="Generate Table" class="btn btn-primary" />
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -280,8 +293,8 @@ directly access it here:
 <br /><code>{$prettyurl}</code></p>
 
 <p>
-<button id="makefancy">Make Table Interactive</button> &nbsp;
-<button id="makerecords" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
+<button id="makefancy" class="btn btn-secondary">Make Table Interactive</button> &nbsp;
+<button id="makerecords" class="btn btn-secondary" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
 </p>
 
 {$table}

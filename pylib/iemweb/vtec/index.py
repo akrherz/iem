@@ -4,6 +4,8 @@ TBW.
 
 """
 
+import json
+import os
 import re
 
 from pydantic import Field
@@ -12,6 +14,8 @@ from pyiem.nws import vtec
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.util import error_log
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_FORM = (
@@ -100,32 +104,47 @@ def as_html(vtecinfo: dict):
     )
 
 
-def get_context(script_url: str) -> dict:
+def get_context(environ: dict) -> dict:
     """Figure out how we were called."""
+    script_uri = environ.get("SCRIPT_URI", "")
     ctx = {
         "title": "NWS Valid Time Event Code (VTEC) Browser",
         "headextra": """
 <link rel="stylesheet"
- href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
+ href="/vendor/jquery-datatables/2.0.2/datatables.min.css" />
 <link rel="stylesheet"
  href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
-<link rel='stylesheet' href="/vendor/openlayers/10.1.0/ol.css" type='text/css'>
-<link type="text/css" href="/vendor/openlayers/10.1.0/ol-layerswitcher.css"
+<link rel='stylesheet' href="/vendor/openlayers/10.5.0/ol.css" type='text/css'>
+<link type="text/css" href="/vendor/openlayers/10.5.0/ol-layerswitcher.css"
  rel="stylesheet" />
 <link rel="stylesheet" href="/vtec/vtec_static.css" />
 """,
         "jsextra": """
-<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
+<script src="/vendor/jquery-datatables/2.0.2/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script src='/vendor/openlayers/10.1.0/ol.js'></script>
-<script src='/vendor/openlayers/10.1.0/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="/vtec/vtec_static.js?20241205"></script>
-<script type="text/javascript" src="/vtec/vtec_app.js?20241113"></script>
+<script src='/vendor/openlayers/10.5.0/ol.js'></script>
+<script src='/vendor/openlayers/10.5.0/ol-layerswitcher.js'></script>
+<script type="text/javascript" src="/vtec/vtec_static.js?v2"></script>
+<script type="text/javascript" src="/vtec/vtec_app.js?v2"></script>
 """,
     }
+    assetfn = "/opt/iem/htdocs/vtec/assets.json"
+    if os.path.isfile(assetfn):
+        try:
+            with open(assetfn) as fh:
+                assets = json.load(fh)["content.js"]
+            ctx["headextra"] = f"""
+<link rel="stylesheet" href="/vtec/{assets["css"][0]}">
+"""
+            ctx["jsextra"] = f"""
+<script src="/vtec/{assets["file"]}" type="module"></script>
+"""
+        except Exception as exp:
+            error_log(environ, f"Failed to load assets.json: {exp}")
+
     # /vtec/event/2019-O-NEW-KDMX-SV-W-0001
-    m = VTEC_IN_URL_RE.search(script_url)
+    m = VTEC_IN_URL_RE.search(script_uri)
 
     if m:
         vtecinfo = m.groupdict()
@@ -164,6 +183,6 @@ def application(environ, start_response):
         url = f"/vtec/event/{environ['vtec']}"
         start_response("301 Moved Permanently", [("Location", url)])
         return [b"Redirecting"]
-    ctx = get_context(environ.get("SCRIPT_URI", ""))
+    ctx = get_context(environ)
     start_response("200 OK", [("Content-type", "text/html")])
     return TEMPLATE.render(ctx).encode("utf-8")

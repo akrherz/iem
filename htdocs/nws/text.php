@@ -9,9 +9,9 @@ $d = date("Y/m/d");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
- <li><a href="/">IEM Homepage</a></li>
- <li><a href="/nws/">NWS Mainpage</a></li>
- <li class="active">NWS Text Archives</li>
+ <li class="breadcrumb-item"><a href="/">IEM Homepage</a></li>
+ <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+ <li class="breadcrumb-item active" aria-current="page">NWS Text Archives</li>
 </ol>
 
 <p>The IEM attempts a robust processing and archival of National Weather
@@ -35,9 +35,9 @@ is the main place to use this identifier.</p>
 <div class="row">
 <div class="col-md-6">
 
-<div class="panel panel-default">
-  <div class="panel-heading">IEM News Items</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">IEM News Items</div>
+  <div class="card-body">
 
   <ul>
 <li>See this <a href="/onsite/news.phtml?id=1408">news item</a> for more details
@@ -47,9 +47,9 @@ on this archive and how it is made available.</li>
 </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">User Somewhat-Friendly Frontends</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">User Somewhat-Friendly Frontends</div>
+  <div class="card-body">
 <ul>
    <li><a href="/wx/afos/">AFOS Product Finder</a>
   <br />If you know what you are looking for, this app works great!</li>
@@ -60,9 +60,9 @@ on this archive and how it is made available.</li>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Raw Text / Scrapable Archives</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Raw Text / Scrapable Archives</div>
+  <div class="card-body">
 
 <ul>
  <li><a href="https://mtarchive.geol.iastate.edu/{$d}/text/cap/">
@@ -81,9 +81,9 @@ on this archive and how it is made available.</li>
 
 </div><div class="col-md-6">
 
-<div class="panel panel-default">
-  <div class="panel-heading">API / Bulk Downloads</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">API / Bulk Downloads</div>
+  <div class="card-body">
 
 <p>Many folks use the IEM as a near realtime data source.  This section details
 some of the techniques used.</p>
@@ -103,9 +103,9 @@ efficiently.</p>
 </div>
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">Misc / Statistics</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Misc / Statistics</div>
+  <div class="card-body">
 <ul>
   <li><a href="/plotting/auto/?q=210">Map of Text Product Issuance Counts</a>
   <br />Autoplot 210 will generate maps of how many text products are

@@ -117,10 +117,12 @@ if (isset($lurl)) {
 $kml = htmlentities($row["kml"]);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/current/severe.phtml">Severe Wx Products</a></li>
-<li class="active">Storm Prediction Center Convective Watch Archive</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/current/severe.phtml">Severe Wx Products</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Storm Prediction Center Convective Watch Archive</li>
+  </ol>
+</nav>
 
 <p>This application presents a browsable archive 
 of <a href="https://www.spc.noaa.gov">SPC</a> issued tornado and 
@@ -144,7 +146,7 @@ valid area is issued by county and marine zone.
 <div class="row">
  <div class="col-md-7">
 <strong>All active watches at issuance:</strong>
-<img src="{$ourl}" class="img img-responsive">
+<img src="{$ourl}" class="img img-fluid">
 
 </div><div class="col-md-5">
 
@@ -155,7 +157,7 @@ valid area is issued by county and marine zone.
 <tr><th>Type:</th><td>{$row["type"]}</td></tr>
 <tr><th>Watch #:</th><td>{$yselect}
 <input name="num" type="text" size="5" value="{$row["num"]}"> 
-<input type="submit" value="GO!"></td></tr>
+<input type="submit" value="GO!" class="btn btn-primary"></td></tr>
 
 {$textlinks}
 <tr><th>Issue:</th><td>{$issue} UTC</td></tr>

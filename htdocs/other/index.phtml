@@ -32,18 +32,27 @@ equipment has been removed.</p>
 
 <h3>Agronomy Hall, ISU:</h3>
 
-<ul>
-<li><a href="/other/current.phtml">Sortable Currents</a></li>
-<li><a href="/plotting/mesoeast/">Ames (Northern, Dave Flory)</a></li>
-<li><a href="/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
-<li><a href="/plotting/isumet/ams2.phtml">ISU AMS Station</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.
-<a href="/request/daily.phtml?network=OT">Download daily summaries</a> for station.</li>
-</ul>
+<div class="card mb-4">
+    <div class="card-body">
+        <ul class="mb-0">
+            <li><a href="/other/current.phtml">Sortable Currents</a></li>
+            <li><a href="/plotting/mesoeast/">Ames (Northern, Dave Flory)</a></li>
+            <li><a href="/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
+            <li><a href="/plotting/isumet/ams2.phtml">ISU AMS Station</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.
+            <a href="/request/daily.phtml?network=OT">Download daily summaries</a> for station.</li>
+        </ul>
+    </div>
+</div>
 
 <h3>City of Ames</h3>
-<ul>
-<li><a href="daily_plot.phtml?station=OT0008&year=2007&month=2&day=13">Reiman Gardens station</a>, only some limited data from 2007 for the site.</li>
-</ul>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <ul class="mb-0">
+            <li><a href="daily_plot.phtml?station=OT0008&year=2007&month=2&day=13">Reiman Gardens station</a>, only some limited data from 2007 for the site.</li>
+        </ul>
+    </div>
+</div>
 
 <h3>Stuart Smith Park Hydrology Learning Lab, Ames</h3>
 
@@ -52,12 +61,14 @@ the Stuart Smith Park in Ames.  These data are used by the Geology 100 class, bu
 are freely available to others.
 
 <div class="row">
-<div class="col-md-6 well">
+<div class="col-md-6">
+<div class="card card-body">
 
 <h4>Download Stream Gage Data ("Bubbler")</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="bubbler">
 <input type="hidden" name="opt" value="bubbler" />
 <table class="table table-bordered">
+<tr>
  <th>Start Date:</th> 
   <td>{$y1select}</td>
   <td>{$m1select}</td>
@@ -70,19 +81,24 @@ are freely available to others.
   <td>{$d2select}</td></tr>
 
 </table>
-<input type="checkbox" name="excel" value="yes" id="ex1" />
-<label for="ex1">Download as Excel File</label>
-<br /><input type="submit" value="Request Data" />
+<div class="form-check mb-3">
+<input type="checkbox" name="excel" value="yes" id="ex1" class="form-check-input" />
+<label for="ex1" class="form-check-label">Download as Excel File</label>
+</div>
+<input type="submit" value="Request Data" class="btn btn-primary" />
 </form>
 
-</div><div class="col-md-6 well">
+</div>
+</div><div class="col-md-6">
+<div class="card card-body">
 
 <h4><i class="fa fa-download"></i> Download Ground Monitoring Well Data</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="gage">
 <input type="hidden" name="opt" value="gage" />
 <table class="table table-bordered">
+<tr>
   <td rowspan="2"><strong>Select Station(s):</strong><br />
-  <select multiple size="4" name="station">
+  <select multiple size="4" name="station" class="form-select">
    <option value="9100131">SSP #1</option>
    <option value="9100104">SSP #6</option>
    <option value="9100156">SSP #7</option>
@@ -101,90 +117,128 @@ are freely available to others.
   <td>{$d2select}</td></tr>
 
 </table>
-<input type="checkbox" name="excel" value="yes" id="ex2" />
-<label for="ex2">Download as Excel File</label>
-<br /><input type="submit" value="Request Data" />
+<div class="form-check mb-3">
+<input type="checkbox" name="excel" value="yes" id="ex2" class="form-check-input" />
+<label for="ex2" class="form-check-label">Download as Excel File</label>
+</div>
+<input type="submit" value="Request Data" class="btn btn-primary" />
 </form>
 
 </div></div>
 
-<h3><a name="purpleair"><i class="fa fa-file"></i></a> ISU Agronomy Hall - Purple Air Quality Sensor</h3>
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0"><a name="purpleair"><i class="fa fa-file"></i></a> ISU Agronomy Hall - Purple Air Quality Sensor</h3>
+    </div>
+    <div class="card-body">
+        <p>Data is collected every minute since 26 April 2024.  Values represent a
+        two minute average.</p>
 
-<p>Data is collected every minute since 26 April 2024.  Values represent a
-two minute average.</p>
+        <form name="purple" action="/cgi-bin/request/purpleair.py">
+        <table class="table table-bordered">
+        <tr>
+         <th>Start Date:</th> 
+          <td>{$y24select}</td>
+          <td>{$m1select}</td>
+          <td>{$d1select}</td></tr>
 
-<form name="purple" action="/cgi-bin/request/purpleair.py">
-<table>
-<tr>
- <th>Start Date:</th> 
-  <td>{$y24select}</td>
-  <td>{$m1select}</td>
-  <td>{$d1select}</td></tr>
+        <tr>
+         <th>End Date:</th>
+          <td>{$y242select}</td>
+          <td>{$m2select}</td>
+          <td>{$d2select}</td></tr>
 
-<tr>
- <th>End Date:</th>
-  <td>{$y242select}</td>
-  <td>{$m2select}</td>
-  <td>{$d2select}</td></tr>
+        </table>
+        <div class="d-flex gap-2">
+        <button type="submit" name="excel" value="yes" class="btn btn-success">Download Excel File</button>
+        <input type="submit" value="Download CSV" class="btn btn-primary">
+        </div>
+        </form>
+    </div>
+</div>
 
-</table>
-<button type="submit" name="excel" value="yes">Download Excel File</button>
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0">ISU FEEL Data</h3>
+    </div>
+    <div class="card-body">
+        <p>This data is provided by The National Laboratory for Agriculture and the Environment.</p>
 
-<input type="submit" value="Download CSV">
-</form>
+        <form name="feel" action="/cgi-bin/request/feel.py">
+        <table class="table table-bordered">
+        <tr>
+         <th>Start Date:</th> 
+          <td>{$y13select}</td>
+          <td>{$m1select}</td>
+          <td>{$d1select}</td></tr>
 
+        <tr>
+         <th>End Date:</th>
+          <td>{$y23select}</td>
+          <td>{$m2select}</td>
+          <td>{$d2select}</td></tr>
 
-<h3>ISU FEEL Data</h3>
+        </table>
+        <input type="submit" value="Request Data" class="btn btn-primary" />
+        </form>
+    </div>
+</div>
 
-<p>This data is provided by The National Laboratory for Agriculture and the Environment.</p>
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0">Raw Data Download!</h3>
+    </div>
+    <div class="card-body">
+        <form name="dl" action="/cgi-bin/request/other.py">
+        <table class="table table-sm table-bordered">
+        <tr><th rowspan="2">Select Location: {$nselect}</th>
+         <th>Start Date:</th> 
+          <td>{$y12select}</td>
+          <td>{$m1select}</td>
+          <td>{$d1select}</td></tr>
 
-<form name="feel" action="/cgi-bin/request/feel.py">
-<table>
-<tr>
- <th>Start Date:</th> 
-  <td>{$y13select}</td>
-  <td>{$m1select}</td>
-  <td>{$d1select}</td></tr>
+        <tr>
+         <th>End Date:</th>
+          <td>{$y22select}</td>
+          <td>{$m2select}</td>
+          <td>{$d2select}</td></tr>
 
-<tr>
- <th>End Date:</th>
-  <td>{$y23select}</td>
-  <td>{$m2select}</td>
-  <td>{$d2select}</td></tr>
+        </table>
+        <input type="submit" value="Request Data" class="btn btn-primary" />
+        </form>
+    </div>
+</div>
 
-</table>
-<input type="submit" value="Request Data" />
-</form>
-
-
-<h3>Raw Data Download!</h3>
-<form name="dl" action="/cgi-bin/request/other.py">
-<table class="table table-condensed table-bordered">
-<tr><th rowspan="2">Select Location: {$nselect}</th>
- <th>Start Date:</th> 
-  <td>{$y12select}</td>
-  <td>{$m1select}</td>
-  <td>{$d1select}</td></tr>
-
-<tr>
- <th>End Date:</th>
-  <td>{$y22select}</td>
-  <td>{$m2select}</td>
-  <td>{$d2select}</td></tr>
-
-</table>
-<input type="submit" value="Request Data" />
-</form>
-
-<h3>WMO BUFR Surface</h3>
-
-<p>During December 2023, the IEM started an ingest of surface data
-disseminated via NOAA in BUFR format.  There are thousands of stations within
-this IEM classified network.  The processing remains a work-in-progress, but
-you can <a href="/request/wmo_bufr_srf.php">download data</a> and view a large
-<a href="/sites/networks.php?network=WMO_BUFR_SRF">network table</a> or
-<a href="/sites/locate.php?network=WMO_BUFR_SRF">station map</a> to see
-what is available.</p>
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0">WMO BUFR Surface</h3>
+    </div>
+    <div class="card-body">
+        <p>During December 2023, the IEM started an ingest of surface data
+        disseminated via NOAA in BUFR format.  There are thousands of stations within
+        this IEM classified network.  The processing remains a work-in-progress, but
+        you can <a href="/request/wmo_bufr_srf.php">download data</a> and view a large
+        <a href="/sites/networks.php?network=WMO_BUFR_SRF">network table</a> or
+        <a href="/sites/locate.php?network=WMO_BUFR_SRF">station map</a> to see
+        what is available.</p>
+    </div>
+</div>
 
 EOM;
+
+// Add JavaScript to enhance form elements with Bootstrap 5 classes
+$t->jsextra = <<<EOM
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Bootstrap 5 classes to select elements
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        if (!select.classList.contains('form-select')) {
+            select.classList.add('form-select');
+        }
+    });
+});
+</script>
+EOM;
+
 $t->render('single.phtml');

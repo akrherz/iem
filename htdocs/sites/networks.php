@@ -111,12 +111,12 @@ $nohtml = isset($_GET['nohtml']);
 $table = "";
 if (strlen($network) > 0) {
     if ($format == "html") {
-        $table .= "<p><table class=\"table table-striped\">\n";
-        $table .= "<caption><b>" . $network . " Network</b></caption>\n";
+        $table .= "<div class=\"table-responsive\"><table class=\"table table-striped\">\n";
+        $table .= "<caption><strong>" . $network . " Network</strong></caption>\n";
         $table .= <<<EOM
-<thead>
+<thead class="table-dark sticky-top">
 <tr>
-<th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
+<th>ID</th><th>Station Name</th><th>Latitude<sup>1</sup></th>
 <th>Longitude<sup>1</sup></th><th>Elevation [m]</th>
 <th>Archive Begins</th><th>Archive Ends</th><th>IEM Network</th>
 <th>Attributes</th>
@@ -136,7 +136,7 @@ EOM;
               <td>" . attrs2str($row["attributes"]) . "</td>
               </tr>";
         }
-        $table .= "</table>\n";
+        $table .= "</table></div>\n";
     } else if ($format == "csv") {
         if (!$nohtml) $table .= "<p><b>" . $network . " Network</b></p>\n";
         if (!$nohtml) $table .= "<pre>\n";
@@ -261,20 +261,28 @@ if (!$nohtml || $format == 'shapefile') {
     $fselect = make_select("format", $format, $ar);
     $nselect = selectNetwork($network, $extra_networks);
     $t->content = <<<EOM
-<h3>Network Location Tables</h3>
+<div class="card mb-4">
+<div class="card-header">
+<h3 class="mb-0">Network Location Tables</h3>
+</div>
+<div class="card-body">
 
-<div class="well pull-right">
+<div class="card float-end" style="width: 300px;">
+<div class="card-body">
 <a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
 added stations.
 
-<br /><strong>Special Table Requests</strong>
-<ul>
+<div class="mt-3">
+<strong>Special Table Requests</strong>
+<ul class="list-unstyled mt-2">
  <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
  <li><a href="networks.php?special=allasos&format=csv&nohtml">Global METAR in CSV Format</a></li>
  <li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
  <li><a href="networks.php?special=alldcp&format=csv&nohtml">All DCPs in CSV Format</a></li>
  <li><a href="networks.php?network=HAS_HML">Sites with HML Coverage</a></li>
 </ul>
+</div>
+</div>
 </div>
 
 
@@ -283,33 +291,44 @@ of the networks listed below.  If there is a particular format for a station
 table that you need, please <a href="/info/contacts.php">let us know</a>.</p>
 
 <form method="GET" action="networks.php" name="networkSelect">
-<table>
-<tr>
-  <th>Select Observing Network:</th>
-  <td>{$nselect}</td>
-</tr>
-<tr>
-  <th>Select Format:</th>
-<td>
+{$sextra}
+
+<div class="row mb-3">
+<div class="col-md-6">
+<label for="network" class="form-label"><strong>Select Observing Network:</strong></label>
+{$nselect}
+</div>
+<div class="col-md-6">
+<label for="format" class="form-label"><strong>Select Format:</strong></label>
 {$fselect}
-</td></tr>
+</div>
+</div>
 
-<tr>
- <td colspan="2"><input type="checkbox" name="nohtml" id="nohtml">
- <label for="nohtml">Just Table, no HTML</label></td></tr>
+<div class="form-check mb-3">
+<input class="form-check-input" type="checkbox" name="nohtml" id="nohtml">
+<label class="form-check-label" for="nohtml">Just Table, no HTML</label>
+</div>
 
-<tr><td colspan="2">
-<input type="submit" value="Create Table">
+<div class="mb-3">
+<input type="submit" value="Create Table" class="btn btn-primary">
+</div>
+
 </form>
-</td></tr>
-</table>
+</div>
+</div>
 
 {$table}
-<p><h3>Notes</h3>
+<div class="card">
+<div class="card-header">
+<h3 class="mb-0">Notes</h3>
+</div>
+<div class="card-body">
 <ol>
 <li>Latitude and Longitude values are in decimal degrees.</li>
 <li>Elevation is expressed in meters above sea level.</li>
 </ol>
+</div>
+</div>
 EOM;
     $t->render($page);
 } else {

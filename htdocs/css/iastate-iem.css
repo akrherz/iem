@@ -1,0 +1,1226 @@
+@charset "UTF-8";
+/*
+ * Iowa Environmental Mesonet CSS
+ * Simplified navigation styles for Bootstrap 5
+ */
+
+/* === Utility Classes === */
+.navbar-transition { transition: all 0.5s ease; }
+.navbar-text-white { color: #fff !important; }
+.navbar-text-shadow { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+
+header {
+    display: block;
+}
+/* === Global === */
+body {
+  font-family: "Nimbus Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#loading {
+  display: none;
+}
+
+thead.sticky {
+    position: sticky;
+    top: 0;
+    background: #FFF;
+    z-index: 10;
+}
+
+/* Fix for dark tables with sticky headers */
+thead.sticky.table-dark {
+    background: #212529;
+}
+
+.table-responsive thead.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* === Header === */
+/* === Navs === */
+#navs {
+  background: #fff;
+}
+
+/* navbar collapse breakpoint */
+@media (max-width: 991px) {
+  .navbar-nav {
+    float: none !important;
+  }
+
+  .navbar-toggler {
+    display: block;
+  }
+
+  .navbar-collapse {
+    border-top: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .fixed-top {
+    top: 0;
+    border-width: 0 0 1px;
+  }
+
+  .navbar-nav {
+    float: none !important;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .navbar-nav > li {
+    float: none;
+  }
+
+  .collapse.show {
+    display: block !important;
+  }
+}
+
+/* === navbar === */
+.navbar {
+  border: none;
+}
+
+.navbar a,
+.navbar a:hover,
+.navbar a:focus {
+  text-decoration: none;
+}
+
+.navbar label {
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+/* Legacy layout rules removed - no longer used */
+/* Unused form and text styles removed */
+
+/* --- navbar-nav --- */
+.navbar-nav > li > a {
+  white-space: nowrap;
+}
+.navbar-site-wordmark {
+  flex: 1;
+  max-width: none;
+  float: left;
+}
+
+/* --- navbar-site --- */
+.navbar-site {
+  background-color: #c00;
+  color: #fff;
+  font-size: 16px;
+  padding: 8px 0;
+  position: relative;
+  z-index: 1030;
+}
+
+.navbar-site .container {
+  padding: 0 15px;
+}
+
+/* === Mobile navbar layout === */
+/* Simple single row layout for mobile */
+.mobile-navbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 8px 0;
+}
+
+.mobile-logo {
+  flex: 0 0 auto;
+}
+
+.mobile-logo img {
+  height: 30px;
+  width: auto;
+}
+
+.mobile-search {
+  flex: 1;
+  max-width: 200px;
+  margin: 0 15px;
+}
+
+.mobile-search .form-control {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  height: 32px;
+  padding: 4px 12px;
+  color: #333;
+}
+
+.mobile-search .form-control::placeholder {
+  color: #666;
+}
+
+.mobile-menu {
+  flex: 0 0 auto;
+}
+
+.mobile-menu .navbar-toggler {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  padding: 8px;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu .navbar-toggler:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-menu .navbar-toggler:active,
+.mobile-menu .navbar-toggler:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.mobile-menu .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 20px 20px;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+/* Mobile site links */
+.mobile-site-nav {
+  flex-direction: column;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 10px;
+}
+
+.mobile-site-nav .nav-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-site-nav .nav-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-site-nav .nav-link {
+  color: #fff;
+  padding: 8px 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.mobile-site-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 10px;
+  transition: all 0.2s ease;
+}
+
+/* === Desktop navbar layout === */
+/* Clean organized layout for desktop */
+.desktop-navbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 55px;
+  padding: 5px 0;
+}
+
+.desktop-wordmark {
+  flex: 0 0 auto;
+  max-width: 50%;
+}
+
+.desktop-wordmark .wordmark-unit {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+
+.desktop-wordmark .wordmark-isu {
+  color: transparent;
+  background-image: url("/vendor/img/isu.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: left center;
+  text-indent: -9999px;
+  overflow: hidden;
+  display: inline-block;
+  width: 150px;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+.desktop-wordmark .wordmark-unit-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 24px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.desktop-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.desktop-search .form-control {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: #333;
+  width: 280px;
+  height: 35px;
+  transition: width 0.3s ease;
+}
+
+.desktop-search .form-control:focus {
+  background: #fff;
+  width: 320px;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.desktop-links .nav {
+  flex-direction: row;
+  gap: 0;
+}
+
+.desktop-links .nav-item {
+  margin: 0 8px;
+}
+
+.desktop-links .nav-link {
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.desktop-links .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* === Shared navbar styles === */
+.navbar-site {
+  background-color: #c00;
+  color: #fff;
+  font-size: 16px;
+  padding: 0;
+  position: relative;
+  z-index: 1030;
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -ms-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+
+.navbar-site .container {
+  padding: 0 15px;
+  transition: all 0.5s ease;
+}
+
+.navbar-site a {
+  text-decoration: none;
+}
+
+.navbar-site a:hover {
+  text-decoration: none;
+}
+
+/* Ensure proper z-index stacking */
+.navbar.navbar-expand-lg {
+  position: relative;
+  z-index: 1020;
+}
+
+/* === Main navigation navbar === */
+/* Clean layout for the main menu navbar */
+.navbar.navbar-expand-lg {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  min-height: 50px;
+  align-items: center;
+}
+
+.navbar.navbar-expand-lg .container {
+  padding: 0 15px;
+}
+
+/* Desktop IEM logo in main navbar */
+.navbar.navbar-expand-lg .d-none.d-lg-block img {
+  height: 50px;
+  width: auto;
+  max-width: none;
+}
+
+/* Main navigation links */
+.navbar.navbar-expand-lg .nav-link {
+  color: #333 !important;
+  padding: 10px 10px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.navbar.navbar-expand-lg .nav-link:hover,
+.navbar.navbar-expand-lg .nav-link:focus {
+  color: #c00 !important;
+  border-bottom-color: #c00;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar.navbar-expand-lg .nav-item.active .nav-link,
+.navbar.navbar-expand-lg .nav-item .nav-link.active {
+  color: #c00 !important;
+  border-bottom-color: #c00;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile layout for main navbar */
+@media (max-width: 991px) {
+  /* Show main navbar on mobile when collapse is active */
+  .navbar.navbar-expand-lg {
+    display: block !important;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    margin-top: 0;
+    min-height: auto;
+  }
+  
+  /* Hide main navbar content by default */
+  .navbar.navbar-expand-lg .navbar-collapse.collapse:not(.show) {
+    display: none !important;
+  }
+  
+  /* Show main navbar content when toggled */
+  .navbar.navbar-expand-lg .navbar-collapse.collapse.show {
+    display: block !important;
+    padding: 10px 0;
+  }
+  
+  /* Hide the desktop logo on mobile */
+  .navbar.navbar-expand-lg .d-none.d-lg-block {
+    display: none !important;
+  }
+}
+
+/* Desktop layout for main navbar */
+@media (min-width: 992px) {
+  .navbar.navbar-expand-lg .navbar-collapse {
+    display: flex !important;
+    visibility: visible !important;
+  }
+  
+  .navbar.navbar-expand-lg .navbar-collapse.collapse {
+    display: flex !important;
+  }
+  
+  .navbar.navbar-expand-lg #navbar-menu-collapse.collapse {
+    display: flex !important;
+  }
+}
+
+/* === Breadcrumb === */
+div.breadcrumb {
+  border-radius: 0;
+  background-color: #f5f5f5;
+  padding: 8px 15px;
+  margin-bottom: 20px;
+}
+
+div.breadcrumb span {
+  display: inline-block;
+}
+
+div.breadcrumb span + span::before {
+  content: '›';
+  color: #777;
+  padding: 0 9px 0 7px;
+  font-weight: 600;
+}
+
+div.breadcrumb span.active {
+  color: #777;
+}
+
+/* === Main === */
+main {
+  background: #fff;
+  padding-bottom: 40px;
+}
+
+main .container {
+  transition: all 0.5s ease;
+}
+
+main .container:hover {
+  transition: all 0.5s ease;
+}
+
+main > .container > form:first-of-type {
+  margin-top: 20px;
+}
+
+/* === Footer === */
+footer {
+  background-color: #f3f3f3;
+  color: #686868;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 20px 0;
+  vertical-align: top;
+  width: 100%;
+}
+
+footer .container {
+  transition: all 0.5s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  width: 100%;
+}
+
+footer .container:hover {
+  transition: all 0.5s ease;
+}
+
+footer section {
+  border-bottom: 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 0;
+}
+
+@media (max-width: 991px) {
+  footer section {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+  }
+}
+footer p {
+  line-height: 21px;
+}
+
+footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+footer a {
+  color: #1f1f1f;
+}
+
+footer a:active,
+footer a:focus,
+footer a:hover {
+  color: #1f1f1f;
+  text-decoration: underline;
+}
+
+footer section.contact h1 {
+  display: none;
+}
+
+footer ul.menu {
+  margin: 0;
+}
+
+footer .wordmark-isu {
+  fill: #c00;
+  width: 180px;
+  margin-bottom: 10px;
+}
+
+/* === Buttons === */
+.btn-wrap {
+  white-space: normal;
+}
+
+/* === Forms === */
+fieldset {
+  background: #f3f3f3;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+legend {
+  background: #f3f3f3;
+  border-radius: 5px;
+  border-width: 0;
+  font-size: 1em;
+  margin-bottom: 0;
+  padding: 0 10px;
+  width: auto;
+}
+
+/* input-group */
+.input-group .form-control:not(:first-child):not(:last-child),
+.input-group-addon:not(:first-child):not(:last-child),
+.input-group-btn:not(:first-child):not(:last-child) {
+  border-left: 0;
+}
+
+/* === Pagination === */
+[class^="pagination"] {
+  color: #555555;
+  display: inline-block;
+  margin: 10px;
+  vertical-align: middle;
+}
+
+/* === Social === */
+.footer-social ul {
+  list-style: none;
+  min-height: 84px;
+}
+
+.footer-social li {
+  padding: 0;
+  margin: 0;
+}
+
+.footer-social ul.unlabeled li {
+  display: inline-block;
+  width: 42px;
+  text-align: center;
+}
+
+@media (max-width: 991px) {
+  .footer-social ul.unlabeled li {
+    text-align: center;
+  }
+}
+.footer-social a {
+  display: block;
+  height: 42px;
+  line-height: 42px;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-social ul.unlabeled a {
+  margin-right: 0;
+}
+
+.footer-social a .fa:before {
+  border-radius: 0;
+  color: #444;
+  display: inline-block;
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  font-size: 34px;
+  font-family: FontAwesome;
+  font-weight: normal;
+  text-align: center;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -ms-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  vertical-align: middle;
+}
+
+.footer-social a:hover .fa:before {
+  text-decoration: none;
+}
+
+.footer-social a[href*='facebook.com'] .fa:before {
+  content: "\f082";
+}
+
+.footer-social a[href*='facebook.com']:hover .fa:before {
+  color: #3b5998;
+}
+
+.footer-social a[href*='twitter.com'] .fa:before {
+  content: "\f081";
+}
+
+.footer-social a[href*='twitter.com']:hover .fa:before {
+  color: #4099ff;
+}
+
+.footer-social a[href*='instagram.com'] .fa:before {
+  content: "\f16d";
+}
+
+.footer-social a[href*='instagram.com']:hover .fa:before {
+  background: -webkit-radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%), -webkit-radial-gradient(circle farthest-corner at 0 140%, #fec564, transparent 50%), -webkit-radial-gradient(ellipse farthest-corner at 0 -25%, #5258cf, transparent 50%), -webkit-radial-gradient(ellipse farthest-corner at 20% -50%, #5258cf, transparent 50%), -webkit-radial-gradient(ellipse farthest-corner at 100% 0, #893dc2, transparent 50%), -webkit-radial-gradient(ellipse farthest-corner at 60% -20%, #893dc2, transparent 50%), -webkit-radial-gradient(ellipse farthest-corner at 100% 100%, #d9317a, transparent), -webkit-linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+  background: radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%), radial-gradient(circle farthest-corner at 0 140%, #fec564, transparent 50%), radial-gradient(ellipse farthest-corner at 0 -25%, #5258cf, transparent 50%), radial-gradient(ellipse farthest-corner at 20% -50%, #5258cf, transparent 50%), radial-gradient(ellipse farthest-corner at 100% 0, #893dc2, transparent 50%), radial-gradient(ellipse farthest-corner at 60% -20%, #893dc2, transparent 50%), radial-gradient(ellipse farthest-corner at 100% 100%, #d9317a, transparent), linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer-social a[href*='youtube.com'] .fa:before {
+  content: "\f166";
+}
+
+.footer-social a[href*='youtube.com']:hover .fa:before {
+  color: #e52d27;
+}
+
+.footer-social a[href*='github.com'] .fa:before {
+  content: "\f092";
+}
+
+.footer-social a[href*='github.com']:hover .fa:before {
+  color: #000000;
+}
+
+.footer-social a[href*='plus.google.com'] .fa:before {
+  content: "\f0d4";
+}
+
+.footer-social a[href*='plus.google.com']:hover .fa:before {
+  color: #dd4b39;
+}
+
+.footer-social a[href*='linkedin.com'] .fa:before {
+  content: "\f08c";
+}
+
+.footer-social a[href*='linkedin.com']:hover .fa:before {
+  color: #007bb5;
+}
+
+.footer-social a[href*='pinterest.com'] .fa:before {
+  content: "\f0d3";
+}
+
+.footer-social a[href*='pinterest.com']:hover .fa:before {
+  color: #cb2027;
+}
+
+.footer-social a[href*='reddit.com'] .fa:before {
+  content: "\f1a2";
+}
+
+.footer-social a[href*='reddit.com']:hover .fa:before {
+  color: #ff4500;
+}
+
+.footer-social a[href*='snapchat.com'] .fa:before {
+  content: "\f2ad";
+}
+
+.footer-social a[href*='snapchat.com']:hover .fa:before {
+  color: #fffc00;
+}
+
+.footer-social a[href*='vimeo.com'] .fa:before {
+  content: "\f194";
+}
+
+.footer-social a[href*='vimeo.com']:hover .fa:before {
+  color: #1ab7ea;
+}
+
+.footer-social a[href*='wordpress'] .fa:before {
+  content: "\f19a";
+}
+
+.footer-social a[href*='wordpress']:hover .fa:before {
+  color: #21759b;
+}
+
+.footer-social a[href*='tumblr.com'] .fa:before {
+  content: "\f174";
+}
+
+.footer-social a[href*='tumblr.com']:hover .fa:before {
+  color: #32506d;
+}
+
+.footer-social a[href*='twitch.tv'] .fa:before {
+  content: "\f1e8";
+  font-size: 30px;
+}
+
+.footer-social a[href*='twitch.tv']:hover .fa:before {
+  color: #6441A5;
+}
+
+.footer-social a[href*='vine.co'] .fa:before {
+  content: "\f1ca";
+  font-size: 30px;
+}
+
+.footer-social a[href*='vine.co']:hover .fa:before {
+  color: #00b488;
+}
+
+.footer-social a[href*='rss'] .fa:before {
+  content: "\f143";
+}
+
+.footer-social a[href*='rss']:hover .fa:before {
+  color: #f26522;
+}
+
+/* === Typeahead === */
+.tt-hint {
+  color: #999;
+}
+
+.tt-menu {
+  width: 100%;
+  color: #fff;
+  background-color: #666;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+/* === Utility === */
+.overflow-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* === Legacy === */
+.wd-Grid-cell, .grid, .wd-Grid-cell--1, .wd-Grid-cell--2, .wd-Grid-cell--3, .wd-Grid-cell--4, .wd-Grid-cell--1of1, .g-1, .g-1-1, .wd-Grid-cell--1of2, .g-1-2, .wd-Grid-cell--1of3, .g-1-3, .wd-Grid-cell--2of3, .g-2-3, .wd-Grid-cell--1of4, .g-1-4, .wd-Grid-cell--3of4, .g-3-4, .wd-Grid-cell--1of5, .g-1-5, .wd-Grid-cell--2of5, .g-2-5, .wd-Grid-cell--3of5, .g-3-5, .wd-Grid-cell--4of5, .g-4-5 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Bootstrap 5 Migration: Dropdown toggle arrow fixes */
+/* Override the existing FontAwesome dropdown arrows with Bootstrap 5 style */
+.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  font-family: inherit !important; /* Override FontAwesome */
+}
+
+.dropdown-toggle:empty::after {
+  margin-left: 0;
+}
+
+/* Ensure dropdown arrows show properly in navigation */
+.nav-link.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+/* Fix for navbar dropdown arrows specifically */
+.navbar-nav .dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+/* Ensure dropdown functionality works properly */
+.dropdown-menu {
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+/* Fix dropdown item styling for Bootstrap 5 */
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 1rem;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  color: #1e2125;
+  background-color: #e9ecef;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  color: #fff;
+  text-decoration: none;
+  background-color: #0d6efd;
+}
+
+/* Duplicate rules removed - consolidated above */
+
+/* navbar-caps layout */
+.navbar-site .navbar-caps .navbar-nav {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media only screen and (max-width: 991px) {
+  .navbar-site .navbar-caps .navbar-nav {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Fix nav-item spacing */
+.navbar-site .navbar-caps .nav-item {
+  margin: 0;
+}
+
+.navbar-site .navbar-caps .nav-link {
+  display: block;
+  padding: 15px 10px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.navbar-site .navbar-caps .nav-link:hover,
+.navbar-site .navbar-caps .nav-link:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* --- Bootstrap 5 dropdown positioning fixes --- */
+/* Ensure dropdowns work properly in both navbars */
+.navbar .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  min-width: 10rem;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  text-align: left;
+  background-color: #e7e7e7;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+}
+
+.navbar .dropdown-menu.show {
+  display: block;
+}
+
+/* Fix dropdown items */
+.navbar .dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 20px;
+  clear: both;
+  font-weight: 400;
+  color: #333;
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+}
+
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+  color: #222;
+  background-color: #d7d7d7;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar .dropdown-item.active,
+.navbar .dropdown-item:active {
+  color: #fff;
+  text-decoration: none;
+  background-color: #c00;
+}
+
+/* Fix mobile dropdown behavior */
+@media (max-width: 991px) {
+  .navbar .dropdown-menu {
+    position: static;
+    float: none;
+    width: auto;
+    margin-top: 0;
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  
+  .navbar .dropdown-item {
+    padding-left: 30px;
+  }
+}
+
+/* Fix navbar collapse transition */
+.navbar .navbar-collapse {
+  transition: height 0.35s ease;
+}
+
+.navbar .navbar-collapse.collapsing {
+  transition: height 0.35s ease;
+}
+
+/* Mobile navigation rules consolidated above */
+
+/* Fix button z-index and positioning */
+.navbar-site .navbar-header .navbar-toggler {
+  position: relative;
+  z-index: 1040;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* --- Header text visibility and contrast fixes --- */
+/* Ensure wordmark text is visible and properly contrasted */
+.navbar-site .wordmark-isu {
+  color: transparent !important; /* Keeps the background image visible */
+  background-image: url("/vendor/img/isu.svg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: left top;
+  text-indent: -9999px; /* Hide text but keep for accessibility */
+  overflow: hidden;
+}
+
+.navbar-site .wordmark-unit-title {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 900;
+  display: block;
+}
+
+/* Fix wordmark link contrast and hover states */
+.navbar-site a.wordmark-unit {
+  color: #fff;
+  text-decoration: none;
+}
+
+.navbar-site a.wordmark-unit:hover,
+.navbar-site a.wordmark-unit:focus {
+  color: #fff;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+/* Ensure search input visibility */
+.navbar-site .navbar-site-search .form-control {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.navbar-site .navbar-site-search .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-site .navbar-site-search .form-control:focus {
+  background: #fff;
+  color: #333;
+  border-color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+  outline: none;
+}
+
+/* Enhanced search input expansion with visual feedback */
+@media only screen and (min-width: 992px) {
+  .navbar-site .navbar-site-search.search-active {
+    z-index: 1050;
+  }
+  
+  .navbar-site .navbar-site-search .form-control.expanded {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25), 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Fix navigation links visibility */
+.navbar-site .navbar-caps .nav-link {
+  color: #fff !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-site .navbar-caps .nav-link:hover,
+.navbar-site .navbar-caps .nav-link:focus {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+}
+
+/* Ensure button icon visibility */
+.navbar-site .navbar-header .navbar-toggler-bar {
+  background-color: #fff !important;
+  opacity: 1;
+}
+
+.navbar-site .navbar-header .navbar-toggler-label {
+  color: #fff !important;
+  opacity: 1;
+}
+
+/* Fix any potential overflow issues */
+.navbar-site {
+  overflow: visible;
+}
+
+.navbar-site .container {
+  overflow: visible;
+}
+
+/* Fix logo visibility in main navbar */
+.navbar.navbar-expand-lg .d-none.d-md-block img {
+  height: 50px;
+  width: auto;
+  max-width: none;
+}
+
+/* --- Bootstrap Icons integration --- */
+/* Ensure Bootstrap Icons display properly with existing styles */
+.bi {
+  display: inline-block;
+  vertical-align: -0.125em;
+  fill: currentColor;
+}
+
+/* Fix Bootstrap Icons in navigation */
+.nav-link .bi {
+  font-size: 1.1em;
+  margin-right: 0.25em;
+}
+
+.navbar-nav .nav-link .bi {
+  color: inherit;
+}
+
+/* Fix Bootstrap Icons in footer links */
+footer a .bi {
+  margin-right: 0.5em;
+  font-size: 0.9em;
+}
+
+/* === Bootstrap 5 Collapse Functionality === */
+/* Ensure collapsible elements work properly */
+.collapse:not(.show) {
+  display: none;
+}
+
+.collapse.show {
+  display: block;
+}
+
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
+}
+
+/* Mobile navbar collapse behavior */
+#mobile-site-links.collapse:not(.show) {
+  display: none;
+}
+
+#mobile-site-links.collapse.show {
+  display: block;
+  animation: fadeInDown 0.3s ease;
+}
+
+#navbar-menu-collapse.collapse:not(.show) {
+  display: none;
+}
+
+#navbar-menu-collapse.collapse.show {
+  display: block;
+}
+
+/* Main navbar responsive behavior */
+@media (max-width: 991px) {
+  .navbar.navbar-expand-lg #navbar-menu-collapse.collapse:not(.show) {
+    display: none;
+  }
+  
+  .navbar.navbar-expand-lg #navbar-menu-collapse.collapse.show {
+    display: block;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    margin-top: 0;
+    padding: 10px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar.navbar-expand-lg #navbar-menu-collapse.collapse {
+    display: flex !important;
+  }
+}
+
+/* Smooth animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

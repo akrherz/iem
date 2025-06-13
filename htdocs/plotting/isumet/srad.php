@@ -30,7 +30,11 @@ $uvindex = array();
 $valid = array();
 
 if (is_null($station)) {
-    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+    $fpath = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat";
+    if (!file_exists($fpath)) {
+        die("File not found");
+    }
+    $fcontents = file($fpath);
     foreach ($fcontents as $line_num => $line) {
         $valid[] = strtotime(substr($line, 0, 26));
         $parts = preg_split("/\s+/", $line);

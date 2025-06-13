@@ -236,7 +236,7 @@ for a bias assessment of these values.</p>
 <form name="dates">
 <input type="hidden" name="network" value="{$network}">
 {$hiddenstations}
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr><th>Growing Degree Days</th>
  <td>base: <input type="text" name="gddbase" size="4" value="{$gddbase}">
  floor: <input type="text" name="gddfloor" size="4" value="{$gddfloor}">
@@ -262,7 +262,7 @@ record since 1951.</p>
 <input type="hidden" name="network" value="{$network}">
 {$hiddenstations}
 {$hiddendates}
-<table class="table table-bordered table-striped table-condensed">
+<table class="table table-bordered table-striped table-sm">
 <thead><tr>
     <th rowspan="2">ID</th>
     <th rowspan="2">Name</th>

@@ -191,7 +191,7 @@ $t->content = <<<EOM
   <div class="row">
   <div class="col-md-7">
 
-<img src="{$url}" class="img img-responsive" />
+<img src="{$url}" class="img img-fluid" />
    <br><i>You can right-click on the image to save it.</i>
   <br><li>Only one year with the record value is shown, there may have been 
     more.</li>
@@ -238,7 +238,7 @@ $t->content = <<<EOM
 
 <tr>
   <td colspan=2 align="center">
-     <input type="submit" value="Generate Plot">
+     <input type="submit" value="Generate Plot" class="btn btn-primary">
     </form><br><br>
   </td></tr>
 

@@ -129,35 +129,43 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
     $apercent = intval($apirate / 100.0 * 100.0);
 
     $s = <<<EOF
-<div class="panel panel-default">
-<div class="panel-heading">Current Website Performance:</div>
-  <div class="panel-body">
+<div class="card mb-3">
+<div class="card-header">Current Website Performance:</div>
+  <div class="card-body">
 
-  <span>Bandwidth: {$label}</span>
-<div class="progress">
-    <div class="progress-bar progress-bar-{$bcolor}" role="progressbar" aria-valuenow="{$bpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$bpercent}%;">
+  <div class="mb-2">
+    <span>Bandwidth: {$label}</span>
+    <div class="progress">
+        <div class="progress-bar bg-{$bcolor}" role="progressbar" aria-valuenow="{$bpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$bpercent}%;">
+        </div>
     </div>
-</div>
+  </div>
 
-<span>Total Website: {$rlabel}</span>
-<div class="progress">
-    <div class="progress-bar progress-bar-{$rcolor}" role="progressbar" aria-valuenow="{$rpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$rpercent}%;">
+  <div class="mb-2">
+    <span>Total Website: {$rlabel}</span>
+    <div class="progress">
+        <div class="progress-bar bg-{$rcolor}" role="progressbar" aria-valuenow="{$rpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$rpercent}%;">
+        </div>
     </div>
-</div>
+  </div>
 
-<span>API/Data Services: {$alabel}</span>
-<div class="progress">
-    <div class="progress-bar progress-bar-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
+  <div class="mb-2">
+    <span>API/Data Services: {$alabel}</span>
+    <div class="progress">
+        <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
+        </div>
     </div>
-</div>
+  </div>
 
-<span>API Success: {$olabel}</span>
-<div class="progress">
-    <div class="progress-bar progress-bar-{$ocolor}" role="progressbar"
-    aria-valuenow="{$opercent}" aria-valuemin="0" aria-valuemax="100"
-    style="width: {$opercent}%;">
+  <div class="mb-2">
+    <span>API Success: {$olabel}</span>
+    <div class="progress">
+        <div class="progress-bar bg-{$ocolor}" role="progressbar"
+        aria-valuenow="{$opercent}" aria-valuemin="0" aria-valuemax="100"
+        style="width: {$opercent}%;">
+        </div>
     </div>
-</div>
+  </div>
 
   </div>
 </div>
@@ -199,7 +207,7 @@ function gen_feature($t)
 
     $linktext = "";
     if ($row["appurl"] != "") {
-        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
+        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"bi bi-bar-chart\"></i> Generate This Chart on Website</a>";
     }
 
     $tagtext = "";
@@ -213,21 +221,21 @@ function gen_feature($t)
     $jsextra = "";
     if ($row["mediasuffix"] == 'mp4') {
         $imgiface = <<<EOM
-<video class="img img-responsive" controls>
+<video class="img-fluid" controls>
     <source src="{$imghref}" type="video/mp4">
     Your browser does not support the video tag.
 </video>
 EOM;
     } else {
-        $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
+        $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img-fluid\" /></a>";
     }
     if ($row["javascripturl"]) {
         $imgiface = <<<EOF
-<div class="hidden-sm hidden-xs">
-<div id="ap_container" style="width:100%s;height:400px;"></div>
+<div class="d-none d-md-block">
+<div id="ap_container" style="width:100%;height:400px;"></div>
 </div>
-<div class="visible-sm visible-xs">
-<a href="$imghref"><img src="$imghref" alt="Feature" class="img img-responsive" /></a>
+<div class="d-md-none">
+<a href="$imghref"><img src="$imghref" alt="Feature" class="img-fluid" /></a>
 </div>
 EOF;
         $HC = "8.2.0";
@@ -240,39 +248,43 @@ EOM;
     }
 
     $s .= <<<EOF
-<div class="panel panel-default top-buffer">
-    <div class="panel-heading">
+<div class="card mb-3">
+    <div class="card-header">
     
 <div class='row'>
-    <div class='col-xs-12 col-sm-4'><b>IEM Daily Feature</b>
+    <div class='col-12 col-sm-4'><b>IEM Daily Feature</b>
         <a href="/feature_rss.php"><img src="/images/rss.gif" /></a></div>
-    <div class='col-xs-12 col-sm-8'>
-        <div class='btn-group row'>
-            <a class="btn btn-default col-xs-6 col-sm-3" href="{$fburl}">Facebook</a>
-            <a class="btn btn-default col-xs-6 col-sm-3" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
-            <a class="btn btn-default col-xs-6 col-sm-4" href="/onsite/features/past.php">Past Features</a>
-            <a class="btn btn-default col-xs-6 col-sm-2" href="/onsite/features/tags/">Tags</a>
+    <div class='col-12 col-sm-8'>
+        <div class='d-flex flex-wrap gap-1'>
+            <a class="btn btn-outline-secondary btn-sm" href="{$fburl}">Facebook</a>
+            <a class="btn btn-outline-secondary btn-sm" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
+            <a class="btn btn-outline-secondary btn-sm" href="/onsite/features/past.php">Past Features</a>
+            <a class="btn btn-outline-secondary btn-sm" href="/onsite/features/tags/">Tags</a>
          </div>
     </div>
 </div>
     
-        <div class="clearfix"></div>
     </div>
-    <div class="panel-body">
-
-    
-        <div class="thumbnail col-xs-12 col-sm-7 pull-right">
-            {$imgiface}
-            <div class="caption"><span>{$row["caption"]}</span>{$linktext}</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12 col-md-5">
+                <h4>{$row["title"]}</h4>
+                <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
+                {$tagtext}
+                <div class="mt-2">{$row["story"]}</div>
+            </div>
+            <div class="col-12 col-md-7">
+                <div class="card">
+                    <div class="card-img-top">
+                        {$imgiface}
+                    </div>
+                    <div class="card-body">
+                        <span>{$row["caption"]}</span>
+                        {$linktext}
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <h4 style="display: inline;">{$row["title"]}</h4>
-        
-            <br /><small>Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
-            {$tagtext}
-            <br />{$row["story"]}
-
-        <div class="clearfix"></div>
 
 EOF;
 
@@ -282,17 +294,17 @@ EOF;
         $vtext = "";
     } else {
         $vtext = <<<EOM
-        <div style="clear:both;">
-        <div class="row">
-        <div class="col-xs-12 col-sm-3"><strong><span id="feature_msg">Rate Feature</span></strong></div>
-        <div class="col-xs-12 col-sm-3"> 
-<button class="btn btn-success btn-block feature_btn" role="button" data-voting="good">Good (<span id="feature_good_votes">$good</span> votes)</button>
+        <div class="mt-3">
+        <div class="row g-2">
+        <div class="col-12 col-sm-3 d-flex align-items-center"><strong><span id="feature_msg">Rate Feature</span></strong></div>
+        <div class="col-12 col-sm-3"> 
+<button class="btn btn-success w-100 feature_btn" type="button" data-voting="good">Good (<span id="feature_good_votes">$good</span> votes)</button>
         </div>
-        <div class="col-xs-12 col-sm-3"> 
-<button class="btn btn-danger btn-block feature_btn" role="button" data-voting="bad">Bad (<span id="feature_bad_votes">$bad</span> votes)</button>
+        <div class="col-12 col-sm-3"> 
+<button class="btn btn-danger w-100 feature_btn" type="button" data-voting="bad">Bad (<span id="feature_bad_votes">$bad</span> votes)</button>
         </div>
-        <div class="col-xs-12 col-sm-3"> 
-<button class="btn btn-warning btn-block feature_btn" role="button" data-voting="abstain">Abstain (<span id="feature_abstain_votes">$abstain</span> votes)</button>
+        <div class="col-12 col-sm-3"> 
+<button class="btn btn-warning w-100 feature_btn" type="button" data-voting="abstain">Abstain (<span id="feature_abstain_votes">$abstain</span> votes)</button>
         </div>
         </div>
     </div>
@@ -314,39 +326,47 @@ EOF;
         <br /><strong>Previous Years' Features</strong>
             
 EOF;
-    /* Now, lets look for older features! */
-    $sql = "select *, extract(year from valid) as yr from feature 
-            WHERE extract(month from valid) = extract(month from now()) 
-            and extract(day from valid) = extract(day from now()) and 
-            extract(year from valid) != extract(year from now()) ORDER by yr DESC";
-    $result = pg_exec($connection, $sql);
-
-    for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
-        // Start a new row
-        if ($i % 2 == 0) {
-            $s .= "\n<div class=\"row\">";
-        }
-        $s .= sprintf(
-            "\n<div class=\"col-xs-6\">%s: %s" .
-                "<a href=\"onsite/features/cat.php?day=%s\">" .
-                "%s</a></div>",
-            $row["yr"],
-            $row["appurl"] ? "<i class=\"fa fa-signal\"></i> " : "",
-            substr($row["valid"], 0, 10),
-            $row["title"]
+    // Find previous years' features
+    $stname = iem_pg_prepare(
+        $connection,
+        "select *, extract(year from valid) as yr from feature ".
+        "WHERE to_char(valid, 'mmdd') = $1 and valid < 'TODAY'::date ".
+        "ORDER by yr DESC"
         );
-        // End the row
-        if ($i % 2 != 0) {
-            $s .= "\n</div>\n";
+    $result = pg_execute($connection, $stname, array(
+        date("md")
+    ));
+
+    // Check if we have any previous years' features
+    $features = [];
+    while ($row = pg_fetch_assoc($result)) {
+        $features[] = $row;
+    }
+
+    if (count($features) > 0) {
+        $s .= '<div class="row g-2 mt-2">';
+        foreach ($features as $row) {
+            $icon = $row["appurl"] ? '<i class="bi bi-bar-chart text-primary me-1"></i>' : '';
+            $s .= sprintf(
+                '<div class="col-md-6 col-xl-4">' .
+                '<div class="card card-body py-2 px-3">' .
+                '<div class="d-flex align-items-center">' .
+                '<span class="badge bg-primary me-2 flex-shrink-0">%s</span>' .
+                '<small class="text-truncate">' .
+                '<a href="onsite/features/cat.php?day=%s" class="text-decoration-none">%s%s</a>' .
+                '</small>' .
+                '</div></div></div>',
+                $row["yr"],
+                substr($row["valid"], 0, 10),
+                $icon,
+                htmlspecialchars($row["title"])
+            );
         }
+        $s .= '</div>';
     }
 
-    if ($i > 0 && $i % 2 != 0) {
-        $s .= "\n<div class=\"col-xs-6\">&nbsp;</div>\n</div>";
-    }
-
-    $s .= "</div><!--  end of panel body -->";
-    $s .= "</div><!-- end of panel -->";
+    $s .= "</div><!--  end of card body -->";
+    $s .= "</div><!-- end of card -->";
 
     return $s;
 };

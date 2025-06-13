@@ -74,7 +74,7 @@ function f2($data, $key, $fmt)
 
 function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
 {
-    $table = '<table class="table table-ruled table-condensed table-bordered">' .
+    $table = '<table class="table table-ruled table-bordered">' .
         '<thead class="sticky">' .
         '<tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th>' .
         '<th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>' .
@@ -266,27 +266,27 @@ by the duration between observations.</p>
  <h3>Select month and year:</h3>
  <div class="row">
  <div class="col-sm-3">
- <a href="{$llink}" class="btn btn-default">{$ltext} <i class="fa fa-arrow-left"></i></a>
+ <a href="{$llink}" class="btn btn-secondary">{$ltext} <i class="fa fa-arrow-left"></i></a>
     </div>
     <div class="col-sm-6">
   {$ms} {$ys}
  <input type="submit" value="Generate Plot">
  </div>
  <div class="col-sm-3">
- <a href="{$nlink}" class="btn btn-default"><i class="fa fa-arrow-right"></i> {$ntext}</a>
+ <a href="{$nlink}" class="btn btn-secondary"><i class="fa fa-arrow-right"></i> {$ntext}</a>
 </div>
 </div>
 </form>
 
 <div class="row">
 <div class="col-md-12">
-<img src="{$plot1}" alt="Monthly Plot" class="img img-responsive">
+<img src="{$plot1}" alt="Monthly Plot" class="img-fluid">
 </div>
 </div>
 
 <div class="row">
 <div class="col-md-12">
-<img src="{$plot2}" alt="Monthly Plot" class="img img-responsive">
+<img src="{$plot2}" alt="Monthly Plot" class="img-fluid">
 </div>
 </div>
 

@@ -5,9 +5,9 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$jobid = xssafe($_REQUEST["jobid"]);
+$jobid = isset($_REQUEST["jobid"]) ? xssafe($_REQUEST["jobid"]) : die("No jobid provided!");
 $status = "PROCESSING";
-if (isset($_REQUEST["jobid"])) {
+if ($jobid) {
     $mesosite = iemdb("mesosite");
     $stname = iem_pg_prepare($mesosite, "SELECT * from racoon_jobs where jobid = $1");
     $rs = pg_execute($mesosite, $stname, array($jobid));

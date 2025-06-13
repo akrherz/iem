@@ -50,7 +50,7 @@ $t->content = <<<EOM
 </div>
         
 <div id="legend"><img src="profit_legend.png" />
-<br /><button class="btn btn-default" id="disclaimer_btn" type="button" role="button"><i class="fa fa-info"></i> View Disclaimer</button>
+<br /><button class="btn btn-secondary" id="disclaimer_btn" type="button" role="button"><i class="fa fa-info"></i> View Disclaimer</button>
 </div>
 
 <div id="disclaimer" style="display: none; overflow: auto;" title="Disclaimer">

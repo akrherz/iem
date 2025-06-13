@@ -177,10 +177,12 @@ $m2select = monthSelect($emonth, 'emonth');
 $d2select = daySelect($eday, 'eday');
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/COOP/">NWS Cooperative Network</a></li>
- <li class="active">Custom Date Duration Charts</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/COOP/">NWS Cooperative Network</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Custom Date Duration Charts</li>
+  </ol>
+</nav>
 
 <p>With this application, you can total a parameter of your
 choice over a duration of your choice.  The resulting data is presented 
@@ -190,7 +192,7 @@ The raw daily data used for this application can be downloaded
 from <a href="/request/coop/fe.phtml">here</a>.
 
 <form method="GET" action="gsplot.phtml" name="theform">
-<table class="table table-condensed">
+<table class="table table-sm">
 <thead>
  <tr>
    <th>Available State:</th>
@@ -210,7 +212,7 @@ from <a href="/request/coop/fe.phtml">here</a>.
   <td>{$yselect}</td>
   <td>{$m1select}</td>
   <td>{$d1select}</td>
-  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  <td rowspan=2><input type="submit" value="Make Plot" class="btn btn-primary"></td>
   </tr>
  <tr>
   <td>to inclusive date:</td>
@@ -225,7 +227,7 @@ from <a href="/request/coop/fe.phtml">here</a>.
 space restrictions.  The small four digit label is the station identifier used
 in the data listing below (without the 2 character state identifier included).
 <br />
-  <img src="{$imgurl}" class="img img-responsive" />
+  <img src="{$imgurl}" class="img img-fluid" />
   </p>
 
 <h3> Data Listing</h3>

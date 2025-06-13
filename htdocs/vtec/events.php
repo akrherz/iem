@@ -161,10 +161,10 @@ directly access it here:
 
 </form>
 
-<p><button id="makefancy" class="btn btn-default">Make Table Below Interactive</button></p>
+<p><button id="makefancy" class="btn btn-secondary">Make Table Below Interactive</button></p>
 
 <div id="thetable">
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-sm">
 <thead><tr><th>WFO</th><th>Event ID</th><th>PH</th><th>SIG</th><th>Event</th>
  <th>Issue</th><th>Expire</th><th>HVTEC NWSLI</th></tr>
 </thead>		

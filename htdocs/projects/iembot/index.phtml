@@ -6,7 +6,7 @@ require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 
 $btable = <<<EOM
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered">
 <thead>
 <tr>
   <th>Bluesky Handle</th>
@@ -55,10 +55,12 @@ $wselect .= "</select>";
 
 $channels = file_get_contents('channels.html');
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/current/severe.phtml">Severe Weather</a></li>
- <li class="active">IEMBot Project</li>
+ <li class="breadcrumb-item"><a href="/current/severe.phtml">Severe Weather</a></li>
+ <li class="breadcrumb-item active" aria-current="page">IEMBot Project</li>
 </ol>
+</nav>
 
 <p><i>iembot</i> is a XMPP chat bot that relays National Weather Service issued
 text products to XMPP chat rooms hosted on the conference.weather.im multi-user
@@ -119,7 +121,7 @@ issued.  The entire process takes much less than a second.</p>
 
 <p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.  The text in blue can be clicked on for the product text and perhaps a visual display.<br />
 
-<img src="iembot.png" class="img img-responsive">
+<img src="iembot.png" class="img-fluid">
 
 <a name="channels"><h3>Channels</h3></a>
 

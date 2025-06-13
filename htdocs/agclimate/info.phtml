@@ -6,10 +6,12 @@ $t = new MyView();
 $t->title = "ISUSM - Network Metadata";
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
-        <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-        <li class="active">Network Metadata</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Network Metadata</li>
+  </ol>
+</nav>
 
 <h3>ISU Soil Moisture Network</h3>
 
@@ -82,8 +84,8 @@ mounted within a radiation grill at 2 meters height.
 model <a href="http://www.campbellsci.com/li200x-l">LI200X</a>.
 
 </div>
-<div class="col-md-6 col-sm-6 well">
-<img src="/agclimate/images/campbell.jpg" class="img img-responsive" />
+<div class="col-md-6 bg-light border rounded p-3">
+<img src="/agclimate/images/campbell.jpg" class="img img-fluid" />
 </div>
 </div>
 

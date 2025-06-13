@@ -63,15 +63,15 @@ grid will update and provide a listing of storm based warnings found.
             <br /><label for="edate1">End Date:
             <input name="edate1" type="text" id="edate1"></label>
     
-        <button type="button" class="btn btn-default" id="manualpt">Update</button>
+        <button type="button" class="btn btn-secondary" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
         <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
     </div>
     <div class="col-md-8">
     <h4 id="table1title"></h4>
-    <button type="button" data-table="1" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
-    <button type="button" data-table="1" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+    <button type="button" data-table="1" data-opt="excel" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="1" data-opt="csv" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
 
     <table id="table1" data-order='[[ 3, "desc" ]]'>
     <thead>
@@ -122,16 +122,16 @@ an office that did not exist at the time.
         <br /><label for="edate">End Date:
         <input name="edate" type="text"></label>
 
-        <div class="well"><strong>2a.</strong> Manual Selection.
+        <div class="card card-body"><strong>2a.</strong> Manual Selection.
         <br /><label for="state">Select State:
         <select name="state" style="width: 100%" id="state"></select></label>
         <br /><label for="ugc">Select County/Zone:
         <select name="ugc" style="width: 100%"></select></label>
-        <br /><button type="button" class="btn btn-default"
+        <br /><button type="button" class="btn btn-secondary"
          id="manualugc">Update</button>
         </div>
 
-        <div class="well"><strong>2b.</strong> Manual Point Selection.
+        <div class="card card-body"><strong>2b.</strong> Manual Point Selection.
         <br />You can otherwise search by lat/lon point. The start and
         end date set above are used with this option as well:</strong><br />
         <i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
@@ -142,10 +142,10 @@ an office that did not exist at the time.
             <option value="0.01">~1 mile (0.01 deg)</option>
             <option value="0.1">~10 miles (0.10 deg)</option>
         </select></p>
-        <button type="button" class="btn btn-default" id="manualpt2">Update</button>
+        <button type="button" class="btn btn-secondary" id="manualpt2">Update</button>
         </div>
 
-        <div class="well">
+        <div class="card card-body">
         <strong>2c.</strong> or drag marker to select coordinate:
         <br />
         <div id="map2" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
@@ -154,8 +154,8 @@ an office that did not exist at the time.
     </div>
     <div class="col-md-8">
     <h4 id="table2title"></h4>
-    <button type="button" data-table="2" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
-    <button type="button" data-table="2" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+    <button type="button" data-table="2" data-opt="excel" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="2" data-opt="csv" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
 
     <table id="table2" data-order='[[ 3, "desc" ]]'>
     <thead>
@@ -198,12 +198,12 @@ by state and year.</p>
         <p><label for="year3">Select Year:</label>
         <select name="year" style="width: 100%" id="year3"></select></p>
 
-        <br /><button type="button" class="btn btn-default" id="button3">Update Table</button>
+        <br /><button type="button" class="btn btn-secondary" id="button3">Update Table</button>
     </div>
     <div class="col-md-8">
     <h4 id="table3title"></h4>
-    <button type="button" data-table="3" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
-    <button type="button" data-table="3" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+    <button type="button" data-table="3" data-opt="excel" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="3" data-opt="csv" class="btn btn-secondary iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
 
     <table id="table3" data-order='[[ 3, "desc" ]]'>
     <thead>

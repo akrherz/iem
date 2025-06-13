@@ -28,11 +28,11 @@ function get_text($pageid)
     $c = $Parsedown->text(file_get_contents($fn));
     $ts = date("F d, Y", filemtime($fn));
     $content = <<<EOM
-<div class="panel panel-info">
-<div class="panel-body">
+<div class="card border-info">
+<div class="card-body">
 {$c}
 </div>
-<div class="panel-footer">Updated: {$ts} <a href="/info/datasets/{$pageid}.html">Permalink</a></div>
+<div class="card-footer">Updated: {$ts} <a href="/info/datasets/{$pageid}.html">Permalink</a></div>
 </div>
 EOM;
     return $content;
@@ -54,20 +54,22 @@ if (is_null($myid)) {
 }
 $tags = '';
 foreach ($pages as $k => $page) {
-    $tags .= sprintf("<a href=\"#%s\" class=\"btn btn-default\">%s</a>", $page, $page);
+    $tags .= sprintf("<a href=\"#%s\" class=\"btn btn-secondary\">%s</a>", $page, $page);
 }
 if ($tags == '') {
-    $tags = "<a href=\"/info/datasets/\" class=\"btn btn-default\"><i class=\"fa fa-th-list\"></i> List All Datasets</a>";
+    $tags = "<a href=\"/info/datasets/\" class=\"btn btn-secondary\"><i class=\"fa fa-th-list\"></i> List All Datasets</a>";
 } else {
     $tags = "<strong>Documented Datasets:</strong> :" . $tags;
 }
 
 $t->content = <<<EOM
-<ul class="breadcrumb">
-<li><a href="/info/">IEM Information</a></li>
-<li><a href="/info/datasets/">IEM Dataset Documentation</a></li>
-<li class="active">{$myid}</li>
-</ul>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/info/">IEM Information</a></li>
+<li class="breadcrumb-item"><a href="/info/datasets/">IEM Dataset Documentation</a></li>
+<li class="breadcrumb-item active" aria-current="page">{$myid}</li>
+</ol>
+</nav>
 
 {$tags}
 

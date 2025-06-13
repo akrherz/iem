@@ -22,15 +22,15 @@ height:100%;
 $jsextra = is_null($this->jsextra) ? '' : $this->jsextra;
  
 if (array_key_exists('north', $this->vars)){
-    echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
+    echo "<div class=\"row\"><div class=\"col-12\">\n";
     echo $this->vars['north'];
     echo "</div></div>\n";
 }
 if (array_key_exists('east', $this->vars) && 
     array_key_exists('west', $this->vars)){
-    echo "<div class=\"row\"><div class=\"col-xs-6\">\n";
+    echo "<div class=\"row\"><div class=\"col-6\">\n";
     echo $this->vars['west'];
-    echo "</div><div class=\"col-xs-6\">\n";
+    echo "</div><div class=\"col-6\">\n";
     echo $this->vars['east'];
     echo "</div></div>\n";
 }
@@ -38,14 +38,14 @@ if (!is_null($this->content)){
   echo $this->content;
 }
 if (array_key_exists('south', $this->vars)){
-    echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
+    echo "<div class=\"row\"><div class=\"col-12\">\n";
     echo $this->vars['south'];
     echo "</div></div>\n";
 }
 ?>
- <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
-    <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/vendor/bootstrap/5.3.6/js/bootstrap.bundle.min.js"></script>
+    <script src="/vendor/jquery/3.2.1/jquery-3.2.1.min.js"></script>
+    <script src="/js/iastate-iem.js"></script>
     <?php echo $jsextra; ?>
   </body>
 </html>

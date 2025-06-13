@@ -91,9 +91,9 @@ not be implied as an endorsement. Of course, you can just search google for
 <div class="row">
 <div class="col-md-4">
 
-<div class="panel panel-default">
-  <div class="panel-heading">IEM Data / Metadata</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">IEM Data / Metadata</div>
+  <div class="card-body">
   <ul>
     <li><a href="/json/climodat_stclimo.py?help">Climodat State Climatology</a></li>
     <li><a href="/geojson/climodat_dayclimo.py?help">Climodat Day Climatology</a></li>
@@ -115,9 +115,9 @@ not be implied as an endorsement. Of course, you can just search google for
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Aviation Services</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Aviation Services</div>
+  <div class="card-body">
   <ul>
     <li><a href="/geojson/convective_sigmet.py?help">SIGMETs</a></li>
   </ul>
@@ -128,9 +128,9 @@ not be implied as an endorsement. Of course, you can just search google for
 </div>
 <div class="col-md-4">
 
-<div class="panel panel-default">
-  <div class="panel-heading">NWS Data</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">NWS Data</div>
+  <div class="card-body">
   <ul>
       <li>CF6 Data: <a href="/geojson/cf6.py?help">GeoJSON</a> or
       <a href="/json/cf6.py?help">JSON</a></li>
@@ -159,9 +159,10 @@ not be implied as an endorsement. Of course, you can just search google for
 </div>
 <div class="col-md-4">
 
-<div class="panel panel-default">
-  <div class="panel-heading">NWS Watch, Warning, and Advisories</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">NWS Watch, Warning, and Advisories</div>
+  <div class="card-body">
+  <ul>
       <li><a href="/geojson/sbw.py?help">Storm Based Warnings</a></li>
       <li><a href="/json/sbw_by_point.py?help">Storm Based Warnings by Point</a></li>
       <li><a href="/geojson/sbw_county_intersect.py?help">SBW Polygon County Intersection</a></li>
@@ -172,14 +173,13 @@ not be implied as an endorsement. Of course, you can just search google for
       <li><a href="/json/vtec_events_byugc.py?help">VTEC Events by UGC</a></a>
       <li><a href="/json/vtec_events_bywfo.py?help">VTEC Events by WFO</a></li>
       <li><a href="/json/vtec_max_etn.py?help">VTEC Max Event ID</a></li>
-  <ul>
   </ul>
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Miscellaneous</div>
-  <div class="panel-body">
+<div class="card mb-3">
+  <div class="card-header">Miscellaneous</div>
+  <div class="card-body">
   <ul>
     <li><a href="/geojson/winter_roads.py?help">Iowa Winter Road Conditions</a></li>
     <li><a href="/json/state_ugc.py?help">NWS State UGC Codes</a></li>

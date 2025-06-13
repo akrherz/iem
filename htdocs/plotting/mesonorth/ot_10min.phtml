@@ -42,10 +42,12 @@ $p = sprintf(
 );
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-<li><a href="/other/">Other Networks</a></li>
-<li class="active">B548 Agronomy Server Room</li>
+<li class="breadcrumb-item"><a href="/other/">Other Networks</a></li>
+<li class="breadcrumb-item active" aria-current="page">B548 Agronomy Server Room</li>
 </ol>
+</nav>
 
 <p>The IEM server resides in a room that is climate controlled by a 
 dedicated heat exchanger.  This page presents daily plots of logged 
@@ -73,7 +75,7 @@ cooled air departs the heat exchanger.</li>
 &nbsp; &nbsp; <a href="{$n}">View Next Day</a> 
 
 <br>
-  <img src="{$url}" alt="Time Series" class="img img-responsive">
+  <img src="{$url}" alt="Time Series" class="img-fluid">
 <br>
 {$battery}
 <br>

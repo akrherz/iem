@@ -15,50 +15,39 @@ $t->jsextra = <<<EOM
  <script src='/vendor/openlayers/{$OL}/ol.js'></script>
  <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
  <script src="/vendor/moment/2.30.1/moment.min.js"></script>
- <script src="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.js"></script>
  <script src='viewer.js?d=1'></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
-<link rel="stylesheet" href="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.css" type="text/css">
+<link rel="stylesheet" href="viewer.css" type="text/css">
 EOM;
 
 $t->content = <<<EOM
-<style>
- h3 {
-   margin-top: 0px;
-}
-</style>
 <div class="row">
 <div class="col-sm-4">
-<h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
+<h3><i class="bi bi-camera"></i> IEM Webcam Viewer</h3>
 </div>
 <div class='col-sm-4'>
     <strong>Mode:</strong>
 <div class="btn-group" id="toggle_event_mode">
     <button type="button" class="btn btn-info locked_active">Realtime</button>
-    <button type="button" class="btn btn-default unlocked_inactive">Archive</button>
+    <button type="button" class="btn btn-outline-secondary unlocked_inactive">Archive</button>
 </div>
         </div>
         <div class='col-sm-4'>
 <div id="dtdiv" style="display: none;">
-<strong>Date &amp; Time:</strong> (click calendar icon)
+<strong>Date &amp; Time:</strong>
 <br />
-<button data-offset="-60" class="btn btn-default timecontrol" type="button">-1h</button>
-<button data-offset="-5" class="btn btn-default timecontrol" type="button">-5min</button>
-<button data-offset="-1" class="btn btn-default timecontrol" type="button">-1min</button>
-<button data-offset="1" class="btn btn-default timecontrol" type="button">+1min</button>
-<button data-offset="5" class="btn btn-default timecontrol" type="button">+5min</button>
-<button data-offset="60" class="btn btn-default timecontrol" type="button">+1h</button>
+<button data-offset="-60" class="btn btn-outline-secondary timecontrol" type="button">-1h</button>
+<button data-offset="-5" class="btn btn-outline-secondary timecontrol" type="button">-5min</button>
+<button data-offset="-1" class="btn btn-outline-secondary timecontrol" type="button">-1min</button>
+<button data-offset="1" class="btn btn-outline-secondary timecontrol" type="button">+1min</button>
+<button data-offset="5" class="btn btn-outline-secondary timecontrol" type="button">+5min</button>
+<button data-offset="60" class="btn btn-outline-secondary timecontrol" type="button">+1h</button>
 <br />
-<div class="form-group">
-    <div class='input-group date' id='dtpicker'>
-    <input type='text' class="form-control" />
-<span class="input-group-addon">
-    <span class="fa fa-calendar"></span>
-</span>
-    </div>
+<div class="mb-3">
+    <input type="datetime-local" id="dtpicker" class="form-control" />
 </div>
 </div>
         </div>
@@ -68,13 +57,13 @@ $t->content = <<<EOM
 <div class="col-md-6">
 
 <div id="singleimageview">
-<img id="webcam_image" name="camera" src="/data/camera/stills/{$id}.jpg" class="img img-responsive">
+<img id="webcam_image" name="camera" src="/data/camera/stills/{$id}.jpg" class="img-fluid">
 <br /><button role="button" id="liveshot">Request Live Shot</button>
 <h3 id="webcam_title"></h3>
 </div>
 
 <div id="rwisview" style="display: none;">
-<img id="rwismain" class="img img-responsive">
+<img id="rwismain" class="img-fluid">
 <br />
 <strong>Click on thumbnail to view</strong><br />
 <div class="row" id="rwislist" style="height: 100px;">

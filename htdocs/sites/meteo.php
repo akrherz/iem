@@ -21,6 +21,6 @@ $t->content = <<<EOM
 
 <p>This page creates a simple plot of recent observations from this site.</p>
 
-<br /><img src="{$uri}" class="img img-responsive">
+<br /><img src="{$uri}" class="img-fluid">
 EOM;
 $t->render('sites.phtml');

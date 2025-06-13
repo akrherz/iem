@@ -28,7 +28,7 @@ $table = <<<EOM
 
 <p>JSON Webservice for the data below:<br />
 <code>{$public}</code></p>
-<table class="table table-condensed table-striped">
+<table class="table table-striped">
 <thead>
 <tr><th>Rank</th>
 <th>Canonical Outlook Date</th>
@@ -48,7 +48,7 @@ if (sizeof($json["outlooks"]) == 0) {
     foreach ($json["outlooks"] as $key => $val) {
         $table .= sprintf(
             "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
-            "<td><img src=\"%s\" class=\"img img-responsive\">".
+            "<td><img src=\"%s\" class=\"img-fluid\">".
             "</div></tr>",
             $rank,
             $val["date"],
@@ -80,7 +80,7 @@ if (sizeof($json["outlooks"]) == 0) {
     foreach ($json["outlooks"] as $key => $val) {
         $stable .= sprintf(
             "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
-            "<td><img src=\"%s\" class=\"img img-responsive\">".
+            "<td><img src=\"%s\" class=\"img-fluid\">".
             "</div></tr>",
             $rank,
             $val["date"],
@@ -153,10 +153,12 @@ $lselect = make_select("level", $level, $levels);
 $yrselect = yearSelect(1987, $year);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
- <li class="active">Top 10 SPC Outlooks by size</li>
-</ol>
+<nav aria-label="breadcrumb">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Top 10 SPC Outlooks by size</li>
+ </ol>
+</nav>
 
 <h3>Top 10 SPC Outlooks by Size</h3>
 
@@ -185,7 +187,7 @@ area is done within the <a href="https://spatialreference.org/ref/epsg/9311/">US
 <td>Select Day: $dayselect</td>
 <td>Select Threshold: $lselect</td>
 </table>
-<input type="submit" value="Update Table">
+<input type="submit" value="Update Table" class="btn btn-primary">
 </form></p>
 
 <h3>Top 10 Largest Day: {$day} Category: {$category} Threshold: {$threshold}</h3>

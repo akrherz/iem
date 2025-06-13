@@ -1,4 +1,4 @@
-/* global $, moment, ol, iemdata */
+/* global $, moment, ol, iemdata, bootstrap */
 let dragPan = null;
 let olmap = null; // Openlayers map
 let lsrtable = null; // LSR DataTable
@@ -852,8 +852,13 @@ function buildOpts() {
 }
 function loadData() {
     // Load up the data please!
-    if ($(".tab .active > a").attr("href") !== "#2a") {
-        $("#lsrtab").click();
+    const activeTab = document.querySelector(".tab .nav-tabs button.active");
+    if (!activeTab || activeTab.getAttribute('data-bs-target') !== "#2a") {
+        const lsrTab = document.querySelector("#lsrtab");
+        if (lsrTab) {
+            const tabInstance = new bootstrap.Tab(lsrTab);
+            tabInstance.show();
+        }
     }
     updateRADARTimes();
 

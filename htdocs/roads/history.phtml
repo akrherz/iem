@@ -78,7 +78,7 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
           conditions for that time.</div>";
     $content .= <<<EOM
 <br />
-<table id='table1' class=\"table table-condensed table-striped\">
+<table id='table1' class=\"table table-sm table-striped\">
 <thead>
 <tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
 <th>Condition</th></tr></thead>
@@ -121,7 +121,7 @@ EOM);
    a listing of historical conditions for that segment.</div>";
     $gisurl = "{$EXTERNAL_BASEURL}/archive/data/" . $valid->format('Y/m/d/') . "/GIS/";
     $content .= "<p>Directory of <a href=\"$gisurl\">gis shapefiles</a> for this UTC date.";
-    $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
+    $content .= "<br /><table id='table1' class=\"table table-sm table-striped\">
           <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
           <th>Condition</th></tr></thead><tbody>";
     $stname = iem_pg_prepare(

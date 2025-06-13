@@ -23,19 +23,19 @@ ImageFilledRectangle($gif, 1, 1, $width - 2, $height - 2, $white);
 $size = imagettfbbox(12, 0, $Font, $ts->format("M"));
 $dx = abs($size[2] - $size[0]);
 $dy = abs($size[5] - $size[3]);
-$x_pad = ($width - $dx) / 2;
+$x_pad = round(($width - $dx) / 2, 0);
 ImageTTFText($gif, 12, 0, $x_pad, 15, $black, $Font, $ts->format("M"));
 
 $size = imagettfbbox(20, 0, $Font, $ts->format("d"));
 $dx = abs($size[2] - $size[0]);
 $dy = abs($size[5] - $size[3]);
-$x_pad = ($width - $dx) / 2;
+$x_pad = round(($width - $dx) / 2, 0);
 ImageTTFText($gif, 18, 0, $x_pad, 35, $red, $Font, $ts->format("d"));
 
 $size = imagettfbbox(15, 0, $Font, $ts->format("Y"));
 $dx = abs($size[2] - $size[0]);
 $dy = abs($size[5] - $size[3]);
-$x_pad = ($width - $dx) / 2;
+$x_pad = round(($width - $dx) / 2, 0);
 ImageTTFText($gif, 14, 0, $x_pad, 55, $black, $Font, $ts->format("Y"));
 
 header("content-type: image/png");

@@ -67,25 +67,37 @@ foreach ($COUNTS as $key => $value) {
     );
 }
 $t->content = <<<EOM
-<ul class="breadcrumb">
-<li><a href="/info/">IEM Information</a></li>
-<li class="active">Referenced By</li>
-</ul>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/info/">IEM Information</a></li>
+<li class="breadcrumb-item active" aria-current="page">Referenced By</li>
+</ol>
+</nav>
 
-<h3>Scholar Work Referencing IEM</h3>
-
+<div class="card mb-4">
+<div class="card-header">
+<h3 class="mb-0">Scholar Work Referencing IEM</h3>
+</div>
+<div class="card-body">
 <p>Beginning in late 2024, the IEM has attempted to curate a list of scholarly
 products referencing datasets found on this website.  The backfilling of
 this list remains a work in progress!</p>
 
 <p>There are currently <strong>{$total}</strong> references in this list.
-Each entry includes a tag for the IEM resource referenced.  Here is now
+Each entry includes a tag for the IEM resource referenced.  Here is how
 many times each tag is used.</p>
 
+<div class="mb-3">
 {$tags}
+</div>
+</div>
+</div>
 
+<div class="card">
+<div class="card-body">
+<div class="table-responsive">
 <table class="table table-striped">
-<thead class="sticky">
+<thead class="table-dark sticky-top">
 <tr>
   <th>IEM Resource</th>
   <th>Publication Date/Link</th>
@@ -96,6 +108,9 @@ many times each tag is used.</p>
 {$table}
 </tbody>
 </table>
+</div>
+</div>
+</div>
 
 EOM;
 $t->render('single.phtml');

@@ -47,7 +47,7 @@ if (!isset($_GET["tag"])) {
 <br />This page summarizes the unique tags used and the number of times used.
 </p>
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped">
 {$table}
 </table>
 
@@ -109,14 +109,14 @@ while ($row = pg_fetch_assoc($rs)) {
     $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
     if ($row["mediasuffix"] == 'mp4') {
         $media = <<<EOM
-        <video class="img img-responsive" controls>
+        <video class="img-fluid" controls>
           <source src="{$big}" type="video/mp4">
           Your browser does not support the video tag.
       </video>
 EOM;
     } else {
         $media = <<<EOM
-      <a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+      <a href="{$big}"><img src="{$big}" class="img-fluid"></a>
       <br /><a href="{$big}">View larger image</a>
 EOM;
     }
@@ -151,7 +151,7 @@ if (pg_num_rows($rs) == 0) {
 
 $t->content = <<<EOM
 <h3>Past IEM Features tagged: {$tag}</h3>
-<p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i>
+<p><a href="index.php" class="btn btn-secondary"><i class="fa fa-th-list"></i>
 List all tags</a></p>
 
 {$winterextra}

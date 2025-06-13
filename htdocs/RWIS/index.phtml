@@ -33,7 +33,7 @@ $t->title = "Roadway Weather Information System (RWIS) Data";
 $camimgs = "";
 for ($i = 0; $i < $cdict[$camid]; $i++) {
     $camimgs .= sprintf(
-        "<div class=\"col-md-3\"><img src=\"/data/camera/stills/%s-%02d.jpg?%s\" class=\"img img-responsive\"></div>",
+        "<div class=\"col-md-3\"><img src=\"/data/camera/stills/%s-%02d.jpg?%s\" class=\"img img-fluid\"></div>",
         $camid,
         $i,
         time()
@@ -63,7 +63,7 @@ of the IEM.  Data for other states is provided via the
 
 <form method="" action="" name="widget">
 Available sites: {$selectform}
-<input type="submit" value="View Webcam">
+<input type="submit" value="View Webcam" class="btn btn-primary">
 </form>
 
 <div class="row">

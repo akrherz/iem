@@ -53,7 +53,7 @@ by the National Science Foundation (grant #1701278).</p>
 
 <h4>2) Specific Date Range:</h4>
 
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select} {$h1select}</td></tr>
 <tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select} {$h2select}</td></tr>
 </table>

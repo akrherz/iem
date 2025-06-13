@@ -267,7 +267,7 @@ EOM;
     reset($images);
     $control = "";
     foreach ($images as $key => $val) {
-        $control .= "<p><img src=\"{$val}\" class=\"img img-responsive\">\n";
+        $control .= "<p><img src=\"{$val}\" class=\"img-fluid\">\n";
     }
 }
 
@@ -304,19 +304,21 @@ if ($mode == "realtime") {
 $t->title = "Current & Historical IEM NEXRAD Mosaic Loop";
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/current/">Current Data</a></li>
- <li class="active"><b>IEM NEXRAD Mosaic</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
+<nav aria-label="breadcrumb">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="/current/">Current Data</a></li>
+ <li class="breadcrumb-item active"><b>IEM NEXRAD Mosaic</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
  </ol>
+</nav>
 
 <p><div class="alert alert-info">
-<i class="fa fa-comment"></i>
+<i class="bi bi-chat"></i>
 If you like this page,
 you may also like the <a href="/one/">IEM One</a> app.  Please try it out and
 <a href="/info/contacts.php">provide feedback</a>!</div>
 
 <div class="row">
-<div class="col-sm-9">
+<div class="col-md-9">
 
 {$watches}
 
@@ -325,7 +327,7 @@ you may also like the <a href="/one/">IEM One</a> app.  Please try it out and
 {$control}
 
 </div>
-<div class="col-sm-3">
+<div class="col-md-3">
 
 <form method="GET" action="{$uri}" name="controls">
 
@@ -344,7 +346,7 @@ you may also like the <a href="/one/">IEM One</a> app.  Please try it out and
 {$modeselect}
 
 <p><strong>Frames:</strong><br />
-<input type="text" size="5" name="frames" value="{$frames}">
+<input type="text" size="5" name="frames" value="{$frames}" class="form-control">
 
 <p><strong>Frame Interval:</strong><br />
 {$intselect}
@@ -354,9 +356,12 @@ you may also like the <a href="/one/">IEM One</a> app.  Please try it out and
 <p><strong>Time:</strong><br />
 {$timeselect}
 
-<p><input type="checkbox" value="yes" name="autopilot"{$autoselected}>Hide menus + header
+<p><div class="form-check">
+<input type="checkbox" value="yes" name="autopilot"{$autoselected} class="form-check-input" id="autopilot">
+<label class="form-check-label" for="autopilot">Hide menus + header</label>
+</div>
 
-<p><input type="submit" value="Generate Loop">
+<p><input type="submit" value="Generate Loop" class="btn btn-primary">
 
 <p><strong>Related Links:</strong><br /> 
 <a href="/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>

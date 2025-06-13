@@ -16,7 +16,7 @@ images saved every 5 minutes for that period!</p>
 <div class="row">
 <div class="col-md-6">
 <img src="/archive/data/2005/11/12/camera/KCCI-016/KCCI-016_200511122300.jpg"
-        class="img img-responsive" />
+        class="img-fluid" />
 <br />Webcam on the top of ISU Agronomy Hall capturing a tornado off to the
         north and west back on 12 Nov 2005.
 </div>

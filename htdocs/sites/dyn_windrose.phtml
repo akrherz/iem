@@ -156,7 +156,7 @@ based on thresholds being met.</p>
 <h4>Select Start/End Time:</h4>
 <i>{$tznote}</i>
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
@@ -341,7 +341,7 @@ if (isset($rose_uri)) {
 </object>
 EOM;
     } else {
-        $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
+        $content .= "<img src=\"$rose_uri\" class=\"img-fluid\" id=\"windrose-plot\">";
     }
 } else {
     $content .= "<div class=\"alert alert-info\">Please make your custom plot

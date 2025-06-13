@@ -88,7 +88,7 @@ fun.</p>
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <form method="GET" name="changeme">
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr>
 <td>
 <input type="radio" name="opt" value="0" {$yearselected} id="year">
@@ -108,7 +108,7 @@ fun.</p>
 <h3>{$title}</h3>
 
 <div id="thetable">
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-sm table-bordered">
 <thead class="sticky">
 <tr><th>Date</th><th>Min &deg;F</th><th>Location(s)</th><th>Max &deg;F</th>
 <th>Location(s)</tr>

@@ -146,8 +146,8 @@ function do_row_ffw($row)
 }
 
 $svrtable = <<<EOM
- <table id='svr' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <table id='svr' class="table table-sm table-striped table-bordered">
+ <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
@@ -155,16 +155,16 @@ $svrtable = <<<EOM
 EOM;
 $tortable = str_replace('svr', 'tor', $svrtable);
 $smwtable = <<<EOM
- <table id='svr' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <table id='svr' class="table table-sm table-striped table-bordered">
+ <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Waterspout Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOM;
 $ffwtable = <<<EOM
- <table id='ffw' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <table id='ffw' class="table table-sm table-striped table-bordered">
+ <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Flash Flood Tag</th><th>Damage Tag</th>
  <th>Heavy Rain Tag</th><th>Dam Tag</th>
@@ -199,10 +199,12 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $gentime = $json["gentime"];
 
 $t->content = <<<EOM
- <ol class="breadcrumb">
- <li><a href="/nws/">NWS Resources</a></li>
- <li>List Warning Tags Issued</li>
- </ol>
+ <nav aria-label="breadcrumb">
+     <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+         <li class="breadcrumb-item active" aria-current="page">List Warning Tags Issued</li>
+     </ol>
+ </nav>
  
  <p>This application lists out Flash Flood, Marine, Severe Thunderstorm,
  and Tornado Warnings
@@ -214,24 +216,39 @@ $t->content = <<<EOM
  these tables into Microsoft Excel prior to making the table sortable!</p>
  
  <form method="GET" name="one">
- <div class="row well">
- <div class="col-sm-6">
- <input type="radio" name="opt" value="bywfo" id="bywfo" {$bywfochecked}> 
- <label for="bywfo">Select by WFO:</label> {$wselect}
+ <div class="row">
+     <div class="col-12">
+         <div class="card mb-3">
+             <div class="card-body">
+                 <div class="row">
+                     <div class="col-sm-6">
+                         <div class="form-check mb-2">
+                             <input type="radio" name="opt" value="bywfo" id="bywfo" class="form-check-input" {$bywfochecked}> 
+                             <label for="bywfo" class="form-check-label">Select by WFO:</label>
+                         </div>
+                         <div class="mb-3">{$wselect}</div>
 
- <br /> <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" {$bydamagetagchecked}> 
- <label for="bydamagetag">Select by Damage Tag:</label> {$tselect}
- </div>
- <div class="col-sm-4">
- <b>Select Year:</b> {$yselect}
- </div>
- <div class="col-sm-2">
- <input type="submit" value="Generate Table">
- </div>
+                         <div class="form-check mb-2">
+                             <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" class="form-check-input" {$bydamagetagchecked}> 
+                             <label for="bydamagetag" class="form-check-label">Select by Damage Tag:</label>
+                         </div>
+                         <div class="mb-3">{$tselect}</div>
+                     </div>
+                     <div class="col-sm-4">
+                         <label class="form-label"><strong>Select Year:</strong></label>
+                         <div class="mb-3">{$yselect}</div>
+                     </div>
+                     <div class="col-sm-2 d-flex align-items-end">
+                         <input type="submit" value="Generate Table" class="btn btn-primary">
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
  </div>
  </form>
  
- <div class="alert alert-success">There is a <a href="/json/">JSON-P webservice</a>
+ <div class="alert alert-info">There is a <a href="/json/">JSON-P webservice</a>
  that provides the data found in this table.  The direct URL is:<br />
  <code>{$publicjsonuri}</code></div>
  
@@ -240,19 +257,19 @@ $t->content = <<<EOM
  values.</p>
 
  <h3>Tornado Warnings</h3>
- <button id="create-grid2" class="btn btn-info" type="button">Make Table Sortable</button>
+ <button id="create-grid2" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
  {$tortable}
 
  <h3>Severe Thunderstorm Warnings</h3>
-<button id="create-grid1" class="btn btn-info" type="button">Make Table Sortable</button>
+<button id="create-grid1" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
 {$svrtable}
 
 <h3>Flash Flood Warnings</h3>
-<button id="create-grid3" class="btn btn-info" type="button">Make Table Sortable</button>
+<button id="create-grid3" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
 {$ffwtable}
 
 <h3>Marine Warnings</h3>
-<button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
+<button id="create-grid4" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
 {$smwtable}
 
 EOM;

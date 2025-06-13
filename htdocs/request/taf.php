@@ -43,7 +43,7 @@ Aerodome Forecasts (TAF)s.  This page allows an atomic data download of the
 processed data.  If you are wishing to download the raw NWS text TAF data,
 try looking <a href="/wx/afos/p.php?pil=TAFDSM">here</a> as a starting point.</p>
 
-<p><a href="/cgi-bin/request/taf.py?help" class="btn btn-default"><i class="fa fa-file"></i> Backend documentation</a>
+<p><a href="/cgi-bin/request/taf.py?help" class="btn btn-secondary"><i class="fa fa-file"></i> Backend documentation</a>
 exists for those wishing to script against this service. The TAF archive dates back to 1 January 1996.</p>
 
 <p><strong>Related:</strong>
@@ -80,7 +80,7 @@ timezone you specify.</i>
 <h3>3. Select Start/End Time:</h3><br>
 <i>This defines the time domain to look for TAFs <strong>issued</strong>
 within.</i>
-<table class="table table-condensed">
+<table class="table table-sm">
 <thead>
   <tr>
     <td></td>

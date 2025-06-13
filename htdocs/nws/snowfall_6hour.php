@@ -116,7 +116,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <form method="GET" name="changeme">
-<table class="table table-condensed">
+<table class="table table-sm">
 <tr>
 <td><strong>Year:</strong> {$yselect}</td>
 <td><strong>Month:</strong> {$mselect}</td>
@@ -144,7 +144,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
 refresh every 6 minutes.</p>
 
 <div id="thetable">
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-sm table-bordered">
 <thead class="sticky">
 <tr><th>Station/Network</th><th>Name</th><th>State</th>
 <th>WFO</th>

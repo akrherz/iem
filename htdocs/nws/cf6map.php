@@ -37,18 +37,20 @@ $t->content = <<<EOM
   <p>This is the popover content</p>
 </div>
 
-<div class="breadcrumb">
-        <li><a href="/nws/">NWS Mainpage</a></li>
-        <li class="active">Map of NWS Daily CF6 Reports</li>
-        </div>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Map of NWS Daily CF6 Reports</li>
+</ol>
+</nav>
         
 <div class="row">
 <div class="col-md-12">
         
-<div class="pull-right">
+<div class="float-end">
 <i class="fa fa-text-size"></i>
-<button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
-<button id="fplus" class="btn btn-default"><i class="fa fa-plus"></i></button>
+<button id="fminus" class="btn btn-secondary" type="button"><i class="fa fa-minus"></i></button>
+<button id="fplus" class="btn btn-secondary" type="button"><i class="fa fa-plus"></i></button>
 </div>
 
         <form name='bah'><p><strong>Select Variable to Plot:</strong> 

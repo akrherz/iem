@@ -142,7 +142,7 @@ EOM;
 $theform = <<<EOM
 <div class="row">
 <div class="col-md-6">
-<div class="form-group">
+<div class="mb-3">
 <input type="radio" name="by" id="by_wfo" value="wfo" checked="checked">
 <label for="by_wfo">Select by WFO: (default ALL)</label>
 <select name="wfo" id="wfo" class="form-control" multiple="multiple"></select>
@@ -157,12 +157,12 @@ $theform = <<<EOM
 </div><!-- ./col-md-6 -->
 <div class="col-md-6">
 
-<div class="form-group">
+<div class="mb-3">
 <label for="sts">Start Time</label>
 <input id="sts" name="sts" class="iemdtp">
 </div>
 
-<div class="form-group">
+<div class="mb-3">
 <label for="ets">End Time</label>
 <input id="ets" name="ets" class="iemdtp">
 </div>
@@ -172,7 +172,7 @@ $theform = <<<EOM
 <div class="row">
 <div class="col-md-10">
 
-<div class="form-group">
+<div class="mb-3">
 <label for="timeslider">RADAR Time: <span id="radartime"></span></label>
 <div id="timeslider" class="form-control">
 <div id="custom-handle" class="ui-slider-handle"></div>
@@ -199,19 +199,25 @@ $t->content = <<<EOM
 
   <div class="tab", role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li class="active"><a href="#1a" data-toggle="tab">Help</a></li>
-        <li><a id="lsrtab" href="#2a" data-toggle="tab">Local Storm Reports</a></li>
-        <li><a href="#3a" data-toggle="tab">Storm Based Warnings</a></li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="help-tab" data-bs-toggle="tab" data-bs-target="#1a" type="button" role="tab" aria-controls="1a" aria-selected="true">Help</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lsrtab" data-bs-toggle="tab" data-bs-target="#2a" type="button" role="tab" aria-controls="2a" aria-selected="false">Local Storm Reports</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sbwtab" data-bs-toggle="tab" data-bs-target="#3a" type="button" role="tab" aria-controls="3a" aria-selected="false">Storm Based Warnings</button>
+        </li>
     </ul>
 
     <div class="tab-content tabs clearfix">
-        <div role="tabpanel" class="tab-pane active" id="1a">
+        <div role="tabpanel" class="tab-pane fade show active" id="1a" aria-labelledby="help-tab">
             {$tab1a}
         </div>
-        <div role="tabpanel" class="tab-pane" id="2a">
+        <div role="tabpanel" class="tab-pane fade" id="2a" aria-labelledby="lsrtab">
             {$tab2a}
         </div>
-        <div role="tabpanel" class="tab-pane" id="3a">
+        <div role="tabpanel" class="tab-pane fade" id="3a" aria-labelledby="sbwtab">
             {$tab3a}
         </div>
 

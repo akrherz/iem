@@ -146,7 +146,7 @@ if (sizeof($metadata["attributes"]) > 0) {
     $attrtable .= <<<EOM
     <h3>Station Attributes:</h3>
     <p><i>These are key value pairs used by the IEM to do data management.</i></p>
-    <table class="table table-condensed table-striped">
+    <table class="table table-sm table-striped">
     <thead><tr><th>Key / Description</th><th>Value</th></tr></thead>
     <tbody>
 EOM;
@@ -175,7 +175,7 @@ if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
 <h3>Station Threading:</h3>
 <p>This station threads together data from multiple stations to provide a
 long term record for the location.</p>
-<table class="table table-condensed table-striped">
+<table class="table table-sm table-striped">
 <thead><tr><th>Station</th><th>Begin Date</th><th>End Date</th></tr></thead>
 <tbody>
 EOM;
@@ -222,7 +222,12 @@ $t->content = <<<EOM
 <div class="row">
 <div class="col-md-4">
 
-<table class="table table-condensed table-striped">
+<div class="card mb-4">
+<div class="card-header">
+<h4 class="mb-0">Station Information</h4>
+</div>
+<div class="card-body">
+<table class="table table-sm table-striped">
 <tr><th>IEM Internal ID:</th><td>{$metadata["iemid"]}</td></tr>
 {$wigos}
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>
@@ -237,40 +242,86 @@ $t->content = <<<EOM
 <tr><th>Archive Begin:</th><td>{$ab}</td></tr>
 <tr><th>Archive End:</th><td>{$ae}</td></tr>
 </table>
+</div>
+</div>
 
 {$attrtable}
 
 {$threading}
 
-<a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="fa fa-menu-hamburger"></span> View {$network} Network Table</a>
+<div class="mb-3">
+<a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary">
+<i class="fa fa-table"></i> View {$network} Network Table
+</a>
+</div>
 
 </div>
 <div class="col-md-8">
 
-  <div id="mymap" style="height: 400px; width: 100%;" data-lat="{$lat}" data-lon="{$lon}"
-  data-suggested-lat="{$suggested_lat}" data-suggested-lon="{$suggested_lon}"
-  data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
- <div>
- <strong>Is the location shown for this station wrong?</strong>
- <br />If so, please consider submitting a location submission by moving the marker
- on the map and completing this form below.<br />
-{$suggested_coordinates_info}
-    <form name="updatecoords" method="GET">
-    <input type="hidden" value="{$network}" name="network">
-    <input type="hidden" value="{$station}" name="station">
-    New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
-    New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
-    <br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
-    <br />Better Location Name?: <input type="text" name="name" value="{$metadata["name"]}" />
-    <br />[1] Your email address will not be shared nor will you be added to any
-    lists. The IEM developer will simply email you back after consideration of
-    this request.
-
-    <br /><strong>Note:</strong> If you are looking for a wind rose for a location
-    other than this, your only option on this website is to find the nearest station
-    with data.
-    <br /><input type="submit" value="I am asking the location be updated."></form>
+<div class="card">
+<div class="card-header">
+<h4 class="mb-0">Station Location</h4>
 </div>
+<div class="card-body">
+
+<div id="mymap" style="height: 400px; width: 100%;" data-lat="{$lat}" data-lon="{$lon}"
+data-suggested-lat="{$suggested_lat}" data-suggested-lon="{$suggested_lon}"
+data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+
+<div class="mt-3">
+<h5>Location Update Request</h5>
+<p><strong>Is the location shown for this station wrong?</strong></p>
+<p>If so, please consider submitting a location submission by moving the marker
+on the map and completing this form below.</p>
+
+{$suggested_coordinates_info}
+
+<form name="updatecoords" method="GET">
+<input type="hidden" value="{$network}" name="network">
+<input type="hidden" value="{$station}" name="station">
+
+<div class="row mb-3">
+<div class="col-md-6">
+<label for="newlat" class="form-label">New Latitude:</label>
+<input id="newlat" type="text" class="form-control" name="lat" placeholder="move marker" required>
+</div>
+<div class="col-md-6">
+<label for="newlon" class="form-label">New Longitude:</label>
+<input id="newlon" type="text" class="form-control" name="lon" placeholder="move marker" required>
+</div>
+</div>
+
+<div class="mb-3">
+<label for="email" class="form-label">Enter Your Email Address <small>[1]</small>:</label>
+<input type="email" id="email" class="form-control" name="email" placeholder="optional" autocomplete="email">
+</div>
+
+<div class="mb-3">
+<label for="name" class="form-label">Better Location Name?:</label>
+<input type="text" id="name" class="form-control" name="name" value="{$metadata["name"]}" maxlength="100" />
+</div>
+
+<div class="alert alert-info">
+<small>
+<strong>[1]</strong> Your email address will not be shared nor will you be added to any
+lists. The IEM developer will simply email you back after consideration of
+this request.
+</small>
+</div>
+
+<div class="alert alert-warning">
+<strong>Note:</strong> If you are looking for a wind rose for a location
+other than this, your only option on this website is to find the nearest station
+with data.
+</div>
+
+<input type="submit" value="I am asking the location be updated." class="btn btn-warning">
+</form>
+</div>
+
+</div>
+</div>
+
 </div>
 
 EOM;

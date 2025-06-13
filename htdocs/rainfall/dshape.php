@@ -25,9 +25,13 @@ if ($duration == 'year') {
     $dir = sprintf("/mesonet/wepp/data/rainfall/shape/daily/%s", date("Y/m", $ts));
     $fp = sprintf("%s_rain",  date("Ymd", $ts));
 }
+$dbf = sprintf("%s/%s.dbf", $dir, $fp);
+if (!file_exists($dbf)) {
+    die("File not found: {$dbf}");
+}
 
 chdir("/tmp");
-copy($dir . "/" . $fp . ".dbf", $fp . ".dbf");
+copy($dbf, $fp . ".dbf");
 copy("/mesonet/wepp/GIS/static/hrap_{$geometry}_{$epsg}.shp", $fp . ".shp");
 copy("/mesonet/wepp/GIS/static/hrap_{$geometry}_{$epsg}.shx", $fp . ".shx");
 copy("/opt/iem/data/gis/meta/{$epsg}.prj", $fp . ".prj");

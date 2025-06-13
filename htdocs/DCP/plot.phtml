@@ -8,10 +8,12 @@ $t->jsextra = <<<EOM
 EOM;
 
 $t->content = <<<EOM
-<ul class="breadcrumb">
- <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
- <li class="active">Historical DCP Plotting</li>
-</ul>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/DCP/">DCP/HADS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Historical DCP Plotting</li>
+  </ol>
+</nav>
 
 <p>This application allows you to plot historical DCP data for 
 a station, time period, and variable of your choice.  Select a station first
@@ -21,41 +23,41 @@ to reveal available variables for that station.  You may also wish to
 <br clear="all" />
 
 <div class="row">
-    <div class="col-md-6 col-sm-6">
+    <div class="col-md-6">
         <div id="myform" style="float: left;">
             <h4>Make Plot Selections Below...</h4>
-            <div class="form-group">
-                <label for="state-select">Select State:</label>
-                <select id="state-select" class="form-control">
+            <div class="mb-3">
+                <label for="state-select" class="form-label">Select State:</label>
+                <select id="state-select" class="form-select">
                     <option value="">Select State...</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="station-select">Station:</label>
-                <select id="station-select" class="form-control">
+            <div class="mb-3">
+                <label for="station-select" class="form-label">Station:</label>
+                <select id="station-select" class="form-select">
                     <option value="">Select Station...</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="variable-select">Variable:</label>
-                <select id="variable-select" class="form-control">
+            <div class="mb-3">
+                <label for="variable-select" class="form-label">Variable:</label>
+                <select id="variable-select" class="form-select">
                     <option value="">Select Variable...</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="date-input">Start Date:</label>
+            <div class="mb-3">
+                <label for="date-input" class="form-label">Start Date:</label>
                 <input type="date" id="date-input" class="form-control" />
             </div>
-            <div class="form-group">
-                <label for="day-interval">Number of Days:</label>
+            <div class="mb-3">
+                <label for="day-interval" class="form-label">Number of Days:</label>
                 <input type="number" id="day-interval" class="form-control" min="1" max="31" value="5" />
             </div>
             <button id="plot-button" class="btn btn-primary">Create Graph</button>
         </div>
     </div>
-    <div class="col-md-6 col-sm-6">
+    <div class="col-md-6">
         <div id="msg"></div><br />
-        <img src="" id="imagedisplay" class="img img-responsive"/>
+        <img src="" id="imagedisplay" class="img img-fluid"/>
     </div>
 </div>
 

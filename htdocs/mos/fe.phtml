@@ -41,63 +41,126 @@ $t->content = <<<EOM
 <h3>NWS MOS Download Interface</h3>
 
 <p>This page allows you to download from the IEM's archive of NWS MOS
-data. The archive goes back to June 2000.  You can set the start and end times
-to the same time to get that particular run.
+data. The archive goes back to June 2000. You can set the start and end times
+to the same time to get that particular run.</p>
 
 <p>For dates after 25 Feb 2020, the NBS was only archived for the 1, 7, 13,
-and 19 UTC cycles as per guidance from the MOS developers.  For dates before
+and 19 UTC cycles as per guidance from the MOS developers. For dates before
 25 Feb 2020, the NBS was only archived for 0, 7, 12, and 19 UTC runs.</p>
 
-<p><a href="/cgi-bin/request/mos.py?help" class="btn btn-default">
+<p><a href="/cgi-bin/request/mos.py?help" class="btn btn-secondary">
 <i class="fa fa-file"></i> Backend documentation</a> exists for those wishing
 to script against this service.</p>
 
-<form name="selector" action="/cgi-bin/request/mos.py" method="GET">
-<table class="table table-striped">
-<tr><th>Enter 4-Char Station ID:</th>
-  <th><input type="text" name="station" value="{$station}" size="10"></th>
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Data Request Form</h4>
+    </div>
+    <div class="card-body">
+        <form name="selector" action="/cgi-bin/request/mos.py" method="GET">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="station" class="form-label">Enter 4-Char Station ID:</label>
+                    <input type="text" id="station" name="station" value="{$station}" class="form-control" maxlength="4" placeholder="e.g., KAMW">
+                </div>
+                <div class="col-md-6">
+                    <label for="model" class="form-label">Select Model:</label>
+                    {$modselect}
+                </div>
+            </div>
 
-<th>Select Model</th>
- <th>{$modselect}
-</th></tr>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h5>Start Date</h5>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Year:</label>
+                    {$ys1}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Month:</label>
+                    {$ms1}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Day:</label>
+                    {$ds1}
+                </div>
+                <div class="col-md-3">
+                    <label for="hour1" class="form-label">Hour (UTC):</label>
+                    <select name="hour1" id="hour1" class="form-select">
+                        <option value="0">00 UTC</option>
+                        <option value="1">01 UTC</option>
+                        <option value="6">06 UTC</option>
+                        <option value="7">07 UTC</option>
+                        <option value="12">12 UTC</option>
+                        <option value="13">13 UTC</option>
+                        <option value="18">18 UTC</option>
+                        <option value="19">19 UTC</option>
+                    </select>
+                </div>
+            </div>
 
-<tr><th>Start Date</th>
-  <td>{$ys1}</td>
-  <td>{$ms1}</td>
-  <td>{$ds1}</td>
-  <td><select name="hour1">
- <option value="0">00 UTC</option>
- <option value="1">01 UTC</option>
- <option value="6">6 UTC</option>
- <option value="7">7 UTC</option>
- <option value="12">12 UTC</option>
- <option value="13">13 UTC</option>
- <option value="18">18 UTC</option>
- <option value="19">19 UTC</option>
-  </select></td></tr>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h5>End Date (inclusive)</h5>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Year:</label>
+                    {$ys2}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Month:</label>
+                    {$ms2}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Day:</label>
+                    {$ds2}
+                </div>
+                <div class="col-md-3">
+                    <label for="hour2" class="form-label">Hour (UTC):</label>
+                    <select name="hour2" id="hour2" class="form-select">
+                        <option value="0">00 UTC</option>
+                        <option value="1">01 UTC</option>
+                        <option value="6">06 UTC</option>
+                        <option value="7">07 UTC</option>
+                        <option value="12">12 UTC</option>
+                        <option value="13">13 UTC</option>
+                        <option value="18">18 UTC</option>
+                        <option value="19">19 UTC</option>
+                    </select>
+                </div>
+            </div>
 
-<tr><th>End Date (inclusive)</th>
-  <td>{$ys2}</td>
-  <td>{$ms2}</td>
-  <td>{$ds2}</td>
-  <td><select name="hour2">
-  <option value="0">00 UTC</option>
-  <option value="1">01 UTC</option>
-  <option value="6">6 UTC</option>
-  <option value="7">7 UTC</option>
-  <option value="12">12 UTC</option>
-  <option value="13">13 UTC</option>
-  <option value="18">18 UTC</option>
-  <option value="19">19 UTC</option>
-   </select></td></tr>
-</table>
+            <div class="row">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa fa-download"></i> Generate Data
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-<input type="submit" value="Generate Data">
-</form>
-
-<h4>Description of MOS variables</h4>
-<table>
-{$table}
-</table>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Description of MOS Variables</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Variable</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {$table}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 EOM;
 $t->render('single.phtml');
