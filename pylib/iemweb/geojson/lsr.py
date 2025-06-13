@@ -284,10 +284,11 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
             products = ""
             for row2 in res.mappings():
                 url = (
-                    f"/vtec/event/{row2['vtec_year']}-O-NEW-"
-                    f"{rectify_wfo(row['wfo'])}-{row2['phenomena']}-"
-                    f"{row2['significance']}-"
-                    f"{row2['eventid']:04.0f}"
+                    f"/vtec/?year={row2['vtec_year']}"
+                    f"&wfo={rectify_wfo(row['wfo'])}"
+                    f"&phenomena={row2['phenomena']}"
+                    f"&significance={row2['significance']}"
+                    f"&eventid={row2['eventid']:04.0f}"
                 )
                 products += (
                     f'<a href="{url}">'

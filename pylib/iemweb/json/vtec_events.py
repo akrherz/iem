@@ -155,8 +155,9 @@ def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
     }
     for row in res.mappings():
         uri = (
-            f"/vtec/event/{year}-O-NEW-{rectify_wfo(wfo)}-{row['phenomena']}-"
-            f"{row['significance']}-{row['eventid']:04.0f}"
+            f"/vtec/?year={year}&wfo={rectify_wfo(wfo)}&"
+            f"phenomena={row['phenomena']}&significance={row['significance']}&"
+            f"eventid={row['eventid']:04.0f}"
         )
         data["events"].append(
             dict(

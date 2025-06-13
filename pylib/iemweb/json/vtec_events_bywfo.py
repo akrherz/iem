@@ -82,9 +82,11 @@ class Schema(CGIModel):
 def make_url(row):
     """Build URL."""
     return (
-        f"https://mesonet.agron.iastate.edu/vtec/event/{row['vtec_year']}-"
-        f"O-NEW-{rectify_wfo(row['wfo'])}-"
-        f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
+        f"https://mesonet.agron.iastate.edu/vtec/?year={row['vtec_year']}&"
+        f"wfo={rectify_wfo(row['wfo'])}&"
+        f"phenomena={row['phenomena']}&"
+        f"significance={row['significance']}&"
+        f"eventid={row['eventid']:04.0f}"
     )
 
 

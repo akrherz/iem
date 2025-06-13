@@ -8,14 +8,14 @@ from werkzeug.test import EnvironBuilder, run_wsgi_app
 def test_index_unknown_vtec():
     """Test the index page."""
     builder = EnvironBuilder(
-        path="/vtec/event/2024-O-NEW-KDMX-TO-W-1045",
+        path=(
+            "/vtec/?year=2024&wfo=KDMX&phenomena=TO&"
+            "significance=W&eventid=1045"
+        ),
         base_url="https://iem.local/vtec/",
     )
     environ = builder.get_environ()
-    environ["SCRIPT_URI"] = "/vtec/event/2024-O-NEW-KDMX-TO-W-1045"
-    (app_iter, status, _headers) = run_wsgi_app(index_app, environ)
-    response_text = "".join([x.decode("utf-8") for x in app_iter])
-    assert "2024-O-NEW-KDMX-TO-W-1045" in response_text
+    (_app_iter, status, _headers) = run_wsgi_app(index_app, environ)
     assert status == "200 OK"
 
 

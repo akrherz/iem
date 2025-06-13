@@ -128,9 +128,10 @@ def get_res(state, year, phenomena, significance):
         )
         for row in res.mappings():
             uri = (
-                f"/vtec/event/{year}-O-NEW-{rectify_wfo(row['wfo'])}-"
-                f"{row['phenomena']}-"
-                f"{row['significance']}-{row['eventid']:04.0f}"
+                f"/vtec/?year={year}&wfo={rectify_wfo(row['wfo'])}&"
+                f"phenomena={row['phenomena']}&"
+                f"significance={row['significance']}&"
+                f"eventid={row['eventid']:04.0f}"
             )
             data["events"].append(
                 dict(

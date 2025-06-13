@@ -133,7 +133,7 @@ def plotter(ctx: dict):
             params=params,
             geom_col="utmgeom",
             index_col=None,
-        )
+        )  # type: ignore
 
         # For size reduction work
         df = pd.read_sql(
@@ -301,7 +301,9 @@ def plotter(ctx: dict):
         )
 
         # Image map
-        url = ("/vtec/event/%s-O-NEW-%s-%s-%s-%04i") % (
+        url = (
+            "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%04i"
+        ) % (
             sts.year,
             rectify_wfo(row["wfo"]),
             row["phenomena"],

@@ -102,7 +102,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>";
 while ($row = pg_fetch_assoc($result)) {
     $uri = sprintf(
-        "<a href=\"%s/vtec/event/%s-O-NEW-%s-%s-%s-%04d\">%s</a>",
+        "<a href=\"%s/vtec?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%04d\">%s</a>",
         $EXTERNAL_BASEURL,
         date('Y', strtotime($row["polygon_begin"])),
         rectify_wfo($row["wfo"]),

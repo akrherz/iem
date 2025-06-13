@@ -1,6 +1,7 @@
-"""..title:: VTEC Browser
+""".. title:: VTEC Browser
 
-TBW.
+This is the front end for the IEM VTEC browser.  The implementation of the
+app is found at `Github iemvtec repo <https://github.com/akrherz/iemvtec>`_.
 
 """
 
@@ -8,13 +9,14 @@ import json
 import os
 import re
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.nws import vtec
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.mlib import rectify_wfo
 from iemweb.util import error_log
 
 # sadly, I have a lot of links in the wild without a status?
@@ -23,13 +25,48 @@ VTEC_FORM = (
     r"(?P<phenomena>[A-Z]{2})-(?P<significance>[A-Z])-(?P<eventid>\d+)"
 )
 VTEC_RE = re.compile(f"^{VTEC_FORM}$")
-VTEC_IN_URL_RE = re.compile(f"/event/{VTEC_FORM}")
+LEGACY_URL_RE = re.compile(f"/event/{VTEC_FORM}")
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
     vtec: str = Field(None, description="VTEC String", pattern=VTEC_RE)
+    wfo: str = Field(
+        "DMX",
+        description="WFO Identifier",
+        pattern=r"^[A-Z]{3,4}$",
+        max_length=4,
+    )
+    eventid: int = Field(
+        45,
+        description="Event Identifier",
+        ge=1,
+        le=9999,
+    )
+    phenomena: str = Field(
+        "TO",
+        description="VTEC Phenomena",
+        pattern=r"^[A-Z]{2}$",
+        max_length=2,
+    )
+    significance: str = Field(
+        "W",
+        description="VTEC Significance",
+        pattern=r"^[A-Z]$",
+        max_length=1,
+    )
+    year: int = Field(
+        2024,
+        description="VTEC Year",
+        ge=1980,  # first year of VTEC
+        le=utc().year + 1,  # allow next year
+    )
+
+    @field_validator("wfo", mode="before")
+    def rectify_wfo(cls, value: str) -> str:
+        """Ensure WFO is 4 characters."""
+        return rectify_wfo(value)
 
 
 def get_data(vtecinfo: dict):
@@ -49,7 +86,7 @@ def get_data(vtecinfo: dict):
         ),
         (
             vtecinfo["year"],
-            vtecinfo["wfo4"][-3:],
+            vtecinfo["wfo"][-3:],
             vtecinfo["phenomena"],
             vtecinfo["significance"],
             int(vtecinfo["eventid"]),
@@ -69,12 +106,8 @@ def get_data(vtecinfo: dict):
 
 def as_html(vtecinfo: dict):
     """Generate the HTML page."""
-    vtecinfo["v"] = (
-        "%(year)s-%(op)s-%(status)s-%(wfo4)s-%(phenomena)s-"
-        "%(significance)s-%(eventid)s"
-    ) % vtecinfo
     vtecinfo["ogtitle"] = "%s %s%s %s #%s" % (
-        vtecinfo["wfo4"],
+        vtecinfo["wfo"],
         vtec.VTEC_PHENOMENA.get(vtecinfo["phenomena"]),
         " (Particularly Dangerous Situation) " if vtecinfo["is_pds"] else "",
         (
@@ -84,18 +117,15 @@ def as_html(vtecinfo: dict):
         ),
         int(vtecinfo["eventid"]),
     )
-    vtecinfo["ogurl"] = (
-        f"https://mesonet.agron.iastate.edu/vtec/event/{vtecinfo['v']}"
-    )
     vtecinfo["ogimg"] = (
         "https://mesonet.agron.iastate.edu/plotting/auto/plot/208/"
         "network:WFO::wfo:%s::year:%s::phenomenav:%s::significancev:%s::"
         "etn:%s"
     ) % (
         (
-            vtecinfo["wfo4"]
-            if vtecinfo["wfo4"].startswith("P")
-            else vtecinfo["wfo4"][-3:]
+            vtecinfo["wfo"]
+            if vtecinfo["wfo"].startswith("P")
+            else vtecinfo["wfo"][-3:]
         ),
         vtecinfo["year"],
         vtecinfo["phenomena"],
@@ -106,8 +136,8 @@ def as_html(vtecinfo: dict):
 
 def get_context(environ: dict) -> dict:
     """Figure out how we were called."""
-    script_uri = environ.get("SCRIPT_URI", "")
     ctx = {
+        "appmode": True,  # causes no inclusion of default CSS/JS
         "title": "NWS Valid Time Event Code (VTEC) Browser",
         "headextra": """
 <link rel="stylesheet"
@@ -143,19 +173,14 @@ def get_context(environ: dict) -> dict:
         except Exception as exp:
             error_log(environ, f"Failed to load assets.json: {exp}")
 
-    # /vtec/event/2019-O-NEW-KDMX-SV-W-0001
-    m = VTEC_IN_URL_RE.search(script_uri)
-
-    if m:
-        vtecinfo = m.groupdict()
-        get_data(vtecinfo)
-        as_html(vtecinfo)
-        ctx["title"] = vtecinfo["ogtitle"]
-        ctx["headextra"] += f"""
-<meta property="og:title" content="{vtecinfo["ogtitle"]}">
-<meta property="og:description" content="{vtecinfo["desc"]}">
-<meta property="og:image" content="{vtecinfo["ogimg"]}.png">
-<meta property="og:url" content="{vtecinfo["ogurl"]}">
+    get_data(environ)
+    as_html(environ)
+    ctx["title"] = environ["ogtitle"]
+    ctx["headextra"] += f"""
+<meta property="og:title" content="{environ["ogtitle"]}">
+<meta property="og:description" content="{environ["desc"]}">
+<meta property="og:image" content="{environ["ogimg"]}.png">
+<meta property="og:url" content="">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
 <meta name="og:image:width" content="1200">
@@ -178,6 +203,45 @@ def application(environ, start_response):
         url = f"https://{environ['HTTP_HOST']}{environ['REQUEST_URI']}"
         start_response("301 Moved Permanently", [("Location", url)])
         return [b"Redirecting"]
+    script_uri = environ.get("SCRIPT_URI", "")
+    m = LEGACY_URL_RE.search(script_uri)
+    if m:
+        # Pivot to use URL Parameters
+        urlparams = {}
+        tokens = script_uri.split("/")
+        for i, token in enumerate(tokens[:-1]):  # chomp last to prevent err
+            if token not in ["event", "tab", "update", "radar"]:
+                continue
+            value = tokens[i + 1]
+            if token == "event":
+                m = VTEC_RE.match(value)
+                if m is None:
+                    start_response(
+                        "404 Not Found", [("Content-type", "text/html")]
+                    )
+                    return [b"Invalid VTEC Event"]
+                vtec = m.groupdict()
+                urlparams["wfo"] = vtec["wfo4"]
+                urlparams["phenomena"] = vtec["phenomena"]
+                urlparams["significance"] = vtec["significance"]
+                urlparams["eventid"] = vtec["eventid"]
+                urlparams["year"] = vtec["year"]
+            if token in ["tab", "update"]:
+                urlparams[token] = value
+            if token == "radar":
+                radtokens = value.split("-")
+                if len(radtokens) == 3:
+                    urlparams["radar"] = radtokens[0]
+                    urlparams["radar_product"] = radtokens[1]
+                    urlparams["radar_time"] = radtokens[2]
+
+        # Forward the request to the new URL
+        url = "/vtec/?" + "&".join(
+            f"{k}={v}" for k, v in urlparams.items() if v is not None
+        )
+        start_response("301 Moved Permanently", [("Location", url)])
+        return [b"Redirecting"]
+
     # If vtec cgi param, redirect to /vtec/event/...
     if environ["vtec"] is not None:
         url = f"/vtec/event/{environ['vtec']}"
