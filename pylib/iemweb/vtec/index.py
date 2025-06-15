@@ -133,6 +133,12 @@ def as_html(vtecinfo: dict):
         vtecinfo["significance"],
         vtecinfo["eventid"],
     )
+    vtecinfo["ogurl"] = (
+        f"https://mesonet.agron.iastate.edu/vtec/?wfo={vtecinfo['wfo']}&amp;"
+        f"phenomena={vtecinfo['phenomena']}&amp;"
+        f"significance={vtecinfo['significance']}&amp;"
+        f"eventid={vtecinfo['eventid']}&amp;year={vtecinfo['year']}"
+    )
 
 
 def get_context(environ: dict) -> dict:
@@ -140,25 +146,8 @@ def get_context(environ: dict) -> dict:
     ctx = {
         "appmode": True,  # causes no inclusion of default CSS/JS
         "title": "NWS Valid Time Event Code (VTEC) Browser",
-        "headextra": """
-<link rel="stylesheet"
- href="/vendor/jquery-datatables/2.0.2/datatables.min.css" />
-<link rel="stylesheet"
- href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
-<link rel='stylesheet' href="/vendor/openlayers/10.5.0/ol.css" type='text/css'>
-<link type="text/css" href="/vendor/openlayers/10.5.0/ol-layerswitcher.css"
- rel="stylesheet" />
-<link rel="stylesheet" href="/vtec/vtec_static.css" />
-""",
-        "jsextra": """
-<script src="/vendor/jquery-datatables/2.0.2/datatables.min.js"></script>
-<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
-<script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script src='/vendor/openlayers/10.5.0/ol.js'></script>
-<script src='/vendor/openlayers/10.5.0/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="/vtec/vtec_static.js?v2"></script>
-<script type="text/javascript" src="/vtec/vtec_app.js?v2"></script>
-""",
+        "headextra": "",
+        "jsextra": "",
     }
     assetfn = "/opt/iem/htdocs/vtec/assets.json"
     if os.path.isfile(assetfn):
@@ -181,7 +170,7 @@ def get_context(environ: dict) -> dict:
 <meta property="og:title" content="{environ["ogtitle"]}">
 <meta property="og:description" content="{environ["desc"]}">
 <meta property="og:image" content="{environ["ogimg"]}.png">
-<meta property="og:url" content="">
+<meta property="og:url" content="{environ["ogurl"]}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
 <meta name="og:image:width" content="1200">
