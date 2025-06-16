@@ -111,6 +111,9 @@ efficiently.</p>
   <br />Autoplot 210 will generate maps of how many text products are
   issued for a given product type. It will also plot the first and last
   usage of a product.</li>
+  <li><a href="/plotting/auto/?q=261">Heatmap of Issuance Times</a>
+  <br />Autoplot 261 will generate a heatmap of product issuance times
+  by hour of the day and week of the year.</li>
 </ul>
   </div>
 </div>
