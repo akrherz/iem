@@ -29,7 +29,7 @@ a:focus {
     border-bottom: 2px solid #e8e8e8;
 }
 
-.tab .nav-tabs button {
+.tab .nav-tabs li a {
     display: block;
     padding: 10px 20px;
     margin: 0 5px 1px 0;
@@ -44,13 +44,13 @@ a:focus {
     transition: all 0.3s ease 0s;
 }
 
-.tab .nav-tabs button:hover,
-.tab .nav-tabs button.active {
+.tab .nav-tabs li a:hover,
+.tab .nav-tabs li.active a {
     color: #198df8;
     border: none;
 }
 
-.tab .nav-tabs button.active:before {
+.tab .nav-tabs li.active a:before {
     content: "\f107";
     font-weight: 700;
     color: #198df8;
@@ -61,7 +61,7 @@ a:focus {
     right: 0;
 }
 
-.tab .nav-tabs button.active:after {
+.tab .nav-tabs li.active a:after {
     content: "";
     width: 100%;
     height: 3px;
@@ -83,7 +83,7 @@ a:focus {
         text-align: center;
     }
 
-    .tab .nav-tabs button.active:before {
+    .tab .nav-tabs li.active a:before {
         content: "\f105";
         bottom: 15%;
         left: 0;
