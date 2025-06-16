@@ -1,5 +1,10 @@
 .col-md-2 {
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     max-height: 350px;
+}
+
+.col-md-2 .card-body {
+    padding: 0.75rem;
+    font-size: 0.875rem;
 }
