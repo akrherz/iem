@@ -7,6 +7,17 @@ Changelog
 
 - 2024-08-05: Initial documtation update
 
+Example Requests
+----------------
+
+Provide all the max ETNs for 2024
+
+https://mesonet.agron.iastate.edu/json/vtec_max_etn.py?year=2024&format=json
+
+And as HTML
+
+https://mesonet.agron.iastate.edu/json/vtec_max_etn.py?year=2024&format=html
+
 """
 
 import json
@@ -39,16 +50,18 @@ def run(year, fmt):
     cursor = pgconn.cursor()
 
     cursor.execute(
-        f"""
+        """
     SELECT wfo, phenomena, significance, max(eventid),
-    '/vtec/event/{year}-O-NEW-K'||
-    wfo||'-'||phenomena||'-'||significance||'-'||
-    LPAD(max(eventid)::text, 4, '0') as url
-     from warnings_{year} WHERE wfo is not null and eventid is not null and
+    '/vtec/?year='||max(vtec_year)||'&wfo='||
+    wfo||'&phenomena='||phenomena||'&significance='||significance||'&eventid='||
+    max(eventid)::text
+    from warnings WHERE vtec_year = %s and
+    wfo is not null and eventid is not null and
     phenomena is not null and significance is not null
     GROUP by wfo, phenomena, significance
     ORDER by wfo ASC, phenomena ASC, significance ASC
-    """
+    """,
+        (year,),
     )
     res = {
         "count": cursor.rowcount,

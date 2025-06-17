@@ -7,31 +7,56 @@ $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css" href="obhour.css"/>
+EOM;
+$t->jsextra = <<<EOM
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/vendor/ext/ux/StatusBar.js"></script>
-<script type="text/javascript" src="obhour-static.js?v=3"></script>
+<script type="text/javascript" src="obhour.js?v=3"></script>
 EOM;
 
 $t->title = "Hourly Precip Accumulator";
 
 $t->content = <<<EOM
-<style type="text/css">
- .x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important; }
-</style>
-<div id="iem-header">
-<a href="/">IEM Homepage</a> &gt; <a href="/ASOS/">ASOS Mainpage</a>
+<div class="row">
+  <div class="col-md-12">
+    <h3><i class="fa fa-tint"></i> Hourly Precipitation Accumulator</h3>
+    <p class="lead">
+      View accumulated precipitation values over different time intervals for ASOS/AWOS stations.
+      The valid time reported is the ending time (e.g., 1 Hour value at 11 AM covers 10-11 AM).
+    </p>
+  </div>
 </div>
-<div id="iem-footer"></div>
 
-<div id="sidebarinfo" style="padding: 5px;">
-<p>This application attempts to compute accumulated precip values over
-different time intervals.  The valid time reported is the ending time, so
-the 1 Hour value at 11 AM would be for a period between 10-11 AM.</p>
+<div class="row">
+  <div class="col-md-12">
+    <div id="extjs-container" style="height: 600px;"></div>
+  </div>
+</div>
 
-<p>This application does not have data for the current hour.  The database
-is updated at the top of the hour for the previous hour.</p>
+<div class="row mt-3">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#infoContent" aria-expanded="false" aria-controls="infoContent">
+          <i class="fa fa-info-circle"></i> Application Information
+        </button>
+      </div>
+      <div class="collapse" id="infoContent">
+        <div class="card-body">
+          <p>This application attempts to compute accumulated precip values over
+          different time intervals. The valid time reported is the ending time, so
+          the 1 Hour value at 11 AM would be for a period between 10-11 AM.</p>
+
+          <p>This application does not have data for the current hour. The database
+          is updated at the top of the hour for the previous hour.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 EOM;
-$t->render('app.phtml');
+$t->render('full.phtml');

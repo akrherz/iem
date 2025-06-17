@@ -1,0 +1,32 @@
+#map {
+    width: 100%;
+    height: 600px;
+    border: none;
+}
+
+.legend-color {
+    width: 20px;
+    height: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legend-items {
+    border-left: 3px solid #dee2e6;
+    padding-left: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    #map {
+        height: 400px;
+    }
+    
+    .legend-items {
+        border-left: none;
+        border-top: 2px solid #dee2e6;
+        padding-left: 0;
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+    }
+}

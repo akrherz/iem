@@ -1,4 +1,4 @@
-/* global $, ol, moment */
+/* global $, ol, moment, bootstrap */
 
 /**
  * Format date for datetime-local input (YYYY-MM-DDTHH:MM)
@@ -36,6 +36,7 @@ let realtimeMode = true;
 let currentCameraFeature = null;
 let element = null;
 let popup = null;
+let bootstrapPopover = null;
 let cameraID = "ISUC-006";
 const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
 
@@ -406,12 +407,36 @@ function buildUI() {
 function popupSBW(feature) {
     const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
     + `<a target="_new" href="${feature.get('href')}">`
-    + `${feature.get('ps')} ${feature.get('eventid')}</a>`;
+    + `${feature.get('ps')} ${feature.get('eventid')}</a>`
+    + `<button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" onclick="closeSBWPopover()"></button>`;
     const geometry = feature.getGeometry();
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);
-    $('#popover-content').html(content);
-    $(element).popover('show');
+    
+    // Update popover content
+    const popoverContent = document.getElementById('popover-content');
+    popoverContent.innerHTML = content;
+    
+    // Show Bootstrap 5 popover
+    if (bootstrapPopover) {
+        bootstrapPopover.dispose();
+    }
+    bootstrapPopover = new bootstrap.Popover(element, {
+        content: popoverContent.innerHTML,
+        html: true,
+        placement: 'top'
+    });
+    bootstrapPopover.show();
+}
+
+/**
+ * Close the SBW popover
+ */
+// eslint-disable-next-line no-unused-vars
+function closeSBWPopover() {
+    if (bootstrapPopover) {
+        bootstrapPopover.hide();
+    }
 }
 
 $().ready(() => {
@@ -505,22 +530,27 @@ $().ready(() => {
     });
     map.addOverlay(popup);
 
-    $(element).popover({
-        'placement': 'top',
-        'html': true,
-        content() { return $('#popover-content').html(); }
-    });
+    // Initialize Bootstrap 5 popover (will be created dynamically when needed)
+    // Note: Popover will be created in popupSBW function
 
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel, (ft) => ft);
         if (!feature) {
+            // Hide existing popover when clicking on empty map area
+            if (bootstrapPopover) {
+                bootstrapPopover.hide();
+            }
             return;
         }
         if (feature.get("cid") === undefined){
             popupSBW(feature);
             return;
         }
-        $(element).popover('hide');
+        
+        // Hide existing popover when clicking on camera features
+        if (bootstrapPopover) {
+            bootstrapPopover.hide();
+        }
 
         // Remove styling
         if (currentCameraFeature) {

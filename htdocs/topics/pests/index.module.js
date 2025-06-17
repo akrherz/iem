@@ -21,21 +21,17 @@ pestData.european_corn_borer = { 'gddbase': 50, 'gddceil': 86 };
  * Hide image loading indicator and show download links
  */
 function hideImageLoad() {
-    const willloadEl = getElement('willload');
-    if (willloadEl) {
-        willloadEl.style.display = 'none';
-    }
-    
-    const theImageEl = getElement('theimage');
-    const theDataEl = getElement('thedata');
-    if (theImageEl && theDataEl) {
-        const url = theImageEl.src.replace(".png", "");
-        theDataEl.innerHTML = 
-            `<p>Download point data: <a href="${url}.txt" class="btn btn-primary">` +
-            '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
-            `<a href="${url}.xlsx" class="btn btn-primary">` +
-            '<i class="fa fa-table"></i> As Excel</a></p>';
-    }
+    const willloadEl = requireElement('willload');
+    willloadEl.style.display = 'none';
+
+    const theImageEl = requireElement('theimage');
+    const theDataEl = requireElement('thedata');
+    const url = theImageEl.src.replace(".png", "");
+    theDataEl.innerHTML = 
+        `<p>Download point data: <a href="${url}.txt" class="btn btn-primary">` +
+        '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
+        `<a href="${url}.xlsx" class="btn btn-primary">` +
+        '<i class="fa fa-table"></i> As Excel</a></p>';
 }
 
 /**

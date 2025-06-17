@@ -1,9 +1,7 @@
-/* global $, Ext, app, cfg */
+/* global Ext, app, cfg */
 Ext.namespace('app');
 Ext.namespace('cfg');
 cfg.refreshint = 60000;
-cfg.header = 'iem-header';
-cfg.headerHeight = 60;
 cfg.jsonSource = '/json/webcams.json';
 let imagestore = null;
 let disableStore = null;
@@ -29,9 +27,15 @@ function fromUTC(dt) {
 
 Ext.onReady(() => {
 
-    $(".ccool").click((event) => {
-        const target = $(event.target);
-        app.appSetTime(target.data("opt"));
+    // Handle cool archived images links - Rule: jQuery removal
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('ccool')) {
+            event.preventDefault();
+            const opt = event.target.getAttribute('data-opt');
+            if (opt) {
+                app.appSetTime(opt);
+            }
+        }
     });
 
     /* Hack needed for Ext 3.0-rc2 to keep timefield working */
@@ -79,7 +83,7 @@ Ext.onReady(() => {
         Ext.each(records, (record) => {
             const checked = (disableStore.find('cid', record.get("cid")) === -1);
             data.push({
-                boxLabel: `${Number(record.get("cid").substring(5, 3))} ${record.get("name")}`,
+                boxLabel: `${record.get("cid")} ${record.get("name")}`,
                 name: record.get("cid"),
                 checked,
                 listeners: {
@@ -137,16 +141,9 @@ Ext.onReady(() => {
         }
     );
 
-    const helpWin = new Ext.Window({
-        contentEl: 'help',
-        title: 'Information',
-        closeAction: 'hide',
-        width: 400
-    });
-
     Ext.create('Ext.Panel', {
         renderTo: 'main',
-        height: Ext.getBody().getViewSize().height - 120,
+        height: 700,
         layout: {
             type: 'border',
             align: 'stretch'
@@ -189,12 +186,6 @@ Ext.onReady(() => {
                 tpl
             }],
             tbar: [{
-                xtype: 'button',
-                text: 'Help',
-                handler() {
-                    helpWin.show();
-                }
-            }, {
                 xtype: 'tbtext',
                 text: 'Sort By:'
             }, {

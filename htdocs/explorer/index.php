@@ -2,14 +2,13 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 138);
 require_once "../../include/myview.php";
-$OL = "9.2.4";
+$OL = "10.6.0";
 $t = new MyView();
 $t->title = "IEM Explorer";
 $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type='text/css'>
-<link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.css">
-<link rel="stylesheet" type="text/css" href="explorer.css" />
+<link rel="stylesheet" type="text/css" href="index.css" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
@@ -21,7 +20,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
-<script src="app.js?v=3"></script>
+<script src="index.js"></script>
 EOM;
 
 $t->content = <<<EOM
@@ -29,62 +28,114 @@ $t->content = <<<EOM
         <span id="info-name"></span>
     </div>
 
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
-    <div class="row">
-        <div class="col-md-2" style="padding-left: 30px; height: 700px;">
-            <strong>Symbol Legend:</strong>
-            <br /><input type="checkbox" class="cs" id="isusm" checked="checked">
-              <label for="isusm"><img src="img/isu.svg" style="height: 30px;"> ISU Soil Moisture</label>
-            <br /><input type="checkbox" class="cs" id="asos" checked="checked">
-              <label for="asos"><img src="img/airport.svg" style="height: 30px;"> Airports</label>
-            <br /><input type="checkbox" class="cs" id="coop" checked="checked">
-              <label for="coop"><img src="img/green_dot.svg" style="height: 30px;"> Climate Stations</label>
-            <br /><input type="checkbox" class="cs" id="cd" checked="checked">
-              <label for="cd"><img src="img/blue_square.svg" style="height: 30px;"> Climate Districts </label>
-            <br /><input type="checkbox" class="cs" id="state" checked="checked">
-              <label for="state"><img src="img/red_square.svg" style="height: 30px;"> State Averages</label>
+    <div class="container-fluid">
+        <div class="row g-3">
+            <!-- Left Sidebar: Symbol Legend and Overview Map -->
+            <div class="col-xl-2 col-lg-3 col-md-4 order-1">
+                <div class="legend-panel">
+                    <h5 class="panel-title">Symbol Legend</h5>
+                    
+                    <div class="legend-controls">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input cs" id="isusm" checked="checked">
+                            <label class="form-check-label" for="isusm">
+                                <img src="img/isu.svg" alt="ISU"> ISU Soil Moisture
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input cs" id="asos" checked="checked">
+                            <label class="form-check-label" for="asos">
+                                <img src="img/airport.svg" alt="Airport"> Airports
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input cs" id="coop" checked="checked">
+                            <label class="form-check-label" for="coop">
+                                <img src="img/green_dot.svg" alt="Climate"> Climate Stations
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input cs" id="cd" checked="checked">
+                            <label class="form-check-label" for="cd">
+                                <img src="img/blue_square.svg" alt="District"> Climate Districts
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input cs" id="state" checked="checked">
+                            <label class="form-check-label" for="state">
+                                <img src="img/red_square.svg" alt="State"> State Averages
+                            </label>
+                        </div>
+                    </div>
+                    <div id="overviewmap"></div>
+                </div>
+            </div>
+            
+            <!-- Center: Main Map -->
+            <div class="col-xl-7 col-lg-6 col-md-8 order-2 order-md-2">
+                <div class="map-panel">
+                    <h5 class="panel-title">Click symbol on map to view available plots</h5>
+                    <div id="olmap"></div>
+                </div>
+            </div>
+            
+            <!-- Right Sidebar: Quick Access Plots -->
+            <div class="col-xl-3 col-lg-3 col-md-12 order-3">
+                <div class="quick-plots-panel maprow">
+                    <h5 class="panel-title">Quick Access Plots</h5>
+                    
+                    <div class="plot-item">
+                        <h6>4 inch Soil Temperatures</h6>
+                        <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures" class="img-fluid"
+                             data-target="{$EXTERNAL_BASEURL}/agclimate/soilt.php">
+                    </div>
 
-            <br /><div id="overviewmap"></div>
-        </div>
-        <div class="col-md-8" style="padding-left: 25px;">
-            <strong>Click symbol on map to view available plots:</strong><br />
-            <div id="olmap"></div>
-        </div>
-        <div class="col-md-2 maprow">
-            <strong>4 inch Soil Temperatures</strong>
-            <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures"
-             data-target="{$EXTERNAL_BASEURL}/agclimate/soilt.php">
+                    <div class="plot-item">
+                        <h6>Today's Precipitation</h6>
+                        <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall" class="img-fluid"
+                             data-target="{$EXTERNAL_BASEURL}">
+                    </div>
 
-             <br /><strong>Today's Precipitation</strong>
-             <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall"
-            data-target="{$EXTERNAL_BASEURL}">
+                    <div class="plot-item">
+                        <h6>Precipitation Departure</h6>
+                        <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2024-08-01::edate:2024-10-10::cmap:BrBG::_r:43.png"
+                             role="button" title="Precip Departure Aug 1" class="img-fluid"
+                             data-target="{$EXTERNAL_BASEURL}">
+                    </div>
 
-            <br /><strong>Precipitation Departure</strong>
-            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2024-08-01::edate:2024-10-10::cmap:BrBG::_r:43.png"
-            role="button" title="Precip Departure Aug 1"
-            data-target="{$EXTERNAL_BASEURL}">
+                    <div class="plot-item">
+                        <h6>Days to Accum 2 inches</h6>
+                        <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button" class="img-fluid"
+                             title="Days to Accumulate 2 inches"
+                             data-target="{$EXTERNAL_BASEURL}">
+                    </div>
 
-            <br /><strong>Days to Accum 2 inches</strong>
-            <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button"
-            title="Days to Accumulate 2 inches"
-            data-target="{$EXTERNAL_BASEURL}">
+                    <div class="plot-item">
+                        <h6>Iowa Drought Coverage</h6>
+                        <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2024-01-01::_r:43.png" role="button" class="img-fluid"
+                             title="Iowa Drought Coverage"
+                             data-target="{$EXTERNAL_BASEURL}">
+                    </div>
 
-            <br /><strong>Iowa Drought Coverage</strong>
-            <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2024-01-01::_r:43.png" role="button"
-            title="Iowa Drought Coverage"
-            data-target="{$EXTERNAL_BASEURL}">
+                    <div class="plot-item">
+                        <h6>NASS Corn Denting Progress</h6>
+                        <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button" class="img-fluid"
+                             title="USDA NASS Corn Denting Progress"
+                             data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
+                    </div>
 
-            <br /><strong>NASS Corn Denting Progress</strong>
-            <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button"
-            title="USDA NASS Corn Denting Progress"
-            data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
-
-            <br /><strong>Climate District Ranks</strong>
-            <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2024::month:summer::cmap:RdBu_r::_r:43.png" role="button"
-            title="Climate District Precip Ranks"
-            data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2024&month=summer&sdate=2024%2F04%2F05&edate=2024%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
-
+                    <div class="plot-item">
+                        <h6>Climate District Ranks</h6>
+                        <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2024::month:summer::cmap:RdBu_r::_r:43.png" role="button"
+                        title="Climate District Precip Ranks"
+                        data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2024&month=summer&sdate=2024%2F04%2F05&edate=2024%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

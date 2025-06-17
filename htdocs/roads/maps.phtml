@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$OL = '10.4.0';
+$OL = '10.6.0';
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);
@@ -20,6 +20,7 @@ $valid = date("h:i A, d M Y", $ts);
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol.css" rel="stylesheet" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="maps.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
@@ -28,21 +29,111 @@ $t->jsextra = <<<EOM
 EOM;
 $t->title = "Interactive Road Conditions";
 $t->content = <<<EOM
-<ol class="breadcrumb">
-  <li><a href="/roads/">Roads</a></li>
-  <li class="active">Interactive Mapping</li>
-</ol>
-<style type="text/css">
-#map {
-    width: 100%;
-    height: 600px;
-    border: 2px solid black;
-}
-</style>
-<h3>Interactive Data Map</h3>
-<div id="map"></div>
 
-<p>This map utilizes various <a href="/api/#json">GeoJSON Services</a> and
-<a href="/ogc/">OGC WebMap Services</a> provided by the IEM.</p>
+<div class="container-fluid">
+
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="/roads/">Roads</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Interactive Mapping</li>
+</ol>
+</nav>
+
+<div class="row mb-4">
+<div class="col-md-12">
+<div class="card">
+<div class="card-header">
+<h3 class="card-title mb-0">Interactive Road Conditions Map</h3>
+</div>
+<div class="card-body">
+<p class="card-text">
+<i class="fa fa-info-circle text-info"></i>
+This interactive map displays current road conditions across Iowa. Data is updated regularly and shows the latest conditions as of <strong>{$valid}</strong>.
+Use the map controls to zoom, pan, and switch between different data layers.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-lg-9 col-md-8 mb-4">
+
+<div class="card">
+<div class="card-header d-flex justify-content-between align-items-center">
+<h4 class="card-title mb-0">Road Conditions Map</h4>
+<small class="text-muted">Last Updated: {$valid}</small>
+</div>
+<div class="card-body p-0">
+<div id="map" class="rounded-bottom"></div>
+</div>
+</div>
+
+</div>
+<div class="col-lg-3 col-md-4 mb-4">
+
+<div class="card h-100">
+<div class="card-header">
+<h5 class="card-title mb-0">Legend & Information</h5>
+</div>
+<div class="card-body">
+
+
+<div class="mb-4">
+<h6 class="fw-bold">Map Controls</h6>
+<ul class="list-unstyled small">
+<li><i class="fa fa-mouse-pointer text-primary"></i> Click and drag to pan</li>
+<li><i class="fa fa-search-plus text-primary"></i> Mouse wheel to zoom</li>
+<li><i class="fa fa-layers text-primary"></i> Use layer switcher for different views</li>
+</ul>
+</div>
+
+<div class="alert alert-info">
+<small>
+<i class="fa fa-clock"></i>
+Road conditions are reported by Iowa DOT and updated as conditions change. 
+Always exercise caution when driving in adverse weather conditions.
+</small>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-12">
+<div class="card">
+<div class="card-header">
+<h5 class="card-title mb-0">Data Sources & API Information</h5>
+</div>
+<div class="card-body">
+<p class="card-text">This map utilizes various <a href="/api/#json" class="btn btn-sm btn-outline-primary">GeoJSON Services</a> and
+<a href="/ogc/" class="btn btn-sm btn-outline-secondary">OGC WebMap Services</a> provided by the IEM.</p>
+
+<div class="row mt-3">
+<div class="col-md-6">
+<h6 class="fw-bold">Available APIs:</h6>
+<ul class="list-unstyled">
+<li><a href="/api/#json" class="text-decoration-none"><i class="fa fa-code text-success"></i> GeoJSON Web Services</a></li>
+<li><a href="/ogc/" class="text-decoration-none"><i class="fa fa-globe text-info"></i> OGC WebMap Services</a></li>
+</ul>
+</div>
+<div class="col-md-6">
+<h6 class="fw-bold">Related Tools:</h6>
+<ul class="list-unstyled">
+<li><a href="/roads/" class="text-decoration-none"><i class="fa fa-road text-warning"></i> Roads Main Page</a></li>
+<li><a href="/api/1/docs" class="text-decoration-none"><i class="fa fa-book text-primary"></i> API Documentation</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
 EOM;
 $t->render('single.phtml');
