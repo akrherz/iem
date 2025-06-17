@@ -274,6 +274,8 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     
     // Create new tab
     const li = document.createElement('li');
+    li.className = 'nav-item';
+    li.setAttribute('role', 'presentation');
     li.dataset.center = text(center);
     li.dataset.sdate = text(sdate);
     li.dataset.edate = text(edate);
@@ -283,7 +285,13 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     li.dataset.order = text(order);
     
     const link = document.createElement('a');
+    link.className = 'nav-link';
     link.href = `#${tabId}`;
+    link.setAttribute('data-bs-toggle', 'tab');
+    link.setAttribute('data-bs-target', `#${tabId}`);
+    link.setAttribute('role', 'tab');
+    link.setAttribute('aria-controls', tabId);
+    link.setAttribute('aria-selected', 'false');
     link.textContent = text(pil);
     link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -295,8 +303,10 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     
     // Create new tab content
     const tabPane = document.createElement('div');
-    tabPane.className = 'tab-pane';
+    tabPane.className = 'tab-pane fade';
     tabPane.id = tabId;
+    tabPane.setAttribute('role', 'tabpanel');
+    tabPane.setAttribute('aria-labelledby', `${tabId}-tab`);
     tabContent.appendChild(tabPane);
     
     // Activate the new tab
@@ -317,22 +327,26 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
  * Activate a specific tab
  */
 function activateTab(targetTab) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.nav-tabs li').forEach(tab => {
-        tab.classList.remove('active');
+    // Remove active class from all nav-links and tab-panes
+    document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
+        link.classList.remove('active');
+        link.setAttribute('aria-selected', 'false');
     });
     document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.classList.remove('active');
+        pane.classList.remove('active', 'show');
     });
     
-    // Add active class to target tab
-    targetTab.classList.add('active');
-    
-    const link = targetTab.querySelector('a');
-    const tabId = link.getAttribute('href');
-    const tabPane = document.querySelector(tabId);
-    if (tabPane) {
-        tabPane.classList.add('active');
+    // Add active class to target tab link
+    const link = targetTab.querySelector('.nav-link');
+    if (link) {
+        link.classList.add('active');
+        link.setAttribute('aria-selected', 'true');
+        
+        const tabId = link.getAttribute('href');
+        const tabPane = document.querySelector(tabId);
+        if (tabPane) {
+            tabPane.classList.add('active', 'show');
+        }
     }
 }
  
@@ -425,16 +439,16 @@ function buildUI() {
     if (closeBtn) {
         closeBtn.addEventListener('click', (event) => {
             event.target.blur();
-            const activeTab = document.querySelector(".nav-tabs li.active");
-            if (!activeTab) {
+            const activeLink = document.querySelector(".nav-tabs .nav-link.active");
+            if (!activeLink) {
                 return;
             }
+            const activeTab = activeLink.closest('li');
             const pil = activeTab.dataset.pil;
             if (pil === undefined) {
                 return;
             }
-            const tabLink = activeTab.querySelector('a');
-            const tabid = tabLink.getAttribute('href');
+            const tabid = activeLink.getAttribute('href');
             const tabPane = document.querySelector(tabid);
             
             // Remove tab and content

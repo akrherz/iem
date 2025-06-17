@@ -9,159 +9,236 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="index.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="module" src="index.module.js"></script>
+<script type="module" src="index.module.js?v=2"></script>
 EOM;
 $t->title = "NWS Text Product Finder";
 
 $helpdiv = <<<EOM
-<h3>IEM NWS Text Product Finder</h3>
-
-<p>Update 15 May 2019: If you specify a three character PIL, you will get
-any PIL matches that start with those three characters.  You can optionally
-specify a WMO Header (TTAAII) to reduce PIL ambiguity.</p>
-
-<p>Update 19 Jan 2012: Added the ability to limit a AFOS PIL by the issuing
-center ID (4 character).  For example, the AFOS pil RWRTX is issued by a 
-number of centers in Texas.  To only get RWRTX from Fort Worth, enter KFWD
-for the center.
-
-<p>Update <strong>29 Mar 2024:</strong> <a href="/cgi-bin/afos/retrieve.py?help"
-class="btn btn-primary"><i class="fa fa-file"></i> Backend documentation</a> exists
-for those wishing to script against this service.</p>
-
-<p>Update <strong>5 June 2025:</strong> The app was mostly rewritten and now
-uses a URL Parameters pil= style page reference.  Any previous bookmarks should
-continue to work, but you may want to update them to the new style.</p>
-
-<br />&nbsp;
-<p>If you don't like this app, <a href="old.phtml">here is the old one</a>.</p>
-<br />&nbsp;
-<p>This application provides a nice interface into viewing National Weather
-Service issued text products.  Once you select a product, a cookie is 
-set on your computer so that when you visit this page the next time, the
-same products will appear!</p>
-<br />&nbsp;
-<p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">UNIDATA IDD</a>
- data feed, a simple script archives <b>recent</b> NWS text products into a database.  The above form allows
-you to query this database for recent products.  You must know 
-the AFOS PIL / AWIPS ID in order to 
-get the products you want.</p>
-
-<div style="float: left; margin: 5px; padding: 5px; border: 1px dashed; background: #eeeeee;">
-<b>MOS PILS</b>
-<pre>
-PIL       Description             Product ID for Des Moines
-ECMxxx    ECMWF Guidance M         ECMDSM
-ECSxxx    ECMWF Guidance S         ECSDSM
-ECXxxx    ECMWF Guidance X         ECXDSM
-MAVxxx    GFS MOS Guidance         MAVDSM
-METxxx    NAM MOS Guidance         METDSM
-MEXxxx    GFSX MOS Guidance        MEXDSM
-NBExxx    National Blend E         NBEDSM
-NBHxxx    National Blend H         NBHDSM
-NBPxxx    National Blend P         NBPDSM
-NBSxxx    National Blend S         NBSDSM
-NBXxxx    National Blend X         NBXDSM
-
-And model output
-
-FRHxx     Eta Output               FRH68
-FRHTxx    NGM Output               FRHT68
-</pre>
-
-<b>Other Favorites:</b>
-<pre>
-REPNT2  NHC Vortex Message
-PMDHMD  Model Diagnostic Discussion
-PMDSPD  Short Range Prognostic Discussion
-PMDEPD  Extended Forecast Discussion
-SWOMCD  SPC Mesoscale Discussion
-SWODY1  SPC Day 1
-SWODY2  SPC Day 2
-AFDDMX  Des Moines WFO Area Forecast Discussion
-SELX    Convective Watch where "X" is a number between 0-9
-</pre>
+<div class="d-flex align-items-center mb-4">
+  <i class="bi bi-info-circle-fill fs-2 text-primary me-3"></i>
+  <div>
+    <h3 class="mb-1">IEM NWS Text Product Finder</h3>
+    <p class="text-muted mb-0">Search and view National Weather Service text products</p>
+  </div>
 </div>
 
-<br />&nbsp;
-<p>The archive maintains products from at least the most recent 7 days.  A daily scrubber 
-runs at 3:30 AM each day to reindex the products and delete old products, so the query 
-interface is off-line at that time. This interruption should only last 10 minutes.</p>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="alert alert-info" role="alert">
+      <h6 class="alert-heading"><i class="bi bi-lightbulb"></i> Quick Start</h6>
+      <p class="mb-0">This application provides a nice interface into viewing National Weather Service issued text products. Once you select a product, a cookie is set on your computer so that when you visit this page the next time, the same products will appear!</p>
+    </div>
 
-<br />&nbsp;
-<p>Please do not depend on this page for operational decision making, errors can and do occur
-with data processing, data reception and any other error possible with Internet communications.
-All products should be used for educational purposes only.</p>
+    <div class="accordion" id="helpAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#updates" aria-expanded="false" aria-controls="updates">
+            <i class="bi bi-clock-history me-2"></i> Recent Updates
+          </button>
+        </h2>
+        <div id="updates" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+          <div class="accordion-body">
+            <ul class="list-unstyled">
+              <li class="mb-2"><strong>5 June 2025:</strong> The app was mostly rewritten and now uses a URL Parameters pil= style page reference. Any previous bookmarks should continue to work, but you may want to update them to the new style.</li>
+              <li class="mb-2"><strong>29 Mar 2024:</strong> <a href="/cgi-bin/afos/retrieve.py?help" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-earmark"></i> Backend documentation</a> exists for those wishing to script against this service.</li>
+              <li class="mb-2"><strong>15 May 2019:</strong> If you specify a three character PIL, you will get any PIL matches that start with those three characters. You can optionally specify a WMO Header (TTAAII) to reduce PIL ambiguity.</li>
+              <li><strong>19 Jan 2012:</strong> Added the ability to limit a AFOS PIL by the issuing center ID (4 character). For example, the AFOS pil RWRTX is issued by a number of centers in Texas. To only get RWRTX from Fort Worth, enter KFWD for the center.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-<p>
-<ul>
- <li><a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">NNN Categories</a></li>
-</ul>
-</p>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#about" aria-expanded="false" aria-controls="about">
+            <i class="bi bi-info-circle me-2"></i> About This Service
+          </button>
+        </h2>
+        <div id="about" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+          <div class="accordion-body">
+            <p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">UNIDATA IDD</a> data feed, a simple script archives <strong>recent</strong> NWS text products into a database. You must know the AFOS PIL / AWIPS ID in order to get the products you want.</p>
+            
+            <div class="alert alert-warning" role="alert">
+              <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Important Notice</h6>
+              <p class="mb-2">Please do not depend on this page for operational decision making. Errors can and do occur with data processing, data reception and any other error possible with Internet communications.</p>
+              <p class="mb-0"><strong>All products should be used for educational purposes only.</strong></p>
+            </div>
+
+            <p>The archive maintains products from at least the most recent 7 days. A daily scrubber runs at 3:30 AM each day to reindex the products and delete old products, so the query interface is off-line at that time. This interruption should only last 10 minutes.</p>
+            
+            <p class="mb-0">If you don't like this app, <a href="old.phtml" class="btn btn-sm btn-outline-secondary">here is the old one</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header bg-secondary text-white">
+        <i class="bi bi-list-ul"></i> Common Product IDs
+      </div>
+      <div class="card-body p-2">
+        <div class="mb-3">
+          <h6 class="text-primary mb-2">MOS PILS</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr><th>PIL</th><th>Description</th><th>DSM Example</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>ECMxxx</td><td>ECMWF Guidance M</td><td>ECMDSM</td></tr>
+                <tr><td>ECSxxx</td><td>ECMWF Guidance S</td><td>ECSDSM</td></tr>
+                <tr><td>MAVxxx</td><td>GFS MOS Guidance</td><td>MAVDSM</td></tr>
+                <tr><td>METxxx</td><td>NAM MOS Guidance</td><td>METDSM</td></tr>
+                <tr><td>NBExxx</td><td>National Blend E</td><td>NBEDSM</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <h6 class="text-primary mb-2">Popular Products</h6>
+          <div class="row">
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='REPNT2'">REPNT2</button>
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='SWODY1'">SWODY1</button>
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='SWODY2'">SWODY2</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='AFDDMX'">AFDDMX</button>
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='SWOMCD'">SWOMCD</button>
+              <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="document.getElementById('pil').value='PMDHMD'">PMDHMD</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx" class="btn btn-sm btn-outline-info">
+            <i class="bi bi-file-earmark-excel"></i> NNN Categories
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 EOM;
 $theform = <<<EOM
 <form name="control" id="myform">
 
-<p><label for="pil">3-6 Character PIL</label>
-<br /><i>Specify 4-6 characters for exact match</i> 
-<br /><input placeholder="AFDDMX" type="text" name="pil" maxlength="6" size="10"></p>
+<div class="mb-3">
+  <label for="pil" class="form-label fw-bold">3-6 Character PIL</label>
+  <input placeholder="AFDDMX" type="text" name="pil" id="pil" maxlength="6" class="form-control form-control-sm">
+  <div class="form-text">Specify 4-6 characters for exact match</div>
+</div>
 
-<p><label for="center">4 Character Center</label>
-<br /><i>Can be left blank</i>
-<br /><input placeholder="KDMX" type="text" name="center" maxlength="4" size="6"></p>
+<div class="mb-3">
+  <label for="center" class="form-label fw-bold">4 Character Center</label>
+  <input placeholder="KDMX" type="text" name="center" id="center" maxlength="4" class="form-control form-control-sm">
+  <div class="form-text">Can be left blank</div>
+</div>
 
-<p><label for="ttaaii">6 Char WMO Header</label>
-<br /><i>Can be left blank</i>
-<br /><input placeholder="FXUS63" type="text" name="ttaaii" maxlength="6" size="6"></p>
+<div class="mb-3">
+  <label for="ttaaii" class="form-label fw-bold">6 Char WMO Header</label>
+  <input placeholder="FXUS63" type="text" name="ttaaii" id="ttaaii" maxlength="6" class="form-control form-control-sm">
+  <div class="form-text">Can be left blank</div>
+</div>
 
-<p><label for="limit">Entries</label>
-<br /><input type="text" name="limit" maxlength="4" size="6" value="1"></p>
+<div class="mb-3">
+  <label for="limit" class="form-label fw-bold">Entries</label>
+  <input type="number" name="limit" id="limit" min="1" max="100" value="1" class="form-control form-control-sm">
+</div>
 
-<p><strong>Time Sort:</strong>
-<br /><input type="radio" name="order" value="desc" id="desc" checked>
-<label for="desc">Newest First</label>&nbsp;&nbsp;
-<input type="radio" name="order" value="asc" id="asc">
-<label for="asc">Oldest First</label></p>
+<div class="mb-3">
+  <label class="form-label fw-bold">Time Sort</label>
+  <div class="form-check">
+    <input type="radio" name="order" value="desc" id="desc" class="form-check-input" checked>
+    <label for="desc" class="form-check-label">Newest First</label>
+  </div>
+  <div class="form-check">
+    <input type="radio" name="order" value="asc" id="asc" class="form-check-input">
+    <label for="asc" class="form-check-label">Oldest First</label>
+  </div>
+</div>
 
-<p><label for="sdate">Start Date @ 00 UTC</label>
-<br /><input id="sdate" type="date" name="sdate" min="1983-01-01"></p>
+<div class="mb-3">
+  <label for="sdate" class="form-label fw-bold">Start Date @ 00 UTC</label>
+  <input id="sdate" type="date" name="sdate" min="1983-01-01" class="form-control form-control-sm">
+</div>
 
-<p><label for="edate">End Date @ 00 UTC</label>
-<br /><input id="edate" type="date" name="edate" min="1983-01-02"></p>
+<div class="mb-3">
+  <label for="edate" class="form-label fw-bold">End Date @ 00 UTC</label>
+  <input id="edate" type="date" name="edate" min="1983-01-02" class="form-control form-control-sm">
+</div>
 
-<p><button type="button" id="myform-submit" class="btn btn-secondary"><i class="fa fa-search"></i> Load Product</button></p>
+<div class="d-grid">
+  <button type="button" id="myform-submit" class="btn btn-primary">
+    <i class="bi bi-search"></i> Load Product
+  </button>
+</div>
 
 </form>
 EOM;
 $t->content = <<<EOM
 
-<div class="clearfix">&nbsp;</div>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item"><a href="/nws/text.php">NWS Text</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Text Product Finder</li>
+  </ol>
+</nav>
 
 <div class="row">
   <div class="col-md-3">
-<div class="card card-body">
-    {$theform}
-</div>
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <i class="bi bi-search"></i> Product Search
+      </div>
+      <div class="card-body">
+        {$theform}
+      </div>
+    </div>
   </div><!-- ./col-md-3 -->
   <div class="col-md-9">
 
 <div class="card" id="thetabs">
     <div class="card-header">
-      <ul class="nav nav-tabs card-header-tabs">
-         <li class="nav-item active"><a class="nav-link" href="#help" data-bs-toggle="tab">Help</a></li>
+      <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+         <li class="nav-item" role="presentation">
+           <a class="nav-link active" href="#help" data-bs-toggle="tab" data-bs-target="#help" role="tab" aria-controls="help" aria-selected="true">Help</a>
+         </li>
       </ul>
     </div><!-- ./card-header -->
     <div class="card-body">
-    <div id="thetabs-toolbar">
-        <button type="button" id="toolbar-refresh" class="btn btn-secondary"><i class="fa fa-refresh"></i> Refresh</button>
-        <button type="button" id="toolbar-download" class="btn btn-secondary"><i class="fa fa-download"></i> Download Text</button>
-        <button type="button" id="toolbar-zip" class="btn btn-secondary"><i class="fa fa-file-archive-o"></i> Download Zipfile</button>
-        <button type="button" id="toolbar-print" class="btn btn-secondary"><i class="fa fa-print"></i> Send Text to Printer</button>
-        <button type="button" id="toolbar-close" class="btn btn-secondary"><i class="fa fa-close"></i> Close Tab</button>
+    <div id="thetabs-toolbar" class="mb-3">
+        <div class="btn-toolbar" role="toolbar">
+          <div class="btn-group me-2" role="group">
+            <button type="button" id="toolbar-refresh" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <button type="button" id="toolbar-download" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-download"></i> Download Text
+            </button>
+            <button type="button" id="toolbar-zip" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-earmark-zip"></i> Download Zipfile
+            </button>
+          </div>
+          <div class="btn-group me-2" role="group">
+            <button type="button" id="toolbar-print" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-printer"></i> Print
+            </button>
+          </div>
+          <div class="btn-group" role="group">
+            <button type="button" id="toolbar-close" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-x-lg"></i> Close Tab
+            </button>
+          </div>
+        </div>
     </div>
-     <div class="tab-content clearfix">
+     <div class="tab-content clearfix" id="myTabContent">
 
-       <div class="tab-pane active" id="help">
+       <div class="tab-pane fade show active" id="help" role="tabpanel" aria-labelledby="help-tab">
         {$helpdiv}
        </div><!-- ./help -->
     </div><!-- ./tab-content -->
