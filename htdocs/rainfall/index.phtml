@@ -17,7 +17,9 @@ $m2select = monthSelect(date("m"));
 $d2select = daySelect(date("d"));
 $h2select = gmtHourSelect(0, "hour");
 $ar = array(
-    "1" => "1 Hour", "24" => "24 Hour", "48" => "48 Hour",
+    "1" => "1 Hour",
+    "24" => "24 Hour",
+    "48" => "48 Hour",
     "72" => "72 Hour"
 );
 $pselect = make_select("period", 1, $ar);
@@ -179,11 +181,11 @@ be refined then.  Sounds confusing.  Please
 
 <p>NOAA has begun working on an advanced replacement of the system that produces
 rainfall estimates.  This project is called 
-<a href="http://mrms.ou.edu/">Multi-RADAR Multi-Sensor System</a>.  The IEM 
+<a href="https://www.nssl.noaa.gov/projects/mrms/">Multi-RADAR Multi-Sensor System</a>.  The IEM 
 processes some of the data found in this feed and produces products from it.
-            
+
 <h4>GIS RASTER PNG Images of Accumulation Estimates</h4>
-            
+
 <p>The technique used provides 8-bit PNG images whereby a function can be used
 to convert the 8-bit value into a rainfall.  This equation is different for
 the various products produced by the IEM in order to accomodate the data ranges
@@ -235,7 +237,7 @@ the script converts the 8bit PNG mentioned above to uint16 IMG file on the fly!<
             </tr>
 </tbody>
 </table>
-        
+
             <input type="submit" value="Request ERDAS Imagine File" />
         </form>
 

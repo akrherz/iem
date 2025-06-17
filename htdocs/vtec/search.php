@@ -21,13 +21,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
-<style>
-  .map {
-    width: 100%;
-    height: 400px;
-    float: left;
-  }
-</style>
+<link rel="stylesheet" href="search.css" type="text/css">
 EOM;
 $t->title = "NWS Warning Search by Point or County/Zone";
 

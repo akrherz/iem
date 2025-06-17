@@ -1,5 +1,5 @@
 <?php
-$OL = "7.2.2";
+$OL = "10.6.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 15);
 require_once "../../include/mlib.php";
@@ -99,6 +99,7 @@ if ($station == "" || !is_file("/mesonet/share/climodat/reports/{$station}_$repo
     $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="index.css" rel="stylesheet" />
 EOM;
     $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
@@ -243,13 +244,6 @@ EOM;
     $content .= "</pre>\n";
 } else {
     $content .= <<<EOM
-<style type="text/css">
-#map {
-   width: 640px;
-   height: 400px;
-   border: 2px solid black;
-}
-</style>
 
 <p>Available stations are presented on the map below. Green dots indicate sites
 that have data up until today.  Yellow dots have data, but not for a period

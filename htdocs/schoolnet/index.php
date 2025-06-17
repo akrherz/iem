@@ -39,7 +39,6 @@ replaced with proprietary solutions.
   <ul>
    <li><a href="/plotting/snet/1station.php">1 station</a> [20 minute data]</li>
    <li><a href="/plotting/snet/1station_1min.php">1 station</a> [1 minute data]</li>
-   <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
   </ul>
 
   </div>

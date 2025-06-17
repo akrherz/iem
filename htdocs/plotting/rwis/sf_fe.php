@@ -1,5 +1,5 @@
 <?php
-$OL = "8.2.0";
+$OL = "10.6.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
@@ -31,6 +31,7 @@ $t->iemselect2 = TRUE;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="sf_fe.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
@@ -42,13 +43,6 @@ $t->title = "RWIS Timeseries Plots";
 $nselect = selectNetworkType("RWIS", $network);
 
 $content = <<<EOM
-<style type="text/css">
-        #map {
-            width: 450px;
-            height: 450px;
-            border: 2px solid black;
-        }
-</style>
 <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/RWIS/">RWIS Homepage</a></li>
     <li class="breadcrumb-item active" aria-current="page">RWIS Temperature Time Series Plots</li>

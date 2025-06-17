@@ -1,11 +1,11 @@
 <?php
-$OL = "7.2.2";
+$OL = "10.6.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "KCCI";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2019;
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
 $station = isset($_GET['station']) ? xssafe($_GET['station']) : "";
@@ -26,7 +26,7 @@ EOM;
 $t->title = "SchoolNet One Minute Time Series";
 
 $nselect = networkSelect($network, $station);
-$ys = yearSelect(2002, $year, "year");
+$ys = yearSelect(2002, $year, "year", '', 2019);
 $ms = monthSelect($month);
 $ds = daySelect($day);
 

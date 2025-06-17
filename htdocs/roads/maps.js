@@ -1,4 +1,4 @@
-/* global $, ol */
+/* global ol */
 const style = new ol.style.Style({
     fill: new ol.style.Fill({
         color: 'rgba(255, 255, 255, 0)'
@@ -32,7 +32,7 @@ const rcLookup = {
     86: '#FF0000'
 };
 
-$(document).ready(() => {
+document.addEventListener('DOMContentLoaded', () => {
 
     const roadLayer = new ol.layer.Vector({
         title: 'Winter Road Conditions',

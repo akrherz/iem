@@ -1,0 +1,31 @@
+/* Webcam ExtJS App Styling - Integrated with Bootstrap */
+
+.webimage {
+  height: 240px;
+  width : 320px;
+}
+
+.thumb-wrap{
+    float: left;
+    margin: 1px;
+    margin-right: 0;
+    padding: 5px;
+    width: 325px;
+}
+
+.x-view-over{
+    border:1px solid #dddddd;
+    padding: 4px;
+}
+
+/* Ensure ExtJS panel plays nice with Bootstrap */
+#main .x-panel {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+/* Improve ExtJS toolbar styling within Bootstrap */
+.x-toolbar {
+    background: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+}

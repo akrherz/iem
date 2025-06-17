@@ -1,0 +1,730 @@
+
+/* Three-Column Layout Improvements */
+
+/* Main container and grid layout */
+.container-fluid {
+    padding: 0 15px;
+    max-width: 100vw;
+}
+
+.row.g-3 {
+    margin: 0;
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+/* Panel styling */
+.legend-panel,
+.map-panel,
+.quick-plots-panel {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    height: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.panel-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.375rem;
+    border-bottom: 2px solid #007bff;
+    font-size: 1rem;
+}
+
+#overviewmap {
+    width: 100%;
+    height: 200px;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Left Sidebar: Legend and Overview Map */
+.legend-panel {
+    min-height: 750px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content overflow */
+}
+
+.legend-controls {
+    margin-bottom: 1rem;
+    flex-shrink: 0; /* Don't shrink the controls */
+}
+
+.legend-controls .form-check {
+    margin-bottom: 0.5rem;
+    padding-left: 0;
+}
+
+.legend-controls .form-check-label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.legend-controls .form-check-label:hover {
+    background-color: #f8f9fa;
+}
+
+.legend-controls .form-check-label img {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.legend-controls .form-check-input {
+    margin-right: 0.5rem;
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+/* Center: Main Map */
+.map-panel {
+    min-height: 750px;
+}
+
+/* Right Sidebar: Quick Access Plots */
+.quick-plots-panel {
+    min-height: 750px;
+    overflow-y: auto;
+}
+
+.plot-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.plot-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.plot-item h6 {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.plot-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.plot-item img:hover {
+    transform: scale(1.02);
+}
+
+/* OpenLayers Map Styling */
+
+h3.title {
+    color: #ff0;
+    font-weight: bolder;
+    font-size: 32px;
+    position: absolute;
+    top: -15px;
+    left: 150px;
+}
+
+#olmap {
+    width: 100%;
+    min-height: 600px;
+    height: 650px;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+/* Update maprow for new layout */
+.maprow {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Bootstrap 5 Modal Enhancements */
+.modal-dialog.modal-xl {
+    max-width: 90vw;
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+/* Fix modal backdrop issues with multiple modals */
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/* Ensure modals don't interfere with each other */
+.modal {
+    --bs-modal-zindex: 1055;
+}
+
+.modal.show {
+    display: block !important;
+}
+
+/* Custom Modal Controls */
+.modal-header .btn-group {
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.modal-header .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+    min-width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-header .btn-group .btn:not(:last-child) {
+    margin-right: 5px;
+}
+
+/* Better button hover states */
+.modal-header .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+/* Consistent styling for custom close button */
+.close-btn {
+    border: 1px solid #6c757d !important;
+    background-color: transparent !important;
+    color: #6c757d !important;
+}
+
+.close-btn:hover {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+/* Icons for minimize/maximize buttons (using Unicode symbols as fallback) */
+.minimize-btn span,
+.maximize-btn span,
+.close-btn span {
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Modal layout improvements */
+.modal-body.d-flex {
+    height: calc(80vh - 60px); /* Subtract header height */
+}
+
+.data-sidebar {
+    min-width: 250px;
+    max-width: 300px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+}
+
+.data-sidebar h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.data-display-area {
+    flex: 1;
+    overflow: auto;
+    background-color: #fff;
+}
+
+/* Responsive modal layout */
+@media (max-width: 992px) {
+    .modal-body.d-flex {
+        flex-direction: column;
+        height: auto;
+        max-height: 80vh;
+    }
+    
+    .data-sidebar {
+        width: 100% !important;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+        max-height: 200px;
+    }
+}
+
+/* Modal z-index management */
+.modal {
+    z-index: 2000 !important;
+}
+
+.modal-backdrop {
+    z-index: 1999 !important;
+}
+
+/* Ensure modal content doesn't overflow */
+.modal-body {
+    overflow: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* Chart container styling */
+.viz {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Checkbox styling for Bootstrap 5 */
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.form-check-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.form-check-label img {
+    margin-right: 0.5rem;
+}
+
+/* QR Button */
+.qrbutton {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    z-index: 200;
+}
+
+/* Popover styling */
+#popover {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    padding: 8px 20px;
+    z-index: 1002;
+    border-radius: 4px;
+    max-width: 300px;
+}
+
+#popover span {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #ffd700;
+}
+
+/* Data display buttons */
+.ddisplay button {
+    margin: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .legend-panel,
+    .map-panel,
+    .quick-plots-panel {
+        min-height: 650px;
+    }
+    
+    #olmap {
+        height: 550px;
+    }
+    
+}
+
+@media (max-width: 992px) {
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .legend-panel,
+    .map-panel {
+        min-height: 500px;
+    }
+    
+    .quick-plots-panel {
+        min-height: auto;
+        max-height: 600px;
+    }
+    
+    #olmap {
+        height: 450px;
+    }
+    
+    
+    .plot-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .plot-item h6 {
+        font-size: 0.9rem;
+    }
+    
+    .legend-controls .form-check-label {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.85rem;
+    }
+    
+    .legend-controls .form-check-label img {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.375rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .legend-panel,
+    .map-panel,
+    .quick-plots-panel {
+        min-height: auto;
+        margin-bottom: 1rem;
+    }
+    
+    .legend-panel {
+        min-height: 400px;
+    }
+    
+    #olmap {
+        height: 400px;
+        min-height: 350px;
+    }
+    
+    
+    .legend-controls {
+        margin-bottom: 0.75rem;
+    }
+    
+    .legend-controls .form-check {
+        margin-bottom: 0.375rem;
+    }
+    
+    .legend-controls .form-check-label {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.8rem;
+    }
+    
+    .legend-controls .form-check-label img {
+        width: 16px;
+        height: 16px;
+        margin-right: 0.375rem;
+    }
+    
+    .plot-item {
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .plot-item h6 {
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .modal-dialog.modal-xl {
+        max-width: 95vw;
+        margin: 10px auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0 5px;
+    }
+    
+    .row.g-3 {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 0.5rem;
+    }
+    
+    .legend-panel,
+    .map-panel,
+    .quick-plots-panel {
+        padding: 0.75rem;
+    }
+    
+    #olmap {
+        height: 350px;
+    }
+    
+    
+    .panel-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Loading states */
+.modal-body.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.modal-body.loading::after {
+    content: "Loading...";
+    color: #6c757d;
+}
+
+/* Improve button spacing in autoload sections */
+.autoload {
+    margin: 0.25rem 0;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.autoload:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.autoload.active {
+    background-color: #e7f3ff;
+    border-color: #0d6efd;
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+/* Modal header button consistency */
+.modal-header .btn-group .btn {
+    border: 1px solid #6c757d;
+    background-color: transparent;
+    color: #6c757d;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    min-width: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-header .btn-group .btn:hover {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.modal-header .btn-group .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.modal-header .btn-group .btn span {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Ensure all three buttons look the same */
+.modal-header .btn-group .minimize-btn,
+.modal-header .btn-group .maximize-btn,
+.modal-header .btn-group .close-btn {
+    border: 1px solid #6c757d !important;
+    background-color: transparent !important;
+    color: #6c757d !important;
+}
+
+/* Style the data templates */
+.asos-data-template,
+.coop-data-template,
+.isusm-data-template {
+    display: none;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    margin-top: 1rem;
+}
+
+/* Modal layout improvements */
+.modal-xl {
+    max-width: 90vw;
+}
+
+.modal-content {
+    height: 80vh;
+}
+
+.modal-body {
+    overflow: hidden;
+    height: calc(80vh - 60px); /* Account for header height */
+}
+
+.data-sidebar {
+    width: 280px;
+    min-width: 280px;
+    border-right: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-content {
+    padding: 1rem;
+}
+
+.data-display-area {
+    flex: 1;
+    overflow: auto;
+    min-width: 0; /* Allow flexbox to shrink this area */
+}
+
+.data-display {
+    min-height: 200px;
+    padding: 1rem;
+    width: 100%;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 1200px) {
+    .data-sidebar {
+        width: 250px;
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .modal-xl {
+        max-width: 95vw;
+    }
+    
+    .data-sidebar {
+        width: 200px;
+        min-width: 200px;
+    }
+    
+    .sidebar-content {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-body {
+        flex-direction: column;
+    }
+    
+    .data-sidebar {
+        width: 100%;
+        min-width: unset;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .data-display-area {
+        flex: 1;
+        min-height: 300px;
+    }
+}
+
+/* Better form styling */
+.data-display select,
+.data-display input,
+.sidebar-content select,
+.sidebar-content input {
+    margin: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    width: calc(100% - 0.5rem);
+    box-sizing: border-box;
+}
+
+.data-display label,
+.sidebar-content label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+/* Chart and image improvements */
+.data-display img,
+.viz {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.viz {
+    min-height: 400px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+}
+
+/* Button improvements in sidebar */
+.sidebar-content .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-content .autoload {
+    width: 100%;
+    text-align: left;
+}
+
+/* Loading spinner for charts */
+.chart-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: #6c757d;
+}
+
+.chart-loading::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0d6efd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

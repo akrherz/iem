@@ -1,10 +1,9 @@
-/* global Ext, Date, iemdata */
-Ext.namespace('iemdata');
+/* global Ext, Date */
 
 let defaultnetwork = null;
 let gpanel = null;
 
-iemdata.networks = [
+const networks = [
     ['IA_ASOS', 'Iowa ASOS/AWOS'],
     ['AL_ASOS', 'Alabama ASOS/AWOS'],
     ['AK_ASOS', 'Alaska ASOS/AWOS'],
@@ -78,7 +77,7 @@ Ext.onReady(() => {
         hiddenName: 'network',
         store: new Ext.data.SimpleStore({
             fields: ['abbr', 'name'],
-            data: iemdata.networks
+            data: networks
         }),
         valueField: 'abbr',
         displayField: 'name',
@@ -253,36 +252,53 @@ Ext.onReady(() => {
         autoScroll: true
     });
 
+    // Information panel for sidebar - Rule: Code comments explain functionality
     const tp = new Ext.Panel({
-        contentEl: 'sidebarinfo'
+        html: `<div style="padding: 8px;">
+            <h6>Quick Tips</h6>
+            <ul style="font-size: 12px; margin: 5px 0;">
+                <li>Select network and date/time to load data</li>
+                <li>Enable "Auto Refresh" for real-time updates</li>
+                <li>Times represent the ending period</li>
+                <li>Data updates at the top of each hour</li>
+            </ul>
+        </div>`,
+        border: false
     });
 
-
-    const viewport = new Ext.Viewport({
+    // Main application panel - replaces Viewport for constrained layout
+    // eslint-disable-next-line no-unused-vars
+    const mainPanel = new Ext.Panel({  // skipcq
+        renderTo: 'extjs-container',
         layout: 'border',
+        height: 600,
+        border: true,
         items: [
-            new Ext.BoxComponent({
-                region: 'north',
-                el: 'iem-header',
-                title: 'IEM Hourly Precipitation Accumulator'
-            }),
-            new Ext.BoxComponent({
-                region: 'south',
-                el: 'iem-footer'
-            }),
             {
                 region: 'west',
-                width: 210,
+                width: 220,
                 collapsible: true,
-                title: 'Settings',
-                layoutConfig: {
-                    animate: true
-                },
-                items: [selectform, tp]
+                title: 'Settings & Info',
+                layout: 'fit',
+                items: [
+                    {
+                        xtype: 'panel',
+                        layout: 'accordion',
+                        items: [
+                            {
+                                title: 'Data Chooser',
+                                items: [selectform]
+                            },
+                            {
+                                title: 'Information',
+                                items: [tp]
+                            }
+                        ]
+                    }
+                ]
             },
             gpanel
         ]
     });
-    viewport.linters_are_painful = true;
 
 });
