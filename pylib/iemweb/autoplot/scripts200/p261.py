@@ -2,7 +2,11 @@
 This chart presents a heatmap of the issuance hour of a given NWS Text
 Product.  While data does exist back into the 1980s, the archive quality
 and numerous changes with various products make long term plots a bit
-problematic.
+problematic.  Please do not conflate this plot to represent when the given
+products are active.  For example, a Flash Flood Watch issued at 9 AM and
+valid for a period from 3 PM till 3 PM the next day will only count as one
+at 9 AM.  If you want statistics on when various alerts are active, try
+<a href="/plotting/auto/?p=48">Autoplot 48</a>.
 """
 
 from datetime import date, datetime
@@ -21,6 +25,17 @@ from iemweb.mlib import rectify_wfo
 PDICT = {
     "utc": "UTC",
     "local": "Local Time for Forecast Office",
+}
+PDICT2 = {
+    "single": "Single Product",
+    "c1": "Combined (SVR + TOR + SVS + FFW + FFS)",
+    "c2": "Combined (SVR + TOR)",
+    "c3": "Combined (SVR + TOR + SVS)",
+}
+LOOKUP = {
+    "c1": ["SVR", "TOR", "SVS", "FFW", "FFS"],
+    "c2": ["SVR", "TOR"],
+    "c3": ["SVR", "TOR", "SVS"],
 }
 
 
@@ -51,6 +66,13 @@ def get_description():
             default="DMX",
             label="Select WFO:",
         ),
+        {
+            "type": "select",
+            "name": "agg",
+            "default": "single",
+            "label": "Plot single product or given combination:",
+            "options": PDICT2,
+        },
         {
             "type": "select",
             "name": "pil",
@@ -97,14 +119,19 @@ def plotter(ctx: dict, conn: Connection | None = None):
         "sts": date(ctx["syear"], 1, 1),
         "ets": date(ctx["eyear"], 12, 31),
         "tzname": tzname,
-        "pil": ctx["pil"],
+        "pils": LOOKUP.get(
+            ctx["agg"],
+            [
+                ctx["pil"],
+            ],
+        ),
     }
     countsdf = pd.read_sql(
         sql_helper(
             """
     select extract(week from entered) as week,
     extract(hour from entered at time zone :tzname) as hour,
-    count(*) from products where substr(pil, 1, 3) = :pil and
+    count(*) from products where substr(pil, 1, 3) = ANY(:pils) and
     source = :source and entered >= :sts and entered <= :ets
     group by week, hour order by week, hour
     """
@@ -115,7 +142,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     )
     if countsdf.empty:
         raise NoDataFound(
-            f"No data found for {params['source']} {params['pil']} "
+            f"No data found for {params['source']} {params['pils']} "
             f"between {params['sts']} and {params['ets']}"
         )
     # Reindex the DataFrame to fill out zeros
@@ -123,10 +150,12 @@ def plotter(ctx: dict, conn: Connection | None = None):
         index="hour", columns="week", values="count"
     ).reindex(range(24), columns=range(1, 54), fill_value=np.nan)
 
-    title = (
-        f"Frequency of NWS {ctx['_nt'].sts[wfo]['name']} issued "
-        f"{prodDefinitions[ctx['pil']]}"
+    label = (
+        prodDefinitions[ctx["pil"]]
+        if ctx["agg"] == "single"
+        else PDICT2[ctx["agg"]]
     )
+    title = f"Frequency of NWS {ctx['_nt'].sts[wfo]['name']} issued {label}"
     subtitle = (
         f"{params['sts']} to {params['ets']} in timezone {params['tzname']}"
     )

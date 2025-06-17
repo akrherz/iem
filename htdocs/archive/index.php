@@ -9,6 +9,7 @@ $t->iem_resource = "ARCHIVE";
 $t->title = "Archived Data Resources";
 
 $dllist = $get_iemapps_tags("download");
+$d = date("Y/m/d");
 $t->content = <<<EOM
 <div class="mb-4">
     <h3>Archived Data & Plots</h3>
