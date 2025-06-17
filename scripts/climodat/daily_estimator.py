@@ -202,7 +202,9 @@ def update_database(cursor, table: str, df: pd.DataFrame):
     # Datatypes are important to the database update
     df["high"] = df["high"].astype("Int64")
     df["low"] = df["low"].astype("Int64")
-    df.loc[df["precip"] > 0.009, "precip"] = df["precip"].round(2)
+    # Sometimes we have a series with an object dtype
+    if df["precip"].dtype != "object":
+        df.loc[df["precip"] > 0.009, "precip"] = df["precip"].round(2)
     df["precip_hour"] = df["precip_hour"].astype("Int64")
     df["temp_hour"] = df["temp_hour"].astype("Int64")
 
