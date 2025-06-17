@@ -408,7 +408,7 @@ function popupSBW(feature) {
     const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
     + `<a target="_new" href="${feature.get('href')}">`
     + `${feature.get('ps')} ${feature.get('eventid')}</a>`
-    + `<button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" onclick="closeSBWPopover()"></button>`;
+    + '<button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" onclick="closeSBWPopover()"></button>';
     const geometry = feature.getGeometry();
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);

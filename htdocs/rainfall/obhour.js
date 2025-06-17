@@ -267,7 +267,8 @@ Ext.onReady(() => {
     });
 
     // Main application panel - replaces Viewport for constrained layout
-    new Ext.Panel({
+    // eslint-disable-next-line no-unused-vars
+    const mainPanel = new Ext.Panel({  // skipcq
         renderTo: 'extjs-container',
         layout: 'border',
         height: 600,
