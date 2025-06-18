@@ -1,7 +1,9 @@
 """
 This autoplot generates a calendar showing calendar day Local Storm
 Report totals by NWS Weather Forecast Office (WFO) or State.  The calendar
-date is based on the local timezone of the WFO selected.  The calendar plot
+date is based on the local timezone of the WFO selected or you can select
+a 12 UTC to 12 UTC period of which the plotted date represents the start
+date of that 24 hour period.  The calendar plot
 type only supports up to 12 months plotted at once.
 """
 
@@ -65,6 +67,10 @@ MDICT = {
     "WILDFIRE": "WILDFIRE",
 }
 PDICT2 = {"cwa": "by NWS Forecast Office", "state": "by State"}
+PDICT3 = {
+    "local": "Local Time Zone for WFO",
+    "12z": "12 UTC to 12 UTC Time Period",
+}
 
 
 def get_description():
@@ -87,6 +93,13 @@ def get_description():
             label="End Date (inclusive):",
             min="1986/01/01",
         ),
+        {
+            "type": "select",
+            "name": "daytz",
+            "default": "local",
+            "label": "Calendar Date Time Zone / Period:",
+            "options": PDICT3,
+        },
         dict(
             type="select",
             name="filter",
@@ -144,10 +157,15 @@ def plotter(ctx: dict):
         raise NoDataFound("Chart duration needs to be less than 1 year.")
     wfo = ctx["wfo"]
     state = ctx["state"]
-    params = {}
-    params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
-    params["sts"] = sts - timedelta(days=2)
-    params["ets"] = ets + timedelta(days=2)
+    params = {
+        "tzname": ctx["_nt"].sts[wfo]["tzname"],
+        "sts": sts - timedelta(days=2),
+        "ets": ets + timedelta(days=2),
+        "offset": "",
+    }
+    if ctx["daytz"] == "12z":
+        params["offset"] = " - interval '12 hours' "
+        params["tzname"] = "UTC"
 
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
@@ -194,11 +212,12 @@ def plotter(ctx: dict):
                     from lsrs l where valid >= :sts and valid < :ets {tlimiter}
                     {wfo_limiter}
                 )
-                SELECT date(valid), count(*) from data GROUP by date
+                SELECT date(valid{offset}), count(*) from data GROUP by date
                 ORDER by date ASC
         """,
                 wfo_limiter=wfo_limiter,
                 tlimiter=tlimiter,
+                offset=params["offset"],
             ),
             conn,
             params=params,
@@ -212,6 +231,7 @@ def plotter(ctx: dict):
         now += timedelta(days=1)
     for dt, row in df.iterrows():
         data[dt] = {"val": row["count"]}
+    dd = params["tzname"] if ctx["daytz"] == "local" else "12 UTC to 12 UTC"
     fig = calendar_plot(
         sts,
         ets,
@@ -221,8 +241,8 @@ def plotter(ctx: dict):
         heatmap=(ctx["heatmap"] == "yes"),
         title=f"{title2} :: Preliminary/Unfiltered Local Storm Reports",
         subtitle=(
-            f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} "
-            f"type limiter: {MDICT.get(myfilter)}"
+            f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {dd}. "
+            f"Type limiter: {MDICT.get(myfilter)}"
         ),
     )
     return fig, df
