@@ -221,11 +221,12 @@ async function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, ord
  * Refresh the currently active tab
  */
 function refreshActiveTab() {
-    const activeTab = document.querySelector(".nav-tabs li.active");
-    if (!activeTab) {
+    const activeLink = document.querySelector(".nav-tabs .nav-link.active");
+    if (!activeLink) {
         return;
     }
     
+    const activeTab = activeLink.closest('li');
     const pil = activeTab.dataset.pil;
     const limit = parseInt(activeTab.dataset.limit, 10);
     const center = activeTab.dataset.center;
@@ -238,8 +239,7 @@ function refreshActiveTab() {
         return;
     }
     
-    const tabLink = activeTab.querySelector('a');
-    const tabid = tabLink.getAttribute('href');
+    const tabid = activeLink.getAttribute('href');
     const tabDiv = document.querySelector(tabid);
     
     if (tabDiv) {
@@ -354,11 +354,12 @@ function activateTab(targetTab) {
  * Download button handler
  */
 function dlbtn(btn, fmt) {
-    const activeTab = document.querySelector(".nav-tabs li.active");
-    if (!activeTab) {
+    const activeLink = document.querySelector(".nav-tabs .nav-link.active");
+    if (!activeLink) {
         return;
     }
     
+    const activeTab = activeLink.closest('li');
     const pil = activeTab.dataset.pil;
     if (pil === undefined) {
         return;
@@ -412,16 +413,16 @@ function buildUI() {
     if (printBtn) {
         printBtn.addEventListener('click', (event) => {
             event.target.blur();
-            const activeTab = document.querySelector(".nav-tabs li.active");
-            if (!activeTab) {
+            const activeLink = document.querySelector(".nav-tabs .nav-link.active");
+            if (!activeLink) {
                 return;
             }
+            const activeTab = activeLink.closest('li');
             const pil = activeTab.dataset.pil;
             if (pil === undefined) {
                 return;
             }
-            const tabLink = activeTab.querySelector('a');
-            const tabid = tabLink.getAttribute('href');
+            const tabid = activeLink.getAttribute('href');
             const divToPrint = document.querySelector(tabid);
             
             if (divToPrint) {

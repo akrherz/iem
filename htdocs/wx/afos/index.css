@@ -1,77 +1,42 @@
-/* Used by index.phtml */
+/* Used by index.phtml - Bootstrap 5 compatible */
 .tab-content {
     height: 500px;
     overflow-y: scroll;
 }
 
-.ui-datepicker {
-    z-index: 99999 !important;
-}
-
-.ui-datepicker-month {
-    color: #000 !important;
-}
-
-.ui-datepicker-year {
-    color: #000 !important;
-}
-
-.panel.with-nav-tabs .panel-heading {
-    padding: 5px 5px 0 5px;
-}
-
-.panel.with-nav-tabs .nav-tabs {
+/* Custom styling for AFOS tabs */
+.card-header-tabs {
     border-bottom: none;
-}
-
-.panel.with-nav-tabs .nav-justified {
     margin-bottom: -1px;
 }
 
-/********************************************************************/
-/*** PANEL DEFAULT ***/
-.with-nav-tabs.panel-default .nav-tabs>li>a,
-.with-nav-tabs.panel-default .nav-tabs>li>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>li>a:focus {
-    color: #777;
-}
-
-.with-nav-tabs.panel-default .nav-tabs>.open>a,
-.with-nav-tabs.panel-default .nav-tabs>.open>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>.open>a:focus,
-.with-nav-tabs.panel-default .nav-tabs>li>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>li>a:focus {
-    color: #777;
-    background-color: #ddd;
-    border-color: transparent;
-}
-
-.with-nav-tabs.panel-default .nav-tabs>li.active>a,
-.with-nav-tabs.panel-default .nav-tabs>li.active>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>li.active>a:focus {
-    color: #555;
-    background-color: #fff;
-    border-color: #ddd;
+.card-header-tabs .nav-link {
     border-bottom-color: transparent;
 }
 
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu {
-    background-color: #f5f5f5;
-    border-color: #ddd;
+.card-header-tabs .nav-link.active {
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    color: #495057;
 }
 
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>li>a {
-    color: #777;
+.card-header-tabs .nav-link:hover:not(.active) {
+    border-color: #e9ecef #e9ecef #dee2e6;
 }
 
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>li>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>li>a:focus {
-    background-color: #ddd;
+/* Toolbar styling */
+#thetabs-toolbar {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
 }
 
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>.active>a,
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>.active>a:hover,
-.with-nav-tabs.panel-default .nav-tabs>li.dropdown .dropdown-menu>.active>a:focus {
-    color: #fff;
-    background-color: #555;
+/* Tab content specific styling */
+.tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
