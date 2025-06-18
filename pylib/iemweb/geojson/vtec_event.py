@@ -87,7 +87,8 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     if sbw == 1:
         sql = """
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
-            ST_asGeoJson(l.geom) as geojson
+            ST_asGeoJson(l.geom) as geojson,
+            coalesce(l.product_id, l.product_id_summary) as product_id
             from lsrs l, sbw w WHERE w.vtec_year = %s and
             l.geom && w.geom and ST_contains(w.geom, l.geom)
             and l.wfo = %s and
@@ -107,7 +108,8 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
                 and w.phenomena = %s)
 
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
-            ST_asGeoJson(l.geom) as geojson
+            ST_asGeoJson(l.geom) as geojson,
+            coalesce(l.product_id, l.product_id_summary) as product_id
             from lsrs l, countybased c WHERE
             l.valid >= c.issued and l.valid < c.expired and
             l.wfo = %s ORDER by l.valid ASC
@@ -132,6 +134,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
                     city=row["city"],
                     county=row["county"],
                     remark=row["remark"],
+                    product_id=row["product_id"],
                 ),
                 geometry=json.loads(row["geojson"]),
             )

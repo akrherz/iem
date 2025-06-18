@@ -3,10 +3,11 @@ This application presents a calendar of daily
 counts of the number of watch, warning, advisories issued by day.  This
 accounting is based on the initial issuance date of a given VTEC phenomena
 and significance by event identifier.  So a single Winter Storm Watch
-for 40 zones, would only count as 1 event for this chart.  Dates are
-computed in the local time zone of the issuance forecast office in the
-case of a single office and in Central Time for the case of all offices of
-plotting a given state.
+for 40 zones, would only count as 1 event for this chart. The concept of
+a calendar date needs some explanation.  The calendar date is either
+US Central Time or the time zone of the local NWS Office or a 12 UTC to
+12 UTC time period.  For the 12 UTC case, the date represents the start
+of that 24 hour period.
 
 <p>You can also generate this plot considering "ALL" NWS Offices, when
 doing so the time zone used to compute the calendar dates is US Central.
@@ -30,6 +31,11 @@ PDICT2 = {
     "ugc": "Summaryize by NWS County/Forecast Zone",
     "fema": "Summarize by FEMA Region",
 }
+PDICT3 = {
+    "local": "Local Time Zone for WFO",
+    "central": "US Central Time Zone",
+    "12z": "12 UTC to 12 UTC Time Period",
+}
 
 
 def get_description():
@@ -52,6 +58,13 @@ def get_description():
             label="End Date (inclusive):",
             min="1986/01/01",
         ),
+        {
+            "type": "select",
+            "name": "daytz",
+            "default": "local",
+            "label": "Calendar Date Time Zone / Period:",
+            "options": PDICT3,
+        },
         dict(
             type="select",
             name="w",
@@ -151,8 +164,16 @@ def plotter(ctx: dict):
 
     pstr = []
     title = []
-    params = {}
-    params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
+    params = {
+        "tzname": ctx["_nt"].sts[wfo]["tzname"],
+        "offset": "",
+    }
+    if ctx["daytz"] == "central":
+        params["tzname"] = "America/Chicago"
+    elif ctx["daytz"] == "12z":
+        params["tzname"] = "UTC"
+        params["offset"] = " - interval '12 hours' "
+        ets += timedelta(hours=12)
     params["sts"] = sts - timedelta(days=2)
     params["ets"] = ets + timedelta(days=2)
     for i, (p, s) in enumerate(zip(phenomena, significance, strict=False)):
@@ -205,10 +226,12 @@ def plotter(ctx: dict):
     GROUP by wfo, vtec_year, phenomena, significance, eventid
     )
 
-    SELECT date(localissue), count(*) from events GROUP by date(localissue)
+    SELECT date(localissue{offset}), count(*) from events
+    GROUP by date
         """,
                 pstr=pstr,
                 wfo_limiter=wfo_limiter,
+                offset=params["offset"],
             ),
             conn,
             params=params,
@@ -225,13 +248,16 @@ def plotter(ctx: dict):
     aa = "VTEC Events"
     if len(significance) == 1:
         aa = f"{vtec.get_ps_string(phenomena[0], significance[0])} Count"
+    dd = params["tzname"]
+    if ctx["daytz"] == "12z":
+        dd = "12 UTC to 12 UTC"
     fig = calendar_plot(
         sts,
         ets,
         data,
         apctx=ctx,
         heatmap=(ctx["heatmap"] == "yes"),
-        title=f"{aa} for {title2} by Local Calendar Date",
+        title=f"{aa} for {title2} by {dd} Date",
         subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {title}",
     )
     return fig, df
