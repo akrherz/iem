@@ -23,6 +23,9 @@ from pyiem.webutil import ensure_list, iemapp
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
 
+sn_contig = state_names.copy()
+for _sn in "AK HI PR VI GU AS MP".split():
+    sn_contig.pop(_sn, None)
 HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
@@ -594,7 +597,8 @@ def generate_form(apid, fdict, headers, cookies):
         elif arg["type"] == "vtec_ps":
             form = vtec_ps_handler(fdict, arg)
         elif arg["type"] == "state":
-            form = make_select(arg["name"], value, state_names)
+            sn = state_names if arg.get("contiguous") is None else sn_contig
+            form = make_select(arg["name"], value, sn)
         elif arg["type"] == "csector":
             set_cookie(cookies, headers, arg["name"], value)
             form = make_select(arg["name"], value, CSECTORS, showvalue=False)
