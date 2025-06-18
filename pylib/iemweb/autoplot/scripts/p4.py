@@ -4,7 +4,7 @@ precipitation.  This chart presents the areal coverage of some trailing
 number of days precipitation for a state of your choice.  This application
 does not properly account for the trailing period of precipitation during
 the first few days of January.  This application only works for contiguous
-states eventhough it presents states like AK and HI as an option, sorry.
+states.
 """
 
 import os
@@ -45,7 +45,13 @@ def get_description():
         dict(
             type="int", name="period", default="7", label="Over Period of Days"
         ),
-        dict(type="state", name="state", default="IA", label="For State"),
+        {
+            "type": "state",
+            "name": "state",
+            "default": "IA",
+            "label": "For Contiguous US State Only:",
+            "contiguous": True,
+        },
     ]
     return desc
 
@@ -67,7 +73,7 @@ def plotter(ctx: dict):
             params={"abbr": state},
             index_col="state_abbr",
             geom_col="the_geom",
-        )
+        )  # type: ignore
 
     ncfn = get_daily_ncname(year)
     if not os.path.isfile(ncfn):
@@ -114,12 +120,15 @@ def plotter(ctx: dict):
 
     title = (
         f"{year} IEM Estimated Areal "
-        f"Coverage Percent of {reference.state_names[state]}\n"
-        f" receiving {threshold:.2f} inches of rain over "
-        f"trailing {period} day period"
+        f"Coverage Percentage of {reference.state_names[state]}"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
-    ax.bar(days, coverage, fc="g", ec="g")
+    subtitle = (
+        f"Receiving {threshold:.2f} inches of precip over "
+        f"trailing {period} day period from {days[0]} to {days[-1]}"
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
+    ax.bar(days, coverage, fc="g", ec="g", align="center")
+    ax.set_xlim(days[0] - timedelta(days=1), days[-1] + timedelta(days=1))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%-d"))
     ax.set_yticks(range(0, 101, 25))
