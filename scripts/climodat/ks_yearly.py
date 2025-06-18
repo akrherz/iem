@@ -96,9 +96,11 @@ def main():
     fn = "/mesonet/share/climodat/ks/yearly.csv"
     with open(fn, "w", encoding="ascii") as fp:
         fp.write("stationID,stationName,Latitude,Longitude,")
-        for i in range(1893, ENDYEAR):
-            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
-                fp.write(f"{i:02.0f}_{v},")
+        fp.writelines(
+            f"{i:02.0f}_{v},"
+            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]
+            for i in range(1893, ENDYEAR)
+        )
         fp.write("CYR_MINT,CYR_MAXT,CYR_PREC,CYR_GDD50,CYR_SDD86,\n")
         for sid in keys:
             metadata(nt, sid, fp)

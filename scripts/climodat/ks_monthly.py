@@ -127,9 +127,11 @@ def main(yr):
     fn = f"{mydir}/{yr}_monthly.csv"
     with open(fn, "w", encoding="utf-8") as fh:  # skipcq
         fh.write("stationID,stationName,Latitude,Longitude,")
-        for i in range(1, 13):
-            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
-                fh.write(f"{i:02.0f}_{v},C{i:02.0f}_{v},")
+        fh.writelines(
+            f"{i:02.0f}_{v},C{i:02.0f}_{v},"
+            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]
+            for i in range(1, 13)
+        )
         fh.write(
             f"{yr}_MINT,CYR_MINT,{yr}_MAXT,CYR_MAXT,{yr}_PREC,CYR_PREC,"
             f"{yr}_GDD50,CYR_GDD50,{yr}_SDD86,CYR_SDD86\n"

@@ -26,8 +26,10 @@ def main():
     with open("/mesonet/data/iemplot/altm.txt", "w") as fh:
         fh.write(" PARM = ALTM\n\n    STN    YYMMDD/HHMM      ALTM\n")
 
-        for sid, row in df.iterrows():
-            fh.write(f"   {sid:4s}    {ts}  {row['altm']:8.2f}\n")
+        fh.writelines(
+            f"   {sid:4s}    {ts}  {row['altm']:8.2f}\n"
+            for sid, row in df.iterrows()
+        )
 
 
 if __name__ == "__main__":

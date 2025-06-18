@@ -44,15 +44,13 @@ def init_files(page, huc12s):
             minv = huc12s["swat"].min()
             maxv = huc12s["swat"].max()
             assert ((maxv - minv) + 1) == len(huc12s.index)
-            for i in range(minv, maxv + 1):
-                fh.write(f"{i:>5}")
+            fh.writelines(f"{i:>5}" for i in range(minv, maxv + 1))
             fh.write("\n")
             # two empty lines
             fh.write("\n\n")
             # 0 eelvation
             fh.write("Elev   ")
-            for _i in range(minv, maxv + 1):
-                fh.write(f"{0:>5}")
+            fh.writelines(f"{0:>5}" for _i in range(minv, maxv + 1))
             fh.write("\n")
 
 
