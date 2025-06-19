@@ -1,6 +1,6 @@
 <?php
 // Main landing page for the IEM Sites stuff
-$OL = "10.6.0";
+$OL = "10.6.1";
 define("IEM_APPID", 5);
 require_once "../../include/forms.php";
 if (isset($_GET["station"]) && isset($_GET["network"])) {

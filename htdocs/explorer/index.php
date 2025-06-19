@@ -2,7 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 138);
 require_once "../../include/myview.php";
-$OL = "10.6.0";
+$OL = "10.6.1";
 $t = new MyView();
 $t->title = "IEM Explorer";
 $t->headextra = <<<EOM
