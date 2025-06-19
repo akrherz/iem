@@ -47,11 +47,12 @@ $publicjsonuri = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $jsonuri);
 
 $t->title = $title;
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
-<script type="text/javascript" src="/vendor/ext/ux/TableGrid.js"></script>
-<script src="list_tags.js"></script>
+<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="list_tags.css" rel="stylesheet">
+EOM;
+
+$t->jsextra = <<<EOM
+<script src="list_tags.module.js" type="module"></script>
 EOM;
 
 
@@ -146,16 +147,16 @@ function do_row_ffw($row)
 }
 
 $svrtable = <<<EOM
- <table id='svr' class="table table-sm table-striped table-bordered">
+ <table id='svr-table' class="table table-sm table-striped table-bordered">
  <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOM;
-$tortable = str_replace('svr', 'tor', $svrtable);
+$tortable = str_replace('svr-table', 'tor-table', $svrtable);
 $smwtable = <<<EOM
- <table id='svr' class="table table-sm table-striped table-bordered">
+ <table id='smw-table' class="table table-sm table-striped table-bordered">
  <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Waterspout Tag</th>
@@ -163,7 +164,7 @@ $smwtable = <<<EOM
  <tbody>
 EOM;
 $ffwtable = <<<EOM
- <table id='ffw' class="table table-sm table-striped table-bordered">
+ <table id='ffw-table' class="table table-sm table-striped table-bordered">
  <thead class="sticky"><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Flash Flood Tag</th><th>Damage Tag</th>
@@ -175,17 +176,143 @@ EOM;
 $data = file_get_contents($jsonuri);
 $json = json_decode($data, $assoc = TRUE);
 
+// Enhanced bean counting to track all tag types and prevent double counting
+$counts = [
+    "SV" => [
+        "events" => [],
+        "tags" => [
+            "windtag" => [],
+            "hailtag" => [],
+            "tornadotag" => [],
+            "damagetag" => []
+        ]
+    ],
+    "TO" => [
+        "events" => [],
+        "tags" => [
+            "windtag" => [],
+            "hailtag" => [],
+            "tornadotag" => [],
+            "damagetag" => []
+        ]
+    ],
+    "MA" => [
+        "events" => [],  
+        "tags" => [
+            "windtag" => [],
+            "hailtag" => [],
+            "waterspouttag" => []
+        ]
+    ],
+    "FF" => [
+        "events" => [],
+        "tags" => [
+            "floodtag_flashflood" => [],
+            "floodtag_damage" => [],
+            "floodtag_heavyrain" => [],
+            "floodtag_dam" => [],
+            "floodtag_leeve" => []
+        ]
+    ]
+];
+
+// Process each warning record
 foreach ($json['results'] as $key => $val) {
-    if ($val["phenomena"] == 'SV') {
+    $ph = $val["phenomena"];
+    $eventid = $val["eventid"];
+    
+    // Track unique events per phenomena type
+    $counts[$ph]["events"][$eventid] = 1;
+    
+    // Track tag usage per event (prevents double counting when same event has multiple records)
+    foreach ($counts[$ph]["tags"] as $tagName => $tagCounts) {
+        if (isset($val[$tagName]) && $val[$tagName] !== null && $val[$tagName] !== '') {
+            $tagValue = (string)$val[$tagName];
+            // Initialize tag value array if doesn't exist
+            if (!isset($counts[$ph]["tags"][$tagName][$tagValue])) {
+                $counts[$ph]["tags"][$tagName][$tagValue] = [];
+            }
+            
+            // Only count once per event (prevents double counting)
+            $counts[$ph]["tags"][$tagName][$tagValue][$eventid] = 1;
+        }
+    }
+
+    // Build the table rows
+    if ($ph == 'SV') {
         $svrtable .= do_row($val);
-    } elseif ($val["phenomena"] == 'TO') {
+    } elseif ($ph == 'TO') {
         $tortable .= do_row($val);
-    } elseif ($val["phenomena"] == 'MA') {
+    } elseif ($ph == 'MA') {
         $smwtable .= do_row_ma($val);
     } else {
         $ffwtable .= do_row_ffw($val);
     }
 }
+
+// Function to generate statistics summary
+function generateStatsSummary($counts) {
+    $phenomena_names = [
+        "SV" => "Severe Thunderstorm",
+        "TO" => "Tornado", 
+        "MA" => "Marine",
+        "FF" => "Flash Flood"
+    ];
+    
+    $tag_labels = [
+        "windtag" => "Wind Tag",
+        "hailtag" => "Hail Tag", 
+        "tornadotag" => "Tornado Tag",
+        "damagetag" => "Damage Tag",
+        "waterspouttag" => "Waterspout Tag",
+        "floodtag_flashflood" => "Flash Flood Tag",
+        "floodtag_damage" => "Flood Damage Tag",
+        "floodtag_heavyrain" => "Heavy Rain Tag",
+        "floodtag_dam" => "Dam Tag",
+        "floodtag_leeve" => "Levee Tag"
+    ];
+    
+    $summary = [];
+    
+    foreach ($counts as $phenomena => $data) {
+        $totalEvents = count($data["events"]);
+        $phenName = $phenomena_names[$phenomena] ?? $phenomena;
+        
+        if ($totalEvents > 0) {
+            $summary[$phenomena] = [
+                "name" => $phenName,
+                "total_events" => $totalEvents,
+                "tags" => []
+            ];
+            
+            foreach ($data["tags"] as $tagName => $tagValues) {
+                if (!empty($tagValues)) {
+                    $tagLabel = $tag_labels[$tagName] ?? $tagName;
+                    $tagStats = [];
+                    
+                    // Calculate percentage for each individual tag value
+                    foreach ($tagValues as $tagValue => $events) {
+                        $eventCount = count($events);
+                        $percentage = round(($eventCount / $totalEvents) * 100, 1);
+                        $tagStats[$tagValue] = [
+                            "count" => $eventCount,
+                            "percentage" => $percentage
+                        ];
+                    }
+                    
+                    $summary[$phenomena]["tags"][$tagName] = [
+                        "label" => $tagLabel,
+                        "values" => $tagStats
+                    ];
+                }
+            }
+        }
+    }
+    
+    return $summary;
+}
+
+$statsummary = generateStatsSummary($counts);
 
 $svrtable .= "</tbody></table>";
 $tortable .= "</tbody></table>";
@@ -199,78 +326,277 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $gentime = $json["gentime"];
 
 $t->content = <<<EOM
- <nav aria-label="breadcrumb">
-     <ol class="breadcrumb">
-         <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
-         <li class="breadcrumb-item active" aria-current="page">List Warning Tags Issued</li>
-     </ol>
- </nav>
- 
- <p>This application lists out Flash Flood, Marine, Severe Thunderstorm,
- and Tornado Warnings
- issued by the National Weather Service for a given year.  The listing
- includes metadata tags included in the initial warning or followup statements. 
- <strong>IMPORTANT: Not all offices include these tags in their warnings!</strong>
- For convience, this application lists out warnings back to 2002 eventhough
- these tags did not start until recent years. You should be able to copy/paste
- these tables into Microsoft Excel prior to making the table sortable!</p>
- 
- <form method="GET" name="one">
- <div class="row">
-     <div class="col-12">
-         <div class="card mb-3">
+ <div class="container-fluid">
+     <nav aria-label="breadcrumb">
+         <ol class="breadcrumb">
+             <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+             <li class="breadcrumb-item active" aria-current="page">List Warning Tags Issued</li>
+         </ol>
+     </nav>
+     
+     <div class="row">
+         <div class="col-12">
+             <div class="alert alert-info d-flex align-items-start" role="alert">
+                 <i class="bi bi-info-circle-fill me-2 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                 <div>
+                     <strong>About This Application:</strong> This tool lists Flash Flood, Marine, Severe Thunderstorm,
+                     and Tornado Warnings issued by the National Weather Service for a given year, including metadata tags 
+                     from initial warnings or followup statements.
+                     <br><strong>Important:</strong> Not all offices include these tags in their warnings! 
+                     Data goes back to 2002, though tags weren't used until recent years.
+                 </div>
+             </div>
+         </div>
+     </div>
+     
+     <form method="GET" name="one" class="mb-4">
+         <div class="card">
+             <div class="card-header bg-light">
+                 <h5 class="card-title mb-0">
+                     <i class="bi bi-funnel-fill me-2"></i>Filter Options
+                 </h5>
+             </div>
              <div class="card-body">
-                 <div class="row">
-                     <div class="col-sm-6">
-                         <div class="form-check mb-2">
-                             <input type="radio" name="opt" value="bywfo" id="bywfo" class="form-check-input" {$bywfochecked}> 
-                             <label for="bywfo" class="form-check-label">Select by WFO:</label>
-                         </div>
-                         <div class="mb-3">{$wselect}</div>
+                 <div class="row g-3">
+                     <div class="col-lg-4">
+                         <fieldset class="border rounded p-3 h-100">
+                             <legend class="fs-6 fw-bold text-primary">Search Criteria</legend>
+                             
+                             <div class="form-check mb-3">
+                                 <input type="radio" name="opt" value="bywfo" id="bywfo" 
+                                        class="form-check-input" {$bywfochecked}> 
+                                 <label for="bywfo" class="form-check-label fw-medium">
+                                     <i class="bi bi-geo-alt-fill me-1"></i>By Weather Forecast Office (WFO)
+                                 </label>
+                             </div>
+                             <div class="mb-3 ms-4">
+                                 <label for="wfo" class="form-label visually-hidden">Select WFO</label>
+                                 {$wselect}
+                             </div>
 
-                         <div class="form-check mb-2">
-                             <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" class="form-check-input" {$bydamagetagchecked}> 
-                             <label for="bydamagetag" class="form-check-label">Select by Damage Tag:</label>
+                             <div class="form-check mb-3">
+                                 <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" 
+                                        class="form-check-input" {$bydamagetagchecked}> 
+                                 <label for="bydamagetag" class="form-check-label fw-medium">
+                                     <i class="bi bi-exclamation-triangle-fill me-1"></i>By Damage Tag Level
+                                 </label>
+                             </div>
+                             <div class="mb-3 ms-4">
+                                 <label for="damagetag" class="form-label visually-hidden">Select Damage Tag</label>
+                                 {$tselect}
+                             </div>
+                         </fieldset>
+                     </div>
+                     
+                     <div class="col-lg-3">
+                         <fieldset class="border rounded p-3 h-100">
+                             <legend class="fs-6 fw-bold text-primary">Time Period</legend>
+                             <label for="year" class="form-label fw-medium">
+                                 <i class="bi bi-calendar3 me-1"></i>Select Year:
+                             </label>
+                             {$yselect}
+                         </fieldset>
+                     </div>
+                     
+                     <div class="col-lg-2 d-flex align-items-end">
+                         <button type="submit" class="btn btn-primary btn-lg w-100">
+                             <i class="bi bi-search me-2"></i>Generate Report
+                         </button>
+                     </div>
+                     
+                     <div class="col-lg-3">
+                         <div class="card bg-light h-100">
+                             <div class="card-body">
+                                 <h6 class="card-title">
+                                     <i class="bi bi-download me-1"></i>Data Access
+                                 </h6>
+                                 <p class="card-text small mb-2">
+                                     JSON webservice available at:
+                                 </p>
+                                 <code class="small text-break">{$publicjsonuri}</code>
+                                 <div class="mt-2">
+                                     <a href="/json/" class="btn btn-outline-secondary btn-sm">
+                                         <i class="bi bi-info-circle me-1"></i>API Docs
+                                     </a>
+                                 </div>
+                             </div>
                          </div>
-                         <div class="mb-3">{$tselect}</div>
                      </div>
-                     <div class="col-sm-4">
-                         <label class="form-label"><strong>Select Year:</strong></label>
-                         <div class="mb-3">{$yselect}</div>
+                 </div>
+             </div>
+         </div>
+     </form>
+     
+     <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+         <i class="bi bi-clock-fill me-2 flex-shrink-0"></i>
+         <div>
+             <strong>Data Generation:</strong> Based on data generated at <code>{$json["generated_at"]}</code>. 
+             Tables are cached for approximately one hour - check back later for updated values.
+         </div>
+     </div>
+
+     <!-- Statistics Summary -->
+     <div class="row mb-4">
+         <div class="col-12">
+             <div class="card">
+                 <div class="card-header bg-light">
+                     <h5 class="card-title mb-0">
+                         <i class="bi bi-bar-chart-fill me-2"></i>Warning Tag Statistics Summary
+                     </h5>
+                 </div>
+                 <div class="card-body">
+                     <div class="row g-3">
+    <p>This table summarizes the tag counts by considering each warning's lifecycle
+    and tries to avoid double counting.  For example, a CONSIDERABLE damage tag
+    used anywhere in the lifecycle would count as 1 event for that tag. This
+    also means that the shown percentages will sometimes add up to a value
+    greater than 100%, since tags update with the product lifecycle.</p>
+EOM;
+
+foreach ($statsummary as $phenomena => $stats) {
+    $t->content .= <<<EOM
+                         <div class="col-md-6 col-lg-3">
+                             <div class="card h-100 border-secondary">
+                                 <div class="card-header bg-secondary text-white">
+                                     <h6 class="card-title mb-0">{$stats['name']} Warnings</h6>
+                                 </div>
+                                 <div class="card-body">
+                                     <div class="mb-2">
+                                         <strong>Total Events:</strong> <span class="badge bg-primary">{$stats['total_events']}</span>
+                                     </div>
+EOM;
+    
+    foreach ($stats['tags'] as $tagName => $tagData) {
+        $t->content .= <<<EOM
+                                     <div class="mb-3">
+                                         <small class="text-muted fw-bold">{$tagData['label']}:</small>
+                                         <table class="table table-sm table-striped mt-1">
+                                             <thead>
+                                                 <tr>
+                                                     <th>Value</th>
+                                                     <th>Count</th>
+                                                     <th>%</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody>
+EOM;
+        
+        // Show individual tag values with their counts and percentages in table rows
+        foreach ($tagData['values'] as $value => $valueData) {
+            $t->content .= <<<EOM
+                                                 <tr>
+                                                     <td><code>{$value}</code></td>
+                                                     <td>{$valueData['count']}</td>
+                                                     <td>{$valueData['percentage']}%</td>
+                                                 </tr>
+EOM;
+        }
+        
+        $t->content .= <<<EOM
+                                             </tbody>
+                                         </table>
+                                     </div>
+EOM;
+    }
+    
+    $t->content .= <<<EOM
+                                 </div>
+                             </div>
+                         </div>
+EOM;
+}
+
+$t->content .= <<<EOM
                      </div>
-                     <div class="col-sm-2 d-flex align-items-end">
-                         <input type="submit" value="Generate Table" class="btn btn-primary">
+                 </div>
+             </div>
+         </div>
+     </div>
+
+ <div class="warning-tables">
+     <div class="row g-4">
+         <div class="col-lg-6">
+             <div class="card h-100">
+                 <div class="card-header bg-danger text-white d-flex align-items-center">
+                     <i class="bi bi-tornado me-2" style="font-size: 1.5rem;"></i>
+                     <h4 class="mb-0">Tornado Warnings</h4>
+                 </div>
+                 <div class="card-body">
+                     <p class="card-text text-muted mb-3">
+                         Tornado warnings with associated impact-based warning tags and damage assessments.
+                     </p>
+                     <button id="create-grid-tor" class="btn btn-danger mb-3" type="button">
+                         <i class="bi bi-table me-2"></i>Enable Interactive Table
+                     </button>
+                     <div class="table-responsive">
+                         {$tortable}
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+         <div class="col-lg-6">
+             <div class="card h-100">
+                 <div class="card-header bg-warning text-dark d-flex align-items-center">
+                     <i class="bi bi-lightning-fill me-2" style="font-size: 1.5rem;"></i>
+                     <h4 class="mb-0">Severe Thunderstorm Warnings</h4>
+                 </div>
+                 <div class="card-body">
+                     <p class="card-text text-muted mb-3">
+                         Severe thunderstorm warnings including wind, hail, and tornado tags with storm speed data.
+                     </p>
+                     <button id="create-grid-svr" class="btn btn-warning mb-3" type="button">
+                         <i class="bi bi-table me-2"></i>Enable Interactive Table
+                     </button>
+                     <div class="table-responsive">
+                         {$svrtable}
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+         <div class="col-lg-6">
+             <div class="card h-100">
+                 <div class="card-header bg-info text-white d-flex align-items-center">
+                     <i class="bi bi-water me-2" style="font-size: 1.5rem;"></i>
+                     <h4 class="mb-0">Flash Flood Warnings</h4>
+                 </div>
+                 <div class="card-body">
+                     <p class="card-text text-muted mb-3">
+                         Flash flood warnings with flood impact tags, heavy rain indicators, and infrastructure threats.
+                     </p>
+                     <button id="create-grid-ffw" class="btn btn-info mb-3" type="button">
+                         <i class="bi bi-table me-2"></i>Enable Interactive Table
+                     </button>
+                     <div class="table-responsive">
+                         {$ffwtable}
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+         <div class="col-lg-6">
+             <div class="card h-100">
+                 <div class="card-header bg-primary text-white d-flex align-items-center">
+                     <i class="bi bi-water me-2" style="font-size: 1.5rem;"></i>
+                     <h4 class="mb-0">Marine Warnings</h4>
+                 </div>
+                 <div class="card-body">
+                     <p class="card-text text-muted mb-3">
+                         Marine weather warnings including wind, hail, and waterspout tags for coastal and offshore areas.
+                     </p>
+                     <button id="create-grid-smw" class="btn btn-primary mb-3" type="button">
+                         <i class="bi bi-table me-2"></i>Enable Interactive Table
+                     </button>
+                     <div class="table-responsive">
+                         {$smwtable}
                      </div>
                  </div>
              </div>
          </div>
      </div>
  </div>
- </form>
- 
- <div class="alert alert-info">There is a <a href="/json/">JSON-P webservice</a>
- that provides the data found in this table.  The direct URL is:<br />
- <code>{$publicjsonuri}</code></div>
- 
- <p><strong>This table is based on data generated at: <code>{$json["generated_at"]}</code>.  There is about
- an hour worth of caching involved with this page, so please check back later for updated
- values.</p>
-
- <h3>Tornado Warnings</h3>
- <button id="create-grid2" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
- {$tortable}
-
- <h3>Severe Thunderstorm Warnings</h3>
-<button id="create-grid1" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
-{$svrtable}
-
-<h3>Flash Flood Warnings</h3>
-<button id="create-grid3" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
-{$ffwtable}
-
-<h3>Marine Warnings</h3>
-<button id="create-grid4" class="btn btn-info mb-2" type="button">Make Table Sortable</button>
-{$smwtable}
+ </div>
 
 EOM;
 $t->render('full.phtml');
