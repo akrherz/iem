@@ -1,4 +1,54 @@
-/* global iemdata, ol, $, olSelectLonLat */
+/* global iemdata, ol, olSelectLonLat, Tabulator */
+
+// URL parameter management functions - removing hash linking approach
+function getURLParams() {
+    return new URLSearchParams(window.location.search);
+}
+
+function updateURL(params) {
+    const url = new URL(window.location);
+    url.search = params.toString();
+    window.history.replaceState({}, '', url);
+}
+
+// Clean URL parameters to only include those relevant to the current mode
+function setModeParams(mode, newParams = {}) {
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+    
+    // Add only relevant parameters for each mode
+    switch (mode) {
+        case 'bypoint':
+            if (newParams.lon) params.set('lon', newParams.lon);
+            if (newParams.lat) params.set('lat', newParams.lat);
+            if (newParams.buffer) params.set('buffer', newParams.buffer);
+            if (newParams.sdate1) params.set('sdate1', newParams.sdate1);
+            if (newParams.edate1) params.set('edate1', newParams.edate1);
+            break;
+            
+        case 'byugc':
+        case 'eventsbypoint':
+            if (newParams.state) params.set('state', newParams.state);
+            if (newParams.ugc) params.set('ugc', newParams.ugc);
+            if (newParams.lon) params.set('lon', newParams.lon);
+            if (newParams.lat) params.set('lat', newParams.lat);
+            if (newParams.buffer) params.set('buffer', newParams.buffer);
+            if (newParams.sdate) params.set('sdate', newParams.sdate);
+            if (newParams.edate) params.set('edate', newParams.edate);
+            break;
+            
+        case 'list':
+            if (newParams.by) params.set('by', newParams.by);
+            if (newParams.datum) params.set('datum', newParams.datum);
+            if (newParams.year) params.set('year', newParams.year);
+            if (newParams.phenomena) params.set('phenomena', newParams.phenomena);
+            if (newParams.significance) params.set('significance', newParams.significance);
+            break;
+    }
+    
+    updateURL(params);
+}
+
 let stateSelect = null;
 let stateSelect3 = null;
 let ugcSelect = null;
@@ -6,7 +56,6 @@ let table1 = null;
 let table2 = null;
 let table3 = null;
 let table2IsByPoint = true;
-let hashlinkUGC = null;
 let marker1 = null;
 let marker2 = null;
 let edate = null;
@@ -20,7 +69,7 @@ const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
 const BACKEND_EVENTS = "/json/vtec_events.py";
 const BACKEND_EVENTS_BYSTATE = "/json/vtec_events_bystate.py";
-const DATE_FMT = "yy-mm-dd";
+
 
 const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
@@ -73,298 +122,717 @@ function escapeHTML(val) {
               .replace(/'/g, '&#039;');
 }
 
+/**
+ * Format date for API calls - works with native HTML date inputs
+ * @param {HTMLInputElement} dateInput - Native date input element
+ * @returns {string} formatted date string (YYYY-MM-DD)
+ */
+function formatDatePicker(dateInput) {
+    if (dateInput?.value) {
+        return dateInput.value; // Native date inputs already return YYYY-MM-DD format
+    }
+    // Fallback to current date
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 function updateMarkerPosition(lon, lat) {
-    $("#lat").val(lat.toFixed(4));
-    $("#lon").val(lon.toFixed(4));
-    const buffer = parseFloat($('select[name="buffer"]').val());
-    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}/${buffer.toFixed(2)}`;
+    document.getElementById("lat").value = lat.toFixed(4);
+    document.getElementById("lon").value = lon.toFixed(4);
+    const buffer = parseFloat(document.querySelector('select[name="buffer"]').value);
+    const sdate1Value = document.getElementById("sdate1").value;
+    const edate1Value = document.getElementById("edate1").value;
+    // Set clean URL parameters for this mode only
+    setModeParams('bypoint', {
+        lon: lon.toFixed(4),
+        lat: lat.toFixed(4),
+        buffer: buffer.toFixed(2),
+        sdate1: sdate1Value,
+        edate1: edate1Value
+    });
     updateTable();
 }
 function updateMarkerPosition2(lon, lat) {
-    $("#lat2").val(lat.toFixed(4));
-    $("#lon2").val(lon.toFixed(4));
-    const buffer = parseFloat($('select[name="buffer2"]').val());
-    window.location.href = `#eventsbypoint/${lon.toFixed(4)}/${lat.toFixed(4)}/${buffer.toFixed(2)}`;
+    document.getElementById("lat2").value = lat.toFixed(4);
+    document.getElementById("lon2").value = lon.toFixed(4);
+    const buffer = parseFloat(document.querySelector('select[name="buffer2"]').value);
+    // Set clean URL parameters for this mode only
+    setModeParams('eventsbypoint', {
+        lon: lon.toFixed(4),
+        lat: lat.toFixed(4),
+        buffer: buffer.toFixed(2)
+    });
     updateTable2ByPoint();
 }
 function updateTable(){
-    const buffer = parseFloat($('select[name="buffer"]').val());
-    let title = `Storm Based Warnings for Point: ${$("#lon").val()}E ${$("#lat").val()}N`;
+    const buffer = parseFloat(document.querySelector('select[name="buffer"]').value);
+    let title = `Storm Based Warnings for Point: ${document.getElementById("lon").value}E ${document.getElementById("lat").value}N`;
     if (buffer > 0){
         title += ` with ${buffer} degree buffer`;
     }
-    $("#table1title").text(title);
+    document.getElementById("table1title").textContent = title;
     // Do what we need to for table 1
-    $.ajax({
-        data: {
-            lat: $("#lat").val(),
-            lon: $("#lon").val(),
-            buffer,
-            sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
-            edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
-        },
-        url: BACKEND_SBW_BYPOINT,
-        dataType: "json",
-        method: "GET",
-        success: (data) => {
-            table1.clear();
-            $.map(data.sbws, (row) => {
-                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
-                table1.row.add(
-                    [uri, row.ph_name, row.sig_name, row.issue,
-                    row.expire, row.issue_hailtag, row.issue_windtag,
-                    row.issue_tornadotag, row.issue_damagetag]);
-            });
-            table1.draw();
-        }
+    fetch(BACKEND_SBW_BYPOINT + '?' + new URLSearchParams({
+        lat: document.getElementById("lat").value,
+        lon: document.getElementById("lon").value,
+        buffer,
+        sdate: formatDatePicker(sdate1),
+        edate: formatDatePicker(edate1)
+    }))
+    .then(response => response.json())
+    .then(data => {
+        const tableData = data.sbws.map(row => ({
+            event: `<a href="${row.url}" target="_blank">${row.eventid}</a>`,
+            phenomena: row.ph_name,
+            significance: row.sig_name,
+            phenomena_code: row.phenomena || '',
+            significance_code: row.significance || '',
+            issued: row.issue,
+            expired: row.expire,
+            issue_hailtag: row.issue_hailtag,
+            issue_windtag: row.issue_windtag,
+            issue_tornadotag: row.issue_tornadotag,
+            issue_damagetag: row.issue_damagetag
+        }));
+        table1.setData(tableData);
+        // Update phenomena summary
+        createPhenomenaSummary(tableData, 'table1title');
+        // Update toolbar count
+        updateTableToolbar('table1title', tableData);
+        // Update table toolbar with record count
+        updateTableToolbar('table1title', tableData);
+    })
+    .catch(() => {
+        // Handle error silently
     });
 }
 
 function updateTable2ByUGC(){
     table2IsByPoint = false;
-    $("#table2title").text(`Events for UGC: ${ugcSelect.val()}`);
+    document.getElementById("table2title").textContent = `Events for UGC: ${ugcSelect.value}`;
+    
+    // Set clean URL parameters for this mode only
+    setModeParams('byugc', { 
+        state: stateSelect.value,
+        ugc: ugcSelect.value,
+        sdate: sdate.value,
+        edate: edate.value
+    });
+    
     // Do what we need to for table 2
-    $.ajax({
-        data: {
-            ugc: ugcSelect.val(),
-            sdate: $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"))
-        },
-        url: BACKEND_EVENTS_BYUGC,
-        dataType: "json",
-        method: "GET",
-        success: (data) => {
-            table2.clear();
-            $.map(data.events, (row) => {
-                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
-                table2.row.add(
-                    [uri, row.ph_name, row.sig_name, row.issue, row.expire]);
-            });
-            table2.draw();
-        }
+    fetch(BACKEND_EVENTS_BYUGC + '?' + new URLSearchParams({
+        ugc: ugcSelect.value,
+        sdate: formatDatePicker(sdate),
+        edate: formatDatePicker(edate)
+    }))
+    .then(response => response.json())
+    .then(data => {
+        const tableData = data.events.map(row => ({
+            event: `<a href="${row.url}" target="_blank">${row.eventid}</a>`,
+            phenomena: row.ph_name,
+            significance: row.sig_name,
+            phenomena_code: row.phenomena || '',
+            significance_code: row.significance || '',
+            issued: row.issue,
+            expired: row.expire
+        }));
+        table2.setData(tableData);
+        // Update phenomena summary
+        createPhenomenaSummary(tableData, 'table2title');
+        // Update table toolbar with record count
+        updateTableToolbar('table2title', tableData);
+    })
+    .catch(() => {
+        // Handle error silently
     });
 }
 
 function updateTable2ByPoint(){
-    const buffer = parseFloat($('select[name="buffer2"]').val());
+    const buffer = parseFloat(document.querySelector('select[name="buffer2"]').value);
     table2IsByPoint = true;
-    let title = `Events for Point: ${$("#lon2").val()}E ${$("#lat2").val()}N`;
+    let title = `Events for Point: ${document.getElementById("lon2").value}E ${document.getElementById("lat2").value}N`;
     if (buffer > 0){
         title += ` with ${buffer} degree buffer`;
     }
-    $("#table2title").text(title);
+    document.getElementById("table2title").textContent = title;
+    
+    // Set clean URL parameters for this mode only
+    setModeParams('byugc', { 
+        lat: document.getElementById("lat2").value,
+        lon: document.getElementById("lon2").value,
+        buffer: buffer.toString(),
+        sdate: sdate.value,
+        edate: edate.value
+    });
+    
     // Do what we need to for table 2
-    $.ajax({
-        data: {
-            lat: $("#lat2").val(),
-            lon: $("#lon2").val(),
-            buffer,
-            sdate: $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"))
-        },
-        url: BACKEND_EVENTS_BYPOINT,
-        dataType: "json",
-        method: "GET",
-        success: (data) => {
-            table2.clear();
-            $.map(data.events, (row) => {
-                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
-                table2.row.add(
-                    [uri, row.ph_name, row.sig_name, row.issue, row.expire]);
-            });
-            table2.draw();
-        }
+    fetch(BACKEND_EVENTS_BYPOINT + '?' + new URLSearchParams({
+        lat: document.getElementById("lat2").value,
+        lon: document.getElementById("lon2").value,
+        buffer,
+        sdate: formatDatePicker(sdate),
+        edate: formatDatePicker(edate)
+    }))
+    .then(response => response.json())
+    .then(data => {
+        const tableData = data.events.map(row => ({
+            event: `<a href="${row.url}" target="_blank">${row.eventid}</a>`,
+            phenomena: row.ph_name,
+            significance: row.sig_name,
+            phenomena_code: row.phenomena || '',
+            significance_code: row.significance || '',
+            issued: row.issue,
+            expired: row.expire
+        }));
+        table2.setData(tableData);
+        // Update phenomena summary
+        createPhenomenaSummary(tableData, 'table2title');
+        // Update table toolbar with record count
+        updateTableToolbar('table2title', tableData);
+    })
+    .catch(() => {
+        // Handle error silently
     });
 }
 
 function updateTable3(){
     // get currently selected by3 radio button
-    const by = escapeHTML($("input[name='by3']:checked").val());
-    const single = escapeHTML($("input[name='single3']:checked").val());
-    const datum = (by === "state") ? escapeHTML(stateSelect3.val()) : escapeHTML($("#wfo3").val());
-    const year = escapeHTML($("#year3").val());
+    const by = escapeHTML(document.querySelector("input[name='by3']:checked").value);
+    const single = escapeHTML(document.querySelector("input[name='single3']:checked").value);
+    const datum = (by === "state") ? escapeHTML(stateSelect3.value) : escapeHTML(document.getElementById("wfo3").value);
+    const year = escapeHTML(document.getElementById("year3").value);
     const params = {
-        wfo: $("#wfo3").val(),
-        state: stateSelect3.val(),
+        wfo: document.getElementById("wfo3").value,
+        state: stateSelect3.value,
         year,
     };
-    let href = `#list/${by}/${datum}/${year}`;
+    
+    // Set clean URL parameters for this mode only
+    const urlParams = {
+        by,
+        datum,
+        year
+    };
     if (single === "single"){
-        params.phenomena = escapeHTML($("#ph3").val());
-        params.significance = escapeHTML($("#sig3").val());
-        href += `/${params.phenomena}/${params.significance}`;
+        params.phenomena = escapeHTML(document.getElementById("ph3").value);
+        params.significance = escapeHTML(document.getElementById("sig3").value);
+        urlParams.phenomena = params.phenomena;
+        urlParams.significance = params.significance;
     }
-    window.location.href = href;
-    $("#table3title").text(`Events for ${by} ${datum} in ${year}`);
+    setModeParams('list', urlParams);
+    
+    // Create descriptive title based on selection type
+    let title = `Events for ${by} ${datum} in ${year}`;
+    if (single === "single") {
+        const phenText = document.getElementById("ph3").selectedOptions[0]?.text || "Unknown";
+        const sigText = document.getElementById("sig3").selectedOptions[0]?.text || "Unknown";
+        title += ` (${phenText} / ${sigText})`;
+    } else {
+        title += ` (All VTEC Events)`;
+    }
+    document.getElementById("table3title").textContent = title;
     // Do what we need to for table 3
-    $.ajax({
-        data: params,
-        url: (by === "wfo") ? BACKEND_EVENTS: BACKEND_EVENTS_BYSTATE,
-        dataType: "json",
-        method: "GET",
-        success: (data) => {
-            table3.clear();
-            $.map(data.events, (row) => {
-                const uri = `<a href="${row.uri}" target="_blank">${row.phenomena}.${row.significance}.${row.eventid}</a>`;
-                table3.row.add(
-                    [uri, row.wfo, row.locations, row.issue, row.expire]);
-            });
-            table3.draw();
-        }
+    fetch((by === "wfo" ? BACKEND_EVENTS : BACKEND_EVENTS_BYSTATE) + '?' + new URLSearchParams(params))
+    .then(response => response.json())
+    .then(data => {
+        const tableData = data.events.map(row => ({
+            event: `<a href="${row.uri}" target="_blank">${row.phenomena}.${row.significance}.${row.eventid}</a>`,
+            phenomena: row.ph_name,
+            significance: row.sig_name,
+            phenomena_code: row.phenomena,
+            significance_code: row.significance,
+            wfo: row.wfo,
+            locations: row.locations,
+            issued: row.issue,
+            expired: row.expire
+        }));
+        table3.setData(tableData);
+        // Update phenomena summary
+        createPhenomenaSummary(tableData, 'table3title');
+        // Update table toolbar with record count
+        updateTableToolbar('table3title', tableData);
+    })
+    .catch(() => {
+        // Handle error silently
     });
 }
 
 
-function buildUI(){
-    // Export Buttons
-    $(".iemtool").click(function(){ // this
-        const btn = $(this);
-        let url = BACKEND_SBW_BYPOINT;
-        let params = {
-            fmt: (btn.data("opt") === "csv") ? "csv" : "xlsx",
-            lat: $("#lat").val(),
-            lon: $("#lon").val(),
-            buffer: $('select[name="buffer"]').val(),
-            sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
-            edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
-        };
-        if (btn.data("table") === 2){
-            url = BACKEND_EVENTS_BYUGC;
-            params.ugc = ugcSelect.val();
-            params.sdate = $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate"));
-            params.edate = $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"));
-            if (table2IsByPoint) {
-                url = BACKEND_EVENTS_BYPOINT;
-                params.lon = $("#lon2").val();
-                params.lat = $("#lat2").val();
-            }
-        }
-        if (btn.data("table") === 3){
-            const by = $("input[name='by3']:checked").val();
-            url = (by === "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
-            params = {
-                fmt: (btn.data("opt") === "csv") ? "csv" : "xlsx",
-                wfo: $("#wfo3").val(),
-                state: stateSelect3.val(),
-                year: $("#year3").val(),
-                phenomena: $("#ph3").val(),
-                significance: $("#sig3").val()
+// Bean counting and filtering functionality for phenomena/significance combinations
+function createPhenomenaSummary(tableData, containerId) {
+    const titleElement = document.getElementById(containerId);
+    if (!titleElement) return;
+    
+    // Find the card body that contains the title
+    const cardBody = titleElement.closest('.card-body');
+    if (!cardBody) return;
+    
+    // Remove existing summary
+    const existingSummary = cardBody.querySelector('.phenomena-summary');
+    if (existingSummary) {
+        existingSummary.remove();
+    }
+    
+    // Count phenomena/significance combinations
+    const combinations = {};
+    tableData.forEach(row => {
+        const key = `${row.phenomena}|${row.significance}`;
+        if (!combinations[key]) {
+            combinations[key] = {
+                phenomena: row.phenomena,
+                significance: row.significance,
+                phenomena_code: row.phenomena_code || '',
+                significance_code: row.significance_code || '',
+                count: 0
             };
         }
-        window.location = `${url}?${$.param(params)}`;
+        combinations[key].count++;
     });
-    // Tables
-    table1 = $("#table1").DataTable({
-        "language": {
-            "emptyTable": "Drag marker on map to auto-populate this table"
-        }
-    });
-    table2 = $("#table2").DataTable({
-        "language": {
-            "emptyTable": "Drag marker on map or select UGC to auto-populate this table"
-        }
-    });
-    table3 = $("#table3").DataTable({
-        "language": {
-            "emptyTable": "Select options to auto-populate this table"
-        }
-    });
-    // Date pickers
-    sdate = $("input[name='sdate']").datepicker({
-        dateFormat:"mm/dd/yy",
-        altFormat:DATE_FMT,
-        minDate: new Date(1986, 0, 1),
-        maxDate: new Date(),
-        onClose: () => {
-            updateTable2ByUGC();
-        }
-    });
-    sdate.datepicker("setDate", new Date(1986, 0, 1));
-    edate = $("input[name='edate']").datepicker({
-        dateFormat:"mm/dd/yy",
-        altFormat:DATE_FMT,
-        minDate: new Date(1986, 0, 1),
-        defaultDate: +1,
-        onClose: () => {
-            updateTable2ByUGC();
-        }
-    });
-    edate.datepicker("setDate", +1);
-    sdate1 = $("input[name='sdate1']").datepicker({
-        dateFormat:"mm/dd/yy",
-        altFormat:DATE_FMT,
-        minDate: new Date(2002, 0, 1),
-        maxDate: new Date(),
-        onClose: () => {
-            updateTable();
-        }
-    });
-    sdate1.datepicker("setDate", new Date(2002, 0, 1));
-    edate1 = $("input[name='edate1']").datepicker({
-        dateFormat:"mm/dd/yy",
-        altFormat:DATE_FMT,
-        minDate: new Date(2002, 0, 1),
-        defaultDate: +1,
-        onClose: () => {
-            updateTable();
-        }
-    });
-    edate1.datepicker("setDate", +1);
-
-    // select boxes
-    const data = $.map(states, (obj) => {
-        const ee = {};
-        ee.id = obj[0];
-        ee.text = obj[1];
-        return ee;
-    });
-    stateSelect3 = $("#state3").select2({
-        placeholder: "Select a geography/state",
-        data
-    });
-    stateSelect3.val('').trigger("change");
-    stateSelect = $("#state").select2({
-        placeholder: "Select a geography/state",
-        data
-    });
-    stateSelect.val('').trigger("change");
-    stateSelect.on("select2:select", (e) => {
-        const state = e.params.data.id;
-        // Load the ugcSelect box
-        $.ajax({
-            data: {
-                state
-            },
-            url: "/json/state_ugc.json",
-            method: "GET",
-            dataType: "json",
-            success: (data2) => {
-                ugcSelect.empty();
-                $.map(data2.ugcs, (obj) => {
-                    const extra = (obj.ugc.substring(2, 1) === "Z") ? " (Zone)": "";
-                    ugcSelect.append(new Option(`[${obj.ugc}] ${obj.name}${extra}`, obj.ugc, false, false));
-                });
-                ugcSelect.val('').trigger("change");
-                if (hashlinkUGC){
-                    ugcSelect.val(hashlinkUGC).trigger("change");
-                    hashlinkUGC = null;
-                    updateTable2ByUGC();
-                }
-            }
+    
+    // Sort by count (descending)
+    const sortedCombinations = Object.values(combinations).sort((a, b) => b.count - a.count);
+    
+    if (sortedCombinations.length === 0) return;
+    
+    // Create summary panel
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'phenomena-summary mt-3 mb-3';
+    summaryDiv.innerHTML = `
+        <div class="card border-info">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <button class="btn btn-link text-decoration-none p-0 fw-bold" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#${containerId}-summary" 
+                            aria-expanded="true" aria-controls="${containerId}-summary">
+                        <i class="fa fa-chart-bar me-2"></i>Phenomena Summary (${tableData.length} total events)
+                        <i class="fa fa-chevron-up ms-2 summary-chevron"></i>
+                    </button>
+                </h6>
+            </div>
+            <div class="collapse show" id="${containerId}-summary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">
+                            <i class="fa fa-info-circle me-1"></i>
+                            Click any combination to filter the table:
+                        </small>
+                        <button class="btn btn-sm btn-outline-secondary clear-filter-btn" type="button" style="display: none;" 
+                                title="Clear current filter and show all results">
+                            <i class="fa fa-times me-1"></i>Clear Filter
+                        </button>
+                    </div>
+                    <div class="phenomena-grid">
+                        ${sortedCombinations.map(combo => `
+                            <div class="phenomena-item" data-phenomena="${combo.phenomena}" data-significance="${combo.significance}"
+                                 title="Click to filter table by ${combo.phenomena} / ${combo.significance} (${combo.count} events)">
+                                <div class="phenomena-badge">
+                                    <span class="fw-bold">${combo.phenomena}</span> / <span class="fw-bold">${combo.significance}</span>
+                                    ${combo.phenomena_code && combo.significance_code ? 
+                                        `<span class="badge bg-secondary ms-1">${combo.phenomena_code}.${combo.significance_code}</span>` : 
+                                        ''
+                                    }
+                                    <span class="badge bg-primary ms-2">${combo.count}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insert summary before the table-responsive div
+    const tableContainer = cardBody.querySelector('.table-responsive');
+    if (tableContainer) {
+        cardBody.insertBefore(summaryDiv, tableContainer);
+    }
+    
+    // Add event listeners for filtering
+    summaryDiv.querySelectorAll('.phenomena-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const phenomena = item.dataset.phenomena;
+            const significance = item.dataset.significance;
+            filterTableByPhenomena(containerId, phenomena, significance);
+            
+            // Update UI state
+            summaryDiv.querySelectorAll('.phenomena-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            summaryDiv.querySelector('.clear-filter-btn').style.display = 'inline-block';
         });
     });
-    ugcSelect = $("select[name='ugc']").select2({
-        placeholder: "Select County/Zone after Selecting Geography"
+    
+    // Clear filter button
+    summaryDiv.querySelector('.clear-filter-btn').addEventListener('click', () => {
+        clearPhenomenaFilter(containerId);
+        summaryDiv.querySelectorAll('.phenomena-item').forEach(i => i.classList.remove('active'));
+        summaryDiv.querySelector('.clear-filter-btn').style.display = 'none';
     });
-    ugcSelect.on("select2:select", (e) => {
-        const ugc = e.params.data.id;
-        window.location.href = `#byugc/${ugc}`;
+    
+    // Toggle chevron icon
+    const collapseElement = document.getElementById(`${containerId}-summary`);
+    collapseElement.addEventListener('show.bs.collapse', () => {
+        summaryDiv.querySelector('.summary-chevron').classList.replace('fa-chevron-down', 'fa-chevron-up');
+    });
+    collapseElement.addEventListener('hide.bs.collapse', () => {
+        summaryDiv.querySelector('.summary-chevron').classList.replace('fa-chevron-up', 'fa-chevron-down');
+    });
+}
+
+function filterTableByPhenomena(containerId, phenomena, significance) {
+    const table = (containerId === 'table1title') ? table1 : 
+                  (containerId === 'table2title') ? table2 : 
+                  (containerId === 'table3title') ? table3 : null;
+    if (!table) return;
+    
+    // Apply filter to Tabulator
+    table.setFilter([
+        {field: "phenomena", type: "=", value: phenomena},
+        {field: "significance", type: "=", value: significance}
+    ]);
+    
+    // Update table title
+    const titleElement = document.getElementById(containerId);
+    if (titleElement) {
+        const originalText = titleElement.textContent.split(' (')[0]; // Remove any existing filter text
+        const filteredCount = table.getDataCount("active");
+        titleElement.innerHTML = `<i class="fa fa-table me-2"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
+    }
+    
+    // Update toolbar count
+    const filteredCount = table.getDataCount("active");
+    const tableData = table.getData(); // Get original data for count
+    updateTableToolbar(containerId, tableData, filteredCount);
+}
+
+function clearPhenomenaFilter(containerId) {
+    const table = (containerId === 'table1title') ? table1 : 
+                  (containerId === 'table2title') ? table2 : 
+                  (containerId === 'table3title') ? table3 : null;
+    if (!table) return;
+    
+    // Clear filter
+    table.clearFilter();
+    
+    // Reset table title
+    const titleElement = document.getElementById(containerId);
+    if (titleElement) {
+        const originalText = titleElement.textContent.split(' (')[0];
+        titleElement.innerHTML = `<i class="fa fa-table me-2"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')}`;
+    }
+    
+    // Update toolbar count (no filter)
+    const tableData = table.getData();
+    updateTableToolbar(containerId, tableData);
+}
+
+// Update table toolbar with current data count
+function updateTableToolbar(containerId, tableData, filteredCount = null) {
+    const container = containerId === 'table1title' ? 
+        document.getElementById('table1title').parentNode : 
+        document.getElementById('table2title') ? document.getElementById('table2title').parentNode :
+        document.getElementById('table3title') ? document.getElementById('table3title').parentNode : null;
+    
+    if (!container) return;
+    
+    const toolbar = container.querySelector('.table-toolbar');
+    if (toolbar) {
+        const countSpan = toolbar.querySelector('.table-count');
+        if (countSpan) {
+            const totalCount = tableData.length;
+            const displayCount = filteredCount !== null ? filteredCount : totalCount;
+            const filterText = filteredCount !== null ? ` (${filteredCount} of ${totalCount} shown)` : '';
+            countSpan.textContent = `${displayCount} record${displayCount !== 1 ? 's' : ''}${filterText}`;
+        }
+    }
+}
+
+function buildUI(){
+    // Backend Export Buttons (Server-processed exports)
+    document.querySelectorAll(".iemtool").forEach(btn => {
+        btn.addEventListener('click', function() {
+            let url = BACKEND_SBW_BYPOINT;
+            let params = {
+                fmt: (btn.dataset.opt === "csv") ? "csv" : "xlsx",
+                lat: document.getElementById("lat").value,
+                lon: document.getElementById("lon").value,
+                buffer: document.querySelector('select[name="buffer"]').value,
+                sdate: formatDatePicker(sdate1),
+                edate: formatDatePicker(edate1)
+            };
+            if (btn.dataset.table === "2"){
+                url = BACKEND_EVENTS_BYUGC;
+                params.ugc = ugcSelect.value;
+                params.sdate = formatDatePicker(sdate);
+                params.edate = formatDatePicker(edate);
+                if (table2IsByPoint) {
+                    url = BACKEND_EVENTS_BYPOINT;
+                    params.lon = document.getElementById("lon2").value;
+                    params.lat = document.getElementById("lat2").value;
+                }
+            }
+            if (btn.dataset.table === "3"){
+                const by = document.querySelector("input[name='by3']:checked").value;
+                url = (by === "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
+                params = {
+                    fmt: (btn.dataset.opt === "csv") ? "csv" : "xlsx",
+                    wfo: document.getElementById("wfo3").value,
+                    state: stateSelect3.value,
+                    year: document.getElementById("year3").value,
+                    phenomena: document.getElementById("ph3").value,
+                    significance: document.getElementById("sig3").value
+                };
+            }
+            window.location = `${url}?${new URLSearchParams(params).toString()}`;
+        });
+    });
+    // Tables
+    table1 = new Tabulator("#table1", {
+        layout: "fitColumns",
+        placeholder: "Drag marker on map to auto-populate this table",
+        height: "400px",
+        columns: [
+            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
+            {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
+            {title: "Issued", field: "issued", headerSort: true, sorter: customDateTimeSorter},
+            {title: "Expired", field: "expired", headerSort: true, sorter: customDateTimeSorter},
+            {title: "Issue Hail Tag", field: "issue_hailtag", headerSort: true, sorter: "string"},
+            {title: "Issue Wind Tag", field: "issue_windtag", headerSort: true, sorter: "string"},
+            {title: "Issue Tornado Tag", field: "issue_tornadotag", headerSort: true, sorter: "string"},
+            {title: "Issue Damage Tag", field: "issue_damagetag", headerSort: true, sorter: "string"}
+        ],
+        initialSort: [
+            {column: "issued", dir: "desc"}
+        ]
+    });
+    
+    // Add table toolbar with current view exports
+    const table1Title = document.getElementById("table1title");
+    if (table1Title && !table1Title.querySelector('.table-toolbar')) {
+        const toolbarDiv = document.createElement('div');
+        toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
+        toolbarDiv.innerHTML = `
+            <div class="table-info">
+                <small class="text-muted">
+                    <i class="fa fa-table me-1"></i>
+                    <span class="table-count">Table data</span>
+                </small>
+            </div>
+            <div class="table-exports">
+                <span class="badge bg-info me-2">Export Current View:</span>
+                <button class="btn btn-sm btn-success me-1" onclick="table1.download('xlsx', 'sbw-current-view.xlsx')" title="Export visible table data to Excel">
+                    <i class="fa fa-download me-1"></i>Excel
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="table1.download('csv', 'sbw-current-view.csv')" title="Export visible table data to CSV">
+                    <i class="fa fa-download me-1"></i>CSV
+                </button>
+            </div>
+        `;
+        
+        // Insert toolbar after the phenomena summary (or after title if no summary)
+        const phenomenaSummary = table1Title.parentNode.querySelector('.phenomena-summary');
+        const insertAfter = phenomenaSummary || table1Title;
+        insertAfter.parentNode.insertBefore(toolbarDiv, insertAfter.nextSibling);
+    }
+    
+    table2 = new Tabulator("#table2", {
+        layout: "fitColumns",
+        placeholder: "Drag marker on map or select UGC to auto-populate this table",
+        height: "400px",
+        columns: [
+            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
+            {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
+            {title: "Issued", field: "issued", headerSort: true, sorter: customDateTimeSorter},
+            {title: "Expired", field: "expired", headerSort: true, sorter: customDateTimeSorter}
+        ],
+        initialSort: [
+            {column: "issued", dir: "desc"}
+        ]
+    });
+    
+    // Add table toolbar with current view exports for table2
+    const table2Title = document.getElementById("table2title");
+    if (table2Title && !table2Title.querySelector('.table-toolbar')) {
+        const toolbarDiv = document.createElement('div');
+        toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
+        toolbarDiv.innerHTML = `
+            <div class="table-info">
+                <small class="text-muted">
+                    <i class="fa fa-table me-1"></i>
+                    <span class="table-count">Table data</span>
+                </small>
+            </div>
+            <div class="table-exports">
+                <span class="badge bg-info me-2">Export Current View:</span>
+                <button class="btn btn-sm btn-success me-1" onclick="table2.download('xlsx', 'events-current-view.xlsx')" title="Export visible table data to Excel">
+                    <i class="fa fa-download me-1"></i>Excel
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="table2.download('csv', 'events-current-view.csv')" title="Export visible table data to CSV">
+                    <i class="fa fa-download me-1"></i>CSV
+                </button>
+            </div>
+        `;
+        
+        // Insert toolbar after the phenomena summary (or after title if no summary)
+        const phenomenaSummary = table2Title.parentNode.querySelector('.phenomena-summary');
+        const insertAfter = phenomenaSummary || table2Title;
+        insertAfter.parentNode.insertBefore(toolbarDiv, insertAfter.nextSibling);
+    }
+    
+    table3 = new Tabulator("#table3", {
+        layout: "fitColumns",
+        placeholder: "Select options to auto-populate this table",
+        height: "400px",
+        columns: [
+            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
+            {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
+            {title: "WFO", field: "wfo", headerSort: true, sorter: "string"},
+            {title: "Locations", field: "locations", headerSort: true, sorter: "string"},
+            {title: "Issued", field: "issued", headerSort: true, sorter: customDateTimeSorter},
+            {title: "Expired", field: "expired", headerSort: true, sorter: customDateTimeSorter}
+        ],
+        initialSort: [
+            {column: "issued", dir: "desc"}
+        ]
+    });
+    
+    // Add table toolbar with current view exports for table3
+    const table3Title = document.getElementById("table3title");
+    if (table3Title && !table3Title.querySelector('.table-toolbar')) {
+        const toolbarDiv = document.createElement('div');
+        toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
+        toolbarDiv.innerHTML = `
+            <div class="table-info">
+                <small class="text-muted">
+                    <i class="fa fa-table me-1"></i>
+                    <span class="table-count">Table data</span>
+                </small>
+            </div>
+            <div class="table-exports">
+                <span class="badge bg-info me-2">Export Current View:</span>
+                <button class="btn btn-sm btn-success me-1" onclick="table3.download('xlsx', 'list-current-view.xlsx')" title="Export visible table data to Excel">
+                    <i class="fa fa-download me-1"></i>Excel
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="table3.download('csv', 'list-current-view.csv')" title="Export visible table data to CSV">
+                    <i class="fa fa-download me-1"></i>CSV
+                </button>
+            </div>
+        `;
+        
+        table3Title.parentNode.insertBefore(toolbarDiv, table3Title.nextSibling);
+    }
+    
+    // Native date inputs - applying jQuery removal rule
+    sdate = document.querySelector("input[name='sdate']");
+    edate = document.querySelector("input[name='edate']");
+    sdate1 = document.querySelector("input[name='sdate1']");
+    edate1 = document.querySelector("input[name='edate1']");
+    
+    // Set default values
+    sdate.value = "1986-01-01";
+    edate.value = new Date().toISOString().split('T')[0]; // Today's date
+    sdate1.value = "2002-01-01";
+    edate1.value = new Date().toISOString().split('T')[0]; // Today's date
+    
+    // Set min/max attributes for date validation
+    sdate.min = "1986-01-01";
+    sdate.max = new Date().toISOString().split('T')[0];
+    edate.min = "1986-01-01";
+    edate.max = new Date().toISOString().split('T')[0];
+    sdate1.min = "2002-01-01";
+    sdate1.max = new Date().toISOString().split('T')[0];
+    edate1.min = "2002-01-01";
+    edate1.max = new Date().toISOString().split('T')[0];
+    
+    // Add event listeners for date changes
+    sdate.addEventListener('change', () => {
+        updateTable2ByUGC();
+    });
+    edate.addEventListener('change', () => {
+        updateTable2ByUGC();
+    });
+    sdate1.addEventListener('change', () => {
+        updateTable();
+    });
+    edate1.addEventListener('change', () => {
+        updateTable();
+    });
+
+    // select boxes - applying jQuery removal rule
+    const data = states.map(obj => ({
+        id: obj[0],
+        text: obj[1]
+    }));
+    
+    // Setup state selects with vanilla JavaScript
+    stateSelect3 = document.getElementById("state3");
+    stateSelect = document.getElementById("state");
+    
+    // Populate state selects
+    [stateSelect3, stateSelect].forEach(select => {
+        // Clear existing options
+        select.innerHTML = '<option value="">Select a geography/state</option>';
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.text;
+            select.appendChild(option);
+        });
+    });
+    
+    stateSelect.addEventListener('change', (e) => {
+        const state = e.target.value;
+        if (!state) return;
+        
+        // Set clean URL parameters for this mode only
+        setModeParams('byugc', { state });
+        
+        // Load the ugcSelect box
+        fetch("/json/state_ugc.json?" + new URLSearchParams({ state }))
+        .then(response => response.json())
+        .then(data2 => {
+            ugcSelect.innerHTML = '<option value="">Select County/Zone</option>';
+            data2.ugcs.forEach(obj => {
+                const extra = (obj.ugc.substring(2, 1) === "Z") ? " (Zone)": "";
+                const option = document.createElement('option');
+                option.value = obj.ugc;
+                option.textContent = `[${obj.ugc}] ${obj.name}${extra}`;
+                ugcSelect.appendChild(option);
+            });
+            // Check if we need to set a specific UGC from URL parameters
+            const urlParams = getURLParams();
+            const targetUGC = urlParams.get('ugc');
+            if (targetUGC){
+                ugcSelect.value = targetUGC;
+                updateTable2ByUGC();
+            }
+        })
+        .catch(() => {
+            // Handle error silently
+        });
+    });
+    
+    ugcSelect = document.querySelector("select[name='ugc']");
+    ugcSelect.innerHTML = '<option value="">Select County/Zone after Selecting Geography</option>';
+    ugcSelect.addEventListener('change', (e) => {
+        const ugc = e.target.value;
+        if (!ugc) return;
+        // Set clean URL parameters for this mode only - include both state and ugc
+        setModeParams('byugc', { 
+            state: stateSelect.value,
+            ugc 
+        });
         updateTable2ByUGC();
     });
     // Manual Point Entry
-    $("#manualpt").click(() => {
-        const la = parseFloat($("#lat").val());
-        const lo = parseFloat($("#lon").val());
+    document.getElementById("manualpt").addEventListener('click', () => {
+        const la = parseFloat(document.getElementById("lat").value);
+        const lo = parseFloat(document.getElementById("lon").value);
         if (isNaN(la) || isNaN(lo)){
             return;
         }
@@ -372,160 +840,349 @@ function buildUI(){
         marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition(lo, la);
     });
-    $("#manualugc").click(() => {
-        const ugc = ugcSelect.val();
+    document.getElementById("manualugc").addEventListener('click', () => {
+        const ugc = ugcSelect.value;
         if (ugc === null){
             return;
         }
-        window.location.href = `#byugc/${escapeHTML(ugc)}`;
+        // Set clean URL parameters for this mode only - include both state and ugc
+        setModeParams('byugc', { 
+            state: stateSelect.value,
+            ugc 
+        });
         updateTable2ByUGC();
     });
-    $("#manualpt2").click(() => {
-        const la = parseFloat($("#lat2").val());
-        const lo = parseFloat($("#lon2").val());
+    document.getElementById("manualpt2").addEventListener('click', () => {
+        const la = parseFloat(document.getElementById("lat2").value);
+        const lo = parseFloat(document.getElementById("lon2").value);
         if (isNaN(la) || isNaN(lo)){
             return;
         }
         marker2.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition2(lo, la);
     });
-    $("#button3").click(() => {
+    document.getElementById("button3").addEventListener('click', () => {
         updateTable3();
     });
-    // Populate wfos select with iemdata.wfos data
-    const wfos = $.map(iemdata.wfos, (obj) => {
-        const ee = {};
-        ee.id = obj[0];
-        ee.text = `[${obj[0]}] ${obj[1]}`;
-        return ee;
+    // Populate wfos select with iemdata.wfos data - applying jQuery removal rule
+    const wfoSelect = document.querySelector("select[name='wfo']");
+    wfoSelect.innerHTML = '<option value="">Select a WFO</option>';
+    iemdata.wfos.forEach(obj => {
+        const option = document.createElement('option');
+        option.value = obj[0];
+        option.textContent = `[${obj[0]}] ${obj[1]}`;
+        wfoSelect.appendChild(option);
     });
-    $("select[name='wfo']").select2({
-        placeholder: "Select a WFO",
-        data: wfos
+    
+    const phSelect = document.querySelector("select[name='ph']");
+    phSelect.innerHTML = '<option value="">Select a Phenomena</option>';
+    iemdata.vtec_phenomena.forEach(obj => {
+        const option = document.createElement('option');
+        option.value = obj[0];
+        option.textContent = obj[1];
+        phSelect.appendChild(option);
     });
-    const ph = $.map(iemdata.vtec_phenomena, (obj) => {
-        const ee = {};
-        ee.id = obj[0];
-        ee.text = obj[1];
-        return ee;
-    });
-    $("select[name='ph']").select2({
-        placeholder: "Select a Phenomena",
-        data: ph
-    });
-    const sig = $.map(iemdata.vtec_significance, (obj) => {
-        const ee = {};
-        ee.id = obj[0];
-        ee.text = obj[1];
-        return ee;
-    });
-    $("select[name='sig']").select2({
-        placeholder: "Select a Phenomena",
-        data: sig
+    
+    const sigSelect = document.querySelector("select[name='sig']");
+    sigSelect.innerHTML = '<option value="">Select a Significance</option>';
+    iemdata.vtec_significance.forEach(obj => {
+        const option = document.createElement('option');
+        option.value = obj[0];
+        option.textContent = obj[1];
+        sigSelect.appendChild(option);
     });
     // populate year3 select with values from 1986 to current year
-    const year3 = $("select[name='year']");
+    const year3 = document.querySelector("select[name='year']");
     const currentYear = new Date().getFullYear();
     for (let i = 1986; i <= currentYear; i++){
-        year3.append(new Option(i, i, false, false));
+        const option = new Option(i, i, false, false);
+        if (i === currentYear) {
+            option.selected = true; // Select current year by default
+        }
+        year3.appendChild(option);
     }
+    
+    // Set up radio button logic for tab 3 (Single vs All VTEC events)
+    const singleRadio = document.getElementById('single3');
+    const allRadio = document.getElementById('all3');
+    const phSelect2 = document.querySelector("select[name='ph']");
+    const sigSelect2 = document.querySelector("select[name='sig']");
+    
+    // Function to update the state of phenomena and significance selects
+    function updateVTECSelects() {
+        const isSingleSelected = singleRadio.checked;
+        
+        // Enable/disable the selects based on radio button state
+        phSelect2.disabled = !isSingleSelected;
+        sigSelect2.disabled = !isSingleSelected;
+        
+        // Update visual styling
+        if (isSingleSelected) {
+            phSelect2.parentElement.classList.remove('opacity-50');
+            sigSelect2.parentElement.classList.remove('opacity-50');
+        } else {
+            phSelect2.parentElement.classList.add('opacity-50');
+            sigSelect2.parentElement.classList.add('opacity-50');
+            // Clear selections when switching to "All"
+            phSelect2.value = '';
+            sigSelect2.value = '';
+        }
+    }
+    
+    // Add event listeners for radio buttons
+    singleRadio.addEventListener('change', updateVTECSelects);
+    allRadio.addEventListener('change', updateVTECSelects);
+    
+    // Initialize the state
+    updateVTECSelects();
 };
 
-function process_hash(hash){
-    const tokens2 = hash.split("/");
-    if (tokens2.length === 2){
-        if (tokens2[0] === 'byugc'){
-            const aTag = $("a[name='byugc']");
-            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-            hashlinkUGC = tokens2[1];
-            stateSelect.val(tokens2[1].substring(0, 2)).trigger("change");
-            stateSelect.val(tokens2[1].substring(0, 2)).trigger({
-                type: "select2:select",
-                params: {
-                    data: {
-                        id: tokens2[1].substring(0, 2)
-                    }
-                }
-            });
-        }
+// Process URL parameters on app initialization - now with Bootstrap tabs
+function processURLParams(){
+    const urlParams = getURLParams();
+    let mode = urlParams.get('mode');
+    
+    // Handle backward compatibility: migrate hash to URL parameters
+    const hash = window.location.hash;
+    if (hash && hash.length > 1) {
+        migrateHashToURLParams(hash.substring(1));
+        return; // Will reload with new URL params
     }
-    if (tokens2.length === 3 || tokens2.length === 4){
-        if (tokens2[0] === 'bypoint'){
-            default_lat = parseFloat(escapeHTML(tokens2[2]));
-            default_lon = parseFloat(escapeHTML(tokens2[1]));
-            if (tokens2.length === 4){
-                try {
-                    const buffer = parseFloat(tokens2[3]);
-                    $('select[name="buffer"]').val(buffer);
-                } catch {
-                    // pass
-                }
-            }
-            updateMarkerPosition(default_lon, default_lat);
-        }
-        if (tokens2[0] === 'eventsbypoint'){
-            default_lat = parseFloat(escapeHTML(tokens2[2]));
-            default_lon = parseFloat(escapeHTML(tokens2[1]));
-            if (tokens2.length === 4){
-                try {
-                    const buffer = parseFloat(tokens2[3]);
-                    $('select[name="buffer2"]').val(buffer);
-                } catch {
-                    // pass
-                }
-            }
-            updateMarkerPosition2(default_lon, default_lat);
-        }
-        if (tokens2[0] === 'list'){
-            const aTag = $("a[name='list']");
-            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-            const by = escapeHTML(tokens2[1]);
-            const datum = escapeHTML(tokens2[2]);
-            const year = escapeHTML(tokens2[3]);
-            $(`input[name='by3'][value='${by}']`).prop("checked", true);
-            $("input[name='single3'][value='all']").prop("checked", true);
-            $("#year3").val(year);
-            if (by === "state"){
-                stateSelect3.val(datum).trigger("change");
-            } else {
-                $("#wfo3").val(datum).trigger("change");
-            }
-            updateTable3();
-        }
+    
+    // Default to first tab if no mode specified
+    if (!mode) {
+        mode = 'bypoint';
+        const params = getURLParams();
+        params.set('mode', mode);
+        updateURL(params);
     }
-    if (tokens2.length === 6){
-        // list
-        const aTag = $("a[name='list']");
-        $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-        const by = escapeHTML(tokens2[1]);
-        const datum = escapeHTML(tokens2[2]);
-        const year = escapeHTML(tokens2[3]);
-        const ph = escapeHTML(tokens2[4]);
-        const sig = escapeHTML(tokens2[5]);
-        $(`input[name='by3'][value='${by}']`).prop("checked", true);
-        $("#year3").val(year);
-        $("#ph3").val(ph);
-        $("#sig3").val(sig);
-        if (by === "state"){
-            stateSelect3.val(datum).trigger("change");
-        } else {
-            $("#wfo3").val(datum).trigger("change");
+    
+    // Activate the appropriate Bootstrap tab
+    activateTab(mode);
+    
+    switch (mode) {
+        case 'byugc': {
+            const state = urlParams.get('state');
+            const ugc = urlParams.get('ugc');
+            const sdateParam = urlParams.get('sdate');
+            const edateParam = urlParams.get('edate');
+            
+            // Set date values if provided
+            if (sdateParam) {
+                document.querySelector('input[name="sdate"]').value = sdateParam;
+            }
+            if (edateParam) {
+                document.querySelector('input[name="edate"]').value = edateParam;
+            }
+            
+            // If we have a state parameter, use it directly
+            if (state) {
+                stateSelect.value = state;
+                stateSelect.dispatchEvent(new Event('change'));
+            } else if (ugc) {
+                // Fallback: extract state from UGC code
+                const stateFromUGC = ugc.substring(0, 2);
+                stateSelect.value = stateFromUGC;
+                stateSelect.dispatchEvent(new Event('change'));
+            }
+            break;
         }
-        updateTable3();
+            
+        case 'bypoint': {
+            const lat = parseFloat(urlParams.get('lat'));
+            const lon = parseFloat(urlParams.get('lon'));
+            const buffer = parseFloat(urlParams.get('buffer'));
+            const sdate1Param = urlParams.get('sdate1');
+            const edate1Param = urlParams.get('edate1');
+            
+            // Set date values if provided
+            if (sdate1Param) {
+                document.getElementById('sdate1').value = sdate1Param;
+            }
+            if (edate1Param) {
+                document.getElementById('edate1').value = edate1Param;
+            }
+            
+            if (!isNaN(lat) && !isNaN(lon)) {
+                default_lat = lat;
+                default_lon = lon;
+                if (!isNaN(buffer)) {
+                    document.querySelector('select[name="buffer"]').value = buffer;
+                }
+                // Update the marker position physically and trigger data loading
+                if (marker1) {
+                    marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+                }
+                updateMarkerPosition(lon, lat);
+            }
+            break;
+        }
+            
+        case 'eventsbypoint': {
+            // This mode uses the byugc tab but with different functionality
+            const lat2 = parseFloat(urlParams.get('lat'));
+            const lon2 = parseFloat(urlParams.get('lon'));
+            const buffer2 = parseFloat(urlParams.get('buffer'));
+            if (!isNaN(lat2) && !isNaN(lon2)) {
+                default_lat = lat2;
+                default_lon = lon2;
+                if (!isNaN(buffer2)) {
+                    document.querySelector('select[name="buffer2"]').value = buffer2;
+                }
+                // Will be handled by marker initialization
+            }
+            break;
+        }
+            
+        case 'list': {
+            const by = urlParams.get('by');
+            const datum = urlParams.get('datum');
+            const year = urlParams.get('year');
+            const phenomena = urlParams.get('phenomena');
+            const significance = urlParams.get('significance');
+            
+            if (by && datum && year) {
+                document.querySelector(`input[name='by3'][value='${by}']`).checked = true;
+                if (phenomena && significance) {
+                    document.querySelector("input[name='single3'][value='single']").checked = true;
+                    document.getElementById("ph3").value = phenomena;
+                    document.getElementById("sig3").value = significance;
+                } else {
+                    document.querySelector("input[name='single3'][value='all']").checked = true;
+                }
+                document.getElementById("year3").value = year;
+                
+                if (by === "state"){
+                    stateSelect3.value = datum;
+                } else {
+                    document.getElementById("wfo3").value = datum;
+                }
+                // Update VTEC select states after setting radio buttons
+                const updateEvent = new Event('change');
+                document.querySelector("input[name='single3']:checked").dispatchEvent(updateEvent);
+                updateTable3();
+            }
+            break;
+        }
     }
 }
 
-$(document).ready(() => {
-    buildUI();
-
-    // Do the anchor tag linking, please
-    const tokens = window.location.href.split("#");
-    if (tokens.length === 2){
-        process_hash(tokens[1]);
+// Activate Bootstrap tab based on mode
+function activateTab(mode) {
+    // Map modes to tab IDs
+    let tabId = 'bypoint-tab'; // Default tab
+    switch (mode) {
+        case 'bypoint':
+            tabId = 'bypoint-tab';
+            break;
+        case 'byugc':
+        case 'eventsbypoint':
+            tabId = 'byugc-tab';
+            break;
+        case 'list':
+            tabId = 'list-tab';
+            break;
     }
+    
+    // Activate the tab using Bootstrap 5 API
+    const tabElement = document.getElementById(tabId);
+    if (tabElement) {
+        const tab = new bootstrap.Tab(tabElement);
+        tab.show();
+    }
+}
+
+// Migrate old hash URLs to URL parameters for backward compatibility
+function migrateHashToURLParams(hash) {
+    const tokens = hash.split("/");
+    const params = new URLSearchParams();
+    
+    if (tokens.length >= 2) {
+        if (tokens[0] === 'byugc') {
+            params.set('mode', 'byugc');
+            params.set('ugc', tokens[1]);
+        } else if (tokens[0] === 'bypoint' && tokens.length >= 3) {
+            params.set('mode', 'bypoint');
+            params.set('lon', tokens[1]);
+            params.set('lat', tokens[2]);
+            if (tokens.length >= 4) {
+                params.set('buffer', tokens[3]);
+            }
+        } else if (tokens[0] === 'eventsbypoint' && tokens.length >= 3) {
+            params.set('mode', 'eventsbypoint');
+            params.set('lon', tokens[1]);
+            params.set('lat', tokens[2]);
+            if (tokens.length >= 4) {
+                params.set('buffer', tokens[3]);
+            }
+        } else if (tokens[0] === 'list' && tokens.length >= 4) {
+            params.set('mode', 'list');
+            params.set('by', tokens[1]);
+            params.set('datum', tokens[2]);
+            params.set('year', tokens[3]);
+            if (tokens.length >= 6) {
+                params.set('phenomena', tokens[4]);
+                params.set('significance', tokens[5]);
+            }
+        }
+    }
+    
+    // Replace URL with parameters and remove hash
+    const url = new URL(window.location);
+    url.search = params.toString();
+    url.hash = '';
+    window.location.replace(url);
+}
+
+// Custom datetime sorter using Luxon for proper date/time sorting
+function customDateTimeSorter(a, b) {
+    // Handle empty/null values
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    
+    // Parse dates using Luxon (accessed via window.luxon.DateTime)
+    const dateA = window.luxon.DateTime.fromFormat(a, "yyyy-MM-dd HH:mm");
+    const dateB = window.luxon.DateTime.fromFormat(b, "yyyy-MM-dd HH:mm");
+    
+    // Handle invalid dates
+    if (!dateA.isValid && !dateB.isValid) return 0;
+    if (!dateA.isValid) return 1;
+    if (!dateB.isValid) return -1;
+    
+    // Compare timestamps
+    return dateA.toMillis() - dateB.toMillis();
+}
+
+// Initialize when DOM is ready
+function initializeApp() {
+    buildUI();
+    
     const res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
     marker1 = res1.marker;
     const res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
     marker2 = res2.marker;
 
-});
+    // Process URL parameters after markers are initialized
+    processURLParams();
+    
+    // Bootstrap tab event listeners - update URL when tabs change (clean parameters)
+    document.getElementById('bypoint-tab').addEventListener('shown.bs.tab', () => {
+        setModeParams('bypoint');
+    });
+    
+    document.getElementById('byugc-tab').addEventListener('shown.bs.tab', () => {
+        setModeParams('byugc');
+    });
+    
+    document.getElementById('list-tab').addEventListener('shown.bs.tab', () => {
+        setModeParams('list');
+    });
+}
+
+// Use vanilla JS for DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}

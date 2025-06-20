@@ -341,9 +341,12 @@ function setupEventHandlers() {
             return;
         }
         
-        // Create datetime object
-        const datetime = new Date(dateStr);
-        datetime.setHours(parseInt(timeStr), 0, 0, 0);
+        // Create datetime object using explicit date components to avoid timezone issues
+        const dateParts = dateStr.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-based
+        const day = parseInt(dateParts[2]);
+        const datetime = new Date(year, month, day, parseInt(timeStr), 0, 0, 0);
         
         updateURL(network);
         loadPrecipitationData(network, datetime);

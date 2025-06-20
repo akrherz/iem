@@ -1,14 +1,74 @@
-/* global $, ol */
+/* global ol */
+// CF6 Map Application - Modernized without jQuery
 let renderattr = "high";
 let vectorLayer = null;
 let map = null;
 let element = null;
 let fontSize = 14;
+let popup = null;
+
+// Utility function to format date as YYYY-MM-DD
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Parse date from YYMMDD format (for legacy hash links)
+function parseDateShort(dateStr) {
+    if (dateStr.length !== 6) return null;
+    const year = 2000 + parseInt(dateStr.slice(0, 2));
+    const month = parseInt(dateStr.slice(2, 4)) - 1;
+    const day = parseInt(dateStr.slice(4, 6));
+    return new Date(year, month, day);
+}
 
 function updateURL() {
-    const tt = $.datepicker.formatDate("yymmdd",
-        $("#datepicker").datepicker('getDate'));
-    window.location.href = `#${tt}/${renderattr}`;
+    const dateInput = document.getElementById("datepicker");
+    
+    const url = new URL(window.location);
+    url.searchParams.set('date', dateInput.value); // Store as YYYY-MM-DD
+    url.searchParams.set('var', renderattr);
+    window.history.pushState({}, '', url);
+}
+
+// Handle legacy hash links and convert to URL parameters
+function handleLegacyHashLinks() {
+    const hash = window.location.hash;
+    if (hash) {
+        const tokens = hash.substring(1).split("/"); // Remove # and split
+        if (tokens.length === 2) {
+            const tpart = tokens[0];
+            const variable = tokens[1];
+            
+            // Parse date from YYMMDD format
+            const parsedDate = parseDateShort(tpart);
+            if (parsedDate && variable) {
+                // Convert hash to URL params and redirect
+                const url = new URL(window.location);
+                url.hash = ''; // Remove hash
+                url.searchParams.set('date', formatDate(parsedDate));
+                url.searchParams.set('var', variable);
+                window.history.replaceState({}, '', url);
+                return { date: formatDate(parsedDate), variable };
+            }
+        }
+    }
+    return null;
+}
+
+// Read URL parameters and set initial state
+function readURLParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const date = urlParams.get('date');
+    const variable = urlParams.get('var');
+    
+    return {
+        date: date || null,
+        variable: variable || null
+    };
 }
 
 /**
@@ -25,17 +85,28 @@ function escapeHTML(val) {
 }
  
 function updateMap() {
-    renderattr = escapeHTML($('#renderattr').val());
-    vectorLayer.setStyle(vectorLayer.getStyle());
+    renderattr = escapeHTML(document.getElementById('renderattr').value);
+    vectorLayer.setStyle(vectorStyleFunction);
     updateURL();
 }
 
 function updateDate() {
-    const fullDate = $.datepicker.formatDate("yy-mm-dd",
-        $("#datepicker").datepicker('getDate'));
+    const dateInput = document.getElementById("datepicker");
+    const fullDate = dateInput.value; // Already in YYYY-MM-DD format
+    
+    // Add loading class
+    const mapElement = document.getElementById('map');
+    mapElement.classList.add('loading');
+    
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer(fullDate);
     map.addLayer(vectorLayer);
+    
+    // Remove loading class after a delay
+    setTimeout(() => {
+        mapElement.classList.remove('loading');
+    }, 1000);
+    
     updateURL();
 }
 
@@ -100,8 +171,7 @@ const vectorStyleFunction = function (feature) {
         ];
     }
     return style;
-}
-
+};
 
 function makeVectorLayer(dt) {
     return new ol.layer.Vector({
@@ -114,32 +184,78 @@ function makeVectorLayer(dt) {
     });
 }
 
-$(document).ready(() => {
+// Show popover with content
+function showPopover(content) {
+    const popoverContent = document.getElementById('popover-content');
+    popoverContent.innerHTML = content;
+    
+    if (window.bootstrap?.Popover) {
+        // Use Bootstrap 5 popover
+        const popoverInstance = window.bootstrap.Popover.getInstance(element) || 
+                               new window.bootstrap.Popover(element, {
+                                   placement: 'top',
+                                   html: true,
+                                   content: () => popoverContent.innerHTML
+                               });
+        popoverInstance.show();
+    }
+}
 
-    $("#datepicker").datepicker({
-        dateFormat: "DD, d MM, yy",
-        minDate: new Date(2001, 1, 1),
-        maxDate: new Date()
-    });
-    $("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(() => {
-        updateDate();
-    });
+// Hide popover
+function hidePopover() {
+    if (window.bootstrap?.Popover) {
+        const popoverInstance = window.bootstrap.Popover.getInstance(element);
+        if (popoverInstance) {
+            popoverInstance.hide();
+        }
+    }
+}
 
-    vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()));
+// Load CF6 report
+function loadCF6Report(url) {
+    const cf6report = document.getElementById('cf6report');
+    cf6report.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading CF6 report...</p></div>';
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            cf6report.innerHTML = `<pre>${data}</pre>`;
+        })
+        .catch(() => {
+            cf6report.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error loading CF6 report</div>';
+        });
+}
+
+// Initialize the application
+function initializeApp() {
+    // Set initial date to today
+    const today = new Date();
+    const dateInput = document.getElementById("datepicker");
+    dateInput.value = formatDate(today);
+    dateInput.max = formatDate(today); // Set max date to today
+    dateInput.min = "2001-01-01"; // Set min date
+    
+    // Date change handler
+    dateInput.addEventListener('change', updateDate);
+    
+    // Initialize vector layer
+    vectorLayer = makeVectorLayer(formatDate(today));
+    
+    // Initialize map
     const key = document.getElementById("map").dataset.bingmapsapikey;
     map = new ol.Map({
         target: 'map',
-        layers: [new ol.layer.Tile({
-            title: 'Global Imagery',
-            source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
-        }),
-        new ol.layer.Tile({
-            title: 'State Boundaries',
-            source: new ol.source.XYZ({
-                url: '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
-            })
-        }),
+        layers: [
+            new ol.layer.Tile({
+                title: 'Global Imagery',
+                source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
+            }),
+            new ol.layer.Tile({
+                title: 'State Boundaries',
+                source: new ol.source.XYZ({
+                    url: '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
+                })
+            }),
             vectorLayer
         ],
         view: new ol.View({
@@ -149,75 +265,91 @@ $(document).ready(() => {
         })
     });
 
+    // Add layer switcher
     map.addControl(new ol.control.LayerSwitcher());
 
+    // Initialize popup
     element = document.getElementById('popup');
-
-    const popup = new ol.Overlay({
+    popup = new ol.Overlay({
         element,
         positioning: 'bottom-center',
         stopEvent: false
     });
     map.addOverlay(popup);
 
-    $(element).popover({
-        'placement': 'top',
-        'html': true,
-        content() { return $('#popover-content').html(); }
-    });
-
-    // display popup on click
+    // Map click handler
     map.on('click', (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2) => {
-                return feature2;
-            });
+        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature2) => feature2);
+        
         if (feature) {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            const content = `<p><strong>${feature.get('name')}</strong><br />High: ${feature.get('high')}<br />Low: ${feature.get('low')}<br />Precip: ${feature.get('precip')}<br />Snow: ${feature.get('snow')}</p>`;
-            $('#popover-content').html(content);
-            $(element).popover('show');
-
-            $('#cf6report').html("<h3>Loading text, one moment please...</h3>");
-            $.get(feature.get('link'), (data) => {
-                $('#cf6report').html(`<pre>${data}</pre>`);
-            });
-
+            
+            const content = `
+                <div class="p-2">
+                    <h6 class="mb-2"><strong>${feature.get('name') || 'Unknown Station'}</strong></h6>
+                    <div class="row g-1 small">
+                        <div class="col-6"><strong>High:</strong> ${feature.get('high') || 'N/A'}</div>
+                        <div class="col-6"><strong>Low:</strong> ${feature.get('low') || 'N/A'}</div>
+                        <div class="col-6"><strong>Precip:</strong> ${feature.get('precip') || 'N/A'}</div>
+                        <div class="col-6"><strong>Snow:</strong> ${feature.get('snow') || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+            
+            showPopover(content);
+            
+            // Load CF6 report
+            const reportUrl = feature.get('link');
+            if (reportUrl) {
+                loadCF6Report(reportUrl);
+            }
         } else {
-            $(element).popover('hide');
+            hidePopover();
         }
-
     });
 
-    // Figure out if we have anything specified from the window.location
-    let tokens = window.location.href.split("#");
-    if (tokens.length === 2) {
-        // #YYYYmmdd/variable
-        tokens = tokens[1].split("/");
-        if (tokens.length === 2) {
-            const tpart = tokens[0];
-            renderattr = tokens[1];
-            $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
-            const dstr = `${tpart.slice(4, 6)}/${tpart.slice(6, 8)}/${tpart.slice(0, 4)}`;
-            $("#datepicker").datepicker("setDate", new Date(dstr));
-            updateDate();
-        }
+    // Handle legacy hash links and URL parameters
+    let initialParams = handleLegacyHashLinks();
+    if (!initialParams) {
+        initialParams = readURLParams();
+    }
+    
+    // Set initial values from URL parameters or use defaults
+    if (initialParams.date) {
+        dateInput.value = initialParams.date;
+    }
+    
+    if (initialParams.variable) {
+        renderattr = initialParams.variable;
+        const selectElement = document.getElementById('renderattr');
+        selectElement.value = renderattr;
+    }
+    
+    // Update map if we have parameters
+    if (initialParams.date || initialParams.variable) {
+        updateDate();
     }
 
-    // Font size buttons
-    $('#fplus').click(() => {
+    // Font size controls
+    document.getElementById('fplus').addEventListener('click', () => {
         fontSize += 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
-    $('#fminus').click(() => {
-        fontSize -= 2;
+    
+    document.getElementById('fminus').addEventListener('click', () => {
+        fontSize = Math.max(8, fontSize - 2); // Minimum font size of 8
         vectorLayer.setStyle(vectorStyleFunction);
     });
 
-    $('#renderattr').change(() => {
-        updateMap();
-    });
+    // Render attribute change handler
+    document.getElementById('renderattr').addEventListener('change', updateMap);
+}
 
-});
+// Initialize when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}

@@ -34,6 +34,7 @@ from io import BytesIO, StringIO
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
@@ -135,6 +136,12 @@ def get_res(state, year, phenomena, significance):
             )
             data["events"].append(
                 dict(
+                    ph_name=VTEC_PHENOMENA.get(
+                        row["phenomena"], row["phenomena"]
+                    ),
+                    sig_name=VTEC_SIGNIFICANCE.get(
+                        row["significance"], row["significance"]
+                    ),
                     phenomena=row["phenomena"],
                     significance=row["significance"],
                     eventid=row["eventid"],
