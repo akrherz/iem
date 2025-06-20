@@ -96,10 +96,15 @@ function updateTable(){
         loadingIndicator.classList.remove("d-none");
     }
     
-    document.getElementById("table1title").innerHTML = `
-        <i class="bi bi-table me-2"></i>SPS for Point: ${lon}°E ${lat}°N
-        <span id="result-count" class="badge bg-light text-dark ms-2">Loading...</span>
-    `;
+    const sanitizedLon = parseFloat(lon).toFixed(4);
+    const sanitizedLat = parseFloat(lat).toFixed(4);
+    document.getElementById("table1title").textContent = 
+        `SPS for Point: ${sanitizedLon}°E ${sanitizedLat}°N`;
+    const resultCountSpan = document.createElement("span");
+    resultCountSpan.id = "result-count";
+    resultCountSpan.className = "badge bg-light text-dark ms-2";
+    resultCountSpan.textContent = "Loading...";
+    document.getElementById("table1title").appendChild(resultCountSpan);
     
     // Prepare request data
     const params = new URLSearchParams({
