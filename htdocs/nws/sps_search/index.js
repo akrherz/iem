@@ -108,8 +108,8 @@ function updateTable(){
     
     // Prepare request data
     const params = new URLSearchParams({
-        lat: lat,
-        lon: lon,
+        lat,
+        lon,
         sdate: sdate.value,
         edate: edate.value
     });
@@ -229,8 +229,8 @@ function buildUI(){
         const lon = document.getElementById("lon").value;
         const params = new URLSearchParams({
             fmt: "xlsx",
-            lat: lat,
-            lon: lon,
+            lat,
+            lon,
             sdate: sdate.value,
             edate: edate.value
         });
@@ -242,8 +242,8 @@ function buildUI(){
         const lon = document.getElementById("lon").value;
         const params = new URLSearchParams({
             fmt: "csv",
-            lat: lat,
-            lon: lon,
+            lat,
+            lon,
             sdate: sdate.value,
             edate: edate.value
         });
