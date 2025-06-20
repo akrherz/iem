@@ -6,56 +6,132 @@ $t = new MyView();
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-<link rel="stylesheet" type="text/css" href="obhour.css"/>
+<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="obhour.css" rel="stylesheet">
 EOM;
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
-<script type="text/javascript" src="/vendor/ext/ux/StatusBar.js"></script>
-<script type="text/javascript" src="obhour.js?v=3"></script>
+<script src="obhour.module.js" type="module"></script>
 EOM;
 
 $t->title = "Hourly Precip Accumulator";
 
 $t->content = <<<EOM
-<div class="row">
-  <div class="col-md-12">
-    <h3><i class="fa fa-tint"></i> Hourly Precipitation Accumulator</h3>
-    <p class="lead">
-      View accumulated precipitation values over different time intervals for ASOS/AWOS stations.
-      The valid time reported is the ending time (e.g., 1 Hour value at 11 AM covers 10-11 AM).
-    </p>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div id="extjs-container" style="height: 600px;"></div>
-  </div>
-</div>
-
-<div class="row mt-3">
-  <div class="col-md-12">
-    <div class="card">
-      <div class="card-header">
-        <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" 
-                data-bs-target="#infoContent" aria-expanded="false" aria-controls="infoContent">
-          <i class="fa fa-info-circle"></i> Application Information
-        </button>
-      </div>
-      <div class="collapse" id="infoContent">
-        <div class="card-body">
-          <p>This application attempts to compute accumulated precip values over
-          different time intervals. The valid time reported is the ending time, so
-          the 1 Hour value at 11 AM would be for a period between 10-11 AM.</p>
-
-          <p>This application does not have data for the current hour. The database
-          is updated at the top of the hour for the previous hour.</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/rainfall/">Rainfall Tools</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Hourly Precipitation Accumulator</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex align-items-center mb-3">
+                <h2 class="mb-0 me-3">
+                    <i class="bi bi-cloud-rain-fill text-primary me-2"></i>
+                    Hourly Precipitation Accumulator
+                </h2>
+            </div>
+            
+            <div class="alert alert-info d-flex align-items-start mb-4">
+                <i class="bi bi-info-circle-fill me-2 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                <div>
+                    <strong>About This Tool:</strong> View accumulated precipitation values over different time intervals for ASOS/AWOS stations.
+                    The valid time reported is the ending time (e.g., 1 Hour value at 11 AM covers 10-11 AM).
+                    <br><strong>Note:</strong> Data updates at the top of each hour. Current hour data is not available.
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Controls Panel -->
+    <form id="precipitation-form" class="mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-sliders me-2"></i>Data Selection
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-3">
+                        <label for="network-select" class="form-label fw-medium">
+                            <i class="bi bi-geo-alt-fill me-1"></i>Network
+                        </label>
+                        <select id="network-select" name="network" class="form-select">
+                            <option value="">Select a Network...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-lg-2">
+                        <label for="date-select" class="form-label fw-medium">
+                            <i class="bi bi-calendar3 me-1"></i>Date
+                        </label>
+                        <input type="date" id="date-select" name="date" class="form-control">
+                    </div>
+                    
+                    <div class="col-lg-2">
+                        <label for="time-select" class="form-label fw-medium">
+                            <i class="bi bi-clock me-1"></i>Time
+                        </label>
+                        <select id="time-select" name="time" class="form-select">
+                        </select>
+                    </div>
+                    
+                    <div class="col-lg-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="auto-refresh">
+                            <label class="form-check-label fw-medium" for="auto-refresh">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Auto Refresh
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-download me-2"></i>Load Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Status and Downloads -->
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <div class="alert alert-secondary mb-0" role="status">
+                <i class="bi bi-info-circle me-2"></i>
+                <span id="status-message">Please select network and date/time to load data</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div id="download-buttons" class="d-none">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" id="download-csv" class="btn btn-success">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV
+                    </button>
+                    <button type="button" id="copy-clipboard" class="btn btn-secondary">
+                        <i class="bi bi-clipboard me-1"></i>Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Precipitation Data Table -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">
+                <i class="bi bi-table me-2"></i>
+                <span id="table-title">Accumulated Precipitation by Interval</span>
+            </h5>
+            <small id="table-subtitle" class="opacity-75"></small>
+        </div>
+        <div class="card-body p-0">
+            <div id="precipitation-table"></div>
+        </div>
+    </div>
 </div>
 
 EOM;

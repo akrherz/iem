@@ -1,0 +1,175 @@
+/* SPS Search Styling - Enhanced Bootstrap 5 Design */
+
+/* Main heading styling */
+.page-header {
+    background: linear-gradient(135deg, #0066cc, #004499);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+}
+
+/* Map container */
+.map {
+    width: 100%;
+    height: 400px;
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.map:hover {
+    border-color: #0d6efd;
+}
+
+/* Card enhancements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid #e9ecef;
+}
+
+.card-header {
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+.card-header.bg-light {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+}
+
+/* Tabulator table styling */
+#table1 {
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Form controls enhancements */
+.form-control {
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#lat, #lon {
+    margin-bottom: 0.5rem;
+}
+
+/* Button enhancements */
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    border-color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.btn-outline-success:hover {
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+/* Alert styling */
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+    background: linear-gradient(135deg, #d1ecf1, #b8daff);
+    border-color: #b8daff;
+}
+
+/* Icon enhancements */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Coordinate input section */
+.coordinates-section {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+/* Loading state */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .map {
+        height: 300px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Table responsive wrapper */
+.tabulator {
+    font-size: 0.875rem;
+}
+
+.tabulator-header {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+}
+
+.tabulator-row:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+/* Status indicators */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
