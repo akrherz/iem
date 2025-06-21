@@ -1,4 +1,4 @@
-/* global iemdata, ol, olSelectLonLat, Tabulator */
+/* global iemdata, ol, olSelectLonLat, Tabulator, bootstrap */
 
 // URL parameter management functions - removing hash linking approach
 function getURLParams() {
