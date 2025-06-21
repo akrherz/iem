@@ -73,7 +73,7 @@ const commonConfig = {
     resizableColumns: true,
     sortMode: "local",
     filterMode: "local",
-    responsiveLayout: "hide",
+    responsiveLayout: false, // Disable responsive hiding - use horizontal scroll instead
     tooltips: true,
     clipboard: true,
     clipboardCopyHeader: true,
