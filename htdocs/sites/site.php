@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
-$OL = "10.5.0";
+$OL = "10.6.1";
 $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;
@@ -264,8 +264,15 @@ $t->content = <<<EOM
 </div>
 <div class="card-body">
 
-<div id="mymap" style="height: 400px; width: 100%;" data-lat="{$lat}" data-lon="{$lon}"
-data-suggested-lat="{$suggested_lat}" data-suggested-lon="{$suggested_lon}"
+<div id="mymap" style="height: 400px; width: 100%;" 
+data-initial-lat="{$lat}" 
+data-initial-lon="{$lon}"
+data-suggested-lat="{$suggested_lat}" 
+data-suggested-lon="{$suggested_lon}"
+data-lat-input="newlat"
+data-lon-input="newlon"
+data-precision="8"
+data-zoom="14"
 data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
 
 <div class="mt-3">

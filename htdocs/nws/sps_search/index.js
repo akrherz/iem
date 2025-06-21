@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let default_lon = -93.653;
     let default_lat = 41.53;
 
-    const res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    const res = olSelectLonLat("map", updateMarkerPosition);
     marker = res.marker;
 
     // Handle legacy hash links first (convert to URL params)

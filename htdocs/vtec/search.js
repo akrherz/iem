@@ -62,8 +62,6 @@ let edate = null;
 let sdate = null;
 let edate1 = null;
 let sdate1 = null;
-let default_lon = -93.653;
-let default_lat = 41.53;
 const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
@@ -158,13 +156,6 @@ function updateMarkerPosition(lon, lat) {
 function updateMarkerPosition2(lon, lat) {
     document.getElementById("lat2").value = lat.toFixed(4);
     document.getElementById("lon2").value = lon.toFixed(4);
-    const buffer = parseFloat(document.querySelector('select[name="buffer2"]').value);
-    // Set clean URL parameters for this mode only
-    setModeParams('eventsbypoint', {
-        lon: lon.toFixed(4),
-        lat: lat.toFixed(4),
-        buffer: buffer.toFixed(2)
-    });
     updateTable2ByPoint();
 }
 function updateTable(){
@@ -260,7 +251,7 @@ function updateTable2ByPoint(){
     document.getElementById("table2title").textContent = title;
     
     // Set clean URL parameters for this mode only
-    setModeParams('byugc', { 
+    setModeParams('eventsbypoint', { 
         lat: document.getElementById("lat2").value,
         lon: document.getElementById("lon2").value,
         buffer: buffer.toString(),
@@ -1004,8 +995,6 @@ function processURLParams(){
             }
             
             if (!isNaN(lat) && !isNaN(lon)) {
-                default_lat = lat;
-                default_lon = lon;
                 if (!isNaN(buffer)) {
                     document.querySelector('select[name="buffer"]').value = buffer;
                 }
@@ -1024,12 +1013,10 @@ function processURLParams(){
             const lon2 = parseFloat(urlParams.get('lon'));
             const buffer2 = parseFloat(urlParams.get('buffer'));
             if (!isNaN(lat2) && !isNaN(lon2)) {
-                default_lat = lat2;
-                default_lon = lon2;
                 if (!isNaN(buffer2)) {
                     document.querySelector('select[name="buffer2"]').value = buffer2;
                 }
-                // Will be handled by marker initialization
+                updateMarkerPosition2(lon2, lat2);
             }
             break;
         }
@@ -1158,10 +1145,10 @@ function customDateTimeSorter(a, b) {
 function initializeApp() {
     buildUI();
     
-    const res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    const res1 = olSelectLonLat("map", updateMarkerPosition);
     marker1 = res1.marker;
-    const res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
-    marker2 = res2.marker;
+    const res2 = olSelectLonLat("map2", updateMarkerPosition2);
+    marker2 = res2.marker
 
     // Process URL parameters after markers are initialized
     processURLParams();

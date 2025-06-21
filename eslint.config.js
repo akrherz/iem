@@ -5,7 +5,7 @@ const globals = require("globals");
 module.exports = [
     // Ignore the ESLint configuration file itself
     {
-        ignores: ["eslint.config.js", "eslint.config.*.js"]
+        ignores: ["eslint.config.js", "htdocs/vtec/assets/*.js", "htdocs/lsr/static.js"]
     },
     js.configs.recommended,
     // Configuration for traditional script files (.js)

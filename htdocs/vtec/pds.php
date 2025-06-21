@@ -33,19 +33,21 @@ foreach ($json['events'] as $key => $val) {
 $t = new MyView();
 $t->title = "Particularly Dangerous Situation (PDS) Listing";
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
+<link type="text/css" href="pds.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
-<script src="pds.js"></script>
+<script type="module" src="pds.module.js?v=3"></script>
 EOM;
 
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">PDS List</li>
+ <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+ <li class="breadcrumb-item active" aria-current="page">PDS List</li>
 </ol>
+</nav>
 <h3>Particularly Dangerous Situation Watch/Warnings</h3>
 
 <p>This page presents the current and
@@ -68,15 +70,45 @@ directly access it here:
 
 <p>
 This listing was generated at: <code>{$json['generated_at']}</code> and is
-regenerated hourly. <button id="makefancy">Make Table Interactive</button></p>
+regenerated hourly. <button id="makefancy" class="btn btn-success">Make Table Interactive</button></p>
 
-<div id="thetable">
+<!-- Tabulator Table Controls (hidden initially) -->
+<div id="table-controls" class="d-none">
+    <div class="d-flex flex-wrap align-items-center">
+        <div class="btn-group me-3 mb-2">
+            <button id="download-csv" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+            <button id="download-json" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Download JSON
+            </button>
+        </div>
+        <div class="btn-group me-3 mb-2">
+            <button id="copy-clipboard" class="btn btn-outline-secondary">
+                <i class="fas fa-copy"></i> Copy to Clipboard
+            </button>
+            <button id="clear-filters" class="btn btn-outline-warning">
+                <i class="fas fa-filter"></i> Clear Filters
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Tabulator Table (hidden initially) -->
+<div id="tabulator-container" class="d-none">
+    <div id="pds-tabulator-table"></div>
+</div>
+
+<!-- Original Table (shown initially) -->
+<div id="original-table">
 <table class="table table-striped table-sm">
 <thead class="sticky">
 <tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
 <th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>
 </thead>
+<tbody>
 {$table}
+</tbody>
 </table>
 </div>
 
