@@ -131,7 +131,14 @@ $t->content = <<<EOM
                     <p class="small text-muted mb-3">
                         <i class="bi bi-hand-index me-1"></i>Drag the marker to select coordinates
                     </p>
-                    <div id="map" class="map"></div>
+                    <div
+                    id="map"
+                    data-initial-lat="41.53"
+                    data-initial-lon="-93.653"
+                    data-lat-input="lat"
+                    data-lon-input="lon"
+                    data-bingmapsapikey="{$BING_MAPS_API_KEY}
+                    class="map"></div>
                 </div>
             </div>
         </div>

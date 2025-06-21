@@ -6,7 +6,7 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "10.5.0";
+$OL = "10.6.1";
 
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
@@ -113,7 +113,12 @@ table.</p>
         <br /><button class="btn btn-secondary" id="manualpt">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />
-        <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+        <div id="map" class="map"
+         data-lat-input="lat"
+         data-lon-input="lon"
+         data-initial-lat="41.53"
+         data-initial-lon="-93.653"
+         data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
     </div>
     <div class="col-md-8">
     <h3>Results of Point Search</h3>

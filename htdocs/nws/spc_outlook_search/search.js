@@ -38,8 +38,6 @@ function updateURLParams(params = {}) {
 }
 
 function updateMarkerPosition(lon, lat) {
-    $("#lat").val(lat.toFixed(4));
-    $("#lon").val(lon.toFixed(4));
     updateURLParams({lon, lat});
     workflow();
 }
@@ -211,7 +209,7 @@ function readURLParams(){
 
 document.addEventListener("DOMContentLoaded", () => {
     buildUI();
-    const res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
+    const res = olSelectLonLat("map", updateMarkerPosition);
     marker = res.marker;
 
     // Legacy URLs used anchor tags, which we want to migrate to url parameters

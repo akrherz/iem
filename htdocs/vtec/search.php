@@ -5,9 +5,11 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
+$lat = isset($_GET['lat']) ? floatval($_GET['lat']) : 41.53;
+$lon = isset($_GET['lon']) ? floatval($_GET['lon']) : -93.653;
 $t = new MyView();
 $DT = "2.0.2";
-$OL = "10.5.0";
+$OL = "10.6.1";
 $t->jsextra = <<<EOM
 
 <script type="text/javascript" src="wfos.js"></script>
@@ -68,11 +70,11 @@ Warning, and Advisories using three different search methods:</p>
                                 <strong>Enter coordinates manually:</strong><br />
                                 <div class="mt-2">
                                     <label for="lat" class="form-label">Latitude (deg N):</label>
-                                    <input id="lat" value="41.53" class="form-control coordinate-input">
+                                    <input id="lat" value="{$lat}" class="form-control coordinate-input">
                                 </div>
                                 <div class="mt-2">
                                     <label for="lon" class="form-label">Longitude (deg E):</label>
-                                    <input id="lon" value="-93.653" class="form-control coordinate-input">
+                                    <input id="lon" value="{$lon}" class="form-control coordinate-input">
                                 </div>
                             </div>
                             
@@ -104,7 +106,14 @@ Warning, and Advisories using three different search methods:</p>
                         <div class="card-body">
                             <h6 class="card-title"><i class="fa fa-mouse-pointer me-2"></i>Interactive Map</h6>
                             <p class="card-text">Drag the marker to select coordinates:</p>
-                            <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+                            <div
+                             id="map"
+                             class="map"
+                             data-initial-lat="{$lat}"
+                             data-initial-lon="{$lon}"
+                             data-lat-input="lat"
+                             data-lon-input="lon"
+                             data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
                         </div>
                     </div>
                 </div>
@@ -224,11 +233,11 @@ Warning, and Advisories using three different search methods:</p>
                             <div class="coordinate-section">
                                 <div class="mb-2">
                                     <label for="lat2" class="form-label">Latitude (deg N):</label>
-                                    <input id="lat2" value="41.53" class="form-control coordinate-input">
+                                    <input id="lat2" value="{$lat}" class="form-control coordinate-input">
                                 </div>
                                 <div class="mb-2">
                                     <label for="lon2" class="form-label">Longitude (deg E):</label>
-                                    <input id="lon2" value="-93.653" class="form-control coordinate-input">
+                                    <input id="lon2" value="{$lon}" class="form-control coordinate-input">
                                 </div>
                             </div>
                             
@@ -250,7 +259,13 @@ Warning, and Advisories using three different search methods:</p>
                         <div class="card-body">
                             <h6 class="card-title"><i class="fa fa-mouse-pointer me-2"></i>Interactive Map</h6>
                             <p class="card-text">Drag the marker to select coordinates:</p>
-                            <div id="map2" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+                            <div
+                             id="map2"
+                             data-initial-lat="{$lat}"
+                             data-initial-lon="{$lon}"
+                             data-lat-input="lat2"
+                             data-lon-input="lon2"
+                             class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
                         </div>
                     </div>
                 </div>

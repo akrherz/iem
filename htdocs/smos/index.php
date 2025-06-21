@@ -5,7 +5,7 @@ force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 // custom code in smosmap.js that will need replaced...
-$OL = "10.5.0";
+$OL = "10.6.1";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->headextra = <<<EOM
@@ -80,7 +80,12 @@ to request a point outside of the domain.  Data is available since
   </tr>
 </table>
 </div><div class="col-md-6">
-<div id="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+<div id="map"
+ data-initial-lat="42.0"
+ data-initial-lon="-93.0"
+ data-lat-input="lat"
+ data-lon-input="lon"
+ data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
 
 </div></div>
 
