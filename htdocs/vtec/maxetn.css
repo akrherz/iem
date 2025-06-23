@@ -1,0 +1,83 @@
+/* VTEC Max ETN Table Styling */
+
+/* Loading indicator styling */
+#loading-indicator .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Tabulator responsive improvements */
+.tabulator {
+    font-size: 0.875rem;
+}
+
+.tabulator .tabulator-header {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    background-color: transparent;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    color: white;
+    font-weight: 600;
+}
+
+.tabulator .tabulator-row:hover {
+    background-color: var(--bs-light);
+}
+
+.tabulator .tabulator-row.tabulator-row-even {
+    background-color: var(--bs-gray-50);
+}
+
+/* Custom button styling for event ID links */
+.tabulator .btn-outline-primary {
+    --bs-btn-padding-y: 0.25rem;
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-font-size: 0.75rem;
+}
+
+/* Pagination styling */
+.tabulator .tabulator-footer {
+    background-color: var(--bs-light);
+    border-top: 2px solid var(--bs-primary);
+}
+
+/* Filter input styling */
+.tabulator .tabulator-header-filter input {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-sm);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Card improvements */
+.card-header .card-title {
+    color: var(--bs-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tabulator {
+        font-size: 0.75rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* API URL input styling */
+.font-monospace {
+    font-size: 0.875rem;
+}
+
+/* Alert improvements */
+.alert-info {
+    border-left: 4px solid var(--bs-info);
+}
