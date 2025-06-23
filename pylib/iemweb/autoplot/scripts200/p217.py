@@ -8,12 +8,13 @@ from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import httpx
-from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
-from pyiem.util import LOG
+from pyiem.util import LOG, utc
+from sqlalchemy.engine import Connection
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 UNITS = {
@@ -56,39 +57,42 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("postgis")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
     pid = ctx["pid"][:35]
-    if len(pid) < 30 or not pid[0].isdigit():
+    if len(pid) < 30 or any(not pid[x].isdigit() for x in range(4)):
+        raise NoDataFound("Invalid pid provided.")
+    prodyear = int(pid[:4])
+    if prodyear < 1980 or prodyear > utc().year + 1:
         raise NoDataFound("Invalid pid provided.")
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 
     # Compute a population estimate
-    popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
-    with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
-            sql_helper(
-                """
-                with geopop as (
-                    select sum(population) as pop from {spstable} s,
-                    {gpwtable} g WHERE s.product_id = :pid and
-                    ST_Contains(s.geom, g.geom) and segmentnum = :segnum
-                )
-                SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
-                max_hail_size, max_wind_gust, segmentnum,
-                coalesce(pop, 0) as pop
-                from {spstable}, geopop where product_id = :pid
-                and segmentnum = :segnum
-                """,
-                gpwtable=f"gpw{popyear}",
-                spstable=f"sps_{pid[:4]}",
-            ),
-            conn,
-            params={"pid": pid, "segnum": segnum},
-            index_col=None,
-            geom_col="geom",
-        )  # type: ignore
+    popyear = min(max([prodyear - prodyear % 5, 2000]), 2020)
+    df = gpd.read_postgis(
+        sql_helper(
+            """
+            with geopop as (
+                select sum(population) as pop from {spstable} s,
+                {gpwtable} g WHERE s.product_id = :pid and
+                ST_Contains(s.geom, g.geom) and segmentnum = :segnum
+            )
+            SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
+            max_hail_size, max_wind_gust, segmentnum,
+            coalesce(pop, 0) as pop
+            from {spstable}, geopop where product_id = :pid
+            and segmentnum = :segnum
+            """,
+            gpwtable=f"gpw{popyear}",
+            spstable=f"sps_{pid[:4]}",
+        ),
+        conn,
+        params={"pid": pid, "segnum": segnum},
+        index_col=None,
+        geom_col="geom",
+    )  # type: ignore
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
     row = df.iloc[0]
@@ -104,33 +108,32 @@ def plotter(ctx: dict):
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
-        with get_sqlalchemy_conn("postgis") as conn:
-            for source in ["z", "fz", "mz"]:
-                ugcdf = gpd.read_postgis(
-                    sql_helper(
-                        """
-                        SELECT simple_geom, ugc, {gpwcol}
-                        as pop from ugcs where wfo = :wfo and ugc = ANY(:ugcs)
-                        and (end_ts is null or end_ts > :expire) and
-                        source = :source
-                        """,
-                        gpwcol=f"gpw_population_{popyear}",
-                    ),
-                    conn,
-                    params={
-                        "wfo": WFOCONV.get(wfo, wfo),
-                        "ugcs": row["ugcs"],
-                        "expire": expire,
-                        "source": source,
-                    },
-                    geom_col="simple_geom",
-                )  # type: ignore
-                if not ugcdf.empty:
-                    if source == "fz":
-                        is_fwx = True
-                    break
-            if ugcdf.empty:
-                raise NoDataFound("No UGCs found for this SPS, sorry.")
+        for source in ["z", "fz", "mz"]:
+            ugcdf = gpd.read_postgis(
+                sql_helper(
+                    """
+                    SELECT simple_geom, ugc, {gpwcol}
+                    as pop from ugcs where wfo = :wfo and ugc = ANY(:ugcs)
+                    and (end_ts is null or end_ts > :expire) and
+                    source = :source
+                    """,
+                    gpwcol=f"gpw_population_{popyear}",
+                ),
+                conn,
+                params={
+                    "wfo": WFOCONV.get(wfo, wfo),
+                    "ugcs": row["ugcs"],
+                    "expire": expire,
+                    "source": source,
+                },
+                geom_col="simple_geom",
+            )  # type: ignore
+            if not ugcdf.empty:
+                if source == "fz":
+                    is_fwx = True
+                break
+        if ugcdf.empty:
+            raise NoDataFound("No UGCs found for this SPS, sorry.")
         bounds = ugcdf["simple_geom"].total_bounds
         population = ugcdf["pop"].sum()
     else:
