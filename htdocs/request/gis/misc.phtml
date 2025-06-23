@@ -7,45 +7,80 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Download Misc NWS Polygons in Shapefile/KML";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">NWS Misc Polygons Download</li>
-</ul>
-</p>
+<div class="container-fluid">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">NWS Misc Polygons Download</li>
+  </ol>
+</nav>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
-&nbsp;
-<a class="btn btn-primary" href="outlooks.phtml">SPC/WPC Outlooks</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="sps.phtml">SPS Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="wpc_mpd.phtml">WPC MPDs</a>
-</p>
+<div class="mb-4">
+  <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Services</h5>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="watchwarn.phtml">
+      <i class="bi bi-exclamation-triangle"></i> NWS VTEC Watch Warning Advisory
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_mcd.phtml">
+      <i class="bi bi-chat-square-text"></i> SPC Convective Discussions
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="outlooks.phtml">
+      <i class="bi bi-eye"></i> SPC/WPC Outlooks
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_watch.phtml">
+      <i class="bi bi-shield-exclamation"></i> SPC Watch Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="sps.phtml">
+      <i class="bi bi-megaphone"></i> SPS Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="wpc_mpd.phtml">
+      <i class="bi bi-cloud-rain"></i> WPC MPDs
+    </a>
+  </div>
+</div>
 
-<p>This miscellaneous service provides polygons associated with NWS Products that
-were not SPS or VTEC enabled.  These include civil emergency messages, fire weather
-warnings, and others.</p>
+<div class="alert alert-info" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-info-circle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <p class="mb-2">This miscellaneous service provides polygons associated with NWS Products that
+      were not SPS or VTEC enabled. These include civil emergency messages, fire weather
+      warnings, and others.</p>
+      <a href="/cgi-bin/request/gis/misc.py?help" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-file-text"></i> Backend Documentation
+      </a>
+    </div>
+  </div>
+</div>
 
-<p><a class="btn btn-primary" href="/cgi-bin/request/gis/misc.py?help"><i class="fa fa-file"></i> Backend documentation</a>
-for those wishing to script against this download portal.</p>
-
-<form method="GET" action="/cgi-bin/request/gis/misc.py">
-<table class="table">
-<thead><tr><th colspan="6">Time Interval for Issuance TIme (UTC)</th></tr></thead>
-<tr>
-    <td></td><th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-</tr>
-
-<tr>
+<form method="GET" action="/cgi-bin/request/gis/misc.py" class="mb-4">
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-calendar-range"></i> Time Interval for Issuance Time (UTC)
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Year</th>
+            <th scope="col">Month</th>
+            <th scope="col">Day</th>
+            <th scope="col">Hour</th>
+            <th scope="col">Minute</th>
+          </tr>
+        </thead>
+        <tbody>
 EOM;
-$content .= "<th>Start:</th>
+$content .= "<tr>
+    <th scope=\"row\" class=\"text-success\">
+      <i class=\"bi bi-play-fill\"></i> Start:
+    </th>
     <td>
      ". yearSelect(2022, date("Y"), "year1") ."
     </td>
@@ -64,7 +99,9 @@ $content .= "<th>Start:</th>
   </tr>
 
   <tr>
-    <th>End:</th>
+    <th scope=\"row\" class=\"text-danger\">
+      <i class=\"bi bi-stop-fill\"></i> End:
+    </th>
     <td>
      ". yearSelect(2022, date("Y"), "year2") ."
     </td>
@@ -81,36 +118,102 @@ $content .= "<th>Start:</th>
      ". minuteSelect(0, "minute2") ."
     </td>
   </tr>
-</table>";
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>";
 
 $content .= <<<EOM
 
-<p><strong>Format:</strong><br />
-<input type="radio" name="format" value="shp" checked="checked" id="shp" />
-<label for="shp">Shapefile</label>
-<input type="radio" name="format" value="kml" id="kml" />
-<label for="kml">KML</label>
-<input type="radio" name="format" value="csv" id="csv" />
-<label for="csv">CSV</label>
-<input type="radio" name="format" value="excel" id="excel" />
-<label for="excel">Excel</label>
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-download"></i> Download Format
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="shp" id="shp" checked>
+          <label class="form-check-label" for="shp">
+            <i class="bi bi-file-earmark-zip text-primary"></i> Shapefile
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="kml" id="kml">
+          <label class="form-check-label" for="kml">
+            <i class="bi bi-geo-alt text-warning"></i> KML
+          </label>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="csv" id="csv">
+          <label class="form-check-label" for="csv">
+            <i class="bi bi-filetype-csv text-success"></i> CSV
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="excel" id="excel">
+          <label class="form-check-label" for="excel">
+            <i class="bi bi-file-earmark-excel text-success"></i> Excel
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<p><input type="submit" value="Giveme data right now!"></p>
+<div class="d-grid gap-2 mb-4">
+  <button type="submit" class="btn btn-primary btn-lg">
+    <i class="bi bi-download"></i> Download Data
+  </button>
+</div>
 </form>
 
-<h4>Shapefile DBF schema:</h4>
-<pre>
-Field 0: Type=C/String, Title='PIL' Six character AWIPS/AFOS ID
-Field 1: Type=C/String, Title='ISSUE', Issuance UTC Time
-Field 2: Type=C/String, Title='EXPIRE', Expiration UTC Time
-Field 3: Type=C/String, Title='PROD_ID', IEM NWS Text Product Identifier, which
-         can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service.
-</pre>
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table"></i> Shapefile DBF Schema
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>PIL</code></td><td>Six character AWIPS/AFOS ID</td></tr>
+          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>Issuance UTC Time</td></tr>
+          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>Expiration UTC Time</td></tr>
+          <tr><td>3</td><td><span class="badge bg-info">String</span></td><td><code>PROD_ID</code></td><td>IEM NWS Text Product Identifier, which can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<h4>Archive / Usage Notes:</h4>
-<ol>
-</ol>
-</form>
+<div class="card">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-info-circle"></i> Archive / Usage Notes
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-secondary" role="alert">
+      <strong><i class="bi bi-info-circle"></i> Note:</strong> This service provides access to miscellaneous NWS polygon data that is not available through other specialized services.
+    </div>
+  </div>
+</div>
+</div>
 EOM;
 
 $t->content = $content;

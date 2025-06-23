@@ -7,51 +7,96 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Download SPC Convective/Fire Weather WPC Excessive Rainfall Outlooks Shapefile";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">SPC Convective and Fire Weather + WPC Excessive Rainfall Outlooks</li>
-</ul>
-</p>
+<div class="container-fluid">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">SPC Convective and Fire Weather + WPC Excessive Rainfall Outlooks</li>
+  </ol>
+</nav>
 
-<p>The IEM attempts to process and archive the convective and fire weather
-outlooks issued by the Storm Prediction Center and the excessive rainfall 
-outlooks issued by the Weather Prediction Center. This processing is done by
-parsing the PTS product via <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/spcpts.py">pyIEM decoder</a>. 
-Recently, the SPC website has added direct single outlook downloads in various
-GIS formats. 
-<strong>Your best data quality will come from scraping their website</strong>, but
-maybe that approach is not for all users of this data! So here it is, a means
-to bulk download the IEM's SPC/WPC Outlook database.</p>
+<div class="alert alert-info" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-info-circle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <p class="mb-2">The IEM attempts to process and archive the convective and fire weather
+      outlooks issued by the Storm Prediction Center and the excessive rainfall 
+      outlooks issued by the Weather Prediction Center. This processing is done by
+      parsing the PTS product via <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/spcpts.py">pyIEM decoder</a>.</p>
+      <p class="mb-2">Recently, the SPC website has added direct single outlook downloads in various
+      GIS formats. <strong>Your best data quality will come from scraping their website</strong>, but
+      maybe that approach is not for all users of this data! So here it is, a means
+      to bulk download the IEM's SPC/WPC Outlook database.</p>
+      <a href="/cgi-bin/request/gis/spc_outlooks.py?help" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-file-text"></i> Backend Documentation
+      </a>
+    </div>
+  </div>
+</div>
 
-<p><a href="/cgi-bin/request/gis/spc_outlooks.py?help" class="btn btn-secondary">
-<i class="fa fa-file"></i> Backend documentation</a> exists for those wishing to
-script against this service. Due to processing constraints, requests are limited
-to 10 single outlook type-years at a time.</p>
+<div class="alert alert-warning" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <strong>Processing Limit:</strong> Due to processing constraints, requests are limited
+      to 10 single outlook type-years at a time.
+    </div>
+  </div>
+</div>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="misc.phtml">NWS Misc Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
-</p>
+<div class="mb-4">
+  <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Services</h5>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="misc.phtml">
+      <i class="bi bi-geo"></i> NWS Misc Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="watchwarn.phtml">
+      <i class="bi bi-exclamation-triangle"></i> NWS VTEC Watch Warning Advisory
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_mcd.phtml">
+      <i class="bi bi-chat-square-text"></i> SPC Convective Discussions
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_watch.phtml">
+      <i class="bi bi-shield-exclamation"></i> SPC Watch Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="wpc_mpd.phtml">
+      <i class="bi bi-cloud-rain"></i> WPC Precip Discussions
+    </a>
+  </div>
+</div>
 
-<form method="GET" action="/cgi-bin/request/gis/spc_outlooks.py">
-<table class="table">
-<thead><tr><th colspan="6">Time Interval for Outlook *Issuance* (UTC)</th></tr></thead>
-<tr>
-    <td></td><th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th><th>Outlook Type:</th><th>Outlook Day:</th>
-</tr>
-
-<tr>
+<form method="GET" action="/cgi-bin/request/gis/spc_outlooks.py" class="mb-4">
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-calendar-range"></i> Time Interval for Outlook Issuance (UTC)
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Year</th>
+            <th scope="col">Month</th>
+            <th scope="col">Day</th>
+            <th scope="col">Hour</th>
+            <th scope="col">Minute</th>
+            <th scope="col">Outlook Type</th>
+            <th scope="col">Outlook Day</th>
+          </tr>
+        </thead>
+        <tbody>
 EOM;
-$content .= "<th>Start:</th>
+$content .= "<tr>
+    <th scope=\"row\" class=\"text-success\">
+      <i class=\"bi bi-play-fill\"></i> Start:
+    </th>
     <td>
      " . yearSelect(1987, date("Y"), "year1") . "
     </td>
@@ -67,36 +112,72 @@ $content .= "<th>Start:</th>
     <td>
      " . minuteSelect(0, "minute1") . "
     </td>
-    <td rowspan=\"2\">
-    <input id=\"tc\" type=\"checkbox\" name=\"type\" value=\"C\" checked>
-    <label for=\"tc\">Convective (1987+)</label>
-    <br /><input id=\"te\" type=\"checkbox\" name=\"type\" value=\"E\" checked>
-    <label for=\"te\">Excessive Rainfall (2019+)</label>
-    <br /><input id=\"tf\" type=\"checkbox\" name=\"type\" value=\"F\" checked>
-    <label for=\"tf\">Fire Weather (2006+)</label>
+    <td rowspan=\"2\" class=\"align-middle\">
+      <div class=\"form-check\">
+        <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"C\" id=\"tc\" checked>
+        <label class=\"form-check-label\" for=\"tc\">
+          <i class=\"bi bi-cloud-lightning text-warning\"></i> Convective (1987+)
+        </label>
+      </div>
+      <div class=\"form-check\">
+        <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"E\" id=\"te\" checked>
+        <label class=\"form-check-label\" for=\"te\">
+          <i class=\"bi bi-cloud-rain text-primary\"></i> Excessive Rainfall (2019+)
+        </label>
+      </div>
+      <div class=\"form-check\">
+        <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"F\" id=\"tf\" checked>
+        <label class=\"form-check-label\" for=\"tf\">
+          <i class=\"bi bi-fire text-danger\"></i> Fire Weather (2006+)
+        </label>
+      </div>
     </td>
-    <td rowspan=\"2\">
-    <input id=\"d1\" type=\"checkbox\" name=\"d\" value=\"1\" checked>
-    <label for=\"d1\">1</label>
-    <input id=\"d2\" type=\"checkbox\" name=\"d\" value=\"2\" checked>
-    <label for=\"d2\">2</label>
-    <input id=\"d3\" type=\"checkbox\" name=\"d\" value=\"3\" checked>
-    <label for=\"d3\">3</label>
-    <input id=\"d4\" type=\"checkbox\" name=\"d\" value=\"4\" checked>
-    <label for=\"d4\">4</label><br />
-    <input id=\"d5\" type=\"checkbox\" name=\"d\" value=\"5\" checked>
-    <label for=\"d5\">5</label>
-    <input id=\"d6\" type=\"checkbox\" name=\"d\" value=\"6\" checked>
-    <label for=\"d6\">6</label>
-    <input id=\"d7\" type=\"checkbox\" name=\"d\" value=\"7\" checked>
-    <label for=\"d7\">7</label>
-    <input id=\"d8\" type=\"checkbox\" name=\"d\" value=\"8\" checked>
-    <label for=\"d8\">8</label>
+    <td rowspan=\"2\" class=\"align-middle\">
+      <div class=\"row g-2\">
+        <div class=\"col-6\">
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"1\" id=\"d1\" checked>
+            <label class=\"form-check-label\" for=\"d1\">1</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"2\" id=\"d2\" checked>
+            <label class=\"form-check-label\" for=\"d2\">2</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"3\" id=\"d3\" checked>
+            <label class=\"form-check-label\" for=\"d3\">3</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"4\" id=\"d4\" checked>
+            <label class=\"form-check-label\" for=\"d4\">4</label>
+          </div>
+        </div>
+        <div class=\"col-6\">
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"5\" id=\"d5\" checked>
+            <label class=\"form-check-label\" for=\"d5\">5</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"6\" id=\"d6\" checked>
+            <label class=\"form-check-label\" for=\"d6\">6</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"7\" id=\"d7\" checked>
+            <label class=\"form-check-label\" for=\"d7\">7</label>
+          </div>
+          <div class=\"form-check form-check-inline\">
+            <input class=\"form-check-input\" type=\"checkbox\" name=\"d\" value=\"8\" id=\"d8\" checked>
+            <label class=\"form-check-label\" for=\"d8\">8</label>
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 
   <tr>
-    <th>End:</th>
+    <th scope=\"row\" class=\"text-danger\">
+      <i class=\"bi bi-stop-fill\"></i> End:
+    </th>
     <td>
      " . yearSelect(1987, date("Y"), "year2") . "
     </td>
@@ -113,53 +194,114 @@ $content .= "<th>Start:</th>
      " . minuteSelect(0, "minute2") . "
     </td>
   </tr>
-</table>";
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>";
 
 $content .= <<<EOM
-<input type="radio" name="geom" value="geom_layers" id="geom_layers">
-<label for="geom_layers">Geometries as 'Cake Layers'</label>
 
-<input type="radio" name="geom" value="geom" id="geom" checked="checked">
-<label for="geom">Geometries as 'Cookie Cutters'</label>
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-gear"></i> Geometry Options
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="geom" value="geom_layers" id="geom_layers">
+      <label class="form-check-label" for="geom_layers">
+        <i class="bi bi-layers text-info"></i> <strong>Geometries as 'Cake Layers'</strong>
+        <div class="text-muted small">Includes all overlapping risk levels for each location</div>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="geom" value="geom" id="geom" checked>
+      <label class="form-check-label" for="geom">
+        <i class="bi bi-cookie text-warning"></i> <strong>Geometries as 'Cookie Cutters'</strong>
+        <div class="text-muted small">Shows only the highest risk level for each location</div>
+      </label>
+    </div>
+  </div>
+</div>
 
-<p><input type="submit" value="Giveme data right now!">
+<div class="d-grid gap-2 mb-4">
+  <button type="submit" class="btn btn-primary btn-lg">
+    <i class="bi bi-download"></i> Download Data
+  </button>
+</div>
 </form>
 
-<h4>Shapefile DBF schema:</h4>
-<pre>
-Field 0: Type=C/String, Title='ISSUE', Outlook Beginning Valid Time UTC
-Field 1: Type=C/String, Title='EXPIRE', Outlook Ending Valid Time UTC
-Field 2: Type=C/String, Title='PRODISS', Timestamp of Product Issuance UTC
-Field 3: Type=C/String, Title='TYPE', Either C=Convective, F=Fire Weather
-Field 4: Type=N/Double, Title='DAY', Day 1 through 8 for the outlook
-Field 5: Type=C/String, Title='THRESHOLD', Threshold Label
-Field 6: Type=C/String, Title='CATEGORY', Category of Threshold Label
-Field 7: Type=N/Double, Title='CYCLE', The generalized forecast issuance hour
-</pre>
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table"></i> Shapefile DBF Schema
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>Outlook Beginning Valid Time UTC</td></tr>
+          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>Outlook Ending Valid Time UTC</td></tr>
+          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>PRODISS</code></td><td>Timestamp of Product Issuance UTC</td></tr>
+          <tr><td>3</td><td><span class="badge bg-info">String</span></td><td><code>TYPE</code></td><td>Either C=Convective, F=Fire Weather</td></tr>
+          <tr><td>4</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>DAY</code></td><td>Day 1 through 8 for the outlook</td></tr>
+          <tr><td>5</td><td><span class="badge bg-info">String</span></td><td><code>THRESHOLD</code></td><td>Threshold Label</td></tr>
+          <tr><td>6</td><td><span class="badge bg-info">String</span></td><td><code>CATEGORY</code></td><td>Category of Threshold Label</td></tr>
+          <tr><td>7</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>CYCLE</code></td><td>The generalized forecast issuance hour</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<h4>Archive / Usage Notes:</h4>
-<ol>
- <li><strong>11 Jul 2023:</strong> The archive was reprocessed to allow for
- specification of returned geometries in either "cake layer" or "cookie cutter"
- form.  This gets complex to explain, but hopefully as a simple example: If you
- are under a "Moderate Risk", the cake layer form would include polygons with
- thresholds of general thunderstorm, marginal, slight, and enhanced for your
- location: the cookie cutter form would just have a moderate polygon covering
- your location.</li>
- <li><strong>1 Apr 2021:</strong> An assessment was made of the archive
- completeness and found 99.9% coverage.  Some of the holes are due to
- lost PTS text products yet to be found and others are due to errors within
- the PTS product causing it to be generally unusable.</li>
- <li>A complication with using this dataset is that all outlooks are returned, the
- <code>CYCLE</code> attribute attempts to define a canonical outlook for a given
- issuance cycle.  For example, the Day 1 20Z convective outlook may get issued three
- times for various reasons.  The download contains all three, but two of them will
- have a cycle of `-1` and the other will have a `20`.</li>
- <li>Presently, the service only returns outlooks that had actual geographies
- associated with the outlook.  For example, if there was no Day 5 area in the
- outlook, no entries are included in the download result.</li>
-</ol>
-</form>
+<div class="card">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-info-circle"></i> Archive / Usage Notes
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-primary" role="alert">
+      <strong><i class="bi bi-calendar-event"></i> 11 Jul 2023:</strong> The archive was reprocessed to allow for
+      specification of returned geometries in either "cake layer" or "cookie cutter"
+      form. This gets complex to explain, but hopefully as a simple example: If you
+      are under a "Moderate Risk", the cake layer form would include polygons with
+      thresholds of general thunderstorm, marginal, slight, and enhanced for your
+      location: the cookie cutter form would just have a moderate polygon covering
+      your location.
+    </div>
+    <div class="alert alert-success" role="alert">
+      <strong><i class="bi bi-check-circle"></i> 1 Apr 2021:</strong> An assessment was made of the archive
+      completeness and found 99.9% coverage. Some of the holes are due to
+      lost PTS text products yet to be found and others are due to errors within
+      the PTS product causing it to be generally unusable.
+    </div>
+    <div class="alert alert-info" role="alert">
+      <strong><i class="bi bi-arrow-repeat"></i> Cycle Handling:</strong> A complication with using this dataset is that all outlooks are returned, the
+      <code>CYCLE</code> attribute attempts to define a canonical outlook for a given
+      issuance cycle. For example, the Day 1 20Z convective outlook may get issued three
+      times for various reasons. The download contains all three, but two of them will
+      have a cycle of <code>-1</code> and the other will have a <code>20</code>.
+    </div>
+    <div class="alert alert-warning" role="alert">
+      <strong><i class="bi bi-geo"></i> Geography Filter:</strong> Presently, the service only returns outlooks that had actual geographies
+      associated with the outlook. For example, if there was no Day 5 area in the
+      outlook, no entries are included in the download result.
+    </div>
+  </div>
+</div>
+</div>
 EOM;
 
 $t->content = $content;
