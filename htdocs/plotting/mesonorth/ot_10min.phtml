@@ -42,73 +42,305 @@ $p = sprintf(
 );
 
 $t->content = <<<EOM
-<nav aria-label="breadcrumb">
-<ol class="breadcrumb">
-<li class="breadcrumb-item"><a href="/other/">Other Networks</a></li>
-<li class="breadcrumb-item active" aria-current="page">B548 Agronomy Server Room</li>
-</ol>
-</nav>
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/other/">Other Networks</a></li>
+            <li class="breadcrumb-item active" aria-current="page">B548 Agronomy Server Room</li>
+        </ol>
+    </nav>
 
-<p>The IEM server resides in a room that is climate controlled by a 
-dedicated heat exchanger.  This page presents daily plots of logged 
-temperatures.  There are four one-wire sensors measuring ambient temperature.
-The arrangement of these sensors has changed over the years. 
-The current temperature observation points are:
-<ul>
- <li><b>In Air Handler:</b> Located at 5 feet above the floor at the 
-intake of the heat exchanger.</li>
- <li><b>Out Air Handler:</b> Located below the sub floor where the
-cooled air departs the heat exchanger.</li>
- <li><b>In Rack:</b> Located on the front door of the rack at about 1 meter
- height.</li>
- <li><b>Out Rack:</b> Located at the back of the rack at about 1 meter
- height.</li>
-</ul>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-thermometer-half"></i> Server Room Climate Monitoring</h4>
+                <p>The IEM server resides in a room that is climate controlled by a dedicated heat exchanger. This page presents daily plots of logged temperatures from four one-wire sensors measuring ambient temperature.</p>
+                <hr>
+                <p class="mb-0"><strong>Note:</strong> The archive begins July 24, 2003.</p>
+            </div>
+        </div>
+    </div>
 
-<br>Note that the archive begins 24 Jul 2003.</p>
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calendar-date"></i> Select Date
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="ot_10min.phtml" class="d-flex flex-column gap-3">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label for="year" class="form-label small">Year</label>
+                                {$ys}
+                            </div>
+                            <div class="col-4">
+                                <label for="month" class="form-label small">Month</label>
+                                {$ms}
+                            </div>
+                            <div class="col-4">
+                                <label for="day" class="form-label small">Day</label>
+                                {$ds}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-graph-up"></i> Generate Plot
+                        </button>
+                    </form>
 
-  <form method="GET" action="ot_10min.phtml">
-{$ys} {$ms} {$ds}
+                    <hr>
 
-  <input type="submit" value="Make Plot"></form>
-<p><a href="{$p}">View Previous Day</a> 
-&nbsp; &nbsp; <a href="{$n}">View Next Day</a> 
+                    <div class="d-flex justify-content-between">
+                        <a href="{$p}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-chevron-left"></i> Previous Day
+                        </a>
+                        <a href="{$n}" class="btn btn-outline-secondary btn-sm">
+                            Next Day <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<br>
-  <img src="{$url}" alt="Time Series" class="img-fluid">
-<br>
-{$battery}
-<br>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-cpu"></i> Temperature Sensor Locations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-primary bg-opacity-25 rounded-circle p-2">
+                                        <i class="bi bi-arrow-down text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">In Air Handler</div>
+                                    <small class="text-muted">5 feet above floor at heat exchanger intake</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-info bg-opacity-25 rounded-circle p-2">
+                                        <i class="bi bi-arrow-up text-info"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Out Air Handler</div>
+                                    <small class="text-muted">Below sub floor where cooled air departs</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-warning bg-opacity-25 rounded-circle p-2">
+                                        <i class="bi bi-hdd-rack text-warning"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">In Rack</div>
+                                    <small class="text-muted">Front door of rack at 1 meter height</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-danger bg-opacity-25 rounded-circle p-2">
+                                        <i class="bi bi-hdd-rack-fill text-danger"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Out Rack</div>
+                                    <small class="text-muted">Back of rack at 1 meter height</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p>
-<strong>Interesting Data Traces</strong>
-<ul>
- <li><a href="ot_10min.phtml?year=2008&month=05&day=16">16 May 2008</a> 
-  <br />Agronomy building looses chilled water supply, the heat exchanger
-  later gets backed up on local 'cooler' water.</li>
- <li><a href="ot_10min.phtml?year=2010&month=06&day=14">14 Jun 2010</a> 
-  <br />ISU Campus takes a power bump knocking out various utilities.</li>
- <li><a href="ot_10min.phtml?year=2010&month=08&day=11">11 Aug 2010</a> 
-  <br />Flooding impacts ISU campus and the chilled water is shut off for a while.</li>
- <li><a href="ot_10min.phtml?year=2013&month=06&day=24">24 Jun 2013</a> 
-  <br />Chilled water is turned off for an hour to check metering.</li>
- <li><a href="ot_10min.phtml?year=2016&month=8&day=9">9 Aug 2016</a>
-  <br />Fan bracket is repaired on heat exchanger.</li>
-  <li><a href="ot_10min.phtml?year=2019&month=4&day=10">10 Apr 2019</a>
-  <br />Lightning strike knocks out chilled water and then power surge
-  knocks out a few servers.</li>
-  <li><a href="ot_10min.phtml?year=2020&month=4&day=11">11 Apr 2020</a>
-  <br />ISU FP&amp;M shuts down chilled water supply to do some local
-  construction work.</li>
-  <li><a href="ot_10min.phtml?year=2022&month=3&day=18">18 Mar 2022</a>
-  <br />ISU FP&amp;M shuts down chilled water supply to do some local
-  construction work.</li>
-  <li><a href="ot_10min.phtml?year=2022&month=3&day=22">22 Mar 2022</a>
-  <br />ISU FP&amp;M shuts down chilled water supply to do some local
-  construction work.</li>
-  <li><a href="ot_10min.phtml?year=2023&month=8&day=24">24 Aug 2023</a>
-  <br />Fire at ISU FP&amp;M shuts down chilled water supply.</li>
-</ul>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-activity"></i> Temperature Time Series
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{$url}" alt="Temperature Time Series" class="img-fluid rounded shadow-sm">
+                    {$battery}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Notable Temperature Events
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-primary">2008</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2008&month=05&day=16" class="text-decoration-none">16 May 2008</a>
+                                            </div>
+                                            <small class="text-muted">Agronomy building loses chilled water supply, heat exchanger later gets backed up on local 'cooler' water.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-warning text-dark">2010</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2010&month=06&day=14" class="text-decoration-none">14 Jun 2010</a>
+                                            </div>
+                                            <small class="text-muted">ISU Campus takes a power bump knocking out various utilities.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-info">2010</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2010&month=08&day=11" class="text-decoration-none">11 Aug 2010</a>
+                                            </div>
+                                            <small class="text-muted">Flooding impacts ISU campus and the chilled water is shut off for a while.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-success">2013</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2013&month=06&day=24" class="text-decoration-none">24 Jun 2013</a>
+                                            </div>
+                                            <small class="text-muted">Chilled water is turned off for an hour to check metering.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-secondary">2016</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2016&month=8&day=9" class="text-decoration-none">9 Aug 2016</a>
+                                            </div>
+                                            <small class="text-muted">Fan bracket is repaired on heat exchanger.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-danger">2019</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2019&month=4&day=10" class="text-decoration-none">10 Apr 2019</a>
+                                            </div>
+                                            <small class="text-muted">Lightning strike knocks out chilled water and then power surge knocks out a few servers.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-warning text-dark">2020</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2020&month=4&day=11" class="text-decoration-none">11 Apr 2020</a>
+                                            </div>
+                                            <small class="text-muted">ISU FP&M shuts down chilled water supply to do some local construction work.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-primary">2022</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2022&month=3&day=18" class="text-decoration-none">18 Mar 2022</a>
+                                            </div>
+                                            <small class="text-muted">ISU FP&M shuts down chilled water supply to do some local construction work.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-info">2022</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2022&month=3&day=22" class="text-decoration-none">22 Mar 2022</a>
+                                            </div>
+                                            <small class="text-muted">ISU FP&M shuts down chilled water supply to do some local construction work.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-danger">2023</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-semibold">
+                                                <a href="ot_10min.phtml?year=2023&month=8&day=24" class="text-decoration-none">24 Aug 2023</a>
+                                            </div>
+                                            <small class="text-muted">Fire at ISU FP&M shuts down chilled water supply.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 EOM;
 $t->render('single.phtml');

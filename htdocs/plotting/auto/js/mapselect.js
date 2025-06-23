@@ -1,4 +1,4 @@
-/* global $, ol */
+/* global ol */
 
 const climateStyle = new ol.style.Style({
     zIndex: 100,
@@ -75,26 +75,29 @@ function stationLayerStyleFunc(feature) {
  
 function mapFactory(network, formname) {
     // Check the state of our button
-    const state = parseInt($(`#button_${network}_${formname}`).data("state"), 10);
+    const button = document.getElementById(`button_${network}_${formname}`);
+    const state = parseInt(button.dataset.state || "0", 10);
+    const mapWrap = document.getElementById(`map_${network}_${formname}_wrap`);
+    
     if (state === 0) {
         // first time to open
-        $(`#button_${network}_${formname}`).data("state", 1);
-        $(`#button_${network}_${formname}`).text("Hide Map");
+        button.dataset.state = "1";
+        button.textContent = "Hide Map";
     } else if (state === 1) {
         // Should hide me
-        $(`#button_${network}_${formname}`).data("state", 2);
-        $(`#button_${network}_${formname}`).text("Show Map");
-        $(`#map_${network}_${formname}_wrap`).css("display", "none");
+        button.dataset.state = "2";
+        button.textContent = "Show Map";
+        mapWrap.style.display = "none";
         return;
     } else {
         // Should show me
-        $(`#button_${network}_${formname}`).data("state", 1);
-        $(`#button_${network}_${formname}`).text("Hide Map");
-        $(`#map_${network}_${formname}_wrap`).css("display", "block");
+        button.dataset.state = "1";
+        button.textContent = "Hide Map";
+        mapWrap.style.display = "block";
         return;
     }
 
-    $(`#map_${network}_${formname}_wrap`).css("display", "block");
+    mapWrap.style.display = "block";
 
     const olMap = new ol.Map({
         target: `map_${network}_${formname}`,
@@ -158,7 +161,7 @@ function mapFactory(network, formname) {
             `<br /><strong>Name:</strong> ${feature.get("sname")}`,
             `<br /><strong>POR:</strong> ${feature.get("time_domain")}`,
         ]
-        $(`#popup_${network}_${formname}`).html(html.join(""));
+        document.getElementById(`popup_${network}_${formname}`).innerHTML = html.join("");
     });
     olMap.on("click", (event) => {
         const feature = olMap.forEachFeatureAtPixel(event.pixel,
@@ -169,16 +172,32 @@ function mapFactory(network, formname) {
             return;
         }
         const station = feature.get("sid");
-        $(`select[name="${formname}"]`).select2().val(station).trigger("change");
+        const selectElement = document.querySelector(`select[name="${formname}"]`);
+        if (selectElement) {
+            // Handle both regular select and select2 elements
+            selectElement.value = station;
+            
+            // Trigger change event for vanilla JS
+            const changeEvent = new Event('change', { bubbles: true });
+            selectElement.dispatchEvent(changeEvent);
+            
+            // If select2 is present, update it as well
+            if (window.$ && window.$.fn.select2) {
+                window.$(selectElement).select2().val(station).trigger("change");
+            }
+        }
     });
     // Fix responsive issues
     olMap.updateSize();
 
 };
 
-$().ready(() => {
+document.addEventListener('DOMContentLoaded', () => {
     // appease linter
-    $("#doesnotexist").click(() => {
-        mapFactory("IACLIMATE", "station");
-    });
+    const nonExistentElement = document.getElementById("doesnotexist");
+    if (nonExistentElement) {
+        nonExistentElement.addEventListener('click', () => {
+            mapFactory("IACLIMATE", "station");
+        });
+    }
 });
