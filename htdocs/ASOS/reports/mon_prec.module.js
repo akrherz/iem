@@ -48,7 +48,7 @@ function getPrecipitationColumns() {
             sorter: "string",
             formatter: "link",
             formatterParams: {
-                urlPrefix: `/sites/site.php?station=`,
+                urlPrefix: '/sites/site.php?station=',
                 urlSuffix: () => `&network=${getNetworkFromURL()}`,
                 target: "_blank"
             },
