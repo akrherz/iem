@@ -53,8 +53,25 @@ function logic() {
 
 function updateTitle() {
     const selectedOption = document.querySelector('#varpicker option:checked');
-    const maptitle = document.getElementById('maptitle');
-    maptitle.textContent = `The map is displaying ${selectedOption.textContent} valid at ${currentdt}`;
+    const maptitleDiv = document.getElementById('maptitle');
+    
+    if (maptitleDiv && selectedOption) {
+        // Find the specific text element within the maptitle structure
+        const textDiv = maptitleDiv.querySelector('.small');
+        if (textDiv) {
+            // Format the datetime for display
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                timeZoneName: 'short'
+            };
+            const formattedDate = currentdt.toLocaleString('en-US', options);
+            textDiv.textContent = `The map is displaying ${selectedOption.textContent} valid at ${formattedDate}`;
+        }
+    }
     updateURL();
 }
 
@@ -289,7 +306,7 @@ function setupUI() {
     varpicker.addEventListener('change', () => {
         varname = escapeHTML(varpicker.value);
         gj.setStyle(gj.getStyle());
-        updateURL();
+        updateTitle(); // Update the title when variable changes
     });
 };
 
