@@ -210,6 +210,7 @@
 /plotting/auto/plot/151/month:all::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:2000::p1eyear:2010::p2syear:2011::p2eyear:2021::cmap:seismic_r::_r:t::dpi:100.png
 /plotting/auto/plot/151/month:custom::sday:0814::eday:0901::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:1951::p1eyear:1980::p2syear:1981::p2eyear:2010::cmap:seismic_r::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/151/month:custom::sday:1226::eday:0103::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:1951::p1eyear:1980::p2syear:1981::p2eyear:2010::cmap:seismic_r::_r:t::dpi:100.png
+/plotting/auto/plot/152/sector:state::state:IA::opt:both::var:season::p1syear:2014::p1eyear:2024::p2syear:2015::p2eyear:2025::cmap:seismic::_r:t::dpi:100.png
 /plotting/auto/plot/153/network:IA_ASOS::zstation:DSM::month:all::var:min_relh::_r:t::dpi:100.png
 /plotting/auto/plot/155/network:IA_ASOS::zstation:AMW::var:max_gust::w:all::threshold:100::month:nov::_r:t::dpi:100.png
 /plotting/auto/plot/155/network:IA_ASOS::zstation:AMW::var:above_dwpf::w:one::threshold:10::hour:12::month:nov::_r:t::dpi:100.png
@@ -248,6 +249,8 @@
 /plotting/auto/plot/174/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::var:temp::sdate:2024-01-01::edate:2024-05-08::_r:43::dpi:100.png
 /plotting/auto/plot/175/year:2023::thres:1.0::state:IA::_r:t::dpi:100.png
 /plotting/auto/plot/175/year:2022::thres:1.0::state:IA::_r:t::dpi:100.png
+/plotting/auto/plot/176/network:IACLIMATE::station:IATAME::opt:1::w:monthly::_r:t::dpi:100.png
+/plotting/auto/plot/176/network:IACLIMATE::station:IATAME::opt:0::w:yearly::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:8::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
@@ -291,6 +294,8 @@
 /plotting/auto/plot/184/network:IACLIMATE::station:IATAME::year:2024::limit:ytd::_r:t::dpi:100.png
 /plotting/auto/plot/185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
 /plotting/auto/plot/191/sdate:2024-01-01::edate:2024-09-12::w:fema::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:TO::significancev1:W::_r:t::dpi:100.png
+/plotting/auto/plot/191/sdate:2024-01-01::edate:2024-06-23::daytz:12z::w:ugc::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:t::dpi:100.png
+/plotting/auto/plot/191/sdate:2023-01-01::edate:2024-06-23::daytz:central::w:state::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:43::dpi:100.png
 /plotting/auto/plot/192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
 /plotting/auto/plot/193/csector:conus::date:2024-07-01::z:0::f:120::opt:both::scale:auto::cmap:gist_ncar::_r:t::dpi:100.png
 /plotting/auto/plot/194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
@@ -347,6 +352,7 @@
 /plotting/auto/plot/217/pid:202408011023-KCASPSCAR::segnum:0::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/217/pid:202408011023-KCAR-WWUS81-SPSCAR::segnum:10::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/217/pid:202408011600-PAJK-WWAK87-SPSAJK::segnum:0::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/217/pid:606%20%20WFUS52-KTBW-%20222242%20-TORTBW-FLC053-101-222315::segnum:0::n:auto::_r:t::dpi:100.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PAAA::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PASN::valid:2024-08-21%200413::_r:t::dpi:100.png
