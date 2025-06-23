@@ -1,11 +1,11 @@
-/* global ol, $ */
+/* global ol */
 let map = null;
 let gj = null;
 let invgj = null;
 let dtpicker = null;
 let n0q = null;
 let varname = 'tmpf';
-let currentdt = null;
+let currentdt = new Date();
 let timeChanged = false;
 
 /**
@@ -29,6 +29,13 @@ function pad(number) {
     return strnum;
 };
 
+function getN0QSource() {
+    // currentdt needs to be rectified to the nearest 5 minute value in the past
+    const rectifiedDate = new Date(Math.floor(currentdt.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000));
+    return new ol.source.XYZ({
+        url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${toIEMString(rectifiedDate)}/{z}/{x}/{y}.png`
+    });
+}
 
 function toIEMString(val) {
     return `${val.getUTCFullYear()}${pad(val.getUTCMonth() + 1)}${pad(val.getUTCDate())}${pad(val.getUTCHours())}${pad(val.getUTCMinutes())}`;
@@ -40,16 +47,28 @@ function toISOString(val) {
 
 function logic() {
     timeChanged = true;
-    currentdt = dtpicker.datetimepicker('getDate');
+    currentdt = new Date(dtpicker.value);
     updateMap();
 }
+
 function updateTitle() {
-    $('#maptitle').text(`The map is displaying ${$('#varpicker :selected').text()} valid at ${currentdt}`);
+    const selectedOption = document.querySelector('#varpicker option:checked');
+    const maptitle = document.getElementById('maptitle');
+    maptitle.textContent = `The map is displaying ${selectedOption.textContent} valid at ${currentdt}`;
+    updateURL();
+}
+
+function updateURL() {
+    const url = new URL(window.location);
+    url.searchParams.set('var', varname);
     if (timeChanged) {
-        window.location.href = `#${varname}/${toISOString(currentdt)}`;
+        url.searchParams.set('dt', toISOString(currentdt));
     } else {
-        window.location.href = `#${varname}`;
+        url.searchParams.delete('dt');
     }
+    // Remove hash if present
+    url.hash = '';
+    window.history.replaceState({}, '', url);
 }
 
 function updateMap() {
@@ -67,10 +86,7 @@ function updateMap() {
         })
         );
     }
-    n0q.setSource(new ol.source.XYZ({
-        url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${toIEMString(currentdt)}/{z}/{x}/{y}.png`
-    })
-    );
+    n0q.setSource(getN0QSource());
     updateTitle();
 }
 
@@ -123,21 +139,22 @@ function setupMap() {
         }),
         style(feature) {
             // Update the img src to the appropriate arrow
-            $(`#${feature.getId()}_arrow`).attr(
-                "src",
-                feature.get("is_inversion") ? "/images/red_arrow_down.svg" : "/images/green_arrow_up.svg"
-            );
-            $(`#${feature.getId()}_15`).text(feature.get('tmpf_15'));
-            $(`#${feature.getId()}_5`).text(feature.get('tmpf_5'));
-            $(`#${feature.getId()}_10`).text(feature.get('tmpf_10'));
+            const arrowEl = document.getElementById(`${feature.getId()}_arrow`);
+            if (arrowEl) {
+                arrowEl.src = feature.get("is_inversion") ? "/images/red_arrow_down.svg" : "/images/green_arrow_up.svg";
+            }
+            const temp15El = document.getElementById(`${feature.getId()}_15`);
+            if (temp15El) temp15El.textContent = feature.get('tmpf_15');
+            const temp5El = document.getElementById(`${feature.getId()}_5`);
+            if (temp5El) temp5El.textContent = feature.get('tmpf_5');
+            const temp10El = document.getElementById(`${feature.getId()}_10`);
+            if (temp10El) temp10El.textContent = feature.get('tmpf_10');
             return [feature.get("is_inversion") ? redArrow : greenArrow];
         }
     });
     n0q = new ol.layer.Tile({
         title: 'NEXRAD Base Reflectivity',
-        source: new ol.source.XYZ({
-            url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${toIEMString(currentdt)}/{z}/{x}/{y}.png`
-        })
+        source: getN0QSource()
     });
     map = new ol.Map({
         target: 'map',
@@ -161,7 +178,10 @@ function setupMap() {
     // Support clicking on the map to get more details on the station
     map.on('click', (evt) => {
         const element = popup.getElement();
-        $(element).popover('destroy');
+        // Clear any existing content
+        element.innerHTML = '';
+        element.style.display = 'none';
+        
         const pixel = map.getEventPixel(evt.originalEvent);
         const feature = map.forEachFeatureAtPixel(pixel, (feature2) => {
             return feature2;
@@ -185,44 +205,54 @@ function setupMap() {
                     '</p>'
                 ].join('<br/>');
             }
-            $(element).popover({
-                'placement': 'top',
-                'animation': false,
-                'html': true,
-                content
-            });
-            $(element).popover('show');
+            element.innerHTML = content;
+            element.style.display = 'block';
         }
     });
 
     const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    dtpicker = $('#datetimepicker');
-    dtpicker.datetimepicker({
-        showMinute: true,
-        showSecond: false,
-        onSelect: logic,
-        minDateTime: (new Date(2013, 1, 1, 0, 0)),
-        maxDateTime: (new Date()),
-        timeFormat: 'h:mm TT'
-    });
+    dtpicker = document.getElementById('datetimepicker');
+    dtpicker.addEventListener('change', logic);
+    
+    // Set min and max dates for the datetime picker
+    const minDate = new Date(2013, 1, 1, 0, 0);
+    const maxDate = new Date();
+    dtpicker.min = minDate.toISOString().slice(0, 16);
+    dtpicker.max = maxDate.toISOString().slice(0, 16);
 
     try {
-        const tokens = window.location.href.split('#');
-        if (tokens.length === 2) {
-            const tokens2 = tokens[1].split("/");
-            varname = escapeHTML(tokens2[0]);
-            $('#varpicker').val(varname);
-            if (tokens2.length === 2) {
-                currentdt = (new Date(Date.parse(escapeHTML(tokens2[1]))));
+        // First check for hash parameters (legacy) and migrate to URL params
+        const hashTokens = window.location.href.split('#');
+        if (hashTokens.length === 2) {
+            const hashParts = hashTokens[1].split("/");
+            varname = escapeHTML(hashParts[0]);
+            document.getElementById('varpicker').value = varname;
+            if (hashParts.length === 2) {
+                currentdt = (new Date(Date.parse(escapeHTML(hashParts[1]))));
+                timeChanged = true;
+            }
+            gj.setStyle(gj.getStyle());
+            // Migrate to URL params and remove hash
+            updateURL();
+            return;
+        }
+        
+        // Check for URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('var')) {
+            varname = escapeHTML(urlParams.get('var'));
+            document.getElementById('varpicker').value = varname;
+            if (urlParams.has('dt')) {
+                currentdt = new Date(Date.parse(escapeHTML(urlParams.get('dt'))));
                 timeChanged = true;
             }
             gj.setStyle(gj.getStyle());
         }
     } catch {
         varname = 'tmpf';
-        currentdt = new Date($("#defaultdt").data("dt"));
+        currentdt = new Date(document.getElementById("defaultdt").dataset.dt);
     }
 
     setDate();
@@ -230,30 +260,41 @@ function setupMap() {
 };
 
 function setDate() {
-    dtpicker.datepicker("disable")
-        .datetimepicker('setDate', currentdt)
-        .datepicker("enable");
+    if (currentdt && dtpicker) {
+        // Convert to local datetime string for the input
+        const year = currentdt.getFullYear();
+        const month = String(currentdt.getMonth() + 1).padStart(2, '0');
+        const day = String(currentdt.getDate()).padStart(2, '0');
+        const hours = String(currentdt.getHours()).padStart(2, '0');
+        const minutes = String(currentdt.getMinutes()).padStart(2, '0');
+        
+        dtpicker.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
 }
 
 function setupUI() {
-    $(".dt").click((event) => {
-        timeChanged = true;
-        $(event.target).removeClass('focus');
-        currentdt = new Date(currentdt.valueOf() + parseInt($(event.target).data('delta')));
-        setDate();
-        updateMap();
+    const dtButtons = document.querySelectorAll(".dt");
+    dtButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            timeChanged = true;
+            event.target.classList.remove('focus');
+            const delta = parseInt(event.target.dataset.delta);
+            currentdt = new Date(currentdt.valueOf() + delta);
+            setDate();
+            updateMap();
+        });
     });
 
-
-    $('#varpicker').change(() => {
-        varname = escapeHTML($('#varpicker').val());
+    const varpicker = document.getElementById('varpicker');
+    varpicker.addEventListener('change', () => {
+        varname = escapeHTML(varpicker.value);
         gj.setStyle(gj.getStyle());
-        updateTitle();
+        updateURL();
     });
 };
 
-$().ready(() => {
-    currentdt = new Date($("#defaultdt").data("dt"));
+document.addEventListener('DOMContentLoaded', () => {
+    currentdt = new Date(document.getElementById("defaultdt").dataset.dt);
     setupMap();
     setupUI();
 });

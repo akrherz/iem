@@ -7,44 +7,78 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Download SPC Watch Outlines";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">Storm Prediction Center Watches</li>
-</ul>
-</p>
+<div class="container-fluid">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Storm Prediction Center Watches</li>
+  </ol>
+</nav>
 
-<p>The IEM maintains an archive of the watch polygons issued by the
-Storm Prediction Center since 1997.  Please note that these watches are
-<strong>not the official spatial bounds</strong>
-anymore as the WCN (watch by county) product is the official coverage.
-<a href="/cgi-bin/request/gis/spc_watch.py?help" class="btn btn-primary">
-<i class="fa fa-file"></i> Backend documentation</a> exists in case you want
-to automate against this service.</p>
+<div class="alert alert-info" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-info-circle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <p class="mb-2">The IEM maintains an archive of the watch polygons issued by the
+      Storm Prediction Center since 1997. Please note that these watches are
+      <strong>not the official spatial bounds</strong>
+      anymore as the WCN (watch by county) product is the official coverage.</p>
+      <a href="/cgi-bin/request/gis/spc_watch.py?help" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-file-text"></i> Backend Documentation
+      </a>
+    </div>
+  </div>
+</div>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="misc.phtml">NWS Misc Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
-&nbsp;
-<a class="btn btn-primary" href="outlooks.phtml">SPC/WPC Outlooks</a>
-&nbsp;
-<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
-</p>
+<div class="mb-4">
+  <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Services</h5>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="misc.phtml">
+      <i class="bi bi-geo"></i> NWS Misc Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="watchwarn.phtml">
+      <i class="bi bi-exclamation-triangle"></i> NWS VTEC Watch Warning Advisory
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_mcd.phtml">
+      <i class="bi bi-chat-square-text"></i> SPC Convective Discussions
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="outlooks.phtml">
+      <i class="bi bi-eye"></i> SPC/WPC Outlooks
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="wpc_mpd.phtml">
+      <i class="bi bi-cloud-rain"></i> WPC Precip Discussions
+    </a>
+  </div>
+</div>
 
-<form method="GET" action="/cgi-bin/request/gis/spc_watch.py">
-<table class="table">
-<thead><tr><th colspan="6">Time Interval for Watch *Issuance* (UTC)</th></tr></thead>
-<tr>
-    <td></td><th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-</tr>
-
-<tr>
+<form method="GET" action="/cgi-bin/request/gis/spc_watch.py" class="mb-4">
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-calendar-range"></i> Time Interval for Watch Issuance (UTC)
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Year</th>
+            <th scope="col">Month</th>
+            <th scope="col">Day</th>
+            <th scope="col">Hour</th>
+            <th scope="col">Minute</th>
+          </tr>
+        </thead>
+        <tbody>
 EOM;
-$content .= "<th>Start:</th>
+$content .= "<tr>
+    <th scope=\"row\" class=\"text-success\">
+      <i class=\"bi bi-play-fill\"></i> Start:
+    </th>
     <td>
      " . yearSelect(1997, date("Y"), "year1") . "
     </td>
@@ -63,7 +97,9 @@ $content .= "<th>Start:</th>
   </tr>
 
   <tr>
-    <th>End:</th>
+    <th scope=\"row\" class=\"text-danger\">
+      <i class=\"bi bi-stop-fill\"></i> End:
+    </th>
     <td>
      " . yearSelect(1997, date("Y"), "year2") . "
     </td>
@@ -80,56 +116,121 @@ $content .= "<th>Start:</th>
      " . minuteSelect(0, "minute2") . "
     </td>
   </tr>
-</table>";
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>";
 
 $content .= <<<EOM
-<p><strong>Download Format</strong><br />
-<input type="radio" name="format" value="shp" id="fshp" checked>
-<label for="fshp"> ESRI Shapefile</label>
 
-<input type="radio" name="format" value="kml" id="fkml">
-<label for="fkml"> KML</label>
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-download"></i> Download Format
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="shp" id="fshp" checked>
+          <label class="form-check-label" for="fshp">
+            <i class="bi bi-file-earmark-zip text-primary"></i> ESRI Shapefile
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="kml" id="fkml">
+          <label class="form-check-label" for="fkml">
+            <i class="bi bi-geo-alt text-warning"></i> KML
+          </label>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="geojson" id="fgeojson">
+          <label class="form-check-label" for="fgeojson">
+            <i class="bi bi-code-square text-info"></i> GeoJSON
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="format" value="csv" id="fcsv">
+          <label class="form-check-label" for="fcsv">
+            <i class="bi bi-filetype-csv text-success"></i> CSV (Polygon as WKT)
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<input type="radio" name="format" value="geojson" id="fgeojson">
-<label for="fgeojson"> GeoJSON</label>
-
-<input type="radio" name="format" value="csv" id="fcsv">
-<label for="fcsv"> CSV (Polygon as WKT)</label>
-</p>
-
-<p><input type="submit" value="Giveme data right now!"></p>
+<div class="d-grid gap-2 mb-4">
+  <button type="submit" class="btn btn-primary btn-lg">
+    <i class="bi bi-download"></i> Download Data
+  </button>
+</div>
 </form>
 
-<h4>Shapefile DBF schema:</h4>
-<pre>
-Field 0: Type=C/String, Title=`ISSUE', UTC Issuance Timestamp YYYYmmddHHMM
-Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
-Field 2: Type=C/String, Title=`SEL', The 0-9 watch sequence number
-Field 3: Type=C/String, Title=`TYPE', TOR or SVR watch
-Field 4: Type=N/Double, Title=`NUM', SPC Watch Number
-Field 5: Type=N/Double, Title=`P_TORTWO', PROB OF 2 OR MORE TORNADOES
-Field 6: Type=N/Double, Title=`P_TOREF2', PROB OF 1 OR MORE STRONG /EF2-EF5/ TORNADOES
-Field 7: Type=N/Double, Title=`P_WIND10', PROB OF 10 OR MORE SEVERE WIND EVENTS
-Field 8: Type=N/Double, Title=`P_WIND65', PROB OF 1 OR MORE WIND EVENTS >= 65 KNOTS 
-Field 9: Type=N/Double, Title=`P_HAIL10', PROB OF 10 OR MORE SEVERE HAIL EVENTS
-Field 10: Type=N/Double, Title=`P_HAIL2I', PROB OF 1 OR MORE HAIL EVENTS >= 2 INCHES
-Field 11: Type=N/Double, Title=`P_HAILWND' PROB OF 6 OR MORE COMBINED SEVERE HAIL/WIND EVENTS
-Field 12: Type=N/Double, Title=`MAX_HAIL', MAX HAIL /INCHES/ 
-Field 13: Type=N/Double, Title=`MAX_GUST', MAX WIND GUSTS SURFACE /KNOTS/
-Field 14: Type=N/Double, Title=`MAX_TOPS', MAX TOPS /X 100 FEET/
-Field 15: Type=N/Double, Title=`MV_DRCT', MEAN STORM MOTION VECTOR /DEGREES/
-Field 16: Type=N/Double, Title=`MV_SKNT', MEAN STORM MOTION VECTOR /KNOTS/
-Field 17: Type=N/Integer, Title=`IS_PDS', PARTICULARLY DANGEROUS SITUATION
-</pre>
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table"></i> Shapefile DBF Schema
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>UTC Issuance Timestamp YYYYmmddHHMM</td></tr>
+          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>UTC MCD Expiration Timestamp</td></tr>
+          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>SEL</code></td><td>The 0-9 watch sequence number</td></tr>
+          <tr><td>3</td><td><span class="badge bg-info">String</span></td><td><code>TYPE</code></td><td>TOR or SVR watch</td></tr>
+          <tr><td>4</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>NUM</code></td><td>SPC Watch Number</td></tr>
+          <tr><td>5</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_TORTWO</code></td><td>PROB OF 2 OR MORE TORNADOES</td></tr>
+          <tr><td>6</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_TOREF2</code></td><td>PROB OF 1 OR MORE STRONG /EF2-EF5/ TORNADOES</td></tr>
+          <tr><td>7</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_WIND10</code></td><td>PROB OF 10 OR MORE SEVERE WIND EVENTS</td></tr>
+          <tr><td>8</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_WIND65</code></td><td>PROB OF 1 OR MORE WIND EVENTS >= 65 KNOTS</td></tr>
+          <tr><td>9</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_HAIL10</code></td><td>PROB OF 10 OR MORE SEVERE HAIL EVENTS</td></tr>
+          <tr><td>10</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_HAIL2I</code></td><td>PROB OF 1 OR MORE HAIL EVENTS >= 2 INCHES</td></tr>
+          <tr><td>11</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>P_HAILWND</code></td><td>PROB OF 6 OR MORE COMBINED SEVERE HAIL/WIND EVENTS</td></tr>
+          <tr><td>12</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>MAX_HAIL</code></td><td>MAX HAIL /INCHES/</td></tr>
+          <tr><td>13</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>MAX_GUST</code></td><td>MAX WIND GUSTS SURFACE /KNOTS/</td></tr>
+          <tr><td>14</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>MAX_TOPS</code></td><td>MAX TOPS /X 100 FEET/</td></tr>
+          <tr><td>15</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>MV_DRCT</code></td><td>MEAN STORM MOTION VECTOR /DEGREES/</td></tr>
+          <tr><td>16</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>MV_SKNT</code></td><td>MEAN STORM MOTION VECTOR /KNOTS/</td></tr>
+          <tr><td>17</td><td><span class="badge bg-success">Integer</span></td><td><code>IS_PDS</code></td><td>PARTICULARLY DANGEROUS SITUATION</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<h4>Archive / Usage Notes:</h4>
-<ol>
-<li><strong>30 April 2022:</strong> Associated probabilities found in the <code>WWP</code>
- product are now included as attributes.  This archive goes back to about May 2006.</li>
-<li>To re-emphasize, these polygons are <strong>not the official</strong>
-watch anymore.  The official watch is issued on a county/zone basis.</li>
-</ol>
-</form>
+<div class="card">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-info-circle"></i> Archive / Usage Notes
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-primary" role="alert">
+      <strong><i class="bi bi-calendar-event"></i> 30 April 2022:</strong> Associated probabilities found in the <code>WWP</code>
+      product are now included as attributes. This archive goes back to about May 2006.
+    </div>
+    <div class="alert alert-warning" role="alert">
+      <strong><i class="bi bi-exclamation-triangle"></i> Important:</strong> To re-emphasize, these polygons are <strong>not the official</strong>
+      watch anymore. The official watch is issued on a county/zone basis.
+    </div>
+  </div>
+</div>
+</div>
 EOM;
 
 $t->content = $content;

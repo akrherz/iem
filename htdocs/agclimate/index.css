@@ -1,0 +1,236 @@
+/* Modern Bootstrap 5 UI Enhancements */
+
+/* Map styling with modern shadow and border */
+#map {
+  width: 100%;
+  height: 450px;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  overflow: hidden;
+}
+
+/* Custom popup styling */
+#popup {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 12px;
+  font-size: 13px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  display: none;
+  position: relative;
+  z-index: 1000;
+  max-width: 300px;
+}
+
+#popup::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  margin-left: -8px;
+  border: 8px solid transparent;
+  border-top-color: white;
+}
+
+#popup::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  margin-left: -8px;
+  border: 8px solid transparent;
+  border-top-color: #dee2e6;
+  z-index: -1;
+}
+
+/* Enhanced form controls */
+#datetimepicker {
+  border-radius: 0.375rem;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+#datetimepicker:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#varpicker {
+  border-radius: 0.375rem;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: #fff;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+#varpicker:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Enhanced cards */
+.card {
+  border: 0;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Enhanced buttons */
+.btn {
+  border-radius: 0.375rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+/* Enhanced alerts */
+.alert {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+  border-left-color: #17a2b8;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+  border-left-color: #ffc107;
+}
+
+.alert-primary {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+  border-left-color: #007bff;
+}
+
+/* Enhanced list groups */
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0.75rem 1.25rem;
+  background-color: transparent;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item-action {
+  color: #495057;
+  text-decoration: none;
+}
+
+/* Temperature inversion styling */
+.inversion-station {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.inversion-station img {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Control section styling */
+.control-section {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.control-section h5 {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+/* Enhanced focus states */
+.form-control:focus,
+.form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  #map {
+    height: 350px;
+  }
+  
+  .dt {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .control-section {
+    padding: 1rem;
+  }
+  
+  .inversion-station {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  #map {
+    height: 300px;
+  }
+  
+  .card-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+}

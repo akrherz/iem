@@ -1,0 +1,335 @@
+/* Bootstrap 5 enhancements for Monthly Precipitation Report */
+
+/* Tabulator container styling */
+#tabulator-container {
+    margin-top: 1rem;
+}
+
+/* Table controls styling */
+#table-controls {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.375rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+#table-controls .btn-group {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#table-controls .btn {
+    margin-right: 0.25rem;
+}
+
+/* Enhance the "Interactive Grid" button */
+#create-grid {
+    background: linear-gradient(135deg, var(--bs-success), var(--bs-primary));
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#create-grid:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+#create-grid:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Original table wrapper */
+#original-table {
+    margin-top: 1rem;
+}
+
+/* Tabulator table customizations */
+.tabulator {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabulator .tabulator-header {
+    background: var(--bs-primary);
+    color: white;
+    border-bottom: 2px solid var(--bs-primary);
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--bs-primary);
+}
+
+.tabulator .tabulator-header .tabulator-col-title {
+    font-weight: 600;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tabulator .tabulator-header .tabulator-col-sorter {
+    color: white !important;
+}
+
+.tabulator .tabulator-header .tabulator-header-filter input {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.25rem;
+    color: var(--bs-dark);
+    font-size: 0.875rem;
+}
+
+.tabulator .tabulator-header .tabulator-header-filter input:focus {
+    background-color: white;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Row styling */
+.tabulator .tabulator-row:nth-child(even) {
+    background-color: var(--bs-light);
+}
+
+.tabulator .tabulator-row:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.tabulator .tabulator-row .tabulator-cell {
+    border-right: 1px solid var(--bs-border-color);
+    padding: 0.5rem 0.75rem;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+}
+
+.tabulator .tabulator-row .tabulator-cell:first-child,
+.tabulator .tabulator-row .tabulator-cell:nth-child(2) {
+    font-family: inherit;
+    text-align: left;
+}
+
+/* Highlight special columns */
+.tabulator .tabulator-row .tabulator-cell.highlight-summer {
+    background-color: rgba(var(--bs-warning-rgb), 0.1);
+    font-weight: 600;
+    border-left: 3px solid var(--bs-warning);
+}
+
+.tabulator .tabulator-row .tabulator-cell.highlight-annual {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+    font-weight: 600;
+    border-left: 3px solid var(--bs-success);
+}
+
+/* Link styling in table */
+.tabulator .tabulator-row .tabulator-cell a {
+    color: var(--bs-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.tabulator .tabulator-row .tabulator-cell a:hover {
+    color: var(--bs-primary);
+    text-decoration: underline;
+}
+
+/* Pagination styling */
+.tabulator .tabulator-footer {
+    background-color: var(--bs-light);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.tabulator .tabulator-footer .tabulator-page {
+    background-color: white;
+    border: 1px solid var(--bs-border-color);
+    color: var(--bs-primary);
+    border-radius: 0.25rem;
+    margin: 0 0.125rem;
+}
+
+.tabulator .tabulator-footer .tabulator-page:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.tabulator .tabulator-footer .tabulator-page.active {
+    background-color: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+}
+
+/* Form styling improvements */
+form[name="change"] {
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.05), rgba(var(--bs-info-rgb), 0.05));
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+form[name="change"] p {
+    margin-bottom: 1rem;
+}
+
+form[name="change"] select {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+form[name="change"] input[type="submit"] {
+    background: var(--bs-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+form[name="change"] input[type="submit"]:hover {
+    background: var(--bs-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #table-controls {
+        padding: 0.75rem;
+    }
+    
+    #table-controls .btn-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    #table-controls .btn {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+    
+    .tabulator .tabulator-header .tabulator-col {
+        min-width: 60px;
+    }
+    
+    form[name="change"] {
+        padding: 1rem;
+    }
+    
+    form[name="change"] select {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0.75rem;
+    }
+    
+    form[name="change"] input[type="submit"] {
+        width: 100%;
+    }
+}
+
+/* Breadcrumb enhancement */
+.breadcrumb {
+    background: linear-gradient(135deg, var(--bs-light), rgba(var(--bs-primary-rgb), 0.05));
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+/* Missing data styling */
+.tabulator .tabulator-row .tabulator-cell:has-text("M") {
+    color: var(--bs-secondary);
+    font-style: italic;
+}
+
+/* Loading spinner */
+.tabulator-loader {
+    border: 3px solid var(--bs-light);
+    border-top: 3px solid var(--bs-primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Page header styling */
+h1, h2, h3 {
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+
+/* Info text styling */
+p {
+    line-height: 1.6;
+    color: var(--bs-body-color);
+}
+
+/* Button group improvements */
+.btn-group .btn {
+    border-radius: 0.375rem;
+    margin-right: 0.25rem;
+    font-weight: 500;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+
+/* Sticky header enhancement */
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bs-primary);
+    color: white;
+}
+
+/* Table wrapper for original table */
+#original-table {
+    overflow-x: auto;
+    border-radius: 0.375rem;
+    border: 1px solid var(--bs-border-color);
+}
+
+#original-table table {
+    margin-bottom: 0;
+}
+
+#original-table th {
+    background: var(--bs-primary);
+    color: white;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+#original-table td {
+    padding: 0.5rem;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    border-color: var(--bs-border-color);
+}
+
+#original-table td:first-child,
+#original-table td:nth-child(2) {
+    font-family: inherit;
+    text-align: left;
+}

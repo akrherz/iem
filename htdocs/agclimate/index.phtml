@@ -5,17 +5,14 @@ require_once "../../include/mlib.php";
 force_https();
 
 define("IEM_APPID", 10);
-$OL = "10.4.0";
+$OL = "10.6.1";
 $t = new MyView();
 $t->title = "ISU Soil Moisture Network";
 
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
 <script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
-<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
-<script src="dataexplorer.js?v=2"></script>
+<script src="index.js?v=3"></script>
 EOM;
 
 // Pick a sensible default datetime
@@ -29,20 +26,12 @@ $dt = $dt->format("Y/m/d H:i");
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css"/ >
-<link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
-<link rel="stylesheet" type="text/css" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css"/ >
-<style>
-  #map {
-    width: 100%;
-    height: 400px;
-  }
-.popover-content {
-  min-width: 180px;
-}
-</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="stylesheet" type="text/css" href="index.css"/ >
 EOM;
 
 $t->content = <<<EOM
+<div class="container-fluid">
 <h3>ISU Soil Moisture Network</h3>
 
 <span id="defaultdt" data-dt="{$dt}"></span>
@@ -55,181 +44,448 @@ comprising the network has changed over the years with a complete network replac
 during 2012.
 </p>
 
-<form name="mapper">
-<div class="row">
-    <div class="col-md-3 col-sm-5 border rounded p-3">
+  <form name="mapper">
+    <div class="row">
+      <div class="col-lg-3 col-md-4">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-primary">
+            <div class="d-flex align-items-center justify-content-between">
+              <h4 class="card-title mb-0">
+                <i class="bi bi-tools me-2"></i>Popular Tools
+              </h4>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <a href="soilt.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-warning bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-map text-warning"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">County Soil Temp Map</div>
+                  <small class="text-muted">Visual soil temperature mapping</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="hist/daily.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-success bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-download text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Daily Download</div>
+                  <small class="text-muted">Historical daily data export</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="/GIS/apps/agclimate/gsplot.phtml" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-info bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-flower1 text-info"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Growing Season Maps</div>
+                  <small class="text-muted">Seasonal agricultural mapping</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="hist/hourly.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-warning bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-clock text-warning"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Minute/Hourly Download</div>
+                  <small class="text-muted">High-resolution time series data</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="/agclimate/isusm.csv" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-secondary bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-filetype-csv text-secondary"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Current IOOS CSV</div>
+                  <small class="text-muted">Real-time CSV data feed</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <span class="badge bg-success bg-opacity-25 text-success me-2">Live</span>
+                  <i class="bi bi-box-arrow-up-right text-muted"></i>
+                </div>
+              </a>
+              <a href="/sites/networks.php?network=ISUSM" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-primary bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-list-ul text-primary"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Listing of Stations</div>
+                  <small class="text-muted">Complete station directory</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="smts.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-info bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-graph-up text-info"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Plot Time Series</div>
+                  <small class="text-muted">Interactive data visualization</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="info.phtml" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-secondary bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-gear text-secondary"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Sensor Package</div>
+                  <small class="text-muted">Technical specifications</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="current.phtml" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-success bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-arrow-repeat text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Sortable Currents</div>
+                  <small class="text-muted">Real-time data table</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <span class="badge bg-success bg-opacity-25 text-success me-2">Live</span>
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+              <a href="/sites/locate.php?network=ISUSM" class="list-group-item list-group-item-action d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="bg-danger bg-opacity-25 rounded-circle p-2">
+                    <i class="bi bi-geo-alt text-danger"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-semibold">Station Metadata</div>
+                  <small class="text-muted">Location and station details</small>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-9 col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-light">
+            <h4 class="card-title mb-0">
+              <i class="bi bi-sliders me-2 text-primary"></i>Data Controls
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="control-section">
+                  <h5 class="mb-3">
+                    <i class="bi bi-clock me-2 text-primary"></i>Select Time
+                  </h5>
+                  <div class="mb-3">
+                    <input type="datetime-local" id="datetimepicker" name="dosomething" step="300" class="form-control" />
+                  </div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="-86400000">
+                      <i class="bi bi-skip-backward me-1"></i>-1 Day
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="-3600000">
+                      <i class="bi bi-rewind me-1"></i>-1 HR
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="-300000">-5 Min</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="300000">+5 Min</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="3600000">
+                      +1 HR<i class="bi bi-fast-forward ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm dt" data-delta="86400000">
+                      +1 Day<i class="bi bi-skip-forward ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="control-section">
+                  <h5 class="mb-3">
+                    <i class="bi bi-thermometer-half me-2 text-danger"></i>Select Variable
+                  </h5>
+                  <select name="varname" id="varpicker" class="form-select">
+                    <option value="tmpf">Air Temperature [F]</option>
+                    <option value="cci">Comprehensive Climate Index</option>
+                    <option value="thi">Temperature Humidity Index</option>
+                    <option value="bat">Battery Voltage [V]</option>
+                    <option value="encrh_avg">Logger Enclosure Rel Humid [%]</option>
+                    <option value="et">Hourly Evapotranspiration [inch]</option>
+                    <option value="dailyet">Daily Evapotranspiration [inch]</option>
+                    <option value="high">Daily High Temperature [F]</option>
+                    <option value="low">Daily Low Temperature [F]</option>
+                    <option value="pday">Calendar Day Precipitation [inch]</option>
+                    <option value="pmonth">Month-to-date Precipitation [inch]</option>
+                    <option value="p24i">24 Hour Precipitation [inch]</option>
+                    <option value="hrprecip">Hourly Precipitation [inch]</option>
+                    <option value="radmj">Hourly Solar Radiation [MJ]</option>
+                    <option value="srad_wm2">Solar Radiation [W/m2]</option>
+                    <option value="rh">Relative Humidity [%]</option>
+                    <option value="plant_water_6_30">Plant Available Water Estimate (6-30in) [inch]</option>
+                    <option value="soil12m">Soil Moisture (12 inch) [Vol %]</option>
+                    <option value="soil24m">Soil Moisture (24 inch) [Vol %]</option>
+                    <option value="soil50m">Soil Moisture (50 inch) [Vol %]</option>
+                    <option value="soil04t">Soil Temperature (4 inch) [F]</option>
+                    <option value="soil12t">Soil Temperature (12 inch) [F]</option>
+                    <option value="soil24t">Soil Temperature (24 inch) [F]</option>
+                    <option value="soil50t">Soil Temperature (50 inch) [F]</option>
+                    <option value="wind">Wind Direction + Speed [mph]</option>
+                    <option value="gust">Wind Gust [mph]</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<h4>Popular Tools:</h4>
-<div class="list-group">
-<a href="soilt.php" class="list-group-item">
-  <i class="fa fa-image"></i> County Soil Temp Map</a>
+        <div class="alert alert-primary border-0 shadow-sm d-flex align-items-center" role="alert" id="maptitle">
+          <div class="flex-shrink-0">
+            <div class="bg-primary bg-opacity-25 rounded-circle p-2">
+              <i class="bi bi-map text-primary"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="mb-1 fw-semibold">Current Map Display</h6>
+            <div class="small">The map is displaying Air Temperature [F] valid at {$dt}</div>
+          </div>
+          <div class="flex-shrink-0 d-none d-sm-block">
+            <span class="badge bg-primary bg-opacity-25 text-primary px-3 py-2">
+              <i class="bi bi-eye me-1"></i>Live Data
+            </span>
+          </div>
+        </div>
+        
+        <div id="map" class="mb-4"></div>
+        <div id="popup" title="Station Information"></div>
 
-<a href="hist/daily.php" class="list-group-item">
-  <i class="fa fa-cloud-download"></i>  Daily Download</a>
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-thermometer-sun me-2"></i>Air Temperature Inversion Station Locations
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="inversion-station">
+                  <div class="d-flex align-items-center mb-2">
+                    <img id="CAMI4_arrow" src="/images/pixel.gif" width="20" height="20" class="me-2">
+                    <strong class="text-primary">Northwest (Sutherland)</strong>
+                  </div>
+                  <div class="small">
+                    <div><em>1.5ft:</em> <span id="CAMI4_15" class="fw-bold">M</span>°F</div>
+                    <div><em>5ft:</em> <span id="CAMI4_5" class="fw-bold">M</span>°F</div>
+                    <div><em>10ft:</em> <span id="CAMI4_10" class="fw-bold">M</span>°F</div>
+                  </div>
+                </div>
+              </div>
 
-<a href="/GIS/apps/agclimate/gsplot.phtml" class="list-group-item">
-  <i class="fa fa-image"></i> Growing Season Maps</a>
+              <div class="col-md-4">
+                <div class="inversion-station">
+                  <div class="d-flex align-items-center mb-2">
+                    <img id="BOOI4_arrow" src="/images/pixel.gif" width="20" height="20" class="me-2">
+                    <strong class="text-success">Central (Ames)</strong>
+                  </div>
+                  <div class="small">
+                    <div><em>1.5ft:</em> <span id="BOOI4_15" class="fw-bold">M</span>°F</div>
+                    <div><em>5ft:</em> <span id="BOOI4_5" class="fw-bold">M</span>°F</div>
+                    <div><em>10ft:</em> <span id="BOOI4_10" class="fw-bold">M</span>°F</div>
+                  </div>
+                </div>
+              </div>
 
-<a href="hist/hourly.php" class="list-group-item">
-  <i class="fa fa-cloud-download"></i> Minute/Hourly Download</a>
-
-<a href="/agclimate/isusm.csv" class="list-group-item">
-  <i class="fa fa-download"></i> Current IOOS CSV</a>
-
-<a href="/sites/networks.php?network=ISUSM" class="list-group-item">
-  <i class="fa fa-info"></i> Listing of Stations</a>
-
-<a href="smts.php" class="list-group-item">
-  <i class="fa fa-signal"></i> Plot Time Series</a>
-
-<a href="info.phtml" class="list-group-item">
-  <i class="fa fa-wrench"></i> Sensor Package</a>
-
-<a href="current.phtml" class="list-group-item">
-  <i class="fa fa-refresh"></i> Sortable Currents</a>
-
-<a href="/sites/locate.php?network=ISUSM" class="list-group-item">
-  <i class="fa fa-info"></i> Station Metadata</a>
-</div>
-
+              <div class="col-md-4">
+                <div class="inversion-station">
+                  <div class="d-flex align-items-center mb-2">
+                    <img id="CRFI4_arrow" src="/images/pixel.gif" width="20" height="20" class="me-2">
+                    <strong class="text-info">Southeast (Crawfordsville)</strong>
+                  </div>
+                  <div class="small">
+                    <div><em>1.5ft:</em> <span id="CRFI4_15" class="fw-bold">M</span>°F</div>
+                    <div><em>5ft:</em> <span id="CRFI4_5" class="fw-bold">M</span>°F</div>
+                    <div><em>10ft:</em> <span id="CRFI4_10" class="fw-bold">M</span>°F</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="col-md-9 col-sm-7">
-    
-<div class="row">
-<div class="col-md-6">
-    <h4>Select Time:</h4> 
-<input type="text" id="datetimepicker" name="dosomething" />
-<br />
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="-86400000">-1 Day</button>
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="-3600000">-1 HR</button>
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="-300000">-5 Mins</button>
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="300000">+5 Mins</button>
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="3600000">+1 HR</button>
- <button type="button" class="btn btn-secondary btn-sm dt" data-delta="86400000">+1 Day</button>
-</div>
-<div class="col-md-6">
-<h4>Select Variable:</h4>
-<select name="varname" id="varpicker">
-    <option value="tmpf">Air Temperature [F]</option>
-    <option value="cci">Comprehensive Climate Index</option>
-    <option value="thi">Temperature Humidity Index</option>
-    <option value="bat">Battery Voltage [V]</option>
-    <option value="encrh_avg">Logger Enclosure Rel Humid [%]</option>
-    <option value="et">Hourly Evapotranspiration [inch]</option>
-    <option value="dailyet">Daily Evapotranspiration [inch]</option>
-    <option value="high">Daily High Temperature [F]</option>
-    <option value="low">Daily Low Temperature [F]</option>
-    <option value="pday">Calendar Day Precipitation [inch]</option>
-    <option value="pmonth">Month-to-date Precipitation [inch]</option>
-    <option value="p24i">24 Hour Precipitation [inch]</option>
-    <option value="hrprecip">Hourly Precipitation [inch]</option>
-    <option value="radmj">Hourly Solar Radiation [MJ]</option>
-    <option value="srad_wm2">Solar Radiation [W/m2]</option>
-    <option value="rh">Relative Humidity [%]</option>
-    <option value="plant_water_6_30">Plant Available Water Estimate (6-30in) [inch]</option>
-    <option value="soil12m">Soil Moisture (12 inch) [Vol %]</option>
-    <option value="soil24m">Soil Moisture (24 inch) [Vol %]</option>
-    <option value="soil50m">Soil Moisture (50 inch) [Vol %]</option>
-    <option value="soil04t">Soil Temperature (4 inch) [F]</option>
-    <option value="soil12t">Soil Temperature (12 inch) [F]</option>
-    <option value="soil24t">Soil Temperature (24 inch) [F]</option>
-    <option value="soil50t">Soil Temperature (50 inch) [F]</option>
-    <option value="wind">Wind Direction + Speed [mph]</option>
-    <option value="gust">Wind Gust [mph]</option>
-</select>
-</div></div><!-- end row -->
+  </form>
 
-<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
-<div id="map"></div>
-<div id="popup" title="Station Information"></div>
-
-<p>Air Temperature Inversion Station Locations:</p>
-
-<div class="row">
-
-<div class="col-md-4">
-<p><img id="CAMI4_arrow" src="/images/pixel.gif" width="20">
-<strong>Northwest (Sutherland):</strong>
-<br /><i>1.5ft</i>: <span id="CAMI4_15">M</span>&deg;F
-<br /><i>5ft</i>: <span id="CAMI4_5">M</span>&deg;F
-<br /><i>10ft</i>: <span id="CAMI4_10">M</span>&deg;F
-</p>
-</div>
-
-<div class="col-md-3">
-<p><img id="BOOI4_arrow" src="/images/pixel.gif" width="20">
-<strong>Central (Ames):</strong>
-<br /><i>1.5ft</i>: <span id="BOOI4_15">M</span>&deg;F
-<br /><i>5ft</i>: <span id="BOOI4_5">M</span>&deg;F
-<br /><i>10ft</i>: <span id="BOOI4_10">M</span>&deg;F
-</p>
-</div>
-
-<div class="col-md-5">
-<p><img id="CRFI4_arrow" src="/images/pixel.gif" width="20">
-<strong>Southeast (Crawfordsville):</strong>
-<br /><i>1.5ft</i>: <span id="CRFI4_15">M</span>&deg;F
-<br /><i>5ft</i>: <span id="CRFI4_5">M</span>&deg;F
-<br /><i>10ft</i>: <span id="CRFI4_10">M</span>&deg;F
-</p>
-</div>
-
-</div><!-- end row -->
-
-</div></div><!-- end row -->
-</form>
-
-<div class="row">
-     <div class="col-md-6 col-sm-6">
-
-     <h4>Rainfall Disclaimer:</h4>
-     <p>The Soil Moisture Network uses a non-heated tipping bucket rain gauge and is
-     unable to measure snowfall. If you are interested in higher quality 
-     precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
-     of human observations.</p>
-     
-     <h4>Additional Tools/Apps:</h4>
-<ul>
-<li><a href="soilt-prob.php">4 inch Soil Temperature Probabilities</a></li>
-<li><a href="/plotting/auto/?q=199">Daily Data Plotter</a></li>
-</ul>
-     <h4>Information:</h4>
-<ul>
-<li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
-<li><a href="et.phtml">Information on Evapotranspiration</a> calculations</li>
-<li><a href="/agclimate/usage/">Website Usage Stats</a></li>
-</ul>
-
-     </div>
-     <div class="col-md-6 col-sm-6">
-
-<h4>Temperature Plots:</h4>
-<ul>
-  <li><a href="display.php?prod=1">Max/Min Air Temps</a></li>
-    <li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
-</ul>
-
-<h4>Soil Plots:</h4>
-<ul>
-  <li><a href="display.php?prod=2">Avg 4in Soil Temps</a></li>
-  <li><a href="display.php?prod=3">Max/Min 4in Soil Temps</a></li>
-</ul>
-
-<h4>Moisture Plots:</h4>
-<ul>
-  <li><a href="display.php?prod=10">Monthly evapotranspiration</a></li>
-  <li><a href="display.php?prod=11">Monthly rainfall</a></li>
-  <li><a href="display.php?prod=6">Potential E-T</a></li>
-</ul>
-
-<h4>Solar/Wind</h4>
-<ul>
-  <li><a href="display.php?prod=4">Solar Radiation Values</a></li>
-  <li><a href="display.php?prod=7">Peak Wind Gust (5 sec)</a></li>
-  <li><a href="display.php?prod=8">Average Wind Speed</a></li>
-</ul>
-
-</div>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-info-circle me-2 text-info"></i>Important Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="alert-heading">Rainfall Disclaimer</h6>
+                  <p class="mb-0">The Soil Moisture Network uses a non-heated tipping bucket rain gauge and is unable to measure snowfall. If you are interested in higher quality precipitation data, check out the <a href="/COOP/" class="alert-link">NWS COOP</a> network of human observations.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <h6 class="text-primary mb-3">
+                <i class="bi bi-tools me-2"></i>Additional Tools/Apps
+              </h6>
+              <div class="list-group list-group-flush">
+                <a href="soilt-prob.php" class="list-group-item list-group-item-action border-0 px-0">
+                  <i class="bi bi-thermometer-half text-warning me-2"></i> 4 inch Soil Temperature Probabilities
+                </a>
+                <a href="/plotting/auto/?q=199" class="list-group-item list-group-item-action border-0 px-0">
+                  <i class="bi bi-graph-up text-primary me-2"></i> Daily Data Plotter
+                </a>
+              </div>
+            </div>
+            
+            <div>
+              <h6 class="text-primary mb-3">
+                <i class="bi bi-info me-2"></i>Information
+              </h6>
+              <div class="list-group list-group-flush">
+                <a href="/agclimate/info.phtml" class="list-group-item list-group-item-action border-0 px-0">
+                  <i class="bi bi-diagram-3 text-success me-2"></i> Information about network stations
+                </a>
+                <a href="et.phtml" class="list-group-item list-group-item-action border-0 px-0">
+                  <i class="bi bi-droplet text-info me-2"></i> Information on Evapotranspiration calculations
+                </a>
+                <a href="/agclimate/usage/" class="list-group-item list-group-item-action border-0 px-0">
+                  <i class="bi bi-bar-chart text-secondary me-2"></i> Website Usage Stats
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-graph-up me-2 text-success"></i>Data Visualization
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-12">
+                <h6 class="text-danger mb-3">
+                  <i class="bi bi-thermometer-sun me-2"></i>Temperature Plots
+                </h6>
+                <div class="list-group list-group-flush">
+                  <a href="display.php?prod=1" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-thermometer-high text-danger me-2"></i> Max/Min Air Temps
+                  </a>
+                  <a href="display.php?prod=12" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-snow text-info me-2"></i> Standard Chill Units since 1 Sept
+                  </a>
+                </div>
+              </div>
+              
+              <div class="col-12">
+                <h6 class="text-success mb-3">
+                  <i class="bi bi-layers me-2"></i>Soil Plots
+                </h6>
+                <div class="list-group list-group-flush">
+                  <a href="display.php?prod=2" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-thermometer text-success me-2"></i> Avg 4in Soil Temps
+                  </a>
+                  <a href="display.php?prod=3" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-graph-up text-success me-2"></i> Max/Min 4in Soil Temps
+                  </a>
+                </div>
+              </div>
+              
+              <div class="col-12">
+                <h6 class="text-primary mb-3">
+                  <i class="bi bi-droplet me-2"></i>Moisture Plots
+                </h6>
+                <div class="list-group list-group-flush">
+                  <a href="display.php?prod=10" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-calendar3 text-primary me-2"></i> Monthly evapotranspiration
+                  </a>
+                  <a href="display.php?prod=11" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-cloud-rain text-primary me-2"></i> Monthly rainfall
+                  </a>
+                  <a href="display.php?prod=6" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-tree text-primary me-2"></i> Potential E-T
+                  </a>
+                </div>
+              </div>
+              
+              <div class="col-12">
+                <h6 class="text-warning mb-3">
+                  <i class="bi bi-brightness-high me-2"></i>Solar/Wind
+                </h6>
+                <div class="list-group list-group-flush">
+                  <a href="display.php?prod=4" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-sun text-warning me-2"></i> Solar Radiation Values
+                  </a>
+                  <a href="display.php?prod=7" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-wind text-info me-2"></i> Peak Wind Gust (5 sec)
+                  </a>
+                  <a href="display.php?prod=8" class="list-group-item list-group-item-action border-0 px-0">
+                    <i class="bi bi-wind text-secondary me-2"></i> Average Wind Speed
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 EOM;

@@ -7,42 +7,76 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">Weather Prediction Center Mesoscale Precipitation Discussions</li>
-</ul>
-</p>
+<div class="container-fluid">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Weather Prediction Center Mesoscale Precipitation Discussions</li>
+  </ol>
+</nav>
 
-<p>The IEM has a database archive of WPC Mesocale Precipitation Discussions since fall 2017. This
-page offers a shapefile download of these.
-<a href="/cgi-bin/request/gis/wpc_mpd.py?help" class="btn btn-secondary">Backend Documentation</a> exists
-for those wishing to script against this service.
-</p>
+<div class="alert alert-info" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-info-circle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <p class="mb-2">The IEM has a database archive of WPC Mesoscale Precipitation Discussions since fall 2017. This
+      page offers a shapefile download of these.</p>
+      <a href="/cgi-bin/request/gis/wpc_mpd.py?help" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-file-text"></i> Backend Documentation
+      </a>
+    </div>
+  </div>
+</div>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="misc.phtml">NWS Misc Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
-&nbsp;
-<a class="btn btn-primary" href="outlooks.phtml">SPC/WPC Outlooks</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
-</p>
+<div class="mb-4">
+  <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Services</h5>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="misc.phtml">
+      <i class="bi bi-geo"></i> NWS Misc Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="watchwarn.phtml">
+      <i class="bi bi-exclamation-triangle"></i> NWS VTEC Watch Warning Advisory
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_mcd.phtml">
+      <i class="bi bi-chat-square-text"></i> SPC Convective Discussions
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="outlooks.phtml">
+      <i class="bi bi-eye"></i> SPC/WPC Outlooks
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_watch.phtml">
+      <i class="bi bi-shield-exclamation"></i> SPC Watch Polygons
+    </a>
+  </div>
+</div>
 
-<form method="GET" action="/cgi-bin/request/gis/wpc_mpd.py">
-<table class="table">
-<thead><tr><th colspan="6">Time Interval for MPD *Issuance* (UTC)</th></tr></thead>
-<tr>
-    <td></td><th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-</tr>
-
-<tr>
+<form method="GET" action="/cgi-bin/request/gis/wpc_mpd.py" class="mb-4">
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-calendar-range"></i> Time Interval for MPD Issuance (UTC)
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Year</th>
+            <th scope="col">Month</th>
+            <th scope="col">Day</th>
+            <th scope="col">Hour</th>
+            <th scope="col">Minute</th>
+          </tr>
+        </thead>
+        <tbody>
 EOM;
-$content .= "<th>Start:</th>
+$content .= "<tr>
+    <th scope=\"row\" class=\"text-success\">
+      <i class=\"bi bi-play-fill\"></i> Start:
+    </th>
     <td>
      ". yearSelect(2017, date("Y"), "year1") ."
     </td>
@@ -61,7 +95,9 @@ $content .= "<th>Start:</th>
   </tr>
 
   <tr>
-    <th>End:</th>
+    <th scope=\"row\" class=\"text-danger\">
+      <i class=\"bi bi-stop-fill\"></i> End:
+    </th>
     <td>
      ". yearSelect(2017, date("Y"), "year2") ."
     </td>
@@ -78,33 +114,70 @@ $content .= "<th>Start:</th>
      ". minuteSelect(0, "minute2") ."
     </td>
   </tr>
-</table>";
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>";
 
 $content .= <<<EOM
-<p><input type="submit" value="Giveme data right now!">
+
+<div class="d-grid gap-2 mb-4">
+  <button type="submit" class="btn btn-primary btn-lg">
+    <i class="bi bi-download"></i> Download Data
+  </button>
+</div>
 </form>
 
-<h4>Shapefile DBF schema:</h4>
-<pre>
-Field 0: Type=C/String, Title=`ISSUE', UTC Issuance Timestamp YYYYmmddHHMM
-Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
-Field 2: Type=C/String, Title=`PROD_ID', IEM Product ID (see below)
-Field 3: Type=N/Double, Title=`YEAR', YEAR of MCD
-Field 4: Type=N/Double, Title=`NUM', SPC MCD Number
-Field 6: Type=C/String, Title=`CONCERN', WPC MPD concerning heading
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table"></i> Shapefile DBF Schema
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>UTC Issuance Timestamp YYYYmmddHHMM</td></tr>
+          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>UTC MCD Expiration Timestamp</td></tr>
+          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>PROD_ID</code></td><td>IEM Product ID (see below)</td></tr>
+          <tr><td>3</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>YEAR</code></td><td>YEAR of MCD</td></tr>
+          <tr><td>4</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>NUM</code></td><td>SPC MCD Number</td></tr>
+          <tr><td>6</td><td><span class="badge bg-info">String</span></td><td><code>CONCERN</code></td><td>WPC MPD concerning heading</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-</pre>
-
-<h4>Archive / Usage Notes:</h4>
-<ol>
-<li>The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
-NWS Text products and can be used to call an IEM API to fetch the text of
-this product. {$EXTERNAL_BASEURL}/api/1/nwstext/{PROD_ID}</li>
-
-<li>The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
-a stable URL into SPC's website like so: https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</li>
-</ol>
-</form>
+<div class="card">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-info-circle"></i> Archive / Usage Notes
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-primary" role="alert">
+      <strong><i class="bi bi-api"></i> API Integration:</strong> The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
+      NWS Text products and can be used to call an IEM API to fetch the text of
+      this product: <code>{$EXTERNAL_BASEURL}/api/1/nwstext/{PROD_ID}</code>
+    </div>
+    <div class="alert alert-info" role="alert">
+      <strong><i class="bi bi-link-45deg"></i> SPC Integration:</strong> The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
+      a stable URL into SPC's website like so: <code>https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</code>
+    </div>
+  </div>
+</div>
+</div>
 EOM;
 
 $t->content = $content;

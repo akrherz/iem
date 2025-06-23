@@ -955,7 +955,13 @@ misc = [
     {"id": 254, "label": "NEXRAD Level III Latency over NOAAPort"},
     {"id": 227, "label": "NWEM / NWS Non-VTEC Products containing a polygon"},
     {"id": 236, "label": "PIREP Daily Counts by ARTCC / Alaska Zone"},
-    {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
+    {
+        "id": 220,
+        "label": (
+            "SPC Convective / Fire Weather / "
+            "WPC Excessive Rainfall Outlook Graphics"
+        ),
+    },
     {"id": 217, "label": "SPS Special Weather Statement Maps"},
     {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
 ]

@@ -43,11 +43,11 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $data[$row["id"]][intval($row["month"]) - 1] = $row["precip"];
 }
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
-<script type="text/javascript" src="/vendor/ext/ux/TableGrid.js"></script>
-<script type="text/javascript" src="mon_prec.js"></script>
+<link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
+<link type="text/css" href="mon_prec.css" rel="stylesheet" />
+EOM;
+$t->jsextra = <<<EOM
+<script type="module" src="mon_prec.module.js?v=2"></script>
 EOM;
 
 reset($data);
@@ -89,47 +89,92 @@ foreach ($data as $key => $val) {
 
 $d = date("d M Y h a");
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-    <li><a href="/ASOS/">ASOS Mainpage</a></li>
-    <li>{$year} {$network} Precipitation Report</li>
+    <li class="breadcrumb-item"><a href="/ASOS/">ASOS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{$year} {$network} Precipitation Report</li>
 </ol>
+</nav>
 
-<p>This table was generated at {$d} and is based
+<p>This table was generated at <strong>{$d}</strong> and is based
 on available ASOS data.  
 <strong>No attempt was made to estimate missing data.</strong></p>
 
-<form name="change">
-<p>{$netselect}
-<p>{$yselect}
-<input type="submit" value="Change Year" />
+<form name="change" class="mb-4">
+<div class="row align-items-end">
+    <div class="col-md-4 mb-3">
+        <label for="network" class="form-label">Network:</label>
+        {$netselect}
+    </div>
+    <div class="col-md-4 mb-3">
+        <label for="year" class="form-label">Year:</label>
+        {$yselect}
+    </div>
+    <div class="col-md-4 mb-3">
+        <button type="submit" class="btn btn-primary">Change Year</button>
+    </div>
+</div>
 </form>
 
-<p><button id="create-grid" type="button">Interactive Grid</button>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Monthly Precipitation Data</h4>
+    <button id="create-grid" type="button" class="btn btn-success">Make Table Interactive</button>
+</div>
 
-<TABLE border="1" cellpadding="2" cellspacing="0" width="100%" id="datagrid">
+<!-- Tabulator Table Controls (hidden initially) -->
+<div id="table-controls" class="d-none">
+    <div class="d-flex flex-wrap align-items-center">
+        <div class="btn-group me-3 mb-2">
+            <button id="download-csv" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+            <button id="download-json" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Download JSON
+            </button>
+        </div>
+        <div class="btn-group me-3 mb-2">
+            <button id="copy-clipboard" class="btn btn-outline-secondary">
+                <i class="fas fa-copy"></i> Copy to Clipboard
+            </button>
+            <button id="clear-filters" class="btn btn-outline-warning">
+                <i class="fas fa-filter"></i> Clear Filters
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Tabulator Table (hidden initially) -->
+<div id="tabulator-container" class="d-none">
+    <div id="precipitation-tabulator-table"></div>
+</div>
+
+<!-- Original Table (shown initially) -->
+<div id="original-table">
+<table class="table table-striped table-sm" id="datagrid">
 <thead class="sticky">
-<TR>
+<tr>
 <th>ID</th>
 <th>Name</th>
-<TH>Jan</TH>
-<TH>Feb</TH>
-<TH>Mar</TH>
-<TH>Apr</TH>
-<TH>May</TH>
-<TH>Jun </TH>
-<TH>Jul</TH>
-<TH>Aug</TH>
-<TH>Sep</TH>
-<TH>Oct</TH>
-<TH>Nov</TH>
-<TH>Dec</TH>
-<TH><B>MJJA</B></TH>
-<TH><B>Year</B></TH>
-</TR>
+<th>Jan</th>
+<th>Feb</th>
+<th>Mar</th>
+<th>Apr</th>
+<th>May</th>
+<th>Jun</th>
+<th>Jul</th>
+<th>Aug</th>
+<th>Sep</th>
+<th>Oct</th>
+<th>Nov</th>
+<th>Dec</th>
+<th><strong>MJJA</strong></th>
+<th><strong>Year</strong></th>
+</tr>
 </thead>
 <tbody>
 {$table}
 </tbody>
 </table>
+</div>
 EOM;
 $t->render('single.phtml');

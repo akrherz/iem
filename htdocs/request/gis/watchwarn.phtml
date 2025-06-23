@@ -104,46 +104,81 @@ for($year=1986;$year<=date("Y");$year++){
 }
 
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">Archived NWS Watch, Warnings, Advisories</li>
-</ul>
-</p>
+<div class="container-fluid">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Archived NWS Watch, Warnings, Advisories</li>
+  </ol>
+</nav>
 
-<p>This page provides a download interface to IEM processed
-<strong>metadata/geometries</strong> associated with National Weather Service
-VTEC-enabled watch, warning, and advisory events.  You can download this
-information on-demand in a zip-file (containing a shapefile + CSV), KML, or
-Microsoft Excel format.</p>
+<div class="alert alert-info" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-info-circle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <p class="mb-2">This page provides a download interface to IEM processed
+      <strong>metadata/geometries</strong> associated with National Weather Service
+      VTEC-enabled watch, warning, and advisory events. You can download this
+      information on-demand in a zip-file (containing a shapefile + CSV), KML, or
+      Microsoft Excel format.</p>
+      <p class="mb-0">If you are looking for a real-time source of warning shapefiles, 
+      you can find that <a href="/data/gis/shape/4326/us/current_ww.zip" class="alert-link">here.</a></p>
+    </div>
+  </div>
+</div>
 
-<p>If you are looking for a real-time source of warning shapefiles, 
-you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
+<div class="alert alert-warning" role="alert">
+  <div class="d-flex">
+    <div class="flex-shrink-0">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    <div class="flex-grow-1 ms-3">
+      <strong>Download Limit:</strong> If you do not limit the state or WFO output,
+      you are limited to downloading <strong>1 year</strong> of data at a time. The reason being
+      to keep the requests from timing out as the response content is delivered on
+      the fly.
+    </div>
+  </div>
+</div>
 
-<div class="alert alert-warning"> If you do not limit the state or WFO output,
-you are limited to downloading <strong>1 year</strong> of data at a time.  The reason being
-to keep the requests from timing out as the response content is delivered on
-the fly.</div>
+<div class="mb-4">
+  <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Services</h5>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="misc.phtml">
+      <i class="bi bi-geo"></i> NWS Misc Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_mcd.phtml">
+      <i class="bi bi-chat-square-text"></i> SPC Convective Discussions
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="outlooks.phtml">
+      <i class="bi bi-eye"></i> SPC/WPC Outlooks
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="spc_watch.phtml">
+      <i class="bi bi-shield-exclamation"></i> SPC Watch Polygons
+    </a>
+    <a class="btn btn-outline-secondary btn-sm" href="wpc_mpd.phtml">
+      <i class="bi bi-cloud-rain"></i> WPC Precip Discussions
+    </a>
+  </div>
+</div>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="misc.phtml">NWS Misc Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
-&nbsp;
-<a class="btn btn-primary" href="outlooks.phtml">SPC/WPC Outlooks</a>
-&nbsp;
-<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
-&nbsp;
-<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
-</p>
+<div class="row"><div class="col-md-6">
 
-<div class="row"><div class="col-sm-6">
-
-<p><a class="btn btn-secondary" href="/cgi-bin/request/gis/watchwarn.py?help">
-<i class="fa fa-file"></i> Backend documentation</a>
-for scripting against this service.</p>
-
-<div style="background: #EEEEEE; border: #000 solid 1px; padding: 5px;">
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-download"></i> Custom Download
+    </h5>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">
+      <a class="btn btn-outline-primary btn-sm" href="/cgi-bin/request/gis/watchwarn.py?help">
+        <i class="bi bi-file-text"></i> Backend Documentation
+      </a>
+      for scripting against this service.
+    </p>
 
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <input type="hidden" value="yes" name="simple">
@@ -162,12 +197,16 @@ for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
     else{
         $group_input_checked = '';
     }
-    $content .= '<h4>';
-    $content .=   '<input type="radio" name="location_group" value="'.$group_key.'"';
-    $content .=   ' ' . $group_input_checked . '>';
-    $content .=   ' ' . $group_meta['title'];
-    $content .= '</h4>';
-    $content .= '<div class="' . $group_input_css . '" id="' . $group_select_container_id . '">';
+    $content .= '<h6 class="mb-2">';
+    $content .=   '<div class="form-check">';
+    $content .=     '<input class="form-check-input" type="radio" name="location_group" value="'.$group_key.'"';
+    $content .=     ' ' . $group_input_checked . ' id="location_'.$group_key.'">';
+    $content .=     '<label class="form-check-label fw-semibold" for="location_'.$group_key.'">';
+    $content .=       $group_meta['title'];
+    $content .=     '</label>';
+    $content .=   '</div>';
+    $content .= '</h6>';
+    $content .= '<div class="' . $group_input_css . ' mb-3" id="' . $group_select_container_id . '">';
     $content .= $location_select_html[$group_key];
     $content .= '</div>';
 }
@@ -175,97 +214,150 @@ $pselect = make_select("phenomena", "TO", $reference["vtec_phenomena"], "", "", 
 $sselect = make_select("significance", "W", $reference["vtec_significance"], "", "", FALSE, TRUE);
 $content .= <<<EOM
 
-<h4>Select time interval</h4>
-<i>(Times are in UTC.)</i>
+<h6 class="mb-3"><i class="bi bi-clock"></i> Select time interval <small class="text-muted">(Times are in UTC.)</small></h6>
 
-<table class="table table-sm table-bordered table-striped">
+<div class="table-responsive">
+<table class="table table-sm table-borderless">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Year</th><th scope="col">Month</th><th scope="col">Day</th>
+      <th scope="col">Hour</th><th scope="col">Minute</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th colspan="6" class="bg-light">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="timeopt" value="1" id="timeopt1" checked>
+          <label class="form-check-label fw-semibold" for="timeopt1">
+            <i class="bi bi-calendar-range text-primary"></i> Option 1: WWA events with start time between the specified start and end dates.
+          </label>
+        </div>
+      </th>
+    </tr>
+
   <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-  </tr>
-
-<tr>
-    <th colspan="6">
-    <input type="radio" name="timeopt" value="1" checked="checked" /> 
-    Option 1: WWA events with start time between the specified start
-    and end dates.</th>
-</tr>
-
-  <tr>
-    <th>Start:</th>
+    <th scope="row" class="text-success"><i class="bi bi-play-fill"></i> Start:</th>
     <td>{$y1select}</td><td>{$m1select}</td><td>{$d1select}</td>
     <td>{$h1select}</td><td>{$mi1select}</td></tr>
   <tr>
-    <th>End:</th>
+    <th scope="row" class="text-danger"><i class="bi bi-stop-fill"></i> End:</th>
     <td>{$y2select}</td><td>{$m2select}</td><td>{$d2select}</td>
     <td>{$h2select}</td><td>{$mi2select}</td></tr>
 <tr>
-    <th colspan="6">
-    <input type="radio" name="timeopt" value="2" /> 
-    Option 2: WWA events valid at this exact time (UTC)</th>
+    <th colspan="6" class="bg-light">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="timeopt" value="2" id="timeopt2">
+        <label class="form-check-label fw-semibold" for="timeopt2">
+          <i class="bi bi-clock text-info"></i> Option 2: WWA events valid at this exact time (UTC)
+        </label>
+      </div>
+    </th>
 </tr>
     <tr>
-    <th>Valid:</th>
+    <th scope="row" class="text-info"><i class="bi bi-calendar-check"></i> Valid:</th>
     <td>{$y3select}</td><td>{$m3select}</td><td>{$d3select}</td>
     <td>{$h3select}</td><td>{$mi3select}</td></tr>
 
 </table>
+</div>
 
-<br /><input id="limit0" type="checkbox" name="limit0" value="yes">
-<label for="limit0">Limit output to Tornado, Severe Thunderstorm, Marine, and
-Flash Flood Warnings</label>
-<br /><input id="limit1" type="checkbox" name="limit1" value="yes">
-<label for="limit1">Limit output to only Storm Based Warnings</label>
-<br /><input id="limit2" type="checkbox" name="limit2" value="yes">
-<label for="limit2">Limit output to only Emergencies [<sup>2</sup>]</label>
-<br /><input id="limitpds" type="checkbox" name="limitpds" value="yes">
-<label for="limitpds">Limit output to only Particularly Dangerous Sitations</label>
+<div class="mb-3">
+  <h6 class="mb-3"><i class="bi bi-funnel"></i> Filter Options</h6>
+  <div class="form-check mb-2">
+    <input class="form-check-input" type="checkbox" name="limit0" value="yes" id="limit0">
+    <label class="form-check-label" for="limit0">
+      <i class="bi bi-tornado text-danger"></i> Limit output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
+    </label>
+  </div>
+  <div class="form-check mb-2">
+    <input class="form-check-input" type="checkbox" name="limit1" value="yes" id="limit1">
+    <label class="form-check-label" for="limit1">
+      <i class="bi bi-geo-alt text-warning"></i> Limit output to only Storm Based Warnings
+    </label>
+  </div>
+  <div class="form-check mb-2">
+    <input class="form-check-input" type="checkbox" name="limit2" value="yes" id="limit2">
+    <label class="form-check-label" for="limit2">
+      <i class="bi bi-exclamation-triangle-fill text-danger"></i> Limit output to only Emergencies [<sup>2</sup>]
+    </label>
+  </div>
+  <div class="form-check mb-2">
+    <input class="form-check-input" type="checkbox" name="limitpds" value="yes" id="limitpds">
+    <label class="form-check-label" for="limitpds">
+      <i class="bi bi-shield-fill-exclamation text-danger"></i> Limit output to only Particularly Dangerous Situations
+    </label>
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="limitps" value="yes" id="limitps">
+    <label class="form-check-label" for="limitps">
+      <i class="bi bi-list-check text-primary"></i> Limit output to selected VTEC phenomena and significance below.
+    </label>
+  </div>
+</div>
 
-<br /><input id="limitps" type="checkbox" name="limitps" value="yes">
-<label for="limitps">Limit output to selected VTEC
-phenomena and significance below.</label>
-
-<div class="row">
+<div class="row mb-3">
 <div class="col-md-6">{$pselect}</div>
 <div class="col-md-6">{$sselect}</div>
 </div><!-- ./row -->
 
-<br /><input id="addsvs" type="checkbox" name="addsvs" value="yes">
-<label for="addsvs">Include polygons/metadata found with any followup (SVS/MWS/etc)
-statements. [<sup>1</sup>]</label></p>
-
-
-<p>
-<input type="submit" value="Request Shapefile" />
-<input type="submit" value="Request CSV" />
-<input type="submit" value="Request Excel" />
-<input type="submit" value="Request KML (*)" />
- <input type="reset" />
-<br />* Only Storm Based Warnings are available via KML.
-<br />[1] By default, only the issuance polygon is included.
-<br />[2] In the case of KML output and emergencies, this get very complex with
-the download. You likely want to enable "Include polygons/metadata" option to
-get a complete download.  Otherwise, you only get emergencies <strong>at issuance</strong>.
-</form>
+<div class="form-check mb-4">
+  <input class="form-check-input" type="checkbox" name="addsvs" value="yes" id="addsvs">
+  <label class="form-check-label" for="addsvs">
+    <i class="bi bi-plus-circle text-success"></i> Include polygons/metadata found with any followup (SVS/MWS/etc) statements. [<sup>1</sup>]
+  </label>
 </div>
 
-<h4>Shapefile DBF schema:</h4>
+<div class="d-grid gap-2">
+  <div class="btn-group" role="group">
+    <input type="submit" class="btn btn-primary" value="Request Shapefile" />
+    <input type="submit" class="btn btn-outline-primary" value="Request CSV" />
+    <input type="submit" class="btn btn-outline-primary" value="Request Excel" />
+    <input type="submit" class="btn btn-outline-primary" value="Request KML (*)" />
+  </div>
+  <input type="reset" class="btn btn-outline-secondary btn-sm" />
+</div>
+<div class="small text-muted mt-2">
+  * Only Storm Based Warnings are available via KML.<br />
+  [1] By default, only the issuance polygon is included.<br />
+  [2] In the case of KML output and emergencies, this gets very complex with
+  the download. You likely want to enable "Include polygons/metadata" option to
+  get a complete download. Otherwise, you only get emergencies <strong>at issuance</strong>.
+</div>
+</form>
+  </div>
+</div>
 
-<p>A discussion of the schema can be found on the <a href="/info/datasets/vtec.html">FAQ Page</a>
-for this dataset.</p>
+<div class="card mb-3">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table"></i> Shapefile DBF Schema
+    </h5>
+  </div>
+  <div class="card-body">
+    <p>A discussion of the schema can be found on the <a href="/info/datasets/vtec.html">FAQ Page</a>
+    for this dataset.</p>
+  </div>
+</div>
 
 
-</div><div class="col-sm-6">
-<h4>Pre-generated zip files</h4>
+</div><div class="col-md-6">
+<div class="card">
+  <div class="card-header bg-success text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-file-earmark-zip"></i> Pre-generated Zip Files
+    </h5>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">These files are same as you could download from the form on the left, just
+    you don't have to wait so long! A script runs at around 2 AM Central Time each
+    day to dump the current year's data. The date stamps with each file denote
+    when they were generated.</p>
 
-<p>These files are same as you could download from the form on the left, just
-you don't have to wait so long! A script runs at around 2 AM Central Time each
-day to dump the current year's data. The date stamps with each file denote
-when they were generated.</p>
-
-<table class="table table-bordered table-striped">
-<thead class="sticky">
+<div class="table-responsive">
+<table class="table table-sm table-striped">
+<thead class="table-dark">
 <tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th>
 <th>Limit Storm Based<br />Tor,Svr,Mar,FF</th></tr>
 </thead>
@@ -273,54 +365,86 @@ when they were generated.</p>
 {$table}
 </tbody>
 </table>
+</div>
+  </div>
+</div>
 
 </div><!-- ./col -->
 </div><!-- ./row -->
 
-<h4>Service changes:</h4>
-<ul>
-    <li><strong>10 Apr 2024</strong>: Polygons associated with CANcel VTEC
-    events when the event is still active for other areas have been culled from
-    the database and thus this portal.  These were not providing any value and
-    were confusing users.</li>
-    <li><strong>12 Mar 2019</strong>: Added <code>UPDATED</code> column to the
-    dataset providing the timestamp of the most recent NWS Text Product for
-    the event.</li>
-    <li><strong>3 Feb 2016</strong>: This service used to allow the download
-    of the high-resolution AWIPS counties/zones shapes.  Sadly, the size
-    of these polygons would overwhelm the backend data service.  So now
-    this service only returns the simplified county/zone polygons. You
-    may wish to do a join against the
-    <a href="https://www.weather.gov/gis/AWIPSShapefiles">AWIPS Geodatabase</a> to
-    get the high resolution depiction. The <code>NWS_UGC</code> column is what
-    you would use to join.</li>	
-</ul>
-        
-<h4>Archive status:</h4>
-<table class="table table-bordered table-striped">
-<thead>
-<tr><th>Dataset component</th><th>Start Time</th><th>Notes</th></tr>
-</thead>
-        <tr>
- <td>Tornado<br />Severe T'storm<br /> Flash Flood<br />Special Marine</td>
- <td>1 Jan 2002 (Polygons)
-     <br />1 Jan 1986 (Counties)</td>
- <td>Only the initial polygon is used.  Polygon updates in the SVS
-  statements are ignored.  The VTEC attributes didn't appear until
-  they became operational.</td>
-</tr>
-<tr>
- <td>All VTEC watch/warn</td>
- <td>12 Nov 2005</td>
- <td>Products other than Tornado and Severe Thunderstorm Warnings.</td>
-</tr>
-<tr>
- <td>SVR,TOR Watch by County</td>
- <td>12 Nov 2005</td>
- <td></td>
-</tr>
-</table>
-
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-clock-history"></i> Service Changes
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-primary" role="alert">
+          <strong><i class="bi bi-calendar-event"></i> 10 Apr 2024:</strong> Polygons associated with CANcel VTEC
+          events when the event is still active for other areas have been culled from
+          the database and thus this portal. These were not providing any value and
+          were confusing users.
+        </div>
+        <div class="alert alert-info" role="alert">
+          <strong><i class="bi bi-plus-circle"></i> 12 Mar 2019:</strong> Added <code>UPDATED</code> column to the
+          dataset providing the timestamp of the most recent NWS Text Product for
+          the event.
+        </div>
+        <div class="alert alert-warning" role="alert">
+          <strong><i class="bi bi-geo"></i> 3 Feb 2016:</strong> This service used to allow the download
+          of the high-resolution AWIPS counties/zones shapes. Sadly, the size
+          of these polygons would overwhelm the backend data service. So now
+          this service only returns the simplified county/zone polygons. You
+          may wish to do a join against the
+          <a href="https://www.weather.gov/gis/AWIPSShapefiles" class="alert-link">AWIPS Geodatabase</a> to
+          get the high resolution depiction. The <code>NWS_UGC</code> column is what
+          you would use to join.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-archive"></i> Archive Status
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead class="table-dark">
+              <tr><th>Dataset Component</th><th>Start Time</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tornado<br />Severe T'storm<br /> Flash Flood<br />Special Marine</td>
+                <td>1 Jan 2002 (Polygons)<br />1 Jan 1986 (Counties)</td>
+                <td>Only the initial polygon is used. Polygon updates in the SVS
+                statements are ignored. The VTEC attributes didn't appear until
+                they became operational.</td>
+              </tr>
+              <tr>
+                <td>All VTEC watch/warn</td>
+                <td>12 Nov 2005</td>
+                <td>Products other than Tornado and Severe Thunderstorm Warnings.</td>
+              </tr>
+              <tr>
+                <td>SVR,TOR Watch by County</td>
+                <td>12 Nov 2005</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 EOM;
 $t->content = $content;
 $t->jsextra = '<script type="module" src="watchwarn.module.js"></script>';
