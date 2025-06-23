@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 
 import cdsapi
 import click
+import httpx
 import numpy as np
 from netCDF4 import Dataset
 from pyiem.iemre import DOMAINS, hourly_offset
@@ -170,20 +171,21 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
 def fetch(valid: datetime, checkcache: bool):
     """Get the data from the CDS."""
     if checkcache:
-        remotepath = (
-            f"/mnt/era5land/{valid:%Y/%m}/era5land_{valid:%Y%m%d%H}.nc"
+        url = (
+            f"https://mtarchive.geol.iastate.edu/era5land/{valid:%Y/%m}/"
+            f"era5land_{valid:%Y%m%d%H}.nc"
         )
-        cmd = [
-            "/usr/bin/scp",
-            "-q",
-            f"mesonet@metvm5-dc:{remotepath}",
-            "data_0.nc",
-        ]
-        LOG.info("command `%s`", " ".join(cmd))
-        subprocess.call(cmd)
-        if os.path.isfile("data_0.nc"):
-            LOG.info("Found %s in cache", remotepath)
-            return
+        try:
+            resp = httpx.head(url, follow_redirects=True, timeout=30)
+            resp.raise_for_status()
+            if resp.headers.get("Content-Length", "0") != "0":
+                LOG.info("Using cached %s", url)
+                resp = httpx.get(url, follow_redirects=True, timeout=30)
+                with open("data_0.nc", "wb") as fh:
+                    fh.write(resp.content)
+                return
+        except Exception as exp:
+            LOG.info("Failed webfetch %s: %s", url, exp)
 
     zipfn = "data_0.nc.zip"
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
