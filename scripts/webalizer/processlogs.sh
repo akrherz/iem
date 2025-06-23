@@ -53,6 +53,7 @@ done
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/depbackend.conf combined-depbackend.log
 
 grep " /agclimate" combined-iem.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log

@@ -17,43 +17,111 @@ $table = file_get_contents($uri);
 $t = new MyView();
 $t->title = "VTEC Event Listing for $year";
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
+<link type="text/css" href="maxetn.css" rel="stylesheet" />
 EOM;
 
 $yselect = yearSelect(2005, $year, 'year');
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">Max VTEC EventID Listing</li>
-</ol>
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Max VTEC EventID Listing</li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-<p>The National Weather Service uses a system called
-<a href="http://www.nws.noaa.gov/om/vtec/">Valid Time Event Code (VTEC)</a> to provide
-more accurate tracking of its watch, warning, and advisories.  The IEM attempts to provide a
-high fidelity database of these products.  The following table is a diagnostic providing the
-largest VTEC eventids (ETN) for each NWS Forecast Office, each phenomena and significance for
-the given year. <strong>Pro-tip</strong>: Use the search box to the upper right of the
-table to search for a specific WFO.</p>
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-info-circle"></i> About VTEC Event Tracking</h4>
+            <p>The National Weather Service uses a system called
+            <a href="http://www.nws.noaa.gov/om/vtec/" class="alert-link">Valid Time Event Code (VTEC)</a> to provide
+            more accurate tracking of its watch, warning, and advisories. The IEM attempts to provide a
+            high fidelity database of these products.</p>
+            <hr>
+            <p class="mb-0">The following table shows the largest VTEC eventids (ETN) for each NWS Forecast Office, 
+            each phenomena, and significance for the given year. <strong>Pro-tip</strong>: Use the search functionality 
+            to filter by a specific WFO.</p>
+        </div>
+    </div>
+</div>
 
-<p>The following <a href="/json/">JSON(P) Webservice</a> provided the data you
-see presented on this page<br />
-<code>{$wsuri}</code></p>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-calendar-event"></i> Year Selection</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="maxetn.php" class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <label for="year" class="form-label">Select Year:</label>
+                        $yselect
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Update Table
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-api"></i> JSON API</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">This data is available via our <a href="/json/">JSON Webservice</a>:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control font-monospace" value="{$wsuri}" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{$wsuri}')">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<form method="GET" action="maxetn.php">
-        Select Year: $yselect
-        <input type="submit" value="Generate Table">
-</form>
-
-<hr >
-<h3>Max VTEC ETN listing for {$year}</h3>
-<div id="thetable">
-{$table}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">Max VTEC ETN Listing for {$year}</h3>
+                <div class="btn-group" role="group" id="download-buttons" style="display: none;">
+                    <button type="button" class="btn btn-success btn-sm" id="download-csv">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="copy-clipboard">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="loading-indicator" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading VTEC data...</p>
+                </div>
+                <div id="vtec-table" style="display: none;"></div>
+                <div id="error-message" class="alert alert-danger" role="alert" style="display: none;">
+                    <i class="bi bi-exclamation-triangle"></i> Error loading data. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="maxetn.js"></script>
+<script src="maxetn.module.js" type="module"></script>
 EOM;
 $t->render("full.phtml");

@@ -83,12 +83,6 @@ function escapeHTML(val) {
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&#039;');
 }
- 
-function updateMap() {
-    renderattr = escapeHTML(document.getElementById('renderattr').value);
-    vectorLayer.setStyle(vectorStyleFunction);
-    updateURL();
-}
 
 function updateDate() {
     const dateInput = document.getElementById("datepicker");
@@ -172,6 +166,12 @@ const vectorStyleFunction = function (feature) {
     }
     return style;
 };
+
+function updateMap() {
+    renderattr = escapeHTML(document.getElementById('renderattr').value);
+    vectorLayer.setStyle(vectorStyleFunction);
+    updateURL();
+}
 
 function makeVectorLayer(dt) {
     return new ol.layer.Vector({
