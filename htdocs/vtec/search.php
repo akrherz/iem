@@ -377,10 +377,10 @@ Warning, and Advisories using three different search methods:</p>
                         <div class="card-body">
                             <h4 id="table3title" class="card-title"><i class="fa fa-table me-2"></i>Search Results</h4>
                             <div class="btn-group-export mb-3">
-                                <button type="button" data-table="3" data-opt="excel" class="btn btn-outline-success btn-sm">
+                                <button type="button" data-table="3" data-opt="excel" class="btn btn-outline-success btn-sm iemtool">
                                     <i class="fa fa-file-excel me-1"></i>Excel
                                 </button>
-                                <button type="button" data-table="3" data-opt="csv" class="btn btn-outline-primary btn-sm">
+                                <button type="button" data-table="3" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool">
                                     <i class="fa fa-file-csv me-1"></i>CSV
                                 </button>
                             </div>
@@ -388,7 +388,13 @@ Warning, and Advisories using three different search methods:</p>
                             <div class="table-responsive">
                                 <table id="table3" data-order='[[ 3, "desc" ]]' class="table table-striped table-hover">
                                 <thead class="table-dark">
-                                <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>WFO</th><th>Locations</th><th>Issued</th>
+                                <tr>
+                                <th>Event</th>
+                                <th>Phenomena</th>
+                                <th>Significance</th>
+                                <th>WFO</th>
+                                <th>Locations</th>
+                                <th>Issued</th>
                                 <th>Expired</th></tr>
                                 </thead>
                                 </table>
