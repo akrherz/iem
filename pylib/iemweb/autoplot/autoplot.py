@@ -351,7 +351,7 @@ def workflow(mc, environ, fmt):
         if len(content) < 9.5 * 1024 * 1024:
             # Default encoding is ascii for text
             mc.set(
-                mckey,
+                mckey.encode("ascii"),
                 (
                     content
                     if isinstance(content, bytes)
@@ -365,6 +365,8 @@ def workflow(mc, environ, fmt):
                 f"Memcache object too large: {len(content)} "
                 f"uri: {environ.get('REQUEST_URI')}",
             )
+    except UnicodeEncodeError as exp:
+        raise BadWebRequest("Memcache key is non-ASCII") from exp
     except Exception as exp:
         error_log(environ, f"Exception while writting key: {mckey} {exp}")
     if isinstance(mixedobj, plt.Figure):
