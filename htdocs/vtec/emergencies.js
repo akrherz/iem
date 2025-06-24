@@ -1,8 +1,10 @@
-/* global moment, ol, $ */
+/* global moment, ol, Tabulator */
 let olmap = null;
 let elayer = null;
+let emergenciesTable = null;
 const tornadoFeatures = [];
 const flashFloodFeatures = [];
+const tableData = [];
 
 const sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
@@ -46,11 +48,10 @@ function toggleFeatures(type, show) {
 }
 
 function load_data() {
-    $.ajax({
-        url: "/api/1/nws/emergencies.geojson",
-        method: "GET",
-        dataType: "json",
-        success: (geodata) => {
+    // Use fetch instead of jQuery Ajax
+    fetch("/api/1/nws/emergencies.geojson")
+        .then(response => response.json())
+        .then(geodata => {
             const format = new ol.format.GeoJSON({
                 featureProjection: "EPSG:3857"
             });
@@ -68,15 +69,32 @@ function load_data() {
                 }
             });
 
-            $.each(geodata.features, (_idx, feat) => {
+            // Populate table data array for Tabulator
+            tableData.length = 0; // Clear existing data
+            geodata.features.forEach(feat => {
                 const prop = feat.properties;
                 const lbl = (prop.phenomena === "TO") ? "Tornado" : "Flash Flood";
-                $('#thetable tbody').append(
-                    `<tr><td>${prop.year}</td><td>${prop.wfo}</td><td>${prop.states}</td><td><a href="${prop.uri}">${prop.eventid}</a></td><td>${lbl} Warning</td><td>${prop.utc_issue}</td><td>${prop.utc_expire}</td></tr>`);
+                tableData.push({
+                    year: prop.year,
+                    wfo: prop.wfo,
+                    states: prop.states,
+                    eventid: prop.eventid,
+                    uri: prop.uri,
+                    event: `${lbl} Warning`,
+                    issue: prop.utc_issue,
+                    expire: prop.utc_expire
+                });
             });
 
-        }
-    })
+            // If table is initialized, update its data
+            if (emergenciesTable) {
+                emergenciesTable.setData(tableData);
+            }
+        })
+        .catch(() => {
+            // Handle errors
+            document.getElementById('thetable').innerHTML = '<div class="alert alert-danger">Error loading data</div>';
+        });
 }
 function featureHTML(features, lalo) {
     const html = [];
@@ -97,7 +115,7 @@ function featureHTML(features, lalo) {
     
     html.push('<div class="card-body"><ul>');
     
-    $.each(features, (_i, feature) => {
+    features.forEach(feature => {
         const utcTime = moment.utc(feature.get('utc_issue'));
         const localTime = moment(utcTime).local();
         const dtUTC = utcTime.format('HHmm [UTC]');
@@ -270,24 +288,25 @@ function makeDraggable(element) {
 }
 
 function applyDateFilter() {
-    let start = $('#startdate').val();
-    let end = $('#enddate').val();
+    let start = document.getElementById('startdate').value;
+    let end = document.getElementById('enddate').value;
     if (start) start = moment.utc(start, 'YYYY-MM-DD');
     if (end) end = moment.utc(end, 'YYYY-MM-DD').endOf('day');
 
     // Update the filter title
+    const filterTitle = document.getElementById('filter-title');
     if (start && end) {
         const formattedStart = moment.utc(start).format('MMMM D, YYYY');
         const formattedEnd = moment.utc(end).format('MMMM D, YYYY');
-        $('#filter-title').text(`Emergencies from ${formattedStart} to ${formattedEnd}`);
+        filterTitle.textContent = `Emergencies from ${formattedStart} to ${formattedEnd}`;
     } else if (start) {
         const formattedStart = moment.utc(start).format('MMMM D, YYYY');
-        $('#filter-title').text(`Emergencies since ${formattedStart}`);
+        filterTitle.textContent = `Emergencies since ${formattedStart}`;
     } else if (end) {
         const formattedEnd = moment.utc(end).format('MMMM D, YYYY');
-        $('#filter-title').text(`Emergencies until ${formattedEnd}`);
+        filterTitle.textContent = `Emergencies until ${formattedEnd}`;
     } else {
-        $('#filter-title').text('');
+        filterTitle.textContent = '';
     }
 
     const source = elayer.getSource();
@@ -298,8 +317,10 @@ function applyDateFilter() {
         if (start && issue.isBefore(start)) valid = false;
         if (end && issue.isAfter(end)) valid = false;
         if (valid) {
-            if ((type === "TO" && $('#toggleTornado').is(':checked')) ||
-                (type === "FF" && $('#toggleFlashFlood').is(':checked'))) {
+            const tornadoToggle = document.getElementById('toggleTornado');
+            const flashFloodToggle = document.getElementById('toggleFlashFlood');
+            if ((type === "TO" && tornadoToggle && tornadoToggle.checked) ||
+                (type === "FF" && flashFloodToggle && flashFloodToggle.checked)) {
                 source.addFeature(feature);
             }
         }
@@ -308,36 +329,119 @@ function applyDateFilter() {
     flashFloodFeatures.forEach(f => addFeatureIfValid(f, "FF"));
 }
 
-function init_ui() {
-    $('#makefancy').click(() => {
-        $("#thetable table").DataTable();
+function initTable() {
+    emergenciesTable = new Tabulator("#emergencies-table", {
+        data: tableData,
+        layout: "fitColumns",
+        responsiveLayout: "collapse",
+        pagination: "local",
+        paginationSize: 25,
+        paginationSizeSelector: [10, 25, 50, 100],
+        movableColumns: true,
+        resizableColumns: true,
+        tooltips: true,
+        columns: [
+            {
+                title: "Year",
+                field: "year",
+                width: 80,
+                sorter: "number",
+                headerFilter: "input"
+            },
+            {
+                title: "WFO",
+                field: "wfo",
+                width: 80,
+                sorter: "string",
+                headerFilter: "input"
+            },
+            {
+                title: "State(s)",
+                field: "states",
+                width: 120,
+                sorter: "string",
+                headerFilter: "input"
+            },
+            {
+                title: "Event ID",
+                field: "eventid",
+                width: 120,
+                sorter: "number",
+                formatter: function(cell) {
+                    const data = cell.getRow().getData();
+                    return `<a href="${data.uri}" target="_blank">${data.eventid}</a>`;
+                }
+            },
+            {
+                title: "Event",
+                field: "event",
+                minWidth: 150,
+                sorter: "string",
+                headerFilter: "input"
+            },
+            {
+                title: "Issue",
+                field: "issue",
+                width: 180,
+                sorter: "datetime",
+                sorterParams: {
+                    format: "YYYY-MM-DD HH:mm"
+                }
+            },
+            {
+                title: "Expire",
+                field: "expire",
+                width: 180,
+                sorter: "datetime",
+                sorterParams: {
+                    format: "YYYY-MM-DD HH:mm"
+                }
+            }
+        ]
     });
+}
+
+function init_ui() {
+    // Initialize table immediately and show it
+    initTable();
+    
+    // Hide the placeholder since table will be visible
+    const placeholder = document.querySelector('.table-placeholder');
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+    
+    // Hide the "Make Fancy" button since table is already interactive
+    const makeFancyBtn = document.getElementById('makefancy');
+    if (makeFancyBtn) {
+        makeFancyBtn.style.display = 'none';
+    }
 
     // Set default values for date inputs
     const defaultStartDate = '1999-05-01';
     const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
-    $('#startdate').val(defaultStartDate);
-    $('#enddate').val(tomorrow);
+    document.getElementById('startdate').value = defaultStartDate;
+    document.getElementById('enddate').value = tomorrow;
 
     const controls = `
         <div>
             <label><input type="checkbox" id="toggleTornado" checked /> Show <span style="color: #FF0000; font-weight: bold;">■</span> Tornado Emergencies</label>
             <br /><label><input type="checkbox" id="toggleFlashFlood" checked /> Show <span style="color: #00FF00; font-weight: bold;">■</span> Flash Flood Emergencies</label>
         </div>`;
-    $('#map').before(controls);
+    document.getElementById('map').insertAdjacentHTML('beforebegin', controls);
 
-    $('#toggleTornado').change((e) => {
+    document.getElementById('toggleTornado').addEventListener('change', (e) => {
         toggleFeatures("TO", e.target.checked);
     });
 
-    $('#toggleFlashFlood').change((e) => {
+    document.getElementById('toggleFlashFlood').addEventListener('change', (e) => {
         toggleFeatures("FF", e.target.checked);
     });
 
-    $('#applyFilter').click(applyDateFilter);
+    document.getElementById('applyFilter').addEventListener('click', applyDateFilter);
 }
 
-$(document).ready(() => {
+document.addEventListener('DOMContentLoaded', () => {
     init_map();
     init_ui();
     load_data();

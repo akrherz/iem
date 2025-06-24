@@ -359,10 +359,10 @@ EOM;
 $content .= $htmlout;
 $t->content = $content;
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
-<script src="hist.js" type="text/javascript"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script src="hist.module.js" type="module"></script>
 EOM;
 $t->render('sites.phtml');

@@ -1,0 +1,169 @@
+/* VTEC Events Page Styles */
+
+/* Form visibility helpers */
+#wfo-select-container, #state-select-container {
+    transition: opacity 0.3s ease;
+}
+
+/* API URL input styling */
+#api-url {
+    font-size: 0.875rem;
+    background-color: #f8f9fa;
+}
+
+/* Loading indicator */
+#loading-indicator {
+    padding: 2rem;
+}
+
+/* Error message styling */
+#error-message {
+    margin-top: 1rem;
+}
+
+/* Event count badge */
+#event-count {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Download buttons */
+#download-buttons {
+    gap: 0.5rem;
+}
+
+/* Tabulator customizations */
+.tabulator {
+    border: none;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.tabulator .tabulator-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+.tabulator .tabulator-header .tabulator-col:last-child {
+    border-right: none;
+}
+
+.tabulator .tabulator-tableholder .tabulator-table .tabulator-row {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover {
+    background-color: #f8f9fa;
+}
+
+.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even {
+    background-color: #fff;
+}
+
+.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd {
+    background-color: #f8f9fa;
+}
+
+/* Links in table */
+.tabulator .tabulator-cell a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.tabulator .tabulator-cell a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tabulator .tabulator-header {
+        font-size: 0.875rem;
+    }
+    
+    .tabulator .tabulator-cell {
+        font-size: 0.875rem;
+    }
+    
+    #download-buttons {
+        flex-direction: column;
+    }
+    
+    #download-buttons .btn {
+        margin-bottom: 0.5rem;
+    }
+    
+    #download-buttons .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Card enhancements */
+.card {
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Form card styling */
+.card-header {
+    font-weight: 500;
+}
+
+.form-check-label {
+    font-weight: 500;
+}
+
+.form-check-label i {
+    margin-right: 0.5rem;
+}
+
+/* Alert enhancements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.alert-info {
+    background-color: #e7f3ff;
+    border-left: 4px solid #0d6efd;
+}
+
+.alert-secondary {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c757d;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}

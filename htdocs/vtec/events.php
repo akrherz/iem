@@ -44,53 +44,19 @@ $public_uri = str_replace(
     $EXTERNAL_BASEURL,
     $uri
 );
-$data = file_get_contents($uri);
-if ($data === FALSE) {
-    die("Failed to fetch data from $uri");
-}
-$json = json_decode($data, $assoc = TRUE);
-$table = "";
-if (sizeof($json["events"]) == 0) {
-    $table .= "<tr><th colspan=\"8\">No Events Found</th><tr>";
-}
-foreach ($json['events'] as $key => $val) {
-    $hmlurl = "";
-    if (($val["hvtec_nwsli"] != null) && ($val["hvtec_nwsli"] != "00000")) {
-        $ts = strtotime($val["issue"]);
-        // Create a deep link to HML autoplot
-        $hmlurl = sprintf(
-            "<a href=\"{$EXTERNAL_BASEURL}/" .
-                "plotting/auto/?_wait=no&q=160&station=%s&dt=%s\">%s</a>",
-            $val["hvtec_nwsli"],
-            date("Y/m/d 0000", $ts),
-            $val["hvtec_nwsli"]
-        );
-    }
-    $table .= sprintf(
-        "<tr><td>%s</td><td><a href=\"%s\">%s</a></td>" .
-            "<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td>" .
-            "<td>%s</td></tr>",
-        $val["wfo"],
-        $val["uri"],
-        $val["eventid"],
-        $val["phenomena"],
-        $val["significance"],
-        $vtec_phenomena[$val["phenomena"]],
-        $vtec_significance[$val["significance"]],
-        $val["issue"],
-        $val["expire"],
-        $hmlurl
-    );
-}
 
 $t = new MyView();
-$t->title = "VTEC Event Listing for $wfo during $year";
+if ($which == 'wfo') {
+    $t->title = "VTEC Event Listing for $wfo during $year";
+} else {
+    $t->title = "VTEC Event Listing for $state during $year";
+}
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
+<link type="text/css" href="events.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="events.js"></script>
+<script src="events.module.js" type="module"></script>
 EOM;
 $yselect = yearSelect(2005, $year, 'year');
 $wfoselect = networkSelect("WFO", $wfo, array(), "wfo");
@@ -104,72 +70,174 @@ $ponchecked = $pon ? "CHECKED" : "";
 $sonchecked = $son ? "CHECKED" : "";
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">NWS VTEC Event Listing</li>
-</ol>
-<h3>NWS VTEC Event ID Usage</h3>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">NWS VTEC Event Listing</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
-<p>This page provides a listing of VTEC events
-for a given forecast office or state and year.  There are a number of caveats to this
-listing due to issues encountered processing NWS VTEC enabled products. Some
-events may appear listed twice due to quirks with how this information 
-is stored within the database.  Hopefully, you can copy/paste the table into
-your favorite spreadsheet program for further usage!</p>
+    <div class="row">
+        <div class="col-12">
+            <h3>NWS VTEC Event ID Usage</h3>
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-info-circle"></i> About VTEC Events</h4>
+                <p>This page provides a listing of VTEC events for a given forecast office or state and year. There are a number of caveats to this listing due to issues encountered processing NWS VTEC enabled products. Some events may appear listed twice due to quirks with how this information is stored within the database.</p>
+                <hr>
+                <p class="mb-0">The "Event ID" column provides a direct link into the <a href="/vtec/" class="alert-link">IEM VTEC Browser</a> and the "HVTEC NWSLI" column provides a direct link into the <a href="/plotting/auto/?q=160" class="alert-link">HML Obs + Forecast Autoplot</a> application.</p>
+            </div>
+        </div>
+    </div>
 
-<p>This listing provides two links to find more information.  The "Event ID" column
-provides a direct link into the <a href="/vtec/">IEM VTEC Browser</a>
-and the "HVTEC NWSLI" column provides a direct link into the
-<a href="/plotting/auto/?q=160">HML Obs + Forecast Autoplot</a>
-application.</p>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-filter"></i> Event Filters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="events.php" id="vtec-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-header bg-light">
+                                        <h6 class="card-title mb-0">Search Scope</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="which" value="wfo" id="which-wfo" $wchecked>
+                                                <label class="form-check-label" for="which-wfo">
+                                                    <i class="bi bi-building"></i> By Weather Forecast Office
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="which" value="state" id="which-state" $schecked>
+                                                <label class="form-check-label" for="which-state">
+                                                    <i class="bi bi-map"></i> By State
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-6" id="wfo-select-container">
+                                                <label for="wfo" class="form-label">WFO:</label>
+                                                $wfoselect
+                                            </div>
+                                            <div class="col-6" id="state-select-container">
+                                                <label for="state" class="form-label">State:</label>
+                                                $stselect
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="year" class="form-label">Year:</label>
+                                                $yselect
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-header bg-light">
+                                        <h6 class="card-title mb-0">Event Type Filters</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="pon" value="on" id="pon" $ponchecked>
+                                                <label class="form-check-label" for="pon">
+                                                    <i class="bi bi-funnel"></i> Filter by Phenomena
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                $pselect
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="son" value="on" id="son" $sonchecked>
+                                                <label class="form-check-label" for="son">
+                                                    <i class="bi bi-funnel-fill"></i> Filter by Significance
+                                                </label>
+                                            </div>
+                                            <div class="mt-2">
+                                                $sselect
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-search"></i> Generate Event Listing
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
-directly access it here:
-<br /><code>{$public_uri}</code></p>
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <div class="alert alert-secondary" role="alert">
+                <h6 class="alert-heading"><i class="bi bi-api"></i> JSON API Access</h6>
+                <p class="mb-0">Data available via <a href="/json/" class="alert-link">JSON webservice</a>:</p>
+                <div class="input-group mt-2">
+                    <input type="text" class="form-control font-monospace" value="Loading..." readonly id="api-url">
+                    <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('')">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="btn-group w-100" role="group" id="download-buttons" style="display: none;">
+                <button type="button" class="btn btn-success" id="download-csv">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV
+                </button>
+                <button type="button" class="btn btn-secondary" id="copy-clipboard">
+                    <i class="bi bi-clipboard"></i> Copy Data
+                </button>
+            </div>
+        </div>
+    </div>
 
-<form method="GET" action="events.php">
-
-<table class="table table-bordered">
-<thead>
-<tr>
- <th><input type="radio" name="which" value="wfo" $wchecked> By WFO</input></th>
- <th><input type="radio" name="which" value="state" $schecked> By State</input></th>
- <th>Year</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
- <td> $wfoselect </td>
- <td> $stselect </td>
- <td> $yselect </td>
- <td><input type="submit" value="Generate Table"></td>
-</tr>
-
-<tr>
- <td colspan="2">
- <input id="pon" type="checkbox" name="pon" value="on" {$ponchecked}>
- <label for="pon">Filter Phenomena?</label> &nbsp; {$pselect}
- </td>
- <td colspan="2">
- <input id="son" type="checkbox" name="son" value="on" {$sonchecked}>
- <label for="son">Filter Significance?</label> &nbsp; {$sselect}
- </td>
-
-</tbody>
-</table>
-
-</form>
-
-<p><button id="makefancy" class="btn btn-secondary">Make Table Below Interactive</button></p>
-
-<div id="thetable">
-<table class="table table-striped table-sm">
-<thead><tr><th>WFO</th><th>Event ID</th><th>PH</th><th>SIG</th><th>Event</th>
- <th>Issue</th><th>Expire</th><th>HVTEC NWSLI</th></tr>
-</thead>		
-{$table}
-</table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-table"></i> VTEC Events
+                    </h5>
+                    <span class="badge bg-light text-dark" id="event-count">Loading...</span>
+                </div>
+                <div class="card-body">
+                    <div id="loading-indicator" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading events...</span>
+                        </div>
+                        <p class="mt-2">Loading VTEC events...</p>
+                    </div>
+                    <div id="vtec-table" style="display: none;"></div>
+                    <div id="error-message" class="alert alert-danger" role="alert" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i> Error loading events. Please try again.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 EOM;

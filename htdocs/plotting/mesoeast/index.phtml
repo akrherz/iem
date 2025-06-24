@@ -47,48 +47,217 @@ if (file_exists($fn)) {
 }
 
 $t->content = <<<EOM
-<ul class="breadcrumb">
- <li><a href="/other/">Other Stations</a></li>
- <li class="active">Mesonet NE Ames</li>
-</ul>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/other/">Other Stations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mesonet NE Ames</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
-<p>You can plot 1 minute data for this location.  Note that 
-the archive <br> begins 24 Oct 2004.</p>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-info-circle"></i> High-Resolution Weather Data</h4>
+                <p class="mb-0">You can plot 1 minute data for this location. Note that the archive begins October 24, 2004.</p>
+            </div>
+        </div>
+    </div>
 
-<table>
-<tr class="even"><td>
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calendar-date"></i> Select Date
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="d-flex flex-column gap-3">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label for="year" class="form-label small">Year</label>
+                                {$ys}
+                            </div>
+                            <div class="col-4">
+                                <label for="month" class="form-label small">Month</label>
+                                {$ms}
+                            </div>
+                            <div class="col-4">
+                                <label for="day" class="form-label small">Day</label>
+                                {$ds}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-graph-up"></i> Generate Plots
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-lg-8 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-thermometer-half"></i> Current Conditions - {$titleDate}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-danger bg-opacity-10 rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-thermometer-high text-danger fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Maximum Temperature</div>
+                                    <div class="fs-5 text-danger">{$thisMax}°F</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-info bg-opacity-10 rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-thermometer-low text-info fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Minimum Temperature</div>
+                                    <div class="fs-5 text-info">{$thisMin}°F</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-warning bg-opacity-10 rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-wind text-warning fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Maximum Wind Gust</div>
+                                    <div class="fs-5 text-warning">{$maxGust} mph</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-secondary bg-opacity-10 rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-clock text-secondary fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-semibold">Gust Time</div>
+                                    <div class="fs-6 text-secondary">{$gustTime}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-center">
+                        <a href="{$dataurl}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-file-earmark-text"></i> View Raw Data File
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <form method="GET">
-  {$ys} {$ms} {$ds}
-
-  <input type="submit" value="Make Plot"></form>
-
-</td></tr><tr><td>
-
-<BR>
-<a href="{$dataurl}">View raw data file</a><br />
-<div><font>Today's Maximum Temperature: {$thisMax} F<br>
-Today's Minimum Temperature: {$thisMin} F<br></font></div> 
-
-<div><font>Today's Maximum Wind Gust: {$maxGust} mph<br>
-Time of Maximum Wind Gust: {$gustTime}<br><br></font></div>
-
-<img src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="1min_inside.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="rh.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="baro.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="dailyrain.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-<img src="temp_rh.php?year={$year}&amp;month={$month}&amp;day={$day}" ALT="Time Series">
-<br />
-</td></tr></table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up"></i> Weather Time Series - {$titleDate}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-primary mb-3">
+                                    <i class="bi bi-thermometer-half"></i> Temperature & Dew Point
+                                </h6>
+                                <img src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Temperature and Dew Point Time Series">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-success mb-3">
+                                    <i class="bi bi-house"></i> Indoor Conditions
+                                </h6>
+                                <img src="1min_inside.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Indoor Temperature Time Series">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-info mb-3">
+                                    <i class="bi bi-droplet"></i> Relative Humidity
+                                </h6>
+                                <img src="rh.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Relative Humidity Time Series">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-secondary mb-3">
+                                    <i class="bi bi-speedometer2"></i> Barometric Pressure
+                                </h6>
+                                <img src="baro.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Barometric Pressure Time Series">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-warning mb-3">
+                                    <i class="bi bi-wind"></i> Wind Conditions
+                                </h6>
+                                <img src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Wind Speed and Direction Time Series">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <h6 class="text-primary mb-3">
+                                    <i class="bi bi-cloud-rain"></i> Daily Precipitation
+                                </h6>
+                                <img src="dailyrain.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Daily Precipitation Time Series">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="text-center">
+                                <h6 class="text-danger mb-3">
+                                    <i class="bi bi-activity"></i> Temperature vs Relative Humidity
+                                </h6>
+                                <img src="temp_rh.php?year={$year}&amp;month={$month}&amp;day={$day}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Temperature vs Relative Humidity Scatter Plot">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 EOM;
 $t->render('single.phtml');
