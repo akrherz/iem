@@ -1,0 +1,198 @@
+/* Observation History Application Styles */
+
+/* Temperature value styling */
+.high {
+    color: #F00;
+}
+
+.low {
+    color: #00F;
+}
+
+/* Show/hide functionality for METAR and MADIS data */
+.metar {
+    display: none;
+}
+
+.metar td {
+    text-align: left !important;
+}
+
+.hfob {
+    display: none;
+}
+
+.hfmetar {
+    display: none;
+}
+
+.hfmetar td {
+    text-align: left !important;
+}
+
+/* Table styling improvements */
+.table th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Sticky header for better usability */
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1020; /* Higher than Bootstrap's default z-index values */
+}
+
+/* Ensure sticky works with Bootstrap table-dark and override inline styles */
+.table thead.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.table thead.sticky th {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background-color: #343a40 !important; /* Override inline bgcolor */
+    color: white !important;
+}
+
+/* Override old HTML bgcolor attributes in headers */
+.table thead tr[bgcolor] {
+    background-color: #343a40 !important;
+}
+
+.table thead th[bgcolor] {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+/* Table container for horizontal scroll without breaking sticky headers */
+.table-container {
+    width: 100%;
+    /* Remove overflow-x to ensure sticky headers work */
+    position: relative;
+}
+
+/* Add overflow only on mobile if needed */
+@media (max-width: 1200px) {
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Disable sticky on mobile due to overflow conflict */
+    .table-container .sticky {
+        position: relative;
+    }
+    
+    .table-container .sticky th {
+        position: relative;
+    }
+}
+
+/* Ensure table takes full width */
+.table-container .table {
+    margin-bottom: 0;
+    min-width: 100%;
+}
+
+/* Table row background colors - will be overridden by inline styles for now */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #FFF;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #EEE;
+}
+
+/* Mobile responsiveness - basic improvements */
+@media (max-width: 768px) {
+    .table-container {
+        font-size: 0.875rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.375rem 0.25rem;
+        white-space: nowrap;
+    }
+    
+    /* Make buttons stack vertically on mobile */
+    .btn-group-navigation,
+    .btn-group-controls {
+        flex-direction: column;
+    }
+    
+    .btn-group-navigation .btn,
+    .btn-group-controls .btn {
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    
+    /* Improve form layout on mobile */
+    #theform .row {
+        --bs-gutter-x: 0.5rem;
+    }
+    
+    #theform .col-auto {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Form styling improvements */
+#theform {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+#theform strong {
+    margin-right: 0.5rem;
+}
+
+#theform select,
+#theform input[type="submit"] {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Button spacing improvements */
+.btn-group-navigation {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-group-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Data notes styling */
+.data-notes {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+}
+
+.api-link {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: #e9ecef;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
