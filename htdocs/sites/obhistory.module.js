@@ -1,95 +1,154 @@
-// ES Module
-import $ from '/js/jquery.module.js';
+import { requireElement } from '/js/iemjs/domUtils.js';
 let station = null;
 let network = null;
 let metar_show = false;
 let madis_show = false;
-let month = null;
-let day = null;
-let year = null;
 
-function updateButton(label){
-    const btn = $(`#${label}`);
-    let uri = `${window.location.origin}${window.location.pathname}`+
-    `?station=${station}&network=${network}&year=${btn.data("year")}`+
-    `&month=${btn.data("month")}&day=${btn.data("day")}`;
-    if (metar_show){
-        uri += "&metar=1";
-    }
-    if (madis_show){
-        uri += "&madis=1";
-    }
-    btn.attr("href", uri);
-}
-function updateURI(){
-    // Add CGI vars that control the METAR and MADIS show buttons
+function updateURI() {
+    // Build URI with modern date parameter and current settings
+    const datePicker = requireElement("date_picker");
+    const sortDirElement = document.querySelector('select[name="sortdir"]');
+    const windUnitsElement = document.querySelector('select[name="windunits"]');
+    const sortDir = sortDirElement ? sortDirElement.value : "asc";
+    const windUnits = windUnitsElement ? windUnitsElement.value : "mph";
+    const currentDate = datePicker.value;
     let uri = `${window.location.origin}${window.location.pathname}?`+
-        `station=${station}&network=${network}&year=${year}`+
-        `&month=${month}&day=${day}`;
-    if (metar_show){
+        `station=${station}&network=${network}&date=${currentDate}&sortdir=${sortDir}&windunits=${windUnits}`;
+    if (metar_show) {
         uri += "&metar=1";
     }
-    if (madis_show){
+    if (madis_show) {
         uri += "&madis=1";
     }
     window.history.pushState({}, "", uri);
-    updateButton("prevbutton");
-    updateButton("nextbutton");
 }
-function showMETAR(){
-    $(".metar").css("display", "table-row");
-    if (madis_show){
-        $(".hfmetar").css("display", "table-row");
+
+function handleDatePickerChange() {
+    // Simply submit the form when date changes - PHP will handle the rest
+    document.getElementById("theform").submit();
+}
+
+function handlePrevButtonClick() {
+    const prevButton = document.getElementById("prevbutton");
+    const targetDate = prevButton.dataset.date;
+    if (targetDate) {
+        navigateToDate(targetDate);
     }
-    $("#metar_toggle").html("<i class=\"fa fa-minus\"></i> Hide METARs");
 }
-function toggleMETAR(){
-    if (metar_show){
+
+function handleNextButtonClick() {
+    const nextButton = document.getElementById("nextbutton");
+    const targetDate = nextButton.dataset.date;
+    if (targetDate && !nextButton.disabled) {
+        navigateToDate(targetDate);
+    }
+}
+
+function navigateToDate(dateStr) {
+    // Build URL with current state preserved
+    const sortDirElement = document.querySelector('select[name="sortdir"]');
+    const windUnitsElement = document.querySelector('select[name="windunits"]');
+    const sortDir = sortDirElement ? sortDirElement.value : "asc";
+    const windUnits = windUnitsElement ? windUnitsElement.value : "mph";
+    let url = `${window.location.origin}${window.location.pathname}?`+
+        `station=${station}&network=${network}&date=${dateStr}&sortdir=${sortDir}&windunits=${windUnits}`;
+    if (metar_show) {
+        url += "&metar=1";
+    }
+    if (madis_show) {
+        url += "&madis=1";
+    }
+    // Navigate to the new URL
+    window.location.href = url;
+}
+function showMETAR() {
+    document.querySelectorAll(".metar").forEach(element => {
+        element.style.display = "table-row";
+    });
+    if (madis_show) {
+        document.querySelectorAll(".hfmetar").forEach(element => {
+            element.style.display = "table-row";
+        });
+    }
+    document.getElementById("metar_toggle").innerHTML = "<i class=\"fa fa-minus\"></i> Hide METARs";
+}
+
+function toggleMETAR() {
+    if (metar_show) {
         // Hide both METARs and HFMETARs
-        $(".metar").css("display", "none");
-        $(".hfmetar").css("display", "none");
-        $("#metar_toggle").html("<i class=\"fa fa-plus\"></i> Show METARs");
-        $("#hmetar").val("0");
-    } else{
+        document.querySelectorAll(".metar").forEach(element => {
+            element.style.display = "none";
+        });
+        document.querySelectorAll(".hfmetar").forEach(element => {
+            element.style.display = "none";
+        });
+        document.getElementById("metar_toggle").innerHTML = "<i class=\"fa fa-plus\"></i> Show METARs";
+        document.getElementById("hmetar").value = "0";
+    } else {
         // show
         showMETAR();
-        $("#hmetar").val("1");
+        document.getElementById("hmetar").value = "1";
     }
     metar_show = !metar_show;
     updateURI();
 }
-function showMADIS(){
-    $("tr[data-madis=1]").css("display", "table-row");
-    if (metar_show){
-        $(".hfmetar").css("display", "table-row");
+
+function showMADIS() {
+    document.querySelectorAll("tr[data-madis='1']").forEach(element => {
+        element.style.display = "table-row";
+    });
+    if (metar_show) {
+        document.querySelectorAll(".hfmetar").forEach(element => {
+            element.style.display = "table-row";
+        });
     }
-    $("#madis_toggle").html("<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS");
+    document.getElementById("madis_toggle").innerHTML = "<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS";
 }
-function toggleMADIS(){
-    if (madis_show){
+
+function toggleMADIS() {
+    if (madis_show) {
         // Hide MADIS
-        $("tr[data-madis=1]").css("display", "none");
-        $(".hfmetar").css("display", "none");
-        $("#madis_toggle").html("<i class=\"fa fa-plus\"></i> Show High Frequency MADIS");
-        $("#hmadis").val("0");
+        document.querySelectorAll("tr[data-madis='1']").forEach(element => {
+            element.style.display = "none";
+        });
+        document.querySelectorAll(".hfmetar").forEach(element => {
+            element.style.display = "none";
+        });
+        document.getElementById("madis_toggle").innerHTML = "<i class=\"fa fa-plus\"></i> Show High Frequency MADIS";
+        document.getElementById("hmadis").value = "0";
     } else {
         // Show
         showMADIS();
-        $("#hmadis").val("1");
+        document.getElementById("hmadis").value = "1";
     }
     madis_show = !madis_show;
     updateURI();
 }
-$().ready(() => {
-    station = $("#station").val();
-    network = $("#network").val();
-    metar_show = $("#hmetar").val() === "1";
-    madis_show = $("#hmadis").val() === "1";
-    month = $("#theform").data("month");
-    day = $("#theform").data("day");
-    year = $("#theform").data("year");
-    $("#metar_toggle").click(toggleMETAR);
-    $("#madis_toggle").click(toggleMADIS);
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Get form values
+    const hiddenStation = document.querySelector('input[name="station"]');
+    const hiddenNetwork = document.querySelector('input[name="network"]');
+    
+    station = hiddenStation.value;
+    network = hiddenNetwork.value;
+    metar_show = document.getElementById("hmetar").value === "1";
+    madis_show = document.getElementById("hmadis").value === "1";
+    
+    // Set up event listeners
+    const metar_toggle = document.getElementById("metar_toggle");
+    if (metar_toggle) {
+        metar_toggle.addEventListener('click', toggleMETAR);
+    }
+    const madis_toggle = document.getElementById("madis_toggle");
+    if (madis_toggle) {
+        madis_toggle.addEventListener('click', toggleMADIS);
+    }
+    requireElement("date_picker").addEventListener('change', handleDatePickerChange);
+    requireElement("prevbutton").addEventListener('click', handlePrevButtonClick);
+    requireElement("nextbutton").addEventListener('click', handleNextButtonClick);
+    
+    // Initial state for METAR/MADIS display
     if (metar_show) {
         showMETAR();
     }

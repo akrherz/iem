@@ -12,13 +12,17 @@ $metadata = $ctx->metadata;
 /*
  * Rip off weather bureau website, but do it better
  */
-function wind_formatter($row)
+function wind_formatter($row, $units = "mph")
 {
     if (is_null($row["drct"]) && is_null($row["sknt"])) {
         return "M";
     }
+    
+    // Convert knots to appropriate units
+    $multiplier = ($units == "mph") ? 1.15 : 1.0; // knots to mph conversion factor
+    
     if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
-        return sprintf("VRB %.0f", $row["sknt"] * 1.15);
+        return sprintf("VRB %.0f", $row["sknt"] * $multiplier);
     }
     if (($row["drct"] == 0) && ($row["sknt"] == 0)) {
         return "Calm";
@@ -28,13 +32,30 @@ function wind_formatter($row)
     }
     $gust_text = "";
     if ($row["gust"] > 0) {
-        $gust_text = sprintf("G %.0f", $row["gust"] * 1.15);
+        $gust_text = sprintf("G%.0f", $row["gust"] * $multiplier);
+    }
+    $peak_text = "";
+    if (!is_null($row["peak_wind_gust"]) &&
+        !is_null($row["peak_wind_drct"]) && 
+        !is_null($row["peak_wind_time"])) {
+        $peakdt = new DateTime($row["peak_wind_time"], 
+            new DateTimeZone("UTC"));
+        global $metadata;
+        $peaktime = $peakdt->setTimezone(new DateTimeZone($metadata["tzname"]))
+            ->format("g:i A");
+        $peak_text = sprintf(
+            "<br />PK %s %.0f @ %s",
+            drct2txt($row["peak_wind_drct"]),
+            $row["peak_wind_gust"] * $multiplier,
+            $peaktime,
+        );
     }
     return sprintf(
-        "%s %.0f%s",
+        "%s %.0f%s%s",
         drct2txt($row["drct"]),
-        $row["sknt"] * 1.15,
-        $gust_text
+        $row["sknt"] * $multiplier,
+        $gust_text,
+        $peak_text,
     );
 }
 function indy_sky_formatter($skyc, $skyl)
@@ -73,7 +94,7 @@ function precip_formatter($val)
     if ($val == 0.0001) return "T";
     return round($val, 2);
 }
-function asos_formatter($i, $row)
+function asos_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
@@ -85,7 +106,7 @@ function asos_formatter($i, $row)
     <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
     <td><span class=\"high\">%s</span></td>
     <td><span class=\"low\">%s</span></td>
-    <td>%s%%</td>
+    <td>%s</td>
     <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
     <tr style=\"background: %s;\" class=\"%smetar\">" .
             "<td colspan=\"17\">%s</td></tr>",
@@ -93,7 +114,7 @@ function asos_formatter($i, $row)
         $ismadis ? "hf" : "",
         $ismadis ? "1" : "0",
         date("g:i A", $ts),
-        wind_formatter($row),
+        wind_formatter($row, $windunits),
         vis_formatter($row["vsby"]),
         sky_formatter($row),
         $row["wxcodes"],
@@ -124,7 +145,7 @@ function pavement_formatter($row, $sensor)
         is_null($text) ? "" : "($text)"
     );
 }
-function rwis_formatter($i, $row)
+function rwis_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     return sprintf(
@@ -133,7 +154,7 @@ function rwis_formatter($i, $row)
         "<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
-        wind_formatter($row),
+        wind_formatter($row, $windunits),
         temp_formatter($row["tmpf"]),
         temp_formatter($row["dwpf"]),
         temp_formatter($row["feel"]),
@@ -144,7 +165,7 @@ function rwis_formatter($i, $row)
         pavement_formatter($row, 3)
     );
 }
-function formatter($i, $row)
+function formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
@@ -162,7 +183,7 @@ function formatter($i, $row)
     <td>%s</td><td>%s</td><td>%s</td><td>%s%s</td></tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
-        wind_formatter($row),
+        wind_formatter($row, $windunits),
         temp_formatter($row["tmpf"]),
         temp_formatter($row["dwpf"]),
         temp_formatter($row["feel"]),
@@ -171,7 +192,7 @@ function formatter($i, $row)
         $precip_extra,
     );
 }
-function hads_formatter($i, $row, $shefcols)
+function hads_formatter($i, $row, $shefcols, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
@@ -186,7 +207,7 @@ function hads_formatter($i, $row, $shefcols)
     <td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
-        wind_formatter($row),
+        wind_formatter($row, $windunits),
         temp_formatter($row["tmpf"]),
         temp_formatter($row["dwpf"]),
         temp_formatter($row["feel"]),
@@ -195,7 +216,7 @@ function hads_formatter($i, $row, $shefcols)
         $html
     );
 }
-function scan_formatter($i, $row)
+function scan_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     return sprintf(
@@ -206,7 +227,7 @@ function scan_formatter($i, $row)
             "<td>%s</td><td>%s</td></tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
-        wind_formatter($row),
+        wind_formatter($row, $windunits),
         temp_formatter($row["tmpf"]),
         temp_formatter($row["dwpf"]),
         $row["relh"],
@@ -224,12 +245,26 @@ function scan_formatter($i, $row)
         $row["soilm40"],
     );
 }
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+// Handle both legacy (year/month/day) and modern (date) URL parameters
+if (isset($_GET["date"]) && !empty($_GET["date"])) {
+    // Modern date parameter takes precedence
+    $date_param = xssafe($_GET["date"]);
+    $date_parts = explode("-", $date_param);
+    $year = intval($date_parts[0]);
+    $month = intval($date_parts[1]);
+    $day = intval($date_parts[2]);
+} else {
+    // Legacy parameters for backwards compatibility
+    $year = get_int404("year", date("Y"));
+    $month = get_int404("month", date("m"));
+    $day = get_int404("day", date("d"));
+    $date_param = sprintf("%04d-%02d-%02d", $year, $month, $day);
+}
+
 $metar = (isset($_GET["metar"]) && xssafe($_GET["metar"]) == "1") ? "1" : "0";
 $madis = (isset($_GET["madis"]) && xssafe($_GET["madis"]) == "1") ? "1" : "0";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
+$windunits = isset($_GET["windunits"]) ? xssafe($_GET["windunits"]) : "mph";
 $date = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
@@ -242,6 +277,12 @@ $sortopts = array(
     "desc" => "Descending",
 );
 $sortform = make_select("sortdir", $sortdir, $sortopts);
+
+$windunitopts = array(
+    "mph" => "MPH",
+    "knots" => "Knots",
+);
+$windunitform = make_select("windunits", $windunits, $windunitopts);
 
 if (!is_null($metadata["archive_begin"])) {
     $startyear = intval($metadata["archive_begin"]->format("Y"));
@@ -259,86 +300,79 @@ $savevars = array(
     "month" => date("m", $date),
     "day" => date("d", $date)
 );
-$t->jsextra = '<script type="module" src="obhistory.module.js"></script>';
+$t->jsextra = '<script type="module" src="obhistory.module.js?v=2"></script>';
+$t->headextra = '<link rel="stylesheet" href="obhistory.css" type="text/css">';
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
+
+// Variables for the new date picker UI
+$today_param = date("Y-m-d");
+$yesterday_param = date("Y-m-d", $yesterday);
+$tomorrow_param = ($tomorrow !== null) ? date("Y-m-d", $tomorrow) : null;
+$next_disabled = ($tomorrow === null) ? 'disabled' : '';
 
 $ys = yearSelect($startyear, date("Y", $date));
 $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
 $mbutton = (preg_match("/ASOS/", $network)) ?
+    '<div class="btn-group-controls">' .
     '<button type="button" class="btn btn-success" id="metar_toggle">' .
     '<i class="fa fa-plus"></i> Show METARs</button>' .
-    ' &nbsp; <button type="button" class="btn btn-success" id="madis_toggle">' .
-    '<i class="fa fa-plus"></i> Show High Frequency MADIS</button>'
+    '<button type="button" class="btn btn-success" id="madis_toggle">' .
+    '<i class="fa fa-plus"></i> Show High Frequency MADIS</button>' .
+    '</div>'
     : "";
-$buttons = sprintf(
-    "<a id=\"prevbutton\" " .
-        "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
-        "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-        "class=\"btn btn-secondary\"><i class=\"fa fa-arrow-left\"></i> " .
-        "Previous Day</a>",
-    date("Y", $yesterday),
-    date("m", $yesterday),
-    date("d", $yesterday),
-    $network,
-    $station,
-    date("Y", $yesterday),
-    date("m", $yesterday),
-    date("d", $yesterday)
-);
 
-if ($tomorrow) {
-    $buttons .= sprintf(
-        "<a id=\"nextbutton\" " .
-            "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
-            "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-            "class=\"btn btn-secondary\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
-        date("Y", $tomorrow),
-        date("m", $tomorrow),
-        date("d", $tomorrow),
-        $network,
-        $station,
-        date("Y", $tomorrow),
-        date("m", $tomorrow),
-        date("d", $tomorrow)
-    );
-}
+// Legacy navigation buttons are now inline with the date picker
+$buttons = "";
 $content = <<<EOM
-<style>
-.high {
-  color: #F00;
-}
-.low {
-  color: #00F;
-}
-.metar {
-  display: none;
-}
-.hfob {
-    display: none;
-}
-.hfmetar {
-    display: none;
-}
-</style>
-
-<h3>{$dstr} Observation History, [{$station}] {$metadata["name"]}, timezone: {$tzname}</h3>
-<form id="theform" name="theform" method="GET"
- data-year="{$year}" data-month="{$month}" data-day="{$day}">
-<strong>Select Date:</strong>
-<input id="station" type="hidden" value="{$station}" name="station" />
-<input id="network" type="hidden" value="{$network}" name="network" />
-<input id="hmetar" type="hidden" value="{$metar}" name="metar" />
-<input id="hmadis" type="hidden" value="{$madis}" name="madis" />
-{$ys}
-{$ms}
-{$ds}
-Time Order:{$sortform}
-<input type="submit" value="Change Date" />
-</form>
-<p>{$mbutton}</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>{$dstr} Observation History, [{$station}] {$metadata["name"]}, timezone: {$tzname}</h3>
+            
+            <form id="theform" name="theform" method="GET" class="mb-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label for="date_picker" class="form-label mb-1">Select Date:</label>
+                        <div class="input-group">
+                            <button type="button" id="prevbutton" class="btn btn-outline-secondary" 
+                                data-date="{$yesterday_param}" title="Previous Day">
+                                <i class="fa fa-arrow-left"></i>
+                            </button>
+                            <input type="date" id="date_picker" name="date" class="form-control" 
+                                value="{$date_param}" min="{$startyear}-01-01" max="{$today_param}">
+                            <button type="button" id="nextbutton" class="btn btn-outline-secondary" 
+                                data-date="{$tomorrow_param}" title="Next Day" {$next_disabled}>
+                                <i class="fa fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label for="sortdir" class="form-label mb-1">Time Order:</label>
+                        {$sortform}
+                    </div>
+                    <div class="col-auto">
+                        <label for="windunits" class="form-label mb-1">Wind Units:</label>
+                        {$windunitform}
+                    </div>
+                    <div class="col-auto">
+                        <input type="submit" value="Update" class="btn btn-primary" />
+                    </div>
+                </div>
+                
+                <!-- Hidden parameters -->
+                <input type="hidden" value="{$station}" name="station" />
+                <input type="hidden" value="{$network}" name="network" />
+                <input id="hmetar" type="hidden" value="{$metar}" name="metar" />
+                <input id="hmadis" type="hidden" value="{$madis}" name="madis" />
+            </form>
+            
+            {$mbutton}
+        </div>
+    </div>
+</div>
 EOM;
 
 $notes = '';
@@ -362,6 +396,7 @@ if ($jobj === FALSE) {
 }
 
 if (preg_match("/ASOS/", $network)) {
+    $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     $notes .= <<<EOM
 <li>For recent years, this page also optionally shows observations from the
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
@@ -370,7 +405,7 @@ EOM;
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="3">Time</th>
-    <th rowspan="3">Wind<br>(mph)</th>
+    <th rowspan="3">{$wind_label}</th>
     <th rowspan="3">Vis.<br>(mi.)</th>
     <th rowspan="3">Sky Cond.<br />(100s ft)</th>
     <th rowspan="3">Present Wx</th>
@@ -395,6 +430,7 @@ EOM;
     <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>    
 EOM;
 } else if (preg_match("/DCP|COOP/", $network)) {
+    $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     // Figure out what extra columns we have here.
     $shefcols = array();
     $shefextra = "";
@@ -415,7 +451,7 @@ EOM;
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="2">Time</th>
-    <th rowspan="2">Wind<br>(mph)</th>
+    <th rowspan="2">{$wind_label}</th>
     <th colspan="3">Temperature (&ordm;F)</th>
     <th rowspan="3">Relative<br>Humidity</th>
     <th>Precipitation (in.)</th>
@@ -431,10 +467,11 @@ EOM;
     </tr>
 EOM;
 } else if (preg_match("/RWIS/", $network)) {
+    $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="2">Time</th>
-    <th rowspan="2">Wind<br>(mph)</th>
+    <th rowspan="2">{$wind_label}</th>
     <th colspan="3">Temperature (&ordm;F)</th>
     <th rowspan="2">Relative<br>Humidity</th>
     <th colspan="4">Pavement Sensors: Temperature (&ordm;F) (Condition)</th>
@@ -451,10 +488,11 @@ EOM;
     </tr>
 EOM;
 } else if ($network == "SCAN") {
+    $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="2">Time</th>
-    <th rowspan="2">Wind<br>(mph)</th>
+    <th rowspan="2">{$wind_label}</th>
     <th colspan="2">Temp (&deg;F)</th>
     <th rowspan="2">RH%</td>
     <th rowspan="2">Solar (W/m2)</th>
@@ -477,10 +515,11 @@ EOM;
     </tr>
 EOM;
 } else {
+    $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="2">Time</th>
-    <th rowspan="2">Wind<br>(mph)</th>
+    <th rowspan="2">{$wind_label}</th>
     <th colspan="3">Temperature (&ordm;F)</th>
     <th rowspan="3">Relative<br>Humidity</th>
     <th>Precipitation (in.)</th></tr>
@@ -503,15 +542,15 @@ if ($sortdir == "desc") {
 }
 foreach ($data as $bogus => $row) {
     if (preg_match("/ASOS/", $network)) {
-        $table .= asos_formatter($i, $row);
+        $table .= asos_formatter($i, $row, $windunits);
     } else if (preg_match("/DCP|COOP/", $network)) {
-        $table .= hads_formatter($i, $row, $shefcols);
+        $table .= hads_formatter($i, $row, $shefcols, $windunits);
     } else if (preg_match("/RWIS/", $network)) {
-        $table .= rwis_formatter($i, $row);
+        $table .= rwis_formatter($i, $row, $windunits);
     } else if ($network == "SCAN") {
-        $table .= scan_formatter($i, $row);
+        $table .= scan_formatter($i, $row, $windunits);
     } else {
-        $table .= formatter($i, $row);
+        $table .= formatter($i, $row, $windunits);
     }
     $i++;
 }
@@ -526,26 +565,28 @@ $content .= <<<EOM
 
 {$errdiv}
 
-{$buttons}
+<div class="table-container">
+    <table class="table table-striped table-bordered table-hover" id="datatable">
+    <thead class="sticky">
+    {$header}
+    </thead>
+    <tbody>
+    {$table}
+    </tbody>
+    </table>
+</div>
 
-<table class="table table-striped table-bordered" id="datatable">
-<thead class="sticky">
-{$header}
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
+<div class="api-link">
+    <p><strong>API:</strong> The <a href="{$wsuri}" target="_blank">IEM API webservice</a> that provided data to this
+    page. For more details, see <a href="/api/1/docs#/default/service_obhistory__fmt__get" target="_blank">documentation</a>.</p>
+</div>
 
-{$buttons}
-
-<p>The <a href="{$wsuri}">IEM API webservice</a> that provided data to this
-page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fmt__get">documentation</a>.</p>
-
-<h4>Data Notes</h4>
-<ul>
-{$notes}
-</ul>
+<div class="data-notes">
+    <h4>Data Notes</h4>
+    <ul>
+    {$notes}
+    </ul>
+</div>
 EOM;
 $t->content = $content;
 $t->render('sites.phtml');
