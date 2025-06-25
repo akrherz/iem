@@ -1,14 +1,12 @@
-/* global $, ol */
+/* global ol */
 let renderattr = "high";
 let vectorLayer = null;
 let map = null;
-let element = null;
+let popup = null;
 let fontSize = 14;
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
- * @returns string converted string
  */
 function escapeHTML(val) {
     return val.replace(/&/g, '&amp;')
@@ -18,27 +16,61 @@ function escapeHTML(val) {
               .replace(/'/g, '&#039;');
 }
 
-function updateURL() {
-    const tt = $.datepicker.formatDate("yymmdd",
-        $("#datepicker").datepicker('getDate'));
-    window.location.href = `#${tt}/${renderattr}`;
+/**
+ * Get current date string from date picker (YYYY-MM-DD format)
+ * Avoids timezone issues by working directly with the string value
+ */
+function getCurrentDateString() {
+    const datePicker = document.getElementById('datepicker');
+    return datePicker.value; // Already in YYYY-MM-DD format
 }
 
+/**
+ * Update URL parameters with current state
+ */
+function updateURL() {
+    const dateStr = getCurrentDateString();
+    const url = new URL(window.location);
+    url.searchParams.set('date', dateStr);
+    url.searchParams.set('var', renderattr);
+    window.history.pushState({}, '', url);
+}
+
+/**
+ * Update map with new render attribute
+ */
 function updateMap() {
-    renderattr = escapeHTML($('#renderattr').val());
+    const selectElement = document.getElementById('renderattr');
+    renderattr = escapeHTML(selectElement.value);
     vectorLayer.setStyle(vectorLayer.getStyle());
     updateURL();
 }
 
+/**
+ * Update map with new date
+ */
 function updateDate() {
-    const fullDate = $.datepicker.formatDate("yy-mm-dd",
-        $("#datepicker").datepicker('getDate'));
+    const dateStr = getCurrentDateString();
+    
+    // Show loading state
+    const mapElement = document.getElementById('map');
+    mapElement.classList.add('loading');
+    
     map.removeLayer(vectorLayer);
-    vectorLayer = makeVectorLayer(fullDate);
+    vectorLayer = makeVectorLayer(dateStr);
     map.addLayer(vectorLayer);
+    
+    // Remove loading state after a brief delay
+    setTimeout(() => {
+        mapElement.classList.remove('loading');
+    }, 500);
+    
     updateURL();
 }
 
+/**
+ * Style function for vector features
+ */
 const vectorStyleFunction = (feature) => {
     let style = null;
     const value = feature.get(renderattr);
@@ -96,13 +128,14 @@ const vectorStyleFunction = (feature) => {
                 color: '#3399CC',
                 width: 1.25
             })
-        })
-        ];
+        })];
     }
     return style;
-}
+};
 
-
+/**
+ * Create vector layer for given date
+ */
 function makeVectorLayer(dt) {
     return new ol.layer.Vector({
         source: new ol.source.Vector({
@@ -114,32 +147,168 @@ function makeVectorLayer(dt) {
     });
 }
 
-$(document).ready(() => {
+/**
+ * Create and show popover with feature information
+ */
+function showPopover(feature, coordinate) {
+    const content = `
+        <div class="p-2">
+            <h6 class="mb-2"><strong>${feature.get('name')}</strong></h6>
+            <div class="row g-1">
+                <div class="col-6"><small><strong>High:</strong> ${feature.get('high')}</small></div>
+                <div class="col-6"><small>Norm: ${feature.get("high_normal")}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get("high_record")}</small></div>
+                <div class="col-6"><small><strong>Low:</strong> ${feature.get('low')}</small></div>
+                <div class="col-6"><small>Norm: ${feature.get("low_normal")}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get("low_record")}</small></div>
+                <div class="col-6"><small><strong>Precip:</strong> ${feature.get('precip')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get("precip_record")}</small></div>
+                <div class="col-6"><small><strong>Snow:</strong> ${feature.get('snow')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get("snow_record")}</small></div>
+            </div>
+        </div>
+    `;
+    
+    // Use the OpenLayers popup element directly
+    const popupElement = document.getElementById('popup');
+    popupElement.innerHTML = `
+        <div class="popover bs-popover-top show">
+            <div class="popover-arrow"></div>
+            <div class="popover-body">${content}</div>
+        </div>
+    `;
+    
+    // Position the popup using OpenLayers
+    popup.setPosition(coordinate);
+}
 
-    $("#datepicker").datepicker({
-        dateFormat: "DD, d MM, yy",
-        minDate: new Date(2001, 1, 1),
-        maxDate: new Date()
-    });
-    $("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(() => {
+/**
+ * Hide popover
+ */
+function hidePopover() {
+    const popupElement = document.getElementById('popup');
+    popupElement.innerHTML = '';
+    popup.setPosition(null);
+}
+
+/**
+ * Fetch and display CLI report
+ */
+async function fetchCLIReport(url) {
+    const reportDiv = document.getElementById('clireport');
+    reportDiv.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm me-2" role="status"></div>Loading CLI report...</div>';
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.text();
+        reportDiv.innerHTML = `<pre class="mb-0">${data}</pre>`;
+    } catch (error) {
+        reportDiv.innerHTML = `<div class="alert alert-warning mb-0">Failed to fetch CLI report. ${error} Please try again.</div>`;
+    }
+}
+
+/**
+ * Set date picker to specific date string (YYYY-MM-DD format)
+ * Avoids timezone issues by working directly with string values
+ */
+/**
+ * Set date picker to specific date string (YYYY-MM-DD format)
+ * Avoids timezone issues by working directly with string values
+ */
+function setDatePickerValue(dateStr) {
+    const datePicker = document.getElementById('datepicker');
+    datePicker.value = dateStr;
+}
+
+/**
+ * Parse URL parameters and update interface
+ * Handles migration from legacy hash-based URLs to modern URL parameters
+ * Legacy format: #YYMMDD/variable -> Modern format: ?date=YYYY-MM-DD&var=variable
+ */
+function parseURLParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check for legacy hash parameters first and migrate them
+    const tokens = window.location.href.split("#");
+    if (tokens.length === 2) {
+        const hashTokens = tokens[1].split("/");
+        if (hashTokens.length === 2) {
+            const tpart = escapeHTML(hashTokens[0]);
+            const hashRenderattr = escapeHTML(hashTokens[1]);
+            
+            // Parse date from hash (YYMMDD format) and convert to YYYY-MM-DD
+            if (tpart.length === 6) {
+                const year = 2000 + parseInt(tpart.substring(0, 2));
+                const month = String(parseInt(tpart.substring(2, 4))).padStart(2, '0');
+                const day = String(parseInt(tpart.substring(4, 6))).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                // Redirect to new URL format
+                const newUrl = new URL(window.location);
+                newUrl.hash = '';
+                newUrl.searchParams.set('date', dateStr);
+                newUrl.searchParams.set('var', hashRenderattr);
+                window.location.replace(newUrl.toString());
+                return;
+            }
+        }
+    }
+    
+    // Handle modern URL parameters
+    const dateParam = urlParams.get('date');
+    const varParam = urlParams.get('var');
+    
+    if (varParam) {
+        renderattr = escapeHTML(varParam);
+        const selectElement = document.getElementById('renderattr');
+        selectElement.value = renderattr;
+    }
+    
+    if (dateParam) {
+        // Validate date format (YYYY-MM-DD) and set directly to avoid timezone issues
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+            setDatePickerValue(dateParam);
+            updateDate();
+        }
+    }
+}
+
+/**
+ * Initialize the application
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize renderattr from the form's selected value
+    const selectElement = document.getElementById('renderattr');
+    renderattr = selectElement.value;
+    
+    // Set up date picker (PHP already sets the initial value)
+    const datePicker = document.getElementById('datepicker');
+    
+    // Set up date picker change handler
+    datePicker.addEventListener('change', () => {
         updateDate();
     });
 
-    vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()));
+    // Initialize vector layer with current date picker value
+    const currentDateStr = getCurrentDateString();
+    vectorLayer = makeVectorLayer(currentDateStr);
+    
+    // Set up map
     const key = document.getElementById('map').dataset.bingmapsapikey;
     map = new ol.Map({
         target: 'map',
-        layers: [new ol.layer.Tile({
-            title: 'Global Imagery',
-            source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
-        }),
-        new ol.layer.Tile({
-            title: 'State Boundaries',
-            source: new ol.source.XYZ({
-                url: '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
-            })
-        }),
+        layers: [
+            new ol.layer.Tile({
+                title: 'Global Imagery',
+                source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
+            }),
+            new ol.layer.Tile({
+                title: 'State Boundaries',
+                source: new ol.source.XYZ({
+                    url: '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
+                })
+            }),
             vectorLayer
         ],
         view: new ol.View({
@@ -151,77 +320,58 @@ $(document).ready(() => {
 
     map.addControl(new ol.control.LayerSwitcher());
 
-    element = document.getElementById('popup');
-
-    const popup = new ol.Overlay({
+    // Set up popup overlay
+    const element = document.getElementById('popup');
+    popup = new ol.Overlay({
         element,
         positioning: 'bottom-center',
         stopEvent: false
     });
     map.addOverlay(popup);
 
-    $(element).popover({
-        'placement': 'top',
-        'html': true,
-        content() { return $('#popover-content').html(); }
-    });
-
-    // display popup on click
+    // Handle map clicks
     map.on('click', (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2) => {
-                return feature2;
-            });
+        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature2) => {
+            return feature2;
+        });
+        
         if (feature) {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
-            popup.setPosition(coord);
-            const content = `<p><strong>${feature.get('name')}</strong><br />High: ${feature.get('high')} Norm:${feature.get("high_normal")} Rec:${feature.get("high_record")}<br />Low: ${feature.get('low')} Norm:${feature.get("low_normal")} Rec:${feature.get("low_record")}<br />Precip: ${feature.get('precip')} Rec:${feature.get("precip_record")}<br />Snow: ${feature.get('snow')} Rec:${feature.get("snow_record")}</p>`;
-            $('#popover-content').html(content);
-            $(element).popover('show');
-
-            $('#clireport').html("<h3>Loading text, one moment please...</h3>");
-            $.get(feature.get('link'), (data) => {
-                $('#clireport').html(`<pre>${data}</pre>`);
-            }).fail(() => {
-                $('#clireport').html("Fetching text failed, sorry");
-            });
-
+            showPopover(feature, coord);
+            
+            // Fetch CLI report
+            const link = feature.get('link');
+            if (link) {
+                fetchCLIReport(link);
+            }
         } else {
-            $(element).popover('hide');
+            hidePopover();
         }
-
     });
 
-    // Figure out if we have anything specified from the window.location
-    let tokens = window.location.href.split("#");
-    if (tokens.length === 2) {
-        // #YYYYmmdd/variable
-        tokens = tokens[1].split("/");
-        if (tokens.length === 2) {
-            const tpart = escapeHTML(tokens[0]);
-            renderattr = escapeHTML(tokens[1]);
-            $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
-            const dstr = `${tpart.substring(4, 2)}/${tpart.substring(6, 2)}/${tpart.substring(0, 4)}`;
-            $("#datepicker").datepicker("setDate", new Date(dstr));
-            updateDate();
-        }
-    }
+    // Parse URL parameters if present
+    parseURLParameters();
 
     // Font size buttons
-    $('#fplus').click(() => {
+    document.getElementById('fplus').addEventListener('click', () => {
         fontSize += 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
-    $('#fminus').click(() => {
+    
+    document.getElementById('fminus').addEventListener('click', () => {
         fontSize -= 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
 
-    $("#dlcsv").click(() => {
-        window.location.href = `/geojson/cli.py?dl=1&fmt=csv&dt=${$.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'))}`;
+    // CSV download button
+    document.getElementById('dlcsv').addEventListener('click', () => {
+        const dateStr = getCurrentDateString();
+        window.location.href = `/geojson/cli.py?dl=1&fmt=csv&dt=${dateStr}`;
     });
-    $("#renderattr").change(() => {
+    
+    // Render attribute change handler
+    document.getElementById('renderattr').addEventListener('change', () => {
         updateMap();
     });
 });

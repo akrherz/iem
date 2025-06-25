@@ -183,6 +183,12 @@ $dselect = daySelect($day);
 $t->content = <<<EOM
 <h3>COOP Climate Data</h3>
 
+<div class="alert alert-info">
+  <h5 class="alert-heading">Try Updated App!</h5>
+  The <a href="/COOP/extremes.php">COOP Extremes App</a> has greatly improved
+  and hopefully will someday replace this app.
+  </div>
+
  Using the COOP data archive, daily averages and extremes
   were calculated.  These numbers are <b>not</b> official, but we believe them
   to be accurate.  Please make your form selections on the left hand side and
