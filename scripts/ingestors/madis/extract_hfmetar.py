@@ -8,8 +8,7 @@ Run from RUN_59_AFTER.sh for current hour
 import os
 import sys
 import warnings
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
 import click
 import numpy as np
@@ -137,6 +136,8 @@ def process(ncfn):
             return data[fieldname][i]
         return None
 
+    pgconn, icursor = get_dbconnc("iem")
+    updates = 0
     for i, sid in tqdm(
         enumerate(stations),
         total=len(stations),
@@ -148,7 +149,7 @@ def process(ncfn):
         ts = datetime(1970, 1, 1) + timedelta(
             seconds=data["observationTime"][i]
         )
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = ts.replace(tzinfo=timezone.utc)
 
         mtr = f"{sid} {ts:%d%H%M}Z AUTO "
         network = xref.get(sid3, "ASOS")
@@ -231,31 +232,47 @@ def process(ncfn):
         if autoremarks[i] != "" or opremarks[i] != "":
             mtr += f"{autoremarks[i]} {opremarks[i]} "
         mtr += "MADISHF"
+        # Account for some common cruft
+        mtr = mtr.replace("!", "! ")
         # Eat our own dogfood
         try:
-            Metar.Metar(mtr)
-            iem.data["raw"] = mtr
+            metar = Metar.Metar(mtr)
+            iem.data["raw"] = " ".join(mtr.strip().split())
+            # Glean peak wind gust
+            if (
+                metar.wind_speed_peak
+                and metar.wind_dir_peak
+                and metar.peak_wind_time
+            ):
+                iem.data["peak_wind_gust"] = metar.wind_speed_peak.value("KT")
+                iem.data["peak_wind_drct"] = metar.wind_dir_peak.value()
+                iem.data["peak_wind_time"] = metar.peak_wind_time.replace(
+                    tzinfo=timezone.utc
+                )
         except Exception as exp:
-            print(f"dogfooding extract_hfmetar {mtr} resulted in {exp}")
+            LOG.exception("dogfooding %s resulted in error", mtr, exc_info=exp)
             continue
 
-        for key in iem.data:
-            if isinstance(iem.data[key], np.float32):
-                print(f"key: {key} type: {type(iem.data[key])}")
-        # FIXME
-        pgconn, icursor = get_dbconnc("iem")
         if not iem.save(icursor, force_current_log=True, skip_current=True):
-            print(
-                f"extract_hfmetar: unknown station? {sid3} {network} {ts}\n"
-                f"{mtr}"
+            LOG.warning(
+                "Unknown station? %s %s %s %s",
+                sid3,
+                network,
+                ts,
+                mtr,
             )
+        updates += 1
+        if updates % 100 == 0:
+            icursor.close()
+            pgconn.commit()
+            icursor = pgconn.cursor()
 
-        icursor.close()
-        pgconn.commit()
-        pgconn.close()
+    icursor.close()
+    pgconn.commit()
+    pgconn.close()
 
 
-def find_fn(hours: int):
+def find_fn(hours: int) -> str | None:
     """Figure out which file to run for"""
     utcnow = utc()
     for i in range(hours, 5):
@@ -265,15 +282,18 @@ def find_fn(hours: int):
             if os.path.isfile(fn):
                 return fn
     LOG.warning("no MADIS HFMETAR file found!")
-    sys.exit()
+    return None
 
 
 @click.command()
-@click.option("--hours", type=int, required=True)
-def main(hours: int):
+@click.option("--hours", type=int, required=False)
+@click.option("--filename", type=str, default=None)
+def main(hours: int | None, filename: str | None) -> None:
     """Do Something"""
-    fn = find_fn(hours)
-    process(fn)
+    if filename is None:
+        filename = find_fn(hours)
+    if filename:
+        process(filename)
 
 
 if __name__ == "__main__":
