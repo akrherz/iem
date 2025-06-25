@@ -122,6 +122,7 @@ def run(conn: Connection, network, month, day, syear, eyear):
             continue
         props = dict(
             station=row["station"],
+            name=nt.sts[row["station"]]["name"],
             years=row["cnt"],
             avg_high=float(row["h"]),
             max_high=row["xh_high"],
@@ -159,7 +160,7 @@ def get_mckey(environ: dict) -> str:
     """Get the memcache key"""
     return (
         f"/geojson/climodat_dayclimo/{environ['network']}/{environ['month']}/"
-        f"{environ['day']}/{environ['syear']}/{environ['eyear']}"
+        f"{environ['day']}/{environ['syear']}/{environ['eyear']}/v2"
     )
 
 

@@ -4,30 +4,75 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 76);
 require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
 force_https();
+
+// Handle URL parameters for date and variable selection
+$date_param = isset($_GET["date"]) ? xssafe($_GET["date"]) : date("Y-m-d");
+$var_param = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
+
+// Validate date parameter
+$valid_date = $date_param;
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_param) || !strtotime($date_param)) {
+    $valid_date = date("Y-m-d");
+}
+
+// Define available render variables with their display names
+$render_vars = [
+    "high" => "High Temperature",
+    "high_depart" => "High Temperature Departure", 
+    "high_record" => "Record High Temperature",
+    "high_normal" => "Normal High Temperature",
+    "low" => "Low Temperature",
+    "low_depart" => "Low Temperature Departure",
+    "low_record" => "Record Low Temperature", 
+    "low_normal" => "Normal Low Temperature",
+    "precip" => "Precipitation",
+    "precip_month" => "Precipitation this month",
+    "precip_jan1" => "Precipitation since January 1",
+    "precip_jan1_normal" => "Precipitation since January 1 Normal",
+    "precip_jan1_depart" => "Precipitation since January 1 Departure",
+    "precip_jun1" => "Precipitation since June 1",
+    "precip_jun1_normal" => "Precipitation since June 1 Normal", 
+    "precip_dec1" => "Precipitation since December 1",
+    "precip_dec1_normal" => "Precipitation since December 1 Normal",
+    "precip_record" => "Precipitation Record",
+    "precip_month_normal" => "Precipitation this month normal",
+    "snow" => "Snowfall",
+    "snowdepth" => "Snow Depth [inch]",
+    "snow_month" => "Snowfall this month",
+    "snow_jun1" => "Snowfall since June 1",
+    "snow_jul1" => "Snowfall since July 1", 
+    "snow_jul1_depart" => "Snowfall since July 1 Departure",
+    "snow_dec1" => "Snowfall since December 1",
+    "snow_record" => "Snowfall Record",
+    "resultant_wind_speed" => "Resultant Wind Speed [mph]",
+    "resultant_wind_direction" => "Resultant Wind Direction",
+    "highest_wind_speed" => "Highest Wind Speed [mph]",
+    "highest_wind_direction" => "Highest Wind Direction", 
+    "highest_gust_speed" => "Highest Wind Gust [mph]",
+    "highest_gust_direction" => "Highest Gust Direction",
+    "average_wind_speed" => "Average Wind Speed [mph]"
+];
+
+// Validate variable parameter
+$valid_var = array_key_exists($var_param, $render_vars) ? $var_param : "high";
+
+// Generate select element using helper function
+$render_select = make_select("renderattr", $valid_var, $render_vars, "", "form-select", FALSE, FALSE, TRUE, ["id" => "renderattr"]);
+
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $OL = '10.5.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
-<link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-<style>
-.map {
-    height:70vh;
-    width: 100%;
-}
-.popover {
-    width: 300px;
-}
-
-</style>
+<link type="text/css" href="climap.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
-<script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='climap.js?v=3'></script>
+<script src='climap.js?v=8'></script>
 EOM;
 
 $t->content = <<<EOM
@@ -45,72 +90,64 @@ $t->content = <<<EOM
 </nav>
 
 <div class="row">
-<div class="col-md-12">
+<div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Map of NWS Daily CLI Reports</h4>
+        <div class="btn-group" role="group" aria-label="Font size controls">
+            <button id="fminus" class="btn btn-outline-secondary btn-sm" type="button" 
+                title="Decrease font size">
+                <i class="fa fa-minus"></i>
+            </button>
+            <span class="btn btn-outline-secondary btn-sm disabled">
+                <i class="fa fa-text-height"></i>
+            </span>
+            <button id="fplus" class="btn btn-outline-secondary btn-sm" type="button"
+                title="Increase font size">
+                <i class="fa fa-plus"></i>
+            </button>
+        </div>
+    </div>
 
-<div class="float-end">
-<i class="fa fa-text-size"></i>
-<button id="fminus" class="btn btn-secondary" type="button"><i class="fa fa-minus"></i></button>
-<button id="fplus" class="btn btn-secondary" type="button"><i class="fa fa-plus"></i></button>
+    <form name='climapform' class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label for="renderattr" class="form-label">Select Variable to Plot:</label>
+                {$render_select}
+            </div>
+            <div class="col-md-4">
+                <label for="datepicker" class="form-label">Select Date:</label>
+                <input type="date" id="datepicker" class="form-control" value="{$valid_date}">
+            </div>
+            <div class="col-md-2">
+                <button id="dlcsv" class="btn btn-success w-100" type="button">
+                    <i class="fa fa-download"></i> CSV
+                </button>
+            </div>
+        </div>
+    </form>
+</div></div><!-- ./row -->
+
+<div class="row">
+<div class="col-12">
+    <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}">
+        <div id="popup"></div>
+    </div>
+</div>
 </div>
 
-<form name='bah'><p><strong>Select Variable to Plot:</strong> 
-<select id="renderattr">
-    <option value="high">High Temperature</option>
-    <option value="high_depart">High Temperature Departure</option>
-    <option value="high_record">Record High Temperature</option>
-    <option value="high_normal">Normal High Temperature</option>
-    <option value="low">Low Temperature</option>
-    <option value="low_depart">Low Temperature Departure</option>
-    <option value="low_record">Record Low Temperature</option>
-    <option value="low_normal">Normal Low Temperature</option>
-    <option value="precip">Precipitation</option>
-    <option value="precip_month">Precipitation this month</option>
-    <option value="precip_jan1">Precipitation since January 1</option>
-    <option value="precip_jan1_normal">Precipitation since January 1 Normal</option>
-    <option value="precip_jan1_depart">Precipitation since January 1 Departure</option>
-    <option value="precip_jun1">Precipitation since June 1</option>
-    <option value="precip_jun1_normal">Precipitation since June 1 Normal</option>
-    <option value="precip_dec1">Precipitation since December 1</option>
-    <option value="precip_dec1_normal">Precipitation since December 1 Normal</option>
-    <option value="precip_record">Precipitation Record</option>
-    <option value="precip_month_normal">Precipitation this month normal</option>
-    <option value="snow">Snowfall</option>
-    <option value="snowdepth">Snow Depth [inch]</option>
-    <option value="snow_month">Snowfall this month</option>
-    <option value="snow_jun1">Snowfall since June 1</option>
-    <option value="snow_jul1">Snowfall since July 1</option>
-    <option value="snow_jul1_depart">Snowfall since July 1 Departure</option>
-    <option value="snow_dec1">Snowfall since December 1</option>
-    <option value="snow_record">Snowfall Record</option>
-    <option value="resultant_wind_speed">Resultant Wind Speed [mph]</option>
-    <option value="resultant_wind_direction">Resultant Wind Direction</option>
-    <option value="highest_wind_speed">Highest Wind Speed [mph]</option>
-    <option value="highest_wind_direction">Highest Wind Direction</option>
-    <option value="highest_gust_speed">Highest Wind Gust [mph]</option>
-    <option value="highest_gust_direction">Highest Gust Direction</option>
-    <option value="average_wind_speed">Average Wind Speed [mph]</option>
-    </select>	
-        
-<strong>For Date:</strong><input type="text" id="datepicker" size="30">
-
-<button id="dlcsv" class="btn btn-secondary" type="button"><i class="fa fa-download"></i> Download as CSV</button>
-
-
-</form>
-</div></div><!-- ./row -->
-
 <div class="row">
-<div class="col-md-12">
-
-<div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}">
-<div id="popup"></div>
-
-</div></div><!-- ./row -->
-
-<div class="row">
-<div class="col-md-12">
-    <h4>Click on map to show CLI text below</h4>
-    <div id="clireport"></div>
+<div class="col-12">
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">CLI Report Details</h5>
+            <small class="text-muted">Click on map markers to view detailed CLI text report</small>
+        </div>
+        <div class="card-body">
+            <div id="clireport">
+                <p class="text-muted mb-0">Click on a map location to view the CLI text report for that station.</p>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
 
