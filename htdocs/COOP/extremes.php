@@ -3,168 +3,33 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 2);
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
-require_once "../../include/mlib.php";
 
+$OL = "10.6.1";
 $t = new MyView();
+$t->title = "NWS COOP Daily Climatology";
 
+// Get URL parameters with defaults
 $tbl = isset($_GET["tbl"]) ? substr(xssafe($_GET["tbl"]), 0, 10) : "climate";
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$valid = mktime(0, 0, 0, $month, $day, 2000);
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
 $network = isset($_GET['network']) ? substr($_GET['network'], 0, 9) : 'IACLIMATE';
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : null;
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']) : 'ASC';
 
-$syear = 1800;
-$eyear = intval(date("Y")) + 1;
-if ($tbl == "climate51") {
-    $syear = 1951;
-} else if ($tbl == "climate71") {
-    $syear = 1971;
-    $eyear = 2001;
-} else if ($tbl == "climate81") {
-    $syear = 1981;
-    $eyear = 2011;
-}
+// Build render variables array
+$render_vars = array(
+    'tbl' => $tbl,
+    'month' => $month,
+    'day' => $day,
+    'sortcol' => $sortcol,
+    'network' => $network,
+    'station' => $station,
+    'sortdir' => $sortdir
+);
 
-$t->title = "NWS COOP Daily Climatology";
-
-$nt = new NetworkTable($network);
-$cities = $nt->table;
-
-$connection = iemdb("coop");
-
-$td = date("Y-m-d", $valid);
-// Option 1, we want climo for one station!
-if ($station != null) {
-    if (! array_key_exists($station, $cities)){
-        // naughty request
-        xssafe("<tag>");
-    }
-    if ($sortcol == 'station') $sortcol = 'valid';
-    $inturl = sprintf(
-        "%s/json/climodat_stclimo.py?station=%s&syear=%s&eyear=%s",
-        $INTERNAL_BASEURL,
-        $station,
-        $syear,
-        $eyear
-    );
-    $jdata = file_get_contents($inturl);
-    $URL = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
-    $json = json_decode($jdata, $assoc = TRUE);
-    $data = array();
-    $table = "";
-    foreach ($json['climatology'] as $key => $val) {
-        $val["valid"]  = mktime(0, 0, 0, $val["month"], $val["day"], 2000);
-        $data[] = $val;
-    }
-    if ($sortdir == 'ASC') {
-        $sorted_data = aSortBySecondIndex($data, $sortcol, "asc");
-    } else {
-        $sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
-    }
-    foreach ($sorted_data as $key => $val) {
-        $link = sprintf(
-            "extremes.php?day=%s&amp;month=%s&amp;network=%s&amp;tbl=%s",
-            $day,
-            $month,
-            $network,
-            $tbl
-        );
-        $table .= sprintf(
-            "<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
-                 <td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-                 <td></td>
-                 <td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-                 <td></td>
-                 <td>%.2f</td><td>%.2f</td><td>%s</td>
-                 </tr>",
-            $link,
-            date("d M", $val["valid"]),
-            $val["years"],
-            $val["avg_high"],
-            $val["max_high"],
-            implode(", ", $val["max_high_years"]),
-            $val["min_high"],
-            implode(", ", $val["min_high_years"]),
-            $val["avg_low"],
-            $val["max_low"],
-            implode(", ", $val["max_low_years"]),
-            $val["min_low"],
-            implode(", ", $val["min_low_years"]),
-            $val["avg_precip"],
-            $val["max_precip"],
-            implode(", ", $val["max_precip_years"])
-        );
-    }
-
-    $h3 = "<h3>NWS COOP Climatology for " . $cities[strtoupper($station)]["name"] . " (ID: " . $station . ")</h3>";
-    // Option 2, just a single date
-} else {
-    if ($sortcol == 'valid') $sortcol = 'station';
-    $inturl = sprintf(
-        "%s/geojson/climodat_dayclimo.py?network=%s&month=%s&day=%s&syear=%s&eyear=%s",
-        $INTERNAL_BASEURL,
-        $network,
-        $month,
-        $day,
-        $syear,
-        $eyear,
-    );
-    $jdata = file_get_contents($inturl);
-    $URL = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
-    $json = json_decode($jdata, $assoc = TRUE);
-    $data = array();
-    $table = "";
-    foreach ($json['features'] as $key => $val) {
-        $data[] = $val['properties'];
-    }
-    if ($sortdir == 'ASC') {
-        $sorted_data = aSortBySecondIndex($data, $sortcol, "asc");
-    } else {
-        $sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
-    }
-    foreach ($sorted_data as $key => $val) {
-        $link = sprintf(
-            "extremes.php?station=%s&amp;network=%s&amp;tbl=%s",
-            $val["station"],
-            $network,
-            $tbl
-        );
-        $table .= sprintf(
-            "<tr><td><a href=\"%s\">%s</a> (%s)</td><td>%s</td>
-                 <td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-                 <td></td>
-                 <td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-                 <td></td>
-                 <td>%.2f</td><td>%.2f</td><td>%s</td>
-                 </tr>",
-            $link,
-            $cities[$val["station"]]['name'],
-            $val["station"],
-            $val["years"],
-            $val["avg_high"],
-            $val["max_high"],
-            implode(", ", $val["max_high_years"]),
-            $val["min_high"],
-            implode(", ", $val["min_high_years"]),
-            $val["avg_low"],
-            $val["max_low"],
-            implode(", ", $val["max_low_years"]),
-            $val["min_low"],
-            implode(", ", $val["min_low_years"]),
-            $val["avg_precip"],
-            $val["max_precip"],
-            implode(", ", $val["max_precip_years"])
-        );
-    }
-
-    $h3 = "<h3>NWS COOP Climatology for " . date("d F", $valid) . "</h3>";
-}
-
+// Create form selects
 $netselect = selectNetworkType("CLIMATE", $network);
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
@@ -177,90 +42,130 @@ $ar = array(
 );
 $tblselect = make_select("tbl", $tbl, $ar);
 
-$sortdir2 = $sortdir == 'ASC' ? 'DESC' : 'ASC';
-if ($station != null) {
-    $uribase = sprintf("&station=%s&network=%s&tbl=%s&amp;sortdir=%s", $station, $network, $tbl, $sortdir2);
-    $h4 = "<a href='extremes.php?sortcol=valid" . $uribase . "'>Date</a>";
-} else {
-    $uribase = sprintf("&day=%s&month=%s&network=%s&tbl=%s&amp;sortdir=%s", $day, $month, $network, $tbl, $sortdir2);
-    $h4 = "<a href='extremes.php?sortcol=station&day=" . $day . "&month=" . $month . "'>Station</a>";
-}
-
 
 $t->content = <<<EOM
+<div id="loading-indicator" class="text-center my-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading climatology data...</p>
+</div>
 
-{$h3}
+<div id="content-area">
+    <div id="header-section">
+        <!-- Header will be populated by JavaScript -->
+    </div>
 
-<p>This table gives a listing of <b>unofficial</b> daily records for NWS
-COOP stations. You may click on a column to sort it.  You can click on the station
-name to get all daily records for that station or click on the date to get all records
-for that date.</p>
+    <div class="alert alert-info">
+        <h5 class="alert-heading">Two App Modes Available:</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>🌡️ Single Date Climatology for State</strong>
+                <p class="mb-0 small">Select a specific date to see records for all stations on that day. Use the form below to choose date and state.</p>
+            </div>
+            <div class="col-md-6">
+                <strong>🏛️ Daily Climatology for Single Station</strong>
+                <p class="mb-0 small">Click any station ID in the table to see all daily records for that station throughout the year.</p>
+            </div>
+        </div>
+    </div>
 
-<p><a href="/COOP/dl/normals.phtml" class="btn btn-primary">
-<span class="fa fa-download"></span> Download Daily Climatology</a></p>
+    <p>This table gives a listing of <b>unofficial</b> daily records for NWS
+    COOP stations. You may click on a column to sort it.  You can click on the station
+    name to get all daily records for that station or click on the date to get all records
+    for that date.</p>
 
-<p>The data found in this table was derived from the following
-<a href="/json/">JSON webservice</a>:<br />
-<code>{$URL}</code>
-</p>
+    <p><a href="/COOP/dl/normals.phtml" class="btn btn-primary">
+    <span class="fa fa-download"></span> Download Daily Climatology</a></p>
 
-<form method="GET" action="extremes.php" name="myform">
-<table class="table table-bordered">
-<thead>
-<tr>
- <th>Select State:</th>
- <th>Select Date:</th>
- <th>Select Record Database:</th>
- <th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
- <td>{$netselect}</td>
- <td>{$mselect} {$dselect}</td>
- <td>{$tblselect}</td>
-<td><input type="submit" value="Request"></td>
-</tr>
-</tbody>
-</table>
-</form>
+    <div id="api-info" class="alert alert-info" style="display: none;">
+        <p class="mb-0">The data found in this table was derived from the following
+        <a href="/json/">JSON webservice</a>:<br />
+        <code id="api-url"></code>
+        </p>
+    </div>
 
-<br />
+    <form method="GET" action="extremes.php" name="myform" id="controls-form">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">🌡️ Single Date Mode Controls</h6>
+            <small class="text-muted">Change state or date to view different climatology data</small>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label for="network" class="form-label small">Select State:</label>
+                    {$netselect}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Select Date:</label>
+                    <div class="d-flex gap-1">
+                        {$mselect} {$dselect}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="tbl" class="form-label small">Record Database:</label>
+                    {$tblselect}
+                </div>
+                <div class="col-md-3">
+                    <input type="submit" value="Update Data" class="btn btn-primary btn-sm" id="form-submit-btn">
+                    <div id="dynamic-indicator" style="display: none; font-size: 11px; color: #666; margin-top: 4px;">
+                        Changes update automatically
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
 
-<table class="table table-bordered table-sm table-striped">
-<thead class="sticky">
-  <tr>
-   <th rowspan='2' class='subtitle' valign='top'>
-{$h4}
-</th>
-<th rowspan='2' class='subtitle' valign='top'>Years</th>
-   <th colspan='5' class='subtitle'>High Temperature [F]</th>
-   <td>&nbsp;</td>
-   <th colspan='5' class='subtitle'>Low Temperature [F]</th>
-   <td>&nbsp;</td>
-   <th colspan='3' class='subtitle'>Precipitation [inch]</th>
-  </tr>
-  <tr>
-    <th><a href='extremes.php?sortcol=avg_high{$uribase}'>Avg:</a></th>
-    <th><a href='extremes.php?sortcol=max_high{$uribase}'>Max:</a></th>
-    <th><a href='extremes.php?sortcol=max_high_years{$uribase}'>Year:</a></th>
-    <th><a href='extremes.php?sortcol=min_high{$uribase}'>Min:</a></th>
-    <th><a href='extremes.php?sortcol=min_high_years{$uribase}'>Year:</a></th>
-    <td>&nbsp;</td>
-    <th><a href='extremes.php?sortcol=avg_low{$uribase}'>Avg:</a></th>
-    <th><a href='extremes.php?sortcol=max_low{$uribase}'>Max:</a></th>
-    <th><a href='extremes.php?sortcol=max_low_years{$uribase}'>Year:</a></th>
-    <th><a href='extremes.php?sortcol=min_low{$uribase}'>Min:</a></th>
-    <th><a href='extremes.php?sortcol=min_low_years{$uribase}'>Year:</a></th>
-    <td>&nbsp;</td>
-    <th><a href='extremes.php?sortcol=avg_precip{$uribase}'>Avg:</a></th>
-    <th><a href='extremes.php?sortcol=max_precip{$uribase}'>Max:</a></th>
-    <th><a href='extremes.php?sortcol=max_precip_years{$uribase}'>Year:</a></th>
-  </tr>
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
+    <br />
+
+    <!-- Map Container (only visible for all stations mode) -->
+    <div id="map-container">
+        <div class="map-controls">
+            <div class="control-row">
+                <label for="label-attribute">Label Points With:</label>
+                <select id="label-attribute" class="form-select form-select-sm">
+                    <option value="station">Station ID</option>
+                    <option value="avg_high" selected>Avg High</option>
+                    <option value="max_high">Max High</option>
+                    <option value="min_high">Min High</option>
+                    <option value="avg_low">Avg Low</option>
+                    <option value="max_low">Max Low</option>
+                    <option value="min_low">Min Low</option>
+                    <option value="avg_precip">Avg Precip</option>
+                    <option value="max_precip">Max Precip</option>
+                    <option value="years">Years</option>
+                </select>
+            </div>
+            <div class="legend-row">
+                <label>Legend:</label>
+                <div class="map-legend">
+                    <!-- Legend will be populated dynamically by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div id="popup" class="ol-popup">
+            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+            <div id="popup-content" class="ol-popup-content"></div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <div id="data-table"></div>
+    </div>
+</div>
 EOM;
-$t->render('single.phtml');
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" type="text/css">
+<link rel="stylesheet" href="extremes.css" type="text/css">
+EOM;
+$t->jsextra = <<<EOM
+<script src="/vendor/openlayers/{$OL}/ol.js"></script>
+<script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script src="extremes.js?v=8" type="text/javascript"></script>
+EOM;
+$t->render('full.phtml');
