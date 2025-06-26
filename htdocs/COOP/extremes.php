@@ -138,6 +138,13 @@ $t->content = <<<EOM
                     <option value="years">Years</option>
                 </select>
             </div>
+            <div class="control-row">
+                <label for="year-filter">Filter by Record Year:</label>
+                <select id="year-filter" class="form-select form-select-sm">
+                    <option value="">All Years</option>
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
             <div class="legend-row">
                 <label>Legend:</label>
                 <div class="map-legend">
@@ -166,6 +173,6 @@ $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
 <script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script src="extremes.js?v=8" type="text/javascript"></script>
+<script src="extremes.js?v=17" type="text/javascript"></script>
 EOM;
 $t->render('full.phtml');

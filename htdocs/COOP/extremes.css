@@ -396,10 +396,26 @@
     margin-bottom: 8px;
 }
 
+.control-row:last-of-type {
+    margin-bottom: 0;
+}
+
 .control-row label {
     font-weight: 500;
     margin: 0;
     white-space: nowrap;
+}
+
+/* Year filter specific styling */
+.control-row:has(#year-filter) {
+    border-top: 1px solid #e9ecef;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.control-row:has(#year-filter) label {
+    color: #6c757d;
+    font-size: 12px;
 }
 
 .legend-row {
