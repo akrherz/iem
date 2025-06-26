@@ -1,53 +1,64 @@
-/* global $, ol */
-const htmlInterface = ['<div class="card">',
+/* global ol */
+const htmlInterface = ['<div class="card iemss-container">',
     '<div class="card-header">',
     '<a class="btn btn-secondary float-end" href="/" id="iemss-metadata-link" target="_new">',
     '<i class="fa fa-info"></i> Station Metadata</a>',
-    '<h3 class="card-title">Select Widget for <span id="iemss-network"></span> Network</h3> ',
+    '<h3 class="card-title"><span id="iemss-network"></span> Station Selector</h3> ',
     '<br class="clearfix" />',
     '</div>',
     '<div class="card-body">',
     '<div class="row">',
     '<div class="col-sm-6">',
 
+    '<div class="d-flex gap-2 mb-2">',
     '<div class="btn-group">',
     '<button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">',
     'Sort Available Stations: <span class="caret"></span>',
     '</button>',
     '<ul class="dropdown-menu" role="menu">',
-    '<li id="iemss-sortbyid"><a href="#">Sort by Identifier</a></li>',
-    '<li id="iemss-sortbyname"><a href="#">Sort by Name</a></li>',
+    '<li id="iemss-sortbyid"><a class="dropdown-item" href="#">Sort by Identifier</a></li>',
+    '<li id="iemss-sortbyname"><a class="dropdown-item" href="#">Sort by Name</a></li>',
     '</ul>',
+    '</div>',
+    '<input type="text" class="form-control flex-fill" id="stationfilter" ',
+    'placeholder="Filter stations...">',
     '</div>',
 
     '<select multiple id="stations_in" class="form-control">',
     '</select>',
-    '<div class="form-inline">',
-    '<div class="mb-3">',
-    '<input type="text" class="form-control" id="stationfilter" ',
-    'placeholder="Enter some text here to filter listing below">',
-    '</div>',
-    '<div class="mb-3">',
-    '<button type="submit" id="stations_add" class="btn btn-secondary"><i class="fa fa-plus"></i> Add Selected</button>',
-    '<button type="submit" id="stations_addall" class="btn btn-secondary">Add All</button>',
-    '</div>',
+    '<div class="iemss-station-count text-muted small" id="available-count">Available: 0 stations</div>',
+    '<div class="mb-3 iemss-button-group">',
+    '<button type="button" id="stations_add" class="btn btn-secondary"><i class="fa fa-plus"></i> Add Selected</button>',
+    '<button type="button" id="stations_addall" class="btn btn-secondary">Add All</button>',
     '</div>',
     '</div>',
     '<div class="col-sm-6">',
-    '<label for="stations_out">Selected Stations:</label>',
-    '<input type="checkbox" name="stations" value="_ALL" style="display: none;">',
+    '<div class="d-flex align-items-center mb-2" style="height: 38px;">',
+    '<label for="stations_out" class="mb-0">Selected Stations:</label>',
+    '</div>',
+    '<input type="checkbox" name="stations" value="_ALL" class="iemss-hidden">',
     '<select multiple id="stations_out" class="form-control" name="stations">',
     '</select>',
-    '<div class="mb-3">',
-    '<button type="submit" id="stations_del" class="btn btn-secondary"><i class="fa fa-minus"></i> Remove Selected</button>',
-    '<button type="submit" id="stations_delall" class="btn btn-secondary">Remove All</button>',
+    '<div class="iemss-station-count text-muted small" id="selected-count">Selected: 0 stations</div>',
+    '<div class="mb-3 iemss-button-group">',
+    '<button type="button" id="stations_del" class="btn btn-secondary"><i class="fa fa-minus"></i> Remove Selected</button>',
+    '<button type="button" id="stations_delall" class="btn btn-secondary">Remove All</button>',
     '</div>',
     '</div>',
     '</div>',
     '<br />',
     '<div class="row"><div class="col-sm-12">',
-    '<div id="map" style="width:100%; height:400px"></div>',
-    '<p>Green dots are locations with current data.</p>',
+    '<div id="map"></div>',
+    '<div class="iemss-map-legend">',
+    '<div class="iemss-legend-item">',
+    '<span class="iemss-legend-dot online"></span>',
+    '<span>Online stations with current data</span>',
+    '</div>',
+    '<div class="iemss-legend-item">',
+    '<span class="iemss-legend-dot offline"></span>',
+    '<span>Offline stations or no recent data</span>',
+    '</div>',
+    '</div>',
     '</div></div>',
     '</div><!-- End of card-body -->',
     '</div><!-- End of card -->'];
@@ -57,146 +68,255 @@ let geojson = null;
 let geojsonSource = null;
 let network = null;
 
-//http://www.lessanvaezi.com/filter-select-list-options/
-jQuery.fn.filterByText = function (textbox, selectSingleMatch) {  // this
-    return this.each(function () {
-        const select = this; // eslint-disable-line
-        const options = [];
-        $(select).find('option').each(function () {
-            options.push({ value: $(this).val(), text: $(this).text() });
-        });
-        $(select).data('options', options);
-        $(textbox).bind('change keyup', function () { // this
-            const opts = $(select).empty().scrollTop(0).data('options');
-            const search = $.trim($(this).val());
-            const regex = new RegExp(search, 'gi');
-
-            $.each(opts, (i) => {
-                const option = options[i];
-                if (option.text.match(regex) !== null) {
-                    $(select).append(
-                        $('<option>').text(option.text).val(option.value)
-                    );
-                }
-            });
-            if (selectSingleMatch === true &&
-                $(select).children().length === 1) {
-                $(select).children().get(0).selected = true;
+// Vanilla JS replacement for jQuery filterByText functionality
+function setupFilterByText(selectElement, textboxElement, selectSingleMatch = false) {
+    const options = Array.from(selectElement.options).map(option => ({
+        value: option.value,
+        text: option.textContent
+    }));
+    
+    // Store original options on the element
+    selectElement.dataset.originalOptions = JSON.stringify(options);
+    
+    const handleFilter = () => {
+        const search = textboxElement.value.trim();
+        const regex = new RegExp(search, 'gi');
+        
+        // Clear current options
+        selectElement.innerHTML = '';
+        
+        // Filter and add matching options
+        options.forEach(optionData => {
+            if (optionData.text.match(regex) !== null) {
+                const option = document.createElement('option');
+                option.value = optionData.value;
+                option.textContent = optionData.text;
+                selectElement.appendChild(option);
             }
         });
-    });
-};
+        
+        // Auto-select if single match
+        if (selectSingleMatch && selectElement.options.length === 1) {
+            selectElement.options[0].selected = true;
+        }
+        
+        // Update counts after filtering
+        updateStationCounts();
+    };
+    
+    textboxElement.addEventListener('input', handleFilter);
+    textboxElement.addEventListener('change', handleFilter);
+}
 
 function sortListing(option) {
-    $("#stations_in").append($("#stations_in option").remove().sort((a, b) => {
-        let at = $(a).text();
-        let bt = $(b).text();
+    const stationsIn = document.getElementById('stations_in');
+    const options = Array.from(stationsIn.options);
+    
+    options.sort((a, b) => {
+        let at = a.textContent;
+        let bt = b.textContent;
         if (option === 'name') {
             at = at.slice(at.indexOf(' ') + 1);
             bt = bt.slice(bt.indexOf(' ') + 1);
         }
         return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
-    }));
+    });
+    
+    // Clear and re-add sorted options
+    stationsIn.innerHTML = '';
+    options.forEach(opt => stationsIn.appendChild(opt));
+    
+    // Update counts after sorting
+    updateStationCounts();
 }
 
-$().ready(() => {
+// Helper functions to replace jQuery functionality
+function moveSelectedOptions(fromSelect, toSelect) {
+    const selected = Array.from(fromSelect.selectedOptions);
+    selected.forEach(option => {
+        option.selected = false;
+        toSelect.appendChild(option);
+    });
+    updateStationCounts();
+    return false;
+}
+
+function moveAllOptions(fromSelect, toSelect) {
+    const options = Array.from(fromSelect.options);
+    options.forEach(option => {
+        option.selected = true;
+        toSelect.appendChild(option);
+    });
+    updateStationCounts();
+    return false;
+}
+
+function selectAllOptions(selectElement) {
+    Array.from(selectElement.options).forEach(option => {
+        option.selected = true;
+    });
+}
+
+// Update station count displays
+function updateStationCounts() {
+    const stationsIn = document.getElementById('stations_in');
+    const stationsOut = document.getElementById('stations_out');
+    const availableCount = document.getElementById('available-count');
+    const selectedCount = document.getElementById('selected-count');
+    
+    if (availableCount && stationsIn) {
+        const count = stationsIn.options.length;
+        availableCount.textContent = `Available: ${count.toLocaleString()} station${count !== 1 ? 's' : ''}`;
+    }
+    
+    if (selectedCount && stationsOut) {
+        const count = stationsOut.options.length;
+        selectedCount.textContent = `Selected: ${count.toLocaleString()} station${count !== 1 ? 's' : ''}`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const iemssElement = document.getElementById('iemss');
+    
+    if (!iemssElement) {
+        return;
+    }
+    
+    // First insert the HTML interface
+    iemssElement.innerHTML = htmlInterface.join('');
+
+    network = iemssElement.getAttribute('data-network');
+    const select_name = iemssElement.getAttribute('data-name');
+    
+    if (!network) {
+        return;
+    }
+    
+    if (select_name) {
+        document.getElementById('stations_out').setAttribute('name', select_name);
+    }
+    document.getElementById('iemss-network').textContent = network;
+    document.getElementById('iemss-metadata-link').setAttribute('href', `/sites/networks.php?network=${network}`);
+    
     // If this does not support all, remove the add all button
-    if ($("#iemss").data("supports-all") === 0) {
-        $("#stations_addall").hide();
-    };
+    if (iemssElement.getAttribute('data-supports-all') === '0') {
+        const addAllBtn = document.getElementById('stations_addall');
+        if (addAllBtn) {
+            addAllBtn.style.display = 'none';
+        }
+    }
 
     // Make sure clicking the submit button selects all of the selected 
     // stations, this avoids user confusion
-    $("form[name='iemss'] :submit").click(() => {
-        // Empty input implies that all are selected!
-        if ($("#iemss").data("supports-all") !== 0) {
-            // If all entries are in the stations_out box
-            if ($('#stations_out option').length >= geojsonSource.getFeatures().length) {
-                // Deselect anything selected so that it does not submit
-                $('#stations_out option').prop('selected', false);
-                $("input[type='checkbox'][name='stations']").prop("checked", true);
-                return true;
-            } else {
-                $("input[type='checkbox'][name='stations']").prop("checked", false);
+    const submitButtons = document.querySelectorAll("form[name='iemss'] input[type='submit'], form[name='iemss'] button[type='submit']");
+    submitButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const stationsOut = document.getElementById('stations_out');
+            const stationsCheckbox = document.querySelector("input[type='checkbox'][name='stations']");
+            
+            // Empty input implies that all are selected!
+            if (iemssElement.getAttribute('data-supports-all') !== '0') {
+                // If all entries are in the stations_out box
+                if (stationsOut && geojsonSource && stationsOut.options.length >= geojsonSource.getFeatures().length) {
+                    // Deselect anything selected so that it does not submit
+                    Array.from(stationsOut.options).forEach(opt => {
+                        opt.selected = false;
+                    });
+                    if (stationsCheckbox) stationsCheckbox.checked = true;
+                    return true;
+                } else {
+                    if (stationsCheckbox) stationsCheckbox.checked = false;
+                }
             }
-        }
-        $('#stations_out option').prop('selected', true);
-        // Stop us if we have no stations selected!
-        if ($('#stations_out option').length === 0) {
-            alert("No stations listed in 'Selected Stations'!");  // skipcq
-            return false;
-        }
-        return true;
-    });
-
-    $("#iemss").append(htmlInterface.join(''));
-
-    network = $("#iemss").data("network");
-    const only_online = ($("#iemss").data("only-online") === 1);
-    const select_name = $("#iemss").attr("data-name");
-    if (select_name) {
-        $("#stations_out").attr("name", select_name);
-    }
-    $("#iemss-network").html(network);
-    $("#iemss-metadata-link").attr('href', `/sites/networks.php?network=${network}`);
-
-    $("#stations_in").dblclick(() => {
-        return !$('#stations_in option:selected').remove().appendTo('#stations_out');
-    });
-    $("#stations_out").dblclick(() => {
-        return !$('#stations_out option:selected').remove().appendTo('#stations_in');
-    });
-
-    $('#stations_add').click(() => {
-        return !$('#stations_in option:selected').remove().appendTo('#stations_out');
-    });
-    $('#stations_addall').click(() => {
-        const ret = !$('#stations_in option').remove().appendTo('#stations_out');
-        $('#stations_out option').prop('selected', true);
-        return ret;
-    });
-    $('#stations_delall').click(() => {
-        return !$('#stations_out option').remove().appendTo('#stations_in');
-    });
-    $('#stations_del').click(() => {
-        $('#stations_out option:selected').remove().appendTo('#stations_in');
-        $('#stations_out option').each((_idx, item) => {
-            $(item).prop("selected", true);
+            if (stationsOut) {
+                selectAllOptions(stationsOut);
+                // Stop us if we have no stations selected!
+                if (stationsOut.options.length === 0) {
+                    alert("No stations listed in 'Selected Stations'!");  // skipcq
+                    event.preventDefault();
+                    return false;
+                }
+            }
+            return true;
         });
-        return false;
     });
 
-    $('#iemss-sortbyid').click(() => {
-        sortListing("id");
-    });
-    $('#iemss-sortbyname').click(() => {
-        sortListing("name");
-    });
+    // Setup event handlers for station movement
+    const stationsIn = document.getElementById('stations_in');
+    const stationsOut = document.getElementById('stations_out');
 
+    if (stationsIn && stationsOut) {
+        stationsIn.addEventListener('dblclick', () => {
+            return moveSelectedOptions(stationsIn, stationsOut);
+        });
+        stationsOut.addEventListener('dblclick', () => {
+            return moveSelectedOptions(stationsOut, stationsIn);
+        });
+    }
+
+    const addBtn = document.getElementById('stations_add');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            return moveSelectedOptions(stationsIn, stationsOut);
+        });
+    }
+    
+    const addAllBtn = document.getElementById('stations_addall');
+    if (addAllBtn) {
+        addAllBtn.addEventListener('click', () => {
+            const ret = moveAllOptions(stationsIn, stationsOut);
+            selectAllOptions(stationsOut);
+            return ret;
+        });
+    }
+    
+    const delAllBtn = document.getElementById('stations_delall');
+    if (delAllBtn) {
+        delAllBtn.addEventListener('click', () => {
+            return moveAllOptions(stationsOut, stationsIn);
+        });
+    }
+    
+    const delBtn = document.getElementById('stations_del');
+    if (delBtn) {
+        delBtn.addEventListener('click', () => {
+            moveSelectedOptions(stationsOut, stationsIn);
+            selectAllOptions(stationsOut);
+            return false;
+        });
+    }
+
+    const sortById = document.getElementById('iemss-sortbyid');
+    if (sortById) {
+        sortById.addEventListener('click', (event) => {
+            event.preventDefault();
+            sortListing("id");
+        });
+    }
+    
+    const sortByName = document.getElementById('iemss-sortbyname');
+    if (sortByName) {
+        sortByName.addEventListener('click', (event) => {
+            event.preventDefault();
+            sortListing("name");
+        });
+    }
+
+    // Setup OpenLayers map and data source
+    const onlyOnline = (iemssElement.getAttribute('data-only-online') === '1');
 
     geojsonSource = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
         projection: ol.proj.get('EPSG:3857'),
-        url: `/geojson/network/${network}.geojson?only_online=${only_online ? "1" : "0"}`
-    });
-    geojson = new ol.layer.WebGLPoints({
-        source: geojsonSource,
-        style: {
-            symbol: {
-                symbolType: 'circle',
-                size: 14,
-                color: ['case', ['==', ['get', 'online'], 1], [0, 128, 0, 1], [255, 0, 0, 1]]
-            }
-        }
+        url: `/geojson/network/${network}.geojson?only_online=${onlyOnline ? "1" : "0"}`
     });
 
+    // Create map first with just the base layer
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
             source: new ol.source.OSM()
-        }),
-            geojson
-        ],
+        })],
         view: new ol.View({
             projection: ol.proj.get('EPSG:3857'),
             center: [-10575351, 5160979],
@@ -204,20 +324,54 @@ $().ready(() => {
         })
     });
 
+    // Now try to create and add the stations layer
+    // For large datasets, prioritize Vector layer with performance optimizations
+    geojson = new ol.layer.Vector({
+        source: geojsonSource,
+        style: function(feature) {
+            // Check for boolean online status
+            const online = feature.get('online');
+            const isOnline = online === true || online === 1 || online === '1';
+
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: isOnline ? 'rgba(0, 128, 0, 1)' : 'rgba(255, 0, 0, 1)'
+                    })
+                })
+            });
+        },
+        // Performance optimization for large datasets
+        renderBuffer: 200,
+        updateWhileAnimating: false,
+        updateWhileInteracting: false
+    });
+    map.addLayer(geojson);
+
     geojsonSource.on('change', () => {
         if (geojsonSource.getState() === 'ready') {
-            $.each(geojsonSource.getFeatures(), (_index, feat) => {
+            const stationsInSelect = document.getElementById('stations_in');
+            
+            // Remove loading state
+            const iemssContainer = document.querySelector('.iemss-container');
+            if (iemssContainer) {
+                iemssContainer.classList.remove('iemss-loading');
+            }
+            
+            geojsonSource.getFeatures().forEach(feat => {
                 let lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
                 if (network !== 'TAF') {
                     lbl += ` ${feat.get('time_domain')}`;
                 }
-                $('#stations_in').append($('<option/>', {
-                    value: feat.get('sid'),
-                    text: lbl
-                }));
+                const option = document.createElement('option');
+                option.value = feat.get('sid');
+                option.textContent = lbl;
+                stationsInSelect.appendChild(option);
             });
             sortListing("id");
-            $('#stations_in').filterByText($('#stationfilter'), true);
+            setupFilterByText(stationsInSelect, document.getElementById('stationfilter'), true);
+            updateStationCounts();
             map.getView().fit(
                 geojsonSource.getExtent(),
                 {
@@ -225,13 +379,24 @@ $().ready(() => {
                     padding: [50, 50, 50, 50]
                 }
             );
+        } else if (geojsonSource.getState() === 'loading') {
+            // Add loading state
+            const iemssContainer = document.querySelector('.iemss-container');
+            if (iemssContainer) {
+                iemssContainer.classList.add('iemss-loading');
+            }
         }
     });
 
-    const $newdiv = $("<div>", { id: "popup", style: "width: 250px;" });
-    $("#map").append($newdiv);
-    const $newdiv2 = $("<div>", { id: "popover-content", style: "display: none;" });
-    $("#map").append($newdiv2);
+    // Create popup elements
+    const mapElement = document.getElementById('map');
+    const popupDiv = document.createElement('div');
+    popupDiv.id = 'popup';
+    mapElement.appendChild(popupDiv);
+    
+    const popoverContentDiv = document.createElement('div');
+    popoverContentDiv.id = 'popover-content';
+    mapElement.appendChild(popoverContentDiv);
 
     const element = document.getElementById('popup');
 
@@ -242,11 +407,16 @@ $().ready(() => {
     });
     map.addOverlay(popup);
 
-    $(element).popover({
-        'placement': 'top',
-        'html': true,
-        content: () => { return $('#popover-content').html(); }
-    });
+    // Initialize Bootstrap popover using vanilla JS
+    let popoverInstance = null;
+    if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+        popoverInstance = new bootstrap.Popover(element, {
+            placement: 'top',
+            html: true,
+            content: () => document.getElementById('popover-content').innerHTML
+        });
+    }
+
     // display popup on click
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
@@ -257,17 +427,59 @@ $().ready(() => {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
             const sid = feature.get('sid');
+            
             popup.setPosition(coord);
             const content = `<p><strong>SID: </strong>${sid}`
                 + `<br /><strong>Name:</strong> ${feature.get('sname')}`
                 + `<br /><strong>Period:</strong> ${feature.get("time_domain")}</p>`;
-            $('#popover-content').html(content);
-            $(element).popover('show');
-            $("#stations_in").find(`option[value="${sid}"]`).attr("selected", "selected");
+            document.getElementById('popover-content').innerHTML = content;
+            
+            if (popoverInstance) {
+                popoverInstance.show();
+            }
+            
+            // Find and select the station in the available stations list
+            const stationsInSelect = document.getElementById('stations_in');
+            const stationOption = Array.from(stationsInSelect.options).find(option => option.value === sid);
+            if (stationOption) {
+                // Clear existing selections and select this station
+                Array.from(stationsInSelect.options).forEach(opt => {
+                    opt.selected = false;
+                });
+                stationOption.selected = true;
+                
+                // Scroll the option into view
+                stationOption.scrollIntoView({ block: 'nearest' });
+            } else {
+                // Station might be filtered out, temporarily clear filter to find it
+                const filterInput = document.getElementById('stationfilter');
+                const originalFilter = filterInput.value;
+                filterInput.value = '';
+                
+                // Trigger filter update to show all stations
+                filterInput.dispatchEvent(new Event('input'));
+                
+                // Now try to find and select the station
+                const foundOption = Array.from(stationsInSelect.options).find(option => option.value === sid);
+                if (foundOption) {
+                    Array.from(stationsInSelect.options).forEach(opt => {
+                        opt.selected = false;
+                    });
+                    foundOption.selected = true;
+                    foundOption.scrollIntoView({ block: 'nearest' });
+                }
+                
+                // Restore original filter after a short delay
+                setTimeout(() => {
+                    filterInput.value = originalFilter;
+                    filterInput.dispatchEvent(new Event('input'));
+                }, 100);
+            }
         } else {
-            $(element).popover('hide');
+            if (popoverInstance) {
+                popoverInstance.hide();
+            }
         }
-
     });
 
 });
