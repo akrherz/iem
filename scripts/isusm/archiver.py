@@ -83,6 +83,8 @@ def zip_and_delete(station, files):
     with zipfile.ZipFile(savefn, "w", zipfile.ZIP_DEFLATED) as zfh:
         for fn in files:
             zfh.write(fn)
+    # Update the file permission to not be so restrictive
+    os.chmod(savefn, 0o664)
     for fn in files:
         os.unlink(fn)
 
