@@ -257,7 +257,7 @@ function initializeTable() {
         scrollHorizontal: true, // Enable horizontal scrolling
         freezeFirstColumn: true, // Freeze the first column
         headerSort: true, // Make headers sticky
-        columns: columns,
+        columns,
         placeholder: "No climatology data available for the selected criteria",
         initialSort: [
             {column: appState.isStationView ? "date_link" : "station_link", dir: "asc"}
@@ -291,7 +291,7 @@ function getTableColumns() {
             width: appState.isStationView ? 120 : 200, // Wider for station names
             headerSort: true,
             cssClass: "station-col",
-            sorter: function(a, b, aRow, bRow) {
+            sorter(a, b, aRow, bRow) {
                 // Use proper sorting for dates in station view
                 if (appState.isStationView) {
                     const aSort = aRow.getData().date_sort || 0;
@@ -310,7 +310,7 @@ function getTableColumns() {
             field: "years",
             width: 60,
             headerSort: true,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             }
         },
@@ -319,7 +319,7 @@ function getTableColumns() {
             title: "Avg High °F",
             field: "avg_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 1);
             },
             cssClass: "temp-group",
@@ -329,7 +329,7 @@ function getTableColumns() {
             title: "Max High °F", 
             field: "max_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -339,11 +339,11 @@ function getTableColumns() {
             title: "Max High Year",
             field: "max_high_years", 
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 // Custom sorter for year arrays
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
@@ -354,7 +354,7 @@ function getTableColumns() {
             title: "Min High °F",
             field: "min_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -364,11 +364,11 @@ function getTableColumns() {
             title: "Min High Year",
             field: "min_high_years",
             width: 100, 
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -379,7 +379,7 @@ function getTableColumns() {
             title: "Avg Low °F",
             field: "avg_low",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 1);
             },
             cssClass: "temp-group",
@@ -389,7 +389,7 @@ function getTableColumns() {
             title: "Max Low °F",
             field: "max_low", 
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -399,11 +399,11 @@ function getTableColumns() {
             title: "Max Low Year",
             field: "max_low_years",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -413,7 +413,7 @@ function getTableColumns() {
             title: "Min Low °F",
             field: "min_low",
             width: 90, 
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -423,11 +423,11 @@ function getTableColumns() {
             title: "Min Low Year", 
             field: "min_low_years",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -438,7 +438,7 @@ function getTableColumns() {
             title: "Avg Precip in",
             field: "avg_precip",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 2);
             },
             cssClass: "precip-group",
@@ -448,7 +448,7 @@ function getTableColumns() {
             title: "Max Precip in",
             field: "max_precip",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 2);
             },
             cssClass: "precip-group",
@@ -458,11 +458,11 @@ function getTableColumns() {
             title: "Max Precip Year",
             field: "max_precip_years",
             width: 110,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "precip-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -1143,14 +1143,14 @@ function calculateColorRanges() {
     const step = range / 5;
     
     return {
-        min: min,
-        max: max,
+        min,
+        max,
         ranges: [
-            { min: min, max: min + step, color: '#3388ff', label: `${min.toFixed(decimals)} - ${(min + step).toFixed(decimals)}` },
+            { min, max: min + step, color: '#3388ff', label: `${min.toFixed(decimals)} - ${(min + step).toFixed(decimals)}` },
             { min: min + step, max: min + 2 * step, color: '#44bb44', label: `${(min + step).toFixed(decimals)} - ${(min + 2 * step).toFixed(decimals)}` },
             { min: min + 2 * step, max: min + 3 * step, color: '#ffbb44', label: `${(min + 2 * step).toFixed(decimals)} - ${(min + 3 * step).toFixed(decimals)}` },
             { min: min + 3 * step, max: min + 4 * step, color: '#ff8844', label: `${(min + 3 * step).toFixed(decimals)} - ${(min + 4 * step).toFixed(decimals)}` },
-            { min: min + 4 * step, max: max, color: '#ff4444', label: `${(min + 4 * step).toFixed(decimals)} - ${max.toFixed(decimals)}` }
+            { min: min + 4 * step, max, color: '#ff4444', label: `${(min + 4 * step).toFixed(decimals)} - ${max.toFixed(decimals)}` }
         ],
         units: getAttributeUnits(appState.labelAttribute)
     };

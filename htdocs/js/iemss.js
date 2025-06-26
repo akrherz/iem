@@ -1,4 +1,4 @@
-/* global ol */
+/* global ol, bootstrap */
 const htmlInterface = ['<div class="card iemss-container">',
     '<div class="card-header">',
     '<a class="btn btn-secondary float-end" href="/" id="iemss-metadata-link" target="_new">',
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // For large datasets, prioritize Vector layer with performance optimizations
     geojson = new ol.layer.Vector({
         source: geojsonSource,
-        style: function(feature) {
+        style(feature) {
             // Check for boolean online status
             const online = feature.get('online');
             const isOnline = online === true || online === 1 || online === '1';
