@@ -18,7 +18,9 @@ let appState = {
     currentApiUrl: null,
     labelAttribute: 'avg_high', // Default label attribute - use numeric for legend
     colorRanges: null, // Will store calculated color ranges for current attribute
-    table: null // Tabulator instance
+    table: null, // Tabulator instance
+    yearFilter: null, // Selected year for filtering
+    allFeatures: null // Store all features for filtering
 };
 
 /**
@@ -30,6 +32,7 @@ function initializeApp() {
     appState.sortDirection = appState.config.sortdir;
     appState.isStationView = Boolean(appState.config.station);
     appState.labelAttribute = appState.config.labelAttribute; // Set from URL parameter
+    appState.yearFilter = appState.config.yearFilter; // Set from URL parameter
     
     // Hide/show components based on view mode
     if (appState.isStationView) {
@@ -91,7 +94,8 @@ function getConfig() {
         network: urlParams.get('network') || (networkSelect ? networkSelect.value : 'IACLIMATE'),
         station: urlParams.get('station') || null,
         sortdir: urlParams.get('sortdir') || 'ASC',
-        labelAttribute: urlParams.get('label') || 'avg_high'
+        labelAttribute: urlParams.get('label') || 'avg_high',
+        yearFilter: urlParams.get('year') || null
     };
 };
 
@@ -177,7 +181,7 @@ function renderHeader() {
     
     if (vars.station) {
         // Station mode - Daily Climatology for Single Station
-        const backLink = `extremes.php?network=${vars.network}&tbl=${vars.tbl}&month=${vars.month}&day=${vars.day}&label=${appState.labelAttribute}`;
+        const backLink = `extremes.php?network=${vars.network}&tbl=${vars.tbl}&month=${vars.month}&day=${vars.day}&label=${appState.labelAttribute}${appState.yearFilter ? '&year=' + appState.yearFilter : ''}`;
         headerHtml = `
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
@@ -253,12 +257,15 @@ function initializeTable() {
         scrollHorizontal: true, // Enable horizontal scrolling
         freezeFirstColumn: true, // Freeze the first column
         headerSort: true, // Make headers sticky
-        columns: columns,
+        columns,
         placeholder: "No climatology data available for the selected criteria",
         initialSort: [
             {column: appState.isStationView ? "date_link" : "station_link", dir: "asc"}
         ]
     });
+    
+    // Add export buttons after table is created
+    addExportButtons();
 }
 
 /**
@@ -284,7 +291,7 @@ function getTableColumns() {
             width: appState.isStationView ? 120 : 200, // Wider for station names
             headerSort: true,
             cssClass: "station-col",
-            sorter: function(a, b, aRow, bRow) {
+            sorter(a, b, aRow, bRow) {
                 // Use proper sorting for dates in station view
                 if (appState.isStationView) {
                     const aSort = aRow.getData().date_sort || 0;
@@ -303,7 +310,7 @@ function getTableColumns() {
             field: "years",
             width: 60,
             headerSort: true,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             }
         },
@@ -312,7 +319,7 @@ function getTableColumns() {
             title: "Avg High °F",
             field: "avg_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 1);
             },
             cssClass: "temp-group",
@@ -322,7 +329,7 @@ function getTableColumns() {
             title: "Max High °F", 
             field: "max_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -332,11 +339,11 @@ function getTableColumns() {
             title: "Max High Year",
             field: "max_high_years", 
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 // Custom sorter for year arrays
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
@@ -347,7 +354,7 @@ function getTableColumns() {
             title: "Min High °F",
             field: "min_high",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -357,11 +364,11 @@ function getTableColumns() {
             title: "Min High Year",
             field: "min_high_years",
             width: 100, 
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -372,7 +379,7 @@ function getTableColumns() {
             title: "Avg Low °F",
             field: "avg_low",
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 1);
             },
             cssClass: "temp-group",
@@ -382,7 +389,7 @@ function getTableColumns() {
             title: "Max Low °F",
             field: "max_low", 
             width: 90,
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -392,11 +399,11 @@ function getTableColumns() {
             title: "Max Low Year",
             field: "max_low_years",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -406,7 +413,7 @@ function getTableColumns() {
             title: "Min Low °F",
             field: "min_low",
             width: 90, 
-            formatter: function(cell) {
+            formatter(cell) {
                 return cell.getValue() || '';
             },
             cssClass: "temp-group",
@@ -416,11 +423,11 @@ function getTableColumns() {
             title: "Min Low Year", 
             field: "min_low_years",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "temp-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -431,7 +438,7 @@ function getTableColumns() {
             title: "Avg Precip in",
             field: "avg_precip",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 2);
             },
             cssClass: "precip-group",
@@ -441,7 +448,7 @@ function getTableColumns() {
             title: "Max Precip in",
             field: "max_precip",
             width: 100,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatNumber(cell.getValue(), 2);
             },
             cssClass: "precip-group",
@@ -451,11 +458,11 @@ function getTableColumns() {
             title: "Max Precip Year",
             field: "max_precip_years",
             width: 110,
-            formatter: function(cell) {
+            formatter(cell) {
                 return formatYears(cell.getValue());
             },
             cssClass: "precip-group",
-            sorter: function(a, b) {
+            sorter(a, b) {
                 const aStr = Array.isArray(a) ? a.join('') : String(a || '');
                 const bStr = Array.isArray(b) ? b.join('') : String(b || '');
                 return aStr.localeCompare(bStr);
@@ -476,6 +483,9 @@ function updateTable() {
     // Prepare data for Tabulator
     const tableData = prepareTableData();
     appState.table.setData(tableData);
+    
+    // Ensure export buttons are present
+    addExportButtons();
 }
 
 /**
@@ -500,6 +510,9 @@ function prepareTableData() {
             if (appState.labelAttribute) {
                 link += `&label=${appState.labelAttribute}`;
             }
+            if (appState.yearFilter) {
+                link += `&year=${appState.yearFilter}`;
+            }
             linkCell = `<a href="${link}">${dateStr}</a>`;
             linkField = 'date_link';
         } else {
@@ -507,6 +520,9 @@ function prepareTableData() {
             let link = `extremes.php?station=${row.station}&network=${vars.network}&tbl=${vars.tbl}`;
             if (appState.labelAttribute) {
                 link += `&label=${appState.labelAttribute}`;
+            }
+            if (appState.yearFilter) {
+                link += `&year=${appState.yearFilter}`;
             }
             
             // Use station name if available, otherwise fall back to station ID
@@ -662,16 +678,49 @@ function attachEventListeners() {
         
         labelSelect.addEventListener('change', function() {
             appState.labelAttribute = this.value;
+            appState.config.labelAttribute = this.value;
+            
+            // Update year filter visibility based on new attribute
+            updateYearFilterVisibility();
+            
+            // Repopulate year filter with years relevant to the new attribute
+            if (appState.allFeatures && !['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(this.value)) {
+                populateYearFilter(appState.allFeatures);
+            }
             
             // Update URL to persist the selection
-            const params = new URLSearchParams(window.location.search);
-            params.set('label', this.value);
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
-            window.history.pushState({}, '', newUrl);
+            updateUrl();
             
-            // Update config and map
-            appState.config.labelAttribute = this.value;
+            // Update map
             updateMapLabels();
+            
+            // Re-apply year filter since filtering logic depends on selected attribute
+            if (appState.yearFilter) {
+                applyYearFilter();
+            }
+        });
+    }
+    
+    // Handle year filter changes for map
+    const yearFilter = document.getElementById('year-filter');
+    if (yearFilter && !appState.isStationView) {
+        // Set initial value from URL parameter
+        if (appState.yearFilter) {
+            yearFilter.value = appState.yearFilter;
+        }
+        
+        // Set initial visibility based on current attribute
+        updateYearFilterVisibility();
+        
+        yearFilter.addEventListener('change', function() {
+            appState.yearFilter = this.value || null;
+            appState.config.yearFilter = this.value || null;
+            
+            // Update URL to persist the selection
+            updateUrl();
+            
+            // Apply filter
+            applyYearFilter();
         });
     }
 };
@@ -821,14 +870,22 @@ function addGeoJSONToMap(geoJsonData) {
         featureProjection: 'EPSG:3857' // Web Mercator for display
     });
     
-    appState.vectorSource.addFeatures(features);
+    // Store all features for filtering
+    appState.allFeatures = features;
+    
+    // Apply current filter
+    const filteredFeatures = filterFeaturesByYear(features);
+    appState.vectorSource.addFeatures(filteredFeatures);
+    
+    // Populate year filter dropdown
+    populateYearFilter(features);
     
     // Calculate initial color ranges and update legend
     appState.colorRanges = calculateColorRanges();
     updateLegend();
     
     // Fit map to show all stations
-    if (features.length > 0) {
+    if (filteredFeatures.length > 0) {
         const extent = appState.vectorSource.getExtent();
         appState.map.getView().fit(extent, {
             padding: [20, 20, 20, 20],
@@ -902,24 +959,69 @@ function showStationPopup(feature, coordinate) {
     // Use station name if available, otherwise fall back to station ID
     const stationDisplayName = props.name ? `${props.name} (${props.station})` : props.station;
     
-    const popupHtml = `
-        <h5>${stationDisplayName}</h5>
-        <table class="popup-data-table">
-            <tr><td class="label">Years:</td><td>${props.years || 'N/A'}</td></tr>
-            <tr><td class="label">Avg High:</td><td>${formatNumber(props.avg_high, 1)}°F</td></tr>
-            <tr><td class="label">Max High:</td><td>${props.max_high || 'N/A'}°F (${formatYears(props.max_high_years)})</td></tr>
-            <tr><td class="label">Min High:</td><td>${props.min_high || 'N/A'}°F (${formatYears(props.min_high_years)})</td></tr>
-            <tr><td class="label">Avg Low:</td><td>${formatNumber(props.avg_low, 1)}°F</td></tr>
-            <tr><td class="label">Max Low:</td><td>${props.max_low || 'N/A'}°F (${formatYears(props.max_low_years)})</td></tr>
-            <tr><td class="label">Min Low:</td><td>${props.min_low || 'N/A'}°F (${formatYears(props.min_low_years)})</td></tr>
-            <tr><td class="label">Avg Precip:</td><td>${formatNumber(props.avg_precip, 2)}"</td></tr>
-            <tr><td class="label">Max Precip:</td><td>${formatNumber(props.max_precip, 2)}" (${formatYears(props.max_precip_years)})</td></tr>
-        </table>
+    let popupHtml = `<h5>${stationDisplayName}</h5>`;
+    
+    // If year filter is active, highlight records from that year
+    if (appState.yearFilter) {
+        const filterYear = parseInt(appState.yearFilter);
+        popupHtml += `<div style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 11px;">
+            <strong>Showing records from ${filterYear}</strong>
+        </div>`;
+    }
+    
+    popupHtml += `<table class="popup-data-table">
+        <tr><td class="label">Years:</td><td>${props.years || 'N/A'}</td></tr>
+        <tr><td class="label">Avg High:</td><td>${formatNumber(props.avg_high, 1)}°F</td></tr>`;
+    
+    // Highlight max high if it matches the filter year
+    let maxHighClass = '';
+    if (appState.yearFilter && Array.isArray(props.max_high_years) && 
+        props.max_high_years.includes(parseInt(appState.yearFilter))) {
+        maxHighClass = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    popupHtml += `<tr${maxHighClass}><td class="label">Max High:</td><td>${props.max_high || 'N/A'}°F (${formatYears(props.max_high_years)})</td></tr>`;
+    
+    // Highlight min high if it matches the filter year
+    let minHighClass = '';
+    if (appState.yearFilter && Array.isArray(props.min_high_years) && 
+        props.min_high_years.includes(parseInt(appState.yearFilter))) {
+        minHighClass = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    popupHtml += `<tr${minHighClass}><td class="label">Min High:</td><td>${props.min_high || 'N/A'}°F (${formatYears(props.min_high_years)})</td></tr>`;
+    
+    popupHtml += `<tr><td class="label">Avg Low:</td><td>${formatNumber(props.avg_low, 1)}°F</td></tr>`;
+    
+    // Highlight max low if it matches the filter year
+    let maxLowClass = '';
+    if (appState.yearFilter && Array.isArray(props.max_low_years) && 
+        props.max_low_years.includes(parseInt(appState.yearFilter))) {
+        maxLowClass = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    popupHtml += `<tr${maxLowClass}><td class="label">Max Low:</td><td>${props.max_low || 'N/A'}°F (${formatYears(props.max_low_years)})</td></tr>`;
+    
+    // Highlight min low if it matches the filter year
+    let minLowClass = '';
+    if (appState.yearFilter && Array.isArray(props.min_low_years) && 
+        props.min_low_years.includes(parseInt(appState.yearFilter))) {
+        minLowClass = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    popupHtml += `<tr${minLowClass}><td class="label">Min Low:</td><td>${props.min_low || 'N/A'}°F (${formatYears(props.min_low_years)})</td></tr>`;
+    
+    popupHtml += `<tr><td class="label">Avg Precip:</td><td>${formatNumber(props.avg_precip, 2)}"</td></tr>`;
+    
+    // Highlight max precip if it matches the filter year
+    let maxPrecipClass = '';
+    if (appState.yearFilter && Array.isArray(props.max_precip_years) && 
+        props.max_precip_years.includes(parseInt(appState.yearFilter))) {
+        maxPrecipClass = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    popupHtml += `<tr${maxPrecipClass}><td class="label">Max Precip:</td><td>${formatNumber(props.max_precip, 2)}" (${formatYears(props.max_precip_years)})</td></tr>`;
+    
+    popupHtml += `</table>
         <p style="margin-top: 8px; font-size: 11px;">
-            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? '&label=' + appState.labelAttribute : ''}" 
+            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? '&label=' + appState.labelAttribute : ''}${appState.yearFilter ? '&year=' + appState.yearFilter : ''}" 
                target="_blank">View station details →</a>
-        </p>
-    `;
+        </p>`;
     
     content.innerHTML = popupHtml;
     appState.popup.setPosition(coordinate);
@@ -1041,14 +1143,14 @@ function calculateColorRanges() {
     const step = range / 5;
     
     return {
-        min: min,
-        max: max,
+        min,
+        max,
         ranges: [
-            { min: min, max: min + step, color: '#3388ff', label: `${min.toFixed(decimals)} - ${(min + step).toFixed(decimals)}` },
+            { min, max: min + step, color: '#3388ff', label: `${min.toFixed(decimals)} - ${(min + step).toFixed(decimals)}` },
             { min: min + step, max: min + 2 * step, color: '#44bb44', label: `${(min + step).toFixed(decimals)} - ${(min + 2 * step).toFixed(decimals)}` },
             { min: min + 2 * step, max: min + 3 * step, color: '#ffbb44', label: `${(min + 2 * step).toFixed(decimals)} - ${(min + 3 * step).toFixed(decimals)}` },
             { min: min + 3 * step, max: min + 4 * step, color: '#ff8844', label: `${(min + 3 * step).toFixed(decimals)} - ${(min + 4 * step).toFixed(decimals)}` },
-            { min: min + 4 * step, max: max, color: '#ff4444', label: `${(min + 4 * step).toFixed(decimals)} - ${max.toFixed(decimals)}` }
+            { min: min + 4 * step, max, color: '#ff4444', label: `${(min + 4 * step).toFixed(decimals)} - ${max.toFixed(decimals)}` }
         ],
         units: getAttributeUnits(appState.labelAttribute)
     };
@@ -1114,6 +1216,14 @@ function handleFormChange() {
     // Keep current label attribute setting
     if (appState.labelAttribute) params.set('label', appState.labelAttribute);
     
+    // Clear year filter when switching to different dataset (network/date change)
+    // The year filter is specific to a particular dataset combination
+    appState.yearFilter = null;
+    appState.config.yearFilter = null;
+    
+    // Make sure year parameter is not included in the new URL
+    params.delete('year');
+    
     // Update URL without page reload
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.pushState({}, '', newUrl);
@@ -1141,6 +1251,15 @@ function handleFormChange() {
                     appState.vectorSource.clear();
                 }
                 addStationsToMap();
+                
+                // Reset year filter UI since we have a new dataset
+                const yearSelect = document.getElementById('year-filter');
+                if (yearSelect) {
+                    yearSelect.value = '';
+                }
+                
+                // Update year filter visibility for current attribute
+                updateYearFilterVisibility();
             }
         })
         .catch(function(error) {
@@ -1149,6 +1268,283 @@ function handleFormChange() {
         .finally(function() {
             showLoading(false);
         });
+}
+
+/**
+ * Update URL with current application state
+ */
+function updateUrl() {
+    const params = new URLSearchParams();
+    
+    // Add all current config values to ensure they're preserved
+    params.set('network', appState.config.network);
+    params.set('month', appState.config.month);
+    params.set('day', appState.config.day);
+    params.set('tbl', appState.config.tbl);
+    
+    // Only add non-default values to keep URLs clean
+    if (appState.config.sortcol && appState.config.sortcol !== 'station') {
+        params.set('sortcol', appState.config.sortcol);
+    }
+    if (appState.config.sortdir && appState.config.sortdir !== 'ASC') {
+        params.set('sortdir', appState.config.sortdir);
+    }
+    if (appState.labelAttribute && appState.labelAttribute !== 'avg_high') {
+        params.set('label', appState.labelAttribute);
+    }
+    if (appState.yearFilter) {
+        params.set('year', appState.yearFilter);
+    }
+    
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, '', newUrl);
+}
+
+/**
+ * Populate the year filter dropdown with available years
+ */
+function populateYearFilter(features) {
+    const yearSelect = document.getElementById('year-filter');
+    if (!yearSelect) return;
+    
+    // Collect years based on the currently selected attribute
+    const allYears = new Set();
+    
+    // Determine which year field to use based on current label attribute
+    let yearField = null;
+    switch (appState.labelAttribute) {
+        case 'max_high':
+            yearField = 'max_high_years';
+            break;
+        case 'min_high':
+            yearField = 'min_high_years';
+            break;
+        case 'max_low':
+            yearField = 'max_low_years';
+            break;
+        case 'min_low':
+            yearField = 'min_low_years';
+            break;
+        case 'max_precip':
+            yearField = 'max_precip_years';
+            break;
+        default:
+            // For non-record attributes, collect from all year arrays
+            yearField = null;
+    }
+    
+    features.forEach(function(feature) {
+        const props = feature.getProperties();
+        
+        if (yearField) {
+            // Collect years from specific field only
+            const years = props[yearField];
+            if (Array.isArray(years)) {
+                years.forEach(function(year) {
+                    allYears.add(year);
+                });
+            }
+        } else {
+            // Collect from all year arrays (for avg attributes)
+            const yearArrays = [
+                'max_high_years', 'min_high_years', 'max_low_years', 
+                'min_low_years', 'max_precip_years'
+            ];
+            
+            yearArrays.forEach(function(yearArrayField) {
+                const years = props[yearArrayField];
+                if (Array.isArray(years)) {
+                    years.forEach(function(year) {
+                        allYears.add(year);
+                    });
+                }
+            });
+        }
+    });
+    
+    // Sort years in descending order
+    const sortedYears = Array.from(allYears).sort(function(a, b) {
+        return b - a;
+    });
+    
+    // Clear existing options except "All Years"
+    yearSelect.innerHTML = '<option value="">All Years</option>';
+    
+    // Add year options
+    sortedYears.forEach(function(year) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (appState.yearFilter && parseInt(appState.yearFilter) === year) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    });
+}
+
+/**
+ * Filter features by selected year
+ */
+function filterFeaturesByYear(features) {
+    if (!appState.yearFilter) {
+        return features; // No filter applied
+    }
+    
+    // Determine which year field to check based on the currently selected attribute
+    let yearField = null;
+    switch (appState.labelAttribute) {
+        case 'max_high':
+            yearField = 'max_high_years';
+            break;
+        case 'min_high':
+            yearField = 'min_high_years';
+            break;
+        case 'max_low':
+            yearField = 'max_low_years';
+            break;
+        case 'min_low':
+            yearField = 'min_low_years';
+            break;
+        case 'max_precip':
+            yearField = 'max_precip_years';
+            break;
+        default:
+            // For non-record attributes (avg_high, avg_low, avg_precip, station, years),
+            // check if ANY record was set in the selected year
+            return features.filter(function(feature) {
+                const props = feature.getProperties();
+                const yearArrays = [
+                    'max_high_years', 'min_high_years', 'max_low_years', 
+                    'min_low_years', 'max_precip_years'
+                ];
+                
+                for (let i = 0; i < yearArrays.length; i++) {
+                    const years = props[yearArrays[i]];
+                    if (Array.isArray(years) && years.includes(parseInt(appState.yearFilter))) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+    }
+    
+    // Filter by specific record type
+    return features.filter(function(feature) {
+        const props = feature.getProperties();
+        const years = props[yearField];
+        return Array.isArray(years) && years.includes(parseInt(appState.yearFilter));
+    });
+}
+
+/**
+ * Apply year filter to the map
+ */
+function applyYearFilter() {
+    if (!appState.allFeatures || !appState.vectorSource) return;
+    
+    // Clear current features first
+    appState.vectorSource.clear();
+    
+    // Filter features based on selected year
+    const filteredFeatures = filterFeaturesByYear(appState.allFeatures);
+    
+    // Add filtered features to the map (even if it's an empty array)
+    if (filteredFeatures.length > 0) {
+        appState.vectorSource.addFeatures(filteredFeatures);
+    }
+    
+    // Note: We don't zoom/fit the map view when filtering - this preserves
+    // the user's current view and spatial context
+    // Note: Color ranges and legend are NOT updated here - they should remain 
+    // consistent based on the full dataset, not the filtered subset
+}
+
+/**
+ * Update year filter visibility based on selected attribute
+ */
+function updateYearFilterVisibility() {
+    const yearFilterRow = document.querySelector('#year-filter').closest('.control-row');
+    if (!yearFilterRow) return;
+    
+    // Hide year filter for average attributes since they don't have specific record years
+    const isAverageAttribute = ['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(appState.labelAttribute);
+    
+    if (isAverageAttribute) {
+        yearFilterRow.style.display = 'none';
+        // Clear any active year filter when hiding
+        if (appState.yearFilter) {
+            appState.yearFilter = null;
+            appState.config.yearFilter = null;
+            const yearSelect = document.getElementById('year-filter');
+            if (yearSelect) {
+                yearSelect.value = '';
+            }
+            // Update URL to remove year parameter
+            updateUrl();
+            // Apply the cleared filter (show all features)
+            if (appState.allFeatures) {
+                applyYearFilter();
+            }
+        }
+    } else {
+        yearFilterRow.style.display = 'flex';
+    }
+}
+
+/**
+ * Add export buttons for CSV and Excel download
+ */
+function addExportButtons() {
+    // Create export buttons container
+    const tableContainer = document.getElementById('data-table');
+    let exportContainer = document.getElementById('table-export-buttons');
+    
+    if (!exportContainer) {
+        exportContainer = document.createElement('div');
+        exportContainer.id = 'table-export-buttons';
+        exportContainer.className = 'mb-2 d-flex gap-2';
+        exportContainer.innerHTML = `
+            <button id="download-csv" class="btn btn-outline-success btn-sm">
+                <i class="fa fa-download"></i> Download CSV
+            </button>
+            <button id="download-xlsx" class="btn btn-outline-primary btn-sm">
+                <i class="fa fa-download"></i> Download Excel
+            </button>
+        `;
+        
+        // Insert before the table
+        tableContainer.parentNode.insertBefore(exportContainer, tableContainer);
+    }
+    
+    // Add event listeners for export buttons
+    document.getElementById('download-csv').addEventListener('click', function() {
+        const filename = generateExportFilename('csv');
+        appState.table.download("csv", filename);
+    });
+    
+    document.getElementById('download-xlsx').addEventListener('click', function() {
+        const filename = generateExportFilename('xlsx');
+        appState.table.download("xlsx", filename, {sheetName: "Climate Data"});
+    });
+}
+
+/**
+ * Generate appropriate filename for exports
+ */
+function generateExportFilename(extension) {
+    const vars = appState.config;
+    let filename = '';
+    
+    if (appState.isStationView) {
+        filename = `climate_station_${vars.station}`;
+    } else {
+        const monthStr = vars.month.toString().padStart(2, '0');
+        const dayStr = vars.day.toString().padStart(2, '0');
+        const networkStr = vars.network.toLowerCase();
+        filename = `climate_${networkStr}_${monthStr}-${dayStr}`;
+    }
+    
+    return `${filename}.${extension}`;
 }
 
 // Initialize the app when DOM is ready

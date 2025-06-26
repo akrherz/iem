@@ -14,13 +14,13 @@ $t->title = "RWIS Data Download";
 
 $startyr = ($network == 'IA_RWIS') ? 1995 : 2009;
 $ys1 = yearSelect($startyr, date("Y"), "year1");
-$ms1 = monthSelect("", "month1");
-$ds1 = daySelect("", "day1");
-$hs1 = hourSelect("", "hour1");
+$ms1 = monthSelect("1", "month1");
+$ds1 = daySelect("1", "day1");
+$hs1 = hourSelect("0", "hour1");
 $ys2 = yearSelect($startyr, date("Y"), "year2");
-$ms2 = monthSelect("", "month2");
-$ds2 = daySelect("", "day2");
-$hs2 = hourSelect("", "hour2");
+$ms2 = monthSelect(date("m"), "month2");
+$ds2 = daySelect(date("d"), "day2");
+$hs2 = hourSelect("23", "hour2");
 
 $ar = array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
@@ -35,27 +35,56 @@ $tzselect = make_select("tz", "Etc/UTC", $ar);
 $sselect = selectNetworkType("RWIS", $network);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/RWIS/">RWIS Homepage</a></li>
- <li class="active">Download</li>
-</ol>
-<h3>RWIS Atmospheric / Surface Data Download</h3>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/RWIS/">RWIS Homepage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Download</li>
+  </ol>
+</nav>
 
-<p>The IEM archives RWIS information for the network in Iowa based on a direct
-feed from the DOT.  We also archive other states based on an archive provided
-by the <a href="https://madis.ncep.noaa.gov/">MADIS project</a>. Data for Iowa dates
-back to 1995, whereas archive availability for other states varies based on
-their participation within MADIS.</p>
+<div class="row">
+  <div class="col-12">
+    <h3 class="mb-3">RWIS Atmospheric / Surface Data Download</h3>
+  </div>
+</div>
 
-<p><a href="/cgi-bin/request/rwis.py?help" class="btn btn-primary"><i class="fa fa-file"></i>
-Backend documentation</a> exists for those wishing to script against this service.</p>
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="alert alert-info" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      The IEM archives RWIS information for the network in Iowa based on a direct
+      feed from the DOT. We also archive other states based on an archive provided
+      by the <a href="https://madis.ncep.noaa.gov/" class="alert-link">MADIS project</a>. 
+      Data for Iowa dates back to 1995, whereas archive availability for other states 
+      varies based on their participation within MADIS.
+    </div>
+  </div>
+</div>
 
-<p>
-<form method="GET" name="s">
-<strong>Available States:</strong> {$sselect}
-<input type="submit" value="Select Network">
-</form>
-</p>
+<div class="row mb-4">
+  <div class="col-12">
+    <a href="/cgi-bin/request/rwis.py?help" class="btn btn-primary">
+      <i class="fas fa-file me-2"></i>Backend Documentation
+    </a>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Network Selection</h5>
+      </div>
+      <div class="card-body">
+        <form method="GET" name="s" class="d-flex align-items-center gap-3">
+          <label class="form-label mb-0 fw-bold">Available States:</label>
+          {$sselect}
+          <button type="submit" class="btn btn-secondary">Select Network</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <form target="_blank" method="GET" action="/cgi-bin/request/rwis.py" name="iemss">
 <input type="hidden" name="minute1" value="0">
@@ -63,112 +92,165 @@ Backend documentation</a> exists for those wishing to script against this servic
 <input type="hidden" name="network" value="{$network}">
 
 <div class="row">
-<div class="col-sm-7">
+  <div class="col-lg-7 mb-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="card-title mb-0">1. Select Station(s)</h5>
+      </div>
+      <div class="card-body">
+        <div id="iemss" data-network="{$network}"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-5 mb-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Data Request Configuration</h5>
+      </div>
+      <div class="card-body">
 
-<div id="iemss" data-network="{$network}"></div>
+        <div class="mb-4">
+          <h6 class="fw-bold">2. Select Start/End Time</h6>
+          <p class="text-muted small mb-3">Times are in timezone you select in step 5 below.</p>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Year</th>
+                  <th scope="col">Month</th>
+                  <th scope="col">Day</th>
+                  <th scope="col">Hour</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Start:</th>
+                  <td>{$ys1}</td>
+                  <td>{$ms1}</td>
+                  <td>{$ds1}</td>
+                  <td>{$hs1}</td>
+                </tr>
+                <tr>
+                  <th scope="row">End:</th>
+                  <td>{$ys2}</td>
+                  <td>{$ms2}</td>
+                  <td>{$ds2}</td>
+                  <td>{$hs2}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
+        <div class="mb-4">
+          <h6 class="fw-bold">3. Select Variables</h6>
+          <p class="text-muted small mb-2">The label value within parenthesis is the output column name.</p>
+          <select size="5" name="vars" multiple class="form-select">
+            <option value="tmpf">Air Temperature [F] (tmpf)</option>
+            <option value="dwpf">Dew Point Temperature [F] (dwpf)</option>
+            <option value="feel">Feels Like Temperature [F] (feel)</option>
+            <option value="relh">Relative Humidity [%] (relh)</option>
+            <option value="sknt">Wind Speed [knots] (sknt)</option>
+            <option value="drct">Wind Direction [degree N] (drct)</option>
+            <option value="gust">Wind Gust [knots] (gust)</option>
+            <option value="tfs0">Pavement Sensor0 Temperature [F] (tfs0)</option>
+            <option value="tfs0_text">Pavement Sensor0 Condition (tfs0_text)</option>
+            <option value="tfs1">Pavement Sensor1 Temperature [F] (tfs1)</option>
+            <option value="tfs1_text">Pavement Sensor1 Condition (tfs1_text)</option>
+            <option value="tfs2">Pavement Sensor2 Temperature [F] (tfs2)</option>
+            <option value="tfs2_text">Pavement Sensor2 Condition (tfs2_text)</option>
+            <option value="tfs3">Pavement Sensor3 Temperature [F] (tfs3)</option>
+            <option value="tfs3_text">Pavement Sensor3 Condition (tfs3_text)</option>
+            <option value="subf">Subsurface Temperature [F] (subf)</option>
+          </select>
+          <div class="form-text">
+            <strong>See below for discussion on "Pavement Sensor Condition"</strong>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold">4. How to view?</h6>
+          <select name="what" class="form-select">
+            <option value="txt">Download as Delimited Text File</option>
+            <option value="excel">Download as Excel</option>
+            <option value="html">View as HTML webpage</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold">5. Timezone of Timestamps</h6>
+          <p class="text-muted small mb-2">This controls the timezone used for presenting the timestamps in the downloaded file.</p>
+          {$tzselect}
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold">6. Data Delimitation</h6>
+          <p class="text-muted small mb-2">How shall the output values be separated?</p>
+          <select name="delim" class="form-select">
+            <option value="comma">Comma</option>
+            <option value="space">Space</option>
+            <option value="tab">Tab</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold">7. Include Lat / Lons? 
+            <img src="/images/gisready.png" alt="GIS Ready" class="ms-2">
+          </h6>
+          <select name="gis" class="form-select">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="mb-0">
+          <h6 class="fw-bold">8. Submit Form</h6>
+          <div class="d-grid gap-2 d-md-flex">
+            <button type="submit" class="btn btn-primary flex-fill">
+              <i class="fas fa-download me-2"></i>Process Data Request
+            </button>
+            <button type="reset" class="btn btn-outline-secondary">
+              <i class="fas fa-undo me-2"></i>Reset
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>
-<div class="col-sm-5">
 
-<p><h4>2. Select Start/End Time:</h4>
-<i>Times are in timezone you select in step 5 below.</i>
-<table>
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th>
-  </tr>
+<div class="row mt-5">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Pavement Sensor Condition Explanation</h4>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-secondary" role="alert">
+          <i class="fas fa-info-circle me-2"></i>
+          The following applies to most of the Iowa RWIS sensors and is passed along by
+          the Iowa RWIS Coordinator.
+        </div>
 
-  <tr>
-    <th>Start:</th>
-    <td>{$ys1}</td>
-    <td>{$ms1}</td>
-   	<td>{$ds1}</td>
-    <td>{$hs1}</td>
-  </tr>
+        <p>The data is taken from the <a href="https://my.vaisala.net/en/roads/products/roadweathersensors/Pages/FP2000.aspx" target="_blank" rel="noopener">Vaisala FP2000</a>.
+        These readings can be lumped into four general categories: wet, dry, snow/ice, error.
+        The sensor gives quite a few more, especially in the snow/ice realm but functionally
+        it is difficult to distinguish clear differences between them.</p>
 
-  <tr>
-    <th>End:</th>
-    <td>{$ys2}</td>
-    <td>{$ms2}</td>
-   	<td>{$ds2}</td>
-    <td>{$hs2}</td>
-  </tr>
-</table>
+        <h5 class="mt-4 mb-3">From the glossary:</h5>
 
-<p><h4>3. Select Variables:</h4>
-<p><i>The label value within parenthesis is the output column name.</i></p>
-<select size="5" name="vars" MULTIPLE>
-  <option value="tmpf">Air Temperature [F] (tmpf)</option>
-  <option value="dwpf">Dew Point Temperature [F] (dwpf)</option>
-  <option value="feel">Feels Like Temperature [F] (feel)</option>
-  <option value="relh">Relative Humidity [%] (relh)</option>
-  <option value="sknt">Wind Speed [knots] (sknt)</option>
-  <option value="drct">Wind Direction [degree N] (drct)</option>
-  <option value="gust">Wind Gust [knots] (gust)</option>
-  <option value="tfs0">Pavement Sensor0 Temperature [F] (tfs0)</option>
-  <option value="tfs0_text">Pavement Sensor0 Condition (tfs0_text)</option>
-  <option value="tfs1">Pavement Sensor1 Temperature [F] (tfs1)</option>
-  <option value="tfs1_text">Pavement Sensor1 Condition (tfs1_text)</option>
-  <option value="tfs2">Pavement Sensor2 Temperature [F] (tfs2)</option>
-  <option value="tfs2_text">Pavement Sensor2 Condition (tfs2_text)</option>
-  <option value="tfs3">Pavement Sensor3 Temperature [F] (tfs3)</option>
-  <option value="tfs3_text">Pavement Sensor3 Condition (tfs3_text)</option>
-  <option value="subf">Subsurface Temperature [F] (subf)</option>
-</select>
-
-<br /><strong>See below for discussion on "Pavement Sensor* Condition"</strong></p>
-
-<p><h4>4. How to view?</h4>
-<select name="what">
-  <option value="txt">Download as Delimited Text File</option>
-  <option value="excel">Download as Excel</option>
-  <option value="html">View as HTML webpage</option>
-</select>
-
-<p><h4>5. Timezone of Timestamps</h4>
-   <i>This controls the timezone used for presenting the timestamps in the
-    downloaded file.</i>
-   <br />{$tzselect}</p>
-    		
-<p><h4>6. Data Delimitation:</h4>
-How shall the output values be seperated?
-<br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
-   </select>
-
-<p>
-<h4>7. Include Lat / Lons?</h4><img src="/images/gisready.png">
- <select name="gis">
-   <option value="no">No
-   <option value="yes">Yes
- </select>
-
-<p><h4>8. Submit Form:</h4>
-<input type="submit" value="Process Data Request">
-<input type="reset">
-
-</div></div>
-
-<hr />
-
-<h3>Pavement Sensor Condition Explaination</h3>
-
-<p>The following applies to most of the Iowa RWIS sensors and is passed along by
-the Iowa RWIS Coordinator.</p>
-
-<p>The data is taken from the <a href="https://my.vaisala.net/en/roads/products/roadweathersensors/Pages/FP2000.aspx">Vaisala FP2000</a>.
-These readings can be lumped into four general categories:  wet, dry, snow/ice, error.
-The sensor gives quite a few more, especially in the snow/ice realm but functionally
-it is difficult to distinguish clear differences between them.</p>
-
-<p>From the glossary:</p>
-
-<table class="table table-bordered">
-<thead><tr><th>Status</th><th>Description</th></tr></thead>
-<tbody>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th scope="col">Status</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
 
 <tr><th>Snow/Ice Warning</th>
 

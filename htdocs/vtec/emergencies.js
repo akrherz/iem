@@ -367,7 +367,7 @@ function initTable() {
                 field: "eventid",
                 width: 120,
                 sorter: "number",
-                formatter: function(cell) {
+                formatter(cell) {
                     const data = cell.getRow().getData();
                     return `<a href="${data.uri}" target="_blank">${data.eventid}</a>`;
                 }

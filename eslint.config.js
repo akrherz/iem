@@ -66,6 +66,7 @@ module.exports = [
             "no-debugger": "error",
             "one-var": ["error", "never"], // Require one variable declaration per line
             "init-declarations": ["error", "always"], // Require variables to be initialized when declared
+            "object-shorthand": "warn", // Use shorthand property syntax for object literals (e.g., {foo} instead of {foo: foo})
             
             // Variable shadowing detection
             "no-shadow": ["error", { 
