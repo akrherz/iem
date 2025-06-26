@@ -90,7 +90,11 @@ class Schema(CGIModel):
     )
     what: str = Field(
         default="dl",
-        description="What to do with the data",
+        description=(
+            "Controls the response format.  `dl` and `txt` provide the data "
+            "in a delimited text file, `html` provides a HTML table, "
+            "`excel` provides the data in a Microsoft Excel format. "
+        ),
         pattern="^(dl|txt|html|excel|download)$",
     )
     tz: str = Field(
