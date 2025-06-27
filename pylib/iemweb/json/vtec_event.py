@@ -21,13 +21,14 @@ Changelog
 Example Requests
 ----------------
 
-Provide information about Des Moines Tornado Warning 110 during 2024.
+Provide information about NWS Des Moines Severe Thunderstorm Warning 110
+during 2024.
 
 https://mesonet.agron.iastate.edu/json/vtec_event.py\
-?wfo=KDMX&phenomena=TO&significance=W&etn=110&year=2024
+?wfo=KDMX&phenomena=SV&significance=W&etn=110&year=2024
 
-Provide information about Des Moines Tornado Warning 45 during 2024, but do
-not include any text.
+Provide information about NWS Des Moines Tornado Warning 45 during 2024, but do
+not include any of the raw product text.
 
 https://mesonet.agron.iastate.edu/json/vtec_event.py\
 ?wfo=KDMX&phenomena=TO&significance=W&etn=45&year=2024&include_text=0
@@ -39,11 +40,13 @@ from datetime import datetime
 
 import httpx
 import pandas as pd
-from pydantic import Field
+from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import LOG, utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.mlib import unrectify_wfo
 
 
 class Schema(CGIModel):
@@ -61,6 +64,7 @@ class Schema(CGIModel):
         description="Three character WFO identifier",
         min_length=3,
         max_length=4,
+        pattern=r"^[A-Z]{3,4}$",
     )
     year: int = Field(
         ..., description="Year of the event", ge=1986, le=utc().year + 1
@@ -73,13 +77,16 @@ class Schema(CGIModel):
     )
     etn: int = Field(..., description="Event Tracking Number", ge=1, le=9999)
 
+    @field_validator("wfo")
+    @classmethod
+    def validate_wfo(cls, v: str) -> str:
+        """VTEC storage is 3 chars, so here we do the necessary evil."""
+        return unrectify_wfo(v)
 
-def run(environ):
+
+def run(environ: dict) -> str:
     """Do great things"""
     wfo = environ["wfo"]
-    if len(wfo) == 4:
-        wfo = wfo[1:]
-
     phenomena = environ["phenomena"]
     significance = environ["significance"]
     etn = environ["etn"]
@@ -200,7 +207,7 @@ def get_mckey(environ: dict) -> str:
     help=__doc__,
     schema=Schema,
     memcachekey=get_mckey,
-    memcacheexpire=300,
+    memcacheexpire=15,  # Without cache invalidation, we have no choice
 )
 def application(environ, start_response):
     """Answer request."""
