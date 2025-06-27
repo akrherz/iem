@@ -1,8 +1,10 @@
 """
-This plot displays the frequency of having overcast
+This plot displays the frequency of having overcast or clear sky
 conditions reported by air temperature.  More specifically, this script
-looks for the report of 'OVC' within the METAR sky conditions.  Many
-caveats apply with the reporting changes of this over the years.
+looks for the report of 'OVC' or 'CLR' within the METAR sky conditions.  Many
+caveats apply with the reporting changes of this over the years.  For the
+observation to be included, it must have a valid temperature and some sky
+condition reported.
 """
 
 from datetime import datetime
@@ -80,66 +82,47 @@ def plotter(ctx: dict):
     hour = ctx.get("hour")
     months = month2months(month)
 
-    if hour is None:
-        with get_sqlalchemy_conn("asos") as conn:
-            df = pd.read_sql(
-                sql_helper(
-                    """
-                SELECT tmpf::int as t,
-                SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
-                    or skyc4 = :v) then 1 else 0 end) as hits,
-                count(*)
-                from alldata where station = :station
-                and tmpf is not null and
-                extract(month from valid) = ANY(:months) and report_type = 3
-                GROUP by t ORDER by t ASC
+    hour_limiter = ""
+    if hour is not None:
+        hour_limiter = (
+            "and extract(hour from ((valid + "
+            "'10 minutes'::interval) at time zone :tzname)) = :hour "
+        )
+
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            sql_helper(
                 """
-                ),
-                conn,
-                params={
-                    "v": varname,
-                    "station": station,
-                    "months": months,
-                },
-                index_col=None,
-            )
-    else:
-        with get_sqlalchemy_conn("asos") as conn:
-            df = pd.read_sql(
-                sql_helper(
-                    """
-                SELECT tmpf::int as t,
-                SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
-                    or skyc4 = :v) then 1 else 0 end) as hits,
-                count(*)
-                from alldata where station = :station
-                and tmpf is not null and
-                extract(month from valid) = ANY(:months)
-                and extract(hour from ((valid +
-                    '10 minutes'::interval) at time zone :tzname)) = :hour
-                and report_type = 3
-                GROUP by t ORDER by t ASC
-                """
-                ),
-                conn,
-                params={
-                    "v": varname,
-                    "station": station,
-                    "months": months,
-                    "tzname": ctx["_nt"].sts[station]["tzname"],
-                    "hour": hour,
-                },
-                index_col=None,
-            )
+            SELECT tmpf::int as t,
+            SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
+                or skyc4 = :v) then 1 else 0 end) as hits,
+            min(valid) as min_valid, max(valid) as max_valid,
+            count(*)
+            from alldata where station = :station
+            and tmpf is not null and skyc1 is not null and
+            extract(month from valid) = ANY(:months)
+            {hour_limiter}
+            and report_type = 3
+            GROUP by t ORDER by t ASC
+            """,
+                hour_limiter=hour_limiter,
+            ),
+            conn,
+            params={
+                "v": varname,
+                "station": station,
+                "months": months,
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "hour": hour,
+            },
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
     df["freq"] = df["hits"] / df["count"] * 100.0
-    df2 = df[df["count"] > 2]
+    df2 = df[df["count"] > 9]
     avg = df["hits"].sum() / float(df["count"].sum()) * 100.0
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     hrlabel = "ALL"
     if hour is not None:
         ts = datetime(2000, 1, 1, hour)
@@ -148,8 +131,8 @@ def plotter(ctx: dict):
     title = (
         f"{ctx['_sname']}\n"
         f"Frequency of {tt} by Air Temp (month={month.upper()},hour={hrlabel})"
-        f" ({ab.year}-{datetime.now().year})\n"
-        "(must have 3+ hourly observations at the given temperature)"
+        f" ({df['min_valid'].min().year}-{df['max_valid'].max().year})\n"
+        "(must have 10+ hourly observations at the given temperature)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df2["t"], df2["freq"], ec="green", fc="green", width=1)
