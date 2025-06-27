@@ -97,7 +97,6 @@ def upload_to_staging():
         "-r",
         "--no-perms",
         "--remove-source-files",
-        "--groupmap=*:iem-friends",
         "--rsync-path",
         f"mkdir -p {rempath} && rsync",
         *glob.glob("archived/*"),
