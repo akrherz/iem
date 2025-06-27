@@ -57,6 +57,10 @@ module.exports = [
                 {
                     "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='MemberExpression']",
                     "message": "Use optional chaining (?.) instead of && for null checks before property access."
+                },
+                {
+                    "selector": "TemplateLiteral[expressions.length=0]",
+                    "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
             ],
             
@@ -85,10 +89,14 @@ module.exports = [
             "no-return-assign": "error",
             "array-callback-return": "error",
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+            "prefer-arrow-callback": "warn", // Consider using arrow functions for callbacks
+            "prefer-template": "warn", // Template Literal Found - use template literals instead of string concatenation
+            "no-unused-vars": ["warn", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }], // Found unused objects
             
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
             "consistent-this": ["error", "self"],
+            "class-methods-use-this": "warn", // Warn when class methods don't use `this` and could be static
             
             // Disable some rules that might be too strict for legacy code
             "no-redeclare": "off"
@@ -145,6 +153,10 @@ module.exports = [
                 {
                     "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='MemberExpression']",
                     "message": "Use optional chaining (?.) instead of && for null checks before property access."
+                },
+                {
+                    "selector": "TemplateLiteral[expressions.length=0]",
+                    "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
             ],
             
@@ -172,6 +184,7 @@ module.exports = [
             "no-return-assign": "error",
             "array-callback-return": "error",
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+            "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }], // Found unused objects
             
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",

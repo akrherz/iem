@@ -166,13 +166,14 @@ function updateTable(){
     }
     document.getElementById("table1title").textContent = title;
     // Do what we need to for table 1
-    fetch(BACKEND_SBW_BYPOINT + '?' + new URLSearchParams({
+    const urlparams = new URLSearchParams({
         lat: document.getElementById("lat").value,
         lon: document.getElementById("lon").value,
         buffer,
         sdate: formatDatePicker(sdate1),
         edate: formatDatePicker(edate1)
-    }))
+    });
+    fetch(`${BACKEND_SBW_BYPOINT}?${urlparams}`)
     .then(response => response.json())
     .then(data => {
         const tableData = data.sbws.map(row => ({
@@ -214,11 +215,12 @@ function updateTable2ByUGC(){
     });
     
     // Do what we need to for table 2
-    fetch(BACKEND_EVENTS_BYUGC + '?' + new URLSearchParams({
+    const urlparams = new URLSearchParams({
         ugc: ugcSelect.value,
         sdate: formatDatePicker(sdate),
         edate: formatDatePicker(edate)
-    }))
+    });
+    fetch(`${BACKEND_EVENTS_BYUGC}?${urlparams}`)
     .then(response => response.json())
     .then(data => {
         const tableData = data.events.map(row => ({
@@ -260,13 +262,14 @@ function updateTable2ByPoint(){
     });
     
     // Do what we need to for table 2
-    fetch(BACKEND_EVENTS_BYPOINT + '?' + new URLSearchParams({
+    const urlparams = new URLSearchParams({
         lat: document.getElementById("lat2").value,
         lon: document.getElementById("lon2").value,
         buffer,
         sdate: formatDatePicker(sdate),
         edate: formatDatePicker(edate)
-    }))
+    });
+    fetch(`${BACKEND_EVENTS_BYPOINT}?${urlparams}`)
     .then(response => response.json())
     .then(data => {
         const tableData = data.events.map(row => ({
@@ -322,11 +325,11 @@ function updateTable3(){
         const sigText = document.getElementById("sig3").selectedOptions[0]?.text || "Unknown";
         title += ` (${phenText} / ${sigText})`;
     } else {
-        title += ` (All VTEC Events)`;
+        title += ' (All VTEC Events)';
     }
     document.getElementById("table3title").textContent = title;
     // Do what we need to for table 3
-    fetch((by === "wfo" ? BACKEND_EVENTS : BACKEND_EVENTS_BYSTATE) + '?' + new URLSearchParams(params))
+    fetch((by === "wfo" ? BACKEND_EVENTS : `${BACKEND_EVENTS_BYSTATE}?${new URLSearchParams(params)}`))
     .then(response => response.json())
     .then(data => {
         const tableData = data.events.map(row => ({
@@ -543,7 +546,7 @@ function updateTableToolbar(containerId, tableData, filteredCount = null) {
 function buildUI(){
     // Backend Export Buttons (Server-processed exports)
     document.querySelectorAll(".iemtool").forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', () => {
             let url = BACKEND_SBW_BYPOINT;
             let params = {
                 fmt: (btn.dataset.opt === "csv") ? "csv" : "xlsx",
@@ -605,7 +608,7 @@ function buildUI(){
     if (table1Title && !table1Title.querySelector('.table-toolbar')) {
         const toolbarDiv = document.createElement('div');
         toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
-        toolbarDiv.innerHTML = `
+        toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
                     <i class="fa fa-table me-1"></i>
@@ -650,7 +653,7 @@ function buildUI(){
     if (table2Title && !table2Title.querySelector('.table-toolbar')) {
         const toolbarDiv = document.createElement('div');
         toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
-        toolbarDiv.innerHTML = `
+        toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
                     <i class="fa fa-table me-1"></i>
@@ -697,7 +700,7 @@ function buildUI(){
     if (table3Title && !table3Title.querySelector('.table-toolbar')) {
         const toolbarDiv = document.createElement('div');
         toolbarDiv.className = 'table-toolbar d-flex justify-content-between align-items-center mb-3 p-2 bg-light border rounded';
-        toolbarDiv.innerHTML = `
+        toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
                     <i class="fa fa-table me-1"></i>
@@ -784,7 +787,7 @@ function buildUI(){
         setModeParams('byugc', { state });
         
         // Load the ugcSelect box
-        fetch("/json/state_ugc.json?" + new URLSearchParams({ state }))
+        fetch(`/json/state_ugc.json?${new URLSearchParams({ state })}`)
         .then(response => response.json())
         .then(data2 => {
             ugcSelect.innerHTML = '<option value="">Select County/Zone</option>';

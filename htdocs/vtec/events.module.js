@@ -1,6 +1,97 @@
 import { TabulatorFull as Tabulator } from 'https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator_esm.min.js';
 import { vtec_phenomena_dict, vtec_significance_dict } from '/js/iemjs/iemdata.js';
 
+function updateEventCount(count) {
+    const countElement = document.getElementById('event-count');
+    if (countElement) {
+        countElement.textContent = `${count} Events`;
+    }
+}
+
+function updateApiUrlDisplay(apiUrl) {
+    const apiUrlElement = document.getElementById('api-url');
+    const copyBtn = apiUrlElement?.nextElementSibling;
+    if (apiUrlElement) {
+        apiUrlElement.value = apiUrl;
+        if (copyBtn) {
+            copyBtn.setAttribute('onclick', `navigator.clipboard.writeText('${apiUrl}')`);
+        }
+    }
+}
+
+function showLoading(show) {
+    const loadingElement = document.getElementById('loading-indicator');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showError(show) {
+    const errorElement = document.getElementById('error-message');
+    if (errorElement) {
+        errorElement.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showDownloadButtons(show) {
+    const buttonsElement = document.getElementById('download-buttons');
+    if (buttonsElement) {
+        buttonsElement.style.display = show ? 'flex' : 'none';
+    }
+}
+
+function getConfig() {
+    // Determine configuration by inspecting DOM elements
+    const whichValue = document.querySelector('input[name="which"]:checked')?.value || 'wfo';
+    const wfo = document.querySelector('select[name="wfo"]')?.value || 'DMX';
+    const state = document.querySelector('select[name="state"]')?.value || 'IA';
+    const year = document.querySelector('select[name="year"]')?.value || new Date().getFullYear();
+    const phenomena = document.querySelector('select[name="p"]')?.value || '';
+    const significance = document.querySelector('select[name="s"]')?.value || '';
+    const ponChecked = document.querySelector('input[name="pon"]')?.checked || false;
+    const sonChecked = document.querySelector('input[name="son"]')?.checked || false;
+
+    // Build API URL based on current form values
+    let apiUrl =
+        whichValue === 'wfo'
+            ? `/json/vtec_events.py?wfo=${wfo}&year=${year}`
+            : `/json/vtec_events_bystate.py?state=${state}&year=${year}`;
+
+    // Add filters if enabled
+    if (ponChecked && phenomena) {
+        apiUrl += `&phenomena=${phenomena}`;
+    }
+    if (sonChecked && significance) {
+        apiUrl += `&significance=${significance}`;
+    }
+
+    return {
+        apiUrl,
+        whichValue,
+        wfo,
+        state,
+        year,
+        phenomena,
+        significance,
+        ponChecked,
+        sonChecked,
+    };
+}
+
+function toggleFormVisibility() {
+    const whichValue = document.querySelector('input[name="which"]:checked')?.value;
+    const wfoContainer = document.getElementById('wfo-select-container');
+    const stateContainer = document.getElementById('state-select-container');
+
+    if (whichValue === 'wfo') {
+        wfoContainer.style.display = 'block';
+        stateContainer.style.display = 'none';
+    } else if (whichValue === 'state') {
+        wfoContainer.style.display = 'none';
+        stateContainer.style.display = 'block';
+    }
+}
+
 class VTECEvents {
     constructor() {
         this.table = null;
@@ -12,52 +103,15 @@ class VTECEvents {
         this.loadEvents();
     }
 
-    getConfig() {
-        // Determine configuration by inspecting DOM elements
-        const whichValue = document.querySelector('input[name="which"]:checked')?.value || 'wfo';
-        const wfo = document.querySelector('select[name="wfo"]')?.value || 'DMX';
-        const state = document.querySelector('select[name="state"]')?.value || 'IA';
-        const year = document.querySelector('select[name="year"]')?.value || new Date().getFullYear();
-        const phenomena = document.querySelector('select[name="p"]')?.value || '';
-        const significance = document.querySelector('select[name="s"]')?.value || '';
-        const ponChecked = document.querySelector('input[name="pon"]')?.checked || false;
-        const sonChecked = document.querySelector('input[name="son"]')?.checked || false;
-
-        // Build API URL based on current form values
-        let apiUrl = whichValue === 'wfo' 
-            ? `/json/vtec_events.py?wfo=${wfo}&year=${year}`
-            : `/json/vtec_events_bystate.py?state=${state}&year=${year}`;
-
-        // Add filters if enabled
-        if (ponChecked && phenomena) {
-            apiUrl += `&phenomena=${phenomena}`;
-        }
-        if (sonChecked && significance) {
-            apiUrl += `&significance=${significance}`;
-        }
-
-        return {
-            apiUrl,
-            whichValue,
-            wfo,
-            state,
-            year,
-            phenomena,
-            significance,
-            ponChecked,
-            sonChecked
-        };
-    }
-
     setupEventListeners() {
         // Form visibility based on which option is selected
         const whichRadios = document.querySelectorAll('input[name="which"]');
         whichRadios.forEach(radio => {
-            radio.addEventListener('change', () => this.toggleFormVisibility());
+            radio.addEventListener('change', () => toggleFormVisibility());
         });
-        
+
         // Initial visibility setup
-        this.toggleFormVisibility();
+        toggleFormVisibility();
 
         // CSV Download
         const downloadCsvBtn = document.getElementById('download-csv');
@@ -74,57 +128,43 @@ class VTECEvents {
         // Listen for form submissions to reload data
         const form = document.getElementById('vtec-form');
         if (form) {
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', e => {
                 e.preventDefault();
                 this.loadEvents();
             });
         }
     }
 
-    toggleFormVisibility() {
-        const whichValue = document.querySelector('input[name="which"]:checked')?.value;
-        const wfoContainer = document.getElementById('wfo-select-container');
-        const stateContainer = document.getElementById('state-select-container');
-        
-        if (whichValue === 'wfo') {
-            wfoContainer.style.display = 'block';
-            stateContainer.style.display = 'none';
-        } else if (whichValue === 'state') {
-            wfoContainer.style.display = 'none';
-            stateContainer.style.display = 'block';
-        }
-    }
-
     async loadEvents() {
         try {
             this.showLoading(true);
-            
-            const config = this.getConfig();
-            this.updateApiUrlDisplay(config.apiUrl);
-            
+
+            const config = getConfig();
+            updateApiUrlDisplay(config.apiUrl);
+
             const response = await fetch(config.apiUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             const data = await response.json();
             this.renderTable(data.events || []);
-            this.updateEventCount(data.events?.length || 0);
-            this.showDownloadButtons(true);
-            
+            updateEventCount(data.events?.length || 0);
+            showDownloadButtons(true);
         } catch {
             // Error loading events, show error message
-            this.showError(true);
+            showError(true);
         } finally {
-            this.showLoading(false);
+            showLoading(false);
         }
     }
 
     renderTable(events) {
         const tableContainer = document.getElementById('vtec-table');
-        
+
         if (events.length === 0) {
-            tableContainer.innerHTML = '<div class="alert alert-warning"><i class="bi bi-info-circle"></i> No events found for the selected criteria.</div>';
+            tableContainer.innerHTML =
+                '<div class="alert alert-warning"><i class="bi bi-info-circle"></i> No events found for the selected criteria.</div>';
             tableContainer.style.display = 'block';
             return;
         }
@@ -149,7 +189,7 @@ class VTECEvents {
                 issue: event.issue,
                 expire: event.expire,
                 hvtec_nwsli: event.hvtec_nwsli,
-                hml_url: hmlUrl
+                hml_url: hmlUrl,
             };
         });
 
@@ -175,42 +215,42 @@ class VTECEvents {
                     field: 'wfo',
                     width: 80,
                     sorter: 'string',
-                    headerFilter: 'input'
+                    headerFilter: 'input',
                 },
                 {
                     title: 'Event ID',
                     field: 'eventid',
                     width: 100,
                     sorter: 'number',
-                    formatter: (cell) => {
+                    formatter: cell => {
                         const data = cell.getRow().getData();
                         return `<a href="${data.eventid_link}" target="_blank">${data.eventid}</a>`;
-                    }
+                    },
                 },
                 {
                     title: 'Phenomena',
                     field: 'phenomena',
                     width: 120,
                     sorter: 'string',
-                    headerFilter: 'input'
+                    headerFilter: 'input',
                 },
                 {
                     title: 'Significance',
                     field: 'significance',
                     width: 120,
                     sorter: 'string',
-                    headerFilter: 'input'
+                    headerFilter: 'input',
                 },
                 {
                     title: 'Description',
                     field: 'phenomena_desc',
                     minWidth: 200,
                     sorter: 'string',
-                    formatter: (cell) => {
+                    formatter: cell => {
                         const data = cell.getRow().getData();
                         return `${data.phenomena_desc} ${data.significance_desc}`;
                     },
-                    headerFilter: 'input'
+                    headerFilter: 'input',
                 },
                 {
                     title: 'Issue Time',
@@ -218,8 +258,8 @@ class VTECEvents {
                     width: 180,
                     sorter: 'datetime',
                     sorterParams: {
-                        format: 'YYYY-MM-DD HH:mm'
-                    }
+                        format: 'YYYY-MM-DD HH:mm',
+                    },
                 },
                 {
                     title: 'Expire Time',
@@ -227,65 +267,26 @@ class VTECEvents {
                     width: 180,
                     sorter: 'datetime',
                     sorterParams: {
-                        format: 'YYYY-MM-DD HH:mm'
-                    }
+                        format: 'YYYY-MM-DD HH:mm',
+                    },
                 },
                 {
                     title: 'HVTEC NWSLI',
                     field: 'hvtec_nwsli',
                     width: 130,
                     sorter: 'string',
-                    formatter: (cell) => {
+                    formatter: cell => {
                         const data = cell.getRow().getData();
                         if (data.hml_url && data.hvtec_nwsli && data.hvtec_nwsli !== '00000') {
                             return `<a href="${data.hml_url}" target="_blank">${data.hvtec_nwsli}</a>`;
                         }
                         return data.hvtec_nwsli || '';
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         });
 
         tableContainer.style.display = 'block';
-    }
-
-    updateEventCount(count) {
-        const countElement = document.getElementById('event-count');
-        if (countElement) {
-            countElement.textContent = `${count} Events`;
-        }
-    }
-
-    updateApiUrlDisplay(apiUrl) {
-        const apiUrlElement = document.getElementById('api-url');
-        const copyBtn = apiUrlElement?.nextElementSibling;
-        if (apiUrlElement) {
-            apiUrlElement.value = apiUrl;
-            if (copyBtn) {
-                copyBtn.setAttribute('onclick', `navigator.clipboard.writeText('${apiUrl}')`);
-            }
-        }
-    }
-
-    showLoading(show) {
-        const loadingElement = document.getElementById('loading-indicator');
-        if (loadingElement) {
-            loadingElement.style.display = show ? 'block' : 'none';
-        }
-    }
-
-    showError(show) {
-        const errorElement = document.getElementById('error-message');
-        if (errorElement) {
-            errorElement.style.display = show ? 'block' : 'none';
-        }
-    }
-
-    showDownloadButtons(show) {
-        const buttonsElement = document.getElementById('download-buttons');
-        if (buttonsElement) {
-            buttonsElement.style.display = show ? 'flex' : 'none';
-        }
     }
 
     downloadCSV() {
