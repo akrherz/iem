@@ -54,23 +54,35 @@ function initializeTable() {
     });
 }
 
-async function fetchData() {
+function buildServiceUrl() {
     const ascbool = (asc === "asc") ? "true" : "false";
     let service = `/api/1/raobs_by_year.json?station=${station}&asc=${ascbool}`;
-    let caption = `RAOB Data for ${station}`;
-    
+
     if (sortby !== "-") {
-        caption = `${caption} sorted by ${sortby} ${asc} (Top 100)`;
         service += `&sortby=${sortby}`;
     } else if (filter_year) {
-        caption = `${caption} for ${year}`;
         service += `&year=${year}`;
     }
-    
-    // Update URL parameters
+
+    return service;
+}
+
+function buildCaption() {
+    let caption = `RAOB Data for ${station}`;
+
+    if (sortby !== "-") {
+        caption = `${caption} sorted by ${sortby} ${asc} (Top 100)`;
+    } else if (filter_year) {
+        caption = `${caption} for ${year}`;
+    }
+
+    return caption;
+}
+
+function updateUrlParameters() {
     const url = new URL(window.location);
     url.searchParams.set('station', station);
-    
+
     if (sortby !== "-") {
         url.searchParams.set('sortby', sortby);
         url.searchParams.set('asc', asc);
@@ -80,14 +92,36 @@ async function fetchData() {
         url.searchParams.set('asc', asc);
         url.searchParams.delete('sortby');
     }
-    
+
     window.history.replaceState({}, '', url);
-    
-    // Update footer caption
+}
+
+function updateFooterCaption(caption, suffix = '') {
     const footerInfo = document.querySelector('.tabulator-info');
     if (footerInfo) {
-        footerInfo.textContent = `Loading: ${caption}...`;
+        footerInfo.textContent = `${caption}${suffix}`;
     }
+}
+
+function handleFetchSuccess(data, caption) {
+    table.setData(data.data);
+    updateFooterCaption(`Viewing: ${caption}`, ` (${data.data.length} records)`);
+    
+    if (data.data.length === 0) {
+        table.setData([]);
+    }
+}
+
+function handleFetchError(error) {
+    updateFooterCaption(`Error loading data ${error.message}`);
+}
+
+async function fetchData() {
+    const service = buildServiceUrl();
+    const caption = buildCaption();
+    
+    updateUrlParameters();
+    updateFooterCaption(`Loading: ${caption}...`);
     
     try {
         const response = await fetch(service);
@@ -95,23 +129,9 @@ async function fetchData() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
-        // Update table data
-        table.setData(data.data);
-        
-        // Update footer caption
-        if (footerInfo) {
-            footerInfo.textContent = `Viewing: ${caption} (${data.data.length} records)`;
-        }
-        
-        if (data.data.length === 0) {
-            table.setData([]);
-        }
-        
+        handleFetchSuccess(data, caption);
     } catch (error) {
-        if (footerInfo) {
-            footerInfo.textContent = `Error loading data ${error.message}`;
-        }
+        handleFetchError(error);
     }
 }
 
@@ -167,98 +187,131 @@ function setupEventListeners() {
     });
 }
 
+function setStationFromToken(token) {
+    station = token;
+    const stationSelect = document.querySelector("select[name='station']");
+    if (stationSelect) {
+        stationSelect.value = station;
+    }
+}
+
+function setYearFromToken(token) {
+    year = token;
+    const yearSelect = document.querySelector("select[name='year']");
+    if (yearSelect) {
+        yearSelect.value = year;
+    }
+}
+
+function setSortbyFromToken(token) {
+    sortby = token;
+    const sortbySelect = document.querySelector("select[name='sortby']");
+    if (sortbySelect) {
+        sortbySelect.value = sortby;
+    }
+    filter_year = false;
+}
+
+function setAscFromToken(token) {
+    asc = token;
+    const ascSelect = document.querySelector("select[name='asc']");
+    if (ascSelect) {
+        ascSelect.value = asc;
+    }
+}
+
+function handleSecondToken(token) {
+    const yearRegex = /^\d{4}$/;
+    if (yearRegex.test(token)) {
+        setYearFromToken(token);
+    } else {
+        setSortbyFromToken(token);
+    }
+}
+
+function parseLegacyHashFormat(hash) {
+    const tokens = hash.split(":");
+    if (tokens.length === 0) return false;
+    
+    // Set station
+    setStationFromToken(tokens[0]);
+    filter_year = true;
+    
+    // Handle second token (year or sortby)
+    if (tokens.length > 1) {
+        handleSecondToken(tokens[1]);
+    }
+    
+    // Handle third token (asc)
+    if (tokens.length > 2) {
+        setAscFromToken(tokens[2]);
+    }
+    
+    return true;
+}
+
+function convertLegacyHashToUrlParams() {
+    const url = new URL(window.location);
+    url.hash = '';
+    url.searchParams.set('station', station);
+    
+    if (sortby !== "-") {
+        url.searchParams.set('sortby', sortby);
+        url.searchParams.set('asc', asc);
+    } else if (filter_year) {
+        url.searchParams.set('year', year);
+        url.searchParams.set('asc', asc);
+    }
+    
+    window.history.replaceState({}, '', url);
+}
+
+function parseStationParam(urlParams) {
+    if (urlParams.has('station')) {
+        setStationFromToken(urlParams.get('station'));
+    }
+}
+
+function parseYearParam(urlParams) {
+    if (urlParams.has('year')) {
+        setYearFromToken(urlParams.get('year'));
+        filter_year = true;
+    }
+}
+
+function parseSortbyParam(urlParams) {
+    if (urlParams.has('sortby')) {
+        setSortbyFromToken(urlParams.get('sortby'));
+    }
+}
+
+function parseAscParam(urlParams) {
+    if (urlParams.has('asc')) {
+        setAscFromToken(urlParams.get('asc'));
+    }
+}
+
+function parseModernUrlParameters(urlParams) {
+    parseStationParam(urlParams);
+    parseYearParam(urlParams);
+    parseSortbyParam(urlParams);
+    parseAscParam(urlParams);
+}
+
 function parseUrlParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash.substring(1); // Remove #
     
     // Check for legacy hash format first for backwards compatibility
     if (hash && !urlParams.has('station')) {
-        const tokens = hash.split(":");
-        if (tokens.length > 0) {
-            station = tokens[0];
-            const stationSelect = document.querySelector("select[name='station']");
-            if (stationSelect) {
-                stationSelect.value = station;
-            }
-            filter_year = true;
+        if (parseLegacyHashFormat(hash)) {
+            convertLegacyHashToUrlParams();
+            return;
         }
-        
-        if (tokens.length > 1) {
-            // This is either a year or a sort by parameter
-            const yearRegex = /^\d{4}$/;
-            if (yearRegex.test(tokens[1])) {
-                year = tokens[1];
-                const yearSelect = document.querySelector("select[name='year']");
-                if (yearSelect) {
-                    yearSelect.value = year;
-                }
-            } else {
-                sortby = tokens[1];
-                const sortbySelect = document.querySelector("select[name='sortby']");
-                if (sortbySelect) {
-                    sortbySelect.value = sortby;
-                }
-                filter_year = false;
-            }
-        }
-        
-        if (tokens.length > 2) {
-            asc = tokens[2];
-            const ascSelect = document.querySelector("select[name='asc']");
-            if (ascSelect) {
-                ascSelect.value = asc;
-            }
-        }
-        
-        // Convert legacy hash to URL parameters and remove hash
-        const url = new URL(window.location);
-        url.hash = '';
-        url.searchParams.set('station', station);
-        if (sortby !== "-") {
-            url.searchParams.set('sortby', sortby);
-            url.searchParams.set('asc', asc);
-        } else if (filter_year) {
-            url.searchParams.set('year', year);
-            url.searchParams.set('asc', asc);
-        }
-        window.history.replaceState({}, '', url);
-        return;
     }
     
     // Parse modern URL parameters
-    if (urlParams.has('station')) {
-        station = urlParams.get('station');
-        const stationSelect = document.querySelector("select[name='station']");
-        if (stationSelect) {
-            stationSelect.value = station;
-        }
-    }
-    
-    if (urlParams.has('year')) {
-        year = urlParams.get('year');
-        const yearSelect = document.querySelector("select[name='year']");
-        if (yearSelect) {
-            yearSelect.value = year;
-        }
-        filter_year = true;
-    }
-    
-    if (urlParams.has('sortby')) {
-        sortby = urlParams.get('sortby');
-        const sortbySelect = document.querySelector("select[name='sortby']");
-        if (sortbySelect) {
-            sortbySelect.value = sortby;
-        }
-        filter_year = false;
-    }
-    
-    if (urlParams.has('asc')) {
-        asc = urlParams.get('asc');
-        const ascSelect = document.querySelector("select[name='asc']");
-        if (ascSelect) {
-            ascSelect.value = asc;
-        }
-    }
+    parseModernUrlParameters(urlParams);
 }
 
 // Initialize when DOM is loaded

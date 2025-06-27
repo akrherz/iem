@@ -1,17 +1,14 @@
+import { requireElement, requireInputElement } from '/js/iemjs/domUtils.js';
 
 /**
  * Handle map station selection functionality
  */
 function handleMapStationSelection() {
-    const addMapStationsBtn = document.getElementById('addmapstations');
-    if (addMapStationsBtn) {
-        addMapStationsBtn.addEventListener('click', () => {
-            const stationsOut = document.getElementById('stations_out');
-            if (stationsOut) {
-                stationsOut.setAttribute('name', 's[]');
-            }
-        });
-    }
+    const addMapStationsBtn = requireElement('#addmapstations');
+    addMapStationsBtn.addEventListener('click', () => {
+        const stationsOut = requireElement('#stations_out');
+        stationsOut.setAttribute('name', 's[]');
+    });
 }
 
 /**
@@ -46,11 +43,11 @@ function handleDateFormSubmission() {
     if (!dateForm) return;
 
     dateForm.addEventListener('submit', () => {
-        const sdateInput = document.getElementById('sdate');
-        const edateInput = document.getElementById('edate');
+        const sdateInput = requireInputElement('sdate');
+        const edateInput = requireInputElement('edate');
 
         // Handle start date conversion
-        if (sdateInput && sdateInput instanceof HTMLInputElement && sdateInput.value) {
+        if (sdateInput.value) {
             const sdateFormatted = convertDateFormat(sdateInput.value);
             if (sdateFormatted) {
                 const hiddenSdate = createHiddenInput('sdate', sdateFormatted);
@@ -60,7 +57,7 @@ function handleDateFormSubmission() {
         }
 
         // Handle end date conversion
-        if (edateInput && edateInput instanceof HTMLInputElement && edateInput.value) {
+        if (edateInput.value) {
             const edateFormatted = convertDateFormat(edateInput.value);
             if (edateFormatted) {
                 const hiddenEdate = createHiddenInput('edate', edateFormatted);

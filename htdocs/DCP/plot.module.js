@@ -193,41 +193,64 @@ function addDays(date, days) {
 }
 
 /**
- * Update the plot image and URL
+ * Validate form inputs for plotting
+ * @returns {object} validation result with isValid flag and error message
  */
-function updateImage() {
+function validatePlotInputs() {
     const state = stateSelect.value;
     const station = stationSelect.value;
     const variable = variableSelect.value;
     const startDate = dateInput?.value;
     const dayInterval = parseInt(dayIntervalInput?.value || '5', 10);
 
-    // Validate required fields
     if (!state || !station || !variable || !startDate) {
-        showMessage('Please fill in all required fields.');
+        return { isValid: false, error: 'Please fill in all required fields.' };
+    }
+
+    return { isValid: true, values: { state, station, variable, startDate, dayInterval } };
+}
+
+/**
+ * Generate plot image URL
+ * @param {object} values form values
+ * @returns {string} image URL
+ */
+function generatePlotImageUrl(values) {
+    const { station, variable, startDate, dayInterval } = values;
+    const startDateObj = new Date(startDate);
+    const endDateObj = addDays(startDateObj, dayInterval);
+    const endDate = formatDateForInput(endDateObj);
+
+    const params = new URLSearchParams({
+        station,
+        sday: startDate,
+        eday: endDate,
+        var: variable
+    });
+    
+    return `plot.php?${params.toString()}`;
+}
+
+/**
+ * Update the plot image and URL
+ */
+function updateImage() {
+    const validation = validatePlotInputs();
+    
+    if (!validation.isValid) {
+        showMessage(validation.error);
         return;
     }
 
     try {
-        const startDateObj = new Date(startDate);
-        const endDateObj = addDays(startDateObj, dayInterval);
-        const endDate = formatDateForInput(endDateObj);
-
-        // Build the image URL
-        const params = new URLSearchParams({
-            station,
-            sday: startDate,
-            eday: endDate,
-            var: variable
-        });
-        
-        const imageUrl = `plot.php?${params.toString()}`;
+        const imageUrl = generatePlotImageUrl(validation.values);
         
         if (imageDisplay) {
             imageDisplay.src = imageUrl;
         }
 
         // Update browser URL
+        const { state, station, variable, startDate, dayInterval } = validation.values;
         updateURL(state, station, variable, startDate, dayInterval);
         
         clearMessage();
@@ -252,9 +275,10 @@ function updateURL(state, station, variable, startDate, dayInterval) {
 }
 
 /**
- * Parse URL search parameters and set form values
+ * Extract URL parameters
+ * @returns {object|null} URL parameters or null if insufficient data
  */
-function parseURLParams() {
+function extractURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     
     const state = urlParams.get('state');
@@ -264,22 +288,50 @@ function parseURLParams() {
     const dayInterval = urlParams.get('dayInterval');
 
     // Only proceed if we have the minimum required parameters
-    if (!state || !station || !variable || !startDate) return;
+    if (!state || !station || !variable || !startDate) {
+        return null;
+    }
+
+    return { state, station, variable, startDate, dayInterval };
+}
+
+/**
+ * Validate URL parameters
+ * @param {object} params URL parameters
+ * @returns {object} validation result
+ */
+function validateURLParams(params) {
+    const { startDate, dayInterval } = params;
 
     // Validate date format (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(startDate)) {
-        showMessage('Invalid date format in URL. Please use YYYY-MM-DD format.');
-        return;
+        return { isValid: false, error: 'Invalid date format in URL. Please use YYYY-MM-DD format.' };
     }
 
     // Validate dayInterval is a reasonable number
     const interval = parseInt(dayInterval, 10);
     if (dayInterval && (isNaN(interval) || interval < 1 || interval > 31)) {
-        showMessage('Invalid day interval in URL. Must be between 1 and 31 days.');
+        return { isValid: false, error: 'Invalid day interval in URL. Must be between 1 and 31 days.' };
+    }
+
+    return { isValid: true };
+}
+
+/**
+ * Parse URL search parameters and set form values
+ */
+function parseURLParams() {
+    const params = extractURLParameters();
+    if (!params) return;
+
+    const validation = validateURLParams(params);
+    if (!validation.isValid) {
+        showMessage(validation.error);
         return;
     }
 
+    const { state, station, variable, startDate, dayInterval } = params;
     setFormValues(state, station, variable, startDate, dayInterval || '5');
 }
 

@@ -6,7 +6,7 @@
 /* global ol, Tabulator */
 
 // Global app state
-let appState = {
+const appState = {
     config: null,
     data: null,
     sortColumn: null,
@@ -56,7 +56,7 @@ function initializeApp() {
     showLoading(true);
     
     fetchData()
-        .then(function() {
+        .then(() => {
             renderHeader();
             updateTable();
             showApiInfo();
@@ -65,10 +65,10 @@ function initializeApp() {
             }
             attachEventListeners();
         })
-        .catch(function(error) {
-            showError('Failed to load climatology data: ' + error.message);
+        .catch((error) => {
+            showError(`Failed to load climatology data: ${error.message}`);
         })
-        .finally(function() {
+        .finally(() => {
             showLoading(false);
         });
 }
@@ -123,26 +123,22 @@ function fetchData() {
     appState.currentApiUrl = apiUrl;
     
     return fetch(apiUrl)
-        .then(function(response) {
+        .then((response) => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             return response.json();
         })
-        .then(function(jsonData) {
+        .then((jsonData) => {
             if (vars.station) {
                 // Process station data
-                appState.data = jsonData.climatology.map(function(item) {
-                    return {
-                        ...item,
-                        valid: new Date(2000, item.month - 1, item.day) // Create date for sorting
-                    };
-                });
+                appState.data = jsonData.climatology.map((item) => ({
+                    ...item,
+                    valid: new Date(2000, item.month - 1, item.day) // Create date for sorting
+                }));
             } else {
                 // Process day data from GeoJSON
-                appState.data = jsonData.features.map(function(feature) {
-                    return feature.properties;
-                });
+                appState.data = jsonData.features.map((feature) => feature.properties);
             }
         });
 };
@@ -181,7 +177,7 @@ function renderHeader() {
     
     if (vars.station) {
         // Station mode - Daily Climatology for Single Station
-        const backLink = `extremes.php?network=${vars.network}&tbl=${vars.tbl}&month=${vars.month}&day=${vars.day}&label=${appState.labelAttribute}${appState.yearFilter ? '&year=' + appState.yearFilter : ''}`;
+        const backLink = `extremes.php?network=${vars.network}&tbl=${vars.tbl}&month=${vars.month}&day=${vars.day}&label=${appState.labelAttribute}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}`;
         headerHtml = `
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
@@ -497,8 +493,8 @@ function prepareTableData() {
     }
     
     const vars = appState.config;
-    
-    return appState.data.map(function(row) {
+
+    return appState.data.map((row) => {
         let linkCell = '';
         let linkField = '';
         
@@ -631,7 +627,7 @@ function attachEventListeners() {
         }
         
         // Prevent form submission
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             handleFormChange();
             return false;
@@ -656,16 +652,9 @@ function attachEventListeners() {
             tblSelect.addEventListener('change', handleFormChange);
         }
     }
-    
-    if (appState.isStationView && form) {
-        // For station view, allow normal form submission
-        form.addEventListener('submit', function() {
-            // Allow normal form submission for station view
-        });
-    }
 
     // Handle browser back/forward navigation
-    window.addEventListener('popstate', function() {
+    window.addEventListener('popstate', () => {
         // Reload the page to handle URL parameter changes
         window.location.reload();
     });
@@ -799,10 +788,8 @@ function initializeMap() {
     appState.map.addControl(layerSwitcher);
     
     // Add click handler for station popups
-    appState.map.on('singleclick', function(evt) {
-        const clickedFeature = appState.map.forEachFeatureAtPixel(evt.pixel, function(feature) {
-            return feature;
-        });
+    appState.map.on('singleclick', (evt) => {
+        const clickedFeature = appState.map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
         if (clickedFeature) {
             showStationPopup(clickedFeature, evt.coordinate);
         } else {
@@ -811,7 +798,7 @@ function initializeMap() {
     });
     
     // Change cursor when hovering over stations
-    appState.map.on('pointermove', function(evt) {
+    appState.map.on('pointermove', (evt) => {
         if (evt.dragging) return;
         const pixel = appState.map.getEventPixel(evt.originalEvent);
         const hit = appState.map.hasFeatureAtPixel(pixel);
@@ -850,13 +837,13 @@ function fetchGeoJSONForMap() {
     const apiUrl = `/geojson/climodat_dayclimo.py?network=${vars.network}&month=${vars.month}&day=${vars.day}&syear=${syear}&eyear=${eyear}`;
     
     fetch(apiUrl)
-        .then(function(response) {
+        .then((response) => {
             return response.json();
         })
-        .then(function(geoJsonData) {
+        .then((geoJsonData) => {
             addGeoJSONToMap(geoJsonData);
         })
-        .catch(function() {
+        .catch(() => {
             // Silently handle error - map will remain empty
         });
 }
@@ -913,10 +900,10 @@ function getStationStyle(feature) {
             labelText = String(value);
         } else if (appState.labelAttribute.includes('precip')) {
             // Precipitation values - show with 2 decimals and inch symbol
-            labelText = typeof value === 'number' ? value.toFixed(2) + '"' : String(value);
+            labelText = typeof value === 'number' ? `${value.toFixed(2)}"` : String(value);
         } else if (appState.labelAttribute.includes('high') || appState.labelAttribute.includes('low')) {
             // Temperature values - show with degree symbol
-            labelText = typeof value === 'number' ? Math.round(value) + '°' : String(value);
+            labelText = typeof value === 'number' ? `${Math.round(value)}°` : String(value);
         } else if (Array.isArray(value)) {
             labelText = value.join(',');
         } else if (typeof value === 'number') {
@@ -1019,7 +1006,7 @@ function showStationPopup(feature, coordinate) {
     
     popupHtml += `</table>
         <p style="margin-top: 8px; font-size: 11px;">
-            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? '&label=' + appState.labelAttribute : ''}${appState.yearFilter ? '&year=' + appState.yearFilter : ''}" 
+            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? `&label=${appState.labelAttribute}` : ''}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}" 
                target="_blank">View station details →</a>
         </p>`;
     
@@ -1040,7 +1027,7 @@ function updateMapLabels() {
         
         // Force redraw of all features by changing the style
         const features = appState.vectorSource.getFeatures();
-        features.forEach(function(feature) {
+        features.forEach((feature) => {
             feature.changed();
         });
     }
@@ -1080,7 +1067,7 @@ function updateLegend() {
         </div>
     `;
     
-    appState.colorRanges.ranges.forEach(function(range) {
+    appState.colorRanges.ranges.forEach((range) => {
         legendHtml += `
             <div class="legend-item">
                 <div class="legend-color" style="background: ${range.color};"></div>
@@ -1122,10 +1109,10 @@ function calculateColorRanges() {
     
     // Get all numeric values for the selected attribute
     const values = appState.data
-        .map(function(item) { return item[appState.labelAttribute]; })
-        .filter(function(val) { return typeof val === 'number' && !isNaN(val); })
-        .sort(function(a, b) { return a - b; });
-    
+        .map((item) => item[appState.labelAttribute])
+        .filter((val) => typeof val === 'number' && !isNaN(val))
+        .sort((a, b) => a - b);
+
     if (values.length === 0) return null;
     
     const min = values[0];
@@ -1236,12 +1223,12 @@ function handleFormChange() {
     
     // Clear any existing error messages
     const existingErrors = document.querySelectorAll('.error-message');
-    existingErrors.forEach(function(error) {
+    existingErrors.forEach((error) => {
         error.remove();
     });
     
     fetchData()
-        .then(function() {
+        .then(() => {
             renderHeader();
             updateTable();
             showApiInfo();
@@ -1262,10 +1249,10 @@ function handleFormChange() {
                 updateYearFilterVisibility();
             }
         })
-        .catch(function(error) {
-            showError('Failed to load climatology data: ' + error.message);
+        .catch((error) => {
+            showError(`Failed to load climatology data: ${error.message}`);
         })
-        .finally(function() {
+        .finally(() => {
             showLoading(false);
         });
 }
@@ -1333,14 +1320,14 @@ function populateYearFilter(features) {
             yearField = null;
     }
     
-    features.forEach(function(feature) {
+    features.forEach((feature) => {
         const props = feature.getProperties();
         
         if (yearField) {
             // Collect years from specific field only
             const years = props[yearField];
             if (Array.isArray(years)) {
-                years.forEach(function(year) {
+                years.forEach((year) => {
                     allYears.add(year);
                 });
             }
@@ -1350,11 +1337,11 @@ function populateYearFilter(features) {
                 'max_high_years', 'min_high_years', 'max_low_years', 
                 'min_low_years', 'max_precip_years'
             ];
-            
-            yearArrays.forEach(function(yearArrayField) {
+
+            yearArrays.forEach((yearArrayField) => {
                 const years = props[yearArrayField];
                 if (Array.isArray(years)) {
-                    years.forEach(function(year) {
+                    years.forEach((year) => {
                         allYears.add(year);
                     });
                 }
@@ -1363,15 +1350,13 @@ function populateYearFilter(features) {
     });
     
     // Sort years in descending order
-    const sortedYears = Array.from(allYears).sort(function(a, b) {
-        return b - a;
-    });
-    
+    const sortedYears = Array.from(allYears).sort((a, b) => b - a);
+
     // Clear existing options except "All Years"
     yearSelect.innerHTML = '<option value="">All Years</option>';
     
     // Add year options
-    sortedYears.forEach(function(year) {
+    sortedYears.forEach((year) => {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
@@ -1411,7 +1396,7 @@ function filterFeaturesByYear(features) {
         default:
             // For non-record attributes (avg_high, avg_low, avg_precip, station, years),
             // check if ANY record was set in the selected year
-            return features.filter(function(feature) {
+            return features.filter((feature) => {
                 const props = feature.getProperties();
                 const yearArrays = [
                     'max_high_years', 'min_high_years', 'max_low_years', 
@@ -1429,7 +1414,7 @@ function filterFeaturesByYear(features) {
     }
     
     // Filter by specific record type
-    return features.filter(function(feature) {
+    return features.filter((feature) => {
         const props = feature.getProperties();
         const years = props[yearField];
         return Array.isArray(years) && years.includes(parseInt(appState.yearFilter));
@@ -1503,7 +1488,7 @@ function addExportButtons() {
         exportContainer = document.createElement('div');
         exportContainer.id = 'table-export-buttons';
         exportContainer.className = 'mb-2 d-flex gap-2';
-        exportContainer.innerHTML = `
+        exportContainer.innerHTML = `${''}
             <button id="download-csv" class="btn btn-outline-success btn-sm">
                 <i class="fa fa-download"></i> Download CSV
             </button>
@@ -1517,12 +1502,12 @@ function addExportButtons() {
     }
     
     // Add event listeners for export buttons
-    document.getElementById('download-csv').addEventListener('click', function() {
+    document.getElementById('download-csv').addEventListener('click', () => {
         const filename = generateExportFilename('csv');
         appState.table.download("csv", filename);
     });
-    
-    document.getElementById('download-xlsx').addEventListener('click', function() {
+
+    document.getElementById('download-xlsx').addEventListener('click', () => {
         const filename = generateExportFilename('xlsx');
         appState.table.download("xlsx", filename, {sheetName: "Climate Data"});
     });
@@ -1548,6 +1533,4 @@ function generateExportFilename(extension) {
 }
 
 // Initialize the app when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
+document.addEventListener('DOMContentLoaded', initializeApp);
