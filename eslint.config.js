@@ -91,7 +91,17 @@ module.exports = [
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
             "prefer-arrow-callback": "warn", // Consider using arrow functions for callbacks
             "prefer-template": "warn", // Template Literal Found - use template literals instead of string concatenation
-            "no-unused-vars": ["warn", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }], // Found unused objects
+            "prefer-const": "warn", // Use const declarations for variables that are never reassigned
+            "default-case": "warn", // No default cases in switch statements
+            "complexity": ["warn", { "max": 10 }], // Function with cyclomatic complexity higher than threshold
+            "no-unused-vars": ["warn", { 
+                "vars": "all", 
+                "args": "after-used", 
+                "ignoreRestSiblings": false,
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "caughtErrors": "all"
+            }], // Found unused objects
             
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
@@ -133,6 +143,7 @@ module.exports = [
             // Modern JavaScript preferences (more strict for modules)
             "prefer-arrow-callback": "error",
             "prefer-template": "error",
+            "prefer-const": "error", // Use const declarations for variables that are never reassigned
             "object-shorthand": "error",
             
             // Deprecated method warnings for modules too
@@ -184,7 +195,16 @@ module.exports = [
             "no-return-assign": "error",
             "array-callback-return": "error",
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
-            "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }], // Found unused objects
+            "default-case": "error", // No default cases in switch statements
+            "complexity": ["error", { "max": 8 }], // Function with cyclomatic complexity higher than threshold
+            "no-unused-vars": ["error", { 
+                "vars": "all", 
+                "args": "after-used", 
+                "ignoreRestSiblings": false,
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "caughtErrors": "all"
+            }], // Found unused objects
             
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
