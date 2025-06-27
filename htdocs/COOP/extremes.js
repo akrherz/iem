@@ -6,7 +6,7 @@
 /* global ol, Tabulator */
 
 // Global app state
-let appState = {
+const appState = {
     config: null,
     data: null,
     sortColumn: null,
