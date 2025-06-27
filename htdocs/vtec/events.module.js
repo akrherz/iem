@@ -40,41 +40,56 @@ function showDownloadButtons(show) {
     }
 }
 
-function getConfig() {
-    // Determine configuration by inspecting DOM elements
-    const whichValue = document.querySelector('input[name="which"]:checked')?.value || 'wfo';
-    const wfo = document.querySelector('select[name="wfo"]')?.value || 'DMX';
-    const state = document.querySelector('select[name="state"]')?.value || 'IA';
-    const year = document.querySelector('select[name="year"]')?.value || new Date().getFullYear();
-    const phenomena = document.querySelector('select[name="p"]')?.value || '';
-    const significance = document.querySelector('select[name="s"]')?.value || '';
-    const ponChecked = document.querySelector('input[name="pon"]')?.checked || false;
-    const sonChecked = document.querySelector('input[name="son"]')?.checked || false;
+function getInputValue(selector, defaultValue) {
+    return document.querySelector(selector)?.value || defaultValue;
+}
 
-    // Build API URL based on current form values
-    let apiUrl =
-        whichValue === 'wfo'
-            ? `/json/vtec_events.py?wfo=${wfo}&year=${year}`
-            : `/json/vtec_events_bystate.py?state=${state}&year=${year}`;
+function getCheckboxValue(selector) {
+    return document.querySelector(selector)?.checked || false;
+}
 
-    // Add filters if enabled
+function getRadioValue(selector, defaultValue) {
+    return document.querySelector(selector)?.value || defaultValue;
+}
+
+function getFormValues() {
+    return {
+        whichValue: getRadioValue('input[name="which"]:checked', 'wfo'),
+        wfo: getInputValue('select[name="wfo"]', 'DMX'),
+        state: getInputValue('select[name="state"]', 'IA'),
+        year: getInputValue('select[name="year"]', new Date().getFullYear()),
+        phenomena: getInputValue('select[name="p"]', ''),
+        significance: getInputValue('select[name="s"]', ''),
+        ponChecked: getCheckboxValue('input[name="pon"]'),
+        sonChecked: getCheckboxValue('input[name="son"]'),
+    };
+}
+
+function buildBaseApiUrl(whichValue, wfo, state, year) {
+    return whichValue === 'wfo'
+        ? `/json/vtec_events.py?wfo=${wfo}&year=${year}`
+        : `/json/vtec_events_bystate.py?state=${state}&year=${year}`;
+}
+
+function addFiltersToUrl(apiUrl, ponChecked, phenomena, sonChecked, significance) {
+    let url = apiUrl;
     if (ponChecked && phenomena) {
-        apiUrl += `&phenomena=${phenomena}`;
+        url += `&phenomena=${phenomena}`;
     }
     if (sonChecked && significance) {
-        apiUrl += `&significance=${significance}`;
+        url += `&significance=${significance}`;
     }
+    return url;
+}
+
+function getConfig() {
+    const formValues = getFormValues();
+    const baseUrl = buildBaseApiUrl(formValues.whichValue, formValues.wfo, formValues.state, formValues.year);
+    const apiUrl = addFiltersToUrl(baseUrl, formValues.ponChecked, formValues.phenomena, formValues.sonChecked, formValues.significance);
 
     return {
         apiUrl,
-        whichValue,
-        wfo,
-        state,
-        year,
-        phenomena,
-        significance,
-        ponChecked,
-        sonChecked,
+        ...formValues,
     };
 }
 

@@ -4,47 +4,51 @@ import {TabulatorFull as Tabulator} from 'https://unpkg.com/tabulator-tables@6.3
 let table = null;
 const API_BASE_URL = '/api/1/nws/wpc_national_hilo.json';
 
-// Process raw API data into tabulator format
-function processTableData(rawData) {
-    // Check if we have valid data structure
-    if (!rawData || !rawData.data || !Array.isArray(rawData.data)) {
-        return [];
-    }
-    
-    if (rawData.data.length === 0) {
-        return [];
-    }
+// Validate raw data structure
+function validateRawData(rawData) {
+    return rawData && rawData.data && Array.isArray(rawData.data) && rawData.data.length > 0;
+}
 
-    const processedData = new Map();
+// Create location string from row data
+function createLocationString(row) {
+    return `(${row.station || 'Unknown'}) ${row.name || 'Unknown'}, ${row.state || 'Unknown'}`;
+}
+
+// Initialize date entry if it doesn't exist
+function initializeDateEntry(processedData, date) {
+    if (!processedData.has(date)) {
+        processedData.set(date, {
+            date,
+            min_temp: '',
+            min_locations: [],
+            max_temp: '',
+            max_locations: []
+        });
+    }
+    return processedData.get(date);
+}
+
+// Process a single row of temperature data
+function processTemperatureRow(processedData, row) {
+    if (!row || !row.date) {
+        return; // Skip invalid rows
+    }
     
-    // Group data by date
-    rawData.data.forEach(row => {
-        if (!row || !row.date) return; // Skip invalid rows
-        
-        const date = row.date;
-        if (!processedData.has(date)) {
-            processedData.set(date, {
-                date,
-                min_temp: '',
-                min_locations: [],
-                max_temp: '',
-                max_locations: []
-            });
-        }
-        
-        const entry = processedData.get(date);
-        const locationString = `(${row.station || 'Unknown'}) ${row.name || 'Unknown'}, ${row.state || 'Unknown'}`;
-        
-        if (row.n_x === 'N') {
-            entry.min_temp = row.value || '';
-            entry.min_locations.push(locationString);
-        } else if (row.n_x === 'X') {
-            entry.max_temp = row.value || '';
-            entry.max_locations.push(locationString);
-        }
-    });
+    const date = row.date;
+    const entry = initializeDateEntry(processedData, date);
+    const locationString = createLocationString(row);
     
-    // Convert Map to Array and format for display
+    if (row.n_x === 'N') {
+        entry.min_temp = row.value || '';
+        entry.min_locations.push(locationString);
+    } else if (row.n_x === 'X') {
+        entry.max_temp = row.value || '';
+        entry.max_locations.push(locationString);
+    }
+}
+
+// Convert processed data to display format
+function convertToDisplayFormat(processedData) {
     return Array.from(processedData.values()).map(entry => ({
         date: entry.date,
         min_temp: entry.min_temp,
@@ -52,6 +56,22 @@ function processTableData(rawData) {
         max_temp: entry.max_temp,
         max_locations: entry.max_locations.join('<br>')
     })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date descending
+}
+
+// Process raw API data into tabulator format
+function processTableData(rawData) {
+    // Check if we have valid data structure
+    if (!validateRawData(rawData)) {
+        return [];
+    }
+
+    const processedData = new Map();
+    
+    // Group data by date
+    rawData.data.forEach(row => processTemperatureRow(processedData, row));
+    
+    // Convert Map to Array and format for display
+    return convertToDisplayFormat(processedData);
 }
 
 // Format temperature values with color coding

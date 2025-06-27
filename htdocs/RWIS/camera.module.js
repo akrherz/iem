@@ -1,4 +1,3 @@
-
 import { escapeHTML, getElement, getInputElement, requireInputElement } from '/js/iemjs/domUtils.js';
 
 /**
@@ -86,41 +85,11 @@ function fetchTimes(findTime) {
     fetch(`/json/webcam.py?cid=${cid}&date=${myDate}`)
         .then(response => response.json())
         .then(data => {
-            let html = '';
-            const len = data.images.length;
-            
-            for (let i = 0; i < len; i++) {
-                const ts = parseISODate(data.images[i].valid);
-                if (!ts) continue;
-                
-                const dateStr = formatDateForDisplay(ts);
-                let hour = ts.getHours();
-                const period = hour >= 12 ? ' PM' : ' AM';
-                
-                if (hour > 12) {
-                    hour = hour - 12;
-                } else if (hour === 0) {
-                    hour = 12;
-                }
-                
-                const minutes = ts.getMinutes().toString().padStart(2, '0');
-                const timeStr = `${dateStr}${hour}:${minutes}${period}`;
-                
-                html += `<option ts="${data.images[i].valid}" value="${data.images[i].href}">${timeStr}</option>`;
-            }
-            
-            if (len === 0) {
-                html += "<option value='-1'>No Images Found!</option>";
-            }
-            
+            const html = generateTimeOptionsHTML(data.images);
             timesSelect.innerHTML = html;
             
             if (findTime) {
-                const targetOption = timesSelect.querySelector(`option[ts="${findTime}"]`);
-                if (targetOption) {
-                    targetOption.selected = true;
-                    getImage();
-                }
+                selectTimeOption(findTime);
             }
         })
         .catch(() => {
@@ -378,6 +347,107 @@ function toggleAutoPlay() {
 }
 
 /**
+ * Convert 24-hour time to 12-hour format with AM/PM
+ * @param {number} hour24 hour in 24-hour format
+ * @returns {object} object with hour12 and period
+ */
+function convertTo12Hour(hour24) {
+    const period = hour24 >= 12 ? ' PM' : ' AM';
+    let hour12 = hour24;
+    
+    if (hour12 > 12) {
+        hour12 = hour12 - 12;
+    } else if (hour12 === 0) {
+        hour12 = 12;
+    }
+    
+    return { hour12, period };
+}
+
+/**
+ * Format time string for display
+ * @param {Date} timestamp date object
+ * @returns {string} formatted time string
+ */
+function formatTimeString(timestamp) {
+    const dateStr = formatDateForDisplay(timestamp);
+    const { hour12, period } = convertTo12Hour(timestamp.getHours());
+    const minutes = timestamp.getMinutes().toString().padStart(2, '0');
+    return `${dateStr}${hour12}:${minutes}${period}`;
+}
+
+/**
+ * Generate HTML options for time select dropdown
+ * @param {Array} images array of image objects
+ * @returns {string} HTML string for options
+ */
+function generateTimeOptionsHTML(images) {
+    if (!images || images.length === 0) {
+        return "<option value='-1'>No Images Found!</option>";
+    }
+    
+    let html = '';
+    for (let i = 0; i < images.length; i++) {
+        const ts = parseISODate(images[i].valid);
+        if (!ts) continue;
+        
+        const timeStr = formatTimeString(ts);
+        html += `<option ts="${images[i].valid}" value="${images[i].href}">${timeStr}</option>`;
+    }
+    
+    return html || "<option value='-1'>No Images Found!</option>";
+}
+
+/**
+ * Select a specific time option and load the image
+ * @param {string} findTime ISO time string to find and select
+ */
+function selectTimeOption(findTime) {
+    const timesSelect = document.querySelector('select[name=times]');
+    const targetOption = timesSelect.querySelector(`option[ts="${findTime}"]`);
+    if (targetOption) {
+        targetOption.selected = true;
+        getImage();
+    }
+}
+
+/**
+ * Check if keyboard navigation should be active for current focus
+ * @param {HTMLElement} activeElement currently focused element
+ * @param {Event} event keyboard event
+ * @returns {boolean} true if navigation should be active
+ */
+function shouldAllowKeyboardNavigation(activeElement, event) {
+    const timesSelectElement = document.querySelector('select[name=times]');
+    
+    return activeElement === timesSelectElement || 
+           event.target.id === 'theimage' ||
+           event.target.tagName === 'SELECT' || 
+           event.target.tagName === 'INPUT';
+}
+
+/**
+ * Handle keyboard navigation events
+ * @param {KeyboardEvent} event keyboard event
+ */
+function handleKeyboardNavigation(event) {
+    if (!shouldAllowKeyboardNavigation(document.activeElement, event)) {
+        return;
+    }
+    
+    if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigateImage(-1);
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        navigateImage(1);
+    } else if (event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault();
+        toggleAutoPlay();
+    }
+}
+
+/**
  * Initialize the application
  */
 function init() {
@@ -413,27 +483,7 @@ function init() {
     });
     
     // Enhanced keyboard navigation
-    document.addEventListener('keydown', (event) => {
-        const timesSelectElement = document.querySelector('select[name=times]');
-        
-        // Allow keyboard navigation when focused on times select or image area
-        if (document.activeElement === timesSelectElement || 
-            event.target.id === 'theimage' ||
-            event.target.tagName === 'SELECT' || 
-            event.target.tagName === 'INPUT') {
-            
-            if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-                event.preventDefault();
-                navigateImage(-1);
-            } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-                event.preventDefault();
-                navigateImage(1);
-            } else if (event.key === ' ' || event.key === 'Spacebar') {
-                event.preventDefault();
-                toggleAutoPlay();
-            }
-        }
-    });
+    document.addEventListener('keydown', handleKeyboardNavigation);
     
     // Make image clickable for better UX
     document.addEventListener('click', (event) => {

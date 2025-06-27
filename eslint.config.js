@@ -197,7 +197,7 @@ module.exports = [
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
             "default-case": "error", // No default cases in switch statements
             "complexity": ["error", { "max": 8 }], // Function with cyclomatic complexity higher than threshold
-            "no-unused-vars": ["error", { 
+            "no-unused-vars": ["error", {
                 "vars": "all", 
                 "args": "after-used", 
                 "ignoreRestSiblings": false,
@@ -225,7 +225,8 @@ module.exports = [
         },
         rules: {
             "no-console": "off",  // Console output is essential for test feedback
-            "require-await": "off"  // Test runners often have async functions with await in loops
+            "require-await": "off",  // Test runners often have async functions with await in loops
+            "complexity": ["error", { "max": 30 }], // Function with cyclomatic complexity higher than threshold
         }
     }
 ];
