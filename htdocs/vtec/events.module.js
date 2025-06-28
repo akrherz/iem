@@ -310,5 +310,5 @@ class VTECEvents {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new VTECEvents();
+    window.ve = new VTECEvents();
 });

@@ -316,17 +316,16 @@ function applyDateFilter() {
     function isFeatureValidForDateRange(feature, startDate, endDate) {
         const issue = moment.utc(feature.get('utc_issue'));
         if (startDate?.isBefore && issue.isBefore(startDate)) return false;
-        if (endDate?.isAfter && issue.isAfter(endDate)) return false;
-        return true;
+        return !(endDate?.isAfter && issue.isAfter(endDate));
     }
     
     function isToggleCheckedForType(type) {
         if (type === "TO") {
             const tornadoToggle = document.getElementById('toggleTornado');
-            return tornadoToggle && tornadoToggle.checked;
+            return tornadoToggle?.checked;
         } else if (type === "FF") {
             const flashFloodToggle = document.getElementById('toggleFlashFlood');
-            return flashFloodToggle && flashFloodToggle.checked;
+            return flashFloodToggle?.checked;
         }
         return false;
     }
