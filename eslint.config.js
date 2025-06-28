@@ -3,9 +3,23 @@ const js = require("@eslint/js");
 const globals = require("globals");
 
 module.exports = [
-    // Ignore the ESLint configuration file itself
+    // Configuration for ESLint config file itself (Node.js environment)
     {
-        ignores: ["eslint.config.js", "htdocs/vtec/assets/*.js", "htdocs/lsr/static.js"]
+        files: ["eslint.config.js"],
+        languageOptions: {
+            ecmaVersion: 2020,
+            sourceType: "script",
+            globals: {
+                ...globals.node
+            }
+        },
+        rules: {
+            "no-console": "off"
+        }
+    },
+    // Ignore other problematic files
+    {
+        ignores: ["htdocs/vtec/assets/*.js", "htdocs/lsr/static.js"]
     },
     js.configs.recommended,
     // Configuration for traditional script files (.js)
@@ -59,6 +73,18 @@ module.exports = [
                     "message": "Use optional chaining (?.) instead of && for null checks before property access."
                 },
                 {
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='CallExpression'][test.right.callee.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && for null checks before method calls."
+                },
+                {
+                    "selector": "IfStatement[consequent.type='BlockStatement'][consequent.body.length=1][consequent.body.0.type='ReturnStatement'][consequent.body.0.argument.type='Literal'][consequent.body.0.argument.value=true][alternate.type='BlockStatement'][alternate.body.length=1][alternate.body.0.type='ReturnStatement'][alternate.body.0.argument.type='Literal'][alternate.body.0.argument.value=false]",
+                    "message": "Found complex boolean return - return the boolean expression directly instead of if/else with true/false."
+                },
+                {
+                    "selector": "IfStatement[consequent.type='ReturnStatement'][consequent.argument.type='Literal'][consequent.argument.value=true][alternate.type='ReturnStatement'][alternate.argument.type='Literal'][alternate.argument.value=false]",
+                    "message": "Found complex boolean return - return the boolean expression directly instead of if/else with true/false."
+                },
+                {
                     "selector": "TemplateLiteral[expressions.length=0]",
                     "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
@@ -83,6 +109,9 @@ module.exports = [
             "no-self-assign": "error",
             "no-sequences": "error",
             "no-unreachable": "error",
+            
+            // Block-scoped declarations
+            "no-inner-declarations": ["error", "both"], // Function or var declarations in nested blocks is not preferred
             
             // Additional code quality rules to catch common issues
             "no-implicit-coercion": "warn",
@@ -166,6 +195,18 @@ module.exports = [
                     "message": "Use optional chaining (?.) instead of && for null checks before property access."
                 },
                 {
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='CallExpression'][test.right.callee.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && for null checks before method calls."
+                },
+                {
+                    "selector": "IfStatement[consequent.type='BlockStatement'][consequent.body.length=1][consequent.body.0.type='ReturnStatement'][consequent.body.0.argument.type='Literal'][consequent.body.0.argument.value=true][alternate.type='BlockStatement'][alternate.body.length=1][alternate.body.0.type='ReturnStatement'][alternate.body.0.argument.type='Literal'][alternate.body.0.argument.value=false]",
+                    "message": "Found complex boolean return - return the boolean expression directly instead of if/else with true/false."
+                },
+                {
+                    "selector": "IfStatement[consequent.type='ReturnStatement'][consequent.argument.type='Literal'][consequent.argument.value=true][alternate.type='ReturnStatement'][alternate.argument.type='Literal'][alternate.argument.value=false]",
+                    "message": "Found complex boolean return - return the boolean expression directly instead of if/else with true/false."
+                },
+                {
                     "selector": "TemplateLiteral[expressions.length=0]",
                     "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
@@ -189,6 +230,9 @@ module.exports = [
             "no-self-assign": "error",
             "no-sequences": "error",
             "no-unreachable": "error",
+            
+            // Block-scoped declarations
+            "no-inner-declarations": ["error", "both"], // Function or var declarations in nested blocks is not preferred
             
             // Additional code quality rules (stricter for modules)
             "no-implicit-coercion": "error",

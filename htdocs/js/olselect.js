@@ -150,7 +150,7 @@ function showTooltip(feature) {
     tooltip.appendChild(tooltipInner);
     
     // Enhanced styling for better visibility
-    tooltip.style.cssText = `
+    tooltip.style.cssText = `${''}
         position: absolute;
         z-index: 1070;
         max-width: 250px;

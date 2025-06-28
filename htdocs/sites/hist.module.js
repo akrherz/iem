@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const table = document.getElementById('thetable');
     if (table) {
-        new Tabulator('#thetable', {
+        window.tt = new Tabulator('#thetable', {
             layout: 'fitColumns',
             responsiveLayout: 'collapse',
             columns: [
