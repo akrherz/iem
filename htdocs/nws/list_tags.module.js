@@ -107,7 +107,7 @@ function addDownloadButtons(originalButtonId, table) {
     const originalButton = document.getElementById(originalButtonId);
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'mb-2';
-    buttonContainer.innerHTML = `
+    buttonContainer.innerHTML = `${''}
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-success btn-sm download-csv">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV

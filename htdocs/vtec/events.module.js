@@ -1,43 +1,34 @@
 import { TabulatorFull as Tabulator } from 'https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator_esm.min.js';
 import { vtec_phenomena_dict, vtec_significance_dict } from '/js/iemjs/iemdata.js';
+import { requireElement } from '/js/iemjs/domUtils.js';
 
 function updateEventCount(count) {
-    const countElement = document.getElementById('event-count');
-    if (countElement) {
-        countElement.textContent = `${count} Events`;
-    }
+    const countElement = requireElement('#event-count');
+    countElement.textContent = `${count} Events`;
 }
 
 function updateApiUrlDisplay(apiUrl) {
-    const apiUrlElement = document.getElementById('api-url');
-    const copyBtn = apiUrlElement?.nextElementSibling;
-    if (apiUrlElement) {
-        apiUrlElement.value = apiUrl;
-        if (copyBtn) {
-            copyBtn.setAttribute('onclick', `navigator.clipboard.writeText('${apiUrl}')`);
-        }
+    const apiUrlElement = requireElement('#api-url');
+    const copyBtn = apiUrlElement.nextElementSibling;
+    apiUrlElement.value = apiUrl;
+    if (copyBtn) {
+        copyBtn.setAttribute('onclick', `navigator.clipboard.writeText('${apiUrl}')`);
     }
 }
 
 function showLoading(show) {
-    const loadingElement = document.getElementById('loading-indicator');
-    if (loadingElement) {
-        loadingElement.style.display = show ? 'block' : 'none';
-    }
+    const loadingElement = requireElement('#loading-indicator');
+    loadingElement.style.display = show ? 'block' : 'none';
 }
 
 function showError(show) {
-    const errorElement = document.getElementById('error-message');
-    if (errorElement) {
-        errorElement.style.display = show ? 'block' : 'none';
-    }
+    const errorElement = requireElement('#error-message');
+    errorElement.style.display = show ? 'block' : 'none';
 }
 
 function showDownloadButtons(show) {
-    const buttonsElement = document.getElementById('download-buttons');
-    if (buttonsElement) {
-        buttonsElement.style.display = show ? 'flex' : 'none';
-    }
+    const buttonsElement = requireElement('#download-buttons');
+    buttonsElement.style.display = show ? 'flex' : 'none';
 }
 
 function getInputValue(selector, defaultValue) {

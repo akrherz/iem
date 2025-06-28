@@ -311,20 +311,32 @@ function applyDateFilter() {
 
     const source = elayer.getSource();
     source.clear();
-    const addFeatureIfValid = function(feature, type) {
+    
+    // Helper functions for applyDateFilter complexity reduction
+    function isFeatureValidForDateRange(feature, startDate, endDate) {
         const issue = moment.utc(feature.get('utc_issue'));
-        let valid = true;
-        if (start && issue.isBefore(start)) valid = false;
-        if (end && issue.isAfter(end)) valid = false;
-        if (valid) {
+        if (startDate?.isBefore && issue.isBefore(startDate)) return false;
+        if (endDate?.isAfter && issue.isAfter(endDate)) return false;
+        return true;
+    }
+    
+    function isToggleCheckedForType(type) {
+        if (type === "TO") {
             const tornadoToggle = document.getElementById('toggleTornado');
+            return tornadoToggle && tornadoToggle.checked;
+        } else if (type === "FF") {
             const flashFloodToggle = document.getElementById('toggleFlashFlood');
-            if ((type === "TO" && tornadoToggle && tornadoToggle.checked) ||
-                (type === "FF" && flashFloodToggle && flashFloodToggle.checked)) {
-                source.addFeature(feature);
-            }
+            return flashFloodToggle && flashFloodToggle.checked;
+        }
+        return false;
+    }
+    
+    const addFeatureIfValid = function(feature, type) {
+        if (isFeatureValidForDateRange(feature, start, end) && isToggleCheckedForType(type)) {
+            source.addFeature(feature);
         }
     };
+    
     tornadoFeatures.forEach(f => addFeatureIfValid(f, "TO"));
     flashFloodFeatures.forEach(f => addFeatureIfValid(f, "FF"));
 }
@@ -423,11 +435,10 @@ function init_ui() {
     document.getElementById('startdate').value = defaultStartDate;
     document.getElementById('enddate').value = tomorrow;
 
-    const controls = `
-        <div>
-            <label><input type="checkbox" id="toggleTornado" checked /> Show <span style="color: #FF0000; font-weight: bold;">■</span> Tornado Emergencies</label>
-            <br /><label><input type="checkbox" id="toggleFlashFlood" checked /> Show <span style="color: #00FF00; font-weight: bold;">■</span> Flash Flood Emergencies</label>
-        </div>`;
+    const controls = '<div>' +
+        '<label><input type="checkbox" id="toggleTornado" checked /> Show <span style="color: #FF0000; font-weight: bold;">■</span> Tornado Emergencies</label>' +
+        '<br /><label><input type="checkbox" id="toggleFlashFlood" checked /> Show <span style="color: #00FF00; font-weight: bold;">■</span> Flash Flood Emergencies</label>' +
+        '</div>';
     document.getElementById('map').insertAdjacentHTML('beforebegin', controls);
 
     document.getElementById('toggleTornado').addEventListener('change', (e) => {

@@ -106,25 +106,23 @@ function updateSliderLabels() {
     }
 }
 
-function update() {
-    if (isUpdating) return; // Safeguard to prevent recursion
-    isUpdating = true;
-
-    updateSliderLabels();
-
-    // Make sure that our current dt matches what can be provided by the
-    // currently selected option.
-    const opt = getSelectedOption();
+// Helper functions for update() complexity reduction
+function calculateTimeConstraints(opt) {
     const ets = moment();
     const sts = moment(opt.getAttribute('data-sts'));
     const interval = parseInt(opt.getAttribute('data-interval'), 10);
     const avail_lag = parseInt(opt.getAttribute('data-avail_lag'), 10);
+    const time_offset = parseInt(opt.getAttribute('data-time_offset'), 10);
+    
     if (avail_lag > 0) {
-        // Adjust the ets such to account for this lag
         ets.add(0 - avail_lag, 'minutes');
     }
-    const time_offset = parseInt(opt.getAttribute('data-time_offset'), 10);
     ets.subtract(time_offset, 'minutes');
+    
+    return { ets, sts, interval };
+}
+
+function adjustTimeForConstraints(sts, ets, interval) {
     // Check 1: Bounds check
     if (dt < sts) {
         dt = sts;
@@ -132,6 +130,7 @@ function update() {
     if (dt > ets) {
         dt = ets;
     }
+    
     // Check 2: If our modulus is OK, we can quit early
     if ((dt.utc().hours() * 60 + dt.minutes()) % interval !== 0) {
         // Check 3: Place dt on a time that works for the given interval
@@ -147,9 +146,17 @@ function update() {
             dt.utc().startOf('hour');
         }
     }
-    const now = moment();
+}
 
-    // Update year slider
+function updateTimeSliders(sts, interval) {
+    const now = moment();
+    updateYearSlider(sts, now);
+    updateDaySliderValue();
+    updateHourSlider(interval);
+    updateMinuteSlider(interval);
+}
+
+function updateYearSlider(sts, now) {
     const yearSlider = document.getElementById('year_slider');
     if (yearSlider?.noUiSlider) {
         yearSlider.noUiSlider.updateOptions({
@@ -160,14 +167,16 @@ function update() {
             start: dt.local().year()
         });
     }
+}
 
-    // Update day slider
+function updateDaySliderValue() {
     const daySlider = document.getElementById('day_slider');
     if (daySlider?.noUiSlider) {
         daySlider.noUiSlider.set(dt.local().dayOfYear());
     }
+}
 
-    // Update hour slider
+function updateHourSlider(interval) {
     const hourSlider = document.getElementById('hour_slider');
     if (hourSlider?.noUiSlider) {
         if (interval >= 1440) { // Disable if interval is a day or more
@@ -179,8 +188,9 @@ function update() {
             hourSlider.noUiSlider.set(dt.local().hour());
         }
     }
+}
 
-    // Update minute slider
+function updateMinuteSlider(interval) {
     const minuteSlider = document.getElementById('minute_slider');
     if (minuteSlider?.noUiSlider) {
         if (interval < 60) {
@@ -199,42 +209,48 @@ function update() {
             minuteSlider.classList.add('noUi-disabled');
         }
     }
+}
 
-    // Show or hide sliders based on interval
-    if (opt.getAttribute('data-interval') >= 60) {
-        // Hide the entire minute column container
-        const minuteSliderElement = document.getElementById('minute_slider');
-        if (minuteSliderElement?.parentElement) {
+function updateSliderVisibility(interval) {
+    updateMinuteSliderVisibility(interval);
+    updateHourSliderVisibility(interval);
+}
+
+function updateMinuteSliderVisibility(interval) {
+    const minuteSliderElement = document.getElementById('minute_slider');
+    if (minuteSliderElement?.parentElement) {
+        if (interval >= 60) {
+            // Hide the entire minute column container
             minuteSliderElement.parentElement.style.display = 'none';
-        }
-    } else {
-        // Show the entire minute column container
-        const minuteSliderElement = document.getElementById('minute_slider');
-        if (minuteSliderElement?.parentElement) {
+        } else {
+            // Show the entire minute column container
             minuteSliderElement.parentElement.style.display = 'block';
         }
     }
-    if (opt.getAttribute('data-interval') >= 1440) {
-        // Hide the entire hour column container
-        const hourSliderElement = document.getElementById('hour_slider');
-        if (hourSliderElement?.parentElement) {
+}
+
+function updateHourSliderVisibility(interval) {
+    const hourSliderElement = document.getElementById('hour_slider');
+    if (hourSliderElement?.parentElement) {
+        if (interval >= 1440) {
+            // Hide the entire hour column container
             hourSliderElement.parentElement.style.display = 'none';
-        }
-    } else {
-        // Show the entire hour column container
-        const hourSliderElement = document.getElementById('hour_slider');
-        if (hourSliderElement?.parentElement) {
+        } else {
+            // Show the entire hour column container
             hourSliderElement.parentElement.style.display = 'block';
         }
     }
+}
 
-    // Update image display with loading indicator
+function updateImageDisplay(opt) {
     const imagedisplay = document.getElementById('imagedisplay');
     const loadingIndicator = document.getElementById('loading-indicator');
+    
     if (loadingIndicator) {
         loadingIndicator.textContent = 'Loading...'; // Set loading text
         loadingIndicator.style.display = 'block'; // Show loading indicator
     }
+    
     const templateText = escapeHTML(opt.getAttribute('data-template'));
     const url = templateText.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
@@ -242,19 +258,37 @@ function update() {
         .replace(/%d/g, dt.utc().format('DD'))
         .replace(/%H/g, dt.utc().format('HH'))
         .replace(/%i/g, dt.utc().format('mm'));
+        
     imagedisplay.onload = () => {
         if (loadingIndicator) {
             loadingIndicator.style.display = 'none'; // Hide loading indicator
         }
     };
     imagedisplay.onerror = () => {
-        loadingIndicator.textContent = 'Error loading image';
+        if (loadingIndicator) {
+            loadingIndicator.textContent = 'Error loading image';
+        }
     };
     imagedisplay.setAttribute('src', url);
+}
+
+function update() {
+    if (isUpdating) return; // Safeguard to prevent recursion
+    isUpdating = true;
+
+    updateSliderLabels();
+
+    // Make sure that our current dt matches what can be provided by the
+    // currently selected option.
+    const opt = getSelectedOption();
+    const { ets, sts, interval } = calculateTimeConstraints(opt);
+    
+    adjustTimeForConstraints(sts, ets, interval);
+    updateTimeSliders(sts, interval);
+    updateSliderVisibility(interval);
+    updateImageDisplay(opt);
 
     updateURL();
-
-    // Update UI timestamp
     updateUITimestamp();
     isUpdating = false;
 }

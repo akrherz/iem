@@ -324,7 +324,7 @@ function setupFormHandler() {
 function updatePageElements() {
     // Update the card title
     const cardTitle = document.querySelector('.card-title:not(.mb-0)');
-    if (cardTitle && cardTitle.textContent.includes('Max VTEC ETN Listing')) {
+    if (cardTitle?.textContent.includes('Max VTEC ETN Listing')) {
         cardTitle.textContent = `Max VTEC ETN Listing for ${state.config.year}`;
     }
     

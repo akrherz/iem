@@ -6,7 +6,7 @@ const API_BASE_URL = '/api/1/nws/wpc_national_hilo.json';
 
 // Validate raw data structure
 function validateRawData(rawData) {
-    return rawData && rawData.data && Array.isArray(rawData.data) && rawData.data.length > 0;
+    return rawData?.data && Array.isArray(rawData.data) && rawData.data.length > 0;
 }
 
 // Create location string from row data

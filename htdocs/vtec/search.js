@@ -11,6 +11,33 @@ function updateURL(params) {
     window.history.replaceState({}, '', url);
 }
 
+// Helper functions for parameter setting (complexity reduction)
+function addByPointParams(params, newParams) {
+    if (newParams.lon) params.set('lon', newParams.lon);
+    if (newParams.lat) params.set('lat', newParams.lat);
+    if (newParams.buffer) params.set('buffer', newParams.buffer);
+    if (newParams.sdate1) params.set('sdate1', newParams.sdate1);
+    if (newParams.edate1) params.set('edate1', newParams.edate1);
+}
+
+function addByUGCParams(params, newParams) {
+    if (newParams.state) params.set('state', newParams.state);
+    if (newParams.ugc) params.set('ugc', newParams.ugc);
+    if (newParams.lon) params.set('lon', newParams.lon);
+    if (newParams.lat) params.set('lat', newParams.lat);
+    if (newParams.buffer) params.set('buffer', newParams.buffer);
+    if (newParams.sdate) params.set('sdate', newParams.sdate);
+    if (newParams.edate) params.set('edate', newParams.edate);
+}
+
+function addListParams(params, newParams) {
+    if (newParams.by) params.set('by', newParams.by);
+    if (newParams.datum) params.set('datum', newParams.datum);
+    if (newParams.year) params.set('year', newParams.year);
+    if (newParams.phenomena) params.set('phenomena', newParams.phenomena);
+    if (newParams.significance) params.set('significance', newParams.significance);
+}
+
 // Clean URL parameters to only include those relevant to the current mode
 function setModeParams(mode, newParams = {}) {
     const params = new URLSearchParams();
@@ -19,30 +46,20 @@ function setModeParams(mode, newParams = {}) {
     // Add only relevant parameters for each mode
     switch (mode) {
         case 'bypoint':
-            if (newParams.lon) params.set('lon', newParams.lon);
-            if (newParams.lat) params.set('lat', newParams.lat);
-            if (newParams.buffer) params.set('buffer', newParams.buffer);
-            if (newParams.sdate1) params.set('sdate1', newParams.sdate1);
-            if (newParams.edate1) params.set('edate1', newParams.edate1);
+            addByPointParams(params, newParams);
             break;
             
         case 'byugc':
         case 'eventsbypoint':
-            if (newParams.state) params.set('state', newParams.state);
-            if (newParams.ugc) params.set('ugc', newParams.ugc);
-            if (newParams.lon) params.set('lon', newParams.lon);
-            if (newParams.lat) params.set('lat', newParams.lat);
-            if (newParams.buffer) params.set('buffer', newParams.buffer);
-            if (newParams.sdate) params.set('sdate', newParams.sdate);
-            if (newParams.edate) params.set('edate', newParams.edate);
+            addByUGCParams(params, newParams);
             break;
             
         case 'list':
-            if (newParams.by) params.set('by', newParams.by);
-            if (newParams.datum) params.set('datum', newParams.datum);
-            if (newParams.year) params.set('year', newParams.year);
-            if (newParams.phenomena) params.set('phenomena', newParams.phenomena);
-            if (newParams.significance) params.set('significance', newParams.significance);
+            addListParams(params, newParams);
+            break;
+            
+        default:
+            // No additional parameters for unknown modes
             break;
     }
     
@@ -522,29 +539,35 @@ function clearPhenomenaFilter(containerId) {
     updateTableToolbar(containerId, tableData);
 }
 
+// Helper function to get container from containerId (complexity reduction)
+function getTableContainer(containerId) {
+    const titleElement = document.getElementById(containerId);
+    return titleElement ? titleElement.parentNode : null;
+}
+
+// Helper function to format record count text (complexity reduction)
+function formatRecordCountText(totalCount, filteredCount) {
+    const displayCount = filteredCount !== null ? filteredCount : totalCount;
+    const filterText = filteredCount !== null ? ` (${filteredCount} of ${totalCount} shown)` : '';
+    return `${displayCount} record${displayCount !== 1 ? 's' : ''}${filterText}`;
+}
+
 // Update table toolbar with current data count
 function updateTableToolbar(containerId, tableData, filteredCount = null) {
-    const container = containerId === 'table1title' ? 
-        document.getElementById('table1title').parentNode : 
-        document.getElementById('table2title') ? document.getElementById('table2title').parentNode :
-        document.getElementById('table3title') ? document.getElementById('table3title').parentNode : null;
-    
+    const container = getTableContainer(containerId);
     if (!container) return;
     
     const toolbar = container.querySelector('.table-toolbar');
-    if (toolbar) {
-        const countSpan = toolbar.querySelector('.table-count');
-        if (countSpan) {
-            const totalCount = tableData.length;
-            const displayCount = filteredCount !== null ? filteredCount : totalCount;
-            const filterText = filteredCount !== null ? ` (${filteredCount} of ${totalCount} shown)` : '';
-            countSpan.textContent = `${displayCount} record${displayCount !== 1 ? 's' : ''}${filterText}`;
-        }
+    if (!toolbar) return;
+    
+    const countSpan = toolbar.querySelector('.table-count');
+    if (countSpan) {
+        countSpan.textContent = formatRecordCountText(tableData.length, filteredCount);
     }
 }
 
-function buildUI(){
-    // Backend Export Buttons (Server-processed exports)
+// Helper functions for buildUI complexity reduction
+function setupExportButtons() {
     document.querySelectorAll(".iemtool").forEach(btn => {
         btn.addEventListener('click', () => {
             let url = BACKEND_SBW_BYPOINT;
@@ -582,6 +605,9 @@ function buildUI(){
             window.location = `${url}?${new URLSearchParams(params).toString()}`;
         });
     });
+}
+
+function setupTableConfigurations() {
     // Tables
     table1 = new Tabulator("#table1", {
         layout: "fitColumns",
@@ -720,7 +746,9 @@ function buildUI(){
         
         table3Title.parentNode.insertBefore(toolbarDiv, table3Title.nextSibling);
     }
-    
+}
+
+function setupDateInputs() {
     // Native date inputs - applying jQuery removal rule
     sdate = document.querySelector("input[name='sdate']");
     edate = document.querySelector("input[name='edate']");
@@ -756,7 +784,9 @@ function buildUI(){
     edate1.addEventListener('change', () => {
         updateTable();
     });
+}
 
+function setupSelectBoxes() {
     // select boxes - applying jQuery removal rule
     const data = states.map(obj => ({
         id: obj[0],
@@ -823,6 +853,9 @@ function buildUI(){
         });
         updateTable2ByUGC();
     });
+}
+
+function setupManualButtons() {
     // Manual Point Entry
     document.getElementById("manualpt").addEventListener('click', () => {
         const la = parseFloat(document.getElementById("lat").value);
@@ -858,6 +891,9 @@ function buildUI(){
     document.getElementById("button3").addEventListener('click', () => {
         updateTable3();
     });
+}
+
+function setupDropdownPopulation() {
     // Populate wfos select with iemdata.wfos data - applying jQuery removal rule
     const wfoSelect = document.querySelector("select[name='wfo']");
     wfoSelect.innerHTML = '<option value="">Select a WFO</option>';
@@ -929,7 +965,122 @@ function buildUI(){
     
     // Initialize the state
     updateVTECSelects();
+}
+
+function buildUI(){
+    setupExportButtons();
+    setupTableConfigurations();
+    setupDateInputs();
+    setupSelectBoxes();
+    setupManualButtons();
+    setupDropdownPopulation();
 };
+
+// Helper functions for processURLParams complexity reduction
+function processHashMigration() {
+    const hash = window.location.hash;
+    if (hash && hash.length > 1) {
+        migrateHashToURLParams(hash.substring(1));
+        return true; // Will reload with new URL params
+    }
+    return false;
+}
+
+function handleByUGCMode(urlParams) {
+    const state = urlParams.get('state');
+    const ugc = urlParams.get('ugc');
+    const sdateParam = urlParams.get('sdate');
+    const edateParam = urlParams.get('edate');
+    
+    // Set date values if provided
+    if (sdateParam) {
+        document.querySelector('input[name="sdate"]').value = sdateParam;
+    }
+    if (edateParam) {
+        document.querySelector('input[name="edate"]').value = edateParam;
+    }
+    
+    // If we have a state parameter, use it directly
+    if (state) {
+        stateSelect.value = state;
+        stateSelect.dispatchEvent(new Event('change'));
+    } else if (ugc) {
+        // Fallback: extract state from UGC code
+        const stateFromUGC = ugc.substring(0, 2);
+        stateSelect.value = stateFromUGC;
+        stateSelect.dispatchEvent(new Event('change'));
+    }
+}
+
+function handleByPointMode(urlParams) {
+    const lat = parseFloat(urlParams.get('lat'));
+    const lon = parseFloat(urlParams.get('lon'));
+    const buffer = parseFloat(urlParams.get('buffer'));
+    const sdate1Param = urlParams.get('sdate1');
+    const edate1Param = urlParams.get('edate1');
+    
+    // Set date values if provided
+    if (sdate1Param) {
+        document.getElementById('sdate1').value = sdate1Param;
+    }
+    if (edate1Param) {
+        document.getElementById('edate1').value = edate1Param;
+    }
+    
+    if (!isNaN(lat) && !isNaN(lon)) {
+        if (!isNaN(buffer)) {
+            document.querySelector('select[name="buffer"]').value = buffer;
+        }
+        // Update the marker position physically and trigger data loading
+        if (marker1) {
+            marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+        }
+        updateMarkerPosition(lon, lat);
+    }
+}
+
+function handleEventsByPointMode(urlParams) {
+    // This mode uses the byugc tab but with different functionality
+    const lat2 = parseFloat(urlParams.get('lat'));
+    const lon2 = parseFloat(urlParams.get('lon'));
+    const buffer2 = parseFloat(urlParams.get('buffer'));
+    if (!isNaN(lat2) && !isNaN(lon2)) {
+        if (!isNaN(buffer2)) {
+            document.querySelector('select[name="buffer2"]').value = buffer2;
+        }
+        updateMarkerPosition2(lon2, lat2);
+    }
+}
+
+function handleListMode(urlParams) {
+    const by = urlParams.get('by');
+    const datum = urlParams.get('datum');
+    const year = urlParams.get('year');
+    const phenomena = urlParams.get('phenomena');
+    const significance = urlParams.get('significance');
+    
+    if (by && datum && year) {
+        document.querySelector(`input[name='by3'][value='${by}']`).checked = true;
+        if (phenomena && significance) {
+            document.querySelector("input[name='single3'][value='single']").checked = true;
+            document.getElementById("ph3").value = phenomena;
+            document.getElementById("sig3").value = significance;
+        } else {
+            document.querySelector("input[name='single3'][value='all']").checked = true;
+        }
+        document.getElementById("year3").value = year;
+        
+        if (by === "state"){
+            stateSelect3.value = datum;
+        } else {
+            document.getElementById("wfo3").value = datum;
+        }
+        // Update VTEC select states after setting radio buttons
+        const updateEvent = new Event('change');
+        document.querySelector("input[name='single3']:checked").dispatchEvent(updateEvent);
+        updateTable3();
+    }
+}
 
 // Process URL parameters on app initialization - now with Bootstrap tabs
 function processURLParams(){
@@ -937,9 +1088,7 @@ function processURLParams(){
     let mode = urlParams.get('mode');
     
     // Handle backward compatibility: migrate hash to URL parameters
-    const hash = window.location.hash;
-    if (hash && hash.length > 1) {
-        migrateHashToURLParams(hash.substring(1));
+    if (processHashMigration()) {
         return; // Will reload with new URL params
     }
     
@@ -955,105 +1104,25 @@ function processURLParams(){
     activateTab(mode);
     
     switch (mode) {
-        case 'byugc': {
-            const state = urlParams.get('state');
-            const ugc = urlParams.get('ugc');
-            const sdateParam = urlParams.get('sdate');
-            const edateParam = urlParams.get('edate');
-            
-            // Set date values if provided
-            if (sdateParam) {
-                document.querySelector('input[name="sdate"]').value = sdateParam;
-            }
-            if (edateParam) {
-                document.querySelector('input[name="edate"]').value = edateParam;
-            }
-            
-            // If we have a state parameter, use it directly
-            if (state) {
-                stateSelect.value = state;
-                stateSelect.dispatchEvent(new Event('change'));
-            } else if (ugc) {
-                // Fallback: extract state from UGC code
-                const stateFromUGC = ugc.substring(0, 2);
-                stateSelect.value = stateFromUGC;
-                stateSelect.dispatchEvent(new Event('change'));
-            }
+        case 'byugc':
+            handleByUGCMode(urlParams);
             break;
-        }
             
-        case 'bypoint': {
-            const lat = parseFloat(urlParams.get('lat'));
-            const lon = parseFloat(urlParams.get('lon'));
-            const buffer = parseFloat(urlParams.get('buffer'));
-            const sdate1Param = urlParams.get('sdate1');
-            const edate1Param = urlParams.get('edate1');
-            
-            // Set date values if provided
-            if (sdate1Param) {
-                document.getElementById('sdate1').value = sdate1Param;
-            }
-            if (edate1Param) {
-                document.getElementById('edate1').value = edate1Param;
-            }
-            
-            if (!isNaN(lat) && !isNaN(lon)) {
-                if (!isNaN(buffer)) {
-                    document.querySelector('select[name="buffer"]').value = buffer;
-                }
-                // Update the marker position physically and trigger data loading
-                if (marker1) {
-                    marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
-                }
-                updateMarkerPosition(lon, lat);
-            }
+        case 'bypoint':
+            handleByPointMode(urlParams);
             break;
-        }
             
-        case 'eventsbypoint': {
-            // This mode uses the byugc tab but with different functionality
-            const lat2 = parseFloat(urlParams.get('lat'));
-            const lon2 = parseFloat(urlParams.get('lon'));
-            const buffer2 = parseFloat(urlParams.get('buffer'));
-            if (!isNaN(lat2) && !isNaN(lon2)) {
-                if (!isNaN(buffer2)) {
-                    document.querySelector('select[name="buffer2"]').value = buffer2;
-                }
-                updateMarkerPosition2(lon2, lat2);
-            }
+        case 'eventsbypoint':
+            handleEventsByPointMode(urlParams);
             break;
-        }
             
-        case 'list': {
-            const by = urlParams.get('by');
-            const datum = urlParams.get('datum');
-            const year = urlParams.get('year');
-            const phenomena = urlParams.get('phenomena');
-            const significance = urlParams.get('significance');
-            
-            if (by && datum && year) {
-                document.querySelector(`input[name='by3'][value='${by}']`).checked = true;
-                if (phenomena && significance) {
-                    document.querySelector("input[name='single3'][value='single']").checked = true;
-                    document.getElementById("ph3").value = phenomena;
-                    document.getElementById("sig3").value = significance;
-                } else {
-                    document.querySelector("input[name='single3'][value='all']").checked = true;
-                }
-                document.getElementById("year3").value = year;
-                
-                if (by === "state"){
-                    stateSelect3.value = datum;
-                } else {
-                    document.getElementById("wfo3").value = datum;
-                }
-                // Update VTEC select states after setting radio buttons
-                const updateEvent = new Event('change');
-                document.querySelector("input[name='single3']:checked").dispatchEvent(updateEvent);
-                updateTable3();
-            }
+        case 'list':
+            handleListMode(urlParams);
             break;
-        }
+            
+        default:
+            // Unknown mode, use default (bypoint) already set above
+            break;
     }
 }
 
@@ -1072,6 +1141,9 @@ function activateTab(mode) {
         case 'list':
             tabId = 'list-tab';
             break;
+        default:
+            // Use default tab (bypoint-tab) already set above
+            break;
     }
     
     // Activate the tab using Bootstrap 5 API
@@ -1082,6 +1154,41 @@ function activateTab(mode) {
     }
 }
 
+// Helper functions for hash migration (complexity reduction)
+function handleByUGCHashMigration(tokens, params) {
+    params.set('mode', 'byugc');
+    params.set('ugc', tokens[1]);
+}
+
+function handleByPointHashMigration(tokens, params) {
+    params.set('mode', 'bypoint');
+    params.set('lon', tokens[1]);
+    params.set('lat', tokens[2]);
+    if (tokens.length >= 4) {
+        params.set('buffer', tokens[3]);
+    }
+}
+
+function handleEventsByPointHashMigration(tokens, params) {
+    params.set('mode', 'eventsbypoint');
+    params.set('lon', tokens[1]);
+    params.set('lat', tokens[2]);
+    if (tokens.length >= 4) {
+        params.set('buffer', tokens[3]);
+    }
+}
+
+function handleListHashMigration(tokens, params) {
+    params.set('mode', 'list');
+    params.set('by', tokens[1]);
+    params.set('datum', tokens[2]);
+    params.set('year', tokens[3]);
+    if (tokens.length >= 6) {
+        params.set('phenomena', tokens[4]);
+        params.set('significance', tokens[5]);
+    }
+}
+
 // Migrate old hash URLs to URL parameters for backward compatibility
 function migrateHashToURLParams(hash) {
     const tokens = hash.split("/");
@@ -1089,31 +1196,13 @@ function migrateHashToURLParams(hash) {
     
     if (tokens.length >= 2) {
         if (tokens[0] === 'byugc') {
-            params.set('mode', 'byugc');
-            params.set('ugc', tokens[1]);
+            handleByUGCHashMigration(tokens, params);
         } else if (tokens[0] === 'bypoint' && tokens.length >= 3) {
-            params.set('mode', 'bypoint');
-            params.set('lon', tokens[1]);
-            params.set('lat', tokens[2]);
-            if (tokens.length >= 4) {
-                params.set('buffer', tokens[3]);
-            }
+            handleByPointHashMigration(tokens, params);
         } else if (tokens[0] === 'eventsbypoint' && tokens.length >= 3) {
-            params.set('mode', 'eventsbypoint');
-            params.set('lon', tokens[1]);
-            params.set('lat', tokens[2]);
-            if (tokens.length >= 4) {
-                params.set('buffer', tokens[3]);
-            }
+            handleEventsByPointHashMigration(tokens, params);
         } else if (tokens[0] === 'list' && tokens.length >= 4) {
-            params.set('mode', 'list');
-            params.set('by', tokens[1]);
-            params.set('datum', tokens[2]);
-            params.set('year', tokens[3]);
-            if (tokens.length >= 6) {
-                params.set('phenomena', tokens[4]);
-                params.set('significance', tokens[5]);
-            }
+            handleListHashMigration(tokens, params);
         }
     }
     
