@@ -1,0 +1,196 @@
+<?php
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 166);
+require_once "../../../include/mlib.php";
+force_https();
+require_once "../../../include/myview.php";
+require_once "../../../include/iemprop.php";
+$t = new MyView();
+$OL = "10.6.1";
+
+$t->jsextra = <<<EOM
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="index.js?v=10"></script>
+EOM;
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
+<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="index.css" />
+EOM;
+$t->title = "WPC Excessive Rainfall Outlook + Discussion Search by Point";
+
+$t->content = <<<EOM
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+  <li class="breadcrumb-item active" aria-current="page">WPC Excessive Rainfall Outlook + Discussion Search by Point</li>
+</ol>
+</nav>
+<p>This application allows you to search an archive of Weather Prediction Center (WPC)
+Excessive Rainfall Outlooks and Mesoscale Precipitation Discussions (MPD)s.
+This archive is <strong>unofficial</strong> and based on IEM's processing of
+products issued by
+the WPC. Each tab presents buttons that allow for a download of the data in
+Excel or CSV format and a direct link to the JSON service backending the
+table.</p>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-4 bg-light p-4 rounded-3 border">
+        <h3 class="mb-3">Search by Point</h3>
+        
+        <div class="mb-4">
+            <h5 class="mb-3">Manual Coordinate Entry</h5>
+            <div class="row g-2">
+                <div class="col-6">
+                    <label for="lat" class="form-label small">Latitude (°N)</label>
+                    <input type="number" class="form-control form-control-sm" id="lat" placeholder="41.5300" step="0.0001">
+                </div>
+                <div class="col-6">
+                    <label for="lon" class="form-label small">Longitude (°E)</label>
+                    <input type="number" class="form-control form-control-sm" id="lon" placeholder="-93.6530" step="0.0001">
+                </div>
+            </div>
+            <button class="btn btn-primary btn-sm mt-2 w-100" id="manualpt">
+                <i class="fa fa-search"></i> Update Search
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <h5 class="mb-3">Outlook Search Options</h5>
+            <div class="form-check mb-2">
+                <input type="checkbox" class="form-check-input" id="last" name="last" value="1">
+                <label class="form-check-label" for="last">
+                    List Most Recent 
+                    <input type="number" class="form-control form-control-sm d-inline-block ms-1" 
+                           id="events" name="events" value="1" min="1" max="100" style="width: 60px;">
+                    Event(s)
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-4 outlook-days">
+            <h5 class="mb-3">Select Outlook Day</h5>
+            <div class="day-grid">
+                <div class="day-item">
+                    <input type="radio" name="day" value="1" checked id="d1">
+                    <label for="d1">Day 1</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="2" id="d2">
+                    <label for="d2">Day 2</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="3" id="d3">
+                    <label for="d3">Day 3</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="4" id="d4">
+                    <label for="d4">Day 4</label>
+                </div>
+                <div class="day-item">
+                    <input type="radio" name="day" value="5" id="d5">
+                    <label for="d5">Day 5</label>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mb-4">
+            <h5 class="mb-3">Map Selection</h5>
+            <p class="small text-muted mb-2">Drag the marker to select coordinates:</p>
+            <div id="map" class="map border rounded"
+                 data-lat-input="lat"
+                 data-lon-input="lon"
+                 data-initial-lat="41.53"
+                 data-initial-lon="-93.653"
+                 data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+        </div>
+    </div>
+    <div class="col-md-8">
+    <h3 id="search-results-header">Results of Point Search</h3>
+    
+    <!-- Central Loading Indicator -->
+    <div id="central-loading" class="text-center py-4 mb-3" style="display: none;">
+        <div class="spinner-border text-primary me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="text-muted">Searching the database, one moment...</span>
+    </div>
+    
+<div id="thetabs">	
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#1a" data-bs-toggle="tab">Excessive Rainfall Outlooks</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#2a" data-bs-toggle="tab">Mesoscale Precipitation Discussions</a>
+        </li>
+    </ul>
+
+    <div class="tab-content clearfix">
+        <div class="tab-pane active" id="1a">
+
+<p>This archive dates back until <strong>2019</strong>.</p>
+
+<div class="float-end">
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_excel">
+    <i class="fa fa-table"></i> Download as Excel</a>
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_csv">
+    <i class="fa fa-table"></i> Download as CSV</a>
+    <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_link">
+    <i class="fa fa-link"></i> JSON-P Webservice</a>
+</div>
+
+<table id="outlooks" class="table table-bordered table-striped">
+<caption></caption>
+<thead>
+<tr><th>Day</th><th>Threshold</th><th>Outlook Issued At (UTC)</th><th>Outlook Begins (UTC)</th>
+<th>Outlook Expires (UTC)</th></tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+
+</div>
+<div class="tab-pane" id="2a">
+
+<p>This archive dates back until <strong>26 September 2017</strong> and is based
+on the MPD polygon included within the text.</p>
+
+<div class="float-end">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_excel">
+    <i class="fa fa-table"></i> Download as Excel</a>
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_csv">
+    <i class="fa fa-table"></i> Download as CSV</a>
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_link">
+    <i class="fa fa-link"></i> JSON-P Webservice</a>
+</div>
+
+
+<table id="mpds" class="table table-bordered table-striped">
+<caption></caption>
+<thead>
+<tr><th>Discussion Number</th>
+<th>UTC Valid</th>
+<th>UTC Expire</th>
+<th>Watch Confidence</th>
+<th>Concerning</th>
+</tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+        </div><!-- ./2a -->
+</div><!-- ./thetabs -->
+
+    </div><!-- ./col-md-8 -->
+</div><!-- ./row -->
+
+EOM;
+$t->render('full.phtml');
