@@ -190,6 +190,8 @@ def main(reprocess: bool, dt: datetime | None, station: str | None):
         for col in ALLCOLS:
             if col not in df.columns:
                 df[col] = np.nan
+        # Prevent bad temperatures from cascading into dewpoint calculations
+        df["TOBS"] = df["TOBS"].clip(lower=-100, upper=150)
         if df["TOBS"].isna().all() or df["RHUM"].isna().all():
             df["dwpf"] = np.nan
         else:

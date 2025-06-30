@@ -7,12 +7,13 @@ require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 
 $t = new MyView();
+
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
+<link type="text/css" href="list_ugcs.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="list_ugcs.js"></script>
+<script src="list_ugcs.module.js" type="module"></script>
 EOM;
 
 $wfo = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : 'DMX';
@@ -44,62 +45,59 @@ else if ($w == "state") {
     $title = "for state: $state";
     $arr["state"] = $state;
 }
-$jobj = iemws_json("nws/ugcs.json", $arr);
-
-$table = "";
-foreach ($jobj["data"] as $bogus => $row) {
-    $table .= sprintf('<tr><td>%s</td><td><a href="/vtec/search.php#byugc/%s">Link</a></td>'.
-        '<td>%s</td><td>%s</td></tr>', $row["ugc"], $row["ugc"], $row["name"], $row["wfo"]);
-}
 
 $wfoselected = ($w == "wfo") ? 'checked="checked"': "";
 $stateselected = ($w == "state") ? 'checked="checked"': "";
 $sselect = stateSelect($state);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS User Resources</a></li>
- <li class="active">NWS UGCs by WFO</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-4 rounded">
+    <li class="breadcrumb-item"><a href="/nws/">NWS User Resources</a></li>
+    <li class="breadcrumb-item active" aria-current="page">NWS UGCs by WFO</li>
+  </ol>
+</nav>
 
-<p>The National Weather Service issues many products associated with 
-<a href="https://www.weather.gov/gis/AWIPSShapefiles">Universal
-Geographic Codes</a> (UGCs).  These UGCs represent counties, forecast zones, marine zones, or
-fire weather zones.  This page lists out a current listing of such codes and is powered
-by an <a href="/api/1/docs#/nws/service_nws_ugcs__fmt__get">IEM Webservice</a>.
-The default display <a href="list_ugcs.php">lists all non-fire weather UGCs</a> or
-you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p>
+<div class="card ugcs-card">
+  <div class="card-body">
+    <p class="mb-2">The National Weather Service issues many products associated with
+      <a href="https://www.weather.gov/gis/AWIPSShapefiles">Universal Geographic Codes</a> (UGCs).
+      These UGCs represent counties, forecast zones, marine zones, or fire weather zones. This page lists out a current listing of such codes and is powered by an
+      <a href="/api/1/docs#/nws/service_nws_ugcs__fmt__get">IEM Webservice</a>.
+    </p>
+    <p class="mb-0">The default display <a href="list_ugcs.php">lists all non-fire weather UGCs</a> or
+      you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.
+    </p>
+  </div>
+</div>
 
-<p><button id="makefancy">Make Table Interactive</button></p>
-
-<form method="GET" name="changeme">
-<table class="table table-sm">
-<tr>
-<td>
-<input type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
-<label for="wfo">Select by WFO</label>:</strong>{$wselect}
-</td>
-<td>
-<input type="radio" name="w" value="state" {$stateselected} id="state">
-<label for="state">Select by State</label>:</strong>{$sselect}
-</td>
-<td>{$fselect}</td>
-<td><input type="submit" value="View UGCs"></td>
-</tr>
-</table>
+<form method="GET" name="changeme" class="row g-3 align-items-end mb-4 bg-white p-3 rounded shadow-sm">
+  <div class="col-md-4">
+    <div class="form-check mb-1">
+      <input class="form-check-input" type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
+      <label class="form-check-label ugcs-form-label" for="wfo">Select by WFO</label>
+    </div>
+    {$wselect}
+  </div>
+  <div class="col-md-4">
+    <div class="form-check mb-1">
+      <input class="form-check-input" type="radio" name="w" value="state" {$stateselected} id="state">
+      <label class="form-check-label ugcs-form-label" for="state">Select by State</label>
+    </div>
+    {$sselect}
+  </div>
+  <div class="col-md-3">
+    <label for="just_firewx" class="form-label ugcs-form-label">Zone Type</label>
+    {$fselect}
+  </div>
+  <div class="col-md-1 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">View UGCs</button>
+  </div>
 </form>
 
-<h3>UGCs listing {$title}</h3>
-
-<div id="thetable">
-<table class="table table-striped table-sm table-bordered">
-<thead class="sticky">
-<tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr>
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
+<div class="ugcs-table-container">
+  <h3 class="h5 mb-3">UGCs listing {$title}</h3>
+  <div id="ugcs-table"></div>
 </div>
 EOM;
 $t->render('full.phtml');

@@ -173,6 +173,6 @@ $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
 <script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script src="extremes.js?v=17" type="text/javascript"></script>
+<script src="extremes.js?v=2" type="text/javascript"></script>
 EOM;
 $t->render('full.phtml');

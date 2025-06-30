@@ -79,25 +79,32 @@ function initializeApp() {
 function getConfig() {
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Extract values from form inputs as fallback
-    const networkSelect = document.querySelector('select[name="network"]');
-    const monthSelect = document.querySelector('select[name="month"]');
-    const daySelect = document.querySelector('select[name="day"]');
-    const tblSelect = document.querySelector('select[name="tbl"]');
-    
+
+    // Helper to get value from URL or fallback
+    function getParamOrInput(param, selector, fallback) {
+        const urlVal = urlParams.get(param);
+        if (urlVal !== null && urlVal !== undefined && urlVal !== '') {
+            return urlVal;
+        }
+        const input = document.querySelector(selector);
+        if (input && input.value !== undefined && input.value !== '') {
+            return input.value;
+        }
+        return fallback;
+    }
+
     return {
-        tbl: urlParams.get('tbl') || (tblSelect ? tblSelect.value : 'climate'),
-        month: parseInt(urlParams.get('month')) || (monthSelect ? parseInt(monthSelect.value) : new Date().getMonth() + 1),
-        day: parseInt(urlParams.get('day')) || (daySelect ? parseInt(daySelect.value) : new Date().getDate()),
-        sortcol: urlParams.get('sortcol') || 'station',
-        network: urlParams.get('network') || (networkSelect ? networkSelect.value : 'IACLIMATE'),
+        tbl: getParamOrInput('tbl', 'select[name="tbl"]', 'climate'),
+        month: parseInt(getParamOrInput('month', 'select[name="month"]', new Date().getMonth() + 1), 10),
+        day: parseInt(getParamOrInput('day', 'select[name="day"]', new Date().getDate()), 10),
+        sortcol: getParamOrInput('sortcol', 'unused', 'station'),
+        network: getParamOrInput('network', 'select[name="network"]', 'IACLIMATE'),
         station: urlParams.get('station') || null,
-        sortdir: urlParams.get('sortdir') || 'ASC',
-        labelAttribute: urlParams.get('label') || 'avg_high',
-        yearFilter: urlParams.get('year') || null
+        sortdir: getParamOrInput('sortdir', 'unused', 'ASC'),
+        labelAttribute: getParamOrInput('label', 'unused', 'avg_high'),
+        yearFilter: getParamOrInput('year', 'unused', null)
     };
-};
+}
 
 
 
@@ -293,12 +300,11 @@ function getTableColumns() {
                     const aSort = aRow.getData().date_sort || 0;
                     const bSort = bRow.getData().date_sort || 0;
                     return aSort - bSort;
-                } else {
-                    // For station names, extract text content from HTML
-                    const aText = a.replace(/<[^>]*>/g, '').trim();
-                    const bText = b.replace(/<[^>]*>/g, '').trim();
-                    return aText.localeCompare(bText);
                 }
+                // For station names, use the station id
+                const aText = aRow.getData().station || '';
+                const bText = bRow.getData().station || '';
+                return aText.localeCompare(bText);
             }
         },
         {
@@ -607,11 +613,22 @@ function showError(message) {
  * Attach event listeners for enhanced interactions
  */
 function attachEventListeners() {
+    // Helper to add change listeners to form elements
+    function addFormChangeListeners(form) {
+        const selectors = ['select[name="network"]', 'select[name="month"]', 'select[name="day"]', 'select[name="tbl"]'];
+        selectors.forEach((selector) => {
+            const el = form.querySelector(selector);
+            if (el) {
+                el.addEventListener('change', handleFormChange);
+            }
+        });
+    }
+
     // Handle form changes dynamically (don't submit, just update data)
     const form = document.getElementById('controls-form');
     const submitBtn = document.getElementById('form-submit-btn');
     const dynamicIndicator = document.getElementById('dynamic-indicator');
-    
+
     if (form && !appState.isStationView) {
         // Update submit button text for dynamic mode
         if (submitBtn) {
@@ -620,37 +637,21 @@ function attachEventListeners() {
             submitBtn.style.color = 'white';
             submitBtn.style.border = '1px solid #0d6efd';
         }
-        
+
         // Show dynamic indicator
         if (dynamicIndicator) {
             dynamicIndicator.style.display = 'block';
         }
-        
+
         // Prevent form submission
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             handleFormChange();
             return false;
         });
-        
+
         // Add change listeners to all form elements
-        const networkSelect = form.querySelector('select[name="network"]');
-        const monthSelect = form.querySelector('select[name="month"]');
-        const daySelect = form.querySelector('select[name="day"]');
-        const tblSelect = form.querySelector('select[name="tbl"]');
-        
-        if (networkSelect) {
-            networkSelect.addEventListener('change', handleFormChange);
-        }
-        if (monthSelect) {
-            monthSelect.addEventListener('change', handleFormChange);
-        }
-        if (daySelect) {
-            daySelect.addEventListener('change', handleFormChange);
-        }
-        if (tblSelect) {
-            tblSelect.addEventListener('change', handleFormChange);
-        }
+        addFormChangeListeners(form);
     }
 
     // Handle browser back/forward navigation
@@ -658,38 +659,38 @@ function attachEventListeners() {
         // Reload the page to handle URL parameter changes
         window.location.reload();
     });
-    
+
     // Handle label attribute changes for map
     const labelSelect = document.getElementById('label-attribute');
     if (labelSelect && !appState.isStationView) {
         // Set initial value
         labelSelect.value = appState.labelAttribute;
-        
+
         labelSelect.addEventListener('change', function() {
             appState.labelAttribute = this.value;
             appState.config.labelAttribute = this.value;
-            
+
             // Update year filter visibility based on new attribute
             updateYearFilterVisibility();
-            
+
             // Repopulate year filter with years relevant to the new attribute
             if (appState.allFeatures && !['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(this.value)) {
                 populateYearFilter(appState.allFeatures);
             }
-            
+
             // Update URL to persist the selection
             updateUrl();
-            
+
             // Update map
             updateMapLabels();
-            
+
             // Re-apply year filter since filtering logic depends on selected attribute
             if (appState.yearFilter) {
                 applyYearFilter();
             }
         });
     }
-    
+
     // Handle year filter changes for map
     const yearFilter = document.getElementById('year-filter');
     if (yearFilter && !appState.isStationView) {
@@ -697,17 +698,17 @@ function attachEventListeners() {
         if (appState.yearFilter) {
             yearFilter.value = appState.yearFilter;
         }
-        
+
         // Set initial visibility based on current attribute
         updateYearFilterVisibility();
-        
+
         yearFilter.addEventListener('change', function() {
             appState.yearFilter = this.value || null;
             appState.config.yearFilter = this.value || null;
-            
+
             // Update URL to persist the selection
             updateUrl();
-            
+
             // Apply filter
             applyYearFilter();
         });
@@ -886,51 +887,64 @@ function addGeoJSONToMap(geoJsonData) {
  */
 function getStationStyle(feature) {
     const props = feature.getProperties();
-    
-    // Get background color based on selected attribute value
     const value = props[appState.labelAttribute];
     const backgroundColor = getColorForValue(value);
-    
-    // Get label text based on selected attribute
-    let labelText = '';
-    if (value !== null && value !== undefined) {
-        if (appState.labelAttribute === 'station') {
-            labelText = String(value);
-        } else if (appState.labelAttribute === 'years') {
-            labelText = String(value);
-        } else if (appState.labelAttribute.includes('precip')) {
-            // Precipitation values - show with 2 decimals and inch symbol
-            labelText = typeof value === 'number' ? `${value.toFixed(2)}"` : String(value);
-        } else if (appState.labelAttribute.includes('high') || appState.labelAttribute.includes('low')) {
-            // Temperature values - show with degree symbol
-            labelText = typeof value === 'number' ? `${Math.round(value)}°` : String(value);
-        } else if (Array.isArray(value)) {
-            labelText = value.join(',');
-        } else if (typeof value === 'number') {
-            labelText = value.toFixed(1);
-        } else {
-            labelText = String(value);
-        }
+
+    // Refactored for complexity: split getLabelText into smaller helpers (Rule: complexity, refactoring)
+    function isNullOrUndefined(val) {
+        return val === null || val === undefined;
     }
-    
+
+    function formatStationOrYears(val) {
+        return String(val);
+    }
+
+    function formatPrecip(val) {
+        return typeof val === 'number' ? `${val.toFixed(2)}"` : String(val);
+    }
+
+    function formatHighLow(val) {
+        return typeof val === 'number' ? `${Math.round(val)}°` : String(val);
+    }
+
+    function formatArray(val) {
+        return val.join(',');
+    }
+
+    function formatNumber1(val) {
+        return val.toFixed(1);
+    }
+
+    function getLabelText(val, attr) {
+        if (isNullOrUndefined(val)) return '';
+        if (attr === 'station' || attr === 'years') {
+            return formatStationOrYears(val);
+        }
+        if (attr.includes('precip')) {
+            return formatPrecip(val);
+        }
+        if (attr.includes('high') || attr.includes('low')) {
+            return formatHighLow(val);
+        }
+        if (Array.isArray(val)) {
+            return formatArray(val);
+        }
+        if (typeof val === 'number') {
+            return formatNumber1(val);
+        }
+        return String(val);
+    }
+
+    const labelText = getLabelText(value, appState.labelAttribute);
+
     return new ol.style.Style({
         text: new ol.style.Text({
             text: labelText,
             font: 'bold 12px Arial',
-            fill: new ol.style.Fill({
-                color: '#333333'
-            }),
-            stroke: new ol.style.Stroke({
-                color: '#ffffff',
-                width: 2
-            }),
-            backgroundFill: new ol.style.Fill({
-                color: backgroundColor
-            }),
-            backgroundStroke: new ol.style.Stroke({
-                color: '#ffffff',
-                width: 1
-            }),
+            fill: new ol.style.Fill({ color: '#333333' }),
+            stroke: new ol.style.Stroke({ color: '#ffffff', width: 2 }),
+            backgroundFill: new ol.style.Fill({ color: backgroundColor }),
+            backgroundStroke: new ol.style.Stroke({ color: '#ffffff', width: 1 }),
             padding: [3, 6, 3, 6]
         })
     });
@@ -938,16 +952,34 @@ function getStationStyle(feature) {
 
 /**
  * Show popup with station information
+
+
+/**
+ * Helper to generate a table row with optional highlight if year matches
+ * Exported for use in other functions.
  */
+window.popupRow = function popupRow(label, value, yearsArr, yearFilter, valueSuffix = '', formatYearsFn = null) {
+    let highlight = '';
+    if (
+        yearFilter &&
+        Array.isArray(yearsArr) &&
+        yearsArr.includes(parseInt(yearFilter))
+    ) {
+        highlight = ' style="background: #fff3cd; font-weight: bold;"';
+    }
+    const yearsStr = formatYearsFn && yearsArr ? formatYearsFn(yearsArr) : (yearsArr ? yearsArr : '');
+    return `<tr${highlight}><td class="label">${label}:</td><td>${value}${valueSuffix}${yearsArr ? ` (${yearsStr})` : ''}</td></tr>`;
+};
+
 function showStationPopup(feature, coordinate) {
     const props = feature.getProperties();
     const content = document.getElementById('popup-content');
-    
+
     // Use station name if available, otherwise fall back to station ID
     const stationDisplayName = props.name ? `${props.name} (${props.station})` : props.station;
-    
+
     let popupHtml = `<h5>${stationDisplayName}</h5>`;
-    
+
     // If year filter is active, highlight records from that year
     if (appState.yearFilter) {
         const filterYear = parseInt(appState.yearFilter);
@@ -955,64 +987,30 @@ function showStationPopup(feature, coordinate) {
             <strong>Showing records from ${filterYear}</strong>
         </div>`;
     }
-    
-    popupHtml += `<table class="popup-data-table">
-        <tr><td class="label">Years:</td><td>${props.years || 'N/A'}</td></tr>
-        <tr><td class="label">Avg High:</td><td>${formatNumber(props.avg_high, 1)}°F</td></tr>`;
-    
-    // Highlight max high if it matches the filter year
-    let maxHighClass = '';
-    if (appState.yearFilter && Array.isArray(props.max_high_years) && 
-        props.max_high_years.includes(parseInt(appState.yearFilter))) {
-        maxHighClass = ' style="background: #fff3cd; font-weight: bold;"';
-    }
-    popupHtml += `<tr${maxHighClass}><td class="label">Max High:</td><td>${props.max_high || 'N/A'}°F (${formatYears(props.max_high_years)})</td></tr>`;
-    
-    // Highlight min high if it matches the filter year
-    let minHighClass = '';
-    if (appState.yearFilter && Array.isArray(props.min_high_years) && 
-        props.min_high_years.includes(parseInt(appState.yearFilter))) {
-        minHighClass = ' style="background: #fff3cd; font-weight: bold;"';
-    }
-    popupHtml += `<tr${minHighClass}><td class="label">Min High:</td><td>${props.min_high || 'N/A'}°F (${formatYears(props.min_high_years)})</td></tr>`;
-    
+
+
+    popupHtml += '<table class="popup-data-table">';
+    popupHtml += `<tr><td class="label">Years:</td><td>${props.years || 'N/A'}</td></tr>`;
+    popupHtml += `<tr><td class="label">Avg High:</td><td>${formatNumber(props.avg_high, 1)}°F</td></tr>`;
+
+    // Use helper for rows with year highlighting
+    popupHtml += window.popupRow('Max High', props.max_high || 'N/A', props.max_high_years, appState.yearFilter, '°F', formatYears);
+    popupHtml += window.popupRow('Min High', props.min_high || 'N/A', props.min_high_years, appState.yearFilter, '°F', formatYears);
     popupHtml += `<tr><td class="label">Avg Low:</td><td>${formatNumber(props.avg_low, 1)}°F</td></tr>`;
-    
-    // Highlight max low if it matches the filter year
-    let maxLowClass = '';
-    if (appState.yearFilter && Array.isArray(props.max_low_years) && 
-        props.max_low_years.includes(parseInt(appState.yearFilter))) {
-        maxLowClass = ' style="background: #fff3cd; font-weight: bold;"';
-    }
-    popupHtml += `<tr${maxLowClass}><td class="label">Max Low:</td><td>${props.max_low || 'N/A'}°F (${formatYears(props.max_low_years)})</td></tr>`;
-    
-    // Highlight min low if it matches the filter year
-    let minLowClass = '';
-    if (appState.yearFilter && Array.isArray(props.min_low_years) && 
-        props.min_low_years.includes(parseInt(appState.yearFilter))) {
-        minLowClass = ' style="background: #fff3cd; font-weight: bold;"';
-    }
-    popupHtml += `<tr${minLowClass}><td class="label">Min Low:</td><td>${props.min_low || 'N/A'}°F (${formatYears(props.min_low_years)})</td></tr>`;
-    
+    popupHtml += window.popupRow('Max Low', props.max_low || 'N/A', props.max_low_years, appState.yearFilter, '°F', formatYears);
+    popupHtml += window.popupRow('Min Low', props.min_low || 'N/A', props.min_low_years, appState.yearFilter, '°F', formatYears);
     popupHtml += `<tr><td class="label">Avg Precip:</td><td>${formatNumber(props.avg_precip, 2)}"</td></tr>`;
-    
-    // Highlight max precip if it matches the filter year
-    let maxPrecipClass = '';
-    if (appState.yearFilter && Array.isArray(props.max_precip_years) && 
-        props.max_precip_years.includes(parseInt(appState.yearFilter))) {
-        maxPrecipClass = ' style="background: #fff3cd; font-weight: bold;"';
-    }
-    popupHtml += `<tr${maxPrecipClass}><td class="label">Max Precip:</td><td>${formatNumber(props.max_precip, 2)}" (${formatYears(props.max_precip_years)})</td></tr>`;
-    
+    popupHtml += window.popupRow('Max Precip', formatNumber(props.max_precip, 2), props.max_precip_years, appState.yearFilter, '"', formatYears);
+
     popupHtml += `</table>
         <p style="margin-top: 8px; font-size: 11px;">
             <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? `&label=${appState.labelAttribute}` : ''}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}" 
                target="_blank">View station details →</a>
         </p>`;
-    
+
     content.innerHTML = popupHtml;
     appState.popup.setPosition(coordinate);
-};
+}
 
 /**
  * Update map labels when attribute selection changes

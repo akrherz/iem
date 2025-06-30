@@ -16,7 +16,6 @@
 // - data-precision: Number of decimal places for input values (default: 4)
 
 (function() {
-    'use strict';
 
     // Helper functions for olSelectLonLat complexity reduction - encapsulated to avoid conflicts
     function extractConfig(element) {

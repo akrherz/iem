@@ -28,161 +28,157 @@ $d2 = daySelect(date("d"), "day2");
 $sselect = selectNetworkType("CLIMATE", $network);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/COOP/">NWS COOP Network</a></li>
-<li class="active">Download IEM Climodat Daily Data</li>
-</ol>
+<div class="container my-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-light px-3 py-2 mb-4 rounded">
+      <li class="breadcrumb-item"><a href="/COOP/">NWS COOP Network</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Download IEM Climodat Daily Data</li>
+    </ol>
+  </nav>
 
-<p>If you are looking for actual NWS COOP observations with no estimating and very little
- quality control done, check out <a href="obs-fe.phtml">this page</a>.</p>
+  <div class="card mb-4">
+    <div class="card-body">
+      <p>If you are looking for actual NWS COOP observations with no estimating and very little
+      quality control done, check out <a href="obs-fe.phtml">this page</a>.</p>
+      <p>This page allows you to download observed, sometimes quality controlled, 
+      and sometimes estimated once daily reports from various NWS networks including
+      COOP.  More detailed
+      <a href="/info/datasets/climodat.html">documentation exists here</a> and should be 
+      consulted before using the data.
+      <a href="/cgi-bin/request/coop.py?help" class="btn btn-secondary btn-sm ms-2 mb-1">
+        <i class="fa fa-file"></i> Backend documentation</a> exists for those wishing
+      to script against the backend service.</p>
+      <p>Data is also available from the following states:</p>
+      <form method="GET" name="SSSS" class="row g-2 align-items-end mb-0">
+        <div class="col-auto">
+          {$sselect}
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-primary btn-sm">Select Network</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<p>This page allows you to download observed, sometimes quality controlled, 
- and sometimes estimated once daily reports from various NWS networks including
- COOP.  More detailed
- <a href="/info/datasets/climodat.html">documentation exists here</a> and should be 
- consulted before using the data.
-<a href="/cgi-bin/request/coop.py?help" class="btn btn-secondary">
-<i class="fa fa-file"></i> Backend documentation</a> exists for those wishing
-to script against the backend service.</p>
+  <div class="alert alert-warning mb-4">The purpose is to provide a dataset that does 
+   not have holes in it for temperature and precipitation and is updated up 
+   until yesterday for most sites.  Unfortunately, these
+   values are not on a local calendar day, so please be very careful before
+   use.  Unfortunately, long term observations that are on local calendar 
+   days does not exist for many locations!</div>
 
-<p>Data is also available from the following states: 
-<form method="GET" name="SSSS">
-{$sselect}
-<input type="submit" value="Select Network">
-</form>
-
-<div class="alert alert-warning">The purpose is to provide a dataset that does 
- not have holes in it for temperature and precipitation and is updated up 
- until yesterday for most sites.  Unfortunately, these
- values are not on a local calendar day, so please be very careful before
- use.  Unfortunately, long term observations that are on local calendar 
- days does not exist for many locations!</div>
-
-<form target="_blank" method="GET" action="/cgi-bin/request/coop.py" name="iemss">
-<input type="hidden" name="network" value="{$network}" />
-
-<div class="row"><div class="col-sm-6">
-
-<h4>1. Select station(s):</h4>
-<div id="iemss" data-network="{$network}" data-only-online="0"></div>
-
-</div><div class="col-sm-6">
-
-<p><h4>2. Select Start/End Time:</h4>
-<i>Please note the start year in the station selector. If you only want data
-for one day, set the start and end times to the same value.</i>
-<table>
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-  </tr>
-
-  <tr>
-    <th>Start:</th>
-    <td>{$y1}</td>
-    <td>{$m1}</td>
-    <td>{$d1}</td>
-  </tr>
-
-  <tr>
-    <th>End:</th>
-    <td>{$y2}</td>
-    <td>{$m2}</td>
-    <td>{$d2}</td>
-   </tr>
-</table>
-
-<h4>3. Select Variables:</h4>
-<p>If you select a model format in option 4 below, this selection is ignored.</p>
-<select size="5" name="vars[]" MULTIPLE>
-  <option value="gdd_50_86">Computed: Growing Degree Days (base=50,max=86) [F]</option>
-  <option value="gdd_40_86">Computed: Growing Degree Days (base=40,max=86) [F]</option>
-  <option value="high">Variable: High Temperature [F]</option>
-  <option value="highc">Variable: High Temperature [C]</option>
-  <option value="low">Variable: Low Temperature [F]</option>
-  <option value="lowc">Variable: Low Temperature [C]</option>
-  <option value="temp_estimated">Temperature Estimated Flag</option>
-  <option value="precip">Variable: Precipitation (rain+melted snow) [inch]</option>
-  <option value="precipmm">Variable: Precipitation (rain+melted snow) [mm]</option>
-  <option value="precip_estimated">Precipitation Estimated Flag</option>
-  <option value="snow">Variable: Snowfall [inch]</option>
-  <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
-  <option value="era5land_srad">Estimate: ERA5 Land Sampled Solar Radiation [MJ/day] (1951-)</option>
-  <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
-  <option value="merra_srad">Estimate: MERRA-2 Sampled Solar Radiation [MJ/day] (1979-)</option>
-  <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
-  <option value="power_srad">Estimate: NASA POWER Sampled Solar Radiation [MJ/day] (1984-)</option>
-  <option value="era5land_soilt4_avg">Estimate: ERA5 Land Soil Temperature 0-7cm [F] (1950-)</option>
-  <option value="era5land_soilm4_avg">Estimate: ERA5 Land Soil Moisture 0-7cm [m3/m3] (1950-)</option>
-  <option value="era5land_soilm1m_avg">Estimate: ERA5 Land Soil Moisture 0-1m [m3/m3] (1950-)</option>
-  <option value="nldas_soilt4_avg">Estimate: NLDASv2 NOAHv2 Soil Temperature 0-10cm [F] (1979-)</option>
-  <option value="nldas_soilm4_avg">Estimate: NLDASv2 NOAHv2 Soil Moisture 0-10cm [m3/m3] (1979-)</option>
-  <option value="nldas_soilm1m_avg">Estimate: NLDASv2 NOAHv2 Soil Moisture 0-1m [m3/m3] (1979-)</option>
-</select>
-
-<p><h4>4. Specialized Data/Model Formats</h4>
-<i>When you select a given data format, it will override any selected variables
-above and formats below.  These are specialized formats typically used for modelling and
-their choice dictates the variables to be included. Please <a href="/info/contact.php">contact us</a>
-to have your format added to the list! The bundled solar radiation with these
-model files is first prioritized by availability (ie HRRR for past week) and
-then proceeds from ERA5-Land to NARR to MERRAv2.</i>
-
-<select size="5" name="model">
-  <option value="apsim">Model: APSIM MET File</option> 
-  <option value="century">Model: Century (Monthly Format)</option> 
-  <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
-  <option value="dndc">Model: DNDC</option> 
-  <option value="salus">Model: SALUS</option> 
-  <option value="swat">Model: SWAT (daily precip and temperatures)</option> 
-</select></p>
-
-<p><h4>5. How to view?</h4>
-
-<p>Note that the Excel format is limited to 1,048,576 rows of data, so selecting
-it will limit the returned data.</p>
-
-<select name="what">
-  <option value="excel">Excel File</option>
-  <option value="download">Download to Disk</option>
-  <option value="view">View on-line</option>
-</select>
-
-<p><h4>6. Data Delimitation:</h4>
-This option is only relevant if you did not select "Excel File" from #5 above.
-<br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
-   </select>
-
-<p><h4>7. Include Latitude and Longitude in output?</h4>
- <select name="gis">
-   <option value="no">No
-   <option value="yes">Yes
- </select>
-
-<p><h4>8. Fill out last year with scenario</h4>
-<i>Optional!</i> This is a bit tricky to explain.  The common usage case is to
-fill out the current calendar's year worth of data with some data from the
-past. For example, if today is 16 August 2024 and you select 2023 as the
-scenario year, the data for 16 August 2024 would instead be a copy of what
-was observed on 16 August 2023.  If you select a date period that was in the
-past and not ending on 31 December, you could still use this feature to fill
-out the year with the scenario year.  The scenario year could be from the
-future!  For example, what if 2020 ended like what was observed in 2023.
-<br />
-<input type="checkbox" name="scenario" value="yes" id="scen">
-<label for="scen">Yes, use this year for replacement:</label> {$sy_select}
-
-<p><h4>9. Submit Form:</h4>
-<i>Please be patient and only submit this form once.  It may take 10-20
-seconds to get a response.</i><br />
-<input type="submit" value="Process Data Request">
-<input type="reset">
-
-</div></div>
-
-</form>
+  <form target="_blank" method="GET" action="/cgi-bin/request/coop.py" name="iemss" class="card p-4 shadow-sm mb-5">
+    <input type="hidden" name="network" value="{$network}" />
+    <div class="row g-4">
+      <div class="col-md-6">
+        <h4 class="h5 mb-3">1. Select station(s):</h4>
+        <div id="iemss" data-network="{$network}" data-only-online="0"></div>
+      </div>
+      <div class="col-md-6">
+        <h4 class="h5 mb-3">2. Select Start/End Time:</h4>
+        <i class="small">Please note the start year in the station selector. If you only want data
+        for one day, set the start and end times to the same value.</i>
+        <table class="table table-sm align-middle mt-2 mb-4">
+          <tr>
+            <td></td>
+            <th>Year</th><th>Month</th><th>Day</th>
+          </tr>
+          <tr>
+            <th>Start:</th>
+            <td>{$y1}</td>
+            <td>{$m1}</td>
+            <td>{$d1}</td>
+          </tr>
+          <tr>
+            <th>End:</th>
+            <td>{$y2}</td>
+            <td>{$m2}</td>
+            <td>{$d2}</td>
+          </tr>
+        </table>
+        <h4 class="h5 mb-3">3. Select Variables:</h4>
+        <p class="small">If you select a model format in option 4 below, this selection is ignored.</p>
+        <select size="5" name="vars[]" MULTIPLE class="form-select mb-3">
+          <option value="gdd_50_86">Computed: Growing Degree Days (base=50,max=86) [F]</option>
+          <option value="gdd_40_86">Computed: Growing Degree Days (base=40,max=86) [F]</option>
+          <option value="high">Variable: High Temperature [F]</option>
+          <option value="highc">Variable: High Temperature [C]</option>
+          <option value="low">Variable: Low Temperature [F]</option>
+          <option value="lowc">Variable: Low Temperature [C]</option>
+          <option value="temp_estimated">Temperature Estimated Flag</option>
+          <option value="precip">Variable: Precipitation (rain+melted snow) [inch]</option>
+          <option value="precipmm">Variable: Precipitation (rain+melted snow) [mm]</option>
+          <option value="precip_estimated">Precipitation Estimated Flag</option>
+          <option value="snow">Variable: Snowfall [inch]</option>
+          <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
+          <option value="era5land_srad">Estimate: ERA5 Land Sampled Solar Radiation [MJ/day] (1951-)</option>
+          <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
+          <option value="merra_srad">Estimate: MERRA-2 Sampled Solar Radiation [MJ/day] (1979-)</option>
+          <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
+          <option value="power_srad">Estimate: NASA POWER Sampled Solar Radiation [MJ/day] (1984-)</option>
+          <option value="era5land_soilt4_avg">Estimate: ERA5 Land Soil Temperature 0-7cm [F] (1950-)</option>
+          <option value="era5land_soilm4_avg">Estimate: ERA5 Land Soil Moisture 0-7cm [m3/m3] (1950-)</option>
+          <option value="era5land_soilm1m_avg">Estimate: ERA5 Land Soil Moisture 0-1m [m3/m3] (1950-)</option>
+          <option value="nldas_soilt4_avg">Estimate: NLDASv2 NOAHv2 Soil Temperature 0-10cm [F] (1979-)</option>
+          <option value="nldas_soilm4_avg">Estimate: NLDASv2 NOAHv2 Soil Moisture 0-10cm [m3/m3] (1979-)</option>
+          <option value="nldas_soilm1m_avg">Estimate: NLDASv2 NOAHv2 Soil Moisture 0-1m [m3/m3] (1979-)</option>
+        </select>
+        <h4 class="h5 mb-3">4. Specialized Data/Model Formats</h4>
+        <p class="small">When you select a given data format, it will override any selected variables
+        above and formats below.  These are specialized formats typically used for modelling and
+        their choice dictates the variables to be included. Please <a href="/info/contact.php">contact us</a>
+        to have your format added to the list! The bundled solar radiation with these
+        model files is first prioritized by availability (ie HRRR for past week) and
+        then proceeds from ERA5-Land to NARR to MERRAv2.</p>
+        <select size="5" name="model" class="form-select mb-3">
+          <option value="apsim">Model: APSIM MET File</option> 
+          <option value="century">Model: Century (Monthly Format)</option> 
+          <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
+          <option value="dndc">Model: DNDC</option> 
+          <option value="salus">Model: SALUS</option> 
+          <option value="swat">Model: SWAT (daily precip and temperatures)</option> 
+        </select>
+        <h4 class="h5 mb-3">5. How to view?</h4>
+        <p class="small">Note that the Excel format is limited to 1,048,576 rows of data, so selecting
+        it will limit the returned data.</p>
+        <select name="what" class="form-select mb-3">
+          <option value="excel">Excel File</option>
+          <option value="download">Download to Disk</option>
+          <option value="view">View on-line</option>
+        </select>
+        <h4 class="h5 mb-3">6. Data Delimitation:</h4>
+        <p class="small">This option is only relevant if you did not select "Excel File" from #5 above.</p>
+        <select name="delim" class="form-select mb-3">
+          <option value="comma">Comma</option>
+          <option value="space">Space</option>
+          <option value="tab">Tab</option>
+        </select>
+        <h4 class="h5 mb-3">7. Include Latitude and Longitude in output?</h4>
+        <select name="gis" class="form-select mb-3">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+        <h4 class="h5 mb-3">8. Fill out last year with scenario</h4>
+        <i class="small">Optional! This is a bit tricky to explain.  The common usage case is to
+        fill out the current calendar's year worth of data with some data from the
+        past. For example, if today is 16 August 2024 and you select 2023 as the
+        scenario year, the data for 16 August 2024 would instead be a copy of what
+        was observed on 16 August 2023.  If you select a date period that was in the
+        past and not ending on 31 December, you could still use this feature to fill
+        out the year with the scenario year.  The scenario year could be from the
+        future!  For example, what if 2020 ended like what was observed in 2023.</i>
+        <div class="form-check mt-2 mb-3">
+          <input type="checkbox" name="scenario" value="yes" id="scen" class="form-check-input">
+          <label for="scen" class="form-check-label">Yes, use this year for replacement:</label> {$sy_select}
+        </div>
+        <h4 class="h5 mb-3">9. Submit Form:</h4>
+        <i class="small">Please be patient and only submit this form once.  It may take 10-20
+        seconds to get a response.</i><br />
+        <button type="submit" class="btn btn-primary">Process Data Request</button>
+        <button type="reset" class="btn btn-secondary ms-2">Reset</button>
+      </div>
+    </div>
+  </form>
+</div>
 EOM;
 $t->render('full.phtml');
