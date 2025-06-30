@@ -1,26 +1,14 @@
 import { TabulatorFull as Tabulator } from 'https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator_esm.min.js';
 
-// Helper: get URL parameters as object
+// Helper: get URL parameters as object (safe, no prototype pollution)
 function getUrlParams() {
-    const params = {};
+    const params = Object.create(null); // no prototype
     for (const [key, value] of new URLSearchParams(window.location.search)) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) continue; // skip if already set
         params[key] = value;
     }
     return params;
 }
-
-// (Unused) Helper: update URL with new params (preserve others)
-// function updateUrl(params) {
-//     const url = new URL(window.location.href);
-//     Object.entries(params).forEach(([k, v]) => {
-//         if (v === null || v === undefined || v === '') {
-//             url.searchParams.delete(k);
-//         } else {
-//             url.searchParams.set(k, v);
-//         }
-//     });
-//     window.location.href = url.toString();
-// }
 
 // Fetch UGC data from API
 async function fetchUgcs(params) {
