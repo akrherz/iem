@@ -11,6 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from zoneinfo import ZoneInfo
 
+import click
 import httpx
 import wwa
 from pyiem.database import get_dbconnc
@@ -78,6 +79,10 @@ IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
         # commits are in reverse order
         for commit in commits:
             if commit["commit"]["message"].startswith("Merge"):
+                LOG.info("Skipping merge commit %s", commit["sha"])
+                continue
+            if commit["commit"]["author"]["name"].startswith("dependabot"):
+                LOG.info("Skipping dependabot commit %s", commit["sha"])
                 continue
             timestring = commit["commit"]["author"]["date"]
             utcvalid = datetime.strptime(timestring, ISO8601)
@@ -301,7 +306,9 @@ def send_email(msg):
     smtp.quit()
 
 
-def main():
+@click.command()
+@click.option("--dryrun", is_flag=True, help="Do not send email, just print")
+def main(dryrun: bool):
     """Go Main!"""
     msg = MIMEMultipart("alternative")
     now = datetime.now()
@@ -346,7 +353,9 @@ def main():
     msg.attach(part1)
     msg.attach(part2)
 
-    exponential_backoff(send_email, msg)
+    if not dryrun:
+        LOG.info("Sending email to %s", msg["To"])
+        exponential_backoff(send_email, msg)
 
     # Send forth LDM
     with open("tmp.txt", "w", encoding="utf-8") as fh:
@@ -359,17 +368,19 @@ def main():
             "tmp.txt",
         ]
     )
-    with open("tmp.txt", "w", encoding="utf-8") as fh:
+    with open("tmp.html", "w", encoding="utf-8") as fh:
         fh.write(html)
     subprocess.call(
         [
             "pqinsert",
             "-p",
             "plot c 000000000000 iemdb.html bogus txt",
-            "tmp.txt",
+            "tmp.html",
         ]
     )
-    os.unlink("tmp.txt")
+    if not dryrun:
+        for suffix in ["txt", "html"]:
+            os.unlink(f"tmp.{suffix}")
 
 
 if __name__ == "__main__":
