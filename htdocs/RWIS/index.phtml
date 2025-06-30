@@ -40,103 +40,115 @@ for ($i = 0; $i < $cdict[$camid]; $i++) {
     );
 }
 
+
 $t->content = <<<EOM
-<h3>Roadway Weather Information System</h3><p>
+<div class="container-fluid px-0">
+  <div class="row mb-4">
+    <div class="col-lg-9 col-md-8">
+      <h1 class="display-5 mt-2 mb-3">Roadway Weather Information System</h1>
+      <p class="lead">
+        The IEM curates an archive of RWIS information. The Iowa data has been provided by the Iowa DOT through a long standing partnership since the founding of the IEM. Data for other states is provided via the <a href="https://madis.ncep.noaa.gov/">NOAA MADIS</a> system.
+      </p>
+    </div>
+    <div class="col-lg-3 col-md-4 d-flex align-items-center justify-content-lg-end justify-content-md-end justify-content-start mt-3 mt-md-0">
+      <a href="/sites/locate.php?network=IA_RWIS" class="btn btn-outline-primary btn-lg">Iowa RWIS Locations</a>
+    </div>
+  </div>
 
-<div class="row">
-<div class="col-md-8">
+  <div class="card mb-4">
+    <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+      <h2 class="h4 mb-0">Roadside Webcams</h2>
+      <div class="btn-group mt-2 mt-md-0">
+        <a href="camera.phtml" class="btn btn-primary">RWIS Archive Viewer</a>
+        <a href="/current/viewer.phtml" class="btn btn-primary">IEM Webcam Viewer</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <form method="" action="" name="widget" class="row g-3 align-items-center mb-3">
+        <div class="col-auto">
+          <label for="camid" class="col-form-label fw-bold">Available sites:</label>
+        </div>
+        <div class="col-auto">
+          {$selectform}
+        </div>
+        <div class="col-auto">
+          <input type="submit" value="View Webcam" class="btn btn-primary">
+        </div>
+      </form>
+      <div class="row g-3">
+        {$camimgs}
+      </div>
+    </div>
+  </div>
 
-The IEM curates an archive of RWIS information.  The Iowa data has been
-provided by the Iowa DOT through a long standing partnership since the founding
-of the IEM.  Data for other states is provided via the
-<a href="https://madis.ncep.noaa.gov/">NOAA MADIS</a> system.
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h3 class="h5">Current Conditions</h3>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><a href="current.phtml">Atmospherics</a></li>
+            <li class="list-group-item"><a href="currentSF.phtml">Pavement</a></li>
+            <li class="list-group-item"><a href="soil.phtml">Soil Probes</a></li>
+            <li class="list-group-item"><a href="traffic.phtml">Traffic Data</a></li>
+            <li class="list-group-item">
+              <a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
+              <div class="small text-muted">Combine air and pavement temperatures with current RADAR.</div>
+            </li>
+          </ul>
+          <h3 class="h6">Time Series Plots</h3>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><a href="/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
+          </ul>
+          <h3 class="h6">Plots with RWIS data</h3>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="/data/mesonet.gif">Combined Mesonet</a></li>
+            <li class="list-group-item"><a href="/data/iowa_rwis.png">RWIS Mesonet</a></li>
+            <li class="list-group-item"><a href="/data/rwis_sf.png">Pavement Temperatures</a></li>
+            <li class="list-group-item"><a href="/data/heat.gif">Heat Index</a></li>
+            <li class="list-group-item"><a href="/data/wcht.gif">Wind Chill Index</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h3 class="h5">Station Plot with NEXRAD</h3>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="/data/DMX_radar.gif">Des Moines</a></li>
+            <li class="list-group-item"><a href="/data/OAX_radar.gif">Omaha</a></li>
+            <li class="list-group-item"><a href="/data/DVN_radar.gif">Davenport</a></li>
+            <li class="list-group-item"><a href="/data/FSD_radar.gif">Sioux Falls</a></li>
+            <li class="list-group-item"><a href="/data/ARX_radar.gif">LaCrosse</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-12">
+      <div class="card h-100">
+        <div class="card-body">
+          <h3 class="h5">Data Download</h3>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><a href="/request/rwis/fe.phtml">Atmosphere &amp; Pavement Data</a></li>
+            <li class="list-group-item"><a href="/request/rwis/soil.phtml">Soil Probe Data</a></li>
+            <li class="list-group-item"><a href="/request/rwis/traffic.phtml">Traffic Data</a></li>
+          </ul>
+          <h3 class="h6">Comparisons</h3>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><a href="/data/temps.gif">Temperatures vs ASOS/AWOS</a></li>
+            <li class="list-group-item"><a href="/data/dewps.gif">Dew Points vs ASOS/AWOS</a></li>
+            <li class="list-group-item"><a href="/data/winds.gif">Winds vs ASOS/AWOS</a></li>
+          </ul>
+          <h3 class="h6">QC Info</h3>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Sites <a href="/QC/offline.php">offline</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-<div class="col-md-4">
-<br><a href="/sites/locate.php?network=IA_RWIS">Iowa RWIS Locations</a>
-</div>
-
-</div><!-- ./row -->
-
-<h4>Roadside Webcams <a href="camera.phtml" class="btn btn-primary">RWIS Archive Viewer</a>
-<a href="/current/viewer.phtml" class="btn btn-primary">IEM Webcam Viewer</a></h4>
-
-<form method="" action="" name="widget">
-Available sites: {$selectform}
-<input type="submit" value="View Webcam" class="btn btn-primary">
-</form>
-
-<div class="row">
-{$camimgs}
-</div>
-
-<div class="row">
-<div class="col-md-4">
-
-  <h3>Current Conditions</h3>
-<ul>
-    <li><a href="current.phtml">Atmospherics</a></li>
-    <li><a href="currentSF.phtml">Pavement</a></li>
-    <li><a href="soil.phtml">Soil Probes</a></li>
-    <li><a href="traffic.phtml">Traffic Data</a></li>
-    <li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
-    <br /><dd>Combine air and pavement temperatures with current
-      RADAR.</dd></li>
-</ul>
-
-  <h3>Time Series Plots:</h3>
-<ul>
-   <li><a href="/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
-</ul>
-
-<h3>Plots with RWIS data</h3>
-<ul>
-   <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
-   <li><a href="/data/iowa_rwis.png">RWIS Mesonet</a></li>
-   <li><a href="/data/rwis_sf.png">Pavement Temperatures</a></li>
-   <li><a href="/data/heat.gif">Heat Index</a></li>
-   <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-</ul>
-
-
-</div>
-<div class="col-md-4">
-
-<h3>Station Plot with NEXRAD</h3>
-<ul>
-   <li><a href="/data/DMX_radar.gif">Des Moines</a></li>
-   <li><a href="/data/OAX_radar.gif">Omaha</a></li>
-   <li><a href="/data/DVN_radar.gif">Davenport</a></li>
-   <li><a href="/data/FSD_radar.gif">Sioux Falls</a></li>
-   <li><a href="/data/ARX_radar.gif">LaCrosse</a></li>
-</ul>
-</div>
-
-<div class="col-md-4">
-
-  <h3>Data Download</h3>
-<ul>
- <li><a href="/request/rwis/fe.phtml">Atmosphere &amp; Pavement Data</a></li>
- <li><a href="/request/rwis/soil.phtml">Soil Probe Data</a></li>
- <li><a href="/request/rwis/traffic.phtml">Traffic Data</a></li>
-</ul>
-
-  <h3>Comparisons:</h3>
-<ul>
-   <li><a href="/data/temps.gif">Temperatures vs ASOS/AWOS</a></li>
-   <li><a href="/data/dewps.gif">Dew Points vs ASOS/AWOS</a></li>
-   <li><a href="/data/winds.gif">Winds vs ASOS/AWOS</a></li>
-</ul>
-
-  <h3>QC Info:</h3>
-<ul>
-  <li>Sites <a href="/QC/offline.php">offline</a></li>
-</ul>
-</p>
-
-</div>
-</div><!-- ./row -->
-
 EOM;
 
 $t->render("single.phtml");

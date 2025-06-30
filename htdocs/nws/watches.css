@@ -1,0 +1,138 @@
+/* SPC Watches Page Styles - Bootstrap 5 + Tabulator compatible */
+
+/* Fixed height table container to keep headers visible */
+.tabulator {
+    height: 70vh !important;
+}
+
+/* Header filter styling */
+.tabulator-header-filter input {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+}
+
+.tabulator-header-filter input:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.tabulator-header-filter input::placeholder {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.75rem;
+}
+
+/* Export buttons styling */
+.export-buttons {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.export-buttons .btn {
+    transition: all 0.15s ease-in-out;
+}
+
+.export-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Highlight PDS badges more prominently */
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 4px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* Better link styling in table */
+.tabulator-cell a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.tabulator-cell a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Responsive font sizes for smaller screens */
+@media (max-width: 768px) {
+    .tabulator {
+        height: 60vh !important;
+        font-size: 0.8rem;
+    }
+    
+    .tabulator-header-filter input {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.3rem;
+    }
+}
+
+/* Card styling enhancements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header.bg-primary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+/* Icon styling */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Alert enhancements */
+.alert {
+    border: 1px solid;
+    border-radius: 0.375rem;
+}
+
+/* Form enhancements */
+.form-select {
+    background-position: right 0.75rem center;
+}
+
+/* Badge styling for PDS watches */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Legacy table styling (in case Tabulator doesn't initialize) */
+#watchesTable {
+    width: 100%;
+    border-collapse: collapse;
+    height: 70vh;
+    overflow-y: auto;
+}
+
+#watchesTable th, #watchesTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#watchesTable th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+/* Table enhancements for Bootstrap styling */
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(0, 0, 0, 0.025);
+}
+
+.table-hover > tbody > tr:hover > td {
+    background-color: rgba(0, 0, 0, 0.075);
+}

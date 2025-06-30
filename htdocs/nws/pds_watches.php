@@ -35,55 +35,43 @@ foreach ($json['events'] as $key => $val) {
 
 $t = new MyView();
 $t->title = "Particularly Dangerous Situation SPC Watches Listing";
+
+// Use Tabulator ES module and Bootstrap 5 for styling
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.3/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+<link type="text/css" href="pds_watches.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="pds_watches.js"></script>
+<script type="module" src="pds_watches.module.js"></script>
 EOM;
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">Particularly Dangerous Situation Watches</li>
-</ol>
-<h3>Particularly Dangerous Situation SPC Watches</h3>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-2 py-2 mb-3">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Particularly Dangerous Situation Watches</li>
+  </ol>
+</nav>
+<h1 class="mb-3">Particularly Dangerous Situation SPC Watches</h1>
 
-<div class="alert alert-info">This page presents the current
-<strong>unofficial</strong> IEM
-accounting of SPC watches that contain the special Particularly Dangerous Situation
-phrasing.
+<div class="alert alert-info mb-4">This page presents the current <strong>unofficial</strong> IEM accounting of SPC watches that contain the special Particularly Dangerous Situation phrasing.</div>
+
+<div class="mb-3">
+  There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can directly access it here:
+  <br><code>{$EXTERNAL_BASEURL}/json/watches.py?is_pds=1</code>
 </div>
 
-<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
-directly access it here:
-<br /><code>{$EXTERNAL_BASEURL}/json/watches.py?is_pds=1</code></p>
-
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>
-&nbsp;
-<a class="btn btn-primary" href="/nws/watches.php">List Watches by Year</a>
-&nbsp;
-<a class="btn btn-primary" href="/vtec/pds.php">PDS Warnings</a>
-&nbsp;
-</p>
-
-<p><button id="makefancy">Make Table Interactive</button></p>
-
-<div id="thetable">
-<table class="table table-striped table-sm">
-<thead class="sticky">
-<tr><th>Year</th><th>Watch Num</th><th>State(s)</th><th>Issued</th>
-<th>Expired</th><th>Prob EF2+ Tor</th><th>Prob Hail 2+in</th>
-<th>Max Hail Size</th>
-<th>Max Wind Gust kts</th></tr>
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
+<div class="mb-4">
+  <strong>Related:</strong>
+  <a class="btn btn-primary btn-sm me-2" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>
+  <a class="btn btn-primary btn-sm me-2" href="/nws/watches.php">List Watches by Year</a>
+  <a class="btn btn-primary btn-sm" href="/vtec/pds.php">PDS Warnings</a>
 </div>
 
+<div class="card mb-4">
+  <div class="card-body">
+    <div id="pds-table"></div>
+  </div>
+</div>
 EOM;
 $t->render("full.phtml");

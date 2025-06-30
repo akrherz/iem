@@ -151,6 +151,8 @@ not be implied as an endorsement. Of course, you can just search google for
       <li><a href="/json/sps_by_point.py?help">Special Weather Statements (SPS) by Point</a></li>
       <li><a href="/json/nwstext.py?help">Text Data</a></li>
       <li><a href="/json/nwstext_search.py?help">Text Product Metadata Search</a></li>
+      <li><a href="/json/wpcmpd.py?help">WPC Mesoscale Discussions</a></li>
+      <li><a href="/json/wpcoutlook.py?help">WPC Outlooks</a></li>
   </ul>
   </div>
 </div>

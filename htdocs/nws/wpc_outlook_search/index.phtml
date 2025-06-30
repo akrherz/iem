@@ -1,6 +1,6 @@
 <?php
 require_once "../../../config/settings.inc.php";
-define("IEM_APPID", 157);
+define("IEM_APPID", 166);
 require_once "../../../include/mlib.php";
 force_https();
 require_once "../../../include/myview.php";
@@ -19,19 +19,20 @@ $t->headextra = <<<EOM
 <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="index.css" />
 EOM;
-$t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
+$t->title = "WPC Excessive Rainfall Outlook + Discussion Search by Point";
 
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
   <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
-  <li class="breadcrumb-item active" aria-current="page">SPC Convective Outlook + Discussion + Watch Search by Point</li>
+  <li class="breadcrumb-item active" aria-current="page">WPC Excessive Rainfall Outlook + Discussion Search by Point</li>
 </ol>
 </nav>
-<p>This application allows you to search an archive of Storm Prediction Center (SPC)
-Convective Outlooks, Mesoscale Convective Discussions (MCD)s, and Convective Watches.
-This archive is <strong>unofficial</strong> and based on IEM's processing of text products issued by
-the SPC. Each tab presents buttons that allow for a download of the data in
+<p>This application allows you to search an archive of Weather Prediction Center (WPC)
+Excessive Rainfall Outlooks and Mesoscale Precipitation Discussions (MPD)s.
+This archive is <strong>unofficial</strong> and based on IEM's processing of
+products issued by
+the WPC. Each tab presents buttons that allow for a download of the data in
 Excel or CSV format and a direct link to the JSON service backending the
 table.</p>
 
@@ -94,46 +95,9 @@ table.</p>
                     <input type="radio" name="day" value="5" id="d5">
                     <label for="d5">Day 5</label>
                 </div>
-                <div class="day-item">
-                    <input type="radio" name="day" value="6" id="d6">
-                    <label for="d6">Day 6</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="day" value="7" id="d7">
-                    <label for="d7">Day 7</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="day" value="8" id="d8">
-                    <label for="d8">Day 8</label>
-                </div>
             </div>
         </div>
 
-        <div class="mb-4 category-select">
-            <h5 class="mb-3">Select Category</h5>
-            <div class="category-grid">
-                <div class="day-item">
-                    <input type="radio" name="cat" value="categorical" checked id="categorical">
-                    <label for="categorical">Categorical</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="cat" value="any severe" id="anysevere">
-                    <label for="anysevere">Any Severe</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="cat" value="hail" id="hail">
-                    <label for="hail">Hail</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="cat" value="tornado" id="tornado">
-                    <label for="tornado">Tornado</label>
-                </div>
-                <div class="day-item">
-                    <input type="radio" name="cat" value="wind" id="wind">
-                    <label for="wind">Wind</label>
-                </div>
-            </div>
-        </div>
 
         <div class="mb-4">
             <h5 class="mb-3">Map Selection</h5>
@@ -160,20 +124,17 @@ table.</p>
 <div id="thetabs">	
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" href="#1a" data-bs-toggle="tab">Convective Outlooks</a>
+            <a class="nav-link active" href="#1a" data-bs-toggle="tab">Excessive Rainfall Outlooks</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#2a" data-bs-toggle="tab">Mesoscale Convective Discussions</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#3a" data-bs-toggle="tab">Watch Polygons</a>
+            <a class="nav-link" href="#2a" data-bs-toggle="tab">Mesoscale Precipitation Discussions</a>
         </li>
     </ul>
 
     <div class="tab-content clearfix">
         <div class="tab-pane active" id="1a">
 
-<p>This archive dates back until <strong>1987</strong>.</p>
+<p>This archive dates back until <strong>2019</strong>.</p>
 
 <div class="float-end">
     <a class="btn btn-secondary" href="/" target="_blank" id="outlooks_excel">
@@ -198,30 +159,26 @@ table.</p>
 </div>
 <div class="tab-pane" id="2a">
 
-<p>This archive dates back until <strong>20 October 2008</strong> and is based
-on the MCD polygon included within the text.</p>
+<p>This archive dates back until <strong>26 September 2017</strong> and is based
+on the MPD polygon included within the text.</p>
 
 <div class="float-end">
-    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_excel">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_excel">
     <i class="fa fa-table"></i> Download as Excel</a>
-    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_csv">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_csv">
     <i class="fa fa-table"></i> Download as CSV</a>
-    <a class="btn btn-secondary" href="/" target="_blank" id="mcds_link">
+    <a class="btn btn-secondary" href="/" target="_blank" id="mpds_link">
     <i class="fa fa-link"></i> JSON-P Webservice</a>
 </div>
 
 
-<table id="mcds" class="table table-bordered table-striped">
+<table id="mpds" class="table table-bordered table-striped">
 <caption></caption>
 <thead>
 <tr><th>Discussion Number</th>
 <th>UTC Valid</th>
 <th>UTC Expire</th>
-<th>Watch Confidence</th>
 <th>Concerning</th>
-<th>Most Prob Tornado</th>
-<th>Most Prob Hail</th>
-<th>Most Prob Gust</th>
 </tr>
 </thead>
 <tbody>
@@ -229,35 +186,6 @@ on the MCD polygon included within the text.</p>
 </tbody>
 </table>
         </div><!-- ./2a -->
-        <div class="tab-pane" id="3a">
-
-<p>This archive dates back until <strong>1997</strong> and uses the initial watch
-polygon included in the SAW product.  <strong>These polygons are not the official
-watches!</strong>  You should use the <a href="/vtec/search.php">VTEC Search</a>
-tool to get more accurate results for the watch-by-county era.</p>
-
-<div class="float-end">
-    <a class="btn btn-secondary" href="/" target="_blank" id="watches_excel">
-    <i class="fa fa-table"></i> Download as Excel</a>
-    <a class="btn btn-secondary" href="/" target="_blank" id="watches_csv">
-    <i class="fa fa-table"></i> Download as CSV</a>
-    <a class="btn btn-secondary" href="/" target="_blank" id="watches_link">
-    <i class="fa fa-link"></i> GeoJSON-P Webservice</a>
-</div>
-
-<table id="watches" class="table table-bordered table-striped">
-<caption></caption>
-<thead>
-<tr><th>Watch Number</th><th>Type</th><th>UTC Valid</th><th>UTC Expire</th>
-<th>Max Hail Size</th><th>Max Wind Speed</th><th>Is PDS?</th>
-</tr>
-</thead>
-<tbody>
-
-</tbody>
-</table>
-        </div>   
-    </div>
 </div><!-- ./thetabs -->
 
     </div><!-- ./col-md-8 -->

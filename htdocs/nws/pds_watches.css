@@ -1,0 +1,36 @@
+/* Add a subtle shadow and rounded corners to Tabulator */
+#pds-table .tabulator {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid #dee2e6;
+  background: #fff;
+}
+
+/* Make sticky headers more distinct */
+#pds-table .tabulator .tabulator-header {
+  background: #f8f9fa;
+  border-bottom: 2px solid #0d6efd;
+}
+
+/* Download buttons group spacing */
+#tab-download-btns {
+  margin-bottom: 1rem;
+}
+
+/* Improve focus/hover for download buttons */
+#tab-download-btns .btn:focus, #tab-download-btns .btn:hover {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+/* Responsive tweaks for small screens */
+@media (max-width: 576px) {
+  #pds-table .tabulator {
+    font-size: 0.95rem;
+  }
+  #tab-download-btns {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

@@ -63,10 +63,12 @@ const htmlInterface = ['<div class="card iemss-container">',
     '</div><!-- End of card-body -->',
     '</div><!-- End of card -->'];
 
-let map = null;
-let geojson = null;
-let geojsonSource = null;
-let network = null;
+const iemssApp = {
+    map: null,
+    geojson: null,
+    geojsonSource: null,
+    network: null
+};
 
 // Vanilla JS replacement for jQuery filterByText functionality
 function setupFilterByText(selectElement, textboxElement, selectSingleMatch = false) {
@@ -175,53 +177,27 @@ function updateStationCounts() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const iemssElement = document.getElementById('iemss');
-    
-    if (!iemssElement) {
-        return;
-    }
-    
-    // First insert the HTML interface
-    iemssElement.innerHTML = htmlInterface.join('');
-
-    network = iemssElement.getAttribute('data-network');
-    const select_name = iemssElement.getAttribute('data-name');
-    
-    if (!network) {
-        return;
-    }
-    
+function setupIemssDom(iemssElement, networkParam, select_name) {
     if (select_name) {
         document.getElementById('stations_out').setAttribute('name', select_name);
     }
-    document.getElementById('iemss-network').textContent = network;
-    document.getElementById('iemss-metadata-link').setAttribute('href', `/sites/networks.php?network=${network}`);
-    
-    // If this does not support all, remove the add all button
+    document.getElementById('iemss-network').textContent = networkParam;
+    document.getElementById('iemss-metadata-link').setAttribute('href', `/sites/networks.php?network=${networkParam}`);
     if (iemssElement.getAttribute('data-supports-all') === '0') {
         const addAllBtn = document.getElementById('stations_addall');
-        if (addAllBtn) {
-            addAllBtn.style.display = 'none';
-        }
+        if (addAllBtn) addAllBtn.style.display = 'none';
     }
+}
 
-    // Make sure clicking the submit button selects all of the selected 
-    // stations, this avoids user confusion
+function setupIemssFormSubmission(iemssElement) {
     const submitButtons = document.querySelectorAll("form[name='iemss'] input[type='submit'], form[name='iemss'] button[type='submit']");
     submitButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             const stationsOut = document.getElementById('stations_out');
             const stationsCheckbox = document.querySelector("input[type='checkbox'][name='stations']");
-            
-            // Empty input implies that all are selected!
             if (iemssElement.getAttribute('data-supports-all') !== '0') {
-                // If all entries are in the stations_out box
-                if (stationsOut && geojsonSource && stationsOut.options.length >= geojsonSource.getFeatures().length) {
-                    // Deselect anything selected so that it does not submit
-                    Array.from(stationsOut.options).forEach(opt => {
-                        opt.selected = false;
-                    });
+                if (stationsOut && iemssApp.geojsonSource && stationsOut.options.length >= iemssApp.geojsonSource.getFeatures().length) {
+                    Array.from(stationsOut.options).forEach(opt => { opt.selected = false; });
                     if (stationsCheckbox) stationsCheckbox.checked = true;
                     return true;
                 } else {
@@ -230,9 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (stationsOut) {
                 selectAllOptions(stationsOut);
-                // Stop us if we have no stations selected!
                 if (stationsOut.options.length === 0) {
-                    alert("No stations listed in 'Selected Stations'!");  // skipcq
+                    alert("No stations listed in 'Selected Stations'!");
                     event.preventDefault();
                     return false;
                 }
@@ -240,130 +215,84 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         });
     });
+}
 
-    // Setup event handlers for station movement
+function setupStationMovementHandlers() {
     const stationsIn = document.getElementById('stations_in');
     const stationsOut = document.getElementById('stations_out');
-
     if (stationsIn && stationsOut) {
-        stationsIn.addEventListener('dblclick', () => {
-            return moveSelectedOptions(stationsIn, stationsOut);
-        });
-        stationsOut.addEventListener('dblclick', () => {
-            return moveSelectedOptions(stationsOut, stationsIn);
-        });
+        stationsIn.addEventListener('dblclick', () => moveSelectedOptions(stationsIn, stationsOut));
+        stationsOut.addEventListener('dblclick', () => moveSelectedOptions(stationsOut, stationsIn));
     }
-
     const addBtn = document.getElementById('stations_add');
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            return moveSelectedOptions(stationsIn, stationsOut);
-        });
-    }
-    
+    if (addBtn) addBtn.addEventListener('click', () => moveSelectedOptions(stationsIn, stationsOut));
     const addAllBtn = document.getElementById('stations_addall');
-    if (addAllBtn) {
-        addAllBtn.addEventListener('click', () => {
-            const ret = moveAllOptions(stationsIn, stationsOut);
-            selectAllOptions(stationsOut);
-            return ret;
-        });
-    }
-    
+    if (addAllBtn) addAllBtn.addEventListener('click', () => {
+        const ret = moveAllOptions(stationsIn, stationsOut);
+        selectAllOptions(stationsOut);
+        return ret;
+    });
     const delAllBtn = document.getElementById('stations_delall');
-    if (delAllBtn) {
-        delAllBtn.addEventListener('click', () => {
-            return moveAllOptions(stationsOut, stationsIn);
-        });
-    }
-    
+    if (delAllBtn) delAllBtn.addEventListener('click', () => moveAllOptions(stationsOut, stationsIn));
     const delBtn = document.getElementById('stations_del');
-    if (delBtn) {
-        delBtn.addEventListener('click', () => {
-            moveSelectedOptions(stationsOut, stationsIn);
-            selectAllOptions(stationsOut);
-            return false;
-        });
-    }
+    if (delBtn) delBtn.addEventListener('click', () => {
+        moveSelectedOptions(stationsOut, stationsIn);
+        selectAllOptions(stationsOut);
+        return false;
+    });
+}
 
+function setupSortAndFilterHandlers() {
     const sortById = document.getElementById('iemss-sortbyid');
-    if (sortById) {
-        sortById.addEventListener('click', (event) => {
-            event.preventDefault();
-            sortListing("id");
-        });
-    }
-    
+    if (sortById) sortById.addEventListener('click', (event) => { event.preventDefault(); sortListing("id"); });
     const sortByName = document.getElementById('iemss-sortbyname');
-    if (sortByName) {
-        sortByName.addEventListener('click', (event) => {
-            event.preventDefault();
-            sortListing("name");
-        });
-    }
+    if (sortByName) sortByName.addEventListener('click', (event) => { event.preventDefault(); sortListing("name"); });
+}
 
-    // Setup OpenLayers map and data source
+function setupIemssMapAndData(iemssElement, networkParam) {
     const onlyOnline = (iemssElement.getAttribute('data-only-online') === '1');
-
-    geojsonSource = new ol.source.Vector({
+    iemssApp.geojsonSource = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
         projection: ol.proj.get('EPSG:3857'),
-        url: `/geojson/network/${network}.geojson?only_online=${onlyOnline ? "1" : "0"}`
+        url: `/geojson/network/${networkParam}.geojson?only_online=${onlyOnline ? "1" : "0"}`
     });
-
-    // Create map first with just the base layer
-    map = new ol.Map({
+    iemssApp.map = new ol.Map({
         target: 'map',
-        layers: [new ol.layer.Tile({
-            source: new ol.source.OSM()
-        })],
+        layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
         view: new ol.View({
             projection: ol.proj.get('EPSG:3857'),
             center: [-10575351, 5160979],
             zoom: 3
         })
     });
-
-    // Now try to create and add the stations layer
-    // For large datasets, prioritize Vector layer with performance optimizations
-    geojson = new ol.layer.Vector({
-        source: geojsonSource,
+    iemssApp.geojson = new ol.layer.Vector({
+        source: iemssApp.geojsonSource,
         style(feature) {
-            // Check for boolean online status
             const online = feature.get('online');
             const isOnline = online === true || online === 1 || online === '1';
-
             return new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 7,
-                    fill: new ol.style.Fill({
-                        color: isOnline ? 'rgba(0, 128, 0, 1)' : 'rgba(255, 0, 0, 1)'
-                    })
+                    fill: new ol.style.Fill({ color: isOnline ? 'rgba(0, 128, 0, 1)' : 'rgba(255, 0, 0, 1)' })
                 })
             });
         },
-        // Performance optimization for large datasets
         renderBuffer: 200,
         updateWhileAnimating: false,
         updateWhileInteracting: false
     });
-    map.addLayer(geojson);
+    iemssApp.map.addLayer(iemssApp.geojson);
+}
 
-    geojsonSource.on('change', () => {
-        if (geojsonSource.getState() === 'ready') {
+function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance, networkParam) {
+    geojsonSourceInstance.on('change', () => {
+        if (geojsonSourceInstance.getState() === 'ready') {
             const stationsInSelect = document.getElementById('stations_in');
-            
-            // Remove loading state
             const iemssContainer = document.querySelector('.iemss-container');
-            if (iemssContainer) {
-                iemssContainer.classList.remove('iemss-loading');
-            }
-            
-            geojsonSource.getFeatures().forEach(feat => {
+            if (iemssContainer) iemssContainer.classList.remove('iemss-loading');
+            geojsonSourceInstance.getFeatures().forEach(feat => {
                 let lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
-                if (network !== 'TAF') {
-                    lbl += ` ${feat.get('time_domain')}`;
-                }
+                if (networkParam !== 'TAF') lbl += ` ${feat.get('time_domain')}`;
                 const option = document.createElement('option');
                 option.value = feat.get('sid');
                 option.textContent = lbl;
@@ -372,114 +301,85 @@ document.addEventListener('DOMContentLoaded', () => {
             sortListing("id");
             setupFilterByText(stationsInSelect, document.getElementById('stationfilter'), true);
             updateStationCounts();
-            map.getView().fit(
-                geojsonSource.getExtent(),
-                {
-                    size: map.getSize(),
-                    padding: [50, 50, 50, 50]
-                }
+            mapInstance.getView().fit(
+                geojsonSourceInstance.getExtent(),
+                { size: mapInstance.getSize(), padding: [50, 50, 50, 50] }
             );
-        } else if (geojsonSource.getState() === 'loading') {
-            // Add loading state
+        } else if (geojsonSourceInstance.getState() === 'loading') {
             const iemssContainer = document.querySelector('.iemss-container');
-            if (iemssContainer) {
-                iemssContainer.classList.add('iemss-loading');
-            }
+            if (iemssContainer) iemssContainer.classList.add('iemss-loading');
         }
     });
-
     // Create popup elements
     const mapElement = document.getElementById('map');
     const popupDiv = document.createElement('div');
     popupDiv.id = 'popup';
     mapElement.appendChild(popupDiv);
-    
     const popoverContentDiv = document.createElement('div');
     popoverContentDiv.id = 'popover-content';
     mapElement.appendChild(popoverContentDiv);
-
     const element = document.getElementById('popup');
-
-    const popup = new ol.Overlay({
-        element,
-        positioning: 'bottom-center',
-        stopEvent: false
-    });
-    map.addOverlay(popup);
-
-    // Initialize Bootstrap popover using vanilla JS
+    const popup = new ol.Overlay({ element, positioning: 'bottom-center', stopEvent: false });
+    mapInstance.addOverlay(popup);
     let popoverInstance = null;
     if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
         popoverInstance = new bootstrap.Popover(element, {
-            placement: 'top',
-            html: true,
+            placement: 'top', html: true,
             content: () => document.getElementById('popover-content').innerHTML
         });
     }
-
-    // display popup on click
-    map.on('click', (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feat) => {
-                return feat;
-            });
+    mapInstance.on('click', (evt) => {
+        const feature = mapInstance.forEachFeatureAtPixel(evt.pixel, feat => feat);
         if (feature) {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
             const sid = feature.get('sid');
-            
             popup.setPosition(coord);
             const content = `<p><strong>SID: </strong>${sid}`
                 + `<br /><strong>Name:</strong> ${feature.get('sname')}`
                 + `<br /><strong>Period:</strong> ${feature.get("time_domain")}</p>`;
             document.getElementById('popover-content').innerHTML = content;
-            
-            if (popoverInstance) {
-                popoverInstance.show();
-            }
-            
-            // Find and select the station in the available stations list
+            if (popoverInstance) popoverInstance.show();
             const stationsInSelect = document.getElementById('stations_in');
             const stationOption = Array.from(stationsInSelect.options).find(option => option.value === sid);
             if (stationOption) {
-                // Clear existing selections and select this station
-                Array.from(stationsInSelect.options).forEach(opt => {
-                    opt.selected = false;
-                });
+                Array.from(stationsInSelect.options).forEach(opt => { opt.selected = false; });
                 stationOption.selected = true;
-                
-                // Scroll the option into view
                 stationOption.scrollIntoView({ block: 'nearest' });
             } else {
-                // Station might be filtered out, temporarily clear filter to find it
                 const filterInput = document.getElementById('stationfilter');
                 const originalFilter = filterInput.value;
                 filterInput.value = '';
-                
-                // Trigger filter update to show all stations
                 filterInput.dispatchEvent(new Event('input'));
-                
-                // Now try to find and select the station
                 const foundOption = Array.from(stationsInSelect.options).find(option => option.value === sid);
                 if (foundOption) {
-                    Array.from(stationsInSelect.options).forEach(opt => {
-                        opt.selected = false;
-                    });
+                    Array.from(stationsInSelect.options).forEach(opt => { opt.selected = false; });
                     foundOption.selected = true;
                     foundOption.scrollIntoView({ block: 'nearest' });
                 }
-                
-                // Restore original filter after a short delay
                 setTimeout(() => {
                     filterInput.value = originalFilter;
                     filterInput.dispatchEvent(new Event('input'));
                 }, 100);
             }
         } else {
-            if (popoverInstance) {
-                popoverInstance.hide();
-            }
+            if (popoverInstance) popoverInstance.hide();
         }
     });
+}
 
+// Main orchestration function (refactored)
+document.addEventListener('DOMContentLoaded', () => {
+    const iemssElement = document.getElementById('iemss');
+    if (!iemssElement) return;
+    iemssElement.innerHTML = htmlInterface.join('');
+    iemssApp.network = iemssElement.getAttribute('data-network');
+    const select_name = iemssElement.getAttribute('data-name');
+    if (!iemssApp.network) return;
+    setupIemssDom(iemssElement, iemssApp.network, select_name);
+    setupIemssFormSubmission(iemssElement);
+    setupStationMovementHandlers();
+    setupSortAndFilterHandlers();
+    setupIemssMapAndData(iemssElement, iemssApp.network);
+    setupIemssMapPopups(iemssApp.map, iemssApp.geojson, iemssApp.geojsonSource, iemssApp.network);
 });
