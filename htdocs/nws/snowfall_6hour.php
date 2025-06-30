@@ -9,11 +9,11 @@ require_once "../../include/forms.php";
 
 $t = new MyView();
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.2.5/dist/css/tabulator_bootstrap5.min.css">
+<link type="text/css" href="snowfall_6hour.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="snowfall_6hour.js"></script>
+<script src="snowfall_6hour.module.js?v=3" type="module"></script>
 EOM;
 
 $year = get_int404("year", date("Y"));
@@ -99,63 +99,110 @@ $sselect = stateSelect($state);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
- <li><a href="/nws/">NWS User Resources</a></li>
- <li class="active">NWS Six Hour Snowfall</li>
+ <li class="breadcrumb-item"><a href="/nws/">NWS User Resources</a></li>
+ <li class="breadcrumb-item active" aria-current="page">NWS Six Hour Snowfall</li>
 </ol>
 
 <p>The National Weather Service has a limited number of observers that report
-snowfall totals at 6 hour intervals.  This page lists any of those observations
+snowfall totals at 6 hour intervals. This page lists any of those observations
 found by the IEM whilst parsing the feed of SHEF encoded data.
 <a href="/api/1/docs#/nws/service_nws_snowfall_6hour__fmt__get">API Service</a>
 with this data.</p>
 
 <p>This page presents one "day" of data at a time. The day is defined as starting
-at 6 UTC, so the first report shown is valid at 12 UTC of the given date.  The
+at 6 UTC, so the first report shown is valid at 12 UTC of the given date. The
 subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
 
-<p><button id="makefancy">Make Table Interactive</button></p>
+<div class="mb-3">
+    <button id="makefancy" class="btn btn-primary">
+        <i class="fas fa-table"></i> Make Table Interactive
+    </button>
+</div>
 
-<form method="GET" name="changeme">
-<table class="table table-sm">
-<tr>
-<td><strong>Year:</strong> {$yselect}</td>
-<td><strong>Month:</strong> {$mselect}</td>
-<td><strong>Day:</strong> {$dselect}</td>
-<td>
-<input type="radio" name="w" value="all" {$allselected} id="all">
-<label for="all">Show all data</label>
-</td>
-<td>
-<input type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
-<label for="wfo">Select by WFO</label>:</strong>{$wselect}
-</td>
-<td>
-<input type="radio" name="w" value="state" {$stateselected} id="state">
-<label for="state">Select by State</label>:</strong>{$sselect}
-</td>
-<td><input type="submit" value="View Table"></td>
-</tr>
-</table>
-</form>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Filter Options</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" name="changeme">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label for="year" class="form-label"><strong>Year:</strong></label>
+                    {$yselect}
+                </div>
+                <div class="col-md-2">
+                    <label for="month" class="form-label"><strong>Month:</strong></label>
+                    {$mselect}
+                </div>
+                <div class="col-md-2">
+                    <label for="day" class="form-label"><strong>Day:</strong></label>
+                    {$dselect}
+                </div>
+                <div class="col-md-6">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="w" value="all" {$allselected} id="all">
+                                <label class="form-check-label" for="all">Show all data</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
+                                <label class="form-check-label" for="wfo">Select by WFO:</label>
+                            </div>
+                            {$wselect}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="w" value="state" {$stateselected} id="state">
+                                <label class="form-check-label" for="state">Select by State:</label>
+                            </div>
+                            {$sselect}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-search"></i> View Table
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <h3>Six Hour Snowfall</h3>
 
-<p>Values are in inches. T indicates a trace of snowfall. The table will
-refresh every 6 minutes.</p>
+<p>Values are in inches. <span class="badge bg-info">T</span> indicates a trace of snowfall. 
+The table will refresh every 6 minutes.</p>
 
+<!-- Tabulator container (initially hidden) -->
+<div id="tabulator-container" style="display: none;">
+    <div id="snowfall-tabulator"></div>
+</div>
+
+<!-- Original table (shown by default) -->
 <div id="thetable">
-<table class="table table-striped table-sm table-bordered">
-<thead class="sticky">
-<tr><th>Station/Network</th><th>Name</th><th>State</th>
-<th>WFO</th>
-<th>12 UTC<br />(6 AM CST)</th><th>18 UTC<br />(12 PM CST)</th>
-<th>0 UTC<br />(6 PM CST)</th>
-<th>6 UTC<br />(12 AM CST)</th></tr>
-</thead>
-<tbody>
-{$table}
-</tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm table-bordered">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Station/Network</th>
+                    <th>Name</th>
+                    <th>State</th>
+                    <th>WFO</th>
+                    <th>12 UTC<br />(6 AM CST)</th>
+                    <th>18 UTC<br />(12 PM CST)</th>
+                    <th>0 UTC<br />(6 PM CST)</th>
+                    <th>6 UTC<br />(12 AM CST)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {$table}
+            </tbody>
+        </table>
+    </div>
 </div>
 EOM;
 $t->render('full.phtml');

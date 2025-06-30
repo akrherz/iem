@@ -1,7 +1,8 @@
 /* global ol, olSelectLonLat, Tabulator */
 let marker = null;
 let outlooksTable = null;
-let mpdsTable = null; 
+let mcdsTable = null; 
+let watchesTable = null;
 
 /**
  * Replace HTML special characters with their entity equivalents
@@ -47,7 +48,8 @@ function workflow() {
     }
     updateSearchResultsHeader(lon, lat);
     doOutlook(lon, lat);
-    doMPD(lon, lat);
+    doMCD(lon, lat);
+    doWatch(lon, lat);
 }
 
 function updateURLParams(params = {}) {
@@ -98,6 +100,13 @@ function buildUI() {
             workflow();
         });
     });
+    document.querySelectorAll('input[type=radio][name=cat]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const cat = document.querySelector("input[name='cat']:checked").value;
+            updateURLParams({cat});
+            workflow();
+        });
+    });
 }
 
 
@@ -111,13 +120,14 @@ function updateSearchResultsHeader(lon, lat) {
 function doOutlook(lon, lat) {
     const last = document.getElementById('last').checked ? escapeHTML(document.getElementById('events').value) : '0';
     const day = escapeHTML(document.querySelector("input[name='day']:checked").value);
-
+    const cat = escapeHTML(document.querySelector("input[name='cat']:checked").value);
+    
     showLoading();
-    const jsonurl = `/json/wpcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}`;
+    const jsonurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}`;
     document.getElementById("outlooks_link").href = jsonurl;
-    const excelurl = `/json/wpcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&fmt=excel`;
+    const excelurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}&fmt=excel`;
     document.getElementById("outlooks_excel").href = excelurl;
-    const csvurl = `/json/wpcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&fmt=csv`;
+    const csvurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}&fmt=csv`;
     document.getElementById("outlooks_csv").href = csvurl;
     
     fetch(jsonurl)
@@ -130,24 +140,64 @@ function doOutlook(lon, lat) {
             hideLoading();
         });
 }
-function doMPD(lon, lat) {
+function doMCD(lon, lat) {
     showLoading();
-    const jsonurl = `/json/wpcmpd.py?lon=${lon}&lat=${lat}`;
-    document.getElementById("mpds_link").href = jsonurl;
-    const excelurl = `/json/wpcmpd.py?lon=${lon}&lat=${lat}&fmt=excel`;
-    document.getElementById("mpds_excel").href = excelurl;
-    const csvurl = `/json/wpcmpd.py?lon=${lon}&lat=${lat}&fmt=csv`;
-    document.getElementById("mpds_csv").href = csvurl;
+    const jsonurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}`;
+    document.getElementById("mcds_link").href = jsonurl;
+    const excelurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}&fmt=excel`;
+    document.getElementById("mcds_excel").href = excelurl;
+    const csvurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}&fmt=csv`;
+    document.getElementById("mcds_csv").href = csvurl;
     
     fetch(jsonurl)
         .then(response => response.json())
         .then(data => {
             hideLoading();
-            mpdsTable.replaceData(data.mpds || []);
+            mcdsTable.replaceData(data.mcds || []);
         })
         .catch(() => {
             hideLoading();
         });
+}
+
+function doWatch(lon, lat) {
+    showLoading();
+    const jsonurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}`;
+    document.getElementById("watches_link").href = jsonurl;
+    const excelurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}&fmt=excel`;
+    document.getElementById("watches_excel").href = excelurl;
+    const csvurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}&fmt=csv`;
+    document.getElementById("watches_csv").href = csvurl;
+    
+    fetch(jsonurl)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            // Extract properties from features array for Tabulator
+            const watchData = data.features ? data.features.map(f => f.properties) : [];
+            watchesTable.replaceData(watchData);
+        })
+        .catch(() => {
+            hideLoading();
+        });
+}
+
+function convertLegacyHashLink() {
+    // Do the anchor tag linking, please
+    const tokens = window.location.href.split("#");
+    if (tokens.length === 2) {
+        const tokens2 = tokens[1].split("/");
+        if (tokens2.length === 3) {
+            if (tokens2[0] === 'bypoint') {
+                const lon = parseFloat(tokens2[1]);
+                const lat = parseFloat(tokens2[2]);
+                marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+                updateMarkerPosition(lon, lat);
+            }
+        }
+        // Remove the hash from the URL
+        window.history.replaceState({}, '', tokens[0]);
+    }
 }
 
 function restoreCoordinatesFromURL(urlParams) {
@@ -172,6 +222,14 @@ function restoreFormSelectionFromURL(urlParams) {
             dayRadio.checked = true;
         }
     }
+    // Set the category selection if provided in URL
+    const cat = urlParams.get('cat');
+    if (cat) {
+        const catRadio = document.querySelector(`input[name='cat'][value='${escapeHTML(cat)}']`);
+        if (catRadio) {
+            catRadio.checked = true;
+        }
+    }
     // Set the "List Most Recent" checkbox if provided in URL
     const last = urlParams.get('last');
     if (last === '1') {
@@ -185,21 +243,21 @@ function restoreFormSelectionFromURL(urlParams) {
             document.getElementById('events').value = eventCount;
         }
     }
-    return { day, last };
+    return { day, cat, last };
 }
 
 function readURLParams(){
     // Read the URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     restoreCoordinatesFromURL(urlParams);
-    const { day, last } = restoreFormSelectionFromURL(urlParams);
+    const { day, cat, last } = restoreFormSelectionFromURL(urlParams);
     
     // Trigger workflow if we have coordinates and any search parameters
     const lon = parseFloat(urlParams.get('lon'));
     const lat = parseFloat(urlParams.get('lat'));
     const hasValidCoordinates = !isNaN(lon) && !isNaN(lat);
     
-    if (hasValidCoordinates && (day || last)) {
+    if (hasValidCoordinates && (day || cat || last)) {
         workflow();
     }
 }
@@ -219,8 +277,8 @@ function initializeTables() {
         ]
     });
 
-    // Initialize mpds table
-    mpdsTable = new Tabulator("#mpds", {
+    // Initialize MCDs table
+    mcdsTable = new Tabulator("#mcds", {
         layout: "fitColumns",
         height: "70vh",
         placeholder: "Click 'Update' or select a point on the map to search for mesoscale convective discussions",
@@ -231,15 +289,53 @@ function initializeTables() {
                 width: 150,
                 formatter: (cell) => {
                     const data = cell.getRow().getData();
-                    return `<a href="/p.php?pid=${data.product_id}" target="_new">${data.year} ${data.product_num}</a>`;
+                    return `<a href="${data.spcurl}" target="_blank">${data.year} ${data.product_num}</a>`;
                 }
             },
             {title: "UTC Valid", field: "utc_issue", widthGrow: 1},
             {title: "UTC Expire", field: "utc_expire", widthGrow: 1},
+            {title: "Watch Confidence", field: "watch_confidence", width: 130},
             {title: "Concerning", field: "concerning", widthGrow: 1},
+            {title: "Most Prob Tornado", field: "most_prob_tornado", width: 140},
+            {title: "Most Prob Hail", field: "most_prob_hail", width: 130},
+            {title: "Most Prob Gust", field: "most_prob_gust", width: 130}
         ]
     });
 
+    // Initialize Watches table
+    watchesTable = new Tabulator("#watches", {
+        layout: "fitColumns",
+        height: "70vh",
+        placeholder: "Click 'Update' or select a point on the map to search for convective watches",
+        columns: [
+            {
+                title: "Watch Number", 
+                field: "number", 
+                width: 130,
+                formatter: (cell) => {
+                    const data = cell.getRow().getData();
+                    return `<a href="${data.spcurl}" target="_blank">${data.year} ${data.number}</a>`;
+                }
+            },
+            {title: "Type", field: "type", width: 80},
+            {title: "UTC Valid", field: "issue", widthGrow: 1},
+            {title: "UTC Expire", field: "expire", widthGrow: 1},
+            {title: "Max Hail Size", field: "max_hail_size", width: 120},
+            {title: "Max Wind Speed", field: "max_wind_gust_knots", width: 130},
+            {
+                title: "Is PDS?", 
+                field: "is_pds", 
+                width: 80,
+                formatter: (cell) => {
+                    const value = cell.getValue();
+                    if (value === 'YES') {
+                        return '<span class="badge bg-danger pds-badge">PDS</span>';
+                    }
+                    return value || '';
+                }
+            }
+        ]
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -248,6 +344,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const res = olSelectLonLat("map", updateMarkerPosition);
     marker = res.marker;
 
+    // Legacy URLs used anchor tags, which we want to migrate to url parameters
+    convertLegacyHashLink();
     readURLParams();
 
 });

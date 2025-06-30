@@ -22,16 +22,12 @@ function onFeatureData(data) {
 
 // Fetch data using modern fetch API
 async function fetchFeatureData(url) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        onFeatureData(data);
-    } catch (error) {
-        console.error('Error fetching feature data:', error);
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
+    const data = await response.json();
+    onFeatureData(data);
 }
 
 // Add event listeners when DOM is loaded

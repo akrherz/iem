@@ -342,6 +342,9 @@ some convective outlook or the number of outlooks for a given point.</li>
 <li><a href="/nws/wpc_national_hilo/">WPC National High Low Listing</a></li>
 <li><a href="/request/gis/outlooks.phtml">
  <i class="fa fa-download"></i> SPC/WPC Outlook Shapefile Download</a></li>
+  <li><a href="/nws/wpc_outlook_search/"><i class="fa fa-search"></i> WPC Outlook / MPD search by point</a>
+  <br />Allows answering of the question of when was a given point last under
+some convective outlook or the number of outlooks for a given point.</li>
  </div>
 </div>
 
