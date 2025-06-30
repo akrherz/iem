@@ -10,6 +10,9 @@ $asos_archive_end = get_iemprop("asos2archive_last");
 $t = new MyView();
 $t->iem_resource = "ASOS";
 $t->iemss = True;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="download.css">
+EOM;
 
 $network = isset($_GET['network']) ? xssafe($_GET['network']): "IA_ASOS";
 $station = "";
@@ -36,15 +39,8 @@ $ar = Array(
 );
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
-        
+
 $t->content = <<<EOM
-<style type="text/css">
-#map {
-    width: 100%;
-    height: 450px;
-    border: 2px solid black;
-}
-</style>
 
 <ol class="breadcrumb">
  <li><a href="/ASOS">ASOS Network</a></li>

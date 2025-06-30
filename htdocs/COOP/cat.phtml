@@ -16,23 +16,27 @@ $t = new MyView();
 $t->title = "NWS COOP Observations by Date by Site";
 
 $content = <<<EOM
- <ol class="breadcrumb">
-  <li><a href="/COOP/">NWS Cooperative Observers</a></li>
-  <li class="active">View Reports by Date or Site</li>
- </ol>
-<p>This page presents the raw observations of daily high and low temperature 
- along with precipitation and snow when available.  The dates shown are the 
- date when the observation was reported.  For observations made at 7 AM, this 
- would be a for a 24 hour period up until that time and not for that local date.
- The timestamps shown are valid for the local timezone of that reporting station.
-
- <p><div class="alert alert-info"><strong>Hint:</strong> You should be able to 
-     highlight the values in the table and then copy + paste these values into a 
-     spreadsheet program like Excel. A 
-     <a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
-    observations.</div>
-
-<form name="switchnwsli" action="cat.phtml" method="GET">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-light px-3 py-2 mb-4 rounded">
+      <li class="breadcrumb-item"><a href="/COOP/">NWS Cooperative Observers</a></li>
+      <li class="breadcrumb-item active" aria-current="page">View Reports by Date or Site</li>
+    </ol>
+  </nav>
+  <div class="card mb-4">
+    <div class="card-body">
+      <p>This page presents the raw observations of daily high and low temperature 
+      along with precipitation and snow when available.  The dates shown are the 
+      date when the observation was reported.  For observations made at 7 AM, this 
+      would be a for a 24 hour period up until that time and not for that local date.
+      The timestamps shown are valid for the local timezone of that reporting station.</p>
+      <div class="alert alert-info mb-0"><strong>Hint:</strong> You should be able to 
+        highlight the values in the table and then copy + paste these values into a 
+        spreadsheet program like Excel. A 
+        <a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
+        observations.</div>
+    </div>
+  </div>
+  <form name="switchnwsli" action="cat.phtml" method="GET" class="row g-3 align-items-end mb-4 bg-white p-3 rounded shadow-sm">
 EOM;
 
 // SCENARIO 1: Print out data for year for station
@@ -41,13 +45,14 @@ if (strlen($station) > 0) {
     if ($sortvar == "") $sortvar = "day";
     $stationselect = networkSelect($network, $station);
     $content .= <<<EOM
- <h3>COOP obs listed by station</h3>
- (<i>Click on a date to get all obs for a particular date.</i>)
- 
- <p>{$stationselect}
- Select Year: 
+      <div class="col-md-6">
+        <h3 class="h5 mb-2">COOP obs listed by station</h3>
+        <div class="mb-2"><i>Click on a date to get all obs for a particular date.</i></div>
+        {$stationselect}
+        <label for="year" class="form-label">Select Year:</label>
 EOM;
     $content .= yearSelect(2004, $year, "year");
+    $content .= "</div>";
 }
 
 // SCENARIO 2: Print out all stations for network and date
@@ -56,35 +61,42 @@ if (strlen($date) > 0) {
     $link = "cat.phtml?date=$date&network=$network&sortvar=";
     if ($sortvar == "") $sortvar = "station";
     $content .= <<<EOM
-<h3>COOP obs listed by date</h3>
-(<i>Click on the NWSLI to view all obs from one station.</i>)
- 
- <p>Enter Date: <input type="date" name="date" value="{$date}">
+      <div class="col-md-6">
+        <h3 class="h5 mb-2">COOP obs listed by date</h3>
+        <div class="mb-2"><i>Click on the NWSLI to view all obs from one station.</i></div>
+        <label for="date" class="form-label">Enter Date:</label>
+        <input type="date" name="date" value="{$date}" class="form-control mb-2">
+      </div>
 EOM;
 }
 
 $netselect = selectNetworkType("COOP", $network);
 
 $content .= <<<EOM
-{$netselect}
-<input type="submit" value="View Data">
+      <div class="col-md-6">
+        <label for="network" class="form-label">Select Network:</label>
+        {$netselect}
+        <button type="submit" class="btn btn-primary mt-2">View Data</button>
+        <button id="rowshower" type="button" class="btn btn-outline-secondary mt-2 ms-2">Hide rows without data</button>
+      </div>
+    </form>
 
-<input id="rowshower" type="button" value="Hide rows without data">
-</form>
-
-<p><table class="table table-striped table-bordered table-sm">
-<thead class="sticky"><tr>
-  <th><a href="{$link}station">NWSLI:</a></th>
-  <th><a href="{$link}sname">Site Name:</a></th>
-  <th><a href="{$link}day">Date:</a></th>
-  <th><a href="{$link}coop_tmpf">Temp at Ob</a></th>
-  <th><a href="{$link}max_tmpf">Max Air Temp</a></th>
-  <th><a href="{$link}min_tmpf">Min Air Temp</a></th>
-  <th><a href="{$link}pday">Precip</a></th>
-  <th><a href="{$link}snow">Snowfall</a></th>
-  <th><a href="{$link}snowd">Snow Depth</a></th>
-  <th><a href="{$link}snoww">Snow Water Equiv</a></th>
-</tr></thead>
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered table-sm align-middle">
+        <thead class="sticky">
+          <tr>
+            <th><a href="{$link}station">NWSLI:</a></th>
+            <th><a href="{$link}sname">Site Name:</a></th>
+            <th><a href="{$link}day">Date:</a></th>
+            <th><a href="{$link}coop_tmpf">Temp at Ob</a></th>
+            <th><a href="{$link}max_tmpf">Max Air Temp</a></th>
+            <th><a href="{$link}min_tmpf">Min Air Temp</a></th>
+            <th><a href="{$link}pday">Precip</a></th>
+            <th><a href="{$link}snow">Snowfall</a></th>
+            <th><a href="{$link}snowd">Snow Depth</a></th>
+            <th><a href="{$link}snoww">Snow Water Equiv</a></th>
+          </tr>
+        </thead>
 EOM;
 
 $nt = new NetworkTable($network);
@@ -188,10 +200,11 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 $content .= <<<EOM
- </table>
-
-<p>Errors exist in this dataset and you should evaluate the observations
-before using...
+      </table>
+    </div>
+    <p class="mt-4">Errors exist in this dataset and you should evaluate the observations
+    before using...</p>
+  </div>
 EOM;
 $t->content = $content;
 $t->jsextra = '<script type="module" src="cat.module.js"></script>';

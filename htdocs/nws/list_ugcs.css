@@ -1,0 +1,13 @@
+.ugcs-card {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.ugcs-table-container {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.5rem;
+}
+.ugcs-form-label {
+  font-weight: 500;
+}
