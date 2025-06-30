@@ -1,0 +1,251 @@
+""".. title:: WPC Outlook Service
+
+Return to `API Services </api/>`_.
+
+Documentation for /json/wpcoutlook.py
+-------------------------------------
+
+This service provides access to the Weather Prediction Center's Excessive
+Rainfall Outlook products.
+The service is designed to be called with a latitude and longitude point.
+
+Changelog
+---------
+
+- 2025-06-29: Initial implementation of WPC Outlook service.
+
+Example Usage
+-------------
+
+Get all the day 1 outlooks for Pierre, South Dakota.  First in JSON, then
+CSV, and finally Excel.
+
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=44.368&lon=-100.336&day=1
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&fmt=csv
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&fmt=excel
+
+Provide the day 1 outlook for Pierre, SD valid at 8 UTC on 3 Aug 2024
+
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00Z
+
+Get only the last day 2 outlook for Washington, DC
+
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=38.907&lon=-77.037&day=2&last=1
+
+"""
+
+import json
+from datetime import datetime, timedelta, timezone
+from io import BytesIO
+
+import pandas as pd
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.nws.products.spcpts import THRESHOLD_ORDER
+from pyiem.reference import ISO8601
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    fmt: str = Field(
+        default="json",
+        description="The format to return data in, either json, excel, or csv",
+        pattern="^(json|excel|csv)$",
+    )
+    callback: str = Field(None, description="JSONP Callback Name")
+    lat: float = Field(
+        42.0, description="Latitude of point in decimal degrees"
+    )
+    lon: float = Field(
+        -95.0, description="Longitude of point in decimal degrees"
+    )
+    last: int = Field(0, description="Limit to last N outlooks, 0 for all")
+    day: int = Field(1, description="Day to query for, 1-8")
+    time: str = Field(
+        None,
+        description=(
+            "Optional specification for a valid timestamp to query outlooks "
+            "for.  This is either a ISO8601 timestamp or 'current' for now."
+        ),
+    )
+
+
+def get_order(threshold):
+    """Lookup a threshold and get its rank, higher is more extreme"""
+    if threshold not in THRESHOLD_ORDER:
+        return -1
+    return THRESHOLD_ORDER.index(threshold)
+
+
+def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
+    """Condition the dataframe."""
+    if outlooks.empty:
+        return outlooks
+    outlooks["threshold_rank"] = outlooks["threshold"].apply(get_order)
+    return outlooks
+
+
+def dotime(time, lon, lat, day) -> tuple[pd.DataFrame, datetime]:
+    """Query for Outlook based on some timestamp"""
+    if time in ["", "current", "now"]:
+        ts = utc()
+        if day > 1:
+            ts += timedelta(days=day - 1)
+    else:
+        # ISO formatting
+        ts = datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
+        ts = ts.replace(tzinfo=timezone.utc)
+    with get_sqlalchemy_conn("postgis") as conn:
+        outlooks = pd.read_sql(
+            sql_helper("""
+        SELECT issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        product_issue at time zone 'UTC' as v,
+        threshold, category from spc_outlooks where
+        product_issue = (
+            select product_issue from spc_outlook where
+            issue <= :ts and expire > :ts and day = :day
+            and outlook_type = 'E' ORDER by product_issue DESC LIMIT 1)
+        and ST_Contains(geom, ST_Point(:lon, :lat, 4326))
+        and day = :day and outlook_type = 'E' and category = 'CATEGORICAL'
+        """),
+            conn,
+            params={"lon": lon, "lat": lat, "day": day, "ts": ts},
+            index_col=None,
+        )
+    return process_df(outlooks), ts
+
+
+def dowork(lon, lat, day) -> pd.DataFrame:
+    """Actually do stuff"""
+    with get_sqlalchemy_conn("postgis") as conn:
+        # Need to compute SIGN seperately
+        outlooks = pd.read_sql(
+            sql_helper("""
+        WITH data as (
+            SELECT issue at time zone 'UTC' as i,
+            expire at time zone 'UTC' as e,
+            product_issue at time zone 'UTC' as v,
+            o.threshold, category, t.priority,
+            row_number() OVER (PARTITION by expire
+                ORDER by priority DESC NULLS last, issue ASC) as rank
+            from spc_outlooks o, spc_outlook_thresholds t
+            where o.threshold = t.threshold and
+            ST_Contains(geom, ST_Point(:lon, :lat, 4326))
+            and day = :day and outlook_type = 'E'
+            and o.threshold not in ('TSTM', 'SIGN') ORDER by issue DESC),
+        agg as (
+            select i, e, v, threshold, category from data where rank = 1),
+        sign as (
+            SELECT issue at time zone 'UTC' as i,
+            expire at time zone 'UTC' as e,
+            product_issue at time zone 'UTC' as v,
+            threshold, category from spc_outlooks
+            where ST_Contains(geom, ST_Point(:lon, :lat, 4326))
+            and day = :day and outlook_type = 'E'
+            and threshold = 'SIGN' ORDER by expire DESC, issue ASC LIMIT 1)
+
+        (SELECT i, e, v, threshold, category from agg
+        ORDER by e DESC, threshold desc) UNION ALL
+        (SELECT i, e, v, threshold, category from sign
+        ORDER by e DESC, threshold desc)
+        """),
+            conn,
+            params={"lon": lon, "lat": lat, "day": day},
+        )
+    return outlooks
+
+
+@iemapp(help=__doc__, schema=Schema)
+def application(environ, start_response):
+    """Answer request."""
+    time = environ.get("time")
+    fmt = environ["fmt"]
+    lon = environ["lon"]
+    lat = environ["lat"]
+    last = environ["last"]
+    day = environ["day"]
+    ts = None
+    if time is not None:
+        outlooks, ts = dotime(time, lon, lat, day)
+        if not outlooks.empty:
+            outlooks = outlooks.iloc[[0]]
+    else:
+        outlooks = dowork(lon, lat, day)
+
+    if fmt == "json" and time is not None:
+        res = {
+            "generation_time": utc().strftime(ISO8601),
+            "query_params": {
+                "time": ts.strftime(ISO8601),
+                "lon": lon,
+                "lat": lat,
+                "day": day,
+            },
+            "outlook": {},
+        }
+        if not outlooks.empty:
+            row0 = outlooks.iloc[0]
+            res["outlook"] = {
+                "threshold": row0["threshold"],
+                "utc_product_issue": pd.Timestamp(row0["v"]).strftime(ISO8601),
+                "utc_issue": pd.Timestamp(row0["i"]).strftime(ISO8601),
+                "utc_expire": pd.Timestamp(row0["e"]).strftime(ISO8601),
+            }
+        headers = [("Content-type", "application/json")]
+        start_response("200 OK", headers)
+        return json.dumps(res)
+    if fmt == "json":
+        running = {}
+        res = {"outlooks": []}
+        for _, row in outlooks.iterrows():
+            if last > 0:
+                running.setdefault(row["threshold"], 0)
+                running[row["threshold"]] += 1
+                if running[row["threshold"]] > last:
+                    continue
+            res["outlooks"].append(
+                dict(
+                    day=day,
+                    utc_issue=row["i"].strftime(ISO8601),
+                    utc_expire=row["e"].strftime(ISO8601),
+                    utc_product_issue=row["v"].strftime(ISO8601),
+                    threshold=row["threshold"],
+                    category=row["category"],
+                )
+            )
+        headers = [("Content-type", "application/json")]
+        start_response("200 OK", headers)
+        return json.dumps(res)
+
+    outlooks = outlooks.rename(
+        columns={
+            "i": "utc_issue",
+            "e": "utc_expire",
+            "v": "utc_product_issue",
+        },
+    )
+    if fmt == "excel":
+        headers = [
+            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-Disposition", "attachment; filename=outlooks.xls"),
+        ]
+        start_response("200 OK", headers)
+        with BytesIO() as bio:
+            outlooks.to_excel(bio, index=False)
+            return bio.getvalue()
+
+    headers = [
+        ("Content-type", "text/csv"),
+        ("Content-Disposition", "attachment; filename=outlooks.csv"),
+    ]
+    start_response("200 OK", headers)
+    return outlooks.to_csv(index=False)

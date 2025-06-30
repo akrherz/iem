@@ -6,6 +6,10 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 $t->iemselect2 = TRUE;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="history.css">
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css">
+EOM;
 $dbconn = iemdb('postgis');
 
 $month = get_int404("month", intval(date("m")));
@@ -15,7 +19,8 @@ $valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", xssafe(
 
 function segmentSelect($dbconn, $year, $month, $selected, $name = "segid")
 {
-    $s = "<select name=\"$name\" class=\"iemselect2\">\n";
+    $s = "<select name=\"$name\" id=\"$name\" class=\"form-select iemselect2\">\n";
+    $s .= "<option value=\"\">Choose a road segment...</option>\n";
     $stname = iem_pg_prepare(
         $dbconn, <<<EOM
     SELECT segid, major, minor from roads_base
@@ -29,60 +34,116 @@ EOM
         if ($row["segid"] == $selected) $s .= "SELECTED";
         $s .= ">{$row['major']} -- {$row['minor']}</option>";
     }
+    $s .= "</select>";
     return $s;
 } // End of segmentSelect
 
 $t->title = "Historical Iowa Winter Road Conditions";
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
-<script src="history.js"></script>
+<script src="history.module.js" type="module"></script>
 EOM;
 
 $segselect = segmentSelect($dbconn, $year, $month, strval($segid));
-$ys = yearSelect(2006, $year, "year");
-$ms = monthSelect($month);
+
+// Create year and month selects with Bootstrap 5 classes
+$yearOptions = array();
+for ($i = 2006; $i <= intval(date("Y")); $i++) {
+    $yearOptions[$i] = (string)$i;
+}
+$ys = make_select("year", $year, $yearOptions, "", "form-select");
+
+$monthOptions = array();
+for ($i = 1; $i <= 12; $i++) {
+    $ts = new DateTime("2000-$i-01");
+    $monthOptions[$i] = $ts->format("M");
+}
+$ms = make_select("month", $month, $monthOptions, "", "form-select");
 
 $content = <<<EOM
-<ul class="breadcrumb">
-<li><a href="/roads/">Roads Mainpage</a></li>
-<li class="active">Historical Listing</li>
-</ul>
-<h3>Historical Road Conditions</h3>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="/roads/"><i class="bi bi-arrow-left-circle me-1"></i>Roads Mainpage</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Historical Listing</li>
+  </ol>
+</nav>
 
-<form method="GET" action="history.phtml">
-<table class="table table-striped">
-<tr>
- <td>Select Road Segment:</td>
- <td>Select Year</td>
- <td>Select Month</td>
- <td></td>
-</tr>
+<div class="d-flex align-items-center mb-4">
+  <i class="bi bi-clock-history me-2 text-primary fs-4"></i>
+  <h3 class="mb-0">Historical Road Conditions</h3>
+</div>
 
-<tr>
- <td>{$segselect}</td>
- <td>{$ys}</td>
- <td>{$ms}</td>
- <td><input type="submit" value="View History"></td>
-</tr>
-</table>
-</form>
+<div class="card mb-4">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-funnel me-2"></i>Filter Options
+    </h5>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="history.phtml">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="segid" class="form-label">
+            <i class="bi bi-signpost-2 me-1"></i>Road Segment
+          </label>
+          {$segselect}
+        </div>
+        <div class="col-md-3">
+          <label for="year" class="form-label">
+            <i class="bi bi-calendar me-1"></i>Year
+          </label>
+          {$ys}
+        </div>
+        <div class="col-md-3">
+          <label for="month" class="form-label">
+            <i class="bi bi-calendar-month me-1"></i>Month
+          </label>
+          {$ms}
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search me-1"></i>View History
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 EOM;
 
 
 if (isset($_GET["month"]) && isset($_GET["segid"])) {
-    $content .= "<div class=\"alert-info\">Here is a listing of historical 
-          road conditions for the segment you selected.  Updates during active
-          weather can be as frequent as every five minutes, but the following
-          display only shows when the given segment changed condition.
-          Click on the time of the report to get a listing of all road 
-          conditions for that time.</div>";
     $content .= <<<EOM
-<br />
-<table id='table1' class=\"table table-sm table-striped\">
-<thead>
-<tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
-<th>Condition</th></tr></thead>
-<tbody>
+<div class="alert alert-info d-flex align-items-start" role="alert">
+  <i class="bi bi-info-circle-fill me-2 mt-1 flex-shrink-0"></i>
+  <div>
+    <strong>Historical Data:</strong> Here is a listing of historical road conditions for the selected segment. 
+    Updates during active weather can be as frequent as every five minutes, but this display only shows 
+    when the segment changed condition. Click on the time of any report to get a listing of all road 
+    conditions for that time.
+  </div>
+</div>
+EOM;
+    
+    $content .= <<<EOM
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table me-2"></i>Road Condition History
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <table id='table1' class="table table-striped table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th><i class="bi bi-calendar-date me-1"></i>Date</th>
+          <th><i class="bi bi-clock me-1"></i>Report Time</th>
+          <th><i class="bi bi-signpost-2 me-1"></i>Road Segment</th>
+          <th><i class="bi bi-exclamation-triangle me-1"></i>Condition</th>
+        </tr>
+      </thead>
+      <tbody>
 EOM;
     $sts = new DateTime("{$year}-{$month}-01");
     $ets = new DateTime("{$year}-{$month}-01");
@@ -113,17 +174,52 @@ EOM);
             $row["label"]
         );
     }
-    $content .= "</tbody></table>\n";
+    $content .= <<<EOM
+      </tbody>
+    </table>
+  </div>
+</div>
+EOM;
 } else if (!is_null($valid)) {
     $year = intval($valid->format("Y"));
-    $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
-   time for all roads monitored in Iowa.  Click on the segment name to get 
-   a listing of historical conditions for that segment.</div>";
+    $content .= <<<EOM
+<div class="alert alert-info d-flex align-items-start" role="alert">
+  <i class="bi bi-info-circle-fill me-2 mt-1 flex-shrink-0"></i>
+  <div>
+    <strong>Snapshot View:</strong> Here is a listing of historical road conditions for a particular
+    time for all roads monitored in Iowa. Click on the segment name to get 
+    a listing of historical conditions for that segment.
+  </div>
+</div>
+EOM;
+    
     $gisurl = "{$EXTERNAL_BASEURL}/archive/data/" . $valid->format('Y/m/d/') . "/GIS/";
-    $content .= "<p>Directory of <a href=\"$gisurl\">gis shapefiles</a> for this UTC date.";
-    $content .= "<br /><table id='table1' class=\"table table-sm table-striped\">
-          <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
-          <th>Condition</th></tr></thead><tbody>";
+    $content .= <<<EOM
+<div class="alert alert-secondary d-flex align-items-center" role="alert">
+  <i class="bi bi-download me-2"></i>
+  <span>Directory of <a href="$gisurl" class="alert-link">GIS shapefiles</a> for this UTC date.</span>
+</div>
+EOM;
+    
+    $content .= <<<EOM
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-table me-2"></i>Road Conditions Snapshot
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <table id='table1' class="table table-striped table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th><i class="bi bi-calendar-date me-1"></i>Date</th>
+          <th><i class="bi bi-clock me-1"></i>Report Time</th>
+          <th><i class="bi bi-signpost-2 me-1"></i>Road Segment</th>
+          <th><i class="bi bi-exclamation-triangle me-1"></i>Condition</th>
+        </tr>
+      </thead>
+      <tbody>
+EOM;
     $stname = iem_pg_prepare(
         $dbconn,
         "SELECT c.label, l.valid, b.major, b.minor, " .
@@ -156,18 +252,51 @@ EOM);
             $row["label"]
         );
     }
-    $content .= "</tbody></table>\n";
+    $content .= <<<EOM
+      </tbody>
+    </table>
+  </div>
+</div>
+EOM;
 } else {
     $content .= <<<EOM
-<p>The Iowa Environmental Mesonet archives the road condition reports as 
-generated by the Iowa State Patrol.  From this page, you can generate a 
-listing of road conditions per road segment for a particular month or a listing
-of all road conditions for a particular time.  Currently, our archive is 
-basically complete back to 14 Feb 2006.
-
-<p><br />and an archive of the GIS shapefiles per report here:
-<br /><code><a href="/archive/data/2005/01/30/GIS/">{$EXTERNAL_BASEURL}/archive/data/2005/01/30/GIS/</a></code>
-<br />look for the iaroads_* files.  Again, timestamps are in UTC.
+<div class="card">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-info-circle me-2"></i>About This Archive
+    </h5>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">
+      <i class="bi bi-archive me-2 text-primary"></i>
+      The Iowa Environmental Mesonet archives the road condition reports as 
+      generated by the Iowa State Patrol. From this page, you can generate a 
+      listing of road conditions per road segment for a particular month or a listing
+      of all road conditions for a particular time.
+    </p>
+    
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <span><strong>Archive Coverage:</strong> Our archive is basically complete back to 14 Feb 2006.</span>
+    </div>
+    
+    <h6 class="mt-4 mb-3">
+      <i class="bi bi-map me-2"></i>GIS Data Archive
+    </h6>
+    <p class="mb-2">Archive of GIS shapefiles per report available at:</p>
+    <div class="bg-light p-3 rounded">
+      <code>
+        <a href="/archive/data/2005/01/30/GIS/" class="text-decoration-none">
+          <i class="bi bi-link-45deg me-1"></i>{$EXTERNAL_BASEURL}/archive/data/2005/01/30/GIS/
+        </a>
+      </code>
+    </div>
+    <small class="text-muted">
+      <i class="bi bi-info-circle me-1"></i>
+      Look for the iaroads_* files. Timestamps are in UTC.
+    </small>
+  </div>
+</div>
 EOM;
 }
 $t->content = $content;

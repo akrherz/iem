@@ -1,0 +1,52 @@
+/* Roads History Page Styles - Bootstrap 5 + Tabulator compatible */
+
+/* Legacy table styling (in case Tabulator doesn't initialize) */
+#table1 {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#table1 th, #table1 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#table1 th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+/* Card styling enhancements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header.bg-primary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+/* Icon styling */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Alert enhancements */
+.alert {
+    border: 1px solid;
+    border-radius: 0.375rem;
+}
+
+/* Form enhancements */
+.form-select {
+    background-position: right 0.75rem center;
+}
+
+/* Table enhancements for Bootstrap styling */
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(0, 0, 0, 0.025);
+}
+
+.table-hover > tbody > tr:hover > td {
+    background-color: rgba(0, 0, 0, 0.075);
+}
