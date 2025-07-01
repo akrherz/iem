@@ -268,6 +268,7 @@ function formatState (data, escape) {
 };
 document.querySelectorAll('.cmapselect').forEach((el) => {
     new TomSelect(el, {
+        maxOptions: 1000,
         render: {
             option: formatState,
             item: formatState
