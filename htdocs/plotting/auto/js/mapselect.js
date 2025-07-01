@@ -173,18 +173,14 @@ function mapFactory(network, formname) {
         }
         const station = feature.get("sid");
         const selectElement = document.querySelector(`select[name="${formname}"]`);
-        if (selectElement) {
-            // Handle both regular select and select2 elements
+        if (selectElement?.tomselect) {
+            // Use Tom Select API to update value and UI
+            selectElement.tomselect.setValue(station, true);
+        } else if (selectElement) {
+            // Fallback for plain select
             selectElement.value = station;
-            
-            // Trigger change event for vanilla JS
             const changeEvent = new Event('change', { bubbles: true });
             selectElement.dispatchEvent(changeEvent);
-            
-            // If select2 is present, update it as well
-            if (window.$ && window.$.fn.select2) {
-                window.$(selectElement).select2().val(station).trigger("change");
-            }
         }
     });
     // Fix responsive issues

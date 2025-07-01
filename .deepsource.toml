@@ -14,7 +14,7 @@ name = "shell"
 name = "javascript"
 
   [analyzers.meta]
-  environment = ["jquery", "browser"]
+  environment = ["browser"]
 
 [[analyzers]]
 name = "python"

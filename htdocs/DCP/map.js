@@ -229,60 +229,75 @@ function initializeMap() {
 /**
  * Parse URL parameters and set form values, handling legacy hash format
  */
-function parseURLParams() {
+// Refactored for ESLint complexity: break into focused helpers (Rule: module-specific orchestration, legacy/Non-ESM)
+function parseLegacyHashParams() {
     const url = new URL(window.location);
-    let migrated = false;
-    
-    // First check for legacy hash format
-    if (url.hash?.includes('.')) {
+    if (url.hash && url.hash.includes('.')) {
         const hashTokens = url.hash.substring(1).split('.');
         if (hashTokens.length === 3) {
-            physical_code = escapeHTML(hashTokens[0]);
-            duration = escapeHTML(hashTokens[1]);
+            const pe = escapeHTML(hashTokens[0]);
+            const dur = escapeHTML(hashTokens[1]);
             const daysParam = parseInt(hashTokens[2], 10);
             if (!isNaN(daysParam) && daysParam > 0) {
-                days = daysParam;
-                migrated = true;
+                return { pe, dur, days: daysParam, migrated: true };
             }
         }
     }
-    
-    // Check for modern URL parameters (these override hash if both exist)
-    if (url.searchParams.has('pe')) {
-        physical_code = escapeHTML(url.searchParams.get('pe'));
-        migrated = false; // Don't migrate if modern params exist
-    }
-    if (url.searchParams.has('duration')) {
-        duration = escapeHTML(url.searchParams.get('duration'));
-        migrated = false;
-    }
+    return { migrated: false };
+}
+
+function parseModernUrlParams() {
+    const url = new URL(window.location);
+    const pe = url.searchParams.has('pe') ? escapeHTML(url.searchParams.get('pe')) : null;
+    const dur = url.searchParams.has('duration') ? escapeHTML(url.searchParams.get('duration')) : null;
+    let daysVal = null;
     if (url.searchParams.has('days')) {
         const daysParam = parseInt(url.searchParams.get('days'), 10);
         if (!isNaN(daysParam) && daysParam > 0) {
-            days = daysParam;
-            migrated = false;
+            daysVal = daysParam;
         }
     }
-    
-    // If we migrated from hash, update URL to modern format
+    return { pe, dur, days: daysVal };
+}
+
+function parseURLParams() {
+    // Try legacy hash first
+    const legacy = parseLegacyHashParams();
+    let migrated = false;
+    if (legacy.migrated) {
+        physical_code = legacy.pe;
+        duration = legacy.dur;
+        days = legacy.days;
+        migrated = true;
+    }
+
+    // Modern URL params override hash
+    const modern = parseModernUrlParams();
+    if (modern.pe) {
+        physical_code = modern.pe;
+        migrated = false;
+    }
+    if (modern.dur) {
+        duration = modern.dur;
+        migrated = false;
+    }
+    if (modern.days) {
+        days = modern.days;
+        migrated = false;
+    }
+
     if (migrated) {
         updateURL();
     }
-    
+
     // Set form values based on parsed or default values
     const peSelect = document.getElementById('pe');
     const durationSelect = document.getElementById('duration');
     const daysInput = document.getElementById('days');
-    
-    if (peSelect) {
-        peSelect.value = physical_code;
-    }
-    if (durationSelect) {
-        durationSelect.value = duration;
-    }
-    if (daysInput) {
-        daysInput.value = days;
-    }
+
+    if (peSelect) peSelect.value = physical_code;
+    if (durationSelect) durationSelect.value = duration;
+    if (daysInput) daysInput.value = days;
 }
 
 /**

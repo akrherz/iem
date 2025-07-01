@@ -1,5 +1,9 @@
-/* CF6 Map Styling - Enhanced Bootstrap 5 Design */
-
+.empty{
+    width: 0px !important;
+    border: 0px !important;
+    padding: 2px !important;
+    background: tan !important;
+}
 /* Main heading styling */
 .page-header {
     background: linear-gradient(135deg, #0066cc, #004499);

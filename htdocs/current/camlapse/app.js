@@ -1,4 +1,4 @@
-/* global $, flowplayer */
+/* global flowplayer */
 
 // https://stackoverflow.com/questions/5202085
 function rsplit(val, sep, maxsplit) {
@@ -44,7 +44,7 @@ function myloader() {
     });
 }
 
-$(() => {
+document.addEventListener('DOMContentLoaded', () => {
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {
         const tokens2 = rsplit(tokens[1], '_', 1);

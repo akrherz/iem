@@ -1,15 +1,4 @@
 <?php 
-$this->headextra .= <<<EOF
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$this->jsextra .= <<<EOF
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-    $(".iemselect2").select2();	
-});
-</script>
-EOF;
 include 'header.phtml'; 
 include 'navbar.phtml';
 echo "<main role=\"main\" id=\"main-content\">";

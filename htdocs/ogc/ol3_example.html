@@ -1,11 +1,11 @@
 <html>
 <head>
   <title>IEM TMS + OpenLayers Example</title>
-  <link type="text/css" href="/vendor/openlayers/9.1.0/ol.css" rel="stylesheet" />
-  <link type="text/css" href="/vendor/openlayers/9.1.0/ol-layerswitcher.css" rel="stylesheet" />
-  <script src="/vendor/openlayers/9.1.0/ol.js"></script> 
-  <script src="/vendor/openlayers/9.1.0/ol-layerswitcher.js"></script> 
-  
+  <link type="text/css" href="/vendor/openlayers/10.6.1/ol.css" rel="stylesheet" />
+  <link type="text/css" href="/vendor/openlayers/10.6.1/ol-layerswitcher.css" rel="stylesheet" />
+  <script src="/vendor/openlayers/10.6.1/ol.js"></script>
+  <script src="/vendor/openlayers/10.6.1/ol-layerswitcher.js"></script>
+
 <script type="text/javascript">
 var map;
 var n0q;
@@ -66,24 +66,31 @@ function init(){
     map.addControl(layerSwitcher);
     
     // Query an IEM JSON service to get the latest timestamps for the TMSs
-    // requires Jquery
     function refresher(){
-        $.getJSON('/json/tms.json', function(data){
-
-            $.each(data.services, function(key, val){
-                if (val.id == 'ridge_uscomp_n0q'){
-                    var dt = new Date(val.utc_valid);
-                    n0q.set('title', "NEXRAD N0Q @"
+        fetch('/json/tms.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.services && Array.isArray(data.services)) {
+                    data.services.forEach(function(val){
+                        if (val.id == 'ridge_uscomp_n0q'){
+                            var dt = new Date(val.utc_valid);
+                            n0q.set('title', "NEXRAD N0Q @"
                                 + ("0"+dt.getUTCHours()).slice(-2)
                                 + ("0"+dt.getUTCMinutes()).slice(-2)
                                 + " UTC");
-                    n0q.setSource(new ol.source.XYZ({
-                        url : '/cache/tile.py/1.0.0/'+val.layername+'/{z}/{x}/{y}.png'
-                    }));
+                            n0q.setSource(new ol.source.XYZ({
+                                url : '/cache/tile.py/1.0.0/'+val.layername+'/{z}/{x}/{y}.png'
+                            }));
+                        }
+                    });
                 }
             })
-        });
-
+            .catch(error => {
+                console.error('Error fetching /json/tms.json:', error);
+            });
     }
     refresher();
     window.setInterval(function(){
@@ -106,6 +113,5 @@ function init(){
 
 <div style="width:100%; height:90%" id="map"></div>
 
-<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 </body>
 </html>

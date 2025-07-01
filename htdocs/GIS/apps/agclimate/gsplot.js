@@ -1,4 +1,4 @@
-// global $, ol
+/* global ol */
 let map = null;
 let dataLayer = null;
 let popup = null;
@@ -171,7 +171,7 @@ function initMap() {
     // Create popup overlay
     const popupElement = document.createElement('div');
     popupElement.className = 'ol-popup';
-    popupElement.style.cssText = `
+    popupElement.style.cssText = `${''}
         background: white;
         border: 2px solid #000;
         border-radius: 5px;
@@ -247,14 +247,18 @@ function initMap() {
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize the map
     initMap();
-    
-    // Handle CSV download
-    $("#save").click(() => {
-        const content = $("#datatable").text().split(/\n/).slice(2).join("\n");
 
-        const link = document.createElement('a');
-        link.setAttribute('download', 'isusm.csv');
-        link.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`);
-        link.click(); 
-    });
+    // Handle CSV download (vanilla JS)
+    const saveBtn = document.getElementById('save');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const datatable = document.getElementById('datatable');
+            if (!datatable) return;
+            const content = datatable.textContent.split(/\n/).slice(2).join("\n");
+            const link = document.createElement('a');
+            link.setAttribute('download', 'isusm.csv');
+            link.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`);
+            link.click();
+        });
+    }
 });

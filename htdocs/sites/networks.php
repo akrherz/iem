@@ -232,6 +232,7 @@ EOM;
 
 if (!$nohtml || $format == 'shapefile') {
     $t = new MyView();
+    $t->iemselect2 = true;
     $t->title = "Network Station Tables";
     $page = 'full.phtml';
     $sextra = "";

@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create popup element
     element = document.createElement('div');
     element.id = 'mappopup';
-    element.style.width = '200px';
+    element.style.width = '400px';
     document.getElementById('map').appendChild(element);
     popup = new ol.Overlay({
         element,
@@ -107,15 +107,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            
+
             // Show custom tooltip
             showTooltip(feature);
-            
-            // Set the select form to proper value
+
+            // Set the select form to proper value (Tom Select aware)
             const stationSelect = document.querySelector('select[name="station"]');
-            if (stationSelect) {
+            if (stationSelect?.tomselect) {
+                // Use Tom Select API to update value and UI
+                stationSelect.tomselect.setValue(feature.get('id'), true);
+            } else if (stationSelect) {
+                // Fallback for plain select
                 stationSelect.value = feature.get('id');
-                // Trigger change event for select2 or other components
                 const changeEvent = new Event('change', { bubbles: true });
                 stationSelect.dispatchEvent(changeEvent);
             }

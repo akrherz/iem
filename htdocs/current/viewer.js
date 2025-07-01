@@ -1,4 +1,4 @@
-/* global $, ol, moment, bootstrap */
+/* global ol, moment, bootstrap */
 
 /**
  * Format date for datetime-local input (YYYY-MM-DDTHH:MM)
@@ -109,7 +109,10 @@ function liveShot() {
     if (aqlive) return;
     aqlive = true;
     ts = new Date();
-    $("#webcam_image").attr('src', `/current/live/${currentCameraFeature.get("cid")}.jpg?ts=${ts.getTime()}`);
+    const webcamImg = document.getElementById("webcam_image");
+    if (webcamImg) {
+        webcamImg.src = `/current/live/${currentCameraFeature.get("cid")}.jpg?ts=${ts.getTime()}`;
+    }
     aqlive = false;
 }
 
@@ -157,27 +160,44 @@ function findFeatureByCid(cid) {
 }
 
 function handleRWISClick(img) {
-    $("#rwismain").attr('src', $(img).attr("src"));
+    const rwisMain = document.getElementById("rwismain");
+    if (rwisMain && img && img.src) {
+        rwisMain.src = img.src;
+    }
 }
 
 window.hrs = handleRWISClick;
 
 function doRWISView() {
     // Do the magic that is the multi-view RWIS data...
-    $("#singleimageview").css("display", "none");
-    $("#rwisview").css("display", "block");
-    $("#rwislist").empty();
+    const singleImageView = document.getElementById("singleimageview");
+    const rwisView = document.getElementById("rwisview");
+    const rwisList = document.getElementById("rwislist");
+    const rwisMain = document.getElementById("rwismain");
+    if (singleImageView) singleImageView.style.display = "none";
+    if (rwisView) rwisView.style.display = "block";
+    if (rwisList) rwisList.innerHTML = "";
     let i = 0;
     let hit = false;
     while (i < 10) {
         const url = currentCameraFeature.get(`imgurl${i}`);
         if (url !== null && url !== undefined) {
             if (!hit) {
-                $("#rwismain").attr('src', url);
+                if (rwisMain) rwisMain.src = url;
                 hit = true;
+                i += 1;
                 continue;
             }
-            $("#rwislist").append(`<div class="col-md-2"><img onclick="handleRWISClick(this);" src="${url}" class="img img-fluid"></div>`);
+            if (rwisList) {
+                const div = document.createElement("div");
+                div.className = "col-md-2";
+                const img = document.createElement("img");
+                img.src = url;
+                img.className = "img img-fluid";
+                img.onclick = function() { handleRWISClick(this); };
+                div.appendChild(img);
+                rwisList.appendChild(div);
+            }
         }
         i += 1;
     }
@@ -195,35 +215,55 @@ function updateCamera() {
     if (cid.startsWith("IDOT-")) {
         doRWISView();
         updateHashLink();
+        return;
     }
-    else {
-        $("#singleimageview").css("display", "block");
-        $("#rwisview").css("display", "none");
-        $("#liveshot").css("display", "block");
-        let url = currentCameraFeature.get("url");
-        if (url === undefined) {
-            $("#liveshot").css("display", "none");
-            url = currentCameraFeature.get("imgurl");
-        }
-        if (url === undefined) {
-            url = currentCameraFeature.get("imgurl0");
-        }
-        let valid = currentCameraFeature.get("valid");
-        if (valid === undefined) {
-            valid = currentCameraFeature.get("utc_valid");
-        }
-        let name = currentCameraFeature.get("name");
-        if (name === undefined) {
-            name = "Iowa DOT Dash Cam";
-        }
-        if (url !== undefined) {
-            $("#webcam_image").attr('src', url);
-            $("#webcam_title").html(
-                `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`);
-            updateHashLink();
-        }
-    }
+    showSingleImageView();
+}
 
+function showSingleImageView() {
+    setSingleImageViewVisibility();
+    const url = getSingleImageUrl();
+    if (url !== undefined) {
+        setWebcamImageAndTitle(url);
+        updateHashLink();
+    }
+}
+
+function setSingleImageViewVisibility() {
+    const singleImageView = document.getElementById("singleimageview");
+    const rwisView = document.getElementById("rwisview");
+    const liveShotBtn = document.getElementById("liveshot");
+    if (singleImageView) singleImageView.style.display = "block";
+    if (rwisView) rwisView.style.display = "none";
+    if (liveShotBtn) liveShotBtn.style.display = "block";
+    const url = getCameraImageUrl();
+    if (url === undefined && liveShotBtn) liveShotBtn.style.display = "none";
+}
+
+function getSingleImageUrl() {
+    let url = getCameraImageUrl();
+    if (url === undefined) {
+        url = getFallbackCameraImageUrl();
+    }
+    return url;
+}
+
+function setWebcamImageAndTitle(url) {
+    const valid = currentCameraFeature.get("valid") ?? currentCameraFeature.get("utc_valid");
+    const name = currentCameraFeature.get("name") ?? "Iowa DOT Dash Cam";
+    const webcamImg = document.getElementById("webcam_image");
+    const webcamTitle = document.getElementById("webcam_title");
+    if (webcamImg) webcamImg.src = url;
+    if (webcamTitle) webcamTitle.innerHTML =
+        `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`;
+}
+
+function getCameraImageUrl() {
+    return currentCameraFeature.get("url");
+}
+
+function getFallbackCameraImageUrl() {
+    return currentCameraFeature.get("imgurl") ?? currentCameraFeature.get("imgurl0");
 }
 function cronMinute() {
     // We are called every minute
@@ -242,7 +282,8 @@ function getRADARSource() {
     }
     dt.subtract(dt.minutes() % 5, 'minutes');
     const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
-    $("#radar_title").html(`US Base Reflectivity @ ${dt.format("h:mm A")}`);
+    const radarTitle = document.getElementById("radar_title");
+    if (radarTitle) radarTitle.innerHTML = `US Base Reflectivity @ ${dt.format("h:mm A")}`;
     return new ol.source.XYZ({
         url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
@@ -254,65 +295,51 @@ function refreshRADAR() {
     }
 }
 function refreshJSON() {
+    setWebcamGeoJsonLayer();
+    setDashcamGeoJsonLayer();
+    setRWISGeoJsonLayer();
+    setSBWLayer();
+}
+
+function setWebcamGeoJsonLayer() {
     let url = "/geojson/webcam.geojson?network=TV";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         const dtpicker = document.getElementById('dtpicker');
         if (dtpicker?.value) {
             const dt = moment(parseDateTimeLocal(dtpicker.value));
             url += `&valid=${dt.utc().format(ISOFMT)}`;
         }
     }
-    let newsource = new ol.source.Vector({
-        url,
-        format: new ol.format.GeoJSON()
-    });
-    newsource.on('change', () => {
-        updateCamera();
-    });
-    webcamGeoJsonLayer.setSource(newsource);
+    setLayerSource(webcamGeoJsonLayer, url);
+}
 
-    // Dashcam
-    url = "/api/1/idot_dashcam.geojson";
+function setDashcamGeoJsonLayer() {
+    let url = "/api/1/idot_dashcam.geojson";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         const dtpicker = document.getElementById('dtpicker');
         if (dtpicker?.value) {
             const dt = moment(parseDateTimeLocal(dtpicker.value));
             url += `?valid=${dt.utc().format(ISOFMT)}`;
         }
     }
-    newsource = new ol.source.Vector({
-        url,
-        format: new ol.format.GeoJSON()
-    });
-    newsource.on('change', () => {
-        updateCamera();
-    });
-    idotdashcamGeoJsonLayer.setSource(newsource);
+    setLayerSource(idotdashcamGeoJsonLayer, url);
+}
 
-    // RWIS
-    url = "/api/1/idot_rwiscam.geojson";
+function setRWISGeoJsonLayer() {
+    let url = "/api/1/idot_rwiscam.geojson";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         const dtpicker = document.getElementById('dtpicker');
         if (dtpicker?.value) {
             const dt = moment(parseDateTimeLocal(dtpicker.value));
             url += `?valid=${dt.utc().format(ISOFMT)}`;
         }
     }
-    newsource = new ol.source.Vector({
-        url,
-        format: new ol.format.GeoJSON()
-    });
-    newsource.on('change', () => {
-        updateCamera();
-    });
-    idotRWISLayer.setSource(newsource);
+    setLayerSource(idotRWISLayer, url);
+}
 
-    url = "/geojson/sbw.geojson";
+function setSBWLayer() {
+    let url = "/geojson/sbw.geojson";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         const dtpicker = document.getElementById('dtpicker');
         if (dtpicker?.value) {
             const dt = moment(parseDateTimeLocal(dtpicker.value));
@@ -325,6 +352,17 @@ function refreshJSON() {
     }));
 }
 
+function setLayerSource(layer, url) {
+    const newsource = new ol.source.Vector({
+        url,
+        format: new ol.format.GeoJSON()
+    });
+    newsource.on('change', () => {
+        updateCamera();
+    });
+    layer.setSource(newsource);
+}
+
 function parseURI() {
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {
@@ -333,7 +371,8 @@ function parseURI() {
             cameraID = escapeHTML(tokens[1]);
         } else {
             cameraID = escapeHTML(tokens2[0]);
-            $('#toggle_event_mode button').eq(1).click();
+            const toggleBtns = document.querySelectorAll('#toggle_event_mode button');
+            if (toggleBtns[1]) toggleBtns[1].click();
             const dtpicker = document.getElementById('dtpicker');
             if (dtpicker) {
                 const momentDate = moment(escapeHTML(tokens2[1]));
@@ -345,9 +384,12 @@ function parseURI() {
 
 function buildUI() {
 
-    $("#liveshot").click(() => {
-        liveShot();
-    });
+    const liveShotBtn = document.getElementById("liveshot");
+    if (liveShotBtn) {
+        liveShotBtn.addEventListener('click', () => {
+            liveShot();
+        });
+    }
 
     // Time increment and decrement buttons
     document.querySelectorAll("button.timecontrol").forEach(button => {
@@ -367,21 +409,31 @@ function buildUI() {
     });
 
     // Thanks to http://jsfiddle.net/hmgyu371/
-    $('#toggle_event_mode button').click(function () { // this
-        if ($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')) {
-            // Enable Archive
-            realtimeMode = false;
-            $('#dtdiv').show();
-            refreshJSON();
-        } else {
-            // Enable Realtime
-            realtimeMode = true;
-            $('#dtdiv').hide();
-            cronMinute();
-        }
-
-        $('#toggle_event_mode button').eq(0).toggleClass('locked_inactive locked_active btn-secondary btn-info');
-        $('#toggle_event_mode button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-secondary');
+    document.querySelectorAll('#toggle_event_mode button').forEach((button, idx, btns) => {
+        button.addEventListener('click', function () {
+            if (this.classList.contains('locked_active') || this.classList.contains('unlocked_inactive')) {
+                // Enable Archive
+                realtimeMode = false;
+                document.getElementById('dtdiv').style.display = '';
+                refreshJSON();
+            } else {
+                // Enable Realtime
+                realtimeMode = true;
+                document.getElementById('dtdiv').style.display = 'none';
+                cronMinute();
+            }
+            // Toggle classes
+            const btn0 = btns[0];
+            const btn1 = btns[1];
+            btn0.classList.toggle('locked_inactive');
+            btn0.classList.toggle('locked_active');
+            btn0.classList.toggle('btn-secondary');
+            btn0.classList.toggle('btn-info');
+            btn1.classList.toggle('unlocked_inactive');
+            btn1.classList.toggle('unlocked_active');
+            btn1.classList.toggle('btn-info');
+            btn1.classList.toggle('btn-secondary');
+        });
     });
 
     // Initialize native datetime picker
@@ -439,7 +491,7 @@ function closeSBWPopover() {
     }
 }
 
-$().ready(() => {
+document.addEventListener('DOMContentLoaded', () => {
     buildUI();
 
     sbwlayer = new ol.layer.Vector({

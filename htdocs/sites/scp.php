@@ -11,7 +11,7 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 $t = new MyView();
-
+$t->iemselect2 = true;
 $t->title = "Satellite Cloud Product";
 $t->sites_current = "scp";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";

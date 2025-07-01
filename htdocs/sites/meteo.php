@@ -9,6 +9,7 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = "Site Meteorograms";
 $t->sites_current = "meteo";
 

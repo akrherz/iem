@@ -249,7 +249,7 @@ def cmap_handler(fdict, value, arg, res):
         arg["name"],
         value,
         CMAPS,
-        cssclass="cmapselect",
+        cssclass="cmapselect form-control-lg",
         showvalue=False,
     )
     checked = ' checked="checked"' if reverse_on else ""
@@ -310,32 +310,35 @@ def sday_handler(value, arg, res):
     if value.find("/") > -1:
         value = f"{value[5:7]}{value[8:10]}"
 
-    def _todate(val):
-        """convert to a timestamp value."""
-        return f"2000/{val[:2]}/{val[2:]}"
-
     res["jsextra"] += f"""
-$( '#{dpname}' ).datepicker({{
-    beforeShow: function (input, inst) {{
-        inst.dpDiv.addClass('sday');
+flatpickr("#{dpname}", {{
+    dateFormat: "m/d",
+    defaultDate: "{int(value[:2])}/{int(value[2:])}",
+    minDate: "{int(vmin[:2])}/{int(vmin[2:])}",
+    maxDate: "{int(vmax[:2])}/{int(vmax[2:])}",
+    allowInput: true,
+    onChange: function(selectedDates, dateStr, instance) {{
+        // Update hidden field in MMDD format
+        if (selectedDates.length) {{
+            const d = selectedDates[0];
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById("alt_{dpname}").value = mm + dd;
+        }}
     }},
-    onClose: function(dateText, inst) {{
-        inst.dpDiv.removeClass('sday');
-    }},
-    changeMonth: true,
-    changeYear: false,
-    dateFormat: "mm/dd",
-    altFormat: "mmdd",
-    altField: "#alt_{dpname}",
-    endDate: new Date('{_todate(vmax)}'),
-    startDate: new Date('{_todate(vmin)}')
+    onReady: function(selectedDates, dateStr, instance) {{
+        // Set hidden field on load
+        if (selectedDates.length) {{
+            const d = selectedDates[0];
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById("alt_{dpname}").value = mm + dd;
+        }}
+    }}
 }});
-$("#{dpname}").datepicker(
-    'setDate', new Date('{_todate(value)}')
-);
     """
     return (
-        f'<input type="text" id="{dpname}"> (mm/dd)'
+        f'<input type="text" id="{dpname}" autocomplete="off"> (mm/dd)'
         f'<input type="hidden" name="{arg["name"]}" value="{value}" '
         f'id="alt_{dpname}">'
     )
@@ -343,23 +346,28 @@ $("#{dpname}").datepicker(
 
 def date_handler(value, arg, res):
     """Handler for datetime instances."""
+    # Rule: jQuery UI → flatpickr, no jQuery, modern JS, preserve UX
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "1893/1/1")
     vmax = arg.get("max", utc().strftime("%Y/%m/%d"))
+
+    # flatpickr expects yyyy-mm-dd
+    def _ymd(val):
+        parts = [int(x) for x in val.replace("-", "/").split("/")]
+        return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
+
     res["jsextra"] += f"""
-$( '#{dpname}' ).datepicker({{
-    changeMonth: true,
-    changeYear: true,
-    dateFormat: "yy/mm/dd",
-    endDate: new Date('{vmax}'),
-    startDate: new Date('{vmin}')
+flatpickr("#{dpname}", {{
+    dateFormat: "Y/m/d",
+    defaultDate: "{_ymd(value)}",
+    minDate: "{_ymd(vmin)}",
+    maxDate: "{_ymd(vmax)}",
+    allowInput: true
 }});
-$("#{dpname}").datepicker(
-    'setDate', new Date('{value}')
-);
     """
     return (
-        f'<input type="text" name="{arg["name"]}" id="{dpname}" > (YYYY/mm/dd)'
+        f'<input type="text" name="{arg["name"]}" id="{dpname}" '
+        f'autocomplete="off"> (YYYY/mm/dd)'
     )
 
 
@@ -367,19 +375,32 @@ def datetime_handler(value, arg, res):
     """Handler for datetime instances."""
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
+    vmin = arg.get("min", "1893/01/01 0000")
+
+    # Convert to flatpickr format: Y/m/d H:i
+    def _to_fp(val):
+        # Accepts 'YYYY/MM/DD HHmm' or 'YYYY-MM-DD HHmm'
+        dt = val.replace("-", "/").split()
+        datepart = dt[0]
+        timepart = dt[1] if len(dt) > 1 else "0000"
+        y, m, d = [int(x) for x in datepart.split("/")]
+        h, mi = int(timepart[:2]), int(timepart[2:])
+        return f"{y:04d}-{m:02d}-{d:02d} {h:02d}{mi:02d}"
+
     res["jsextra"] += f"""
-$( "#{dpname}" ).flatpickr({{
+flatpickr("#{dpname}", {{
     enableTime: true,
     dateFormat: "Y/m/d Hi",
     time_24hr: true,
     allowInput: true,
-    defaultDate: moment('{value}', 'YYYY/MM/DD HHmm').toDate(),
-    maxDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
-    minDate: moment('{arg["min"]}', 'YYYY/MM/DD HHmm').toDate()}});
+    defaultDate: "{_to_fp(value)}",
+    minDate: "{_to_fp(vmin)}",
+    maxDate: "{_to_fp(vmax)}"
+}});
     """
     return (
         f'<input type="text" name="{arg["name"]}" id="{dpname}" '
-        "> (YYYY/mm/dd HH24MI)"
+        'autocomplete="off"> (YYYY/mm/dd HH24MI)'
     )
 
 
@@ -500,21 +521,21 @@ def dat_handler(fdict, res):
             )
     ss += "</select>"
     res["jsextra"] += f"""
-$("#dat").datepicker({{
-    changeMonth: true,
-    changeYear: true,
-    dateFormat: "yy/mm/dd",
-    startDate: new Date('2001/01/01'),
-    endDate: new Date('{utc():%Y/%m/%d}'),
-    onSelect: function(dateText) {{
-        onNetworkChange(dateText);
+flatpickr("#dat", {{
+    dateFormat: "Y/m/d",
+    defaultDate: "{dt}",
+    minDate: "2001-01-01",
+    maxDate: "{utc():%Y-%m-%d}",
+    allowInput: true,
+    onChange: function(selectedDates, dateStr, instance) {{
+        onNetworkChange(dateStr);
     }}
 }});
-$("#dat").datepicker(
-    'setDate', new Date('{dt}')
-);
     """
-    return f'<input type="text" name="dat" id="dat"> (YYYY/mm/dd) &nbsp; {ss}'
+    return (
+        f'<input type="text" name="dat" id="dat" autocomplete="off"> '
+        f"(YYYY/mm/dd) &nbsp; {ss}"
+    )
 
 
 def generate_form(apid, fdict, headers, cookies):
@@ -689,18 +710,14 @@ def generate_form(apid, fdict, headers, cookies):
             )
             res["headextra"] += """
 <link type="text/css"
- href="/vendor/jquery-datatables/1.10.24/datatables.min.css"
+ href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css"
  rel="stylesheet" />
             """
             res["extrascripts"] += """
-<script src='/vendor/jquery-datatables/1.10.24/datatables.min.js'></script>
-<script src="/js/maptable.js"></script>
-<script>
-var maptable;
-$(document).ready(function(){{
-    maptable = $("div.iem-maptable").MapTable();
-}});
+<script
+ src='https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js'>
 </script>
+<script src="/js/maptable.js?v=2"></script>
             """
         elif fmt in ["png", "svg"]:
             timing_secs = get_timing(apid) + 1
@@ -973,7 +990,11 @@ plot type.</p>
 
 def generate_autoplot_list(apid):
     """The select list of available autoplots."""
-    s = '<select name="q" class="iemselect2" data-width="100%">\n'
+    s = (
+        '<select name="q" class="iemselect2 form-control-lg" '
+        'data-width="100%">'
+        "\n"
+    )
     for entry in autoplot_data["plots"]:
         s += f'<optgroup label="{entry["label"]}">\n'
         for opt in entry["options"]:
@@ -1138,10 +1159,10 @@ def generate(fdict, headers, cookies):
         "title": "Automated Data Plotter",
         "content": content,
         "jsextra": f"""
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+<script
+ src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js">
+</script>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
@@ -1184,20 +1205,21 @@ document.addEventListener('DOMContentLoaded', function() {{
 </script>
         """,
         "headextra": f"""
- <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
  <link rel="stylesheet" type="text/css"
  href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
 <link
  href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
  rel="stylesheet">
+<link
+ href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.css"
+ rel="stylesheet">
+
 <link rel="stylesheet"
  href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
 <link type="text/css"
  href="/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.css"
  rel="stylesheet" />
 <style>
-.ui-datepicker{{
-    width: 17em; padding: .2em .2em 0; z-index: 9999 !important; }}
 .cmapselect{{
     width: 400px; }}
 </style>

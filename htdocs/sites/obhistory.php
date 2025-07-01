@@ -291,7 +291,7 @@ if (!is_null($metadata["archive_begin"])) {
 }
 
 $t = new MyView();
-
+$t->iemselect2 = true;
 $t->title = "Observation History";
 $t->sites_current = 'obhistory';
 

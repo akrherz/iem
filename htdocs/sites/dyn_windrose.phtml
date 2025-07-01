@@ -106,6 +106,7 @@ if (!is_null($metadata["archive_begin"])) {
 }
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = "Custom Wind Roses";
 $t->sites_current = "custom_windrose";
 $tznote = "(Times are in {$metadata["tzname"]} time zone)";

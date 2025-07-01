@@ -16,6 +16,7 @@ if (strpos($network, "CLIMATE") === false){
 }
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = "Period of Record Daily Climatology";
 $t->sites_current = "porclimo";
 

@@ -1,5 +1,5 @@
 <?php
-$OL = "10.4.0";
+$OL = "10.6.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
 require_once "../../include/mlib.php";
@@ -24,6 +24,13 @@ $t->headextra = <<<EOM
 EOM;
 
 $t->content = <<<EOM
+<div class="alert alert-warning text-center mb-3" role="alert">
+  <strong>Notice:</strong> The newly created
+  <a href="/one/?dashcam=1&rwis=1" class="alert-link">IEM One app</a>
+  generally replicates this
+  app's functionality and more.  If there are no user complaints, this app
+  will be retired in the future.
+</div>
 <div class="row">
 <div class="col-sm-4">
 <h3><i class="bi bi-camera"></i> IEM Webcam Viewer</h3>
