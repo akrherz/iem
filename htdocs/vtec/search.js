@@ -346,7 +346,7 @@ function updateTable3(){
     }
     document.getElementById("table3title").textContent = title;
     // Do what we need to for table 3
-    fetch((by === "wfo" ? BACKEND_EVENTS : `${BACKEND_EVENTS_BYSTATE}?${new URLSearchParams(params)}`))
+    fetch((by === "wfo" ? `${BACKEND_EVENTS}?${new URLSearchParams(params)}` : `${BACKEND_EVENTS_BYSTATE}?${new URLSearchParams(params)}`))
     .then(response => response.json())
     .then(data => {
         const tableData = data.events.map(row => ({
