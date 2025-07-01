@@ -12,6 +12,7 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->iemselect2 = true;
 
 /* Get vars */
 $year = get_int404('year', intval(date("Y", time() - 86400)));

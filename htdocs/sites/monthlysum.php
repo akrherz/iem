@@ -15,6 +15,7 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = "Monthly Summaries";
 $t->sites_current = "monthsum";
 

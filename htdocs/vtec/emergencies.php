@@ -2,7 +2,6 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 120);
 $OL = "10.6.1";
-$JQUERYUI = "1.13.2";
 
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
@@ -11,14 +10,12 @@ $t = new MyView();
 $t->title = "Tornado + Flash Flood Emergencies Listing";
 $t->headextra = <<<EOM
 <link type="text/css" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link type="text/css" href="emergencies.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>

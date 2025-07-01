@@ -13,6 +13,7 @@ $station4 = (strlen($station) == 3) ? sprintf("K%s", $station) : $station;
 $station3 = substr($station4, 1, 3);
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->refresh = 300;
 $t->title = "Terminal Aerodome Forecasts";
 $t->sites_current = "taf";

@@ -137,8 +137,6 @@ $loopts = $ts - ($diff * 60);
 $lwidth = 650;
 $lheight = 550;
 
-$files = "";
-
 $images = array();
 $radtimes = array();
 for ($i = 0; $i < intval($frames); $i++) {
@@ -151,7 +149,6 @@ for ($i = 0; $i < intval($frames); $i++) {
     $myhref = "/archive/data/" . gmdate('Y/m/d/', $fts) . "GIS/uscomp/n0r_" .
         gmdate('YmdHi', $fts) . ".png";
     $gisbase = "/archive/data/" . gmdate('Y/m/d/', $fts) . "GIS/uscomp/";
-    $files .= $myuri . ",";
     $images[] = $myuri;
     $radtimes[] = $fts;
 }
@@ -370,6 +367,7 @@ you may also like the <a href="/one/">IEM One</a> app.  Please try it out and
 
 </div></div>
 
+<br />
 <p><b>GIS NEXRAD layers</b>
 <br />The NEXRAD layer used in these images are available in a georeferenced 
 RASTER format. You will need this 

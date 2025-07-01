@@ -13,7 +13,7 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 $t = new MyView();
-
+$t->iemselect2 = true;
 $dir = isset($_GET["dir"]) ? xssafe($_GET["dir"]) : "";
 
 $filename = "/mesonet/share/pics/{$station}/{$station}.jpg";

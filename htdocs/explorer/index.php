@@ -14,7 +14,6 @@ $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>

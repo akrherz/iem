@@ -46,6 +46,7 @@ foreach ($jobj["features"] as $feature){
 $table .= "</tbody></table>";
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = "Site Neighbors";
 $t->sites_current = "neighbors";
 

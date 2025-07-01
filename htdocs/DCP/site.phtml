@@ -1,5 +1,5 @@
 <?php
-$OL = "10.4.0";
+$OL = "10.6.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 110);
 require_once "../../include/mlib.php";
@@ -74,8 +74,11 @@ if (!is_null($station)) {
 
 $t->title = "SHEF Data by Site by Day";
 $t->iemselect2 = TRUE;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="site.css" type="text/css">
+EOM;
 if (is_null($station)) {
-    $t->headextra = <<<EOM
+    $t->headextra .= <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 EOM;
@@ -86,7 +89,7 @@ EOM;
 EOM;
 }
 
-$nselect = "<select name=\"network\">";
+$nselect = '<select name="network" class="iemselect2">';
 $rs = pg_query($mesosite, "SELECT id, name from networks " .
     "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -111,13 +114,6 @@ $ds = daySelect($day);
 $extra = "";
 if (is_null($station)) {
     $extra = <<<EOM
-<style type="text/css">
-#map {
-    width: 100%;
-    height: 400px;
-    border: 2px solid black;
-}
-</style>
 <i>Click on the dot to select your site:</i><br />
 <div id="map" data-network="{$network}"></div>
 EOM;
@@ -179,47 +175,60 @@ EOM;
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/DCP/">GOES DCP/HADS Mainpage</a></li>
- <li class="active">List Obs by Date</li>
-</ol>
-<h3>SHEF Site Observations by Date</h3>
-<ul>
- <li>Timestamps are presented in central standard or daylight time</li>
- <li>The column headings are the 
- <a href="https://vlab.noaa.gov/web/mdl/shef-information">SHEF</a> encoded
- variable names.</li>
- <li>Archive begins on 1 Jan 2002 for Iowa, 9 Dec 2010 for other states.
- The archive is not complete for all the sites listed.</li>
- <li>The IEM classifies SHEF provided data into two classes on a state by
- state basis.  The COOP network sites are mostly official once-daily cooperative
- observer sites.  The DCP network is everybody else!</li>
- <li>If you select a COOP network site, you are provided observations for the
- entire year.</li>
- </ul>
-
-<form method="GET" name="chstate">
-<p><strong>Select Network:</strong> {$nselect}
-
-<input type="submit" value="Select Network" />
-</form>
-
-<form method="GET" name="olselect">
-<input type="hidden" name="network" value="{$network}" />
-<table class="table table-sm">
-<thead>
-<tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
-</thead>
-<tr>
-<td>{$n2select}
-<br /><a href="site.phtml?year={$year}&month={$month}&day={$day}&network={$network}">Select from map</a></td>
-<td>{$ys}</td>
-<td>{$ms}</td>
-<td>{$ds}</td>
-<td><input type="submit" value="View Data"></td>
-</tr></table>
-</form>
-
-$extra
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-light px-3 py-2 mb-4 rounded">
+    <li class="breadcrumb-item"><a href="/DCP/">GOES DCP/HADS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">List Obs by Date</li>
+  </ol>
+</nav>
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="card h-100">
+      <div class="card-body">
+        <h3 class="card-title mb-3">SHEF Site Observations by Date</h3>
+        <ul class="mb-4">
+          <li>Timestamps are presented in central standard or daylight time</li>
+          <li>The column headings are the <a href="https://vlab.noaa.gov/web/mdl/shef-information">SHEF</a> encoded variable names.</li>
+          <li>Archive begins on 1 Jan 2002 for Iowa, 9 Dec 2010 for other states. The archive is not complete for all the sites listed.</li>
+          <li>The IEM classifies SHEF provided data into two classes on a state by state basis. The COOP network sites are mostly official once-daily cooperative observer sites. The DCP network is everybody else!</li>
+          <li>If you select a COOP network site, you are provided observations for the entire year.</li>
+        </ul>
+        <form method="GET" name="chstate" class="row g-3 align-items-end mb-3">
+          <div class="col-md-8">
+            <label class="form-label fw-bold">Select Network:</label>
+            {$nselect}
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">Select Network</button>
+          </div>
+        </form>
+        <form method="GET" name="olselect" class="row g-3 align-items-end">
+          <input type="hidden" name="network" value="{$network}" />
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Station:</label>
+            {$n2select}
+            <div><a href="site.phtml?year={$year}&month={$month}&day={$day}&network={$network}">Select from map</a></div>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Year:</label>
+            {$ys}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Month:</label>
+            {$ms}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Day:</label>
+            {$ds}
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-success w-100">View Data</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{$extra}
 EOM;
 $t->render('full.phtml');

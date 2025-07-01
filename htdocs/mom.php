@@ -65,7 +65,6 @@
         </div>
 
     </div>
-    <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
     <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 

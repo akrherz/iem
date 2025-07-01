@@ -107,6 +107,7 @@ EOM;
 }
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->title = sprintf("Site Info: %s %s", $station, $metadata["name"]);
 $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>

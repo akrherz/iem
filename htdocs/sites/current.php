@@ -11,6 +11,7 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->iemselect2 = true;
 $t->refresh = 60;
 $t->title = "Latest Observation";
 $t->sites_current = "current";

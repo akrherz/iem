@@ -49,14 +49,6 @@ $generated_at = $json['generated_at'];
 $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
 $table = <<<EOM
-<style>
-.empty{
-    width: 0px !important;
-    border: 0px !important;
-    padding: 2px !important;
-    background: tan !important;
-}
-</style>
 <h3>{$title}</h3>
 <table id="thetable" class="table table-striped table-bordered table-hover">
 <thead class="sticky">
@@ -242,10 +234,10 @@ perhaps a slightly more human readable format.  The codes are as follows:
 EOM;
 
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="cf6table.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="cf6table.js"></script>
+<script type="module" src="cf6table.module.js"></script>
 EOM;
 $t->render('full.phtml');
