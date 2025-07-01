@@ -12,6 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('iemjsani');
     if (!container || imageSrcs.length === 0) return;
 
+    // Buttons
+    let controlsFaster = null;
+    let controlsSlower = null;
+    let controlsLoop = null;
+    let controlsPlay = null;
+    let controlsFirst = null;
+    let controlsPrev = null;
+    let controlsNext = null;
+    let controlsLast = null;
+    let controlsZoomIn = null;
+    let controlsZoomOut = null;
+
     // Config
     const aniWidth = container.offsetWidth;
     const aniHeight = container.offsetHeight;
@@ -113,16 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Buttons
-    const controlsPlay = makeBtn('Play', 'Play/Pause', () => playing ? pause() : play());
-    const controlsFirst = makeBtn('⏮', 'First Frame', first);
-    const controlsPrev = makeBtn('◀', 'Previous Frame', prev);
-    const controlsNext = makeBtn('▶', 'Next Frame', next);
-    const controlsLast = makeBtn('⏭', 'Last Frame', last);
-    const controlsLoop = makeBtn('Loop', 'Toggle Loop', toggleLoop);
-    const controlsSlower = makeBtn('–', 'Slower', slower);
-    const controlsFaster = makeBtn('+', 'Faster', faster);
-    const controlsZoomIn = makeBtn('🔍+', 'Zoom In', zoomIn);
-    const controlsZoomOut = makeBtn('🔍–', 'Zoom Out', zoomOut);
+    controlsPlay = makeBtn('Play', 'Play/Pause', () => playing ? pause() : play());
+    controlsFirst = makeBtn('⏮', 'First Frame', first);
+    controlsPrev = makeBtn('◀', 'Previous Frame', prev);
+    controlsNext = makeBtn('▶', 'Next Frame', next);
+    controlsLast = makeBtn('⏭', 'Last Frame', last);
+    controlsLoop = makeBtn('Loop', 'Toggle Loop', toggleLoop);
+    controlsSlower = makeBtn('–', 'Slower', slower);
+    controlsFaster = makeBtn('+', 'Faster', faster);
+    controlsZoomIn = makeBtn('🔍+', 'Zoom In', zoomIn);
+    controlsZoomOut = makeBtn('🔍–', 'Zoom Out', zoomOut);
 
     [controlsPlay, controlsFirst, controlsPrev, controlsNext, controlsLast, controlsLoop, controlsSlower, controlsFaster, controlsZoomIn, controlsZoomOut].forEach(btn => controls.appendChild(btn));
     container.appendChild(controls);
