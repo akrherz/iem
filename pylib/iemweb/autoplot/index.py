@@ -310,10 +310,6 @@ def sday_handler(value, arg, res):
     if value.find("/") > -1:
         value = f"{value[5:7]}{value[8:10]}"
 
-    # flatpickr expects MMDD as default, but we want to show mm/dd
-    def _todate(val):
-        return f"2000-{val[:2]}-{val[2:]}"
-
     res["jsextra"] += f"""
 flatpickr("#{dpname}", {{
     dateFormat: "m/d",
