@@ -34,3 +34,4 @@
 /json/prism.py?lat=-140&lon=35
 /json/raob.py?ts=1930-01-01T12:00:00Z
 /json/stage4.py?valid=2024-08-11&lon=-102.30&lat=45.10&tz=Boguis
+/autoplot/autoplot.py?q=84&sector=IA&network=WFO&src:mrms&opt=per&usdm=yes&ptype=g&date=2021-07-25\xc2\xa7or&edate=2021-07-31&clip=yes&cmap=BrBG::_r=t&dpi=100&fmt=geotiff

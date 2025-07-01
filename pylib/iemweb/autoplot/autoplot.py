@@ -212,7 +212,7 @@ def plot_metadata(fig, start_time, p):
     )
 
 
-def get_mckey(scriptnum, fdict, fmt):
+def get_mckey(scriptnum, fdict: dict, fmt: str):
     """Figure out what our memcache key should be."""
     vals = []
     for key in fdict:
@@ -220,9 +220,16 @@ def get_mckey(scriptnum, fdict, fmt):
         # except when they should be, sigh
         if not key.startswith("_") or key in ["_r", "_"]:
             vals.append(f"{key}:{fdict[key]}")  # noqa
-    return (
+    mckey = (
         f"/plotting/auto/plot/{scriptnum}/{'::'.join(vals)}.{fmt}"
     ).replace(" ", "")
+    # If the key does not decode to ascii, this is likely a naughty request
+    try:
+        mckey.encode("ascii")
+    except UnicodeEncodeError as exp:
+        raise BadWebRequest("Memcache key is non-ASCII") from exp
+
+    return mckey
 
 
 def workflow(mc, environ, fmt):

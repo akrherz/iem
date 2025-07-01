@@ -1,16 +1,4 @@
-/**
- * AFOS List Application - Modernized JavaScript
- * Provides smooth scrolling navigation and date range toggle functionality
- */
-
-// Initialize the application when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Add event listener for date range checkbox
-    const drangeCheckbox = document.getElementById('drange');
-    if (drangeCheckbox) {
-        drangeCheckbox.addEventListener('change', showHide);
-    }
-});
+import { requireElement } from '/js/iemjs/domUtils.js';
 
 /**
  * Toggle visibility of date range selector
@@ -38,6 +26,13 @@ function j(name) {
         });
     }
 }
+
+// Initialize the application when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Add event listener for date range checkbox
+    const drangeCheckbox = requireElement('#drange');
+    drangeCheckbox.addEventListener('change', showHide);
+});
 
 // Export functions for global access (needed for PHP-generated onclick handlers)
 window.showHide = showHide;
