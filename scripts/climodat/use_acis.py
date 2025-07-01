@@ -89,27 +89,27 @@ def do(meta, station, acis_station) -> int:
         payload["edate"],
         station,
     )
-    for _ in range(3):
-        req = httpx.post(SERVICE, json=payload, timeout=30)
-        if req is None:
-            LOG.warning("Total download failure for %s", acis_station)
-            return 0
-        if req.status_code != 200:
+    for attempt in range(3):
+        try:
+            resp = httpx.post(SERVICE, json=payload, timeout=30)
+            resp.raise_for_status()
+            j = resp.json()
+            break
+        except Exception:
             LOG.warning(
-                "Got status_code %s for %s |%s|",
-                req.status_code,
+                "Failed to query ACIS for %s, sleeping 60 seconds",
                 acis_station,
-                req.text[:100],
             )
             # Give server some time to recover from transient errors
             time.sleep(60)
-    try:
-        j = req.json()
-    except Exception as exp:
-        LOG.exception(exp)
-        return 0
+        if attempt == 2:
+            LOG.error(
+                "Failed to query ACIS for %s after 3 attempts, giving up",
+                acis_station,
+            )
+            return 0
     if "data" not in j:
-        LOG.info("No Data!, content=%s", req.content)
+        LOG.info("No Data!, content=%s", resp.content)
         return 0
     acis = pd.DataFrame(
         j["data"],
