@@ -49,14 +49,6 @@ if ($opt === "bystation") {
 $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
 $table = <<<EOM
-<style>
-.empty{
-    width: 0px !important;
-    border: 0px !important;
-    padding: 2px !important;
-    background: tan !important;
-}
-</style>
 <h3>{$title}</h3>
 <table id="thetable" class="table table-sm table-striped table-bordered table-hover"
  data-column-defs='[{"sortable": false, "targets": [7,14,21]}]'>
@@ -240,75 +232,84 @@ $t->title = "Tabular CLI Report Data";
 
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
+    <ol class="breadcrumb bg-light px-3 py-2 mb-4 rounded">
         <li class="breadcrumb-item"><a href="/climate/">Climate Data</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Tabular CLI Report Data</li>		
+        <li class="breadcrumb-item active" aria-current="page">Tabular CLI Report Data</li>
     </ol>
 </nav>
 
-<div class="row">
-    <div class="col-md-3">This application lists out parsed data from 
-    National Weather Service issued daily climate reports.  These reports
-    contain 24 hour totals for a period between midnight <b>local standard time</b>.
-    This means that during daylight saving time, this period is from 1 AM to 
-    1 AM local daylight time!
-    </div>
-    <div class="col-md-6">
-        <div class="card">
+<div class="row g-4 mb-4">
+    <div class="col-lg-3">
+        <div class="card h-100">
             <div class="card-body">
-                <h4 class="card-title">Option 1: One Station for One Year</h4>
-                <form method="GET" name="one">
+                <h5 class="card-title">About</h5>
+                <p class="mb-0">This application lists out parsed data from National Weather Service issued daily climate reports. These reports contain 24 hour totals for a period between midnight <b>local standard time</b>. This means that during daylight saving time, this period is from 1 AM to 1 AM local daylight time!</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Option 1: One Station for One Year</h5>
+                <form method="GET" name="one" class="row g-3 align-items-end">
                     <input type="hidden" name="opt" value="bystation" />
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Select Station:</strong></label>
+                    <div class="col-12 col-md-7">
+                        <label class="form-label fw-bold">Select Station:</label>
                         {$sselect}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Year:</strong></label>
+                    <div class="col-12 col-md-5">
+                        <label class="form-label fw-bold">Year:</label>
                         {$ys}
                     </div>
-                    <input type="submit" value="Generate Table" class="btn btn-primary" />
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Generate Table</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card">
+    <div class="col-lg-3">
+        <div class="card h-100">
             <div class="card-body">
-                <h4 class="card-title">Option 2: One Day for Stations</h4>
-                <form method="GET" name="two">
+                <h5 class="card-title">Option 2: One Day for Stations</h5>
+                <form method="GET" name="two" class="row g-3 align-items-end">
                     <input type="hidden" name="opt" value="bydate" />
-                    <div class="mb-3">
+                    <div class="col-12">
                         {$ys} {$ms} {$ds}
                     </div>
-                    <input type="submit" value="Generate Table" class="btn btn-primary" />
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Generate Table</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
-directly access it here:
-<br /><code>{$prettyurl}</code></p>
+<div class="alert alert-info mb-4">
+    <strong>API:</strong> There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation. You can directly access it here:<br>
+    <code>{$prettyurl}</code>
+</div>
 
-<p>
-<button id="makefancy" class="btn btn-secondary">Make Table Interactive</button> &nbsp;
-<button id="makerecords" class="btn btn-secondary" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
-</p>
+<div class="mb-3 d-flex flex-wrap gap-2">
+    <button id="makefancy" class="btn btn-outline-secondary"><i class="fa fa-table"></i> Make Table Interactive</button>
+    <button id="makerecords" class="btn btn-outline-secondary" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
+</div>
 
 {$table}
 
-<p><strong>Key:</strong> &nbsp; &nbsp;
+<div class="mt-3">
+    <strong>Key:</strong> &nbsp;
     <i class="fa fa-star-o"></i> Record Tied,
-    <i class="fa fa-star"></i> Record Set.</p>
+    <i class="fa fa-star"></i> Record Set.
+</div>
 
 EOM;
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css">
+<link type="text/css" href="clitable.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/{$DT}/datatables.min.js'></script>
-<script src="clitable.js"></script>
+<script type="module" src="clitable.module.js"></script>
 EOM;
 $t->render('full.phtml');

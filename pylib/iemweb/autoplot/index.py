@@ -258,22 +258,21 @@ def cmap_handler(fdict, value, arg, res):
         f'value="on"{checked}> Reverse Colormap?'
     )
     res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
+    res["extrascripts"] += """
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+"""
     res["jsextra"] += """
-function formatState (state) {
-    if (!state.id) {
-        return state.text;
-    }
-    var baseUrl = "/pickup/cmaps";
-    var $state = $(
-        '<span><img src="' + baseUrl + '/' + state.element.value +
-        '.png" /> ' + state.text + '</span>'
-    );
-    return $state;
+function formatState (data, escape) {
+    return '<div><img src="/pickup/cmaps/' + data.value +
+        '.png" /> ' + data.text + '</div>';
 };
-
-$(".cmapselect").select2({
-    templateSelection: formatState,
-    templateResult: formatState
+document.querySelectorAll('.cmapselect').forEach((el) => {
+    new TomSelect(el, {
+        render: {
+            option: formatState,
+            item: formatState
+        }
+    });
 });
     """
     return s
@@ -1142,12 +1141,13 @@ def generate(fdict, headers, cookies):
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
+<script src="/js/select2.js?v=2"></script>
 <script>
 function hideImageLoad() {{
     const willload = document.getElementById('willload');
@@ -1180,11 +1180,6 @@ document.addEventListener('DOMContentLoaded', function() {{
             hideImageLoad();
         }}
     }}
-
-    // Initialize select2 (still uses jQuery)
-    if (typeof $ !== 'undefined') {{
-        $(".iemselect2").select2();
-    }}
 }});
 </script>
         """,
@@ -1192,18 +1187,15 @@ document.addEventListener('DOMContentLoaded', function() {{
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
  <link rel="stylesheet" type="text/css"
  href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
- <link rel="stylesheet" type="text/css"
- href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
+<link
+ href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+ rel="stylesheet">
 <link rel="stylesheet"
  href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
 <link type="text/css"
  href="/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.css"
  rel="stylesheet" />
 <style>
-    .select2-results .select2-disabled,
-    .select2-results__option[aria-disabled=true] {{
-    display: none;
-    }}
 .ui-datepicker{{
     width: 17em; padding: .2em .2em 0; z-index: 9999 !important; }}
 .cmapselect{{

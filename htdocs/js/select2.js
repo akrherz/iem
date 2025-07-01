@@ -1,4 +1,8 @@
-// global $
-$(() => {
-    $('.iemselect2').select2();
+/* global TomSelect */
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.iemselect2').forEach((el) => {
+        window.ts = new TomSelect(el, {
+            searchField: 'text'
+        });
+    });
 });
