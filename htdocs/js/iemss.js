@@ -190,7 +190,11 @@ function setupIemssDom(iemssElement, networkParam, select_name) {
 }
 
 function setupIemssFormSubmission(iemssElement) {
-    const submitButtons = document.querySelectorAll("form[name='iemss'] input[type='submit'], form[name='iemss'] button[type='submit']");
+    const form = document.querySelector("form[name='iemss']");
+    const submitButtons = form ? Array.from(form.elements).filter(
+    el => (el.tagName === "BUTTON" || el.tagName === "INPUT") &&
+            (el.type === "submit" || el.type === "image")
+    ) : [];
     submitButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             const stationsOut = document.getElementById('stations_out');
