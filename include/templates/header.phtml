@@ -20,6 +20,13 @@ if ($this->iemselect2) {
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
 EOM;
 }
+if ($this->jsani){
+    $headextra .= <<<EOM
+<link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
+EOM;
+}
 $bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
 ?>
 <!DOCTYPE html>
