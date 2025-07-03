@@ -8,7 +8,6 @@ require_once "../../include/iemprop.php";
 $lat = isset($_GET['lat']) ? floatval($_GET['lat']) : 41.53;
 $lon = isset($_GET['lon']) ? floatval($_GET['lon']) : -93.653;
 $t = new MyView();
-$DT = "2.0.2";
 $OL = "10.6.1";
 $t->jsextra = <<<EOM
 
