@@ -7,8 +7,11 @@ if ($this->iemss){
 EOF;
 }
 if ($this->jsani){
-    $jsextra .= <<<EOM
-<script src="/js/jsani.js"></script>
+	$jsextra .= <<<EOM
+<script src="/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script src="/js/jsani.js?v=2"></script>
 EOM;
 }
 if ($this->iemselect2) {
@@ -71,6 +74,7 @@ EOM;
     </div>
 </footer>
 <!-- /footer -->
+ <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
     <script src="/vendor/bootstrap/5.3.6/js/bootstrap.bundle.min.js"></script>
     <script src="/js/iastate-iem.js"></script>
 
