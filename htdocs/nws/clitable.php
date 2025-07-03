@@ -1,7 +1,6 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 156);
-$DT = "1.13.6";
 require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";

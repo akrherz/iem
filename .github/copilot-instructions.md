@@ -3,6 +3,15 @@
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the
 output. You can abbreviate the rule description to a single word or phrase.
 
+## Code Stack
+
+- PHP 8.4
+- Tabulator JavaScript library for interactive tables
+- Python 3.11
+- PostgreSQL 17
+- Bootstrap 5
+- OpenLayers for interactive maps
+
 ## Code Organization and Abstractions
 
 - Before creating new utility functions, check if similar functionality exists
@@ -57,9 +66,6 @@ Legacy JavaScript files should keep complexity-reducing functions within their o
 ## ESLint Usage
 
 - **ALWAYS use `npx eslint <filepath>` for linting individual files.**
-- **NEVER use `npm run lint -- <filepath>` as this does not work correctly.**
-- The correct command for targeted file linting: `npx eslint htdocs/vtec/search.js`
-- The incorrect command that fails: `npm run lint -- htdocs/vtec/search.js`
 - Use the direct ESLint command to get accurate, file-specific linting results.
 
 ## Project Context
