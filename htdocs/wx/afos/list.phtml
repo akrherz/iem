@@ -141,15 +141,18 @@ foreach ($datequeue as $dt) {
             );
         }
     } else {
+        // Chronological mode: build hour-based columns and rows
         $lasthour = "";
         $colnum = 0;
+        $rowopen = false;
+        $containeropen = false;
         $atags .= '<div class="clearfix"></div><div class="mb-3"><strong>Skip to Hour:</strong><div class="d-flex flex-wrap gap-1 mt-2">';
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
             if (gmdate("H", $ts) != $lasthour) {
                 if ($lasthour != "") {
-                    // End previous col-
-                    $table .= "</div>\n";
+                    // End previous card/col
+                    $table .= "</div></div></div>\n";
                 }
                 $lasthour = gmdate("H", $ts);
                 $atags .= sprintf(
@@ -158,11 +161,15 @@ foreach ($datequeue as $dt) {
                     $lasthour
                 );
                 if ($colnum % 6 == 0) {
-                    if ($colnum > 0) {
-                        // End previous row + container
-                        $table .= "</div></div></div>";
+                    if ($rowopen) {
+                        // End previous row and container
+                        $table .= "</div></div>\n";
+                        $rowopen = false;
+                        $containeropen = false;
                     }
                     $table .= "<div class=\"container\"><div class=\"row mb-3\">\n";
+                    $rowopen = true;
+                    $containeropen = true;
                 }
                 $table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-4 mb-2\"><div class=\"card h-100\"><div class=\"card-body\">";
                 $table .= sprintf("<strong>%s UTC</strong><br />", gmdate('d M Y : H', $ts));
@@ -176,7 +183,12 @@ foreach ($datequeue as $dt) {
                 gmdate("H:i", $ts)
             );
         }
+        // Close any open card/col
         $table .= "</div></div></div>\n";
+        // Close any open row/container
+        if ($rowopen) {
+            $table .= "</div></div>\n";
+        }
         $atags .= '</div></div>';
     }
 }
