@@ -11,9 +11,6 @@ $pgconn = iemdb("hads");
 
 $station = isset($_REQUEST['station']) ? xssafe($_REQUEST["station"]) : die("No station");
 $varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']) : die("No var");
-if (strlen($varname) == 7) {
-    $varname = substr($varname, 0, 6);
-}
 $sday = isset($_REQUEST['sday']) ? strtotime(xssafe($_REQUEST['sday'])) : die("No sday");
 $eday = isset($_REQUEST['eday']) ? strtotime(xssafe($_REQUEST['eday'])) : die("No eday");
 
