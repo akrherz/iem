@@ -14,13 +14,13 @@ $t->jsextra = <<<EOM
 <script type="text/javascript" src="wfos.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script type="text/javascript" src="search.js?v=5"></script>
+<script type="text/javascript" src="search.js?v=6"></script>
 EOM;
 $t->headextra = <<<EOM
 <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
-
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link rel="stylesheet" href="search.css" type="text/css">
 EOM;
