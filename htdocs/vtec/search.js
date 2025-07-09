@@ -569,7 +569,9 @@ function updateTableToolbar(containerId, tableData, filteredCount = null) {
 // Helper functions for buildUI complexity reduction
 function setupExportButtons() {
     document.querySelectorAll(".iemtool").forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
             let url = BACKEND_SBW_BYPOINT;
             let params = {
                 fmt: (btn.dataset.opt === "csv") ? "csv" : "xlsx",
@@ -602,7 +604,20 @@ function setupExportButtons() {
                     significance: document.getElementById("sig3").value
                 };
             }
-            window.location = `${url}?${new URLSearchParams(params).toString()}`;
+            // For CSV, trigger download; for Excel, open in new tab to avoid reload
+            const downloadUrl = `${url}?${new URLSearchParams(params).toString()}`;
+            if (btn.dataset.opt === "csv") {
+                // Create a hidden link and click it to trigger download
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = '';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                // Open Excel export in a new tab to avoid page reload
+                window.open(downloadUrl, '_blank');
+            }
         });
     });
 }
@@ -614,7 +629,20 @@ function setupTableConfigurations() {
         placeholder: "Drag marker on map to auto-populate this table",
         height: "400px",
         columns: [
-            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {
+                title: "Event",
+                field: "event",
+                formatter: "html",
+                headerSort: false,
+                width: 120,
+                download: (value) => {
+                    // Extract eventid from the HTML string for export
+                    const div = document.createElement('div');
+                    div.innerHTML = value;
+                    const a = div.querySelector('a');
+                    return a ? a.textContent : value;
+                }
+            },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
             {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
             {title: "Issued", field: "issued", headerSort: true, sorter: customDateTimeSorter},
@@ -643,10 +671,10 @@ function setupTableConfigurations() {
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
-                <button class="btn btn-sm btn-success me-1" onclick="table1.download('xlsx', 'sbw-current-view.xlsx')" title="Export visible table data to Excel">
+                <button type="button" class="btn btn-sm btn-success me-1" onclick="table1.download('xlsx', 'sbw-current-view.xlsx')" title="Export visible table data to Excel">
                     <i class="fa fa-download me-1"></i>Excel
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="table1.download('csv', 'sbw-current-view.csv')" title="Export visible table data to CSV">
+                <button type="button" class="btn btn-sm btn-primary" onclick="table1.download('csv', 'sbw-current-view.csv')" title="Export visible table data to CSV">
                     <i class="fa fa-download me-1"></i>CSV
                 </button>
             </div>
@@ -663,7 +691,19 @@ function setupTableConfigurations() {
         placeholder: "Drag marker on map or select UGC to auto-populate this table",
         height: "400px",
         columns: [
-            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {
+                title: "Event",
+                field: "event",
+                formatter: "html",
+                headerSort: false,
+                width: 120,
+                download: (value) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = value;
+                    const a = div.querySelector('a');
+                    return a ? a.textContent : value;
+                }
+            },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
             {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
             {title: "Issued", field: "issued", headerSort: true, sorter: customDateTimeSorter},
@@ -688,10 +728,10 @@ function setupTableConfigurations() {
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
-                <button class="btn btn-sm btn-success me-1" onclick="table2.download('xlsx', 'events-current-view.xlsx')" title="Export visible table data to Excel">
+                <button type="button" class="btn btn-sm btn-success me-1" onclick="table2.download('xlsx', 'events-current-view.xlsx')" title="Export visible table data to Excel">
                     <i class="fa fa-download me-1"></i>Excel
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="table2.download('csv', 'events-current-view.csv')" title="Export visible table data to CSV">
+                <button type="button" class="btn btn-sm btn-primary" onclick="table2.download('csv', 'events-current-view.csv')" title="Export visible table data to CSV">
                     <i class="fa fa-download me-1"></i>CSV
                 </button>
             </div>
@@ -708,7 +748,19 @@ function setupTableConfigurations() {
         placeholder: "Select options to auto-populate this table",
         height: "400px",
         columns: [
-            {title: "Event", field: "event", formatter: "html", headerSort: false, width: 120},
+            {
+                title: "Event",
+                field: "event",
+                formatter: "html",
+                headerSort: false,
+                width: 120,
+                download: (value) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = value;
+                    const a = div.querySelector('a');
+                    return a ? a.textContent : value;
+                }
+            },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
             {title: "Significance", field: "significance", headerSort: true, sorter: "string"},
             {title: "WFO", field: "wfo", headerSort: true, sorter: "string"},
@@ -735,10 +787,10 @@ function setupTableConfigurations() {
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
-                <button class="btn btn-sm btn-success me-1" onclick="table3.download('xlsx', 'list-current-view.xlsx')" title="Export visible table data to Excel">
+                <button type="button" class="btn btn-sm btn-success me-1" onclick="table3.download('xlsx', 'list-current-view.xlsx')" title="Export visible table data to Excel">
                     <i class="fa fa-download me-1"></i>Excel
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="table3.download('csv', 'list-current-view.csv')" title="Export visible table data to CSV">
+                <button type="button" class="btn btn-sm btn-primary" onclick="table3.download('csv', 'list-current-view.csv')" title="Export visible table data to CSV">
                     <i class="fa fa-download me-1"></i>CSV
                 </button>
             </div>
