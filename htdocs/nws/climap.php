@@ -129,7 +129,7 @@ $t->content = <<<EOM
 
 <div class="row">
 <div class="col-12">
-    <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}">
+    <div id="map" class="map">
         <div id="popup"></div>
     </div>
 </div>

@@ -273,8 +273,7 @@ data-suggested-lon="{$suggested_lon}"
 data-lat-input="newlat"
 data-lon-input="newlon"
 data-precision="8"
-data-zoom="14"
-data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+data-zoom="14"></div>
 
 <div class="mt-3">
 <h5>Location Update Request</h5>

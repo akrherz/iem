@@ -323,7 +323,7 @@ be wonderful.</p>
 </form>
 </div></div>
 
-<div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"><div id="popup"></div></div>
+<div id="map" class="map"><div id="popup"></div></div>
 
 EOM;
 

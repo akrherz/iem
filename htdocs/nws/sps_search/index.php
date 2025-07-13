@@ -137,7 +137,6 @@ $t->content = <<<EOM
                     data-initial-lon="-93.653"
                     data-lat-input="lat"
                     data-lon-input="lon"
-                    data-bingmapsapikey="{$BING_MAPS_API_KEY}
                     class="map"></div>
                 </div>
             </div>

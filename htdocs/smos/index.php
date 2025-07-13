@@ -84,8 +84,7 @@ to request a point outside of the domain.  Data is available since
  data-initial-lat="42.0"
  data-initial-lon="-93.0"
  data-lat-input="lat"
- data-lon-input="lon"
- data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+ data-lon-input="lon"></div>
 
 </div></div>
 
