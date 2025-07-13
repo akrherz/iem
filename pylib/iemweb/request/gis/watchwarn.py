@@ -70,10 +70,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 &significance=W
 
 Same request, but using the more verbose parameterization for the timestamp
+and also filtering the result by text products signed by john
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&year3=2024&month3=5&day3=21&hour3=21&minute3=20&timeopt=2\
-&limitps=yes&phenomena=TO&significance=W
+&limitps=yes&phenomena=TO&significance=W&fcster=john
 
 """
 
