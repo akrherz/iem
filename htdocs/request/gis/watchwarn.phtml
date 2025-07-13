@@ -289,7 +289,16 @@ $content .= <<<EOM
       <i class="bi bi-shield-fill-exclamation text-danger"></i> Limit output to only Particularly Dangerous Situations
     </label>
   </div>
-  <div class="form-check mb-3">
+
+  <div class="mb-3">
+    <label for="fcster" class="form-label">
+      <i class="bi bi-person text-info"></i> Forecaster Filter (optional)
+    </label>
+    <input type="text" class="form-control" name="fcster" id="fcster" placeholder="Enter forecaster name or initials">
+    <div class="form-text">Case-insensitive search against forecaster field</div>
+  </div>
+
+  <div class="form-check mb-2">
     <input class="form-check-input" type="checkbox" name="limitps" value="yes" id="limitps">
     <label class="form-check-label" for="limitps">
       <i class="bi bi-list-check text-primary"></i> Limit output to selected VTEC phenomena and significance below.
