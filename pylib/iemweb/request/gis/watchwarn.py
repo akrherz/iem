@@ -16,6 +16,8 @@ services found at
 Changelog
 ---------
 
+- 2025-07-12: Added ``fcster`` parameter to filter results by forecaster name
+  (case-insensitive matching).  This field is also added to the output.
 - 2025-05-09: Fixed issue with ``ETN`` DBF column allways being (null).
 - 2024-10-28: The service default for parameter ``simple`` was set back to
   ``yes``.  It was mistakenly set to ``no`` when this was migrated to pydantic.
@@ -68,10 +70,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 &significance=W
 
 Same request, but using the more verbose parameterization for the timestamp
+and also filtering the result by text products signed by john
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&year3=2024&month3=5&day3=21&hour3=21&minute3=20&timeopt=2\
-&limitps=yes&phenomena=TO&significance=W
+&limitps=yes&phenomena=TO&significance=W&fcster=john
 
 """
 
@@ -286,6 +289,12 @@ class Schema(CGIModel):
             "time."
         ),
     )
+    fcster: str = Field(
+        None,
+        description="Optional forecaster filter to limit results to events "
+        "where the forecaster field matches this value (case-insensitive).",
+        max_length=100,
+    )
 
 
 def dfmt(txt):
@@ -386,6 +395,14 @@ def build(environ: dict) -> tuple[str, str, dict]:
     elimiter = " and is_emergency " if environ["limit2"] == "yes" else ""
     pdslimiter = " and is_pds " if environ["limitpds"] else ""
 
+    # Forecaster filter
+    fcsterlimiter_warnings = ""
+    fcsterlimiter_sbw = ""
+    if environ["fcster"]:
+        fcsterlimiter_warnings = " and w.fcster ~* :fcster "
+        fcsterlimiter_sbw = " and w.product_signature ~* :fcster "
+        params["fcster"] = environ["fcster"]
+
     warnings_table = "warnings"
     sbw_table = "sbw"
     if sts.year == ets.year:
@@ -401,7 +418,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
         "phenomena, gtype, significance, eventid,  status, ugc, area2d, "
         "utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, "
         "is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag, "
-        "tornadotag, damagetag, product_id "
+        "tornadotag, damagetag, product_id, fcster "
     )
     if environ["accept"] not in ["excel", "csv"]:
         cols = f"geo, {cols}"
@@ -446,10 +463,10 @@ def build(environ: dict) -> tuple[str, str, dict]:
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      windtag, hailtag, tornadotag,
      coalesce(damagetag, floodtag_damage) as damagetag,
-     product_id
+     product_id, product_signature as fcster
      from {sbw_table} w {table_extra}
      WHERE {statuslimit} and {sbwtimelimit}
-     {wfo_limiter} {limiter} {elimiter} {pdslimiter}
+     {wfo_limiter} {limiter} {elimiter} {pdslimiter} {fcsterlimiter_sbw}
     ),
     countybased as (
      SELECT ST_AsBinary(u.{geomcol}) as geo, 'C'::text as gtype,
@@ -469,9 +486,10 @@ def build(environ: dict) -> tuple[str, str, dict]:
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      null::real as windtag, null::real as hailtag, null::varchar as tornadotag,
      null::varchar as damagetag,
-     product_ids[1] as product_id
+     product_ids[1] as product_id, fcster
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
      {timelimit} {wfo_limiter2} {limiter} {elimiter} {pdslimiter}
+     {fcsterlimiter_warnings}
      )
      SELECT {cols} from stormbased UNION ALL
      SELECT {cols} from countybased {sbwlimiter}
@@ -512,7 +530,7 @@ def process_results_yield_records(cursor, csv):
         "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
         "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
         "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
-        "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID\n"
+        "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID,FCSTER\n"
     )
     for row in cursor.mappings():
         if row["geo"] is None:  # Is this possible?
@@ -534,7 +552,8 @@ def process_results_yield_records(cursor, csv):
             f"{dfmt(row['utc_polygon_begin'])},"
             f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
             f"{row['hailtag']},{row['tornadotag']},"
-            f"{row['damagetag']},{row['product_id']}\n"
+            f"{row['damagetag']},{row['product_id']},"
+            f"{row['fcster']}\n"
         )
         yield {
             "properties": {
@@ -563,6 +582,7 @@ def process_results_yield_records(cursor, csv):
                 "TORNTAG": row["tornadotag"],
                 "DAMAGTAG": row["damagetag"],
                 "PROD_ID": row["product_id"],
+                "FCSTER": row["fcster"],
             },
             "geometry": mapping(mp),
         }
@@ -650,6 +670,7 @@ def application(environ, start_response):
                         "TORNTAG": "str:16",
                         "DAMAGTAG": "str:16",
                         "PROD_ID": "str:36",
+                        "FCSTER": "str:24",
                     },
                 },
             ) as output,
