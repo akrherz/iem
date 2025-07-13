@@ -159,7 +159,7 @@ $t->content = <<<EOM
                 </h5>
             </div>
             <div class="card-body p-0">
-                <div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}">
+                <div id="map" class="map">
                     <div id="popup"></div>
                 </div>
             </div>

@@ -111,8 +111,7 @@ Warning, and Advisories using three different search methods:</p>
                              data-initial-lat="{$lat}"
                              data-initial-lon="{$lon}"
                              data-lat-input="lat"
-                             data-lon-input="lon"
-                             data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+                             data-lon-input="lon"></div>
                         </div>
                     </div>
                 </div>
@@ -264,7 +263,7 @@ Warning, and Advisories using three different search methods:</p>
                              data-initial-lon="{$lon}"
                              data-lat-input="lat2"
                              data-lon-input="lon2"
-                             class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}"></div>
+                             class="map"></div>
                         </div>
                     </div>
                 </div>
