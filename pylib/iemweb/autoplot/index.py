@@ -5,6 +5,7 @@ IEM_APPID 92
 
 import calendar
 import os
+import re
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -26,6 +27,7 @@ from iemweb.autoplot import data as autoplot_data
 sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
     sn_contig.pop(_sn, None)
+DATE_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})$")
 HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
@@ -345,7 +347,7 @@ flatpickr("#{dpname}", {{
     )
 
 
-def date_handler(value, arg, res):
+def date_handler(value: str, arg, res):
     """Handler for datetime instances."""
     # Rule: jQuery UI → flatpickr, no jQuery, modern JS, preserve UX
     dpname = f"datepicker_{arg['name']}"
@@ -353,8 +355,11 @@ def date_handler(value, arg, res):
     vmax = arg.get("max", utc().strftime("%Y/%m/%d"))
 
     # flatpickr expects yyyy-mm-dd
-    def _ymd(val):
-        parts = [int(x) for x in val.replace("-", "/").split("/")]
+    def _ymd(val: str):
+        rectified = val.replace("-", "/")
+        if not DATE_RE.match(rectified):
+            raise BadWebRequest("Invalid date format")
+        parts = [int(x) for x in rectified.split("/")]
         return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
 
     res["jsextra"] += f"""
