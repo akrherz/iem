@@ -16,9 +16,11 @@ days that had "hatched"/"SIGNificant" risk.  Note that this isn't an exact
 science as the hatched and probability risk are not checked to see if they
 spatially/temporally overlap each other.</p>
 
-<p><strong>Updated 6 June 2025</strong>: The CSV/Excel output was updated
-to include a `None` value for days without an outlook spatially coincident.
-Additionally, the `date` column is now formatted as `YYYY-MM-DD`.</p>
+<p><strong>Updated 15 July 2025</strong>: An option was added to just plot
+a single threshold.  This logic gets a bit tricky as consider an example of
+Iowa being engulfed by a moderate risk, but you choose to only plot enhanced
+risk days.  The plot would show an enhanced risk for that day eventhough
+it was a moderate.</p>
 """
 
 import calendar
@@ -130,6 +132,16 @@ def get_description():
             default="1",
             label="Select Day Outlook",
         ),
+        {
+            "type": "select",
+            "label": "Optionally only plot this threshold value:",
+            "name": "just",
+            "default": "",
+            "options": {
+                "": "All Thresholds",
+                **{k: k for k in COLORS},
+            },
+        },
         dict(
             type="select",
             name="w",
@@ -197,10 +209,14 @@ def plotter(ctx: dict):
     elif outlook_type == "W":
         outlook_type_code = "C"
         category = "WIND"
+    threshold_filter = ""
+    if ctx["just"]:
+        threshold_filter = " and d.threshold = :just "
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                sql_helper("""
+                sql_helper(
+                    """
             with data as (
                 select outlook_date, threshold from spc_outlooks
                 WHERE category = :category and day = :day and
@@ -215,13 +231,16 @@ def plotter(ctx: dict):
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN')
+                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN'
+                {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
             case when h.threshold = 'SIGN' then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
-            """),
+            """,
+                    threshold_filter=threshold_filter,
+                ),
                 conn,
                 params={
                     "category": category,
@@ -229,6 +248,7 @@ def plotter(ctx: dict):
                     "ot": outlook_type_code,
                     "sts": sts,
                     "ets": ets,
+                    "just": ctx["just"],
                 },
                 index_col="date",
                 parse_dates=[
@@ -294,7 +314,8 @@ def plotter(ctx: dict):
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN')
+                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN'
+                {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
             case when h.threshold = 'SIGN' then true else false end as sign
@@ -305,6 +326,7 @@ def plotter(ctx: dict):
                     sqllimiter=sqllimiter,
                     geomcol=geomcol,
                     abbrcol=abbrcol,
+                    threshold_filter=threshold_filter,
                 ),
                 conn,
                 params={
@@ -314,6 +336,7 @@ def plotter(ctx: dict):
                     "ot": outlook_type_code,
                     "sts": sts,
                     "ets": ets,
+                    "just": ctx["just"],
                 },
                 index_col="date",
                 parse_dates="date",
@@ -346,8 +369,9 @@ def plotter(ctx: dict):
             "val": row["threshold"] + ("H" if row["sign"] else ""),
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
+    jj = f"Only {ctx['just']}" if ctx["just"] else "Highest"
     title = (
-        f"Highest {'WPC' if outlook_type == 'E' else 'SPC'} Day "
+        f"{jj} {'WPC' if outlook_type == 'E' else 'SPC'} Day "
         f"{day} {PDICT[outlook_type]} Outlook for {title2}"
     )
     subtitle = (
@@ -382,11 +406,12 @@ def plotter(ctx: dict):
 
         cmap = mpcolors.ListedColormap(list(COLORS.values()))
         cmap.set_under("#FFF")
-        norm = mpcolors.BoundaryNorm(range(len(COLORS)), cmap.N)
+        boundaries = np.arange(-0.5, len(COLORS), 1)
+        norm = mpcolors.BoundaryNorm(boundaries, cmap.N)
         ax.imshow(
             data,
             aspect="auto",
-            interpolation="nearest",
+            interpolation="None",
             extent=(0, 366, ets.year + 0.5, sts.year - 0.5),
             cmap=cmap,
             norm=norm,
