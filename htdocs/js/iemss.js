@@ -139,6 +139,12 @@ function moveSelectedOptions(fromSelect, toSelect) {
         option.selected = false;
         toSelect.appendChild(option);
     });
+    
+    // If moving to stations_out (right side), select all options there
+    if (toSelect.id === 'stations_out') {
+        selectAllOptions(toSelect);
+    }
+    
     updateStationCounts();
     return false;
 }
@@ -146,9 +152,14 @@ function moveSelectedOptions(fromSelect, toSelect) {
 function moveAllOptions(fromSelect, toSelect) {
     const options = Array.from(fromSelect.options);
     options.forEach(option => {
-        option.selected = true;
         toSelect.appendChild(option);
     });
+    
+    // If moving to stations_out (right side), select all options there
+    if (toSelect.id === 'stations_out') {
+        selectAllOptions(toSelect);
+    }
+    
     updateStationCounts();
     return false;
 }
@@ -232,16 +243,14 @@ function setupStationMovementHandlers() {
     if (addBtn) addBtn.addEventListener('click', () => moveSelectedOptions(stationsIn, stationsOut));
     const addAllBtn = document.getElementById('stations_addall');
     if (addAllBtn) addAllBtn.addEventListener('click', () => {
-        const ret = moveAllOptions(stationsIn, stationsOut);
-        selectAllOptions(stationsOut);
-        return ret;
+        moveAllOptions(stationsIn, stationsOut);
+        return false;
     });
     const delAllBtn = document.getElementById('stations_delall');
     if (delAllBtn) delAllBtn.addEventListener('click', () => moveAllOptions(stationsOut, stationsIn));
     const delBtn = document.getElementById('stations_del');
     if (delBtn) delBtn.addEventListener('click', () => {
         moveSelectedOptions(stationsOut, stationsIn);
-        selectAllOptions(stationsOut);
         return false;
     });
 }

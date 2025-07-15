@@ -21,8 +21,10 @@ from pyiem.util import logger
 LOG = logger()
 NT = NetworkTable("IA_ASOS")
 
-BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
-BASE_URL2 = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/"
+BASE_URL = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/"
+BASE_URL2 = (
+    "https://thredds-test.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
+)
 URLS = {
     "NAM": (
         "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"

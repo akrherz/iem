@@ -60,6 +60,7 @@ service. The archive dates back to 23 September 2004.</p>
 </p>
 
 <form method="GET" action="/cgi-bin/request/tempwind_aloft.py" name="dl" target="_blank">
+<div class="form2url"></div>
 
 <div class="row">
 <div class="col-md-6">
