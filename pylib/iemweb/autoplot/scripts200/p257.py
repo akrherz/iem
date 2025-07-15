@@ -88,7 +88,7 @@ def do_processing(ctx: dict):
 
     return comprehensive_climate_index(
         units.degK * tmpk,
-        units.percent * rh,
+        rh,
         wind_speed(units("m/s") * u, units("m/s") * v),
         units("W/m^2") * srad,
         shade_effect=ctx["shade"] == "yes",
