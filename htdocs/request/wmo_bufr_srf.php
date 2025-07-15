@@ -30,6 +30,7 @@ $t->content = <<<EOM
 wish to script against this service.</p>
 
 <form target="_blank" method="GET" action="/cgi-bin/request/wmo_bufr_srf.py" name="iemss">
+<div class="form2url"></div>
 <input type='hidden' name='network' value="WMO_BUFR_SRF" />
 
 <div class="row">

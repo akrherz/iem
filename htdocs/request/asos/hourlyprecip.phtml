@@ -74,11 +74,12 @@ data prior to 2010 for missing hours.</div>
 
 <p>Select network to download from:<br />
 <form name="network" action="hourlyprecip.phtml">
-{$nselect}		
+{$nselect}
 <input type="submit" value="Switch Network">
 </form>
 
 <form target="_blank" name="dl" action="/cgi-bin/request/hourlyprecip.py">
+<div class="form2url"></div>
 <input type="hidden" value="{$network}" name="network" />
 
 <div class="row">
