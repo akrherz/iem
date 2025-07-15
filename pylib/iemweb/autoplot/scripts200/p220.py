@@ -26,6 +26,7 @@ from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.scripts200.p201 import COLORS
 
 CENTRALTZ = ZoneInfo("America/Chicago")
 PDICT = {
@@ -70,26 +71,6 @@ THRESHOLD_LEVELS = {
 WPC_THRESHOLD_LEVELS = {
     "MDT": "3. Moderate",
     "HIGH": "4. High",
-}
-COLORS = {
-    "TSTM": "#c0e8c0",
-    "MRGL": "#66c57d",
-    "SLGT": "#f6f67b",
-    "ENH": "#edbf7c",
-    "MDT": "#f67a7d",
-    "HIGH": "#ff78ff",
-    "ELEV": "#ffbb7c",
-    "CRIT": "#ff787d",
-    "EXTM": "#ff78ff",
-    "IDRT": "#c5a392",
-    "SDRT": "#ff7f7f",
-    "0.02": "#008b00",
-    "0.05": "#8b4726",
-    "0.10": "#ffc800",
-    "0.15": "#ff0000",
-    "0.30": "#ff00ff",
-    "0.45": "#912cee",
-    "0.60": "#104e8b",
 }
 DAY_COLORS = {
     3: "#ff00ff",
