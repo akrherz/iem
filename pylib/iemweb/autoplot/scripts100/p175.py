@@ -40,7 +40,13 @@ def get_description():
             default="1.0",
             label="Snow Cover Threshold [inch]",
         ),
-        dict(type="state", name="state", default="IA", label="For State"),
+        dict(
+            contiguous=True,
+            type="state",
+            name="state",
+            default="IA",
+            label="For State",
+        ),
     ]
     return desc
 

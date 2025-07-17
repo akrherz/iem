@@ -39,7 +39,11 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    dt: str = Field(None, description="ISO8601 timestamp")
+    dt: str = Field(
+        None,
+        description="ISO8601 timestamp",
+        pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}",
+    )
     inversion: str = Field(None, description="Set to 1 to get inversion data")
 
 
