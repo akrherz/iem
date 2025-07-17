@@ -28,6 +28,8 @@ sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
     sn_contig.pop(_sn, None)
 DATE_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})$")
+SDAY_RE = re.compile(r"^(\d{2})(\d{2})$")
+DATETIME_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2}) (\d{1,2})(\d{2})$")
 HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
@@ -304,7 +306,7 @@ def datetypes_handler(arg, value):
     return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
-def sday_handler(value, arg, res):
+def sday_handler(value: str, arg, res):
     """Handler for datetime instances."""
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "0101")
@@ -312,6 +314,8 @@ def sday_handler(value, arg, res):
     # account for legacy URLs that had dates here
     if value.find("/") > -1:
         value = f"{value[5:7]}{value[8:10]}"
+    if not SDAY_RE.match(value):
+        raise BadWebRequest("Invalid sdate format")
 
     res["jsextra"] += f"""
 flatpickr("#{dpname}", {{
@@ -386,9 +390,13 @@ def datetime_handler(value, arg, res):
     # Convert to flatpickr format: Y/m/d H:i
     def _to_fp(val):
         # Accepts 'YYYY/MM/DD HHmm' or 'YYYY-MM-DD HHmm'
+        if val is None or val == "":
+            raise BadWebRequest("Invalid datetime value")
         dt = val.replace("-", "/").split()
         datepart = dt[0]
         timepart = dt[1] if len(dt) > 1 else "0000"
+        if not DATETIME_RE.match(f"{datepart} {timepart}"):
+            raise BadWebRequest("Invalid datetime format")
         y, m, d = [int(x) for x in datepart.split("/")]
         h, mi = int(timepart[:2]), int(timepart[2:])
         return f"{y:04d}-{m:02d}-{d:02d} {h:02d}{mi:02d}"
@@ -624,6 +632,8 @@ def generate_form(apid, fdict, headers, cookies):
             form = vtec_ps_handler(fdict, arg)
         elif arg["type"] == "state":
             sn = state_names if arg.get("contiguous") is None else sn_contig
+            if value not in sn:
+                value = "IA"
             form = make_select(arg["name"], value, sn)
         elif arg["type"] == "csector":
             set_cookie(cookies, headers, arg["name"], value)

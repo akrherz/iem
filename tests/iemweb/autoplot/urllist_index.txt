@@ -2,3 +2,4 @@
 ?q=51
 ?q=253
 ?q=230
+?q=175&year=2024&thres=1.0&state=AK&_r=t&dpi=100&_fmt=png

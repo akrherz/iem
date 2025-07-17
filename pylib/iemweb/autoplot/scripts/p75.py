@@ -88,6 +88,8 @@ def plotter(ctx: dict):
             rows.append(dict(year=int(row["yr"]), value=float(row[season])))
     cursor.close()
     pgconn.close()
+    if not rows:
+        raise NoDataFound("No Data Found.")
     df = pd.DataFrame(rows).set_index("year")
 
     title = (
