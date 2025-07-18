@@ -113,6 +113,8 @@ def plotter(ctx: dict):
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes((0.1, 0.2, 0.8, 0.7))
 
+    xlabels = []
+    xticks = []
     if not df.empty:
         # Convert speed to desired units
         df["speed"] = convert_value(df["sknt"], "knot", XREF_UNITS[plot_units])
@@ -133,8 +135,6 @@ def plotter(ctx: dict):
         )
         # Get this year's data
         df = df[df["year"] == year]
-        xlabels = []
-        xticks = []
         if not df.empty:
             ax.text(
                 0,
