@@ -170,19 +170,20 @@ def plotter(ctx: dict):
                         [str(x), pprint(row["speed"]), pprint(row["gust"])]
                     )
                 )
-                if row["drct"] is not None:
+                if pd.notna(row["drct"]):
                     arrow(ax, x, apos, row["drct"])
-                ax.text(
-                    x,
-                    pos,
-                    drct2text(row["drct"]),
-                    ha="center",
-                    rotation=90,
-                    color="white",
-                    va="center",
-                ).set_path_effects(
-                    [PathEffects.withStroke(linewidth=2, foreground="k")]
-                )
+                if pd.notna(row["drct"]):
+                    ax.text(
+                        x,
+                        pos,
+                        drct2text(row["drct"]),
+                        ha="center",
+                        rotation=90,
+                        color="white",
+                        va="center",
+                    ).set_path_effects(
+                        [PathEffects.withStroke(linewidth=2, foreground="k")]
+                    )
             ax.set_ylim(0, apos * 1.05)
             ax.plot(
                 climo["day_of_month"],
