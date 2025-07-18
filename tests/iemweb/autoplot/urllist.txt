@@ -68,6 +68,7 @@
 /plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:accum::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:fema::network:WFO::station:DMX::state:IA::fema:7::phenomena:SV::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/71/network:IA_ASOS::zstation:AMW::year:2020::month:7::units:MPH::dpi:100::_cb:1.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
 /plotting/auto/plot/72/network:WFO::station:OAX::phenomena:TO::significance:W::season:spring2::_r:43::dpi:100.png

@@ -3,7 +3,8 @@ DD=$(date +%d)
 
 cd isusm
 bash run_plots.sh
-python backfill_summary.py &
+python backfill_summary.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+python backfill_summary.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 if [ $DD -eq "07" ]
     then
         python nmp_monthly_email.py

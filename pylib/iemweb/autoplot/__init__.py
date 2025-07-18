@@ -371,6 +371,10 @@ monthly_opts = [
     },
     {"id": 15, "label": "Daily Temperature Change Frequencies by Month"},
     {
+        "id": 71,
+        "label": "Daily Wind Speed, Gust, and Direction for Single Month",
+    },
+    {
         "id": 98,
         "label": "Day of Month Frequency of meeting temp/precip threshold",
     },
@@ -446,10 +450,6 @@ monthly_opts = [
     {
         "id": 39,
         "label": "Scenarios for this month besting some previous month",
-    },
-    {
-        "id": 71,
-        "label": "Wind Speed and Wind Direction Daily Averages for Month",
     },
     {
         "id": 138,
