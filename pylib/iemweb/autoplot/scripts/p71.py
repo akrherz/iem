@@ -12,10 +12,10 @@ is computed by vector averaging of the wind speed and direction reports.
 from datetime import date, datetime
 
 import matplotlib.patheffects as PathEffects
-import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import convert_value, drct2text
 
 PDICT = {
@@ -66,19 +66,24 @@ def get_description():
     return desc
 
 
-def arrow(ax, x, y, angle):
+def pprint(value: float) -> str:
+    """Return a pretty printed value"""
+    if value is None or pd.isna(value):
+        return "M"
+    return f"{value:.0f}"
+
+
+def arrow(ax: Axes, x: float, y: float, drct: float):
     """Draw a arrow."""
-    # This is suboptimal as it is in data space and not an annotation space
-    r = 0.25
-    ax.arrow(
-        x,
-        y,
-        r * np.cos(angle),
-        r * np.sin(angle),
-        head_width=0.35,
-        head_length=0.35,
-        fc="k",
-        ec="k",
+    angle_deg = 90 - drct + 180
+    ax.annotate(
+        "→",
+        xy=(x, y),
+        ha="center",
+        va="center",
+        fontsize=16,
+        rotation=angle_deg,
+        color="black",
     )
 
 
@@ -94,23 +99,24 @@ def plotter(ctx: dict):
             """
                 SELECT extract(year from day) as year,
                 to_char(day, 'mmdd') as sday,
-                day, avg_sknt as sknt, vector_avg_drct as drct
+                day, avg_sknt as sknt, vector_avg_drct as drct,
+                coalesce(max_gust, 0) as gust
                 from summary s WHERE iemid = %s and
                 extract(month from day) = %s and avg_sknt is not null
-                and vector_avg_drct is not null ORDER by day ASC
+                ORDER by day ASC
         """,
             conn,
             params=(ctx["_nt"].sts[station]["iemid"], month),
             parse_dates=["day"],
         )
-    title = (
-        f"{ctx['_sname']}\n{sts:%b %Y} Daily Average Wind Speed and Direction"
-    )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    title = f"{ctx['_sname']}\n{sts:%b %Y} Daily Wind Speed and Direction"
+    fig = figure(title=title, apctx=ctx)
+    ax = fig.add_axes((0.1, 0.2, 0.8, 0.7))
 
     if not df.empty:
         # Convert speed to desired units
         df["speed"] = convert_value(df["sknt"], "knot", XREF_UNITS[plot_units])
+        df["gust"] = convert_value(df["gust"], "knot", XREF_UNITS[plot_units])
         # compute climatology
         climo = (
             df[["speed", "sday"]]
@@ -122,25 +128,50 @@ def plotter(ctx: dict):
         )
         climo["day_of_month"] = climo["sday"].apply(lambda x: int(x[-2:]))
         label = (
-            f"Smoothed Climatology ({df['year'].min():.0f}-"
+            f"Smoothed Speed Climatology ({df['year'].min():.0f}-"
             f"{df['year'].max():.0f})"
         )
         # Get this year's data
         df = df[df["year"] == year]
+        xlabels = []
+        xticks = []
         if not df.empty:
+            ax.text(
+                0,
+                -0.02,
+                "Day\nSpeed\nGust",
+                ha="right",
+                va="top",
+                fontsize=8,
+                transform=ax.transAxes,
+            )
+            ax.bar(
+                df["day"].dt.day.values,
+                df["gust"].values,
+                color="red",
+                align="center",
+                label="Max Gust",
+            )
             ax.bar(
                 df["day"].dt.day.values,
                 df["speed"].values,
-                ec="green",
-                fc="green",
+                color="green",
                 align="center",
+                label="Average Speed",
             )
-            pos = max([df["speed"].min() / 2.0, 0.5])
+            pos = max(df["speed"].min() / 2.0, 0.5)
             # Leave 15% room at the top
-            apos = df["speed"].max() * 1.075
+            apos = max(df["speed"].max() * 1.075, df["gust"].max() * 1.075)
             for _, row in df.iterrows():
                 x = row["day"].day
-                arrow(ax, x, apos, (270.0 - row["drct"]) / 180.0 * np.pi)
+                xticks.append(x)
+                xlabels.append(
+                    "\n".join(
+                        [str(x), pprint(row["speed"]), pprint(row["gust"])]
+                    )
+                )
+                if row["drct"] is not None:
+                    arrow(ax, x, apos, row["drct"])
                 ax.text(
                     x,
                     pos,
@@ -152,7 +183,7 @@ def plotter(ctx: dict):
                 ).set_path_effects(
                     [PathEffects.withStroke(linewidth=2, foreground="k")]
                 )
-            ax.set_ylim(0, df["speed"].max() * 1.15)
+            ax.set_ylim(0, apos * 1.05)
             ax.plot(
                 climo["day_of_month"],
                 climo["speed"],
@@ -160,8 +191,8 @@ def plotter(ctx: dict):
                 lw=2,
                 label=label,
             )
-            ax.legend(loc=(0.5, -0.1))
-        ax.grid(True, zorder=11)
+            ax.legend(loc=(0.0, -0.2), ncol=3)
+        ax.grid(True, axis="y", zorder=11)
     else:
         ax.text(
             0.5,
@@ -172,8 +203,10 @@ def plotter(ctx: dict):
             bbox={"color": "white"},
         )
     ax.set_xlim(0.5, 31.5)
-    ax.set_xticks(range(1, 31, 5))
+    if xlabels:
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xlabels, ha="center", fontsize=8)
 
-    ax.set_ylabel(f"Average Wind Speed [{PDICT[plot_units]}]")
+    ax.set_ylabel(f"Wind Speed [{PDICT[plot_units]}]")
 
     return fig, df
