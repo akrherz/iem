@@ -20,6 +20,12 @@ made available to this plotting application:
     24 hours totals at 12 UTC each day.</li>
     <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
 </ul>
+
+<p>The concept of dates within this application is a little bit tricky. For
+MRMS and IFC, the dates are approximately a US Central time calendar day. For
+the others, they are generally something close to 12 UTC to 12 UTC. The end
+date you select is inclusive, but represents a 24 hour period ending at about
+12 UTC on that date.
 """
 
 import os
@@ -132,7 +138,7 @@ def get_description():
             type="date",
             name="edate",
             default=today.strftime("%Y/%m/%d"),
-            label="End Date:",
+            label="End Date (inclusive):",
             min="1893/01/01",
             max=f"{datetime.today():%Y/%m/%d}",
         ),
@@ -165,16 +171,10 @@ def compute_title(src, sdate, edate):
             )
     else:
         # This is 12z to 12z totals.
-        if sdate == edate:
-            title = (
-                f"{(sdate - timedelta(days=1)):%-d %B %Y} ~12z to "
-                f"{edate:%-d %B %Y} ~12z"
-            )
-        else:
-            title = (
-                f"{(sdate - timedelta(days=1)):%-d %B %Y} ~12z to "
-                f"{(edate + timedelta(days=1)):%-d %B %Y} ~12z"
-            )
+        title = (
+            f"{(sdate - timedelta(days=1)):%-d %B %Y} ~12z to "
+            f"{edate:%-d %B %Y} ~12z"
+        )
     return title
 
 
