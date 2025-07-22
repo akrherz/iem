@@ -5,10 +5,12 @@ Some of the variables don't get properly updated in the summary table.
 cronjob from RUN_2AM.sh
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 import click
 import pandas as pd
+from metpy.calc import wind_components, wind_direction
+from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger
 
@@ -53,6 +55,59 @@ def process(pgconn, obs: pd.DataFrame):
     wcursor.close()
 
 
+def compute_drct(dt: date):
+    """Do things the hard way, because that is what we do."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        obs = pd.read_sql(
+            sql_helper("""
+    select station, ws_mph_qc, winddir_d1_wvt_qc
+    from sm_minute where valid > :dt and valid < :dt + interval '1 day'
+    and ws_mph_qc > 0 and winddir_d1_wvt_qc >= 0
+    """),
+            conn,
+            params={"dt": dt},
+        )
+    obs["u"], obs["v"] = wind_components(
+        obs["ws_mph_qc"].values * units("mph"),
+        obs["winddir_d1_wvt_qc"].values * units.degrees,
+    )
+    with (
+        get_sqlalchemy_conn("iem") as iemconn,
+        get_sqlalchemy_conn("isuag") as isuagconn,
+    ):
+        for station, gdf in obs.groupby("station"):
+            u = gdf["u"].mean()
+            v = gdf["v"].mean()
+            if u == 0 and v == 0:
+                continue
+            drct = float(
+                wind_direction(u * units("mph"), v * units("mph"))
+                .to("degrees")
+                .m
+            )
+            isuagconn.execute(
+                sql_helper("""
+                        update sm_daily SET winddir_d1_wvt_qc = :drct,
+                            winddir_d1_wvt = :drct
+                        where station = :station and valid = :dt and
+                        winddir_d1_wvt_qc is null
+                        """),
+                {"drct": drct, "station": station, "dt": dt},
+            )
+            isuagconn.commit()
+            iemconn.execute(
+                sql_helper("""
+                update summary s
+                SET vector_avg_drct = :drct
+                from stations t
+                where s.iemid = t.iemid and t.id = :station
+                        and t.network = 'ISUSM' and day = :dt
+                            """),
+                {"drct": drct, "station": station, "dt": dt},
+            )
+            iemconn.commit()
+
+
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
 def main(dt: datetime):
@@ -90,6 +145,9 @@ def main(dt: datetime):
     with get_dbconn("iem") as pgconn:
         process(pgconn, obs)
         pgconn.commit()
+
+    # Lovely one-offs
+    compute_drct(dt)
 
 
 if __name__ == "__main__":
