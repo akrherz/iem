@@ -18,6 +18,11 @@ $year = get_int404("year", date("Y"));
 
 $single_station_mode = !is_null($station);
 
+if ($year < 2000 || $year > (intval(date("Y")) + 1)) {
+    // naughty request
+    xssafe("<tag>");
+}
+
 try {
     $dt = new DateTime($datestr);
 } catch (Exception $e) {
