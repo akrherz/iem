@@ -88,11 +88,11 @@ def main(station: str, sts: datetime, ets: datetime):
     """Go Main Go"""
     res = input(f"{station} {sts}->{ets}, OK? y/[n] ")
     if str(res) != "y":
-        print("ABORT")
+        LOG.warning("ABORT")
         return
     do_iem(station, sts, ets)
     do_isuag(station, sts, ets)
-    print("Redoing estimates")
+    LOG.info("Redoing estimates")
     subprocess.call(["python", "fix_temps.py"])
 
 

@@ -2,7 +2,6 @@
 
 IMERG-Early has at most 4 hour latency.
 
-
 IMERG-Late has about 14 hours.
 
 Replace HHE with HHL
@@ -28,7 +27,7 @@ import numpy as np
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
-from pyiem.util import exponential_backoff, logger, ncopen, utc
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 
@@ -53,33 +52,34 @@ def main(valid: datetime, realtime: bool):
     routes = "ac" if realtime else "a"
     LOG.info("Using source: `%s` for valid: %s[%s]", source, valid, routes)
     url = valid.strftime(
-        "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/aggregation/"
-        f"GPM_3IMERGHH{source}.06/%Y/GPM_3IMERGHH{source}"
-        ".06_Aggregation_%Y%03j.ncml.ncml?"
-        "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
+        "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/grid/aggregation/"
+        f"GPM_3IMERGHH{source}.07/%Y/GPM_3IMERGHH{source}"
+        ".07_Aggregation_%Y%03j.ncml.ncml?"
+        "var=precipitation&time=%Y-%m-%dT%H%%3A%M%%3A00Z&"
+        "accept=netcdf4-classic"
     )
-    req = exponential_backoff(httpx.get, url, timeout=120)
-    if req is None:
-        LOG.warning("Unable to get %s", url)
-        return
-    ct = req.headers.get("content-type", "")
-    # Sometimes, the service returns a 200 that is an error webpage :(
-    if req.status_code != 200 or not ct.startswith("application/x-netcdf4"):
-        LOG.info(
-            "failed to fetch %s [%s, %s] using source %s",
-            valid,
-            req.status_code,
-            ct,
-            source,
-        )
-        LOG.info(url)
+    auth = httpx.NetRCAuth()
+    with httpx.Client(auth=auth, follow_redirects=False) as client:
+        resp = client.get(url, timeout=10)
+        if resp.status_code in (301, 302, 303, 307, 308):
+            url = resp.headers["Location"]
+            LOG.info("Redirected to %s", url)
+            resp = client.get(url, timeout=120, follow_redirects=True)
+            if resp.status_code == 400:  # Out of time bounds
+                LOG.info("Got 400, no data for %s", valid)
+                return
+        resp.raise_for_status()
+    # Check content-type return header
+    ct = resp.headers.get("content-type", "")
+    if not ct.startswith("application/x-netcdf"):
+        LOG.warning("Unexpected content-type for %s: %s", url, ct)
         return
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(req.content)
+        tmp.write(resp.content)
     with ncopen(tmp.name) as nc:
         # x, y
-        pmm = nc.variables["precipitationCal"][0, :, :] / 2.0  # mmhr to 30min
-        pmm = np.flipud(pmm.T)
+        pmm = nc.variables["precipitation"][0, :, :] / 2.0  # mmhr to 30min
+        pmm = np.flipud(pmm)
     os.unlink(tmp.name)
 
     if np.max(pmm) > 102:

@@ -49,13 +49,13 @@ def generate_rr5():
             index_col="station",
         )
     df["valid"] = df["valid"].dt.tz_convert(ZoneInfo("America/Chicago"))
-    df["tmpf"] = c2f(df["tair_c_avg_qc"].values)
     for station, row in df.iterrows():
         q = qcdict.get(station, {})
-        if "tmpf" in q or pd.isna(row["tmpf"]):
+        if "tmpf" in q or pd.isna(row["tair_c_avg_qc"]):
             tmpf = "M"
         else:
-            tmpf = f"{row['tmpf']:.1f}"
+            value = c2f(row["tair_c_avg_qc"])
+            tmpf = f"{value:.1f}"
         # prevent duplicated entries due to having both sensors
         mv_done = []
         tv_done = []
