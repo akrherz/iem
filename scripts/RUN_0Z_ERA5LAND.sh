@@ -12,3 +12,11 @@ python fetch_era5.py --date=$D6
 
 cd ../climodat
 python era5land_extract.py --date=$D7
+
+# So fetch_era5 got files from six days ago from 1z on
+cd ../iemre
+for domain in "europe" "sa" "china"; do
+    for hr in {0..23}; do
+        python precip_ingest.py --domain=$domain --valid="${D6}T${hr}:00:00"
+    done
+done
