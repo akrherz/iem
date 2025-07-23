@@ -102,7 +102,7 @@ def application(environ, start_response):
         data = {"error": "Coordinates outside of domain"}
         return [json.dumps(data).encode("ascii")]
 
-    if dt.year > 1980:
+    if dt.year > 1980 and domain == "":
         ncfn = f"/mesonet/data/prism/{dt.year}_daily.nc"
         if not os.path.isfile(ncfn):
             prism_precip = None
@@ -113,7 +113,7 @@ def application(environ, start_response):
     else:
         prism_precip = None
 
-    if dt.year > 2000:
+    if dt.year > 2000 and domain == "":
         ncfn = get_daily_mrms_ncname(dt.year)
         if not os.path.isfile(ncfn):
             mrms_precip = None
@@ -127,7 +127,7 @@ def application(environ, start_response):
     c2000 = dt.replace(year=2000)
     coffset = daily_offset(c2000)
 
-    with ncopen(fn) as nc, ncopen(get_dailyc_ncname()) as cnc:
+    with ncopen(fn) as nc, ncopen(get_dailyc_ncname(domain)) as cnc:
         res["data"].append(
             {
                 "prism_precip_in": myrounder(prism_precip, 2),

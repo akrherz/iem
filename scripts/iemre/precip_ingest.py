@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import click
 import numpy as np
 import pygrib
-from pyiem.grid import nav
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_hourly_ncname, hourly_offset, reproject2iemre
 from pyiem.stage4 import ARCHIVE_FLIP
 from pyiem.util import archive_fetch, logger, ncopen
@@ -82,11 +82,11 @@ def copy_to_iemre(valid):
 
     # Reproject to IEMRE
     aff = (
-        nav.STAGE4.affine
+        get_nav("STAGE4", "").affine
         if valid >= ARCHIVE_FLIP
-        else nav.STAGE4_PRE2002.affine
+        else get_nav("STAGE4_PRE2002", "").affine
     )
-    res = reproject2iemre(val, aff, nav.STAGE4.crs, domain="")
+    res = reproject2iemre(val, aff, get_nav("STAGE4", "").crs, domain="")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data
@@ -107,26 +107,27 @@ def copy_to_iemre(valid):
     )
 
 
-def era5workflow(valid):
+def era5workflow(valid: datetime, domain: str):
     """Copy ERA5Land to IEMRE."""
     # NOTE, this may be off-by-one
     idx = hourly_offset(valid)
-    with ncopen(f"/mesonet/data/era5/{valid:%Y}_era5land_hourly.nc") as nc:
+    dd = "" if domain == "" else f"_{domain}"
+    with ncopen(f"/mesonet/data/era5{dd}/{valid:%Y}_era5land_hourly.nc") as nc:
         p01m = nc.variables["p01m"][idx]
     # Convert trace/drizzle to 0, values < 0.01in or .254mm
     p01m[p01m < 0.254] = 0
-    affine_in = nav.ERA5LAND.affine
-    val = reproject2iemre(p01m, affine_in, "EPSG:4326")
+    affine_in = get_nav("ERA5LAND", domain).affine
+    val = reproject2iemre(p01m, affine_in, "EPSG:4326", domain=domain)
     with ncopen(
-        get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+        get_hourly_ncname(valid.year, domain=domain), "a", timeout=300
     ) as nc:
         nc.variables["p01m"][idx] = val
 
 
-def workflow(valid, force_copy):
+def workflow(valid: datetime, domain: str, force_copy: bool):
     """Our stage IV workflow."""
-    if valid.year < 1997:
-        era5workflow(valid)
+    if valid.year < 1997 or domain != "":
+        era5workflow(valid, domain)
         return
     # Figure out what the current status is
     p01m_status = get_p01m_status(valid)
@@ -140,17 +141,18 @@ def workflow(valid, force_copy):
 @click.command()
 @click.option("--valid", "ts", type=click.DateTime(), help="Specific UTC")
 @click.option("--valid12z", "ets", type=click.DateTime(), help="12z UTC")
-def main(ts: datetime | None, ets: datetime | None):
+@click.option("--domain", default="", help="IEMRE Domain")
+def main(ts: datetime | None, ets: datetime | None, domain: str):
     """Go Main"""
     if ts is not None:
         ts = ts.replace(tzinfo=timezone.utc)
-        workflow(ts, True)
+        workflow(ts, domain, True)
         return
     # Otherwise we are running for an explicit 12z to 12z period, copy only
     ets = ets.replace(tzinfo=timezone.utc)
     now = ets - timedelta(hours=23)
     while now <= ets:
-        workflow(now, False)
+        workflow(now, domain, False)
         now += timedelta(hours=1)
 
 

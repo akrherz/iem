@@ -219,7 +219,7 @@ def set_ncinfo(ctx):
         subtitle = "NOAA MRMS Project, MultiSensorPass2 and RadarOnly"
     elif ctx["src"] == "iemre":
         ncfn = iemre.get_daily_ncname(ctx["sdate"].year)
-        clncfn = iemre.get_dailyc_ncname()
+        clncfn = iemre.get_dailyc_ncname("")
         ncvar = "p01d_12z"
         clncvar = "p01d"
         source = "IEM Reanalysis"

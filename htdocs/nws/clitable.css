@@ -4,3 +4,140 @@
     padding: 2px !important;
     background: tan !important;
 }
+
+/* Tabulator table customizations for CLI data */
+.tabulator {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabulator .tabulator-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid var(--bs-border-color);
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    border-right: 1px solid var(--bs-border-color);
+    background-color: transparent;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    padding: 0.5rem 0.25rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Frozen column styling */
+.tabulator .tabulator-frozen.tabulator-frozen-left {
+    border-right: 2px solid var(--bs-primary);
+    background-color: #ffffff;
+    z-index: 10;
+}
+
+.tabulator .tabulator-frozen.tabulator-frozen-left .tabulator-cell {
+    background-color: #ffffff;
+}
+
+/* Ensure frozen column header also has solid background */
+.tabulator .tabulator-header .tabulator-frozen.tabulator-frozen-left {
+    background-color: #f8f9fa;
+    z-index: 11;
+}
+
+.tabulator .tabulator-header .tabulator-frozen.tabulator-frozen-left .tabulator-col-content {
+    background-color: #f8f9fa;
+}
+
+/* Row styling */
+.tabulator .tabulator-row:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.tabulator .tabulator-row:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Ensure frozen column maintains solid background on hover */
+.tabulator .tabulator-row:hover .tabulator-frozen.tabulator-frozen-left .tabulator-cell {
+    background-color: #f0f8ff;
+}
+
+.tabulator .tabulator-row:nth-child(even) .tabulator-frozen.tabulator-frozen-left .tabulator-cell {
+    background-color: #fafafa;
+}
+
+.tabulator .tabulator-row .tabulator-cell {
+    border-right: 1px solid var(--bs-border-color-translucent);
+    padding: 0.375rem 0.25rem;
+    font-size: 0.8rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* First column (Date/Station) styling */
+.tabulator .tabulator-row .tabulator-cell[tabulator-field="col0"] {
+    text-align: left;
+    font-weight: 500;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Temperature departure color coding support */
+.tabulator .tabulator-cell[style*="background"] {
+    font-weight: 600;
+}
+
+/* Ensure HTML content in cells is properly rendered */
+.tabulator .tabulator-cell .fa {
+    margin-right: 0.25rem;
+}
+
+/* Temperature cells with background colors from PHP */
+.tabulator .tabulator-cell[data-sort] {
+    font-weight: 600;
+}
+
+/* Support for inline styles from PHP temperature departure coloring */
+.tabulator .tabulator-cell[style] {
+    font-weight: 600;
+}
+
+/* Link styling in table */
+.tabulator .tabulator-cell a {
+    color: var(--bs-primary);
+    text-decoration: none;
+}
+
+.tabulator .tabulator-cell a:hover {
+    color: var(--bs-primary);
+    text-decoration: underline;
+}
+
+/* Icon styling */
+.tabulator .tabulator-cell .fa {
+    margin-right: 0.25rem;
+}
+
+/* Export buttons styling */
+#clitable-export-buttons {
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    background-color: var(--bs-light);
+    border: 1px solid var(--bs-border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        padding: 0.25rem 0.125rem;
+        font-size: 0.65rem;
+    }
+    
+    .tabulator .tabulator-row .tabulator-cell {
+        padding: 0.25rem 0.125rem;
+        font-size: 0.7rem;
+    }
+}

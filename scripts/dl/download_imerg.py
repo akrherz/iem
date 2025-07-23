@@ -65,8 +65,8 @@ def main(valid: datetime, realtime: bool):
             url = resp.headers["Location"]
             LOG.info("Redirected to %s", url)
             resp = client.get(url, timeout=120, follow_redirects=True)
-            if resp.status_code == 400:  # Out of time bounds
-                LOG.info("Got 400, no data for %s", valid)
+            if resp.status_code in (400, 404):  # Out of time bounds or no data
+                LOG.info("Got %d, no data for %s", resp.status_code, valid)
                 return
         resp.raise_for_status()
     # Check content-type return header

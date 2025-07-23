@@ -22,7 +22,7 @@ def main():
     sts = ets - timedelta(days=121)
 
     # Get the normal accumm
-    with ncopen(iemre.get_dailyc_ncname(), "r") as cnc:
+    with ncopen(iemre.get_dailyc_ncname(""), "r") as cnc:
         lons = cnc.variables["lon"][:]
         lats = cnc.variables["lat"][:]
         index0 = iemre.daily_offset(sts)

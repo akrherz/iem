@@ -187,7 +187,7 @@ def generic_gridder(df, idx, domain=""):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def grid_hour(ts, domain):
+def grid_hour(ts: datetime, domain: str):
     """
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window

@@ -17,7 +17,7 @@ def main():
     sts = datetime(ets.year, 1, 1)
 
     # Get the normal accumm
-    with ncopen(iemre.get_dailyc_ncname()) as cnc:
+    with ncopen(iemre.get_dailyc_ncname("")) as cnc:
         lons = cnc.variables["lon"][:]
         lats = cnc.variables["lat"][:]
         index0 = iemre.daily_offset(sts)
