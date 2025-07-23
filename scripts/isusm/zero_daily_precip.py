@@ -4,10 +4,10 @@ Likely due to water being dumped into the tipping bucket to clean it :/
 """
 
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 import click
 from pyiem.database import get_dbconn
+from pyiem.util import utc
 
 
 def zero_hourly(station, sts, ets):
@@ -78,8 +78,7 @@ def main(station: str, dt: datetime):
     dt = dt.date()
     # Our weather stations are in CST, so the 'daily' precip is for a 6z to 6z
     # period and not calendar day, the hourly values are in the rears
-    sts = datetime(dt.year, dt.month, dt.day, 6)
-    sts = sts.replace(tzinfo=ZoneInfo("UTC"))
+    sts = utc(dt.year, dt.month, dt.day, 6)
     ets = sts + timedelta(hours=24)
     zero_hourly(station, sts, ets)
     zero_daily(station, dt)
