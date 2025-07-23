@@ -309,6 +309,6 @@ $t->headextra = <<<EOM
 <link type="text/css" href="clitable.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="module" src="clitable.module.js"></script>
+<script type="module" src="clitable.module.js?v=2"></script>
 EOM;
 $t->render('full.phtml');
