@@ -17,6 +17,7 @@ def main(domain: str):
         high_tmpk = None
         low_tmpk = None
         p01d = None
+        power_swdn = None
         count = 0.0
         for year in range(2007, 2025):
             ncname = get_daily_ncname(year, domain)
@@ -29,20 +30,24 @@ def main(domain: str):
                         high_tmpk = nc.variables["high_tmpk"][_doy, :]
                         low_tmpk = nc.variables["low_tmpk"][_doy, :]
                         p01d = nc.variables["p01d"][_doy, :]
+                        power_swdn = nc.variables["swdn"][_doy, :]
                     else:
                         high_tmpk += nc.variables["high_tmpk"][_doy, :]
                         low_tmpk += nc.variables["low_tmpk"][_doy, :]
                         p01d += nc.variables["p01d"][_doy, :]
+                        power_swdn += nc.variables["swdn"][_doy, :]
         with ncopen(climofn, "a") as climonc:
             climonc.variables["high_tmpk"][doy, :] = high_tmpk / count
             climonc.variables["low_tmpk"][doy, :] = low_tmpk / count
             climonc.variables["p01d"][doy, :] = p01d / count
+            climonc.variables["swdn"][doy, :] = power_swdn / count
         if doy == 364:
             # Repeat
             with ncopen(climofn, "a") as climonc:
                 climonc.variables["high_tmpk"][365, :] = high_tmpk / count
                 climonc.variables["low_tmpk"][365, :] = low_tmpk / count
                 climonc.variables["p01d"][365, :] = p01d / count
+                climonc.variables["swdn"][365, :] = power_swdn / count
 
 
 if __name__ == "__main__":

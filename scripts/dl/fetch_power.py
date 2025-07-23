@@ -22,7 +22,8 @@ LOG = logger()
 @click.command()
 @click.option("--year", type=int, required=True)
 @click.option("--domain", default="", type=str, help="IEMRE Domain")
-def main(year: int, domain: str):
+@click.option("--force", is_flag=True, help="Force a re-download of data")
+def main(year: int, domain: str, force: bool):
     """Go Main Go."""
     gridnav = get_nav("iemre", domain)
     sts = date(year, 1, 1)
@@ -32,8 +33,8 @@ def main(year: int, domain: str):
     while now >= sts:
         ds = get_grids(now, varnames="power_swdn", domain=domain)
         maxval = ds["power_swdn"].values.max()
-        if np.isnan(maxval) or maxval < 0:
-            LOG.info("adding %s as currently empty", now)
+        if force or np.isnan(maxval) or maxval < 0:
+            LOG.info("adding %s as currently empty or forced: %s", now, force)
             current[now] = {"data": ds, "dirty": False}
         now -= timedelta(days=1)
     if not current:
@@ -56,23 +57,23 @@ def main(year: int, domain: str):
             f"longitude-max={x0 + 9.9}&parameters=ALLSKY_SFC_SW_DWN&"
             f"community=SB&start={sts:%Y%m%d}&end={ets:%Y%m%d}&format=netcdf"
         )
-        req = exponential_backoff(httpx.get, url, timeout=60)
+        resp = exponential_backoff(httpx.get, url, timeout=60)
         # Can't find docs on how many requests/sec are allowed...
-        if req is not None and req.status_code == 429:
+        if resp is not None and resp.status_code == 429:
             LOG.info("Got 429 (too-many-requests), sleeping 60")
             time.sleep(60)
-            req = exponential_backoff(httpx.get, url, timeout=60)
-        if req is None or req.status_code != 200:
+            resp = exponential_backoff(httpx.get, url, timeout=60)
+        if resp is None or resp.status_code != 200:
             LOG.warning(
                 "failed to download %s with %s %s",
                 url,
-                "req is none" if req is None else req.status_code,
-                "req is none" if req is None else req.text,
+                "resp is none" if resp is None else resp.status_code,
+                "resp is none" if resp is None else resp.text,
             )
             continue
-        ncfn = f"/tmp/power{year}.nc"
+        ncfn = f"/tmp/power{year}_{domain}.nc"
         with open(ncfn, "wb") as fh:
-            for chunk in req.iter_bytes(chunk_size=1024):
+            for chunk in resp.iter_bytes(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
         with ncopen(ncfn) as nc:
@@ -86,8 +87,8 @@ def main(year: int, domain: str):
                 if np.ma.is_masked(data):
                     data[data.mask] = np.mean(data)
                 i, j = gridnav.find_ij(x0, y0)
-                # resample data is 0.5, iemre is 0.125
-                data = np.repeat(np.repeat(data, 4, axis=0), 4, axis=1)
+                # NASA Power is 1 degree for Solar, so repeat 8x
+                data = np.repeat(np.repeat(data, 8, axis=0), 8, axis=1)
                 data = np.where(data < 0, np.nan, data)
                 shp = np.shape(data)
                 jslice = slice(j, min([j + shp[0], gridnav.ny]))

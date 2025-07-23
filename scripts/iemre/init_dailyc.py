@@ -112,6 +112,15 @@ def init_year(domain: str, ts: datetime):
     p01d.coordinates = "lon lat"
     p01d.description = "Precipitation accumulation for the day"
 
+    swdn = nc.createVariable(
+        "swdn", float, ("time", "lat", "lon"), fill_value=1.0e20
+    )
+    swdn.units = "MJ d-1"
+    swdn.long_name = "All Sky Insolation Incident on a Horizontal Surface"
+    swdn.standard_name = "All Sky Insolation Incident on a Horizontal Surface"
+    swdn.coordinates = "lon lat"
+    swdn.description = "Solar Radiation"
+
     nc.close()
 
 
