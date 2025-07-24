@@ -33,6 +33,7 @@ from tqdm import tqdm
 
 # metpy can be noisy and we don't care about runtime warnings
 warnings.simplefilter("ignore", category=RuntimeWarning)
+warnings.simplefilter("ignore", category=UserWarning)
 LOG = logger()
 
 

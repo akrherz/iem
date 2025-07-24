@@ -81,6 +81,7 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
             sql_helper(
                 """select day, year, high, low from alldata
             WHERE station = :station and day >= :sts and day <= :ets
+            and high is not null and low is not null
             order by day ASC"""
             ),
             conn,

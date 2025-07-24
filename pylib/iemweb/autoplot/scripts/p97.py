@@ -221,12 +221,12 @@ def get_description():
     return desc
 
 
-def cull_to_list(vals):
+def cull_to_list(vals: str):
     """Convert to a list for culling."""
     res = ["ZZZZZZ"]
-    vals = vals.replace(",", " ")
-    for val in vals.strip().split():
-        res.append(val.upper()[:6])  # noqa
+    res.extend(
+        val.upper()[:6] for val in vals.replace(",", " ").strip().split()
+    )
     return res
 
 
