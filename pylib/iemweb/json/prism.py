@@ -33,7 +33,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pydantic import Field
+from pydantic import Field, model_validator
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import PRISM800
 from pyiem.iemre import daily_offset
@@ -61,6 +61,18 @@ class Schema(CGIModel):
         default=None,
         description="Inclusive end date for data request",
     )
+
+    @model_validator(mode="after")
+    @classmethod
+    def validate_dates(cls, values):
+        """Ensure we have valid dates."""
+        if (
+            values.sdate is not None
+            and values.edate is not None
+            and values.sdate > values.edate
+        ):
+            raise ValueError("sdate must be before edate")
+        return values
 
 
 def myrounder(val, precision):

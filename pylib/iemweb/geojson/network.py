@@ -52,7 +52,10 @@ class Schema(CGIModel):
 
     callback: str = Field(None, description="JSONP callback function name")
     network: str = Field(
-        "IA_ASOS", description="IEM Network Code", max_length=30
+        "IA_ASOS",
+        description="IEM Network Code",
+        max_length=30,
+        pattern=r"^[A-Z0-9_]+$",
     )
     only_online: bool = Field(
         False, description="Only include online stations"

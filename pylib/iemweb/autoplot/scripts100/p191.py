@@ -135,7 +135,9 @@ def get_ugc_name(ugc):
     """Return the WFO and county name."""
     cursor = get_dbconn("postgis").cursor()
     cursor.execute(
-        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+        "SELECT name, wfo from ugcs where ugc = %s "
+        "ORDER by end_ts nulls first",
+        (ugc,),
     )
     return cursor.fetchone()
 

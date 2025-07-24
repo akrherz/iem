@@ -32,6 +32,7 @@
 /json/nwstext_center_date.py?center=KDMX
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01
 /json/prism.py?lat=-140&lon=35
+/json/prism.py?lat=38.64293560387211&lon=-90.3077262041419&sdate=2025-07-22&edate=2024-08-10
 /json/raob.py?ts=1930-01-01T12:00:00Z
 /json/stage4.py?valid=2024-08-11&lon=-102.30&lat=45.10&tz=Boguis
 /autoplot/autoplot.py?q=84&sector=IA&network=WFO&src:mrms&opt=per&usdm=yes&ptype=g&date=2021-07-25\xc2\xa7or&edate=2021-07-31&clip=yes&cmap=BrBG::_r=t&dpi=100&fmt=geotiff

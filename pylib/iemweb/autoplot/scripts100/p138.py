@@ -49,7 +49,7 @@ def plotter(ctx: dict):
             select date_trunc('hour', valid at time zone 'UTC') as ts,
             avg(sknt) as sknt, max(drct) as drct from alldata
             WHERE station = %s and sknt is not null and drct is not null
-            GROUP by ts
+            and report_type = 3 GROUP by ts
         """,
             conn,
             params=(station,),
@@ -98,10 +98,11 @@ def plotter(ctx: dict):
             va="center",
             bbox=dict(color="white"),
         )
+        val = row[f"sped_{units}"]
         ax.text(
-            row[f"sped_{units}"] * 0.98,
+            val * 0.98,
             mon,
-            "%.1f" % (row[f"sped_{units}"],),
+            f"{val:.1f}",
             ha="right",
             va="center",
             bbox=dict(color="white", boxstyle="square,pad=0.03"),
