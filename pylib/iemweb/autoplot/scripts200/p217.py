@@ -182,6 +182,12 @@ def plotter(ctx: dict, conn: Connection | None = None):
     if pos == -1:
         pos = 0
     report = report[pos : report.find("LAT...LON")]
+    # Appears we have space for about 32 lines of text
+    if len(report.split("\n")) > 32:
+        report = (
+            "\n".join(report.split("\n")[:32])
+            + "\n...Text truncated due to space constraints."
+        )
     mp.fig.text(
         0.5,
         0.85,

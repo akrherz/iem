@@ -18,23 +18,20 @@ of multiple observations within an hour, a simple average of the found
 values is used.  In the future, the hope is to limit the considered data
 to the "synoptic" observation at the top of the hour, but we are not there
 yet.</p>
-
-<p><strong>Change made 29 Aug 2018</strong>: The algorithm used here was
-updated to use greater than or equal to the given threshold.  In the case
-of wind chill, it is less than or equal to.</p>
 """
 
 from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 PDICT = {
     "yes": "Yes, Include only Year to Date period each year",
     "no": "No, Include all available data for each year",
+    "custom": "Specify a custom date range",
 }
 VDICT = {
     "tmpf": "Air Temperature",
@@ -84,6 +81,25 @@ def get_description():
             label="End year (inclusive, if data available) for plot:",
         ),
         dict(
+            type="select",
+            options=PDICT,
+            name="ytd",
+            default="no",
+            label="Include Only Year to Date Data?",
+        ),
+        {
+            "type": "sday",
+            "name": "sday",
+            "default": "0101",
+            "label": "Start Date for Custom Date Range:",
+        },
+        {
+            "type": "sday",
+            "name": "eday",
+            "default": "1231",
+            "label": "Inclusive End Date for Custom Date Range:",
+        },
+        dict(
             type="year",
             min=1973,
             default=date.today().year,
@@ -99,13 +115,6 @@ def get_description():
         ),
         dict(
             type="select",
-            options=PDICT,
-            name="ytd",
-            default="no",
-            label="Include Only Year to Date Data?",
-        ),
-        dict(
-            type="select",
             options=OPTDICT,
             name="inc",
             default="no",
@@ -117,10 +126,20 @@ def get_description():
     return desc
 
 
-def get_doylimit(ytd, varname):
+def get_doylimit(ytd: str, varname: str, ctx: dict):
     """Get the SQL limiter"""
     if ytd == "no":
         return ""
+    if ytd == "custom":
+        if ctx["sday"] < ctx["eday"]:
+            return (
+                "and extract(doy from valid) >= extract(doy from :sday) "
+                "and extract(doy from valid) <= extract(doy from :eday) "
+            )
+        return (
+            "and (extract(doy from valid) >= extract(doy from :sday) "
+            "or extract(doy from valid) <= extract(doy from :eday)) "
+        )
     if varname not in ["windchill", "tmpf_cold", "dwpf_cold"]:
         return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
     if date.today().month > 7:
@@ -144,18 +163,24 @@ def plotter(ctx: dict):
     ytd = ctx["ytd"]
     varname = ctx["var"]
     inc = ctx["inc"]
-    doylimiter = get_doylimit(ytd, varname)
+    doylimiter = get_doylimit(ytd, varname, ctx)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(f"""
             SELECT valid at time zone 'UTC' as valid,
             tmpf::int as tmpf, gust * 1.15 as gust,
             dwpf::int as dwpf, feel
-            from alldata WHERE station = %s
-            and dwpf <= tmpf and valid > %s and valid < %s
-            and report_type = 3 {doylimiter}""",
+            from alldata WHERE station = :station
+            and dwpf <= tmpf and valid > :sdate and valid < :edate
+            and report_type = 3 {doylimiter}"""),
             conn,
-            params=(station, sdate, edate),
+            params={
+                "sday": ctx["sday"],
+                "eday": ctx["eday"],
+                "station": station,
+                "sdate": sdate,
+                "edate": edate,
+            },
             index_col=None,
         )
     if df.empty:
@@ -215,6 +240,8 @@ def plotter(ctx: dict):
         title = "1 Jul "
     title = f"{title}till {date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
+    if ytd == "custom":
+        title = f"Custom Range: {ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
     title = (
         f"{ctx['_sname']} ({minyear}-{maxyear})\n"
         f"{title2.split('::')[0]} Histogram ({title}){inctitle}"
