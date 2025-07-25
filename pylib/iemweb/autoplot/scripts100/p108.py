@@ -45,8 +45,12 @@ def get_description():
         dict(
             type="date",
             name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            label="End Date (inclusive):",
+            default=f"{today:%Y/%m/%d}",
+            max=f"{today:%Y}/12/31",
+            label=(
+                "End Date (inclusive): [Setting to future date will increase "
+                "the x-axis to show more climatology]"
+            ),
             min="1893/01/01",
         ),
         dict(
@@ -142,7 +146,7 @@ def plotter(ctx: dict):
             index_col="day",
         )
     df["precip_diff"] = df["oprecip"] - df["cprecip"]
-    df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
+    df[f"{glabel}_diff"] = df[f"o{glabel}"] - df[f"c{glabel}"]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
     years = (datetime.now().year - ab.year) + 1
@@ -239,9 +243,11 @@ def plotter(ctx: dict):
                 label=f"{yearlabel}",
             )
 
-        # Plot Climatology
         if wantedyears.index(year) == 0:
-            x = df.loc[sts:ets, "c" + glabel].cumsum()
+            # Plot climatology, but do a trick to plot a larger time domain
+            csts = sts.replace(year=df.index[0].year)
+            cets = ets.replace(year=df.index[0].year)
+            x = df.loc[csts:cets, f"c{glabel}"].cumsum()
             if whichplots in ["all", "gdd"]:
                 ax1.plot(
                     range(len(x.index)),
@@ -251,7 +257,7 @@ def plotter(ctx: dict):
                     lw=2,
                     zorder=5,
                 )
-            x = df.loc[sts:ets, "cprecip"].cumsum()
+            x = df.loc[csts:cets, "cprecip"].cumsum()
             if whichplots in ["all", "precip"]:
                 ax3.plot(
                     range(len(x.index)),
@@ -261,7 +267,7 @@ def plotter(ctx: dict):
                     lw=2,
                     zorder=5,
                 )
-            x = df.loc[sts:ets, "csdd86"].cumsum()
+            x = df.loc[csts:cets, "csdd86"].cumsum()
             if whichplots in ["all", "sdd"]:
                 ax4.plot(
                     range(len(x.index)),
