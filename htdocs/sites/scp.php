@@ -113,7 +113,7 @@ foreach ($data as $key => $row) {
     }
     $table .= sprintf(
         "<tr><td class=\"rl\">%sZ</td><td class=\"rl\">%s</td>",
-        date("Hi", strtotime($row["utc_scp_valid"])),
+        gmdate("Hi", strtotime($row["utc_scp_valid"])),
         $lvalid,
     );
     foreach ($birds as $b) {

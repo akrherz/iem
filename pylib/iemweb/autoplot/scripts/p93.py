@@ -122,6 +122,14 @@ def get_description():
                 "Include cases where windchill or heatindex is not additive"
             ),
         ),
+        {
+            "type": "int",
+            "min": 0,
+            "max": 99999,
+            "name": "ylimit",
+            "default": 0,
+            "label": "Y Axis Hours Limit (0 for automatic):",
+        },
     ]
     return desc
 
@@ -296,7 +304,7 @@ def plotter(ctx: dict):
     ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
     dy = 24 * (int(ymax / 240) + 1)
     ax.set_yticks(range(0, ymax, dy))
-    ax.set_ylim(-0.5, ymax + 5)
+    ax.set_ylim(-0.5, (ymax + 5) if ctx["ylimit"] == 0 else ctx["ylimit"])
     ax2 = ax.twinx()
     ax2.set_ylim(-0.5, ymax + 5)
     ax2.set_yticks(range(0, ymax, dy))
