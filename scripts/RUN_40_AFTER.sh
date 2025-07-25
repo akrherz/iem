@@ -1,6 +1,8 @@
 # Run at 40 minutes after the hour, there are some expensive scripts here
 
 DT6="$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00"
+DT="$(date -u --date '1 hour' +'%Y-%m-%dT%H'):00:00"
+DT12="$(date -u --date '12 hours ago' +'%Y-%m-%dT%H'):00:00"
 
 cd dl
 python download_ffg.py &
@@ -9,6 +11,10 @@ python download_nam.py --valid=$(date -u --date '3 hours ago' +'%Y-%m-%dT%H'):00
 
 cd ../rtma
 python wind_power.py &
+
+cd ../iemre
+python use_icon.py --valid=$DT
+python use_icon.py --valid=$DT12 &
 
 cd ../qc
 python check_webcams.py
