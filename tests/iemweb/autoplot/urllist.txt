@@ -135,6 +135,8 @@
 /plotting/auto/plot/92/phenomena:TO::significance:W::e:all::edate:2025-02-03::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:gust::ytd:yes::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
+/plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf::ytd:custom::sday:0601::eday:0720::inc:no::_r:t::dpi:100.png
+/plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf::ytd:custom::sday:0720::eday:0601::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DEH::syear:1973::eyear:1993::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2024-01-01::usdm:no::date2:2024-09-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2023-10-01::usdm:no::date2:2024-04-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
