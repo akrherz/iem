@@ -20,7 +20,13 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
-from pyiem.iemre import get_grids, get_hourly_ncname, hourly_offset, set_grids
+from pyiem.iemre import (
+    DOMAINS,
+    get_grids,
+    get_hourly_ncname,
+    hourly_offset,
+    set_grids,
+)
 from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
 
@@ -84,14 +90,13 @@ def generic_gridder(df, idx, domain: str):
 
 def copy_iemre_hourly(ts: datetime, ds, domain):
     """Lots of work to do here..."""
-    # tricky
-    if domain == "":
-        sts = utc(ts.year, ts.month, ts.day, 6)
-    elif domain == "europe":
-        sts = utc(ts.year, ts.month, ts.day, 0)
-    else:
-        sts = utc(ts.year, ts.month, ts.day, 18) - timedelta(days=1)
+    # Get noon of the day
+    sts = datetime(
+        ts.year, ts.month, ts.day, 12, tzinfo=DOMAINS[domain]["tzinfo"]
+    )
+    sts = sts.replace(hour=1 if sts.dst() else 0)
     ets = sts + timedelta(hours=23)
+    LOG.info("Using %s to %s for %s localday", sts, ets, domain)
     pairs = [(sts, ets)]
     if sts.year != ets.year:
         # These are inclusive
