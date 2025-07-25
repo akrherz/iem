@@ -36,7 +36,7 @@ PDICT3 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.today() - timedelta(days=1)
+    today = datetime.today() + timedelta(days=2)
     desc["arguments"] = [
         ARG_IEMRE_DOMAIN,
         dict(
@@ -120,7 +120,7 @@ def plotter(ctx: dict):
         "axisbg": "white",
         "nocaption": True,
         "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
-        "subtitle": "Data derived from various NOAA/ERA5-Land datasets",
+        "subtitle": "Sourced from various NOAA/ERA5-Land/DWD ICON datasets",
     }
     if domain != "":
         ctx["csector"] = "custom"
@@ -167,6 +167,9 @@ def plotter(ctx: dict):
         elif varname == "rsds":
             plot_units = "W m**-2"
             clevs = pretty_bins(0, ptiles[1])
+        elif varname == "skyc":
+            plot_units = "%"
+            clevs = np.arange(0, 101, 10)
 
     if ptype == "c":
         x, y = np.meshgrid(gridnav.x_points, gridnav.y_points)
