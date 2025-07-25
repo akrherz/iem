@@ -136,11 +136,10 @@ def get_doylimit(ytd: str, varname: str, ctx: dict):
                 "and extract(doy from valid) >= extract(doy from :sday) "
                 "and extract(doy from valid) <= extract(doy from :eday) "
             )
-        else:
-            return (
-                "and (extract(doy from valid) >= extract(doy from :sday) "
-                "or extract(doy from valid) <= extract(doy from :eday)) "
-            )
+        return (
+            "and (extract(doy from valid) >= extract(doy from :sday) "
+            "or extract(doy from valid) <= extract(doy from :eday)) "
+        )
     if varname not in ["windchill", "tmpf_cold", "dwpf_cold"]:
         return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
     if date.today().month > 7:
