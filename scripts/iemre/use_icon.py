@@ -37,9 +37,9 @@ META = {
     "p01m": {"gname": "tot_prec"},
     "p01m_prev": {"gname": "tot_prec", "offset": 1},
     # Inconsistent on server, punted "soil4t": {"gname": "t_so"},
-    # this is accumulated and asked here
-    # https://github.com/open-meteo/open-meteo/discussions/1427
+    # This is net shortwave
     "rsds": {"gname": "asob_s"},
+    "rsds_prev": {"gname": "asob_s", "offset": 1},
 }
 
 
@@ -125,14 +125,14 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
             LOG.error("Failed to download %s: %s", filename, e)
 
 
-def copy_grib_to_netcdf(valid: datetime, domain: str) -> None:
+def copy_grib_to_netcdf(valid: datetime, domain: str, fhour: int) -> None:
     """Fun times."""
     idx = hourly_offset(valid)
     # grib file is stored S to N
     affine_in = Affine(0.125, 0, -180.0, 0, 0.125, -90.0)
     with ncopen(get_hourly_ncname(valid.year, domain), "a") as nc:
         for var in META:
-            if var == "p01m_prev":  # lame
+            if var.endswith("_prev"):  # lame
                 continue
             grib_file = f"{var}_latlon.grib2"
             if not os.path.exists(grib_file):
@@ -143,7 +143,9 @@ def copy_grib_to_netcdf(valid: datetime, domain: str) -> None:
             if var == "p01m":
                 with pygrib.open(f"{var}_prev_latlon.grib2") as grbs:
                     values = values - grbs[1].values
-
+            if var == "rsds":
+                with pygrib.open(f"{var}_prev_latlon.grib2") as grbs:
+                    values = (values * fhour) - (grbs[1].values * (fhour - 1))
             iemre_data = reproject2iemre(
                 values, affine_in, "EPSG:4326", domain=domain
             )
@@ -173,11 +175,12 @@ def main(valid: datetime, keep: bool) -> None:
     os.makedirs(tmpdir, exist_ok=True)
     os.chdir(tmpdir)
     grib_download(model_valid, valid)
+    fhour = (valid - model_valid).total_seconds() // 3600
     # 3. Copy to IEMRE netcdf files
     for domain in DOMAINS:
         if domain == "":
             continue
-        copy_grib_to_netcdf(valid, domain)
+        copy_grib_to_netcdf(valid, domain, fhour)
     # 4. Cleanup
     os.chdir("/mesonet/tmp")
     if not keep:
