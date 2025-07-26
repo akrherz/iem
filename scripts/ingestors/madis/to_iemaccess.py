@@ -6,7 +6,6 @@ RUN_50_AFTER for previous hour and three hours ago.
 
 import os
 import subprocess
-import tempfile
 import warnings
 from datetime import datetime, timedelta, timezone
 
@@ -37,9 +36,8 @@ def find_file(variant, valid: datetime):
         else:
             uri = f"{WEBROOT}LDAD/{variant[:-1]}/netCDF/{valid:%Y%m%d_%H}00.gz"
         try:
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=".gz"
-            ) as tmp:
+            # Prevent script errors from filling up /tmp
+            with open("/tmp/madis_download.gz", "wb") as tmp:
                 resp = httpx.get(uri)
                 resp.raise_for_status()
                 tmp.write(resp.content)
