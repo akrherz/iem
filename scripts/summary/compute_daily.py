@@ -70,7 +70,7 @@ def get_rwis_obs(dt: date) -> pd.DataFrame:
     with get_sqlalchemy_conn("rwis") as conn:
         obsdf = pd.read_sql(
             sql_helper("""
-        select station, network, iemid, drct, sknt, gust,
+        select station, network, iemid, drct, sknt, gust, dwpf,
         valid at time zone tzname as localvalid, valid, relh, feel from
         alldata d JOIN stations t on (t.id = d.station)
         where network ~* 'RWIS'
@@ -94,7 +94,7 @@ def get_asos_obs(dt: date) -> pd.DataFrame:
     with get_sqlalchemy_conn("asos") as conn:
         obsdf = pd.read_sql(
             sql_helper("""
-        select station, network, iemid, drct, sknt, gust,
+        select station, network, iemid, drct, sknt, gust, dwpf,
         valid at time zone tzname as localvalid, valid, relh, feel,
         peak_wind_gust, peak_wind_drct, peak_wind_time,
         peak_wind_time at time zone tzname as local_peak_wind_time from
@@ -237,6 +237,20 @@ def do(dt: date, netclass: str, meta: dict):
             currentrow,
             newdata,
         )
+
+        is_new(
+            "max_dwpf",
+            clean(ldf["dwpf"].max(), -150, 100),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "min_dwpf",
+            clean(ldf["dwpf"].min(), -150, 100),
+            currentrow,
+            newdata,
+        )
+
         if not newdata:
             continue
         cols = []
