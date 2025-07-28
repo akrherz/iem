@@ -422,7 +422,7 @@ def produce_content(nexrad, poh, meso, tvs, max_size, v3):
     return produce_content_v2(df, threshold, title, titleadd)
 
 
-def produce_content_v3(df, title, titleadd):
+def produce_content_v3(df: pd.DataFrame, title, titleadd):
     """v3 stuff."""
     res = (
         "Placefile {\n"
@@ -474,7 +474,7 @@ def produce_content_v3(df, title, titleadd):
     return res
 
 
-def produce_content_v2(df, threshold, title, titleadd):
+def produce_content_v2(df: pd.DataFrame, threshold, title, titleadd):
     """Make the content"""
     res = (
         "Refresh: 3\n"

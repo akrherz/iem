@@ -7,7 +7,10 @@ some mucking with the database to improve coverage.
 """
 
 from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.util import logger
 from sqlalchemy.engine import Connection
+
+LOG = logger()
 
 
 @with_sqlalchemy_conn("id3b")
@@ -27,9 +30,20 @@ def ldm_product_log(conn: Connection = None) -> None:
     conn.commit()
 
 
+@with_sqlalchemy_conn("radar")
+def nexrad_attributes(conn: Connection = None) -> None:
+    """Update these to be current."""
+    res = conn.execute(
+        sql_helper("update nexrad_attributes SET valid = now()")
+    )
+    LOG.warning("Updated %s nexrad_attributes to current time", res.rowcount)
+    conn.commit()
+
+
 def main():
     """Go Main."""
     ldm_product_log()
+    nexrad_attributes()
 
 
 if __name__ == "__main__":
