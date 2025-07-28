@@ -147,7 +147,9 @@ def get_daily_data(ctx, sdate, edate):
     """Do the data work"""
     edate = min([edate, date.today()])
     if edate <= sdate:
-        raise NoDataFound("start date after end date, please correct")
+        raise NoDataFound(
+            f"start date ({sdate}) after end date ({edate}), please correct"
+        )
     if (edate - sdate).days > 366:
         raise NoDataFound(
             "Sorry, too long of period selected. < 1 year please"
@@ -264,6 +266,10 @@ def plotter(ctx: dict):
         else:
             sts = date(year, int(month), 1)
             ets = (sts + timedelta(days=34)).replace(day=1) - oneday
+        if sts > date.today():
+            raise NoDataFound(
+                f"start date ({sts}) in future, please decrement year."
+            )
 
         get_daily_data(ctx, sts, ets)
     ctx["lastyear"] = date.today().year
