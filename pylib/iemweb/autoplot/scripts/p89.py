@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
@@ -87,9 +87,12 @@ def get_data(ctx):
     """Do the processing work, please"""
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.GeoDataFrame.from_postgis(
-            "SELECT the_geom, state_abbr from states where state_abbr = %s",
+            sql_helper(
+                "SELECT the_geom, state_abbr from states "
+                "where state_abbr = :stabbr"
+            ),
             conn,
-            params=(ctx["state"],),
+            params={"stabbr": ctx["state"]},
             index_col="state_abbr",
             geom_col="the_geom",
         )

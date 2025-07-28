@@ -82,14 +82,20 @@ function showCopyFeedback(button, message) {
     }, 2000);
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function updateForm2UrlDisplay(div) {
     const form = div.closest('form');
     if (form) {
-        const curlCommand = form2url(form);
+        const curlCommand = escapeHtml(form2url(form));
         div.innerHTML = `<div class="alert alert-info">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <h5 class="mb-0"><i class="fa fa-terminal"></i> Automation Example with Curl</h5>
-                <button type="button" class="btn btn-sm btn-outline-primary copy-curl-btn" data-command="${curlCommand.replace(/"/g, '&quot;')}">
+                <button type="button" class="btn btn-sm btn-outline-primary copy-curl-btn" data-command="${curlCommand}">
                     <i class="fa fa-copy"></i> Copy
                 </button>
             </div>

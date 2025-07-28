@@ -89,6 +89,7 @@ def do(meta, station, acis_station) -> int:
         payload["edate"],
         station,
     )
+    j = {}
     for attempt in range(3):
         try:
             resp = httpx.post(SERVICE, json=payload, timeout=30)

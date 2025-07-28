@@ -23,7 +23,7 @@ function escapeHTML(val) {
  */
 function getCurrentDateString() {
     const datePicker = document.getElementById('datepicker');
-    return datePicker.value; // Already in YYYY-MM-DD format
+    return escapeHTML(datePicker.value); // Already in YYYY-MM-DD format
 }
 
 /**

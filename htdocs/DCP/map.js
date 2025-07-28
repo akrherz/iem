@@ -239,10 +239,9 @@ function initializeMap() {
 /**
  * Parse URL parameters and set form values, handling legacy hash format
  */
-// Refactored for ESLint complexity: break into focused helpers (Rule: module-specific orchestration, legacy/Non-ESM)
 function parseLegacyHashParams() {
     const url = new URL(window.location);
-    if (url.hash && url.hash.includes('.')) {
+    if (url.hash?.includes('.')) {
         const hashTokens = url.hash.substring(1).split('.');
         if (hashTokens.length === 3) {
             const pe = escapeHTML(hashTokens[0]);

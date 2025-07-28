@@ -8,7 +8,7 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -69,16 +69,21 @@ def plotter(ctx: dict):
     operator = ">=" if drct == "above" else "<"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             SELECT sday,
-            sum(case when {varname}::numeric {operator} %s then 1 else 0 end)
+            sum(case when {varname}::numeric {operator} :thres
+                then 1 else 0 end)
             as hit,
             count(*) as total
-            from alldata WHERE station = %s and month = %s
+            from alldata WHERE station = :station and month = :month
             GROUP by sday ORDER by sday ASC
             """,
+                varname=varname,
+                operator=operator,
+            ),
             conn,
-            params=(threshold, station, month),
+            params={"thres": threshold, "station": station, "month": month},
             index_col="sday",
         )
     if df.empty:
