@@ -88,7 +88,7 @@ def generic_gridder(df, idx, domain: str):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def copy_iemre_hourly(ts: datetime, ds, domain):
+def copy_iemre_hourly(ts: datetime, ds, domain: str):
     """Lots of work to do here..."""
     # Get noon of the day
     sts = datetime(
@@ -164,12 +164,15 @@ def copy_iemre_hourly(ts: datetime, ds, domain):
         ds["wind_speed"].values = runningsum / hours
     # -----------------------------------------------------------------
     for vname in (
-        "high_tmpk low_tmpk p01d high_soil4t avg_dwpk "
+        "high_tmpk low_tmpk p01d high_soil4t avg_dwpk rsds "
         "low_soil4t high_tmpk_12z low_tmpk_12z p01d_12z"
     ).split():
+        if vname == "rsds" and domain == "":
+            # Done via other means
+            continue
         res = None
         aggfunc = np.ma.max
-        if vname.startswith("p01d"):
+        if vname in ["p01d_12", "p01d", "rsds"]:
             aggfunc = np.ma.sum  # was np.nansum, better check this
         elif vname.startswith("low"):
             aggfunc = np.ma.min
@@ -203,6 +206,9 @@ def copy_iemre_hourly(ts: datetime, ds, domain):
             res += 0.8
         if vname in ["low_tmpk", "low_tmpk_12z"]:
             res -= 0.8
+        if vname == "rsds":
+            # Convert from Wm-2
+            res = res / 24.0
         ds[vname].values = res
 
 
