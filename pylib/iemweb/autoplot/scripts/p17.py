@@ -18,8 +18,9 @@ from pyiem.plot import figure_axes
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {
-    "temps": "High/Low Temperatures",
-    "dwpf": "Dew Point Temperatures",
+    "temps": "High/Low Temperature",
+    "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
     "precip": "Precipitation",
 }
 
@@ -113,7 +114,7 @@ def common(ctx):
                 "NCEI 1991-2020 Climate Site: "
                 f"{ctx['_nt'].sts[station]['ncei91']}"
             )
-    if ctx["p"] == "dwpf":
+    if ctx["p"] in ("dwpf", "feel"):
         subtitle = "Climatology is a simple 7 day smoothed POR average"
     # Get the normals
     with get_sqlalchemy_conn("coop") as conn:
@@ -302,7 +303,10 @@ def do_dwpf_plot(ctx) -> bool:
             sql_helper(
                 """select extract(day from day) as day_of_month,
                 avg(max_dwpf) as climo_max_dwpf,
-                avg(min_dwpf) as climo_min_dwpf from summary a JOIN stations t
+                avg(min_dwpf) as climo_min_dwpf,
+                avg(max_feel) as climo_max_feel,
+                avg(min_feel) as climo_min_feel
+                from summary a JOIN stations t
                 on (a.iemid = t.iemid) where t.network = :network and
                 t.id = :station and extract(month from day) = :month
                 group by day_of_month order by day_of_month""",
@@ -317,23 +321,23 @@ def do_dwpf_plot(ctx) -> bool:
         )
         if not climodf.empty:
             # Smooth the data 7 days
-            climodf["climo_max_dwpf"] = (
-                climodf["climo_max_dwpf"]
+            climodf[f"climo_max_{ctx['p']}"] = (
+                climodf[f"climo_max_{ctx['p']}"]
                 .rolling(7, min_periods=1)
                 .mean()
                 .round(1)
             )
-            climodf["climo_min_dwpf"] = (
-                climodf["climo_min_dwpf"]
+            climodf[f"climo_min_{ctx['p']}"] = (
+                climodf[f"climo_min_{ctx['p']}"]
                 .rolling(7, min_periods=1)
                 .mean()
                 .round(1)
             )
-    if climodf["climo_max_dwpf"].notnull().any():
+    if climodf[f"climo_max_{ctx['p']}"].notnull().any():
         hasdata = True
         ax.plot(
             climodf.index.values,
-            climodf["climo_max_dwpf"].values,
+            climodf[f"climo_max_{ctx['p']}"].values,
             zorder=3,
             marker="o",
             color="pink",
@@ -341,27 +345,31 @@ def do_dwpf_plot(ctx) -> bool:
         )
         ax.plot(
             climodf.index.values,
-            climodf["climo_min_dwpf"].values,
+            climodf[f"climo_min_{ctx['p']}"].values,
             zorder=3,
             marker="o",
             color="skyblue",
             label="Climate Low",
         )
-    if "max_dwpf" in df.columns and not all(pd.isnull(df["max_dwpf"])):
+    if f"max_{ctx['p']}" in df.columns and not all(
+        pd.isnull(df[f"max_{ctx['p']}"])
+    ):
         hasdata = True
         ax.bar(
             df.index.values - 0.3,
-            df["max_dwpf"].values,
+            df[f"max_{ctx['p']}"].values,
             fc="r",
             ec="k",
             width=0.3,
             linewidth=0.6,
             label="Ob High",
         )
-        if "min_dwpf" in df.columns and not all(pd.isnull(df["min_dwpf"])):
+        if f"min_{ctx['p']}" in df.columns and not all(
+            pd.isnull(df[f"min_{ctx['p']}"])
+        ):
             ax.bar(
                 df.index.values,
-                df["min_dwpf"].values,
+                df[f"min_{ctx['p']}"].values,
                 fc="b",
                 ec="k",
                 width=0.3,
@@ -373,15 +381,20 @@ def do_dwpf_plot(ctx) -> bool:
         ax.set_ylim(0, 1)
 
     i = 0
-    if "max_tmpf" in df.columns and not all(pd.isnull(df["max_tmpf"])):
+    if f"max_{ctx['p']}" in df.columns and not all(
+        pd.isnull(df[f"max_{ctx['p']}"])
+    ):
         for _, row in df.iterrows():
-            if pd.isna(row["max_tmpf"]) or pd.isna(row["min_tmpf"]):
+            if pd.isna(row[f"max_{ctx['p']}"]) or pd.isna(
+                row[f"min_{ctx['p']}"]
+            ):
                 i += 1
                 continue
+            col = row[f"max_{ctx['p']}"]
             txt = ax.text(
                 i + 1 - 0.15,
-                row["max_dwpf"] + 0.5,
-                f"{row['max_dwpf']:.0f}",
+                col + 0.5,
+                f"{col:.0f}",
                 ha="center",
                 va="bottom",
                 color="k",
@@ -389,10 +402,11 @@ def do_dwpf_plot(ctx) -> bool:
             txt.set_path_effects(
                 [PathEffects.withStroke(linewidth=2, foreground="w")]
             )
+            col = row[f"min_{ctx['p']}"]
             txt = ax.text(
                 i + 1 + 0.15,
-                row["min_dwpf"] + 0.5,
-                f"{row['min_dwpf']:.0f}",
+                col + 0.5,
+                f"{col:.0f}",
                 ha="center",
                 va="bottom",
                 color="k",
@@ -401,18 +415,24 @@ def do_dwpf_plot(ctx) -> bool:
                 [PathEffects.withStroke(linewidth=2, foreground="w")]
             )
             i += 1
-        if df["min_dwpf"].notnull().any():
+        if df[f"min_{ctx['p']}"].notnull().any():
             ax.set_ylim(
                 np.nanmin(
-                    [climodf["climo_min_dwpf"].min(), df["min_dwpf"].min()]
+                    [
+                        climodf[f"climo_min_{ctx['p']}"].min(),
+                        df[f"min_{ctx['p']}"].min(),
+                    ]
                 )
                 - 5,
                 np.nanmax(
-                    [climodf["climo_max_dwpf"].max(), df["max_dwpf"].max()]
+                    [
+                        climodf[f"climo_max_{ctx['p']}"].max(),
+                        df[f"max_{ctx['p']}"].max(),
+                    ]
                 )
                 + 5,
             )
-    ax.set_ylabel(r"Dew Point Temperature $^\circ$F")
+    ax.set_ylabel(PDICT[ctx["p"]] + r" $^\circ$F")
     return hasdata
 
 
@@ -421,7 +441,7 @@ def plotter(ctx: dict):
     common(ctx)
     if ctx["p"] == "precip":
         hasdata = do_precip_plot(ctx)
-    elif ctx["p"] == "dwpf":
+    elif ctx["p"] in ("dwpf", "feel"):
         hasdata = do_dwpf_plot(ctx)
     else:
         hasdata = do_temperature_plot(ctx)
