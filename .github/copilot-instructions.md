@@ -7,7 +7,7 @@ output. You can abbreviate the rule description to a single word or phrase.
 
 - PHP 8.4
 - Tabulator JavaScript library for interactive tables
-- Python 3.11
+- Python 3.13
 - PostgreSQL 17
 - Bootstrap 5
 - OpenLayers for interactive maps

@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.11"]
+        PYTHON_VERSION: ["3.13"]
         WITH_IEM_DATA: ["YES", "NO"]
         TEST_WEB: ["YES", "NO"]
         exclude:
-          - PYTHON_VERSION: "3.11"
+          - PYTHON_VERSION: "3.13"
             TEST_WEB: "NO"
             WITH_IEM_DATA: "NO"
     env:
