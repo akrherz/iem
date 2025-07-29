@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 import click
 import httpx
 import numpy as np
+import rasterio
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
@@ -32,26 +33,36 @@ from pyiem.util import logger, ncopen, utc
 LOG = logger()
 
 
-def compute_source(valid):
-    """Which source to use."""
-    utcnow = utc()
-    # IMERG Early, increased from 24 hours
-    if (utcnow - valid) < timedelta(hours=72):
-        return "E"
-    if (utcnow - valid) < timedelta(days=120):
-        return "L"
-    return ""
+def get_geotiff(valid: datetime, source: str) -> np.ndarray:
+    """Do the GeoTIFF workflow."""
+    endts = valid + timedelta(minutes=29, seconds=59)
+    minutes = valid.hour * 60 + valid.minute
+    pp = "early" if source == "E" else f"{valid:%Y/%m}"
+    url = (
+        f"https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/{pp}/"
+        f"3B-HHR-{source}.MS.MRG.3IMERG.{valid:%Y%m%d}-S{valid:%H%M%S}-"
+        f"E{endts:%H%M%S}.{minutes:04.0f}.V07B.30min.tif"
+    )
+    auth = httpx.NetRCAuth()
+    with httpx.Client(auth=auth, follow_redirects=False) as client:
+        LOG.info("Fetching %s", url)
+        try:
+            resp = client.get(url, timeout=10)
+            resp.raise_for_status()
+        except Exception as exp:
+            LOG.info("Error fetching %s: %s", url, exp)
+            return None
+        with open("pps.tif", "wb") as f:
+            f.write(resp.content)
+        with rasterio.open("pps.tif") as src:
+            pmm = src.read(1) / 10.0
+            # Life choice, set anything above 300mm to zero
+            pmm = np.where(pmm > 300, 0, pmm)
+    return pmm
 
 
-@click.command()
-@click.option("--valid", type=click.DateTime(), help="UTC Valid Time")
-@click.option("--realtime", is_flag=True, default=False)
-def main(valid: datetime, realtime: bool):
-    """Go Main Go."""
-    valid = valid.replace(tzinfo=timezone.utc)
-    source = compute_source(valid)
-    routes = "ac" if realtime else "a"
-    LOG.info("Using source: `%s` for valid: %s[%s]", source, valid, routes)
+def get_netcdf(valid, source) -> np.ndarray:
+    """The NetCDF workflow"""
     url = valid.strftime(
         "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/grid/aggregation/"
         f"GPM_3IMERGHH{source}.07/%Y/GPM_3IMERGHH{source}"
@@ -74,14 +85,34 @@ def main(valid: datetime, realtime: bool):
     ct = resp.headers.get("content-type", "")
     if not ct.startswith("application/x-netcdf"):
         LOG.warning("Unexpected content-type for %s: %s", url, ct)
-        return
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        return None
+    with open("imerg.nc", "wb") as tmp:
         tmp.write(resp.content)
-    with ncopen(tmp.name) as nc:
+    with ncopen("imerg.nc") as nc:
         # x, y
         pmm = nc.variables["precipitation"][0, :, :] / 2.0  # mmhr to 30min
         pmm = np.flipud(pmm)
-    os.unlink(tmp.name)
+    return pmm
+
+
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="UTC Valid Time")
+@click.option("--realtime", is_flag=True, default=False)
+def main(valid: datetime, realtime: bool):
+    """Go Main Go."""
+    valid = valid.replace(tzinfo=timezone.utc)
+    routes = "ac" if realtime else "a"
+    # If we are within 30 days of the valid time
+    if (utc() - valid).total_seconds() < (3_600 * 24 * 30):
+        for source in ("L", "E"):
+            pmm = get_geotiff(valid, source)
+            if pmm is not None:
+                break
+    else:
+        pmm = get_netcdf(valid, "")
+    if pmm is None:
+        LOG.warning("No data for %s", valid)
+        return
 
     if np.max(pmm) > 102:
         LOG.warning("overflow with max(%s) value > 102", np.max(pmm))
@@ -98,7 +129,7 @@ def main(valid: datetime, realtime: bool):
 
     png = Image.fromarray(img.astype("u1"))
     png.putpalette(mrms.make_colorramp())
-    png.save(f"{tmp.name}.png")
+    png.save("imerg.png")
 
     metadata = {
         "start_valid": (valid - timedelta(minutes=15)).strftime(ISO8601),
@@ -107,7 +138,7 @@ def main(valid: datetime, realtime: bool):
         "source": "F" if source == "" else source,  # E, L, F
         "generation_time": utc().strftime(ISO8601),
     }
-    with open(f"{tmp.name}.json", "w", encoding="utf8") as fp:
+    with open("imerg.json", "w", encoding="utf8") as fp:
         json.dump(metadata, fp)
     cmd = [
         "pqinsert",
@@ -115,12 +146,11 @@ def main(valid: datetime, realtime: bool):
         "-p",
         f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.json "
         f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json",
-        f"{tmp.name}.json",
+        "imerg.json",
     ]
     subprocess.call(cmd)
-    os.unlink(f"{tmp.name}.json")
 
-    with open(f"{tmp.name}.wld", "w", encoding="utf8") as fp:
+    with open("imerg.wld", "w", encoding="utf8") as fp:
         fp.write("0.1\n0.0\n0.0\n-0.1\n-179.95\n89.95")
     cmd = [
         "pqinsert",
@@ -128,10 +158,9 @@ def main(valid: datetime, realtime: bool):
         "-p",
         f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.wld "
         f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld",
-        f"{tmp.name}.wld",
+        "imerg.wld",
     ]
     subprocess.call(cmd)
-    os.unlink(f"{tmp.name}.wld")
 
     cmd = [
         "pqinsert",
@@ -139,11 +168,12 @@ def main(valid: datetime, realtime: bool):
         "-p",
         f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.png "
         f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png",
-        f"{tmp.name}.png",
+        "imerg.png",
     ]
     subprocess.call(cmd)
-    os.unlink(f"{tmp.name}.png")
 
 
 if __name__ == "__main__":
-    main()
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        os.chdir(_tmpdir)
+        main()
