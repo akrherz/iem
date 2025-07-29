@@ -109,9 +109,10 @@ def main(valid: datetime, realtime: bool):
             if pmm is not None:
                 break
     else:
+        source = "F"
         pmm = get_netcdf(valid, "")
     if pmm is None:
-        LOG.warning("No data for %s", valid)
+        LOG.info("No data for %s", valid)
         return
 
     if np.max(pmm) > 102:
