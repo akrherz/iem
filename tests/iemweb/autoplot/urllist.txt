@@ -98,6 +98,7 @@
 /plotting/auto/plot/84/sector:IA::network:WFO::src:iemre::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:ifc::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-02::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:MN::network:WFO::src:stage4::opt:acc::usdm:no::ptype:c::sdate:2024-01-01::edate:2024-01-01::clip:yes::cmap:YlGnBu::_r:t::dpi:100.png
+/plotting/auto/plot/84/sector:MN::network:WFO::src:stage4::opt:acc::usdm:no::ptype:c::sdate:2024-01-01::edate:2025-01-01::clip:yes::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:AK::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:IN::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/domain:europe::csector:IN::var:rsds::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png

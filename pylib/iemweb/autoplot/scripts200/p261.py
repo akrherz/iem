@@ -42,9 +42,7 @@ LOOKUP = {
 def fix():
     """muck with the prodDefinitions to get the key included"""
     for key, val in prodDefinitions.items():
-        if val.startswith("["):
-            continue
-        prodDefinitions[key] = f"[{key}] {prodDefinitions[key]}"
+        prodDefinitions[key] = val if val.startswith("[") else f"[{key}] {val}"
 
 
 def get_description():

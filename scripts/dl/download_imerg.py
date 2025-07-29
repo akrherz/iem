@@ -35,7 +35,8 @@ LOG = logger()
 def compute_source(valid):
     """Which source to use."""
     utcnow = utc()
-    if (utcnow - valid) < timedelta(hours=24):
+    # IMERG Early, increased from 24 hours
+    if (utcnow - valid) < timedelta(hours=72):
         return "E"
     if (utcnow - valid) < timedelta(days=120):
         return "L"
