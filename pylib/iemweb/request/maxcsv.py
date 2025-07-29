@@ -377,16 +377,17 @@ def do_iowa_azos(dt: date, itoday=False):
                 conn,
                 index_col="station",
             )
-            for col in [
-                "precip24",
-                "precip48",
-                "precip72",
-                "precip168",
-                "precip720",
-            ]:
-                df[col] = df2[col].round(2)
-                # make sure the new column is >= precip
-                df.loc[df[col] < df["precip"], col] = df["precip"]
+            if not df.empty:
+                for col in [
+                    "precip24",
+                    "precip48",
+                    "precip72",
+                    "precip168",
+                    "precip720",
+                ]:
+                    df[col] = df2[col].round(2)
+                    # make sure the new column is >= precip
+                    df.loc[df[col] < df["precip"], col] = df["precip"]
     df = df.reset_index()
     return df
 
