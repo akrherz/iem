@@ -33,7 +33,7 @@ from pyiem.util import logger, ncopen, utc
 LOG = logger()
 
 
-def get_geotiff(valid: datetime, source: str) -> np.ndarray:
+def get_geotiff(valid: datetime, source: str) -> np.ndarray | None:
     """Do the GeoTIFF workflow."""
     endts = valid + timedelta(minutes=29, seconds=59)
     minutes = valid.hour * 60 + valid.minute
@@ -61,7 +61,7 @@ def get_geotiff(valid: datetime, source: str) -> np.ndarray:
     return pmm
 
 
-def get_netcdf(valid, source) -> np.ndarray:
+def get_netcdf(valid, source) -> np.ndarray | None:
     """The NetCDF workflow"""
     url = valid.strftime(
         "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/grid/aggregation/"
@@ -79,7 +79,7 @@ def get_netcdf(valid, source) -> np.ndarray:
             resp = client.get(url, timeout=120, follow_redirects=True)
             if resp.status_code in (400, 404):  # Out of time bounds or no data
                 LOG.info("Got %d, no data for %s", resp.status_code, valid)
-                return
+                return None
         resp.raise_for_status()
     # Check content-type return header
     ct = resp.headers.get("content-type", "")
