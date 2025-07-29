@@ -608,12 +608,12 @@ function setupExportButtons() {
             const downloadUrl = `${url}?${new URLSearchParams(params).toString()}`;
             if (btn.dataset.opt === "csv") {
                 // Create a hidden link and click it to trigger download
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = '';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                const aa = document.createElement('a');
+                aa.href = downloadUrl;
+                aa.download = '';
+                document.body.appendChild(aa);
+                aa.click();
+                document.body.removeChild(aa);
             } else {
                 // Open Excel export in a new tab to avoid page reload
                 window.open(downloadUrl, '_blank');
@@ -639,8 +639,8 @@ function setupTableConfigurations() {
                     // Extract eventid from the HTML string for export
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
@@ -700,8 +700,8 @@ function setupTableConfigurations() {
                 download: (value) => {
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
@@ -757,8 +757,8 @@ function setupTableConfigurations() {
                 download: (value) => {
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
