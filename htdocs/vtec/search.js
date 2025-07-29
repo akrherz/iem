@@ -608,12 +608,12 @@ function setupExportButtons() {
             const downloadUrl = `${url}?${new URLSearchParams(params).toString()}`;
             if (btn.dataset.opt === "csv") {
                 // Create a hidden link and click it to trigger download
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = '';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                const aa = document.createElement('a');
+                aa.href = downloadUrl;
+                aa.download = '';
+                document.body.appendChild(aa);
+                aa.click();
+                document.body.removeChild(aa);
             } else {
                 // Open Excel export in a new tab to avoid page reload
                 window.open(downloadUrl, '_blank');
@@ -639,8 +639,8 @@ function setupTableConfigurations() {
                     // Extract eventid from the HTML string for export
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
@@ -700,8 +700,8 @@ function setupTableConfigurations() {
                 download: (value) => {
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
@@ -757,8 +757,8 @@ function setupTableConfigurations() {
                 download: (value) => {
                     const div = document.createElement('div');
                     div.innerHTML = value;
-                    const a = div.querySelector('a');
-                    return a ? a.textContent : value;
+                    const aa = div.querySelector('a');
+                    return aa ? aa.textContent : value;
                 }
             },
             {title: "Phenomena", field: "phenomena", headerSort: true, sorter: "string"},
@@ -807,21 +807,26 @@ function setupDateInputs() {
     sdate1 = document.querySelector("input[name='sdate1']");
     edate1 = document.querySelector("input[name='edate1']");
     
+    // Get tomorrow's UTC date
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const tomorrowUTC = tomorrow.toISOString().split('T')[0];
+    
     // Set default values
     sdate.value = "1986-01-01";
-    edate.value = new Date().toISOString().split('T')[0]; // Today's date
+    edate.value = tomorrowUTC; // Tomorrow's UTC date
     sdate1.value = "2002-01-01";
-    edate1.value = new Date().toISOString().split('T')[0]; // Today's date
+    edate1.value = tomorrowUTC; // Tomorrow's UTC date
     
     // Set min/max attributes for date validation
     sdate.min = "1986-01-01";
-    sdate.max = new Date().toISOString().split('T')[0];
+    sdate.max = tomorrowUTC;
     edate.min = "1986-01-01";
-    edate.max = new Date().toISOString().split('T')[0];
+    edate.max = tomorrowUTC;
     sdate1.min = "2002-01-01";
-    sdate1.max = new Date().toISOString().split('T')[0];
+    sdate1.max = tomorrowUTC;
     edate1.min = "2002-01-01";
-    edate1.max = new Date().toISOString().split('T')[0];
+    edate1.max = tomorrowUTC;
     
     // Add event listeners for date changes
     sdate.addEventListener('change', () => {

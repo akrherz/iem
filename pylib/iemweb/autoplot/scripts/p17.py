@@ -1,5 +1,5 @@
 """
-Daily plot of observed high and low temperatures or precipitation
+Daily plot of observed daily summary variables
 along with the daily climatology for the nearest (sometimes same) location.
 The vertical highlighted stripes on the plot are just the weekend dates.
 """
@@ -17,7 +17,12 @@ from pyiem.exceptions import BadWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 
 warnings.simplefilter("ignore", UserWarning)
-PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
+PDICT = {
+    "temps": "High/Low Temperature",
+    "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
+    "precip": "Precipitation",
+}
 
 
 def get_description():
@@ -109,6 +114,8 @@ def common(ctx):
                 "NCEI 1991-2020 Climate Site: "
                 f"{ctx['_nt'].sts[station]['ncei91']}"
             )
+    if ctx["p"] in ("dwpf", "feel"):
+        subtitle = "Climatology is a simple 7 day smoothed POR average"
     # Get the normals
     with get_sqlalchemy_conn("coop") as conn:
         cdf = pd.read_sql(
@@ -129,12 +136,7 @@ def common(ctx):
     if "accum_pday" not in df.columns:
         df["accum_pday"] = 0
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
-    title = (
-        f"{ctx['_sname']} :: "
-        f"{'Hi/Lo Temps' if ctx['p'] == 'temps' else 'Precipitation'} "
-        f"for {sts:%b %Y}\n"
-        f"{subtitle}"
-    )
+    title = f"{ctx['_sname']} :: {PDICT[ctx['p']]} for {sts:%b %Y}\n{subtitle}"
     (ctx["fig"], ax) = figure_axes(title=title, apctx=ctx)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
@@ -291,11 +293,156 @@ def do_temperature_plot(ctx) -> bool:
     return hasdata
 
 
+def do_dwpf_plot(ctx) -> bool:
+    """Make the dew point temperature plot."""
+    ax = ctx["fig"].gca()
+    df = ctx["df"]
+    hasdata = False
+    with get_sqlalchemy_conn("iem") as conn:
+        climodf = pd.read_sql(
+            sql_helper(
+                """select extract(day from day) as day_of_month,
+                avg(max_dwpf) as climo_max_dwpf,
+                avg(min_dwpf) as climo_min_dwpf,
+                avg(max_feel) as climo_max_feel,
+                avg(min_feel) as climo_min_feel
+                from summary a JOIN stations t
+                on (a.iemid = t.iemid) where t.network = :network and
+                t.id = :station and extract(month from day) = :month
+                group by day_of_month order by day_of_month""",
+            ),
+            conn,
+            params={
+                "network": ctx["network"],
+                "station": ctx["station"],
+                "month": ctx["month"],
+            },
+            index_col="day_of_month",
+        )
+        if not climodf.empty:
+            # Smooth the data 7 days
+            climodf[f"climo_max_{ctx['p']}"] = (
+                climodf[f"climo_max_{ctx['p']}"]
+                .rolling(7, min_periods=1)
+                .mean()
+                .round(1)
+            )
+            climodf[f"climo_min_{ctx['p']}"] = (
+                climodf[f"climo_min_{ctx['p']}"]
+                .rolling(7, min_periods=1)
+                .mean()
+                .round(1)
+            )
+    if climodf[f"climo_max_{ctx['p']}"].notnull().any():
+        hasdata = True
+        ax.plot(
+            climodf.index.values,
+            climodf[f"climo_max_{ctx['p']}"].values,
+            zorder=3,
+            marker="o",
+            color="pink",
+            label="Climate High",
+        )
+        ax.plot(
+            climodf.index.values,
+            climodf[f"climo_min_{ctx['p']}"].values,
+            zorder=3,
+            marker="o",
+            color="skyblue",
+            label="Climate Low",
+        )
+    if f"max_{ctx['p']}" in df.columns and not all(
+        pd.isnull(df[f"max_{ctx['p']}"])
+    ):
+        hasdata = True
+        ax.bar(
+            df.index.values - 0.3,
+            df[f"max_{ctx['p']}"].values,
+            fc="r",
+            ec="k",
+            width=0.3,
+            linewidth=0.6,
+            label="Ob High",
+        )
+        if f"min_{ctx['p']}" in df.columns and not all(
+            pd.isnull(df[f"min_{ctx['p']}"])
+        ):
+            ax.bar(
+                df.index.values,
+                df[f"min_{ctx['p']}"].values,
+                fc="b",
+                ec="k",
+                width=0.3,
+                linewidth=0.6,
+                label="Ob Low",
+            )
+    else:
+        ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes, ha="center")
+        ax.set_ylim(0, 1)
+
+    i = 0
+    if f"max_{ctx['p']}" in df.columns and not all(
+        pd.isnull(df[f"max_{ctx['p']}"])
+    ):
+        for _, row in df.iterrows():
+            if pd.isna(row[f"max_{ctx['p']}"]) or pd.isna(
+                row[f"min_{ctx['p']}"]
+            ):
+                i += 1
+                continue
+            col = row[f"max_{ctx['p']}"]
+            txt = ax.text(
+                i + 1 - 0.15,
+                col + 0.5,
+                f"{col:.0f}",
+                ha="center",
+                va="bottom",
+                color="k",
+            )
+            txt.set_path_effects(
+                [PathEffects.withStroke(linewidth=2, foreground="w")]
+            )
+            col = row[f"min_{ctx['p']}"]
+            txt = ax.text(
+                i + 1 + 0.15,
+                col + 0.5,
+                f"{col:.0f}",
+                ha="center",
+                va="bottom",
+                color="k",
+            )
+            txt.set_path_effects(
+                [PathEffects.withStroke(linewidth=2, foreground="w")]
+            )
+            i += 1
+        if df[f"min_{ctx['p']}"].notnull().any():
+            ax.set_ylim(
+                np.nanmin(
+                    [
+                        climodf[f"climo_min_{ctx['p']}"].min(),
+                        df[f"min_{ctx['p']}"].min(),
+                    ]
+                )
+                - 5,
+                np.nanmax(
+                    [
+                        climodf[f"climo_max_{ctx['p']}"].max(),
+                        df[f"max_{ctx['p']}"].max(),
+                    ]
+                )
+                + 5,
+            )
+    ax.set_ylabel(PDICT[ctx["p"]] + r" $^\circ$F")
+    return hasdata
+
+
 def plotter(ctx: dict):
     """Go"""
     common(ctx)
     if ctx["p"] == "precip":
         hasdata = do_precip_plot(ctx)
+    elif ctx["p"] in ("dwpf", "feel"):
+        hasdata = do_dwpf_plot(ctx)
     else:
         hasdata = do_temperature_plot(ctx)
     # Prevent matplotlib warning about no artists
