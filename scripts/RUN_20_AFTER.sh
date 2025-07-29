@@ -5,8 +5,11 @@
 cd dl
 python download_gfs.py --valid=$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00 &
 
-python download_imerg.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H:00:00')
-python download_imerg.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H:30:00') --realtime
+# Still boggling this timing
+python download_imerg.py --valid=$(date -u --date '4 hours ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '4 hours ago' +'%Y-%m-%dT%H:30:00') --realtime
+python download_imerg.py --valid=$(date -u --date '6 hours ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '6 hours ago' +'%Y-%m-%dT%H:30:00')
 python download_imerg.py --valid=$(date -u --date '27 hours ago' +'%Y-%m-%dT%H:00:00')
 python download_imerg.py --valid=$(date -u --date '27 hours ago' +'%Y-%m-%dT%H:30:00')
 python download_imerg.py --valid=$(date -u --date '35 hours ago' +'%Y-%m-%dT%H:00:00')

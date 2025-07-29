@@ -7,6 +7,7 @@ require_once "../../../include/network.php";
 $nt = new NetworkTable("WFO");
 
 $t = new MyView();
+$t->iemss = true;
 $t->iem_resource = "LSR";
 $t->title = "Archived Local Storm Reports";
 
@@ -21,6 +22,7 @@ $ds2 = daySelect(date("d"), "day2");
 $hs2 = gmtHourSelect(23, "hour2");
 $ns2 = minuteSelect(59, "minute2");
 $stateselect = stateSelect("_ALL", '', "state", 5, true, true);
+$stateselect = str_replace('<select', '<select class="form-select" id="state"', $stateselect);
 $ss = "";
 foreach ($nt->table as $key => $value) {
     $ss .= "<option value='$key'>[$key] " . $value["name"] . "</option>\n";
@@ -81,12 +83,15 @@ $types = Array(
     "WIND CHILL" => "Wind Chill",
 );
 $typeselect = make_select("type", "ALL", $types, "", "", TRUE, TRUE, FALSE);
+$typeselect = str_replace('<select', '<select class="form-select" id="type"', $typeselect);
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-<li><a href="/GIS/">GIS Mainpage</a></li>
-<li class="active">Archived Local Storm Reports Shapefiles</li>
+<li class="breadcrumb-item"><a href="/GIS/">GIS Mainpage</a></li>
+<li class="breadcrumb-item active" aria-current="page">Archived Local Storm Reports Shapefiles</li>
 </ol>
+</nav>
 
 <p>This page allows you to generate a GIS shapefile of NWS issued Local Storm
 Reports for a time period of your choice.  Please be sure to read the
@@ -115,21 +120,29 @@ not the issuance of the text product itself that contained the LSR.
 for those wishing to script against this service.</p>
 
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
+<div class="form2url"></div>
+<h4>Filter Options</h4>
 <div class="row">
 <div class="col-md-4">
-    <h4>Limit Weather Forecast Office (WFO)</h4>
-    <select name="wfo" MULTIPLE size="5">
-    <option value="ALL" SELECTED>All Available</option>
-    {$ss}
-    </select>
+    <div class="mb-3">
+        <label for="wfo" class="form-label">Limit Weather Forecast Office (WFO)</label>
+        <select name="wfo" id="wfo" class="form-select" multiple size="5">
+        <option value="ALL" selected>All Available</option>
+        {$ss}
+        </select>
+    </div>
 </div>
 <div class="col-md-4">
-    <h4>Limit by State</h4>
-    {$stateselect}
+    <div class="mb-3">
+        <label for="state" class="form-label">Limit by State</label>
+        {$stateselect}
+    </div>
 </div>
 <div class="col-md-4">
-    <h4>Limit by Report Type</h4>
-    {$typeselect}
+    <div class="mb-3">
+        <label for="type" class="form-label">Limit by Report Type</label>
+        {$typeselect}
+    </div>
 </div>
 </div><!-- ./row -->
 
@@ -163,15 +176,19 @@ between these times selected below will be included in the output GIS file...)</
     </tbody>
 </table>
 
-<p><strong>Download Format:</strong>
-<select name="fmt">
+<div class="mb-3">
+<label for="fmt" class="form-label"><strong>Download Format:</strong></label>
+<select name="fmt" id="fmt" class="form-select" style="width: auto; display: inline-block;">
   <option value="shp">ESRI Shapefile</option>
   <option value="csv">Comma Delimited (.csv)</option>
   <option value="kml">KML (.kml)</option>
   <option value="excel">Microsoft Excel (.xlsx)</option>
 </select>
+</div>
 
-<p><input type="submit" value="Giveme File Now Please!">
+<div class="mb-3">
+<button type="submit" class="btn btn-primary">Generate File</button>
+</div>
 </form>
 
 <h4>Shapefile DBF schema:</h4>
