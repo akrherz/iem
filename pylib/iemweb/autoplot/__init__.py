@@ -718,7 +718,7 @@ mopts = [
     },
     {
         "id": 106,
-        "label": "Hourly temp distributions on days exceeding temperature",
+        "label": "Hourly variable distributions on days exceeding threshold",
     },
     {
         "id": 202,
