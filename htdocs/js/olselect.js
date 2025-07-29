@@ -56,19 +56,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     map = new ol.Map({
         target: 'map',
-        layers: [new ol.layer.Tile({
-            title: 'OpenStreetMap',
-            visible: true,
-            source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-            title: "Global Imagery",
-            visible: false,
-            source: new ol.source.TileWMS({
-                url: 'http://maps.opengeo.org/geowebcache/service/wms',
-                params: { LAYERS: 'bluemarble', VERSION: '1.1.1' }
-            })
-        }),
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    attributions: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                })
+            }),
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+                    attributions: 'Tiles © Esri'
+                }),
+                opacity: 0.8,
+                zIndex: 1000
+            }),
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+                    attributions: 'Tiles © Esri'
+                }),
+                opacity: 0.7,
+                zIndex: 1001
+            }),
             vectorLayer
         ],
         view: new ol.View({

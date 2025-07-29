@@ -114,15 +114,27 @@
             target: element,
             layers: [
                 new ol.layer.Tile({
-                    title: 'Global Imagery',
                     source: new ol.source.XYZ({
+                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                         attributions:
-                            'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/' +
-                            'rest/services/World_Imagery/MapServer">ArcGIS</a>',
-                        url:
-                            'https://server.arcgisonline.com/ArcGIS/rest/services/' +
-                            'World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                            'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
                     }),
+                }),
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+                        attributions: 'Tiles © Esri',
+                    }),
+                    opacity: 0.8,
+                    zIndex: 1000,
+                }),
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+                        attributions: 'Tiles © Esri',
+                    }),
+                    opacity: 0.7,
+                    zIndex: 1001,
                 }),
                 vectorLayer,
             ],
