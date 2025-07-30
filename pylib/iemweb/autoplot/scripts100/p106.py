@@ -147,8 +147,8 @@ def plotter(ctx: dict):
         SELECT valid at time zone :tzname + '10 minutes'::interval, {hourlyvar}
         from alldata a, events e where
         a.station = :station and
-        (date(a.valid at time zone :tzname) = e.date) and
-        report_type = 3 and {hourlyvar} is not null
+    (date((a.valid + '10 minutes'::interval) at time zone :tzname) = e.date)
+        and report_type = 3 and {hourlyvar} is not null
         """,
                 dailyvar=dailyvar,
                 mydir=">=" if dailydir == "above" else "<",
