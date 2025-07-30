@@ -74,7 +74,7 @@ def cleanup():
 
 def is_realtime(gts):
     """Is this timestamp a realtime product"""
-    utcnow = datetime.utcnow()
+    utcnow = datetime.now(timezone.utc)
     return utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H")
 
 

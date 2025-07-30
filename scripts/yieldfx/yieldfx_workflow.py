@@ -11,7 +11,7 @@
 import os
 import subprocess
 import tempfile
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from io import StringIO
 
 import click
@@ -55,7 +55,7 @@ def write_and_upload(df, location):
             sio.write(line.strip() + "\r\n")
     sio.write(
         ("! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n")
-        % (datetime.utcnow().isoformat(),)
+        % (datetime.now(timezone.utc).isoformat(),)
     )
     fmt = (
         "%-10s%-10s%-10s%-10s%-10s%-10s"

@@ -6,7 +6,7 @@ Called from RUN_40_AFTER.sh
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from zoneinfo import ZoneInfo
 
@@ -72,10 +72,7 @@ def run(mcursor, model, station, lon, lat, ts):
 
     host = (
         BASE_URL
-        if (
-            datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")) - ts
-        ).total_seconds()
-        < 86400
+        if (datetime.now(timezone.utc) - ts).total_seconds() < 86400
         else BASE_URL2
     )
     url = (
@@ -181,7 +178,7 @@ def check_and_run(mcursor, model, runtime):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """Do Something"""
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = valid.replace(tzinfo=timezone.utc)
     pgconn = get_dbconn("mos")
     mcursor = pgconn.cursor()
 
