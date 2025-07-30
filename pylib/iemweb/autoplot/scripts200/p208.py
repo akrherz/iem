@@ -139,7 +139,7 @@ def plotter(ctx: dict):
             params=params,
             index_col="ugc",
             geom_col="simple_geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("VTEC Event was not found, sorry.")
     if ctx["opt"] == "expand":
@@ -167,7 +167,7 @@ def plotter(ctx: dict):
                 },
                 index_col="ugc",
                 geom_col="simple_geom",
-            )
+            )  # type: ignore
     elif ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
@@ -187,7 +187,7 @@ def plotter(ctx: dict):
                 params=params,
                 index_col="ugc",
                 geom_col="simple_geom",
-            )
+            )  # type: ignore
     if df.empty:
         raise NoDataFound("VTEC Event was not found, sorry.")
     with get_sqlalchemy_conn("postgis") as conn:
@@ -203,7 +203,7 @@ def plotter(ctx: dict):
             conn,
             params=params,
             geom_col="geom",
-        )
+        )  # type: ignore
     if not sbwdf.empty and ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
@@ -226,7 +226,7 @@ def plotter(ctx: dict):
                     "issue": df["issue"].min(),
                 },
                 geom_col="geom",
-            )
+            )  # type: ignore
     elif not sbwdf.empty and ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
@@ -242,7 +242,7 @@ def plotter(ctx: dict):
                 conn,
                 params=params,
                 geom_col="geom",
-            )
+            )  # type: ignore
 
     if utcvalid is None:
         utcvalid = df["issue"].max()
@@ -268,6 +268,9 @@ def plotter(ctx: dict):
     else:
         df2 = df[~df["wfo"].isin(["AJK", "AFC", "AFG", "HFO", "JSJ"])]
         bounds = df2["simple_geom"].total_bounds
+    # Check for dateline wrapping
+    if (bounds[2] - bounds[0]) > 180:
+        bounds = [-177, 32, -110, 72]
     buffer = 0.4
     _pds = " (PDS) " if True in df["is_pds"].values else ""
     lbl = vtec.get_ps_string(p1, s1)
