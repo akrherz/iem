@@ -5,9 +5,9 @@ import re
 from datetime import date
 from io import BytesIO
 
+from matplotlib.figure import Figure
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.plot.use_agg import plt
 from pyiem.webutil import iemapp
 
 from iemweb import error_log
@@ -76,7 +76,8 @@ def application(environ, start_response):
     # Option 3, we have no file.
     if not os.path.isfile(fn):
         headers.append(get_content_type("png"))
-        (_, ax) = plt.subplots(1, 1)
+        fig = Figure()
+        ax = fig.add_subplot(1, 1, 1)
         ax.text(
             0.5,
             0.5,
@@ -84,10 +85,9 @@ def application(environ, start_response):
             transform=ax.transAxes,
             ha="center",
         )
-        plt.axis("off")
+        ax.axis("off")
         ram = BytesIO()
-        plt.savefig(ram, format="png")
-        plt.close()
+        fig.savefig(ram, format="png")
         ram.seek(0)
         start_response("404 Not Found", headers)
         return [ram.read()]

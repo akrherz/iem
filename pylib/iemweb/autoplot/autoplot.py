@@ -10,6 +10,7 @@ from datetime import timezone
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
+import matplotlib as mpl
 import numpy as np
 import pandas as pd
 import rasterio
@@ -21,7 +22,6 @@ from pyiem.exceptions import (
     NoDataFound,
     UnknownStationException,
 )
-from pyiem.plot.use_agg import plt
 from pyiem.reference import ISO8601
 from pyiem.util import get_autoplot_context, utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
@@ -112,16 +112,16 @@ def get_response_headers(status, fmt):
 
 def error_image(message, fmt):
     """Create an error image"""
-    plt.close()
-    _, ax = plt.subplots(1, 1)
+    fig = mpl.figure.Figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
     cleantext = str(message).replace("\t", "")
     msg = f"IEM Autoplot generation resulted in an error\n{cleantext}"
     ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha="center", va="center")
+    ax.axis("off")
     ram = BytesIO()
-    plt.axis("off")
-    plt.savefig(ram, format=fmt, dpi=100)
+    fig.savefig(ram, format=fmt, dpi=100)
     ram.seek(0)
-    plt.close()
+    fig.clear()
     return ram.read()
 
 
@@ -282,13 +282,13 @@ def workflow(mc, environ, fmt):
     elif fmt in ["js", "geojson", "geotiff"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"]:
-        if isinstance(mixedobj, plt.Figure):
+        if isinstance(mixedobj, mpl.figure.Figure):
             # if our content is a figure, then add some fancy metadata to plot
             if meta.get("plotmetadata", True):
                 plot_metadata(mixedobj, start_time, scriptnum)
             ram = BytesIO()
-            plt.savefig(ram, format=fmt, dpi=fdict["dpi"])
-            plt.close()
+            mixedobj.savefig(ram, format=fmt, dpi=fdict["dpi"])
+            mixedobj.clear()
             ram.seek(0)
             content = ram.read()
         elif isinstance(mixedobj, Image.Image):
@@ -376,8 +376,8 @@ def workflow(mc, environ, fmt):
         raise BadWebRequest("Memcache key is non-ASCII") from exp
     except Exception as exp:
         error_log(environ, f"Exception while writting key: {mckey} {exp}")
-    if isinstance(mixedobj, plt.Figure):
-        plt.close()
+    if isinstance(mixedobj, mpl.figure.Figure):
+        mixedobj.clear()
     syslog.syslog(
         syslog.LOG_LOCAL1 | syslog.LOG_INFO,
         f"Autoplot[{scriptnum:3.0f}] "

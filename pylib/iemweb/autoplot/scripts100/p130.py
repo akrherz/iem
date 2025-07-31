@@ -11,10 +11,10 @@ import calendar
 
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 
 from iemweb.autoplot import ARG_STATION
 
@@ -126,8 +126,8 @@ def plotter(ctx: dict):
         ax[i].axhline(32, ls="--", color="purple", alpha=0.8, lw=0.5)
         ax[i].text(len(months) - 0.3, 32, r"32$^\circ$", color="purple")
 
-    pr0 = plt.Rectangle((0, 0), 1, 1, fc="r")
-    pr1 = plt.Rectangle((0, 0), 1, 1, fc="b")
+    pr0 = Rectangle((0, 0), 1, 1, fc="r")
+    pr1 = Rectangle((0, 0), 1, 1, fc="b")
     ax[0].legend(
         (pr0, pr1),
         ("Without Snow Cover", "With Snow Cover"),

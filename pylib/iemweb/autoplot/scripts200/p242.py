@@ -10,13 +10,13 @@ from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
+from matplotlib.image import imread
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS
-from pyiem.plot.use_agg import plt
 from pyiem.reference import Z_OVERLAY2
 
 ICONS = {
@@ -80,7 +80,7 @@ def get_description():
 def get_image(filename):
     """Get an image"""
     fn = f"/opt/iem/htdocs/lsr/icons/{filename}"
-    return OffsetImage(plt.imread(fn, format=filename[-3:]), zoom=0.7)
+    return OffsetImage(imread(fn, format=filename[-3:]), zoom=0.7)
 
 
 def overlay_info(fig, df: gpd.GeoDataFrame):

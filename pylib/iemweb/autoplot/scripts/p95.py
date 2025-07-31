@@ -13,10 +13,10 @@ from datetime import date
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from matplotlib.cm import ScalarMappable
 from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.plot.use_agg import plt
 from scipy import stats
 
 PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
@@ -175,7 +175,7 @@ def plotter(ctx: dict):
     ax.axhline(np.average(ys), lw=2, color="k", linestyle="-.", zorder=2)
     ax.axvline(np.average(xs), lw=2, color="k", linestyle="-.", zorder=2)
 
-    sm = plt.cm.ScalarMappable(norm, cmap)
+    sm = ScalarMappable(norm, cmap)
     sm.set_array(zdata)
     cb = fig.colorbar(sm, extend="both", ax=ax)
     cb.set_label("<-- El Nino :: SOI :: La Nina -->")

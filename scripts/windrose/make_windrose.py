@@ -7,7 +7,6 @@ from calendar import month_abbr
 
 import click
 from pyiem.network import Table as NetworkTable
-from pyiem.plot.use_agg import plt
 from pyiem.windrose_utils import windrose
 
 CACHE_DIR = "/mesonet/share/windrose"
@@ -41,7 +40,6 @@ def main(network, station):
         tzname=nt.sts[station]["tzname"],
     )
     res.savefig(fn)
-    plt.close()
     for month in range(1, 13):
         fn = f"{mydir}/{station}_{month_abbr[month].lower()}.png"
         res = windrose(
@@ -54,7 +52,6 @@ def main(network, station):
             tzname=nt.sts[station]["tzname"],
         )
         res.savefig(fn)
-        plt.close()
 
 
 if __name__ == "__main__":
