@@ -43,10 +43,11 @@ def save_other(data):
 
 def main():
     """Go Main Go."""
-    # http://10.26.117.91/json?live=false
     with httpx.Client() as client:
         try:
-            req = client.get("http://10.26.117.91/json?live=false", timeout=15)
+            req = client.get(
+                "http://airqual.geol.iastate.edu/json?live=false", timeout=30
+            )
         except Exception as exp:
             print(exp)
             return
