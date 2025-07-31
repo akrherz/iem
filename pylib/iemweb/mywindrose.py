@@ -29,11 +29,11 @@ from datetime import timedelta
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
+from matplotlib.figure import Figure
 from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.plot.use_agg import plt
 from pyiem.webutil import CGIModel, iemapp
 from pyiem.windrose_utils import windrose
 
@@ -151,7 +151,8 @@ def send_error(form, msg, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return msg.encode("ascii")
 
-    fig, ax = plt.subplots(1, 1)
+    fig = Figure()
+    ax = fig.add_subplot(1, 1, 1)
     ax.text(0.5, 0.5, msg, ha="center")
     start_response("200 OK", [("Content-type", ct)])
     bio = BytesIO()

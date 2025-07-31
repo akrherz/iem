@@ -14,7 +14,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
@@ -227,7 +226,7 @@ def plotter(ctx: dict):
     ax.set_xlabel("Wind Speed [mph]", fontsize=14)
     ax.set_ylabel("Hail Size [inch]", fontsize=14)
     ax.xaxis.set_label_position("top")
-    plt.tick_params(top=False, bottom=False, left=False, right=False)
+    ax.tick_params(top=False, bottom=False, left=False, right=False)
     fig.suptitle(
         f"{PDICT2[ctx['p']]} of NWS Wind/Hail Tags for Svr Tstorm Warn "
         f"{PDICT3[ctx['agg']]}\n"

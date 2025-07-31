@@ -23,13 +23,13 @@ from datetime import date, timedelta
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from matplotlib.artist import setp
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure, get_cmap
-from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
@@ -287,10 +287,10 @@ def plotter(ctx: dict):
         align="center",
     )
     ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
-    plt.setp(ax.get_yticklabels(), visible=False)
+    setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Events")
-    xloc = plt.MaxNLocator(3)
+    xloc = MaxNLocator(3)
     ax.xaxis.set_major_locator(xloc)
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -299,10 +299,10 @@ def plotter(ctx: dict):
     gdf = df[["vtec_year", "count"]].groupby("vtec_year").count()
     ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
     ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
-    plt.setp(ax.get_yticklabels(), visible=False)
+    setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Dates")
-    xloc = plt.MaxNLocator(3)
+    xloc = MaxNLocator(3)
     ax.xaxis.set_major_locator(xloc)
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 

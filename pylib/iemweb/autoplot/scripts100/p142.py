@@ -20,7 +20,6 @@ from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.plot.use_agg import plt
 from pyiem.util import LOG
 
 from iemweb import error_log
@@ -98,14 +97,13 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     axis.text(
         0.0, 1.03, "Drought Category Underlain", transform=axis.transAxes
     )
-    legend = plt.legend(
+    axis.legend(
         rects,
         [f"D{cat}" for cat in range(5)],
         ncol=5,
         fontsize=11,
         loc=(0.3, 1.01),
     )
-    axis.add_artist(legend)
     uri = (
         "http://mesonet.agron.iastate.edu/"
         f"api/1/usdm_bypoint.json?sdate={sts:%Y-%m-%d}&edate={ets:%Y-%m-%d}"
@@ -284,8 +282,7 @@ def plotter(ctx: dict):
         )
     )
     ax.grid(True)
-    legend = plt.legend(handles=[l1, l2, l3], ncol=3, fontsize=12, loc="best")
-    ax.add_artist(legend)
+    ax.legend(handles=[l1, l2, l3], ncol=3, fontsize=12, loc="best")
     ax.text(
         1,
         -0.14,

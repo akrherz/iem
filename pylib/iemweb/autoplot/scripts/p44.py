@@ -30,12 +30,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -170,7 +170,7 @@ def make_barplot(ctx, df):
             ha="center",
         )
     ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)
-    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_ylim(top=top)
     plot_common(ctx, ax)
     return fig, df2

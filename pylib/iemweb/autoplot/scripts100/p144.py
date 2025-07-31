@@ -7,11 +7,11 @@ subsequent periods below 50 degrees for that year.
 """
 
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
-from pyiem.plot.use_agg import plt
 from pyiem.util import convert_value, utc
 
 XREF = {
@@ -214,9 +214,9 @@ def plotter(ctx: dict):
 
     ax.set_ylim(df["yr"].min() - 1, df2["yr"].max() + 1)
 
-    p0 = plt.Rectangle((0, 0), 1, 1, fc="r")
-    p1 = plt.Rectangle((0, 0), 1, 1, fc="lightblue")
-    p2 = plt.Rectangle((0, 0), 1, 1, fc="b")
+    p0 = Rectangle((0, 0), 1, 1, fc="r")
+    p1 = Rectangle((0, 0), 1, 1, fc="lightblue")
+    p2 = Rectangle((0, 0), 1, 1, fc="b")
     ax.legend(
         (p0, p1, p2),
         (

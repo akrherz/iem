@@ -24,12 +24,12 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
+from matplotlib.artist import setp
 from matplotlib.ticker import MaxNLocator
 from pyiem import reference
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 
 from iemweb.autoplot import ARG_FEMA, get_monofont
 
@@ -360,7 +360,7 @@ def plotter(ctx: dict):
             fontproperties=monofont,
         )
     ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
-    plt.setp(ax.get_yticklabels(), visible=False)
+    setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Days")
     ax.xaxis.set_major_locator(MaxNLocator(3, integer=True))

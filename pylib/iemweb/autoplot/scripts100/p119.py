@@ -25,8 +25,7 @@ import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes, get_cmap
 
 from iemweb.autoplot import ARG_STATION
 
@@ -224,7 +223,7 @@ def plotter(ctx: dict):
     celltext = [[""] * 4 for _ in range(11)]
     cellcolors = [["white"] * 4 for _ in range(11)]
     # create 12 jet colors to use to color the cells by month of the year
-    colors = plt.cm.jet(np.arange(12) / 12.0)
+    colors = get_cmap("jet")(np.arange(12) / 12.0)
     # set the alpha to 0.5
     colors[:, -1] = 0.5
 

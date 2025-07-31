@@ -10,11 +10,11 @@ from zoneinfo import ZoneInfo
 import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
+from matplotlib.artist import setp
 from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 from pyiem.util import utc
 
 PDICT = {
@@ -201,7 +201,7 @@ def plotter(ctx: dict):
     )
     if not df2.empty:
         ax.set_ylim(bottom=df["dwpf"].min() - 3)
-    plt.setp(ax.get_xticklabels(), visible=True)
+    setp(ax.get_xticklabels(), visible=True)
     date_ticker(ax, ZoneInfo(tzname))
     ax.set_xlim(xmin, xmax)
     ax.legend(loc="best", ncol=2)

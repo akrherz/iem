@@ -26,10 +26,10 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION, get_monofont
@@ -302,8 +302,8 @@ def plotter(ctx: dict):
     for lbl in ["cmins", "cmeans", "cmaxes"]:
         v1[lbl].set_color("b")
 
-    pr0 = plt.Rectangle((0, 0), 1, 1, fc="r")
-    pr1 = plt.Rectangle((0, 0), 1, 1, fc="b")
+    pr0 = Rectangle((0, 0), 1, 1, fc="r")
+    pr1 = Rectangle((0, 0), 1, 1, fc="b")
     ax.legend(
         (pr0, pr1),
         (

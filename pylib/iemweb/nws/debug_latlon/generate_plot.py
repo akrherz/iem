@@ -25,11 +25,10 @@ import tempfile
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
-from matplotlib.figure import Figure
 from pydantic import Field
 from pyiem.nws.product import str2polygon
 from pyiem.plot import fitbox
-from pyiem.plot.use_agg import plt
+from pyiem.plot.use_agg import figure
 from pyiem.reference import ISO8601, TWITTER_RESOLUTION_INCH
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
@@ -42,7 +41,7 @@ class Schema(CGIModel):
     title: str = Field(None, description="Optional title for the plot")
 
 
-def plot_poly(fig: Figure, poly, environ):
+def plot_poly(fig, poly, environ):
     """Add to axes."""
     ax = fig.add_axes((0.15, 0.15, 0.7, 0.7))
     title = environ["title"] if environ["title"] else "No Title Provided"
@@ -92,8 +91,7 @@ def process(environ):
     text = text.replace("LAT...LON", "").replace("\n", " ")
     # Add extra whitespace to account for upstream issues
     poly = str2polygon(text + " \n")
-    plt.close()
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(figsize=TWITTER_RESOLUTION_INCH)
 
     res = {}
     if poly is not None:
@@ -104,7 +102,6 @@ def process(environ):
     with tempfile.NamedTemporaryFile() as tmpfd:
         name = os.path.basename(tmpfd.name)
         fig.savefig(f"/var/webtmp/{name}.png")
-    plt.close()
     res["imgurl"] = f"/tmp/{name}.png"
     return res
 

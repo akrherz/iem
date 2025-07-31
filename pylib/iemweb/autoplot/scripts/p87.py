@@ -15,10 +15,11 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
+from matplotlib.artist import setp
+from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
 
 PDICT = {
     "BLSN": "Blowing Snow (BLSN)",
@@ -162,7 +163,7 @@ def plotter(ctx: dict):
         data, aspect="auto", rasterized=True, interpolation="nearest"
     )
     fig.colorbar(res, cax=cax)
-    xloc = plt.MaxNLocator(4)
+    xloc = MaxNLocator(4)
     cax.yaxis.set_major_locator(xloc)
     cax.set_ylabel("Count")
     ax.set_ylim(-0.5, 23.5)
@@ -196,11 +197,11 @@ def plotter(ctx: dict):
         lax.set_xlim(-0.5, 365.5)
         lax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
         lax.set_xticklabels(calendar.month_abbr[1:])
-    plt.setp(ax.get_xticklabels(), visible=False)
+    setp(ax.get_xticklabels(), visible=False)
 
     # Bottom grid
     lax.grid(True)
-    yloc = plt.MaxNLocator(3)
+    yloc = MaxNLocator(3)
     lax.yaxis.set_major_locator(yloc)
     lax.yaxis.get_major_ticks()[-1].label1.set_visible(False)
 
@@ -209,7 +210,7 @@ def plotter(ctx: dict):
     rax.barh(np.arange(0, 24) - 0.4, np.ma.sum(data, 1), facecolor="tan")
     rax.set_ylim(-0.5, 23.5)
     rax.set_yticks([])
-    xloc = plt.MaxNLocator(3)
+    xloc = MaxNLocator(3)
     rax.xaxis.set_major_locator(xloc)
     rax.xaxis.get_major_ticks()[0].label1.set_visible(False)
     rax.grid(True)

@@ -10,10 +10,10 @@ temperature for that date are omitted.
 from datetime import date, timedelta
 
 import pandas as pd
+from matplotlib.artist import setp
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.plot.use_agg import plt
 
 MDICT = {
     "high": "High Temperature",
@@ -127,7 +127,7 @@ def plotter(ctx: dict):
     ticks = [-100, -90, -75, -50, -25, -10, 0, 10, 25, 50, 75, 90, 100]
     ax.set_xticks(ticks)
     ax.set_xticklabels([abs(x) for x in ticks])
-    plt.setp(ax.get_xticklabels(), rotation=30)
+    setp(ax.get_xticklabels(), rotation=30)
     ax.set_position([0.1, 0.15, 0.85, 0.75])
 
     return fig, df
