@@ -92,10 +92,10 @@ def plotter(ctx: dict):
     ) as gribfn:
         if gribfn is None:
             raise NoDataFound(f"gribfn {gribfn} missing")
-        grbs = pygrib.open(gribfn)
-        grb = grbs[1]
-        precip = mm2inch(grb.values)
-        lats, lons = grb.latlons()
+        with pygrib.open(gribfn) as grbs:
+            grb = grbs[1]
+            lats, lons = grb.latlons()
+            precip = mm2inch(grb.values)
 
     title = (
         f"Weather Prediction Center {PDICT[period]} "

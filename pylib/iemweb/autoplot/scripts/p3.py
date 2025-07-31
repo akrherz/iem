@@ -165,15 +165,15 @@ Highcharts.chart('{containername}', {{
         tooltip: {{
             valueDecimals: 2
         }},
-        data: {ctx["data"].tolist()},
+        data: {ctx["data"]},
         threshold: null
         }}, {{
         tooltip: {{valueDecimals: 2}},
         name: '30 Year Trailing Avg',
     pointStart: {ctx["df"].index.min() + (3 if ctx["decadal"] else 30)},
-        pointInterval: {ptinterval},
-            width: 2,
-        data: {ctx["tavg"][(3 if ctx["decadal"] else 30) :]}
+    pointInterval: {ptinterval},
+    width: 2,
+    data: {ctx["tavg"][(3 if ctx["decadal"] else 30) :]}
         }},{{
             tooltip: {{
                 valueDecimals: 2
@@ -183,7 +183,7 @@ Highcharts.chart('{containername}', {{
             pointPadding: 0.1,
             pointStart: {ctx["df"].index.min()},
             pointInterval: {ptinterval},
-            data: {[ctx["avgv"]] * len(ctx["df"].index)}
+            data: {[float(x) for x in [ctx["avgv"]] * len(ctx["df"].index)]}
         }}]
 }});
     """
@@ -328,17 +328,17 @@ def add_ctx(ctx):
         xlabel += f", Min: {df[ptype].min():.2f} {df2.index.values[0]}{xx}"
     ctx["xlabel"] = xlabel
     data = df[ptype].values
-    ctx["data"] = data
+    ctx["data"] = data.tolist()
     ctx["avgv"] = df[ptype].mean()
     ctx["df"] = df
     # Compute 30 year trailing average
     tavg = [None] * 30
     for i in range(30, len(data)):
-        tavg.append(np.average(data[i - 30 : i]))
+        tavg.append(float(np.average(data[i - 30 : i])))
     if ctx["decadal"]:
         tavg = [None] * 3
         for i in range(3, len(data)):
-            tavg.append(np.average(data[i - 3 : i]))
+            tavg.append(float(np.average(data[i - 3 : i])))
 
     ctx["tavg"] = tavg
     # End interval is inclusive
