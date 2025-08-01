@@ -251,7 +251,7 @@ Highcharts.chart('"""
         zIndex: 5,
         shadow: true,
         data: """
-        + str(ctx["y2"][::-1])
+        + str([int(x) for x in ctx["y2"][::-1]])
         + """,
         yAxis: 1
     },{
@@ -263,7 +263,7 @@ Highcharts.chart('"""
         pointInterval: 24 * 3600 * 1000, // one day
         zIndex: 3,
         data: """
-        + str(ctx["totals"][::-1])
+        + str([float(x) for x in ctx["totals"][::-1]])
         + """
     },{
         name: 'Average',
@@ -274,7 +274,7 @@ Highcharts.chart('"""
         pointInterval: 24 * 3600 * 1000, // one day
         zIndex: 4,
         data: """
-        + str(ctx["avgs"][::-1])
+        + str([float(x) for x in ctx["avgs"][::-1]])
         + """
     }, {
         name: 'Maximum',
@@ -285,7 +285,7 @@ Highcharts.chart('"""
         + """,
         pointInterval: 24 * 3600 * 1000, // one day
         data: """
-        + str(ctx["maxes"][::-1])
+        + str([float(x) for x in ctx["maxes"][::-1]])
         + """
     }],
     xAxis: {

@@ -43,6 +43,9 @@ def test_autoplot_calls_via_frontend(entry: dict):
         fmts.append("geotiff")
     for fmt in fmts:
         c = Client(autoplot_app)
-        res = c.get(f"?p={entry['id']}&fmt={fmt}")
+        res = c.get(f"?p={entry['id']}&fmt={fmt}&cb=1")
+        # Crude check that numpy arrays are not being str rendered
+        if fmt == "js":
+            assert res.text.find("np.") == -1
         # 400 is Rumsfeld's knowns
         assert res.status_code in [200, 400]
