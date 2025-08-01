@@ -76,7 +76,7 @@ def get_highcharts(ctx: dict) -> str:
         data: """
             + str(
                 [
-                    list(a)
+                    [float(a[0]), float(a[1])]
                     for a in zip(
                         ctx["lines"]["season"]["x"],
                         ctx["lines"]["season"]["y"],
@@ -88,40 +88,32 @@ def get_highcharts(ctx: dict) -> str:
 
         },"""
         )
-    d25 = str(
-        [
-            list(a)
-            for a in zip(
-                ctx["lines"]["25%"]["x"], ctx["lines"]["25%"]["y"], strict=True
-            )
-        ]
-    )
-    dmean = str(
-        [
-            list(a)
-            for a in zip(
-                ctx["lines"]["mean"]["x"],
-                ctx["lines"]["mean"]["y"],
-                strict=True,
-            )
-        ]
-    )
-    d75 = str(
-        [
-            list(a)
-            for a in zip(
-                ctx["lines"]["75%"]["x"], ctx["lines"]["75%"]["y"], strict=True
-            )
-        ]
-    )
-    dmax = str(
-        [
-            list(a)
-            for a in zip(
-                ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"], strict=True
-            )
-        ]
-    )
+    d25 = [
+        [float(a[0]), float(a[1])]
+        for a in zip(
+            ctx["lines"]["25%"]["x"], ctx["lines"]["25%"]["y"], strict=True
+        )
+    ]
+    dmean = [
+        [float(a[0]), float(a[1])]
+        for a in zip(
+            ctx["lines"]["mean"]["x"],
+            ctx["lines"]["mean"]["y"],
+            strict=True,
+        )
+    ]
+    d75 = [
+        [float(a[0]), float(a[1])]
+        for a in zip(
+            ctx["lines"]["75%"]["x"], ctx["lines"]["75%"]["y"], strict=True
+        )
+    ]
+    dmax = [
+        [float(a[0]), float(a[1])]
+        for a in zip(
+            ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"], strict=True
+        )
+    ]
     containername = ctx["_e"]
     res = (
         """
@@ -158,7 +150,7 @@ Highcharts.chart('"""
         + """'
         },
         data: """
-        + d25
+        + str(d25)
         + """
         },{
         name: 'Avg',
@@ -170,7 +162,7 @@ Highcharts.chart('"""
         + """'
         },
         data: """
-        + dmean
+        + str(dmean)
         + """
         },{
         name: '75%',
@@ -182,7 +174,7 @@ Highcharts.chart('"""
         + """'
         },
         data: """
-        + d75
+        + str(d75)
         + """
         },{
         name: 'Max',
@@ -194,7 +186,7 @@ Highcharts.chart('"""
         + """'
         },
         data: """
-        + dmax
+        + str(dmax)
         + """
         }]
 });
