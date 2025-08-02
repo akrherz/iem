@@ -32,6 +32,7 @@
 /plotting/auto/plot/24/which:st::csector:midwest::var:aridity::w:dep::p:day::year:2024::month:1::sdate:2022-12-15::edate:2023-01-15::cmap:BrBG_r::_r:43::dpi:100.png
 /plotting/auto/plot/27/network:IACLIMATE::station:IATAME::t1:-55::t2:-60::_r:43::dpi:100.png
 /plotting/auto/plot/28/network:IACLIMATE::station:IATAME::opt:rank::date:2024-07-26::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/30/network:IACLIMATE::station:IATAME::opt:yearly::month:8::year:2020::eyear:2025::_r:96::dpi:100.png
 /plotting/auto/plot/31/network:IACLIMATE::station:IATAME::syear:1893::eyear:2024::month:gs::how:three::var:low::days:4::stat:avg::thres:70::mdays:2::mstat:avg::fdays:4::fstat:avg::agg:month::_r:43::dpi:100.png
 /plotting/auto/plot/31/network:IACLIMATE::station:IATAME::syear:1893::eyear:2024::month:fall::how:two::var:high::days:1::stat:max::mdays:4::mstat:max::fdays:4::fstat:max::agg:year::_r:43::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:sigma::cmap:jet::_r:t::dpi:100.png
@@ -68,6 +69,7 @@
 /plotting/auto/plot/59/network:IA_ASOS::station:CSQ::units:mph::_r:t::dpi:100.png
 /plotting/auto/plot/60/network:IA_ASOS::zstation:DSM::var:tmpf::w:freq::threshold:120::direction:above::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
+/plotting/auto/plot/61/var:precip::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
 /plotting/auto/plot/69/network:IACLIMATE::station:IA0000::var:high::which:above::unit:degrees::mag:0::month:winter::opt:percent::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:wfo::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jul1::f:none::cmap:jet::_r:t::dpi:100.png
@@ -84,6 +86,7 @@
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:TSA::state:IA::ugc:IAC169::limit:udf::sday:0104::eday:0104::phenomena:SV::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/75/network:IACLIMATE::station:IA0200::season:all::year:2025::_r:t::dpi:100.png
 /plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:winter::varname:dwpf::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
+/plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:spring::varname:dwpf::agg:max::year:1980::w:violin::hours:14-24::_r:t::dpi:100.png
 /plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:water_year::varname:vpd::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
 /plotting/auto/plot/78/network:IA_ASOS::zstation:DSM::month:winter::date:2024-08-01::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
@@ -146,6 +149,7 @@
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf::ytd:custom::sday:0601::eday:0720::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf::ytd:custom::sday:0720::eday:0601::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DEH::syear:1973::eyear:1993::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
+/plotting/auto/plot/96/network:IA_ASOS::zstation:BNW::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2024-01-01::usdm:no::date2:2024-09-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2023-10-01::usdm:no::date2:2024-04-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:avg_temp::bins:50%2055%2060%2065%2070%2075%2080%2085%2090%2095%20100::gddbase:55::gddceil:86::date1:2024-05-01::usdm:no::date2:2024-09-30::p:contour::cmap:RdYlBu_r::c:no::ct:ncei_climate91::_r:88::dpi:100.png

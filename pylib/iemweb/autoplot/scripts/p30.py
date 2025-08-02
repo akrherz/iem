@@ -10,9 +10,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -78,40 +79,44 @@ def plot_trailing(ax, df, colname):
     )
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
     station = ctx["station"]
     month = ctx["month"]
     year = ctx["year"]
+    params = {
+        "station": station,
+        "month": month,
+        "eyear": ctx["eyear"],
+    }
 
     if ctx["opt"] == "monthly":
-        with get_sqlalchemy_conn("coop") as conn:
-            df = pd.read_sql(
-                """
-            SELECT year,  max(high) as max_high,  min(low) as min_low
-            from alldata where station = %s and month = %s and
-            high is not null and low is not null
-            and year <= %s GROUP by year
-            ORDER by year ASC
-            """,
-                conn,
-                params=(station, month, ctx["eyear"]),
-                index_col="year",
-            )
+        df = pd.read_sql(
+            sql_helper("""
+        SELECT year,  max(high) as max_high,  min(low) as min_low
+        from alldata where station = :station and month = :month and
+        high is not null and low is not null
+        and year <= :eyear GROUP by year
+        ORDER by year ASC
+        """),
+            conn,
+            params=params,
+            index_col="year",
+        )
     else:
-        with get_sqlalchemy_conn("coop") as conn:
-            df = pd.read_sql(
-                """
-            SELECT year,  max(high) as max_high,  min(low) as min_low
-            from alldata where station = %s and
-            high is not null and low is not null
-            and year <= %s GROUP by year
-            ORDER by year ASC
-            """,
-                conn,
-                params=(station, ctx["eyear"]),
-                index_col="year",
-            )
+        df = pd.read_sql(
+            sql_helper("""
+        SELECT year,  max(high) as max_high,  min(low) as min_low
+        from alldata where station = :station and
+        high is not null and low is not null
+        and year <= :eyear GROUP by year
+        ORDER by year ASC
+        """),
+            conn,
+            params=params,
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["rng"] = df["max_high"] - df["min_low"]

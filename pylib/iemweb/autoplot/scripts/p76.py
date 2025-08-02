@@ -125,7 +125,7 @@ def get_description():
             default="0-23",
             label=(
                 "Inclusive Local Hours (24-hour clock) "
-                "to Limit Analysis (optional)"
+                "to Limit Analysis (0 thru 23) (optional)"
             ),
         ),
     ]
@@ -209,12 +209,12 @@ def get_data(ctx, startyear):
     if ctx.get("hours"):
         try:
             tokens = [int(i.strip()) for i in ctx["hours"].split("-")]
-            hours = list(range(tokens[0], tokens[1] + 1))
+            hours = list(range(max(0, tokens[0]), min(23, tokens[1] + 1)))
         except ValueError as exp:
             raise Exception("malformed hour limiter, sorry.") from exp
         ctx["hour_limiter"] = (
-            f"[{utc(2017, 1, 1, tokens[0]):%-I %p}-"
-            f"{utc(2017, 1, 1, tokens[1]):%-I %p}]"
+            f"[{utc(2017, 1, 1, hours[0]):%-I %p}-"
+            f"{utc(2017, 1, 1, hours[-1]):%-I %p}]"
         )
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(

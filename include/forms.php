@@ -264,8 +264,8 @@ function xssafe($data, $encoding = 'UTF-8')
     }
     $res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
     if ($res !== $data) {
-        // 404 this
-        http_response_code(404);
+        // 405, which ends up hitting some iemwebfarm code
+        http_response_code(405);
         die();
     }
 
@@ -280,13 +280,14 @@ function get_str404($name, $default = null, $maxlength = null)
     }
     $val = xssafe($_REQUEST[$name]);
     if ($maxlength !== null && strlen($val) > $maxlength) {
-        http_response_code(404);
+        // passed up to iemwebfarm handler
+        http_response_code(405);
         die();
     }
     return $val;
 }
 
-// Ensure we are getting int values from request or we 404
+// Ensure we are getting int values from request or we 405
 function get_int404($name, $default = null)
 {
     if (!array_key_exists($name, $_REQUEST)) {
@@ -295,7 +296,8 @@ function get_int404($name, $default = null)
     $val = $_REQUEST[$name];
     if ($val != "0" && empty($val)) return $default;
     if (!is_numeric($val)) {
-        http_response_code(404);
+        // passed up to iemwebfarm handler
+        http_response_code(405);
         die();
     }
     return intval($val);

@@ -10,7 +10,7 @@ from datetime import date, timedelta
 
 import geopandas as gpd
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
@@ -82,7 +82,7 @@ def get_data(ctx):
     d180 = today - timedelta(days=180)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         with obs as (
         select station, valid,
         (case when low > low_normal then 1 else 0 end) as low_hit,
@@ -92,24 +92,29 @@ def get_data(ctx):
         where high is not null
         and high_normal is not null and low is not null and
         low_normal is not null and precip is not null
-        and valid > %s and valid <= %s),
+        and valid > :d180 and valid <= :today),
 
         totals as (
         SELECT station,
-        max(case when low_hit = 0 then valid else %s end) as last_low_below,
-        max(case when low_hit = 1 then valid else %s end) as last_low_above,
-        max(case when high_hit = 0 then valid else %s end) as last_high_below,
-        max(case when high_hit = 1 then valid else %s end) as last_high_above,
-        max(case when precip_hit = 0 then valid else %s end) as last_dry,
-        max(case when precip_hit = 1 then valid else %s end) as last_wet,
+        max(case when low_hit = 0 then valid else :d180 end) as last_low_below,
+        max(case when low_hit = 1 then valid else :d180 end) as last_low_above,
+        max(case when high_hit = 0 then valid else :d180 end)
+            as last_high_below,
+        max(case when high_hit = 1 then valid else :d180 end)
+            as last_high_above,
+        max(case when precip_hit = 0 then valid else :d180 end) as last_dry,
+        max(case when precip_hit = 1 then valid else :d180 end) as last_wet,
         count(*) as count from obs GROUP by station)
 
         SELECT station, last_low_below, last_low_above, last_high_below,
         last_high_above, last_dry, last_wet
         from totals where count > 170
-        """,
+        """),
             conn,
-            params=(d180, today, d180, d180, d180, d180, d180, d180),
+            params={
+                "d180": d180,
+                "today": today,
+            },
             index_col="station",
             parse_dates=[
                 "last_dry",
