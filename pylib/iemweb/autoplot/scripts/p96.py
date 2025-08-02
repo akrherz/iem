@@ -12,10 +12,11 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
+from sqlalchemy.engine import Connection
 
 
 def get_description():
@@ -33,20 +34,25 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("iem")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor()
     station = ctx["zstation"]
     ts1973 = utc(1973, 1, 1)
     utcnow = utc()
-    cursor.execute(
-        "SELECT valid at time zone 'UTC', phour from hourly WHERE "
-        "iemid = %s and phour > 0.009 and "
-        "valid >= %s and valid < %s ORDER by valid ASC",
-        (ctx["_nt"].sts[station]["iemid"], ts1973, utcnow),
+    rs = conn.execute(
+        sql_helper("""
+    SELECT valid at time zone 'UTC', phour from hourly WHERE
+    iemid = :iemid and phour > 0.009 and valid >= :sts and valid < :ets
+    ORDER by valid ASC
+    """),
+        {
+            "iemid": ctx["_nt"].sts[station]["iemid"],
+            "sts": ts1973,
+            "ets": utcnow,
+        },
     )
-    if cursor.rowcount == 0:
+    if rs.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
     # Create storage for the data
@@ -55,7 +61,7 @@ def plotter(ctx: dict):
     minvalid = None
     # make ts1973 naive
     ts1973 = ts1973.replace(tzinfo=None)
-    for row in cursor:
+    for row in rs:
         if minvalid is None:
             minvalid = row[0]
         data[(row[0] - ts1973).days * 24 + row[0].hour] = row[1]
