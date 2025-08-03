@@ -51,6 +51,13 @@ def get_description():
             default=date.today().year,
             label="Year to Plot:",
         ),
+        {
+            "type": "year",
+            "optional": True,
+            "name": "y2",
+            "default": date.today().year - 1,
+            "label": "Additional Year to Plot (supported for some plots):",
+        },
         dict(
             type="select",
             name="var",
@@ -126,89 +133,108 @@ def plotter(ctx: dict):
         df[varname] = df["era5land_soilm1m_avg"] * 39.3701
     # Compute the ranks of the daily values by sday
     df["rank"] = df.groupby("sday")[varname].rank(method="min")
-    thisyear = (
-        df[df["year"] == year]
-        .set_index("sday")
-        .copy()
-        .reindex(
-            pd.date_range(f"{year}/1/1", f"{year}/12/31").strftime("%m%d")
-        )
-        .assign(
-            day=lambda _: pd.date_range(f"{year}/1/1", f"{year}/12/31").values
-        )
-    )
-    if thisyear[varname].isna().all():
-        raise NoDataFound("No Data Found.")
-    thisyear.index.name = "MonDay"
-    thisyear[f"{varname}_ptile"] = thisyear["rank"] / df["rank"].max() * 100.0
+    yeardf = {}
     climo = (
         df[["sday", varname]]
         .groupby("sday")
         .agg(["mean", "std", "min", "max"])
     )
     climo.columns = climo.columns.droplevel()
-    thisyear[f"{varname}_mean"] = climo["mean"]
-    thisyear[f"{varname}_min"] = climo["min"]
-    thisyear[f"{varname}_max"] = climo["max"]
-    thisyear[f"{varname}_std"] = climo["std"]
-    thisyear[f"{varname}_range"] = climo["max"] - climo["min"]
-    thisyear[f"{varname}_diff"] = thisyear[varname] - climo["mean"]
-    thisyear[f"{varname}_sigma"] = thisyear[f"{varname}_diff"] / climo["std"]
+    y2 = ctx.get("y2")
+    for yr in [year, y2]:
+        if yr is None:
+            continue
+        yeardf[yr] = (
+            df[df["year"] == yr]
+            .set_index("sday")
+            .copy()
+            .reindex(
+                pd.date_range(f"{year}/1/1", f"{year}/12/31").strftime("%m%d")
+            )
+            .assign(
+                day=lambda _: pd.date_range(
+                    f"{year}/1/1", f"{year}/12/31"
+                ).values
+            )
+        )
+        if yeardf[yr][varname].isna().all():
+            raise NoDataFound("No Data Found.")
+        yeardf[yr].index.name = "MonDay"
+        yeardf[yr][f"{varname}_ptile"] = (
+            yeardf[yr]["rank"] / df["rank"].max() * 100.0
+        )
+        yeardf[yr][f"{varname}_mean"] = climo["mean"]
+        yeardf[yr][f"{varname}_min"] = climo["min"]
+        yeardf[yr][f"{varname}_max"] = climo["max"]
+        yeardf[yr][f"{varname}_std"] = climo["std"]
+        yeardf[yr][f"{varname}_range"] = climo["max"] - climo["min"]
+        yeardf[yr][f"{varname}_diff"] = yeardf[yr][varname] - climo["mean"]
+        yeardf[yr][f"{varname}_sigma"] = (
+            yeardf[yr][f"{varname}_diff"] / climo["std"]
+        )
 
     tt = "Departure" if how != "ptile" else "Percentile"
     if how == "valrange":
         tt = ""
     title = f"{ctx['_sname']}:: Year {year} Daily {PDICT[varname]} {tt}"
-    subtitle = (
-        f"{year} data till "
-        f"{thisyear.loc[thisyear[varname].notna(), 'day'].max():%-d %b %Y}"
-    )
+    d2 = yeardf[year].loc[yeardf[year][varname].notna(), "day"]
+    subtitle = f"{year} data till {d2.max():%-d %b %Y}"
     if varname.startswith("era5land_soilm"):
         slt = ctx["_nt"].sts[station]["attributes"].get("ERA5LAND_SOILTYPE")
         subtitle += f", ERA5-Land Soil Type: {slt}"
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     if how == "valrange":
         ax.bar(
-            thisyear["day"].values,
-            thisyear[f"{varname}_range"].values,
-            bottom=thisyear[f"{varname}_min"].values,
+            yeardf[year]["day"].values,
+            yeardf[year][f"{varname}_range"].values,
+            bottom=yeardf[year][f"{varname}_min"].values,
             color="tan",
             width=1.0,
             label=f"Observed Range {df.iloc[0]['year']}-{df.iloc[-1]['year']}",
         )
         ax.bar(
-            thisyear["day"].values,
-            thisyear[f"{varname}_std"].values * 2.0,
+            yeardf[year]["day"].values,
+            yeardf[year][f"{varname}_std"].values * 2.0,
             bottom=(
-                thisyear[f"{varname}_mean"].values
-                - thisyear[f"{varname}_std"].values
+                yeardf[year][f"{varname}_mean"].values
+                - yeardf[year][f"{varname}_std"].values
             ),
             color="green",
             width=1.0,
             label="+/- 1 Std Dev",
         )
         ax.plot(
-            thisyear["day"].values,
-            thisyear[varname].values,
+            yeardf[year]["day"].values,
+            yeardf[year][varname].values,
             color="k",
             label=str(year),
         )
+        if y2 is not None:
+            ax.plot(
+                yeardf[y2]["day"].values,
+                yeardf[y2][varname].values,
+                color="b",
+                label=str(y2),
+            )
         ax.plot(
-            thisyear["day"].values,
-            thisyear[f"{varname}_mean"].values,
+            yeardf[year]["day"].values,
+            yeardf[year][f"{varname}_mean"].values,
             color="r",
             label="Climatology",
         )
-        ax.legend(loc="best", ncol=4)
+        ax.legend(loc="best", ncol=5)
     else:
-        values = thisyear[f"{varname}_{how}"].values
+        values = yeardf[year][f"{varname}_{how}"].values
         if how == "ptile" and "cmap" in ctx:
             bins = range(0, 101, 10)
             cmap = get_cmap(ctx["cmap"])
             norm = mpcolors.BoundaryNorm(bins, cmap.N)
             colors = cmap(norm(values))
             ax.bar(
-                thisyear["day"].values, values, color=colors, align="center"
+                yeardf[year]["day"].values,
+                values,
+                color=colors,
+                align="center",
             )
             ax.set_yticks(bins)
         else:
@@ -217,17 +243,17 @@ def plotter(ctx: dict):
             if varname.find("soilm") > 0:
                 abovecolor = "b"
                 belowcolor = "r"
-            thisyear["color"] = abovecolor
-            thisyear.loc[values < 0, "color"] = belowcolor
+            yeardf[year]["color"] = abovecolor
+            yeardf[year].loc[values < 0, "color"] = belowcolor
             ax.set_position([0.1, 0.1, 0.7, 0.8])
             ax = barchart_with_top10(
                 fig,
-                thisyear.rename(columns={f"{varname}_{how}": "Diff"}),
+                yeardf[year].rename(columns={f"{varname}_{how}": "Diff"}),
                 "Diff",
                 ax=ax,
-                color=thisyear["color"].values,
+                color=yeardf[year]["color"].values,
             )
-            meanval = thisyear[f"{varname}_mean"].mean()
+            meanval = yeardf[year][f"{varname}_mean"].mean()
             ax.text(
                 0.99,
                 1.01,
@@ -273,4 +299,4 @@ def plotter(ctx: dict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.xaxis.set_major_locator(mdates.DayLocator(1))
 
-    return fig, thisyear
+    return fig, yeardf[year]
