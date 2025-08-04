@@ -4,7 +4,7 @@ Create a variable X hour plot of stage IV estimates
 Called from RUN_STAGE4.sh
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import click
@@ -78,7 +78,7 @@ def do(ts: datetime, hours: int, realtime: bool):
 @click.option("--realtime", is_flag=True, default=False)
 def main(valid: datetime, hours: int, realtime: bool):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = valid.replace(tzinfo=timezone.utc)
     do(valid, hours, realtime)
 
 

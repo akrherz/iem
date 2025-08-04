@@ -4,14 +4,14 @@ Sum up the hourly precipitation from NCEP stage IV and produce maps
 called from RUN_STAGE4.sh
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import click
 import pygrib
 from metpy.units import masked_array, units
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import archive_fetch, logger
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 
@@ -24,13 +24,13 @@ def doday(ts, realtime):
     """
     LOG.info("Running for %s realtime: %s", ts, realtime)
     sts = ts.replace(hour=1)
-    ets = sts + timedelta(hours=24)
+    ets = min(sts + timedelta(hours=24), utc())
     interval = timedelta(hours=1)
     now = sts
     total = None
     lts = None
     while now < ets:
-        gmt = now.astimezone(ZoneInfo("UTC"))
+        gmt = now.astimezone(timezone.utc)
         ppath = gmt.strftime("%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
         with archive_fetch(ppath) as fn:
             if fn is not None:
