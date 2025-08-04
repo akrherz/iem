@@ -88,18 +88,18 @@ function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td></tr>",
             $year,
-            f($data, "{$year}_1", $key, $fmt),
-            f($data, "{$year}_2", $key, $fmt),
-            f($data, "{$year}_3", $key, $fmt),
-            f($data, "{$year}_4", $key, $fmt),
-            f($data, "{$year}_5", $key, $fmt),
-            f($data, "{$year}_6", $key, $fmt),
-            f($data, "{$year}_7", $key, $fmt),
-            f($data, "{$year}_8", $key, $fmt),
-            f($data, "{$year}_9", $key, $fmt),
-            f($data, "{$year}_10", $key, $fmt),
-            f($data, "{$year}_11", $key, $fmt),
-            f($data, "{$year}_12", $key, $fmt)
+            f($data, sprintf("%s_1", $year), $key, $fmt),
+            f($data, sprintf("%s_2", $year), $key, $fmt),
+            f($data, sprintf("%s_3", $year), $key, $fmt),
+            f($data, sprintf("%s_4", $year), $key, $fmt),
+            f($data, sprintf("%s_5", $year), $key, $fmt),
+            f($data, sprintf("%s_6", $year), $key, $fmt),
+            f($data, sprintf("%s_7", $year), $key, $fmt),
+            f($data, sprintf("%s_8", $year), $key, $fmt),
+            f($data, sprintf("%s_9", $year), $key, $fmt),
+            f($data, sprintf("%s_10", $year), $key, $fmt),
+            f($data, sprintf("%s_11", $year), $key, $fmt),
+            f($data, sprintf("%s_12", $year), $key, $fmt)
         );
     }
     if (sizeof($climo) > 0) {
