@@ -312,6 +312,8 @@
 /plotting/auto/plot/183/s:national::state:IA::sdate:2023-01-12::edate:2025-01-01::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/184/network:IACLIMATE::station:IATAME::year:2024::limit:ytd::_r:t::dpi:100.png
 /plotting/auto/plot/185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
+/plotting/auto/plot/185/sector:IA::date:2024-05-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
+/plotting/auto/plot/185/sector:IA::date:2024-06-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.geotiff
 /plotting/auto/plot/191/sdate:2024-01-01::edate:2024-09-12::w:fema::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:TO::significancev1:W::_r:t::dpi:100.png
 /plotting/auto/plot/191/sdate:2024-01-01::edate:2024-06-23::daytz:12z::w:ugc::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:t::dpi:100.png
 /plotting/auto/plot/191/sdate:2023-01-01::edate:2024-06-23::daytz:central::w:state::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:43::dpi:100.png

@@ -77,8 +77,6 @@ def plot1(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         if ctx["qc"].get(station, {}).get("soil4", False):
             continue
         data.append(
@@ -120,8 +118,6 @@ def plot2(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -156,8 +152,6 @@ def plot3(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -188,8 +182,6 @@ def plot4(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -222,8 +214,6 @@ def plot5(ctx, col):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -255,8 +245,6 @@ def plot7(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -286,8 +274,6 @@ def plot8(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],
@@ -322,8 +308,6 @@ def plot9(ctx):
 
     data = []
     for station, row in df.iterrows():
-        if station not in ctx["nt"].sts:
-            continue
         data.append(
             {
                 "lon": ctx["nt"].sts[station]["lon"],

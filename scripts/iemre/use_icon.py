@@ -12,6 +12,7 @@ Called from RUN_40_AFTER.sh
 
 import os
 import subprocess
+import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
@@ -80,9 +81,6 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
     fhour = (valid - model_valid).total_seconds() // 3600
     for var, meta in META.items():
         filename = f"{var}.grib2.bz2"
-        if os.path.exists(filename):
-            LOG.info("File %s already exists, skipping download", filename)
-            continue
         fhour_off = fhour - meta.get("offset", 0)
         url = (
             f"{baseurl}{meta['gname']}/icon_global_icosahedral_single-level_"
@@ -161,8 +159,7 @@ def copy_grib_to_netcdf(valid: datetime, domain: str, fhour: int) -> None:
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), required=True)
-@click.option("--keep", is_flag=True, help="Keep temporary files")
-def main(valid: datetime, keep: bool) -> None:
+def main(valid: datetime) -> None:
     """Main function to process ICON data for IEMRE."""
     valid = valid.replace(tzinfo=timezone.utc)
     # 1. Figure out which ICON model is available for usage
@@ -171,9 +168,6 @@ def main(valid: datetime, keep: bool) -> None:
         LOG.warning("No ICON model data available for %s", valid)
         return
     # 2. Download the necessary files
-    tmpdir = f"/mesonet/tmp/icon{valid:%Y%m%d%H}"
-    os.makedirs(tmpdir, exist_ok=True)
-    os.chdir(tmpdir)
     grib_download(model_valid, valid)
     fhour = (valid - model_valid).total_seconds() // 3600
     # 3. Copy to IEMRE netcdf files
@@ -181,12 +175,9 @@ def main(valid: datetime, keep: bool) -> None:
         if domain == "":
             continue
         copy_grib_to_netcdf(valid, domain, fhour)
-    # 4. Cleanup
-    os.chdir("/mesonet/tmp")
-    if not keep:
-        LOG.info("Cleaning up temporary files in %s", tmpdir)
-        subprocess.run(["rm", "-rf", tmpdir], check=True)
 
 
 if __name__ == "__main__":
-    main()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
+        main()

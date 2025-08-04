@@ -9,7 +9,7 @@ This is tricky as some variables we can compute sooner than others.
 """
 
 import subprocess
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import click
 import numpy as np
@@ -96,6 +96,9 @@ def copy_iemre_hourly(ts: datetime, ds, domain: str):
     )
     sts = sts.replace(hour=1 if sts.dst() else 0)
     ets = sts + timedelta(hours=23)
+    # Logic below needs UTC
+    sts = sts.astimezone(timezone.utc)
+    ets = ets.astimezone(timezone.utc)
     LOG.info("Using %s to %s for %s localday", sts, ets, domain)
     pairs = [(sts, ets)]
     if sts.year != ets.year:

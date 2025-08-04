@@ -68,8 +68,6 @@ def grid_day(nc, ts):
 
 def workflow(ts):
     """our workflow"""
-    # Load up a station table we are interested in
-
     # Load up our netcdf file!
     with ncopen("/mesonet/data/iemre/ifc_dailyc.nc", "a") as nc:
         grid_day(nc, ts)
