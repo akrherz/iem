@@ -184,6 +184,7 @@
 /plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-09-01%202359::var:days::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-09-01%202359::var:count_rank::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-09-01%202359::var:count_standard::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-09-01%202359::var:count_mean::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
@@ -365,6 +366,7 @@
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/211/ptype:windkt::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:both::var:height::level:500::_r:t::dpi:100.png
+/plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:afternoon::var:height::level:500::_r:t::dpi:100.png
 /plotting/auto/plot/215/network:IACLIMATE::station:IATAME::v:avgt::month:mar::sy1:1981::ey1:2010::sy2:1991::ey2:2020::_r:43::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/216/network:IA_ASOS::station:AMW::var:high::dir:below::threshold:32::_r:t::dpi:100.png

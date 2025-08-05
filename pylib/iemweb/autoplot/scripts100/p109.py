@@ -17,8 +17,9 @@ event counts.  The current three available metrics are:<br />
     <li><strong>Departure from Average of Event Count</strong>: The number
     of events that the given period differs from the period of record
     climatology.</li>
-    <li>
-    <strong>Standardized Departure from Average of Event Count</strong>:
+    <li><strong>Mean of Event Count</strong>: The average number of events
+    for the given period.</li>
+    <li><strong>Standardized Departure from Average of Event Count</strong>:
     The departure expressed in sigma units of this periods event total
     vs the period of record climatology.</li>
 </ul></p>
@@ -52,6 +53,7 @@ PDICT = {
     "tpercent": "Percent of Time",
     "count_rank": "Rank of Event Count (1=lowest)",
     "count_departure": "Departure from Average of Event Count",
+    "count_mean": "Mean of Event Count",
     "count_standard": "Standardized Departure from Average of Event Count",
 }
 PDICT2 = {
@@ -285,7 +287,7 @@ def get_count_bins(df, varname):
         return np.arange(1, 10, 1)
     if varname == "count_rank":
         bins = np.arange(1, maxv + 2)
-    elif varname == "count":
+    elif varname in ["count", "count_mean"]:
         bins = [1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
         if maxv > 5000:
             bins = [
@@ -399,7 +401,7 @@ def plotter(ctx: dict):
         bins = get_count_bins(df, varname)
         lformat = "%.0f"
         units = "Count"
-        if varname == "count":
+        if varname in ["count", "count_mean"]:
             extend = "max"
             # Can't do state as events are double counted
             if ctx["by"] == "wfo":
@@ -512,6 +514,9 @@ def plotter(ctx: dict):
         units = "Percent"
         lformat = "%.1f"
 
+    domain = f"{sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M}"
+    if varname == "count_mean":
+        domain = f"{sts:%d %b %H:%M} - {ets:%d %b %H:%M}"
     mp = MapPlot(
         apctx=ctx,
         sector="nws",
@@ -519,7 +524,7 @@ def plotter(ctx: dict):
         nocaption=True,
         title=f"{title} {PDICT[varname]} {PDICT4[ctx['by']]}",
         subtitle=(
-            f"Issued between {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"Issued between {domain} UTC, "
             f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
             f"{subtitle_extra}"
         ),
