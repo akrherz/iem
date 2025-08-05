@@ -22,7 +22,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import mm2inch
 
-PDICT = {"00": "00 UTC", "12": "12 UTC", "both": "00 + 12 UTC"}
+PDICT = {
+    "00": "00 UTC",
+    "12": "12 UTC",
+    "18": "18 UTC",
+    "afternoon": "18 + 00 UTC",
+    "both": "00 + 12 UTC",
+}
 PDICT3 = {
     "tmpc": "Air Temperature (°C)",
     "dwpc": "Dew Point (°C)",
@@ -124,24 +130,28 @@ def get_data(ctx):
         "level": level,
     }
     hour = ctx["hour"]
-    hrlimiter = "and extract(hour from f.valid at time zone 'UTC') in (0, 12)"
-    if hour != "both":
-        hrlimiter = "and extract(hour from f.valid at time zone 'UTC') = :hour"
-        params["hour"] = int(hour)
+    if hour == "both":
+        params["hrs"] = [0, 12]
+    elif hour == "afternoon":
+        params["hrs"] = [18, 0]
+    else:
+        params["hrs"] = [
+            int(hour),
+        ]
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
                 sql_helper(
-                    "select "
-                    "extract(year from f.valid at time zone 'UTC')::int "
-                    "as year, f.valid at time zone 'UTC' as utc_valid, "
-                    "{varname} from raob_profile p JOIN raob_flights f on "
-                    "(p.fid = f.fid) WHERE f.station = ANY(:stations) "
-                    "{hrlimiter} and p.pressure = :level  "
-                    "and {varname} is not null ORDER by valid ASC",
+                    """
+    select extract(year from f.valid at time zone 'UTC')::int as year,
+    f.valid at time zone 'UTC' as utc_valid, {varname}
+    from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
+    WHERE f.station = ANY(:stations)
+    and extract(hour from f.valid at time zone 'UTC') = any(:hrs)
+    and p.pressure = :level  and {varname} is not null ORDER by valid ASC
+                    """,
                     varname=varname,
-                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params=params,
@@ -152,14 +162,14 @@ def get_data(ctx):
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
                 sql_helper(
-                    "select "
-                    "extract(year from valid at time zone 'UTC')::int "
-                    "as year, valid at time zone 'UTC' as utc_valid, "
-                    "{varname} from raob_flights f WHERE "
-                    "station = ANY(:stations) "
-                    "{hrlimiter} and {varname} is not null ORDER by valid ASC",
+                    """
+    select extract(year from valid at time zone 'UTC')::int as year,
+    valid at time zone 'UTC' as utc_valid, {varname}
+    from raob_flights f WHERE station = ANY(:stations) {hrlimiter} and
+    {varname} is not null
+    and extract(hour from f.valid at time zone 'UTC') = any(:hrs)
+    ORDER by valid ASC""",
                     varname=varname,
-                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params=params,
@@ -207,9 +217,8 @@ def get_data(ctx):
     ctx["df"] = df
     ctx["dfin"] = dfin
 
-    label = "00 + 12 UTC" if hour == "both" else f"{int(hour):02.0f} UTC"
     ctx["title"] = (
-        f"{station} {name} {label} Sounding "
+        f"{station} {name} {PDICT[ctx['hour']]} Sounding "
         f"({dfin['year'].index[0]:%Y-%m-%d %H}z - "
         f"{dfin['year'].index[-1]:%Y-%m-%d %H}z)\n"
         f"{PDICT3[varname]} {ctx['leveltitle']}"

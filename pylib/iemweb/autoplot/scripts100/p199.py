@@ -20,7 +20,7 @@ PLOTTYPES = {
     "3": "Average 4 Inch Soil Temp",
     "4": "Solar Radiation",
     "5": "Potential Evapotranspiration",
-    "6": "DPrecipitation",
+    "6": "Precipitation",
     "7": "Peak Wind Gust",
     "8": "Average Wind Speed",
     "9": "Plant Available Soil Water (6-30 inches)",
