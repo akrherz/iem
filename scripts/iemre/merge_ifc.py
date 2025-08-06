@@ -3,7 +3,7 @@
 called from RUN_10_AFTER.sh
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import click
@@ -26,7 +26,7 @@ def run(ts):
 
     total = None
     while now <= ets:
-        gmt = now.astimezone(ZoneInfo("UTC"))
+        gmt = now.astimezone(timezone.utc)
         if gmt > currenttime:
             break
         ppath = gmt.strftime("%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")
@@ -34,8 +34,8 @@ def run(ts):
             if fn is None:
                 now += interval
                 continue
-            png = gdal.Open(fn, 0)
-            data = png.ReadAsArray()  # units are mm per 5 minutes
+            with gdal.Open(fn, 0) as png:
+                data = png.ReadAsArray()  # units are mm per 5 minutes
             data = np.where(data > 254, 0, data) / 10.0
             if total is None:
                 total = data

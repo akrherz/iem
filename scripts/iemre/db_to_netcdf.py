@@ -29,12 +29,13 @@ LOG = logger()
     help="Valid timestamp",
 )
 @click.option("--domain", default="", help="Domain to process")
-def main(dt: datetime, domain: str):
+@click.option("--varname", default=None, help="Variable to process")
+def main(dt: datetime, domain: str, varname: str | None) -> None:
     """Go Main Go."""
     dt = dt.date()
     ncfn = iemre.get_daily_ncname(dt.year, domain=domain)
     idx = iemre.daily_offset(dt)
-    ds = iemre.get_grids(dt, domain=domain)
+    ds = iemre.get_grids(dt, domain=domain, varnames=varname)
     with ncopen(ncfn, "a", timeout=600) as nc:
         for vname in ds:
             if vname not in nc.variables:

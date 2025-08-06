@@ -226,6 +226,7 @@ def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
             "db_to_netcdf.py",
             f"--date={ts:%Y-%m-%d}",
             f"--domain={domain}",
+            "--varname=rsds",
         ]
     )
 

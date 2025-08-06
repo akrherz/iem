@@ -31,7 +31,7 @@ def main(year: int):
 
     fp = f"{BASEDIR}/{ts.year}_narr.nc"
     if os.path.isfile(fp):
-        LOG.info("Cowardly refusing to overwrite file %s.", fp)
+        LOG.warning("Cowardly refusing to overwrite file %s.", fp)
         sys.exit()
     nc = ncopen(fp, "w")
     nc.title = f"IEM Packaged NARR for {ts.year}"

@@ -325,7 +325,7 @@ def plot9(ctx):
 def plotter(ctx: dict):
     """Go"""
     ctx["qc"] = loadqc(date=ctx["date"])
-    ctx["nt"] = NetworkTable("ISUSM")
+    ctx["nt"] = NetworkTable("ISUSM", only_online=False)
     if not ctx["nt"].sts:
         raise NoDataFound("No station metadata found.")
     # Adjust stations to make some room

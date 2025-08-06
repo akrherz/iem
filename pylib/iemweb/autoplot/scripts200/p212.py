@@ -165,7 +165,7 @@ def get_data(ctx):
                     """
     select extract(year from valid at time zone 'UTC')::int as year,
     valid at time zone 'UTC' as utc_valid, {varname}
-    from raob_flights f WHERE station = ANY(:stations) {hrlimiter} and
+    from raob_flights f WHERE station = ANY(:stations) and
     {varname} is not null
     and extract(hour from f.valid at time zone 'UTC') = any(:hrs)
     ORDER by valid ASC""",
