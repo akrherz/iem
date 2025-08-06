@@ -1,7 +1,7 @@
 """
 Stop gap ingest from SPC since rucsoundings is down
 
-called from RUN_10_AFTER.sh for 00z and 12z
+called from RUN_10_AFTER.sh for 00, 12, and 18 UTC
 """
 
 import sys
