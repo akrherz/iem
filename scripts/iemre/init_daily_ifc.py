@@ -19,7 +19,7 @@ def init_year(ts: datetime, ci: bool):
 
     fp = f"/mesonet/data/iemre/{ts.year}_ifc_daily.nc"
     if os.path.isfile(fp):
-        LOG.info("Cowardly refusing to overwrite file %s.", fp)
+        LOG.warning("Cowardly refusing to overwrite file %s.", fp)
         sys.exit()
     nc = ncopen(fp, "w")
     nc.title = f"IFC Daily Precipitation {ts:%Y}"

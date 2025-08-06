@@ -18,7 +18,7 @@ from pyiem.util import archive_fetch, logger, ncopen, utc
 LOG = logger()
 
 
-def save12z(ts, val):
+def save12z(ts: datetime, val: np.ndarray):
     """Save the data to our daily 12z file."""
     ncfn = f"/mesonet/data/stage4/{ts.year}_stage4_daily.nc"
     if not os.path.isfile(ncfn):
@@ -34,7 +34,7 @@ def save12z(ts, val):
             nc.variables["p01d_12z"][idx] = val
 
 
-def merge(ts):
+def merge(ts: datetime):
     """
     Process an hour's worth of stage4 data into the hourly RE
     """

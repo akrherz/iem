@@ -143,6 +143,11 @@ then
     python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T12:00:00
     python compute_params.py --year=$YYYY
 fi
+if [ $HH -eq 19 ]
+then
+    python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T18:00:00
+    python compute_params.py --year=$YYYY
+fi
 
 cd ../mos
 python current_bias.py --model=NAM

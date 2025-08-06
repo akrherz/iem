@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from pyiem import iemre
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
@@ -47,11 +47,13 @@ def grid_day(nc, ts):
         ts = datetime(2000, 3, 1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "select station, st_x(geom) as lon, st_y(geom) as lat, precip "
-            "from ncei_climate91 c JOIN stations t on (c.station = t.id) "
-            "WHERE t.network = 'NCEI91' and c.valid = %s",
+            sql_helper("""
+    select station, st_x(geom) as lon, st_y(geom) as lat, precip
+    from ncei_climate91 c JOIN stations t on (c.station = t.id)
+    WHERE t.network = 'NCEI91' and c.valid = :dt
+"""),
             conn,
-            params=(ts.strftime("%Y-%m-%d"),),
+            params={"dt": ts.date()},
             index_col="station",
         )
     if len(df.index) > 4:
@@ -61,9 +63,10 @@ def grid_day(nc, ts):
                 res, "inch", "millimeter"
             )
     else:
-        print(
-            ("%s has %02i entries, FAIL")
-            % (ts.strftime("%Y-%m-%d"), len(df.index))
+        LOG.warning(
+            "%s has %02i entries, FAIL",
+            ts.strftime("%Y-%m-%d"),
+            len(df.index),
         )
 
 
@@ -83,7 +86,7 @@ def main():
     interval = timedelta(days=1)
     now = sts
     while now < ets:
-        print(now)
+        LOG.warning(now)
         workflow(now)
         now += interval
 

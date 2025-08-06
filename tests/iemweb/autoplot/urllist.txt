@@ -365,6 +365,7 @@
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/211/ptype:windkt::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
+/plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:both::var:pwater_in::level:300::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:both::var:height::level:500::_r:t::dpi:100.png
 /plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:afternoon::var:height::level:500::_r:t::dpi:100.png
 /plotting/auto/plot/215/network:IACLIMATE::station:IATAME::v:avgt::month:mar::sy1:1981::ey1:2010::sy2:1991::ey2:2020::_r:43::dpi:100.png

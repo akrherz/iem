@@ -19,6 +19,7 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
 from pyiem.iemre import (
+    DOMAINS,
     get_hourly_ncname,
     grb2iemre,
     hourly_offset,
@@ -30,6 +31,12 @@ from pyiem.util import archive_fetch, logger, ncopen
 warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 MEMORY = {"ts": datetime.now()}
+SAMPLES = {
+    "": {"name": "Ames", "lat": 42.022, "lon": -93.617},
+    "china": {"name": "Bejing", "lat": 39.904, "lon": 116.407},
+    "europe": {"name": "Berlin", "lat": 52.520, "lon": 13.405},
+    "sa": {"name": "Sao Paulo", "lat": -23.550, "lon": -46.633},
+}
 
 
 def use_era5land(ts, kind, domain):
@@ -325,7 +332,7 @@ def grid_hour(ts: datetime, domain: str):
         write_grid(ts, "skyc", res, domain)
 
 
-def write_grid(valid, vname, grid, domain):
+def write_grid(valid, vname, grid, domain: str):
     """Atomic write of data to our netcdf storage
 
     This is isolated so that we don't 'lock' up our file while intensive
@@ -334,21 +341,31 @@ def write_grid(valid, vname, grid, domain):
     if isinstance(grid, pint.Quantity):
         grid = grid.m
     offset = hourly_offset(valid)
+    meta = SAMPLES[domain]
+    i, j = get_nav("iemre", domain).find_ij(meta["lon"], meta["lat"])
     with ncopen(get_hourly_ncname(valid.year, domain), "a", timeout=300) as nc:
         LOG.info(
-            "offset: %s writing %s with min: %s max: %s Ames: %s",
+            "offset: %s writing %s with min: %s max: %s %s[%s,%s]: %s",
             offset,
             vname,
             np.nanmin(grid),
             np.nanmax(grid),
-            grid[151, 259],
+            meta["name"],
+            j,
+            i,
+            grid[j, i],
         )
         nc.variables[vname][offset] = grid
 
 
 @click.command()
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
-@click.option("--domain", default="", help="Domain to process")
+@click.option(
+    "--domain",
+    default="",
+    type=click.Choice(DOMAINS.keys()),
+    help="Domain to process",
+)
 def main(valid: datetime, domain):
     """Go Main"""
     grid_hour(valid.replace(tzinfo=timezone.utc), domain)

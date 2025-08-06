@@ -7,7 +7,7 @@ at play here, so there is no hope.
 
 ## Yearly NetCDF storage
 
-The basic storage unit of IEMRE are yearly netCDF files. You can find most of these files [here](https://mesonet.agron.iastate.edu/onsite/iemre/).  For yearly file storage, there are
+The basic storage unit of IEMRE are yearly netCDF files. You can find most of these files at  [onsite/iemre](https://mesonet.agron.iastate.edu/onsite/iemre/).  For yearly file storage, there are
 
 | Filename | Description |
 | ---- | --- |
