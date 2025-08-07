@@ -45,15 +45,15 @@ def build_stations(dt) -> pd.DataFrame:
     with get_sqlalchemy_conn("coop") as conn:
         # There's a lone VICLIMATE site at -65 :/
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT station, st_x(geom) as lon, st_y(geom) as lat, temp_hour
             from alldata a JOIN stations t on (a.station = t.id) WHERE
-            t.network ~* 'CLIMATE' and a.day = %s and
+            t.network ~* 'CLIMATE' and a.day = :dt and
             st_x(geom) between -127 and -65.1
             ORDER by station ASC
-            """,
+            """),
             conn,
-            params=(dt,),
+            params={"dt": dt},
             index_col="station",
         )
     df["power_srad"] = np.nan
@@ -123,8 +123,8 @@ def main(valid: datetime | None):
     with get_sqlalchemy_conn("coop") as conn:
         days = pd.read_sql(
             sql_helper("""
-                SELECT day from alldata_ia where station = 'IATAME'
-                and power_srad is null and day >= '1984-01-01'
+                SELECT distinct day from alldata_ia where power_srad is null
+                and day >= '1984-01-01'
                 ORDER by day ASC LIMIT 100
             """),
             conn,
