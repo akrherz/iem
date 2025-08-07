@@ -245,13 +245,16 @@ function networkSelectAuto($network, $selected, $extra = array())
         $sname = make_sname($tbl);
         $options[$sid] = $sname;
     }
-    
     return make_select(
         "station",                    // name
         $selected,                   // selected value
         $options,                    // options array
-        "this.form.submit",          // onchange callback
-        "iemselect2"                 // CSS class
+        null,                        // onchange callback
+        "iemselect2",               // CSS class
+        FALSE,                      // multiple
+        FALSE,                      // showvalue
+        FALSE,                      // appendbrackets
+        array('style' => 'min-width: 300px;') // extra attributes for width
     );
 }
 
