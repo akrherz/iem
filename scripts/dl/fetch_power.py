@@ -6,7 +6,7 @@ For now, we just run each Monday for the current year RUN_2AM.sh
 import subprocess
 import sys
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import click
 import httpx
@@ -20,14 +20,19 @@ LOG = logger()
 
 
 @click.command()
-@click.option("--year", type=int, required=True)
+@click.option("--year", type=int, help="Year to Process")
+@click.option("--date", "dt", type=click.DateTime(), help="Date to fetch")
 @click.option("--domain", default="", type=str, help="IEMRE Domain")
 @click.option("--force", is_flag=True, help="Force a re-download of data")
-def main(year: int, domain: str, force: bool):
+def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     """Go Main Go."""
     gridnav = get_nav("iemre", domain)
-    sts = date(year, 1, 1)
-    ets = min([date(year, 12, 31), date.today()])
+    if dt is not None:
+        sts = dt.date()
+        ets = sts
+    else:
+        sts = date(year, 1, 1)
+        ets = min([date(year, 12, 31), date.today()])
     current = {}
     now = ets
     while now >= sts:
@@ -49,6 +54,7 @@ def main(year: int, domain: str, force: bool):
     for x0 in np.arange(gridnav.left, gridnav.right, 10.0):
         for y0 in np.arange(gridnav.bottom, gridnav.top, 10.0):
             queue.append([x0, y0])  # noqa
+    prev_meanval = None
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
             "https://power.larc.nasa.gov/api/temporal/daily/regional?"
@@ -82,10 +88,29 @@ def main(year: int, domain: str, force: bool):
                 if dt not in current:
                     continue
                 # W/m2 to MJ/d 86400 / 1e6
-                data = nc.variables["ALLSKY_SFC_SW_DWN"][day, :, :] * 0.0864
+                data = nc.variables["ALLSKY_SFC_SW_DWN"][day] * 0.0864
                 # Sometimes there are missing values?
                 if np.ma.is_masked(data):
-                    data[data.mask] = np.mean(data)
+                    if data.mask.all():
+                        LOG.warning(
+                            "All values masked for %s at %s, assigning %s",
+                            dt,
+                            (x0, y0),
+                            prev_meanval,
+                        )
+                        if prev_meanval is None:
+                            continue
+                        data = data.filled(prev_meanval)
+                    else:
+                        meanval = np.mean(data)
+                        LOG.info(
+                            "Replacing masked values with mean %.2f for %s %s",
+                            meanval,
+                            dt,
+                            (x0, y0),
+                        )
+                        data = data.filled(meanval)
+                prev_meanval = np.mean(data)
                 i, j = gridnav.find_ij(x0, y0)
                 # NASA Power is 1 degree for Solar, so repeat 8x
                 data = np.repeat(np.repeat(data, 8, axis=0), 8, axis=1)
@@ -106,17 +131,18 @@ def main(year: int, domain: str, force: bool):
                     continue
                 current[dt]["data"]["power_swdn"].values[jslice, islice] = data
                 current[dt]["dirty"] = True
-    for dt, item in current.items():
+    for _dt, item in current.items():
         if not item["dirty"]:
             continue
-        LOG.info("saving %s", dt)
-        set_grids(dt, item["data"], domain=domain)
+        LOG.info("saving %s", _dt)
+        set_grids(_dt, item["data"], domain=domain)
         subprocess.call(
             [
                 "python",
                 "../iemre/db_to_netcdf.py",
-                f"--date={dt:%Y-%m-%d}",
+                f"--date={_dt:%Y-%m-%d}",
                 f"--domain={domain}",
+                "--varname=power_swdn",
             ]
         )
 

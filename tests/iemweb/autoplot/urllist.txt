@@ -35,6 +35,8 @@
 /plotting/auto/plot/30/network:IACLIMATE::station:IATAME::opt:yearly::month:8::year:2020::eyear:2025::_r:96::dpi:100.png
 /plotting/auto/plot/31/network:IACLIMATE::station:IATAME::syear:1893::eyear:2024::month:gs::how:three::var:low::days:4::stat:avg::thres:70::mdays:2::mstat:avg::fdays:4::fstat:avg::agg:month::_r:43::dpi:100.png
 /plotting/auto/plot/31/network:IACLIMATE::station:IATAME::syear:1893::eyear:2024::month:fall::how:two::var:high::days:1::stat:max::mdays:4::mstat:max::fdays:4::fstat:max::agg:year::_r:43::dpi:100.png
+/plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2020::sday:0101::eday:1231::var:power_srad::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43::dpi:100.png
+/plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2020::sday:0101::eday:1231::var:power_srad::gddbase:50::gddceil:86::how:valrange::cmap:jet::_r:43::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:sigma::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:valrange::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:ptile::cmap:jet::_r:t::dpi:100.png
@@ -57,6 +59,7 @@
 /plotting/auto/plot/48/ugc:IAC169::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/50/network:WFO::station:OAX::state:IA::opt:wfo::p:count::agg:issuance::date1:2010-04-01::date2:2025-01-29::_r:43::dpi:100.png
 /plotting/auto/plot/50/network:WFO::station:DMX::state:IA::opt:state::p:count::agg:max::date1:2010-04-01::date2:2025-01-29::_r:43::dpi:100.png
+/plotting/auto/plot/51/network:IA_ASOS::station:AMW::sdate:2020-05-01::edate:2020-08-06::base:50::ceil:86::which:srad::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:BOOI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:all::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:BOOI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:gdd::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:BOOI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:precip::_r:t::dpi:100.png

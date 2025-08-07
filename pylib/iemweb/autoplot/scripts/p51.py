@@ -15,10 +15,11 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 PDICT = {
-    "all": "Show All Three Plots",
-    "gdd": "Show just Growing Degree Days",
-    "precip": "Show just Precipitation",
-    "sdd": "Show just Stress Degree Days",
+    "all": "Show GDD, Precipitation, and SDD",
+    "gdd": "Only plot Growing Degree Days",
+    "precip": "Only plot Precipitation",
+    "sdd": "Only plot Stress Degree Days",
+    "srad": "Only plot Solar Radiation",
 }
 
 
@@ -127,7 +128,8 @@ def plotter(ctx: dict):
             sql_helper(
                 """
             SELECT day, sday, gddxx(:gddbase, :gddceil, high, low) as {glabel},
-            sdd86(high, low) as sdd86, precip
+            sdd86(high, low) as sdd86, precip,
+            coalesce(era5land_srad, hrrr_srad) as srad
             from alldata WHERE station = :station and
             year >= 1951 ORDER by day ASC
             """,
@@ -152,17 +154,21 @@ def plotter(ctx: dict):
     pacc[:] = np.nan
     sacc = np.zeros((years, xlen))
     sacc[:] = np.nan
+    radacc = np.zeros((years, xlen))
+    radacc[:] = np.nan
     for year in range(baseyear, datetime.now().year + 1):
         sts = sdate.replace(year=year)
         ets = sts + timedelta(days=xlen - 1)
         x = climo.loc[sts:ets, glabel].cumsum()
         if x.empty:
             continue
-        acc[(year - baseyear), : len(x.index)] = x.values
+        acc[(year - baseyear), : len(x.index)] = x.to_numpy()
         x = climo.loc[sts:ets, "precip"].cumsum()
-        pacc[(year - baseyear), : len(x.index)] = x.values
+        pacc[(year - baseyear), : len(x.index)] = x.to_numpy()
         x = climo.loc[sts:ets, "sdd86"].cumsum()
-        sacc[(year - baseyear), : len(x.index)] = x.values
+        sacc[(year - baseyear), : len(x.index)] = x.to_numpy()
+        x = climo.loc[sts:ets, "srad"].cumsum()
+        radacc[(year - baseyear), : len(x.index)] = x.to_numpy()
 
     sday_climo = climo.groupby("sday").mean()
     rows = []
@@ -184,22 +190,28 @@ def plotter(ctx: dict):
                 "csdd86_acc": np.nanmean(sacc[:, i]),
                 "csdd86_min_acc": np.nanmin(sacc[:, i]),
                 "csdd86_max_acc": np.nanmax(sacc[:, i]),
+                "csrad": sday_climo.at[sday, "srad"],
+                "csrad_acc": np.nanmean(radacc[:, i]),
+                "csrad_min_acc": np.nanmin(radacc[:, i]),
+                "csrad_max_acc": np.nanmax(radacc[:, i]),
             }
         )
     climo = pd.DataFrame(rows)
 
     # build the obs
-    with get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             sql_helper(
                 """
-            SELECT valid as day, to_char(valid, 'mmdd') as sday,
-            gddxx(:gddbase, :gddceil, c2f(tair_c_max_qc), c2f(tair_c_min_qc))
+            SELECT day, to_char(day, 'mmdd') as sday,
+            gddxx(:gddbase, :gddceil, max_tmpf, min_tmpf)
                 as o{glabel},
-            coalesce(rain_in_tot_qc, 0) as oprecip,
-            sdd86(c2f(tair_c_max_qc), c2f(tair_c_min_qc)) as osdd86
-            from sm_daily
-            WHERE station = :station and to_char(valid, 'mmdd') != '0229'
+            coalesce(pday, 0) as oprecip,
+            sdd86(max_tmpf, min_tmpf) as osdd86,
+            srad_mj as osrad
+            from summary s JOIN stations t on (s.iemid = t.iemid)
+            WHERE id = :station and network = :network and
+            to_char(day, 'mmdd') != '0229'
             ORDER by day ASC""",
                 glabel=glabel,
             ),
@@ -208,6 +220,7 @@ def plotter(ctx: dict):
                 "gddbase": gddbase,
                 "gddceil": gddceil,
                 "station": station,
+                "network": ctx["network"],
             },
             index_col=None,
         )
@@ -243,6 +256,10 @@ def plotter(ctx: dict):
         ax3 = fig.add_axes((0.1, 0.11, 0.8, 0.75))
         ax1 = ax3
         title = "Precipitation"
+    elif whichplots == "srad":
+        ax3 = fig.add_axes((0.1, 0.11, 0.8, 0.75))
+        ax1 = ax3
+        title = "Solar Radiation (MJ/d)"
     else:  # sdd
         ax4 = fig.add_axes((0.1, 0.1, 0.8, 0.8))
         ax1 = ax4
@@ -296,6 +313,17 @@ def plotter(ctx: dict):
                 label=f"{yearlabel}",
             )
 
+        p = x["osrad"].cumsum()
+        if whichplots == "srad":
+            ax3.plot(
+                range(len(p.index)),
+                p.values,
+                color=color,
+                lw=2,
+                zorder=6,
+                label=f"{yearlabel}",
+            )
+
         # Plot Climatology
         if wantedyears.index(year) == 0:
             x = df.loc[sts:ets, "c" + glabel].cumsum()
@@ -328,6 +356,16 @@ def plotter(ctx: dict):
                     lw=2,
                     zorder=5,
                 )
+            x = df.loc[sts:ets, "csrad"].cumsum()
+            if whichplots == "srad":
+                ax3.plot(
+                    range(len(x.index)),
+                    x.values,
+                    color="k",
+                    label="Climatology",
+                    lw=2,
+                    zorder=5,
+                )
 
         x = df.loc[sts:ets, glabel + "_diff"].cumsum()
         if whichplots in ["all", "gdd"]:
@@ -350,6 +388,12 @@ def plotter(ctx: dict):
     if whichplots in ["all", "precip"]:
         ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax3.set_ylabel("Precipitation [inch]")
+        ax3.grid(True)
+    if whichplots == "srad":
+        xmin = np.nanmin(radacc, 0)
+        xmax = np.nanmax(radacc, 0)
+        ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
+        ax3.set_ylabel("Solar Radiation [MJ/d]")
         ax3.grid(True)
     xmin = np.nanmin(sacc, 0)
     xmax = np.nanmax(sacc, 0)
@@ -412,6 +456,11 @@ def plotter(ctx: dict):
 
         ax1.set_xlim(0, xlen + 1)
     if whichplots in ["all", "precip"]:
+        ax3.set_xticks(xticks)
+        ax3.set_xticklabels(xticklabels)
+        ax3.legend(loc=2, prop={"size": 10})
+        ax3.set_xlim(0, xlen + 1)
+    if whichplots == "srad":
         ax3.set_xticks(xticks)
         ax3.set_xticklabels(xticklabels)
         ax3.legend(loc=2, prop={"size": 10})
