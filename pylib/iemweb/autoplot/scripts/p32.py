@@ -52,6 +52,18 @@ def get_description():
             label="Year to Plot:",
         ),
         {
+            "type": "sday",
+            "name": "sday",
+            "default": "0101",
+            "label": "Inclusive Start Day of Year to Plot (MMDD):",
+        },
+        {
+            "type": "sday",
+            "name": "eday",
+            "default": "1231",
+            "label": "Inclusive End Day of Year to Plot (MMDD):",
+        },
+        {
             "type": "year",
             "optional": True,
             "name": "y2",
@@ -94,6 +106,131 @@ def get_description():
     return desc
 
 
+def plot_valrange(yeardf, year, varname, y2, ax, df):
+    ax.bar(
+        yeardf[year]["day"].values,
+        yeardf[year][f"{varname}_range"].values,
+        bottom=yeardf[year][f"{varname}_min"].values,
+        color="tan",
+        width=1.0,
+        label=f"Observed Range {df.iloc[0]['year']}-{df.iloc[-1]['year']}",
+    )
+    ax.bar(
+        yeardf[year]["day"].values,
+        yeardf[year][f"{varname}_std"].values * 2.0,
+        bottom=(
+            yeardf[year][f"{varname}_mean"].values
+            - yeardf[year][f"{varname}_std"].values
+        ),
+        color="green",
+        width=1.0,
+        label="+/- 1 Std Dev",
+    )
+    ax.plot(
+        yeardf[year]["day"].values,
+        yeardf[year][varname].values,
+        color="k",
+        label=str(year),
+    )
+    if y2 is not None:
+        ax.plot(
+            yeardf[y2]["day"].values,
+            yeardf[y2][varname].values,
+            color="b",
+            label=str(y2),
+        )
+    ax.plot(
+        yeardf[year]["day"].values,
+        yeardf[year][f"{varname}_mean"].values,
+        color="r",
+        label="Climatology",
+    )
+    ax.legend(loc="best", ncol=5)
+    ax.set_ylabel(PDICT[varname])
+
+
+def plot_others(yeardf, year, varname, how, ctx, fig, ax):
+    """Plot the other types of data."""
+    values = yeardf[year][f"{varname}_{how}"].values
+    if how == "ptile" and "cmap" in ctx:
+        bins = range(0, 101, 10)
+        cmap = get_cmap(ctx["cmap"])
+        norm = mpcolors.BoundaryNorm(bins, cmap.N)
+        colors = cmap(norm(values))
+        ax.bar(
+            yeardf[year]["day"].values,
+            values,
+            color=colors,
+            align="center",
+        )
+        ax.set_yticks(bins)
+    else:
+        abovecolor = "r" if how == "diff" else "b"
+        belowcolor = "b" if how == "diff" else "r"
+        if varname.find("soilm") > 0:
+            abovecolor = "b"
+            belowcolor = "r"
+        yeardf[year]["color"] = abovecolor
+        yeardf[year].loc[values < 0, "color"] = belowcolor
+        ax.set_position([0.1, 0.1, 0.7, 0.8])
+        ax = barchart_with_top10(
+            fig,
+            yeardf[year].rename(columns={f"{varname}_{how}": "Diff"}),
+            "Diff",
+            ax=ax,
+            color=yeardf[year]["color"].values,
+        )
+        meanval = yeardf[year][f"{varname}_mean"].mean()
+        ax.text(
+            0.99,
+            1.01,
+            f"Mean: {meanval:.1f}",
+            transform=ax.transAxes,
+            color="k",
+            ha="right",
+            va="bottom",
+            bbox=dict(facecolor="white", edgecolor="white"),
+        )
+        ax.text(
+            0.9,
+            0.95,
+            f"Days Above {(values > 0).sum()}",
+            transform=ax.transAxes,
+            color=abovecolor,
+            ha="center",
+            va="top",
+            bbox=dict(facecolor="white", edgecolor="white"),
+        )
+        ax.text(
+            0.9,
+            0.05,
+            f"Days Below {(values < 0).sum()}",
+            transform=ax.transAxes,
+            color=belowcolor,
+            ha="center",
+            va="top",
+            bbox=dict(facecolor="white", edgecolor="white"),
+        )
+        if varname in ["era5land_srad", "power_srad"]:
+            ax.set_position([0.1, 0.4, 0.7, 0.5])
+            ax2 = fig.add_axes([0.1, 0.1, 0.7, 0.25])
+            ax2.plot(
+                yeardf[year]["day"].values,
+                yeardf[year][f"{varname}_diff"].cumsum().to_numpy(),
+                color="k",
+            )
+            ax2.grid(True)
+            ax2.set_ylabel("Accum Departure (MJ)")
+            ax2.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+            ax2.xaxis.set_major_locator(mdates.DayLocator(1))
+    if how == "diff":
+        ax.set_ylabel(f"{PDICT[varname]} Departure")
+    elif how == "ptile":
+        ax.set_ylabel(f"{PDICT[varname]} Percentile (100 highest)")
+    else:
+        ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure")
+
+
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
@@ -107,6 +244,8 @@ def plotter(ctx: dict):
         "station": station,
         "gddbase": gddbase,
         "gddceil": gddceil,
+        "sday": f"{ctx['sday']:%m%d}",
+        "eday": f"{ctx['eday']:%m%d}",
     }
     sqlvarname = "high" if varname in ["avg", "gdd"] else varname
     if varname == "era5land_soilm1m_sw":
@@ -119,7 +258,8 @@ def plotter(ctx: dict):
             (high+low)/2. as avg,
             gddxx(:gddbase, :gddceil, high, low) as gdd, {sqlvarname}
             from alldata where station = :station and
-            {sqlvarname} is not null ORDER by day ASC
+            {sqlvarname} is not null and sday >= :sday and sday <= :eday
+            ORDER by day ASC
         """,
                 sqlvarname=sqlvarname,
             ),
@@ -184,115 +324,9 @@ def plotter(ctx: dict):
         subtitle += f", ERA5-Land Soil Type: {slt}"
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     if how == "valrange":
-        ax.bar(
-            yeardf[year]["day"].values,
-            yeardf[year][f"{varname}_range"].values,
-            bottom=yeardf[year][f"{varname}_min"].values,
-            color="tan",
-            width=1.0,
-            label=f"Observed Range {df.iloc[0]['year']}-{df.iloc[-1]['year']}",
-        )
-        ax.bar(
-            yeardf[year]["day"].values,
-            yeardf[year][f"{varname}_std"].values * 2.0,
-            bottom=(
-                yeardf[year][f"{varname}_mean"].values
-                - yeardf[year][f"{varname}_std"].values
-            ),
-            color="green",
-            width=1.0,
-            label="+/- 1 Std Dev",
-        )
-        ax.plot(
-            yeardf[year]["day"].values,
-            yeardf[year][varname].values,
-            color="k",
-            label=str(year),
-        )
-        if y2 is not None:
-            ax.plot(
-                yeardf[y2]["day"].values,
-                yeardf[y2][varname].values,
-                color="b",
-                label=str(y2),
-            )
-        ax.plot(
-            yeardf[year]["day"].values,
-            yeardf[year][f"{varname}_mean"].values,
-            color="r",
-            label="Climatology",
-        )
-        ax.legend(loc="best", ncol=5)
+        plot_valrange(yeardf, year, varname, y2, ax, df)
     else:
-        values = yeardf[year][f"{varname}_{how}"].values
-        if how == "ptile" and "cmap" in ctx:
-            bins = range(0, 101, 10)
-            cmap = get_cmap(ctx["cmap"])
-            norm = mpcolors.BoundaryNorm(bins, cmap.N)
-            colors = cmap(norm(values))
-            ax.bar(
-                yeardf[year]["day"].values,
-                values,
-                color=colors,
-                align="center",
-            )
-            ax.set_yticks(bins)
-        else:
-            abovecolor = "r" if how == "diff" else "b"
-            belowcolor = "b" if how == "diff" else "r"
-            if varname.find("soilm") > 0:
-                abovecolor = "b"
-                belowcolor = "r"
-            yeardf[year]["color"] = abovecolor
-            yeardf[year].loc[values < 0, "color"] = belowcolor
-            ax.set_position([0.1, 0.1, 0.7, 0.8])
-            ax = barchart_with_top10(
-                fig,
-                yeardf[year].rename(columns={f"{varname}_{how}": "Diff"}),
-                "Diff",
-                ax=ax,
-                color=yeardf[year]["color"].values,
-            )
-            meanval = yeardf[year][f"{varname}_mean"].mean()
-            ax.text(
-                0.99,
-                1.01,
-                f"Mean: {meanval:.1f}",
-                transform=ax.transAxes,
-                color="k",
-                ha="right",
-                va="bottom",
-                bbox=dict(facecolor="white", edgecolor="white"),
-            )
-
-            ax.text(
-                0.9,
-                0.95,
-                f"Days Above {(values > 0).sum()}",
-                transform=ax.transAxes,
-                color=abovecolor,
-                ha="center",
-                va="top",
-                bbox=dict(facecolor="white", edgecolor="white"),
-            )
-            ax.text(
-                0.9,
-                0.05,
-                f"Days Below {(values < 0).sum()}",
-                transform=ax.transAxes,
-                color=belowcolor,
-                ha="center",
-                va="top",
-                bbox=dict(facecolor="white", edgecolor="white"),
-            )
-    if how == "diff":
-        ax.set_ylabel(f"{PDICT[varname]} Departure")
-    elif how == "ptile":
-        ax.set_ylabel(f"{PDICT[varname]} Percentile (100 highest)")
-    elif how == "valrange":
-        ax.set_ylabel(PDICT[varname])
-    else:
-        ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure")
+        plot_others(yeardf, year, varname, how, ctx, fig, ax)
     if varname == "gdd":
         ax.set_xlabel(f"Growing Degree Day Base: {gddbase} Ceiling: {gddceil}")
     ax.grid(True)
