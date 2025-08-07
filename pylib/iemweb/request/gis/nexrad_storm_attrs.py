@@ -103,7 +103,7 @@ def run(environ, start_response):
     radarlimit = ""
     if environ["radar"] and "ALL" not in environ["radar"]:
         radarlimit = " and nexrad = ANY(:radar) "
-    score = len(environ["radar"]) if "ALL" not in environ["radar"] else 150
+    score = len(environ["radar"]) if radarlimit != "" else 150
     score *= (environ["ets"] - environ["sts"]).days
     if score > 1_500:
         raise IncompleteWebRequest(

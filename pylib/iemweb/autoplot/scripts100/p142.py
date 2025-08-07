@@ -17,7 +17,7 @@ import httpx
 import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import LOG
@@ -48,9 +48,27 @@ def get_description():
             label="Select Station:",
             network="IACLIMATE",
         ),
-        dict(type="int", name="p1", default=31, label="First Period of Days"),
-        dict(type="int", name="p2", default=91, label="Second Period of Days"),
-        dict(type="int", name="p3", default=365, label="Third Period of Days"),
+        dict(
+            min=1,
+            type="int",
+            name="p1",
+            default=31,
+            label="First Period of Days",
+        ),
+        dict(
+            min=1,
+            type="int",
+            name="p2",
+            default=91,
+            label="Second Period of Days",
+        ),
+        dict(
+            min=1,
+            type="int",
+            name="p3",
+            default=365,
+            label="Third Period of Days",
+        ),
         dict(
             type="date",
             name="sdate",
@@ -143,27 +161,27 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         -- Get all period averages
         with avgs as (
             SELECT day, sday,
-            count(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as counts,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_high,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_high,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_high,
-            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_low,
-            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_low,
-            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_low,
+            count(high) OVER (ORDER by day ASC ROWS :md1 PRECEDING) as counts,
+            avg(high) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as p1_high,
+            avg(high) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as p2_high,
+            avg(high) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as p3_high,
+            avg(low) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as p1_low,
+            avg(low) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as p2_low,
+            avg(low) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as p3_low,
             avg((high+low)/2.)
-                OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_avgt,
+                OVER (ORDER by day ASC ROWS :d1 PRECEDING) as p1_avgt,
             avg((high+low)/2.)
-                OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_avgt,
+                OVER (ORDER by day ASC ROWS :d2 PRECEDING) as p2_avgt,
             avg((high+low)/2.)
-                OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_avgt,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_precip,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_precip,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_precip
-            from alldata WHERE station = %s
+                OVER (ORDER by day ASC ROWS :d3 PRECEDING) as p3_avgt,
+    sum(precip) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as p1_precip,
+    sum(precip) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as p2_precip,
+    sum(precip) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as p3_precip
+    from alldata WHERE station = :station
         ),
         -- Get sday composites
         sdays as (
@@ -183,7 +201,7 @@ def plotter(ctx: dict):
             stddev(p2_precip) as p2_precip_stddev,
             avg(p3_precip) as p3_precip_avg,
             stddev(p3_precip) as p3_precip_stddev
-            from avgs WHERE counts = %s GROUP by sday
+            from avgs WHERE counts = :maxdays GROUP by sday
         )
         -- Now merge to get obs
             SELECT day, s.sday,
@@ -212,28 +230,19 @@ def plotter(ctx: dict):
             (p2_precip - p2_precip_avg) / p2_precip_stddev as p2_precip_sigma,
             (p3_precip - p3_precip_avg) / p3_precip_stddev as p3_precip_sigma
             from avgs a JOIN sdays s on (a.sday = s.sday) WHERE
-            day >= %s and day <= %s ORDER by day ASC
-        """,
+            day >= :sts and day <= :ets ORDER by day ASC
+        """),
             conn,
-            params=(
-                maxdays - 1,
-                p1 - 1,
-                p2 - 1,
-                p3 - 1,
-                p1 - 1,
-                p2 - 1,
-                p3 - 1,
-                p1 - 1,
-                p2 - 1,
-                p3 - 1,
-                p1 - 1,
-                p2 - 1,
-                p3 - 1,
-                station,
-                maxdays,
-                sts,
-                ets,
-            ),
+            params={
+                "md1": maxdays - 1,
+                "d1": p1 - 1,
+                "d2": p2 - 1,
+                "d3": p3 - 1,
+                "station": station,
+                "maxdays": maxdays,
+                "sts": sts,
+                "ets": ets,
+            },
             index_col="day",
         )
     if df.empty:
@@ -286,7 +295,7 @@ def plotter(ctx: dict):
     ax.text(
         1,
         -0.14,
-        "%s to %s" % (sts.strftime("%-d %b %Y"), ets.strftime("%-d %b %Y")),
+        f"{sts:-%d %b %Y} to {ets:-%d %b %Y}",
         va="bottom",
         ha="right",
         fontsize=12,

@@ -91,6 +91,17 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
         try:
             with httpx.Client() as client:
                 response = client.get(url)
+                if response.status_code == 404:
+                    # Try something 6 hours older
+                    mv2 = model_valid - timedelta(hours=6)
+                    fo2 = fhour_off + 6
+                    url = (
+                        f"{baseurl}{meta['gname']}/"
+                        "icon_global_icosahedral_single-level_"
+                        f"{mv2:%Y%m%d%H}_{fo2:03.0f}_{meta['gname'].upper()}"
+                        ".grib2.bz2"
+                    )
+                    response = client.get(url)
             response.raise_for_status()
             with open(filename, "wb") as f:
                 f.write(response.content)

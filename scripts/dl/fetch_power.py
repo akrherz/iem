@@ -92,7 +92,7 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                 # Sometimes there are missing values?
                 if np.ma.is_masked(data):
                     if data.mask.all():
-                        LOG.warning(
+                        LOG.info(
                             "All values masked for %s at %s, assigning %s",
                             dt,
                             (x0, y0),
