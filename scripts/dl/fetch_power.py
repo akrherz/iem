@@ -131,16 +131,16 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                     continue
                 current[dt]["data"]["power_swdn"].values[jslice, islice] = data
                 current[dt]["dirty"] = True
-    for dt, item in current.items():
+    for _dt, item in current.items():
         if not item["dirty"]:
             continue
-        LOG.info("saving %s", dt)
-        set_grids(dt, item["data"], domain=domain)
+        LOG.info("saving %s", _dt)
+        set_grids(_dt, item["data"], domain=domain)
         subprocess.call(
             [
                 "python",
                 "../iemre/db_to_netcdf.py",
-                f"--date={dt:%Y-%m-%d}",
+                f"--date={_dt:%Y-%m-%d}",
                 f"--domain={domain}",
                 "--varname=power_swdn",
             ]
