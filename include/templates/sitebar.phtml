@@ -30,8 +30,15 @@ if (isset($_REQUEST["day"])){
 <ol class="breadcrumb">
 <li class="breadcrumb-item"><a href="/sites/locate.php">Station Data &amp; Metadata</a></li>
 <li class="breadcrumb-item"><a href="/sites/locate.php?network=<?php echo $network; ?>"><?php echo $network; ?></a></li>
-<li class="breadcrumb-item active" aria-current="page"><?php echo networkSelectAuto($network, $station); ?> or <a href="locate.php?network=<?php echo $network; ?>">select from map</a></li>
 </ol>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <label for="station-select" class="form-label mb-0">Select Station:</label>
+    <?php echo networkSelectAuto($network, $station); ?> 
+    <input type="submit" class="btn btn-primary" value="Change Station" />
+    <span class="text-muted">or</span>
+    <a href="locate.php?network=<?php echo $network; ?>" class="btn btn-outline-secondary btn-sm">Select from map</a>
+</div>
 </form>
 
 <div class="d-flex flex-wrap gap-2 mb-3">

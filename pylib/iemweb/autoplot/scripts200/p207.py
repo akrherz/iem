@@ -1,5 +1,5 @@
 """
-Generates an analysis map of snowfall or freezing rain data
+Generates an analysis map of rainfall, snowfall, or freezing rain data
 based on NWS Local Storm Reports, NWS COOP Data, and CoCoRaHS.  This autoplot
 presents a number of tunables including:
 <ul>
@@ -73,7 +73,11 @@ PDICT5 = {
     "yes": "Include any reports, if possible.",
     "no": "Do not include any reports.",
 }
-PDICT6 = {"snow": "Snowfall", "ice": "Freezing Rain / Ice Storm (LSRs Only)"}
+PDICT6 = {
+    "rain": "Rainfall",
+    "snow": "Snowfall",
+    "ice": "Freezing Rain / Ice Storm (LSRs Only)",
+}
 PDICT7 = {
     "yes": "Clip Display by Plotted Geography",
     "no": "Allow sometimes extrapolation outside of plotted area",
@@ -198,12 +202,19 @@ def get_description():
             min=0,
             max=10,
         ),
+        {
+            "type": "cmap",
+            "label": "Select color map for precipitation",
+            "default": "jet",
+            "name": "cmap",
+        },
     ]
     return desc
 
 
 def load_data(ctx: dict, basets: datetime, endts: datetime):
     """Generate a dataframe with the data we want to analyze."""
+    typs = {"rain": "R", "snow": "S", "ice": "5"}
     with get_sqlalchemy_conn("postgis") as conn:
         df: gpd.GeoDataFrame = gpd.read_postgis(
             sql_helper(
@@ -218,7 +229,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             ),
             conn,
             params={
-                "typ": "S" if ctx["v"] == "snow" else "5",
+                "typ": typs[ctx["v"]],
                 "basets": basets,
                 "endts": endts,
             },
@@ -241,15 +252,16 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
                     """SELECT state, wfo, id as nwsli,
-                sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+                sum({col}) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
                 from summary s JOIN stations t on (s.iemid = t.iemid)
                 WHERE s.day = ANY(:days)
-                and t.network ~* 'COOP' and snow >= 0 and
+                and t.network ~* 'COOP' and {col} >= 0 and
                 coop_valid >= :basets and coop_valid <= :endts
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
-                """
+                """,
+                    col="snow" if ctx["v"] == "snow" else "pday",
                 ),
                 conn,
                 params={
@@ -273,11 +285,11 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
                     """SELECT state, wfo, id as nwsli,
-                sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+                sum({col}) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
                 from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
                 WHERE s.day = ANY(:days)
-                and t.network ~* '_COCORAHS' and snow >= 0 and
+                and t.network ~* '_COCORAHS' and {col} >= 0 and
                 obvalid >= :basets and obvalid <= :endts and
                 ST_Contains(
                     ST_MakeEnvelope(:minx, :miny, :maxx, :maxy, 2163),
@@ -285,7 +297,8 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 )
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
-                """
+                """,
+                    col="snow" if ctx["v"] == "snow" else "precip",
                 ),
                 conn,
                 params={
@@ -477,6 +490,9 @@ def plotter(ctx: dict):
     if ctx["v"] == "ice":
         rng = [0.01, 0.1, 0.25, 0.5, 0.75, 1, 2]
         cmap = nwsice()
+    elif ctx["v"] == "rain":
+        rng = [0.01, 0.1, 0.5, 1, 2, 3, 5, 10]
+        cmap = ctx["cmap"]
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
@@ -487,6 +503,8 @@ def plotter(ctx: dict):
     title = f"NWS Local Storm Report{_t} Snowfall Total Analysis"
     if ctx["v"] == "ice":
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
+    elif ctx["v"] == "rain":
+        title = f"NWS Local Storm Report{_t} Rainfall Total Analysis"
     obcnt = len(df2[df2["state"] != "Z"].index)
     mp = MapPlot(
         apctx=ctx,

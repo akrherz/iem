@@ -1184,7 +1184,7 @@ def generate(fdict, headers, cookies):
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
-<script src="/js/select2.js?v=2"></script>
+<script src="/js/select2.js?v=3"></script>
 <script>
 function hideImageLoad() {{
     const willload = document.getElementById('willload');
