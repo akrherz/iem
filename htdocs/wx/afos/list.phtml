@@ -14,7 +14,7 @@ $t->iemselect2 = TRUE;
 $t->title = "NWS Text Product by Issuing Center by Date";
 $t->headextra = '<link rel="stylesheet" href="list.css" />';
 $t->jsextra = <<<EOM
-<script src="list.module.js" type="module"></script>
+<script src="list.module.js?v=2" type="module"></script>
 EOM;
 
 // A dance here to get a 4-char and 3-char identifier
@@ -55,6 +55,8 @@ $dt = new DateTime("$year-$month-$day");
 $datequeue = array($dt->format("Y-m-d"));
 
 $d2display = "none";
+$ariaexpanded = "false"; // ARIA initial collapsed state for date range
+$ariahidden = "true"; // ARIA hidden state for end date container
 
 $timeformat = "H:i";
 if (isset($_REQUEST['drange'])) {
@@ -73,6 +75,8 @@ if (isset($_REQUEST['drange'])) {
         $dt->modify("+1 day");
     }
     $d2display = "block";
+    $ariaexpanded = "true";
+    $ariahidden = "false";
     $timeformat = "d/H:i";
 }
 
@@ -87,6 +91,7 @@ $oselect = make_select("order", $order, $ar);
 
 $table = "";
 $atags = "";
+$totalcount = 0; // Count rows for ARIA summary
 
 // Loop over dates in the datequeue
 $prods = array();
@@ -105,6 +110,7 @@ foreach ($datequeue as $dt) {
     if ($order == "desc") {
         $rows = array_reverse($rows);
     }
+    if (is_array($rows)) { $totalcount += count($rows); }
     if (is_null($rows) || sizeof($rows) == 0) {
         $table .= "<h3>No products found for $dt</h3>\n";
         continue;
@@ -146,7 +152,7 @@ foreach ($datequeue as $dt) {
         $colnum = 0;
         $rowopen = false;
         $containeropen = false;
-        $atags .= '<div class="clearfix"></div><div class="mb-3"><strong>Skip to Hour:</strong><div class="d-flex flex-wrap gap-1 mt-2">';
+    $atags .= '<div class="clearfix"></div><nav class="mb-3" aria-label="Hour navigation"><strong class="d-block">Skip to Hour:</strong><div class="d-flex flex-wrap gap-1 mt-2">';
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
             if (gmdate("H", $ts) != $lasthour) {
@@ -155,8 +161,10 @@ foreach ($datequeue as $dt) {
                     $table .= "</div></div></div>\n";
                 }
                 $lasthour = gmdate("H", $ts);
+                // Use data-jump attribute; JS adds listener (Rule: no JS embedded in HTML files)
                 $atags .= sprintf(
-                    "<button type=\"button\" class=\"btn btn-outline-primary btn-sm\" onclick=\"j('%s');\">%s</button>",
+                    "<button type=\"button\" class=\"btn btn-outline-primary btn-sm\" data-jump=\"%s\" aria-label=\"Jump to hour %s UTC\">%s</button>",
+                    $lasthour,
                     $lasthour,
                     $lasthour
                 );
@@ -189,28 +197,34 @@ foreach ($datequeue as $dt) {
         if ($rowopen) {
             $table .= "</div></div>\n";
         }
-        $atags .= '</div></div>';
+    $atags .= '</div></nav>';
     }
 }
 if ($view == "prod") {
     $keys = array_keys($prods);
     asort($keys);
     $table .= <<<EOM
-<table class="table table-sm table-striped">
-<tr><th>Source</th><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>
+<table class="table table-sm table-striped" aria-describedby="resultsSummary">
+<caption class="visually-hidden">NWS text products listing</caption>
+<thead><tr><th scope="col">Source</th><th scope="col">Product Link</th><th scope="col">Date</th><th scope="col">UTC Time</th></tr></thead>
+<tbody>
 EOM;
     foreach ($keys as $i => $k) {
         $table .= sprintf("%s", $prods[$k]);
     }
-    $table .= "</table>";
+    $table .= "</tbody></table>";
 } else if ($view == "grid") {
     ksort($columns);
     $keys = array_keys($columns);
     $table = "";
-    $atags .= '<div class="clearfix"></div><div class="mb-3"><strong>Skip to ' . $antiby . ':</strong><div class="d-flex flex-wrap gap-1 mt-2">';
+    $atags .= '<div class="clearfix"></div><nav class="mb-3" aria-label="' . htmlspecialchars($antiby) . ' navigation"><strong class="d-block">Skip to ' . $antiby . ':</strong><div class="d-flex flex-wrap gap-1 mt-2">';
     foreach ($keys as $i => $k) {
+        // Use data-jump attribute; JS adds listener (Rule: no JS embedded in HTML files)
+        $labelcontext = ($antiby == 'pil') ? 'product' : 'center';
         $atags .= sprintf(
-            "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"j('%s');\">%s</button>",
+            "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" data-jump=\"%s\" aria-label=\"Jump to %s %s\">%s</button>",
+            $k,
+            $labelcontext,
             $k,
             $k
         );
@@ -226,7 +240,7 @@ EOM;
         );
     }
     $table .= "</div>\n";
-    $atags .= '</div></div>';
+    $atags .= '</div></nav>';
 }
 
 $drangecheck = (isset($_REQUEST["drange"])) ? "checked='checked'" : "";
@@ -347,11 +361,11 @@ and a brief associated product name on the NWS website.</p>
 </div>
 
 <div class="form-check">
-<input id="drange" type="checkbox" name="drange" value="yes" class="form-check-input" {$drangecheck}/>
+<input id="drange" type="checkbox" name="drange" value="yes" class="form-check-input" {$drangecheck} aria-controls="d2" aria-expanded="{$ariaexpanded}"/>
 <label for="drange" class="form-check-label">List over UTC date range through (max 10 days)</label>
 </div>
 
-<div id="d2" class="mt-2" style="display: {$d2display}">
+<div id="d2" class="mt-2" style="display: {$d2display}" aria-hidden="{$ariahidden}">
 <label class="form-label">End Date:</label>
 <div class="d-flex gap-2">
 {$y2select} {$m2select} {$d2select}
@@ -380,6 +394,7 @@ and a brief associated product name on the NWS website.</p>
 </div>
 </div>
 </form>
+<div id="resultsSummary" class="visually-hidden" aria-live="polite">Loaded {$totalcount} product rows in {$view} view.</div>
 {$atags}
 
 {$table}

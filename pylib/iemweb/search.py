@@ -10,6 +10,18 @@ Changelog
 Example Requests
 ----------------
 
+Search using a station identifier
+
+https://mesonet.agron.iastate.edu/search.py?q=DSM
+
+Search using a four character station identifier
+
+https://mesonet.agron.iastate.edu/search.py?q=KPAH
+
+Provide an IEM AWIPS ID / AFOS identifier
+
+https://mesonet.agron.iastate.edu/search.py?q=202407101919-KDMX-FXUS63-AFDDMX
+
 Search for a given NWS AFOS Product Identifier
 
 https://mesonet.agron.iastate.edu/search.py?q=AAABBB
@@ -17,6 +29,10 @@ https://mesonet.agron.iastate.edu/search.py?q=AAABBB
 Link to a given autoplot number
 
 https://mesonet.agron.iastate.edu/search.py?q=ap100
+
+Auto forward to station closest to the given street address
+
+https://mesonet.agron.iastate.edu/search.py?q=100%20Main%20St%20Ames%20Iowa
 
 """
 
@@ -30,7 +46,6 @@ import pandas as pd
 from commonregex import CommonRegex
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{4,6}$", re.IGNORECASE)
@@ -39,7 +54,7 @@ AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.IGNORECASE)
 PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.IGNORECASE)
 
 
-def station_df_handler(df):
+def station_df_handler(df: pd.DataFrame) -> str:
     """Common."""
     if df.empty:
         return "/sites/locate.php"
@@ -54,17 +69,14 @@ def station_df_handler(df):
 
 def geocoder(q):
     """Attempt geocoding."""
-    props = get_properties()
     resp = httpx.get(
-        "https://maps.googleapis.com/maps/api/geocode/json",
-        params=dict(address=q, key=props["google.maps.key2"], sensor="true"),
+        "http://iem.local/cgi-bin/geocoder.py",
+        params={"address": q},
         timeout=30,
     )
-    data = resp.json()
-    if not data["results"]:
+    if resp.status_code != 200:
         return "/sites/locate.php"
-    lat = data["results"][0]["geometry"]["location"]["lat"]
-    lon = data["results"][0]["geometry"]["location"]["lng"]
+    lat, lon = resp.text.split(",")
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
             sql_helper("""SELECT id, network,
@@ -73,7 +85,7 @@ def geocoder(q):
             ORDER by dist ASC LIMIT 50
             """),
             conn,
-            params={"lat": lat, "lon": lon},
+            params={"lat": float(lat), "lon": float(lon)},
         )
     return station_df_handler(df)
 
@@ -93,7 +105,7 @@ def afos_handler(pil):
     return f"/wx/afos/p.php?pil={pil}"
 
 
-def station_handler(sid):
+def station_handler(sid: str) -> str:
     """Attempt to find a station."""
     # convert KXXX to XXX
     if sid.startswith("K") and len(sid) == 4:
