@@ -16,7 +16,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/geocoder.py\
 from io import StringIO
 
 import httpx
-from pydantic import Field
+from pydantic import Field, model_validator
 from pyiem.webutil import CGIModel, iemapp
 
 SERVICE = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
@@ -26,6 +26,14 @@ class MyModel(CGIModel):
     address: str = Field(None, description="Street address to geocode")
     city: str = Field(None, description="City name to geocode")
     street: str = Field(None, description="Street name to geocode")
+
+    @model_validator(mode="after")
+    def validate_request(self):
+        if not (self.address or (self.street and self.city)):
+            raise ValueError(
+                "Must provide either 'address' or both 'street' and 'city'"
+            )
+        return self
 
 
 @iemapp(help=__doc__, schema=MyModel)
