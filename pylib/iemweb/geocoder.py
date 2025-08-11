@@ -39,13 +39,10 @@ class MyModel(CGIModel):
 @iemapp(help=__doc__, schema=MyModel)
 def application(environ, start_response):
     """Go main go"""
-    if "address" in environ:
+    if environ["address"]:
         address = environ["address"].strip()
-    elif "street" in environ and "city" in environ:
-        address = f"{environ['street']}, {environ['city']}".strip()
     else:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"APIFAIL"]
+        address = f"{environ['street']}, {environ['city']}".strip()
 
     params = {
         "address": address,
