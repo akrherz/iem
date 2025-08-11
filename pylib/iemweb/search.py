@@ -133,7 +133,7 @@ def has_station(sid):
     return not df.empty
 
 
-def find_handler(q):
+def find_handler(q, referer: str | None):
     """Do we have a handler for this request?"""
     if q == "":
         return None, None
@@ -154,7 +154,7 @@ def find_handler(q):
         return afos_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
     c = CommonRegex(q)
-    if c.street_addresses:
+    if c.street_addresses and referer:
         return geocoder, q
     return None, None
 
@@ -191,7 +191,7 @@ def application(environ, start_response):
         .encode("latin-1", "replace")
         .decode("utf-8", "replace")
     )
-    handler, qclean = find_handler(q)
+    handler, qclean = find_handler(q, environ.get("HTTP_REFERER"))
     if handler is None:
         start_response("200 OK", [("Content-type", "text/html")])
         return default_form()

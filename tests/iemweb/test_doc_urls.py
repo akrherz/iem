@@ -49,6 +49,6 @@ def test_docutils_publish_string(arg):
 def test_urls(arg):
     """Test what urls.txt tells us to."""
     c = Client(arg[0].application)
-    res = c.get(arg[1])
+    res = c.get(arg[1], headers={"Referer": "http://iem.local"})
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]
