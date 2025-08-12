@@ -6,7 +6,7 @@ first station having a higher value than the second station.
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure_axes
 
 PDICT = {
@@ -61,32 +61,32 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH obs1 as (
             SELECT day, high, low, precip, (high+low)/2. as avgt from
-            alldata WHERE station = %s),
+            alldata WHERE station = :station1),
         obs2 as (
             SELECT day, high, low, precip, (high+low)/2. as avgt from
-            alldata WHERE station = %s)
+            alldata WHERE station = :station2)
 
         SELECT extract(doy from o.day) as doy, count(*),
-        sum(case when o.high >= (t.high::numeric + %s) then 1 else 0 end)
+        sum(case when o.high >= (t.high::numeric + :mag) then 1 else 0 end)
             as high_hits,
-        sum(case when o.low >= (t.low::numeric + %s) then 1 else 0 end)
+        sum(case when o.low >= (t.low::numeric + :mag) then 1 else 0 end)
             as low_hits,
-        sum(case when o.precip >= (t.precip + %s) then 1 else 0 end)
+        sum(case when o.precip >= (t.precip + :mag) then 1 else 0 end)
         as precip_hits,
-        sum(case when o.avgt >= (t.avgt::numeric + %s) then 1 else 0 end)
+        sum(case when o.avgt >= (t.avgt::numeric + :mag) then 1 else 0 end)
             as avgt_hits
         from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy
         ORDER by doy ASC
-        """,
+        """),
             conn,
-            params=(station1, station2, mag, mag, mag, mag),
+            params={"station1": station1, "station2": station2, "mag": mag},
             index_col="doy",
         )
     for _v in ["high", "low", "avgt", "precip"]:
-        df["%s_freq[%%]" % (_v,)] = df["%s_hits" % (_v,)] / df["count"] * 100.0
+        df[f"{_v}_freq[%]"] = df[f"{_v}_hits"] / df["count"] * 100.0
 
     (fig, ax) = figure_axes(apctx=ctx)
 

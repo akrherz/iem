@@ -90,7 +90,7 @@ def taf_search(pgconn, station, valid):
 def compute_flight_condition(row):
     """What's our status."""
     # TEMPO may not address sky or vis
-    if row["is_tempo"] and (not row["skyc"] or pd.isna(row[VIS])):
+    if row["ftype"] == 2 and (not row["skyc"] or pd.isna(row[VIS])):
         return None
     level = 10000
     if "SKC" in row["skyc"]:
@@ -117,6 +117,7 @@ def fetch(station: str, ts: datetime) -> pd.DataFrame:
             sql_helper("""
     SELECT f.*, t.product_id from taf t JOIN taf_forecast f on
     (t.id = f.taf_id) WHERE t.station = :station and t.valid = :valid
+    and ftype in (0, 1, 2)
     ORDER by f.valid ASC"""),
             conn,
             params={"station": station, "valid": ts},
