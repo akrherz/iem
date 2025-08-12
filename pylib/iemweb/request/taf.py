@@ -9,6 +9,13 @@ This service provides access to Terminal Aerodrome Forecast (TAF) data for
 specified stations and time ranges. The time range limits the TAF issuance
 timestamps, not the forecast valid times.
 
+Changelog
+---------
+
+- 2025-08-12: The parser was improved to delineate forecast types, the
+  `is_tempo` field remains, but will be removed in the future.  See the `ftype`
+  column for the delineation.
+
 Example Usage
 ~~~~~~~~~~~~~
 
@@ -104,12 +111,16 @@ def run(start_response, environ):
             sql_helper(
                 """
             select t.station, t.valid at time zone 'UTC' as valid,
-            f.valid at time zone 'UTC' as fx_valid, raw, is_tempo,
+            f.valid at time zone 'UTC' as fx_valid, raw,
+            case when f.ftype = 2 then true else false end as is_tempo,
             end_valid at time zone 'UTC' as fx_valid_end,
             sknt, drct, gust, visibility,
             presentwx, skyc, skyl, ws_level, ws_drct, ws_sknt, product_id,
+            ft.label as ftype,
             rank() OVER (PARTITION by t.station ORDER by t.valid DESC)
-            from taf t JOIN taf_forecast f on (t.id = f.taf_id)
+            from taf t
+              JOIN taf_forecast f on (t.id = f.taf_id)
+              JOIN taf_ftype ft on (f.ftype = ft.ftype)
             WHERE t.station = ANY(:stations) and t.valid >= :sts
             and t.valid < :ets order by t.valid asc, f.valid asc
             """

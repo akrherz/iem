@@ -24,19 +24,15 @@ $min2select = minuteSelect(0, "minute2");
 $hour2select = hourSelect(0, "hour2");
 
 $t->headextra = <<<EOM
-<style type="text/css">
-#map {
-    width: 100%;
-    height: 450px;
-    border: 2px solid black;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="taf.css">
 EOM;
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS Mainpage</a></li>
- <li class="active">Download TAF data</li>
-</ol>
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Download TAF data</li>
+  </ol>
+</nav>
 
 <p>The IEM attempts a high fidelity processing and archival of Terminal
 Aerodome Forecasts (TAF)s.  This page allows an atomic data download of the
@@ -125,7 +121,6 @@ within.</i>
 <tr><th>valid</th><td>TAF issuance timestamp</td></tr>
 <tr><th>fx_valid</th><td>Forecast Timestamp</td></tr>
 <tr><th>raw</th><td>Raw TAF string for this forecast time</td></tr>
-<tr><th>is_tempo</th><td>Is Tempo set?</td></tr>
 <tr><th>fx_end_valid</th><td>Forecast timestamp end time (when set).</td></tr>
 <tr><th>sknt</th><td>Wind Speed (kts)</td></tr>
 <tr><th>drct</th><td>Wind Direction (deg)</td></tr>
@@ -137,6 +132,9 @@ Greater than 6 miles is encoded as 6.01</td></tr>
 <tr><th>ws_drct</th><td>Wind Shift Direction (deg)</td></tr>
 <tr><th>ws_sknt</th><td>Wind Shift Wind Speed (kts)</td></tr>
 <tr><th>product_id</th><td>IEM NWS Text Product Identifier</td></tr>
+<tr><th>ftype</th><td>Forecast Type: Observation, "FM" Forecast,
+ "BECMG" Becoming, "PROB30" Probability 30, "PROB40" Probability 40, or
+ "TEMPO" Temporary</td></tr>
 </tbody>
 </table>
 
