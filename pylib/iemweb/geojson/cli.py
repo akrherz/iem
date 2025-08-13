@@ -34,6 +34,8 @@ https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
 
 """
 
+import csv
+import io
 from datetime import date
 
 import simplejson as json
@@ -44,14 +46,19 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
+from iemweb.util import get_ct
+
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None, description="JSONP callback function name."
+    callback: str | None = Field(
+        default=None,
+        description="JSONP callback function name.",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
     )
     dl: bool = Field(default=False, description="Force download of CSV file.")
     dt: date = Field(default=date.today(), description="Date of interest.")
@@ -226,7 +233,8 @@ def get_data(conn, ts, fmt):
             }
         )
     if fmt == "geojson":
-        return json.dumps(data)
+        # Ensure unicode is preserved; JSONP wrapping happens in application()
+        return json.dumps(data, ensure_ascii=False)
     cols = (
         "station,lon,lat,valid,name,state,wfo,high,high_record,"
         "high_record_years,"
@@ -238,31 +246,24 @@ def get_data(conn, ts, fmt):
         "snow_record,snow_record_years,snow_jul1_normal,snow_dec1_normal,"
         "snow_month_normal,snow_jul1_depart,average_sky_cover"
     )
-    res = cols + "\n"
+    # Build CSV robustly with proper quoting
+    output = io.StringIO()
+    writer = csv.writer(output)
+    header = cols.split(",")
+    writer.writerow(header)
     for feat in data["features"]:
-        for col in cols.split(","):
+        row = []
+        for col in header:
             val = feat["properties"][col]
             if isinstance(val, list | tuple):
-                res += f"{' '.join([str(s) for s in val])},"
+                row.append(" ".join(str(s) for s in val))
             else:
-                res += f"{val},"
-        res += "\n"
-    return res
+                row.append(val)
+        writer.writerow(row)
+    return output.getvalue()
 
 
-def get_ct(environ):
-    """Get the content-type."""
-    fmt = environ["fmt"]
-    if fmt == "geojson":
-        return "application/vnd.geo+json"
-    if fmt == "csv" and environ["dl"]:
-        return "application/octet-stream"
-    if fmt == "csv":
-        return "text/plain"
-    return "text/plain"
-
-
-def get_mckey(environ):
+def get_mckey(environ: dict) -> str:
     """Figure out the memcache key."""
     return f"/geojson/cli/{environ['dt']:%Y%m%d}?fmt={environ['fmt']}"
 
@@ -277,24 +278,26 @@ def get_mckey(environ):
 def application(environ, start_response):
     """see how we are called"""
     fmt = environ["fmt"]
+    callback = environ.get("callback")
 
-    headers = []
-    if fmt == "geojson":
-        headers.append(("Content-type", "application/vnd.geo+json"))
-    elif fmt == "csv" and environ["dl"]:
-        headers.extend(
-            [
-                ("Content-type", "application/octet-stream"),
-                (
-                    "Content-disposition",
-                    f"attachment; filename=cli{environ['dt']:%Y%m%d}.csv",
-                ),
-            ]
+    # Derive content-type from shared utility
+    headers = [("Content-type", get_ct(environ))]
+    # Add attachment header only when CSV download is requested
+    if fmt == "csv" and environ["dl"]:
+        headers.append(
+            (
+                "Content-disposition",
+                f"attachment; filename=cli{environ['dt']:%Y%m%d}.csv",
+            )
         )
-    else:
-        headers.append(("Content-type", "text/plain"))
 
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, environ["dt"], fmt)
+    # Optionally wrap GeoJSON in JSONP callback
+    if fmt == "geojson" and callback:
+        payload = f"{callback}({data});"
+    else:
+        payload = data
     start_response("200 OK", headers)
-    return data.encode("ascii")
+    # Use UTF-8 to support non-ASCII station names, etc.
+    return payload.encode("utf-8")

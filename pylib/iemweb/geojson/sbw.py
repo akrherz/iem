@@ -56,14 +56,17 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb.mlib import rectify_wfo, unrectify_wfo
+from iemweb.util import get_ct
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
+    callback: str | None = Field(
         default=None,
         description="Optional JSONP callback function name",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
     )
     ets: AwareDatetime = Field(
         default=None,
@@ -100,6 +103,11 @@ class Schema(CGIModel):
     wfos: ListOrCSVType = Field(
         default=None,
         description="Optional list of WFOs to limit the results to",
+    )
+    fmt: str = Field(
+        default="geojson",
+        description="Output format (fixed to geojson).",
+        pattern=r"^geojson$",
     )
 
     @field_validator("sts", "ets", mode="before")
@@ -287,7 +295,7 @@ def run(environ: dict):
                 )
             )
     res["count"] = len(res["features"])
-    return json.dumps(res)
+    return json.dumps(res, ensure_ascii=False)
 
 
 def get_mcexpire(environ: dict) -> int:
@@ -308,7 +316,6 @@ def get_mckey(environ):
         ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
     else:
         ts = ts.strftime(ISO8601)
-
     return (
         f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}|"
         f"{','.join(states)[:100]}"
@@ -318,14 +325,16 @@ def get_mckey(environ):
 @iemapp(
     help=__doc__,
     schema=Schema,
-    content_type="application/vnd.geo+json",
+    content_type=get_ct,
     memcachekey=get_mckey,
     memcacheexpire=get_mcexpire,
     parse_times=False,
 )
 def application(environ, start_response):
     """Main Workflow"""
-    headers = [("Content-type", "application/vnd.geo+json")]
+    headers = [("Content-type", get_ct(environ))]
     res = run(environ)
+    cb = environ.get("callback")
+    payload = f"{cb}({res});" if cb else res
     start_response("200 OK", headers)
-    return res.encode("utf-8")
+    return payload.encode("utf-8")

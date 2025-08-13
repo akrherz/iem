@@ -42,6 +42,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import get_ct
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -118,16 +120,6 @@ def dowork(valid) -> gpd.GeoDataFrame:
     return process_df(watches)
 
 
-def get_ct(environ) -> str:
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "geojson":
-        return "application/vnd.geo+json"
-    if fmt == "excel":
-        return "application/vnd.ms-excel"
-    return "text/csv"
-
-
 @iemapp(content_type=get_ct, help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
@@ -143,12 +135,16 @@ def application(environ, start_response):
         watches = dowork(ts)
 
     if fmt == "geojson":
-        headers = [("Content-type", "application/vnd.geo+json")]
+        headers = [("Content-type", get_ct(environ))]
         start_response("200 OK", headers)
-        return watches.to_json()
+        cb = environ.get("callback")
+        payload = watches.to_json()
+        if cb:
+            return f"{cb}({payload});"
+        return payload
     if fmt == "excel":
         headers = [
-            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-type", get_ct(environ)),
             ("Content-Disposition", "attachment; filename=watches.xls"),
         ]
         start_response("200 OK", headers)
@@ -157,7 +153,7 @@ def application(environ, start_response):
             return bio.getvalue()
 
     headers = [
-        ("Content-type", "text/csv"),
+        ("Content-type", get_ct(environ)),
         ("Content-Disposition", "attachment; filename=watches.csv"),
     ]
     start_response("200 OK", headers)

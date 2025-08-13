@@ -29,6 +29,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import get_ct
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -108,14 +110,6 @@ def run(year, fmt):
     return html
 
 
-def get_ct(environ):
-    """Figure out the content type."""
-    fmt = environ["format"]
-    if fmt == "json":
-        return "application/json"
-    return "text/html"
-
-
 def get_mckey(environ):
     """Figure out the key."""
     year = environ["year"]
@@ -135,10 +129,12 @@ def application(environ, start_response):
 
     year = environ["year"]
     fmt = environ["format"]
-    headers = [
-        ("Content-type", get_ct(environ)),
-    ]
+    headers = [("Content-type", get_ct(environ))]
 
     res = run(year, fmt)
+    # Optional JSONP wrapping for JSON responses
+    cb = environ.get("callback")
+    if fmt == "json" and cb:
+        res = f"{cb}({res});"
     start_response("200 OK", headers)
     return res

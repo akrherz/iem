@@ -80,6 +80,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.util import get_ct
+
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
 
@@ -242,16 +244,6 @@ def get_mckey(environ: dict) -> str | None:
             f"{ed}_{environ['limit']}"
         )
     return None
-
-
-def get_ct(environ: dict) -> str:
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "zip" or environ["dl"]:
-        return "application/octet-stream"
-    if fmt == "html":
-        return "text/html"
-    return "text/plain"
 
 
 @iemapp(

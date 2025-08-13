@@ -100,8 +100,8 @@ def get_description():
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
+    sdate: date = ctx["sdate"]
+    edate: date = ctx["edate"]
     if edate < sdate:
         sdate, edate = edate, sdate
     if f"{sdate:%m%d}" == "0229":
@@ -143,8 +143,14 @@ def plotter(ctx: dict):
                 "gddbase": gddbase,
                 "gddceil": gddceil,
             },
+            parse_dates="day",
             index_col="day",
         )
+    if df.empty:
+        raise NoDataFound("No data found for this station!")
+    # Trim the first year, if it does not start on sdate
+    if df.index[0].strftime("%m%d") != sdate.strftime("%m%d"):
+        df = df[df.index.year > df.index[0].year]
     df["precip_diff"] = df["oprecip"] - df["cprecip"]
     df[f"{glabel}_diff"] = df[f"o{glabel}"] - df[f"c{glabel}"]
 
@@ -200,11 +206,11 @@ def plotter(ctx: dict):
         x = df.loc[sts:ets, f"o{glabel}"].cumsum()
         if x.empty:
             continue
-        acc[(year - sdate.year), : len(x.index)] = x.values
+        acc[(year - sdate.year), : len(x.index)] = x.to_numpy()
         x = df.loc[sts:ets, "oprecip"].cumsum()
-        pacc[(year - sdate.year), : len(x.index)] = x.values
+        pacc[(year - sdate.year), : len(x.index)] = x.to_numpy()
         x = df.loc[sts:ets, "osdd86"].cumsum()
-        sacc[(year - sdate.year), : len(x.index)] = x.values
+        sacc[(year - sdate.year), : len(x.index)] = x.to_numpy()
 
         if year not in wantedyears:
             continue
@@ -215,7 +221,7 @@ def plotter(ctx: dict):
         if whichplots in ["gdd", "all"]:
             ax1.plot(
                 range(len(x.index)),
-                df.loc[sts:ets, "o" + glabel].cumsum().values,
+                df.loc[sts:ets, f"o{glabel}"].cumsum().values,
                 zorder=6,
                 color=color,
                 label=f"{yearlabel}",
