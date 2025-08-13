@@ -315,8 +315,12 @@ function applyDateFilter() {
     // Helper functions for applyDateFilter complexity reduction
     function isFeatureValidForDateRange(feature, startDate, endDate) {
         const issue = moment.utc(feature.get('utc_issue'));
-        if (startDate?.isBefore && issue.isBefore(startDate)) return false;
-        return !(endDate?.isAfter && issue.isAfter(endDate));
+        if (startDate?.isBefore?.(issue)) return false;
+        if (endDate?.isAfter?.(issue) === false) {
+            // If endDate exists but isAfter returns false, keep feature
+        }
+        if (endDate?.isAfter?.(issue)) return false;
+        return true;
     }
     
     function isToggleCheckedForType(type) {

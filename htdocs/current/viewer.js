@@ -161,7 +161,7 @@ function findFeatureByCid(cid) {
 
 function handleRWISClick(img) {
     const rwisMain = document.getElementById("rwismain");
-    if (rwisMain && img && img.src) {
+    if (rwisMain && img?.src) {
         rwisMain.src = img.src;
     }
 }

@@ -585,9 +585,11 @@ function showApiInfo() {
     const apiInfo = document.getElementById('api-info');
     const apiUrl = document.getElementById('api-url');
     
-    if (apiInfo && apiUrl && appState.currentApiUrl) {
+    if (apiInfo && apiUrl) {
+        if (appState.currentApiUrl) {
         apiUrl.textContent = appState.currentApiUrl;
         apiInfo.style.display = 'block';
+        }
     }
 };
 
@@ -960,15 +962,24 @@ function getStationStyle(feature) {
  */
 window.popupRow = function popupRow(label, value, yearsArr, yearFilter, valueSuffix = '', formatYearsFn = null) {
     let highlight = '';
-    if (
-        yearFilter &&
-        Array.isArray(yearsArr) &&
-        yearsArr.includes(parseInt(yearFilter))
-    ) {
-        highlight = ' style="background: #fff3cd; font-weight: bold;"';
+    if (yearFilter) {
+        if (yearsArr?.includes?.(parseInt(yearFilter))) {
+            highlight = ' style="background: #fff3cd; font-weight: bold;"';
+        }
     }
-    const yearsStr = formatYearsFn && yearsArr ? formatYearsFn(yearsArr) : (yearsArr ? yearsArr : '');
-    return `<tr${highlight}><td class="label">${label}:</td><td>${value}${valueSuffix}${yearsArr ? ` (${yearsStr})` : ''}</td></tr>`;
+    let yearsStr = '';
+    if (yearsArr) {
+        if (formatYearsFn) {
+            yearsStr = formatYearsFn(yearsArr);
+        } else {
+            yearsStr = yearsArr;
+        }
+    }
+    let suffixYears = '';
+    if (yearsArr) {
+        suffixYears = ` (${yearsStr})`;
+    }
+    return `<tr${highlight}><td class="label">${label}:</td><td>${value}${valueSuffix}${suffixYears}</td></tr>`;
 };
 
 function showStationPopup(feature, coordinate) {
@@ -1403,7 +1414,7 @@ function filterFeaturesByYear(features) {
                 
                 for (let i = 0; i < yearArrays.length; i++) {
                     const years = props[yearArrays[i]];
-                    if (Array.isArray(years) && years.includes(parseInt(appState.yearFilter))) {
+                    if (years?.includes?.(parseInt(appState.yearFilter))) {
                         return true;
                     }
                 }
@@ -1415,7 +1426,7 @@ function filterFeaturesByYear(features) {
     return features.filter((feature) => {
         const props = feature.getProperties();
         const years = props[yearField];
-        return Array.isArray(years) && years.includes(parseInt(appState.yearFilter));
+        return Boolean(years?.includes?.(parseInt(appState.yearFilter)));
     });
 }
 

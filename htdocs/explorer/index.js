@@ -319,7 +319,7 @@ function loadImage(elem) {
 
     // Show modal using Bootstrap (with fallback)
     let bootstrapModal = null;
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    if (typeof bootstrap !== 'undefined' && bootstrap?.Modal) {
         bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
     } else {
@@ -400,10 +400,9 @@ function loadAutoplot(container, uri, divid) {
     // Remove any previous content
     target.innerHTML = '';
     target.setAttribute('role', 'region');
-    const regionLabel =
-        container.dataset && container.dataset.station
-            ? `Data display for ${container.dataset.station}`
-            : 'Data display';
+    const regionLabel = container.dataset?.station
+        ? `Data display for ${container.dataset.station}`
+        : 'Data display';
     target.setAttribute('aria-label', regionLabel);
     target.setAttribute('aria-live', 'polite');
     target.setAttribute('aria-busy', 'true');
@@ -536,7 +535,7 @@ function resizeCharts(container) {
 
         // Check if this chart is within the current container
         const chartContainer = chart.renderTo;
-        if (container.contains && container.contains(chartContainer)) {
+    if (container.contains?.(chartContainer)) {
             const height = chartContainer.clientHeight;
             const width = chartContainer.clientWidth;
             chart.setSize(width, height);
@@ -628,7 +627,7 @@ function windowFactory(initdiv, classID) {
 
     // Create Bootstrap modal instance
     let bootstrapModal = null;
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    if (typeof bootstrap !== 'undefined' && bootstrap?.Modal) {
         bootstrapModal = new bootstrap.Modal(modal, {
             backdrop: false, // Allow multiple modals
             keyboard: true,

@@ -68,13 +68,22 @@ module.exports = [
                     "selector": "CallExpression > Identifier[name='undefined']:last-child",
                     "message": "Avoid explicitly passing 'undefined' as the last argument. Omit the argument instead - it defaults to undefined."
                 },
+                // Encourage optional chaining over && in conditionals
                 {
-                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='MemberExpression']",
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.right.type='MemberExpression']",
                     "message": "Use optional chaining (?.) instead of && for null checks before property access."
                 },
                 {
-                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.left.type='Identifier'][test.right.type='CallExpression'][test.right.callee.type='MemberExpression']",
+                    "selector": "IfStatement[test.type='LogicalExpression'][test.operator='&&'][test.right.type='CallExpression'][test.right.callee.type='MemberExpression']",
                     "message": "Use optional chaining (?.) instead of && for null checks before method calls."
+                },
+                {
+                    "selector": "ConditionalExpression[test.type='LogicalExpression'][test.operator='&&'][test.right.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && in conditional expressions for property access."
+                },
+                {
+                    "selector": "ConditionalExpression[test.type='LogicalExpression'][test.operator='&&'][test.right.type='CallExpression'][test.right.callee.type='MemberExpression']",
+                    "message": "Use optional chaining (?.) instead of && in conditional expressions for method calls."
                 },
                 {
                     "selector": "IfStatement[consequent.type='BlockStatement'][consequent.body.length=1][consequent.body.0.type='ReturnStatement'][consequent.body.0.argument.type='Literal'][consequent.body.0.argument.value=true][alternate.type='BlockStatement'][alternate.body.length=1][alternate.body.0.type='ReturnStatement'][alternate.body.0.argument.type='Literal'][alternate.body.0.argument.value=false]",
@@ -97,6 +106,7 @@ module.exports = [
             "one-var": ["error", "never"], // Require one variable declaration per line
             "init-declarations": ["error", "always"], // Require variables to be initialized when declared
             "object-shorthand": "warn", // Use shorthand property syntax for object literals (e.g., {foo} instead of {foo: foo})
+            
             
             // Variable shadowing detection
             "no-shadow": ["error", { 
@@ -174,6 +184,7 @@ module.exports = [
             "prefer-template": "error",
             "prefer-const": "error", // Use const declarations for variables that are never reassigned
             "object-shorthand": "error",
+            
             
             // Deprecated method warnings for modules too
             "no-restricted-syntax": [
