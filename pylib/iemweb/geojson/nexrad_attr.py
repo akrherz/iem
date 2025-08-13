@@ -46,6 +46,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.util import get_ct
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -173,14 +175,6 @@ def run(valid, fmt, conn: Connection = None):
     return data
 
 
-def get_ct(environ):
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "geojson":
-        return "application/vnd.geo+json"
-    return "text/csv"
-
-
 def get_mckey(environ):
     """Figure out our memcache key."""
     valid = environ["valid"]
@@ -203,4 +197,8 @@ def application(environ, start_response):
 
     res = run(environ["valid"], fmt)
     start_response("200 OK", headers)
+    if fmt == "geojson":
+        cb = environ.get("callback")
+        if cb:
+            return f"{cb}({res});".encode("ascii")
     return res.encode("ascii")

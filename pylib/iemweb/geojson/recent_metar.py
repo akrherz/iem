@@ -49,13 +49,20 @@ from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import get_ct
+
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: str | None = Field(
+        default=None,
+        description="JSONP callback function name.",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
+    )
     q: str = Field(
         "snowdepth",
         description=(
@@ -64,6 +71,7 @@ class Schema(CGIModel):
         ),
         pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A)$",
     )
+    fmt: str = Field(default="geojson", description="Output format")
 
 
 def trace(val):
@@ -99,7 +107,7 @@ def get_data(q):
         if q == "50":
             countrysql = "and country = 'US'"
     else:
-        return json.dumps(data)
+        return json.dumps(data, ensure_ascii=False)
     cursor.execute(
         f"""
     select id, network, name, st_x(geom) as lon, st_y(geom) as lat,
@@ -133,14 +141,16 @@ def get_data(q):
 
 
 @iemapp(
-    content_type="application/vnd.geo+json",
-    memcachekey=lambda req: f"/geojson/recent_metar?{req['q']}",
+    content_type=get_ct,
+    memcachekey=lambda req: f"/geojson/recent_metar?q={req['q']}",
     help=__doc__,
     schema=Schema,
 )
 def application(environ, start_response):
     """see how we are called"""
-    headers = [("Content-type", "application/vnd.geo+json")]
+    headers = [("Content-type", get_ct(environ))]
     res = get_data(environ["q"])
+    cb = environ.get("callback")
+    payload = f"{cb}({res});" if cb else res
     start_response("200 OK", headers)
-    return res.encode("ascii")
+    return payload.encode("utf-8")

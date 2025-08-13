@@ -54,6 +54,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import get_ct
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -130,7 +132,7 @@ def dowork(environ: dict) -> pd.DataFrame:
             conn,
             params=params,
             geom_col="geom",
-        )
+        )  # type: ignore
     if domain.empty:
         return outlooks
     # Now we need to merge the domain into the outlooks
@@ -151,16 +153,6 @@ def dowork(environ: dict) -> pd.DataFrame:
             outlooks[col] = outlooks[col].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     return outlooks.drop(columns=["geom"])
-
-
-def get_ct(environ) -> str:
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "json":
-        return "application/json"
-    if fmt == "excel":
-        return "application/vnd.ms-excel"
-    return "text/csv"
 
 
 @iemapp(
@@ -184,12 +176,16 @@ def application(environ, start_response):
             },
             "outlooks": outlooks.to_dict(orient="records"),
         }
-        headers = [("Content-type", "application/json")]
+        headers = [("Content-type", get_ct(environ))]
         start_response("200 OK", headers)
-        return json.dumps(res).replace("NaN", "null")
+        payload = json.dumps(res).replace("NaN", "null")
+        cb = environ.get("callback")
+        if cb:
+            return f"{cb}({payload});"
+        return payload
     if fmt == "excel":
         headers = [
-            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-type", get_ct(environ)),
             ("Content-Disposition", "attachment; filename=outlooks.xls"),
         ]
         start_response("200 OK", headers)
@@ -198,7 +194,7 @@ def application(environ, start_response):
             return bio.getvalue()
 
     headers = [
-        ("Content-type", "text/csv"),
+        ("Content-type", get_ct(environ)),
         ("Content-Disposition", "attachment; filename=outlooks.csv"),
     ]
     start_response("200 OK", headers)

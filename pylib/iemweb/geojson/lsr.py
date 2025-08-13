@@ -57,12 +57,18 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb.mlib import rectify_wfo, unrectify_wfo
+from iemweb.util import get_ct
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function")
+    callback: str | None = Field(
+        default=None,
+        description="JSONP callback function",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
+    )
     inc_ap: bool = Field(
         default=False,
         description="Include any associated warnings in the output.",
@@ -136,6 +142,11 @@ class Schema(CGIModel):
         description="Southern extent of spatial bounds. (degrees North)",
         ge=-90,
         le=90,
+    )
+    fmt: str = Field(
+        default="geojson",
+        description="Output format (fixed to geojson).",
+        pattern=r"^geojson$",
     )
 
     @model_validator(mode="after")
@@ -311,7 +322,7 @@ def get_mckey(environ: dict) -> str | None:
 
 
 @iemapp(
-    content_type="application/vnd.geo+json",
+    content_type=get_ct,
     help=__doc__,
     schema=Schema,
     parse_times=False,
@@ -330,7 +341,7 @@ def application(environ, start_response):
             environ["ets"] = utc()
         environ["sts"] = environ["ets"] - timedelta(hours=environ["hours"])
     # Go Main Go
-    headers = [("Content-type", "application/vnd.geo+json")]
+    headers = [("Content-type", get_ct(environ))]
     if environ["phenomena"] is not None:
         lsrdf = do_vtec(environ)
     elif environ["states"]:
@@ -354,5 +365,9 @@ def application(environ, start_response):
     lsrdf["magnitude"] = lsrdf["magnitude"].str.replace(
         r"\.0$", "", regex=True
     )
+    payload = lsrdf.to_json()
+    cb = environ.get("callback")
+    if cb:
+        payload = f"{cb}({payload});"
     start_response("200 OK", headers)
-    return lsrdf.to_json().encode("ascii")
+    return payload.encode("utf-8")

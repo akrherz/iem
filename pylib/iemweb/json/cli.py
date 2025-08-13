@@ -32,6 +32,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
+from iemweb.util import get_ct
+
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
@@ -217,13 +219,6 @@ def get_mckey(environ: dict):
     return f"/json/cli/{environ['station']}/{environ['year']}/{environ['fmt']}"
 
 
-def get_ct(environ: dict) -> str:
-    """Get the content type."""
-    if environ["fmt"] == "json":
-        return "application/json"
-    return "text/plain"
-
-
 @iemapp(
     help=__doc__,
     schema=Schema,
@@ -239,5 +234,9 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, station, year, fmt)
-    start_response("200 OK", [("Content-type", get_ct(environ))])
+    headers = [("Content-type", get_ct(environ))]
+    start_response("200 OK", headers)
+    cb = environ.get("callback")
+    if fmt == "json" and cb:
+        return f"{cb}({data});".encode("ascii")
     return data.encode("ascii")

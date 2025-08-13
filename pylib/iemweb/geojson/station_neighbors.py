@@ -32,11 +32,18 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import get_ct
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: str | None = Field(
+        default=None,
+        description="JSONP callback function name",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
+    )
     network: str = Field(..., description="IEM Network Code", max_length=30)
     station: str = Field(
         ..., description="IEM Station Identifier", max_length=30
@@ -49,6 +56,11 @@ class Schema(CGIModel):
     )
     only_online: bool = Field(
         False, description="Only include online stations"
+    )
+    fmt: str = Field(
+        default="geojson",
+        description="Output format (fixed to geojson).",
+        pattern=r"^geojson$",
     )
 
 
@@ -134,7 +146,7 @@ def run(conn, environ: dict):
                 geometry=json.loads(row["geojson"]),
             )
         )
-    return json.dumps(res)
+    return json.dumps(res, ensure_ascii=False)
 
 
 def get_mckey(environ) -> str:
@@ -148,14 +160,16 @@ def get_mckey(environ) -> str:
 @iemapp(
     memcachekey=get_mckey,
     memcacheexpire=86400,
-    content_type="application/vnd.geo+json",
+    content_type=get_ct,
     help=__doc__,
     schema=Schema,
 )
 def application(environ, start_response):
     """Main Workflow"""
-    headers = [("Content-type", "application/vnd.geo+json")]
+    headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("mesosite") as conn:
         res = run(conn, environ)
+    cb = environ.get("callback")
+    payload = f"{cb}({res});" if cb else res
     start_response("200 OK", headers)
-    return res
+    return payload.encode("utf-8")

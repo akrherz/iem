@@ -28,9 +28,8 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from simplejson import encoder
 
-encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+from iemweb.util import get_ct
 
 
 class Schema(CGIModel):
@@ -160,13 +159,6 @@ def get_mckey(environ):
     return f"/json/cf6/{environ['station']}/{environ['year']}/{environ['fmt']}"
 
 
-def get_ct(environ):
-    """Get the content type."""
-    if environ["fmt"] == "json":
-        return "application/json"
-    return "text/plain"
-
-
 @iemapp(
     help=__doc__,
     schema=Schema,
@@ -183,4 +175,8 @@ def application(environ, start_response):
         res = get_data(conn, station, year, environ["fmt"])
     headers = [("Content-type", get_ct(environ))]
     start_response("200 OK", headers)
+    # Optional JSONP wrapping for JSON responses
+    cb = environ.get("callback")
+    if environ["fmt"] == "json" and cb:
+        return f"{cb}({res});"
     return res

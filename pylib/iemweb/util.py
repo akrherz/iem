@@ -8,6 +8,31 @@ from TileCache.Service import wsgiHandler
 from iemweb import error_log
 
 
+def get_ct(environ: dict) -> str:
+    """Construct the content type based on our generalized patterns.
+
+    Supported fmt/format values: json, geojson, csv, html, excel, zip.
+    For json/geojson with a non-empty callback, return JavaScript for JSONP.
+    """
+    fmt = environ.get("fmt", environ.get("format", "json"))
+    # If JSONP is requested, serve JavaScript
+    if fmt in ("json", "geojson") and environ.get("callback"):
+        return "application/javascript; charset=utf-8"
+    if fmt == "geojson":
+        return "application/vnd.geo+json; charset=utf-8"
+    if fmt == "json":
+        return "application/json; charset=utf-8"
+    if fmt == "csv":
+        return "text/csv; charset=utf-8"
+    if fmt == "html":
+        return "text/html"
+    if fmt == "excel":
+        return "application/vnd.ms-excel"
+    if fmt == "zip":
+        return "application/octet-stream"
+    return "text/plain"
+
+
 def tms_handler(environ: dict, start_response: callable, service: dict):
     """Handler for TMS requests and subsequent failures."""
     try:

@@ -26,6 +26,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
+from iemweb.util import get_ct
+
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
@@ -33,8 +35,17 @@ class Schema(CGIModel):
     """See how we are called."""
 
     dt: date = Field(default=date.today(), description="Date to query for")
-    callback: str = Field(None, description="JSONP callback function name")
-    fmt: str = Field(description="Format of output", default="geojson")
+    callback: str | None = Field(
+        default=None,
+        description="JSONP callback function name.",
+        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+        max_length=64,
+    )
+    fmt: str = Field(
+        description="Format of output",
+        default="geojson",
+        pattern=r"^(geojson|csv)$",
+    )
 
 
 def departure(ob, climo):
@@ -133,7 +144,7 @@ def get_data(conn, ts, fmt):
             }
         )
     if fmt == "geojson":
-        return json.dumps(data)
+        return json.dumps(data, ensure_ascii=False)
     cols = (
         "station,valid,name,state,wfo,high,low,avg_temp,dep_temp,hdd,cdd,"
         "precip,snow,snowd_12z,avg_smph,max_smph,avg_drct,minutes_sunshine,"
@@ -156,14 +167,6 @@ def get_mckey(environ: dict) -> str:
     return f"/geojson/cf6/{environ['dt']:%Y%m%d}?fmt={environ['fmt']}"
 
 
-def get_ct(environ: dict) -> str:
-    """Figure out our content type."""
-    fmt = environ["fmt"]
-    if fmt == "geojson":
-        return "application/vnd.geo+json"
-    return "text/plain"
-
-
 @iemapp(
     help=__doc__,
     schema=Schema,
@@ -175,8 +178,14 @@ def application(environ, start_response):
     """see how we are called"""
     dt = environ["dt"]
     fmt = environ["fmt"]
+    callback = environ.get("callback")
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("iem") as conn:
-        res = get_data(conn, dt, fmt)
+        data = get_data(conn, dt, fmt)
+    # Optionally wrap GeoJSON in JSONP callback
+    if fmt == "geojson" and callback:
+        payload = f"{callback}({data});"
+    else:
+        payload = data
     start_response("200 OK", headers)
-    return res
+    return payload.encode("utf-8")
