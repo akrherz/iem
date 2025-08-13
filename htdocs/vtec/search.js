@@ -441,9 +441,9 @@ function createPhenomenaSummary(tableData, containerId) {
                                  title="Click to filter table by ${combo.phenomena} / ${combo.significance} (${combo.count} events)">
                                 <div class="phenomena-badge">
                                     <span class="fw-bold">${combo.phenomena}</span> / <span class="fw-bold">${combo.significance}</span>
-                                    ${combo.phenomena_code && combo.significance_code ? 
-                                        `<span class="badge bg-secondary ms-1">${combo.phenomena_code}.${combo.significance_code}</span>` : 
-                                        ''
+                                    ${combo.phenomena_code?.length && combo.significance_code?.length
+                                        ? `<span class="badge bg-secondary ms-1">${combo.phenomena_code}.${combo.significance_code}</span>`
+                                        : ''
                                     }
                                     <span class="badge bg-primary ms-2">${combo.count}</span>
                                 </div>

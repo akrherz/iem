@@ -207,8 +207,9 @@ def do_hrrr(ts: datetime) -> np.ndarray | None:
 def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
     """Do the necessary work."""
     avgval = np.ma.mean(srad)
-    if avgval < 50:
-        LOG.info("Average value is %.2f and below 50, skipping", avgval)
+    # 50 was found to be too high in Europe
+    if avgval < 10:
+        LOG.warning("Average value is %.2f and below 10, skipping", avgval)
         return False
 
     ds = xr.Dataset(

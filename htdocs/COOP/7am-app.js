@@ -286,9 +286,11 @@ function buildUI() {
         minusDayElement.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent form submission
             const datepicker = document.getElementById('datepicker');
-            if (datepicker instanceof HTMLInputElement && datepicker.value) {
-                datepicker.value = addDaysToDateString(datepicker.value, -1);
-                updateDate();
+            if (datepicker instanceof HTMLInputElement) {
+                if (datepicker.value) {
+                    datepicker.value = addDaysToDateString(datepicker.value, -1);
+                    updateDate();
+                }
             }
         });
     }
@@ -298,9 +300,11 @@ function buildUI() {
         plusDayElement.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent form submission
             const datepicker = document.getElementById('datepicker');
-            if (datepicker instanceof HTMLInputElement && datepicker.value) {
-                datepicker.value = addDaysToDateString(datepicker.value, 1);
-                updateDate();
+            if (datepicker instanceof HTMLInputElement) {
+                if (datepicker.value) {
+                    datepicker.value = addDaysToDateString(datepicker.value, 1);
+                    updateDate();
+                }
             }
         });
     }
@@ -312,9 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get the date from the datepicker after parseURLParams() has run
     // This will be either the URL date or today's date (set by buildUI)
     const datepickerElement = document.getElementById('datepicker');
-    const currentDate = datepickerElement instanceof HTMLInputElement && datepickerElement.value 
-        ? datepickerElement.value 
-        : formatDateISO(new Date());
+    let currentDate = formatDateISO(new Date());
+    if (datepickerElement instanceof HTMLInputElement) {
+        if (datepickerElement.value) {
+            currentDate = datepickerElement.value;
+        }
+    }
     
     cocorahsLayer = makeVectorLayer(currentDate, 'IA CoCoRaHS Reports', 'cocorahs');
     coopLayer = makeVectorLayer(currentDate, 'NWS COOP Reports', 'coop');

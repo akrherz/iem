@@ -101,17 +101,17 @@ def export_shapefile(txn, valid):
     os.chdir("/tmp")
     shp = shapefile.Writer("iaroad_cond")
     shp.field("SEGID", "N", 6, 0)
-    shp.field("MAJOR", "S", 10, 0)
-    shp.field("MINOR", "S", 128, 0)
+    shp.field("MAJOR", "C", 10, 0)
+    shp.field("MINOR", "C", 128, 0)
     shp.field("US1", "N", 4, 0)
     shp.field("ST1", "N", 4, 0)
     shp.field("INT1", "N", 4, 0)
     shp.field("TYPE", "N", 4, 0)
-    shp.field("VALID", "S", 12, 0)
+    shp.field("VALID", "C", 12, 0)
     shp.field("COND_CODE", "N", 4, 0)
-    shp.field("COND_TXT", "S", 120, 0)
-    shp.field("BAN_TOW", "S", 1, 0)
-    shp.field("LIM_VIS", "S", 1, 0)
+    shp.field("COND_TXT", "C", 120, 0)
+    shp.field("BAN_TOW", "C", 1, 0)
+    shp.field("LIM_VIS", "C", 1, 0)
 
     txn.execute(
         "select b.*, c.*, b.geom from roads_base b, roads_current c "

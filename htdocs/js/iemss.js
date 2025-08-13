@@ -335,7 +335,7 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
     const popup = new ol.Overlay({ element, positioning: 'bottom-center', stopEvent: false });
     mapInstance.addOverlay(popup);
     let popoverInstance = null;
-    if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+    if (typeof bootstrap !== 'undefined' && bootstrap?.Popover) {
         popoverInstance = new bootstrap.Popover(element, {
             placement: 'top', html: true,
             content: () => document.getElementById('popover-content').innerHTML

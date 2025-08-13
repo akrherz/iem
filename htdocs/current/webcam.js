@@ -328,8 +328,9 @@ Ext.onReady(() => {
 
     const task = {
         run() {
-            if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
-                Ext.getCmp("timemode").realtime) {
+            // Modernization: optional chaining instead of duplicated && null-guard (Rule: optional-chaining)
+            const timemodeCmp = Ext.getCmp("timemode");
+            if (imagestore.data.length > 0 && timemodeCmp?.realtime) {
                 imagestore.reload({
                     add: false,
                     params: {
