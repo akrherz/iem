@@ -231,9 +231,9 @@ $counts = [
 foreach ($json['results'] as $key => $val) {
     $ph = $val["phenomena"];
     $eventid = $val["eventid"];
-    
+    $countkey = sprintf("%s_%s", $val["wfo"], $eventid);
     // Track unique events per phenomena type
-    $counts[$ph]["events"][$eventid] = 1;
+    $counts[$ph]["events"][$countkey] = 1;
     
     // Track tag usage per event (prevents double counting when same event has multiple records)
     foreach ($counts[$ph]["tags"] as $tagName => $tagCounts) {
@@ -245,7 +245,7 @@ foreach ($json['results'] as $key => $val) {
             }
             
             // Only count once per event (prevents double counting)
-            $counts[$ph]["tags"][$tagName][$tagValue][$eventid] = 1;
+            $counts[$ph]["tags"][$tagName][$tagValue][$countkey] = 1;
         }
     }
 
