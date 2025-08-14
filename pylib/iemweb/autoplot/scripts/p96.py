@@ -7,7 +7,7 @@ be patient.  This chart attempts to address the question of if computing
 are commmon when computing this metric for high or low temperature.
 """
 
-from datetime import date
+from datetime import date, timezone
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -73,7 +73,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     rows = []
     for hr in range(24):
         ts = lts.replace(hour=hr)
-        zhour = ts.astimezone(ZoneInfo("UTC")).hour
+        zhour = ts.astimezone(timezone.utc).hour
         arr = np.reshape(data[zhour : (0 - 24 + zhour)], (days - 1, 24))
         tots = np.sum(arr, 1)
         cnts[hr] = np.sum(np.where(tots > 0, 1, 0))

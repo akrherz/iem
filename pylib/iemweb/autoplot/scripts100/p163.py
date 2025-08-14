@@ -15,8 +15,7 @@ to use some heuristics to associate those with an actual political
 boundary.  This fails about one percent of the time.
 """
 
-from datetime import timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta, timezone
 
 import numpy as np
 import pandas as pd
@@ -174,8 +173,8 @@ def get_count_bins(df: pd.DataFrame, varname: str):
 def plotter(ctx: dict):
     """Go"""
     params = {
-        "sts": ctx["sdate"].replace(tzinfo=ZoneInfo("UTC")),
-        "ets": ctx["edate"].replace(tzinfo=ZoneInfo("UTC")),
+        "sts": ctx["sdate"].replace(tzinfo=timezone.utc),
+        "ets": ctx["edate"].replace(tzinfo=timezone.utc),
     }
     varname = ctx["var"]
     by = ctx["by"]

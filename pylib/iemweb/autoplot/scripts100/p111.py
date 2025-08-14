@@ -1,4 +1,8 @@
-"""Top 30 24-Hour Precipitation Events."""
+"""Top 30 24-Hour Precipitation Events.
+
+<a href="/plotting/auto/?q=134">Autoplot 134</a> is a more functional interface
+than this legacy "climodat" based one.
+"""
 
 from datetime import date
 

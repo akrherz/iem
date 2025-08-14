@@ -7,7 +7,6 @@ from pyiem.database import get_dbconnc
 
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
-    17,  # is referenced by canonical page
     31,  # not useful
     33,  # too pidgeon-holed
     68,  # nws unique VTEC types per year
@@ -15,8 +14,8 @@ NO_FEATURES = [
     91,  # hated by myself and the general public
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
-    111,
-    112,
+    111,  # Duplicate of 134
+    112,  # no plot option
     114,
     117,
     118,

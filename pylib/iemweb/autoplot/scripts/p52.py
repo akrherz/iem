@@ -13,7 +13,7 @@ there is no hallow area, these are events that went into effect immediately
 at issuance.  For example, Severe Thunderstorm Warnings are all this way.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -208,7 +208,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No events were found for WFO and time period.")
     for col in date_cols:
-        df[col] = df[col].dt.tz_localize(ZoneInfo("UTC"))
+        df[col] = df[col].dt.tz_localize(timezone.utc)
     df["endts"] = df[["maxexpire", "maxinitexpire"]].max(axis=1)
     # Flood warnings, for example, could have an issuance until-further-notice
     # which is not helpful for this plot, so don't allow a maxinitexpire

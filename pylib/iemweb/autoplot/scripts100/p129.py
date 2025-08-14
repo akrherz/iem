@@ -10,7 +10,7 @@ import calendar
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -70,15 +70,24 @@ def add_ctx(ctx):
         level = int(level)
     with get_sqlalchemy_conn("coop") as conn:
         monthly = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         SELECT month, year,
-        sum(case when {varname} {comp} %s then 1 else 0 end) as hits,
-        count(*) from alldata WHERE station = %s {plimit}
-        and day < %s
+        sum(case when {varname} {comp} :level then 1 else 0 end) as hits,
+        count(*) from alldata WHERE station = :station {plimit}
+        and day < :day
         GROUP by year, month ORDER by year desc, month ASC
         """,
+                varname=varname,
+                comp=comp,
+                plimit=plimit,
+            ),
             conn,
-            params=(level, station, date.today().replace(day=1)),
+            params={
+                "level": level,
+                "station": station,
+                "day": date.today().replace(day=1),
+            },
             index_col=None,
         )
     if monthly.empty:
@@ -111,12 +120,7 @@ def add_ctx(ctx):
         level,
         units,
     )
-    ctx["subtitle"] = ("for [%s] %s (%s-%s)") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        bs.year,
-        date.today().year,
-    )
+    ctx["subtitle"] = f"for {ctx['_sname']} ({bs:%Y}-{date.today():%Y})"
     return ctx
 
 

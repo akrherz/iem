@@ -8,7 +8,7 @@ shown in the date can be ignored.
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -39,23 +39,23 @@ def get_data(ctx):
     offset = int((dt - jul1).days)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         with obs as (
             select day,
             day -
             ((case when month > 6 then year else year - 1 end)||'-07-01')::date
             as doy,
             (case when month > 6 then year else year - 1 end) as eyear, snow
-            from alldata where station = %s)
+            from alldata where station = :station)
 
             SELECT eyear,
-            sum(case when doy < %s then snow else 0 end) as before,
-            sum(case when doy >= %s then snow else 0 end) as after,
+            sum(case when doy < :offset then snow else 0 end) as before,
+            sum(case when doy >= :offset then snow else 0 end) as after,
             sum(snow) as total from obs
             GROUP by eyear ORDER by eyear ASC
-        """,
+        """),
             conn,
-            params=(station, offset, offset),
+            params={"station": station, "offset": offset},
             index_col="eyear",
         )
     df = df[df["total"] > 0]
@@ -141,13 +141,13 @@ def plotter(ctx: dict):
         df["before"].mean(),
         color="r",
         lw=2,
-        label="Before Avg: %.1f" % (df["before"].mean(),),
+        label=f"Before Avg: {df['before'].mean():.1f}",
     )
     ax.axhline(
         df["after"].mean(),
         color="b",
         lw=2,
-        label="After Avg: %.1f" % (df["after"].mean(),),
+        label=f"After Avg: {df['after'].mean():.1f}",
     )
     ax.legend(ncol=2, fontsize=12)
     return fig, df

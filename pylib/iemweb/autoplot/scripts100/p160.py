@@ -16,7 +16,7 @@ hide and show the various lines.</p>
 easily download the raw data in bulk.</p>
 """
 
-from datetime import timedelta
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -41,7 +41,7 @@ PDICT = {
     "fx": "Just plot forecasts",
     "obs": "Just plot observations",
 }
-UTC = ZoneInfo("UTC")
+UTC = timezone.utc
 
 
 def get_description():

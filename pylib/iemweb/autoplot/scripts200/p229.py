@@ -16,7 +16,7 @@ from datetime import timedelta, timezone
 import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, Z_CLIP2, state_bounds
@@ -81,17 +81,17 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("nldn") as conn:
         giswkt = f"LINESTRING({bnds[0]} {bnds[1]}, {bnds[2]} {bnds[3]})"
         df = gpd.read_postgis(
-            """
+            sql_helper("""
             SELECT ST_Transform(geom, 9311) as geo
-            from nldn_all WHERE valid >= %s and valid < %s and
+            from nldn_all WHERE valid >= :sts and valid < :ets and
             ST_Contains(
-                ST_SetSRID(ST_Envelope(%s::geometry),
+                ST_SetSRID(ST_Envelope(:giswkt ::geometry),
                 4326), geom)
-            """,
+            """),
             conn,
-            params=(sts, ets, giswkt),
+            params={"sts": sts, "ets": ets, "giswkt": giswkt},
             geom_col="geo",
-        )
+        )  # type: ignore
     with get_sqlalchemy_conn("postgis") as conn:
         statedf = gpd.read_postgis(
             "SELECT st_transform(the_geom, 9311) as geo from states "

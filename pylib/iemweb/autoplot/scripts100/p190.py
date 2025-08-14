@@ -7,7 +7,7 @@ import calendar
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 
@@ -65,7 +65,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH data as (
             SELECT sday, day, year,
             rank() OVER (PARTITION by sday ORDER by high DESC NULLS LAST)
@@ -78,16 +78,16 @@ def plotter(ctx: dict):
                 as min_low_rank,
             rank() OVER (PARTITION by sday ORDER by precip DESC NULLS LAST)
                 as max_precip_rank
-            from alldata WHERE station = %s)
+            from alldata WHERE station = :station)
         SELECT *,
         extract(doy from
         ('2000-'||substr(sday, 1, 2)||'-'||substr(sday, 3, 2))::date) as doy
         from data WHERE max_high_rank = 1 or min_high_rank = 1 or
         max_low_rank = 1 or min_low_rank = 1 or max_precip_rank = 1
         ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:
@@ -97,15 +97,15 @@ def plotter(ctx: dict):
     fig = figure(apctx=ctx, title=title)
     axwidth = 0.265
     x0 = 0.04
-    ax = fig.add_axes([x0, 0.54, axwidth, 0.35])
+    ax = fig.add_axes((x0, 0.54, axwidth, 0.35))
     magic(fig, ax, df, "max_high_rank", "Maximum High (warm)", ctx)
-    ax = fig.add_axes([x0, 0.09, axwidth, 0.35])
+    ax = fig.add_axes((x0, 0.09, axwidth, 0.35))
     magic(fig, ax, df, "min_high_rank", "Minimum High (cold)", ctx)
-    ax = fig.add_axes([x0 + 0.32, 0.54, axwidth, 0.35])
+    ax = fig.add_axes((x0 + 0.32, 0.54, axwidth, 0.35))
     magic(fig, ax, df, "max_low_rank", "Maximum Low (warm)", ctx)
-    ax = fig.add_axes([x0 + 0.32, 0.09, axwidth, 0.35])
+    ax = fig.add_axes((x0 + 0.32, 0.09, axwidth, 0.35))
     magic(fig, ax, df, "min_low_rank", "Minimum Low (cold)", ctx)
-    ax = fig.add_axes([x0 + 0.64, 0.09, axwidth, 0.35])
+    ax = fig.add_axes((x0 + 0.64, 0.09, axwidth, 0.35))
     magic(fig, ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
 
     return fig, df
