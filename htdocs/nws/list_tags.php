@@ -10,6 +10,7 @@ $t = new MyView();
 
 $year = get_int404("year", date("Y"));
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
+$state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
 $opt = isset($_REQUEST["opt"]) ? xssafe($_REQUEST["opt"]) : "bywfo";
 $damagetag = isset($_REQUEST["damagetag"]) ? xssafe($_REQUEST["damagetag"]) : "considerable";
 
@@ -24,6 +25,7 @@ if (!array_key_exists($damagetag, $damagetags)) {
 
 $bywfochecked = "";
 $bydamagetagchecked = "";
+$bystatechecked = "";
 if ($opt == "bywfo") {
     $bywfochecked = "checked";
     $jsonuri = sprintf(
@@ -33,6 +35,15 @@ if ($opt == "bywfo") {
         $year
     );
     $title = "NWS $wfo issued Impact Based Warning Tags for $year";
+} else if ($opt == "bystate") {
+    $bystatechecked = "checked";
+    $jsonuri = sprintf(
+        "%s/json/ibw_tags.py?state=%s&year=%s",
+        $INTERNAL_BASEURL,
+        $state,
+        $year
+    );
+    $title = "NWS issued Impact Based Warning Tags for $state during $year";
 } else {
     $bydamagetagchecked = "checked";
     $jsonuri = sprintf(
@@ -52,7 +63,7 @@ $t->headextra = <<<EOM
 EOM;
 
 $t->jsextra = <<<EOM
-<script src="list_tags.module.js" type="module"></script>
+<script src="list_tags.module.js?v=2" type="module"></script>
 EOM;
 
 
@@ -323,6 +334,7 @@ $tselect = make_select("damagetag", $damagetag, $damagetags);
 
 $yselect = yearSelect(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
+$sselect = stateSelect($state);
 $gentime = $json["gentime"];
 
 $t->content = <<<EOM
@@ -350,81 +362,74 @@ $t->content = <<<EOM
      </div>
      
      <form method="GET" name="one" class="mb-4">
-         <div class="card">
+         <div class="card form-compact">
              <div class="card-header bg-light">
-                 <h5 class="card-title mb-0">
-                     <i class="bi bi-funnel-fill me-2"></i>Filter Options
-                 </h5>
+                 <h5 class="card-title mb-0 d-flex align-items-center"><i class="bi bi-funnel-fill me-2"></i>Filter Options</h5>
              </div>
              <div class="card-body">
-                 <div class="row g-3">
-                     <div class="col-lg-4">
-                         <fieldset class="border rounded p-3 h-100">
-                             <legend class="fs-6 fw-bold text-primary">Search Criteria</legend>
-                             
-                             <div class="form-check mb-3">
-                                 <input type="radio" name="opt" value="bywfo" id="bywfo" 
-                                        class="form-check-input" {$bywfochecked}> 
-                                 <label for="bywfo" class="form-check-label fw-medium">
-                                     <i class="bi bi-geo-alt-fill me-1"></i>By Weather Forecast Office (WFO)
-                                 </label>
-                             </div>
-                             <div class="mb-3 ms-4">
-                                 <label for="wfo" class="form-label visually-hidden">Select WFO</label>
-                                 {$wselect}
-                             </div>
-
-                             <div class="form-check mb-3">
-                                 <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" 
-                                        class="form-check-input" {$bydamagetagchecked}> 
-                                 <label for="bydamagetag" class="form-check-label fw-medium">
-                                     <i class="bi bi-exclamation-triangle-fill me-1"></i>By Damage Tag Level
-                                 </label>
-                             </div>
-                             <div class="mb-3 ms-4">
-                                 <label for="damagetag" class="form-label visually-hidden">Select Damage Tag</label>
-                                 {$tselect}
+                 <div class="row g-3 align-items-stretch">
+                     <!-- Search Criteria -->
+                     <div class="col-lg-7">
+                         <fieldset class="border rounded p-3 h-100" aria-labelledby="criteriaLegend">
+                             <legend id="criteriaLegend" class="fs-6 fw-bold text-primary mb-2">Search Criteria</legend>
+                             <div class="criteria-options">
+                                 <div class="criteria-item mb-2">
+                                     <div class="form-check">
+                                         <input type="radio" name="opt" value="bywfo" id="bywfo" class="form-check-input" {$bywfochecked}>
+                                         <label for="bywfo" class="form-check-label fw-medium"><i class="bi bi-building me-1"></i>By WFO</label>
+                                     </div>
+                                     <div class="criteria-select">{$wselect}</div>
+                                 </div>
+                                 <div class="criteria-item mb-2">
+                                     <div class="form-check">
+                                         <input type="radio" name="opt" value="bystate" id="bystate" class="form-check-input" {$bystatechecked}>
+                                         <label for="bystate" class="form-check-label fw-medium"><i class="bi bi-map me-1"></i>By State</label>
+                                     </div>
+                                     <div class="criteria-select">{$sselect}</div>
+                                 </div>
+                                 <div class="criteria-item">
+                                     <div class="form-check">
+                                         <input type="radio" name="opt" value="bydamagetag" id="bydamagetag" class="form-check-input" {$bydamagetagchecked}>
+                                         <label for="bydamagetag" class="form-check-label fw-medium"><i class="bi bi-exclamation-triangle me-1"></i>By Damage Tag</label>
+                                     </div>
+                                     <div class="criteria-select">{$tselect}</div>
+                                 </div>
                              </div>
                          </fieldset>
                      </div>
-                     
-                     <div class="col-lg-3">
-                         <fieldset class="border rounded p-3 h-100">
-                             <legend class="fs-6 fw-bold text-primary">Time Period</legend>
-                             <label for="year" class="form-label fw-medium">
-                                 <i class="bi bi-calendar3 me-1"></i>Select Year:
-                             </label>
+                     <!-- Year -->
+                     <div class="col-lg-2">
+                         <fieldset class="border rounded p-3 h-100" aria-labelledby="yearLegend">
+                             <legend id="yearLegend" class="fs-6 fw-bold text-primary mb-2">Year</legend>
+                             <label for="year" class="visually-hidden">Select Year</label>
                              {$yselect}
                          </fieldset>
                      </div>
-                     
-                     <div class="col-lg-2 d-flex align-items-end">
-                         <button type="submit" class="btn btn-primary btn-lg w-100">
-                             <i class="bi bi-search me-2"></i>Generate Report
-                         </button>
-                     </div>
-                     
-                     <div class="col-lg-3">
-                         <div class="card bg-light h-100">
-                             <div class="card-body">
-                                 <h6 class="card-title">
-                                     <i class="bi bi-download me-1"></i>Data Access
-                                 </h6>
-                                 <p class="card-text small mb-2">
-                                     JSON webservice available at:
-                                 </p>
-                                 <code class="small text-break">{$publicjsonuri}</code>
-                                 <div class="mt-2">
-                                     <a href="/json/" class="btn btn-outline-secondary btn-sm">
-                                         <i class="bi bi-info-circle me-1"></i>API Docs
-                                     </a>
-                                 </div>
+                     <!-- Run Action -->
+                     <div class="col-lg-3 d-flex flex-column">
+                         <div class="action-area h-100 d-flex flex-column border rounded p-3">
+                             <div class="small text-muted mb-2">When ready:</div>
+                             <div class="mt-auto">
+                                 <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>Generate</button>
                              </div>
                          </div>
                      </div>
                  </div>
              </div>
          </div>
+         <div class="data-access-box mt-2 small">
+             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                 <div class="d-flex align-items-center fw-semibold text-primary"><i class="bi bi-download me-2"></i>Data Access</div>
+                 <div class="flex-grow-1">
+                     <div class="text-muted">JSON endpoint:</div>
+                     <code class="small text-break d-block">{$publicjsonuri}</code>
+                 </div>
+                 <div>
+                     <a href="/json/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-info-circle me-1"></i>API Docs</a>
+                 </div>
+             </div>
+         </div>
+     </form>
      </form>
      
      <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">

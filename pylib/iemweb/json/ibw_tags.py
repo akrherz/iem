@@ -1,4 +1,4 @@
-""".. title:: Impact Based Warning Tags by WFO and Year
+""".. title:: Impact Based Warning Tags by WFO/State and Year
 
 Return to `API Services </api/#json>`_
 
@@ -6,11 +6,30 @@ Documentation for /json/ibw_tags.py
 -----------------------------------
 
 This service returns a JSON representation of Impact Based Warning Tags
-(IBW) for a given year and WFO identifier.
+(IBW) for a given year and WFO/State identifier.
+
+Changelog
+---------
+
+- 2025-08-14: Added support to query by state
+
+Usage Examples
+--------------
+
+Provide all 2024 warnings from Omaha with the CONSIDERABLE damage tag.
+
+https://mesonet.agron.iastate.edu/json/ibw_tags.py?\
+year=2024&wfo=OAX&damagetag=CONSIDERABLE
+
+Provide all 2024 warnings for Iowa with the destructive damage tag.
+
+https://mesonet.agron.iastate.edu/json/ibw_tags.py?\
+year=2024&state=IA&damagetag=DESTRUCTIVE
 
 """
 
 import json
+from datetime import datetime
 
 from pydantic import Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -29,43 +48,60 @@ class Schema(CGIModel):
 
     callback: str = Field(None, description="JSONP Callback Name")
     damagetag: str = Field(None, description="Damage Tag", max_length=20)
+    state: str = Field(
+        None,
+        description="State identifier is used first if wfo provided too",
+        max_length=2,
+    )
     wfo: str = Field(None, description="WFO Identifier", max_length=4)
     year: int = Field(..., description="Year to query", ge=2000, le=utc().year)
 
     @model_validator(mode="after")
     def validate_wfo_or_damagetag(self):
         """Ensure we have either a WFO or a damage tag"""
-        if self.wfo is None and self.damagetag is None:
-            raise ValueError("Either a WFO or damage tag must be provided")
+        if self.wfo is None and self.damagetag is None and self.state is None:
+            raise ValueError(
+                "Either a WFO, damage tag, or state must be provided"
+            )
         return self
 
 
-def ptime(val):
+def ptime(val: datetime | None) -> str | None:
     """Pretty print a timestamp"""
     if val is None:
         return val
     return val.strftime(ISO8601)
 
 
-def run(wfo, damagetag, year):
+def run(
+    wfo: str | None, state: str | None, damagetag: str | None, year: int
+) -> dict:
     """Actually generate output"""
     params = {
         "wfo": wfo,
+        "state": state,
         "year": year,
     }
-    wfolimiter = " w.wfo = :wfo and "
+    sbw_wfolimiter = " w.wfo = :wfo and "
+    cbw_wfolimiter = " w.wfo = :wfo and "
     damagelimiter = ""
     if damagetag is not None:
         damagetag = damagetag.upper()
         assert damagetag in DAMAGE_TAGS
-        wfolimiter = ""
+        sbw_wfolimiter = ""
+        cbw_wfolimiter = ""
         params["damagetag"] = damagetag
         damagelimiter = (
             " (damagetag = :damagetag or floodtag_damage = :damagetag) and "
         )
+    if state is not None:
+        cbw_wfolimiter = " substr(w.ugc, 1, 2) = :state and "
+        sbw_wfolimiter = ""  # Best we can do, the join cleans up our mess
+
     res = {
         "year": year,
         "wfo": wfo,
+        "state": state,
         "generated_at": utc().strftime(ISO8601),
         "gentime": utc().strftime(ISO8601),
         "results": [],
@@ -82,7 +118,7 @@ def run(wfo, damagetag, year):
      status, windtag, hailtag, tornadotag, tml_sknt, damagetag, wfo,
      floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
      floodtag_dam, floodtag_leeve, waterspouttag, product_id
-     from sbw w WHERE {damagelimiter} {wfolimiter}
+     from sbw w WHERE {damagelimiter} {sbw_wfolimiter}
      phenomena in ('SV', 'TO', 'FF', 'MA')
      and w.vtec_year = :year and significance = 'W' and status != 'EXP' and
      status != 'CAN'
@@ -91,7 +127,7 @@ def run(wfo, damagetag, year):
  countybased as (
     select string_agg( u.name || ' ['||u.state||']', ', ') as locations,
     eventid, phenomena, w.wfo from warnings w JOIN ugcs u
-    ON (u.gid = w.gid) WHERE {wfolimiter}
+    ON (u.gid = w.gid) WHERE {cbw_wfolimiter}
     w.vtec_year = :year and significance = 'W' and
     phenomena in ('SV', 'TO', 'FF', 'MA')
     and eventid is not null GROUP by w.wfo, eventid, phenomena
@@ -106,7 +142,8 @@ def run(wfo, damagetag, year):
  c.phenomena = s.phenomena and c.wfo = s.wfo)
  ORDER by s.wfo ASC, eventid ASC, utc_polygon_begin ASC
      """,
-                wfolimiter=wfolimiter,
+                sbw_wfolimiter=sbw_wfolimiter,
+                cbw_wfolimiter=cbw_wfolimiter,
                 damagelimiter=damagelimiter,
             ),
             params,
@@ -156,24 +193,14 @@ def run(wfo, damagetag, year):
     return json.dumps(res)
 
 
-def get_mckey(environ):
-    """ "Get the key."""
-    damagetag = environ["damagetag"]
-    year = environ["year"]
-    wfo = environ["wfo"]
-    return (
-        f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"
-    )
-
-
-@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
     year = environ["year"]
     wfo = environ["wfo"]
     damagetag = environ["damagetag"]
-
-    res = run(wfo, damagetag, year)
+    state = environ["state"]
+    res = run(wfo, state, damagetag, year)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return res

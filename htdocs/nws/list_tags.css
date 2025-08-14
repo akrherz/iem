@@ -238,3 +238,57 @@ code {
 .bi {
     vertical-align: -0.125em;
 }
+
+/* Compact form layout adjustments */
+/* Year select inside its own column now */
+.form-compact select#year { max-width: 100%; }
+
+.criteria-options {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.criteria-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem 1rem;
+    padding: .35rem .5rem .5rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .375rem;
+    background: rgba(var(--bs-light-rgb), .6);
+}
+
+.criteria-item:hover {
+    background: rgba(var(--bs-primary-rgb), .05);
+}
+
+.criteria-item .criteria-select select, .criteria-item .criteria-select {
+    min-width: 9rem;
+}
+
+@media (min-width: 992px) {
+    .criteria-item { flex-wrap: nowrap; }
+    .criteria-item .criteria-select { flex: 1; }
+}
+
+.action-area {
+    background: rgba(var(--bs-light-rgb), 0.5);
+}
+
+.action-area .btn { font-weight: 600; }
+
+/* Data access box separated from filters */
+.data-access-box {
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+    padding: .75rem 1rem;
+    background: linear-gradient(135deg, rgba(var(--bs-light-rgb),0.8) 0%, rgba(var(--bs-light-rgb),0.6) 100%);
+}
+
+.data-access-box code { background: rgba(var(--bs-dark-rgb),0.04); }
+
+@media (max-width: 991.98px) {
+    .criteria-item { padding: .5rem .5rem .75rem; }
+}
