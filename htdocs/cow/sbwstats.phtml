@@ -8,6 +8,9 @@ require_once "../../include/myview.php";
 
 $t = new MyView();
 $t->title = "Storm Based Warning Stats";
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="sbwstats.css">
+EOM;
 
 $nt = new NetworkTable("WFO", TRUE);
 $postgis = iemdb("postgis");
@@ -77,15 +80,6 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 $table = "
-<style>
-.phto  { background: #FFC1C1; }
-.phsv  { background: #FFFF7E;}
-.phma  { background: #A2CD5A;}
-.phfa { background: #C8F526;}
-.phff { background: #FFEC8B;}
-.phds { background: #FFE4C4;}
-.phsq { background: #C71585;}
-</style>
 <table border=\"1\" class=\"table\">
 <caption>Data valid for warnings issued between " . date('d M Y H:i', $sts) . " and " . date('d M Y H:i', $ets) . " UTC</caption>
 <thead class=\"sticky\">
@@ -290,12 +284,13 @@ since summer of 2007.
   <td>{$m1select}</td>
   <td>{$d1select}</td>
   <td>{$h1select}</td>
-  <td rowspan='2'><input type='submit' value='Generate Stats'></td>
+  <td><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
   <td>{$y2select}</td>
   <td>{$m2select}</td>
   <td>{$d2select}</td>
   <td>{$h2select}</td>
+  <td></td>
  </tr>
 </tbody>
 </table>

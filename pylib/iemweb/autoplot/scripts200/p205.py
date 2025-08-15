@@ -10,7 +10,7 @@ import calendar
 import itertools
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -142,11 +142,14 @@ def plotter(ctx: dict):
         raise NoDataFound("Please select some options for plotting.")
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            f"SELECT {' , '.join(params)}, extract(doy from day) as doy "
-            "from summary s JOIN stations t "
-            "ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s",
+            sql_helper(
+                """
+    SELECT {cols}, extract(doy from day) as doy from summary s JOIN stations t
+    ON (s.iemid = t.iemid) WHERE t.id = :station and t.network = :network""",
+                cols=" , ".join(params),
+            ),
             conn,
-            params=(station, ctx["network"]),
+            params={"station": station, "network": ctx["network"]},
         )
     if df.empty:
         raise NoDataFound("No Data Found.")

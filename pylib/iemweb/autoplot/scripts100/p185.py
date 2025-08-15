@@ -8,6 +8,7 @@ be patient with it!
 
 import os
 from datetime import date, datetime, timedelta
+from typing import cast
 
 import geopandas as gpd
 import numpy as np
@@ -69,7 +70,7 @@ def get_raster(ctx: dict):
     czs = CachingZonalStats(MRMS_IEMRE.affine_image)
     steps = 0
     czs.gen_stats(
-        np.zeros((MRMS_IEMRE.ny, MRMS_IEMRE.nx)),
+        np.zeros((cast("int", MRMS_IEMRE.ny), cast("int", MRMS_IEMRE.nx))),
         df["the_geom"],
     )
     jslice = None

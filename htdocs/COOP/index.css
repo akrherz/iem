@@ -1,0 +1,15 @@
+div.tease {
+ margin: 5px;
+ padding: 5px;
+ width: 400px;
+ background: #e8cc84;
+ float: left;
+}
+div.tease img {
+ margin-right: 5px;
+ float: left;
+}
+div.tease a {
+ font-weight: bold;
+ padding: 5px;
+}

@@ -6,7 +6,7 @@ prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
 
-from datetime import timedelta
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -47,7 +47,7 @@ def get_description():
 
 def add_context(ctx):
     """Get plot context"""
-    ctx["dt"] = ctx["dt"].replace(tzinfo=ZoneInfo("UTC"))
+    ctx["dt"] = ctx["dt"].replace(tzinfo=timezone.utc)
     dt = ctx["dt"]
     station = ctx["station"]
     minutes = ctx["minutes"]
@@ -105,16 +105,12 @@ def get_highcharts(ctx: dict) -> str:
     ]:
         vals = df[["ticks", col]].to_json(orient="values")
         lines.append(
-            """{
-            name: '"""
-            + col
-            + """',
+            f"""{{
+            name: '{col}',
             type: 'line',
-            tooltip: {valueDecimal: 1},
-            data: """
-            + vals
-            + """
-            }
+            tooltip: {{valueDecimal: 1}},
+            data: {vals}
+            }}
         """
         )
     for col in [
@@ -128,16 +124,12 @@ def get_highcharts(ctx: dict) -> str:
     ]:
         vals = df[["ticks", col]].to_json(orient="values")
         lines2.append(
-            """{
-            name: '"""
-            + col
-            + """',
+            f"""{{
+            name: '{col}',
             type: 'line',
-            tooltip: {valueDecimal: 1},
-            data: """
-            + vals
-            + """
-            }
+            tooltip: {{valueDecimal: 1}},
+            data: {vals}
+        }}
         """
         )
     for col in [
@@ -151,16 +143,12 @@ def get_highcharts(ctx: dict) -> str:
     ]:
         vals = df[["ticks", col]].to_json(orient="values")
         lines3.append(
-            """{
-            name: '"""
-            + col
-            + """',
+            f"""{{
+            name: '{col}',
             type: 'line',
-            tooltip: {valueDecimal: 1},
-            data: """
-            + vals
-            + """
-            }
+            tooltip: {{valueDecimal: 1}},
+            data: {vals}
+        }}
         """
         )
     for col in [
@@ -179,16 +167,12 @@ def get_highcharts(ctx: dict) -> str:
     ]:
         vals = df[["ticks", col]].to_json(orient="values")
         lines4.append(
-            """{
-            name: '"""
-            + col
-            + """',
+            f"""{{
+            name: '{col}',
             type: 'line',
-            tooltip: {valueDecimal: 1},
-            data: """
-            + vals
-            + """
-            }
+            tooltip: {{valueDecimal: 1}},
+            data: {vals}
+        }}
         """
         )
 

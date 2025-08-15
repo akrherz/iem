@@ -4,6 +4,9 @@ require_once "../../include/myview.php";
 require_once "../../include/generators.php";
 $t = new MyView();
 $t->title = "NWS COOP Data";
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="index.css">
+EOM;
 
 $yr = date("Y");
 
@@ -109,62 +112,61 @@ $dict = array(
 );
 $content = "";
 foreach ($dict as $k => $v) {
-    $content .= <<<EOM
-<div class="tease">
- <a href="{$v["url"]}"><img src="/images/{$v["img"]}" border="0"></a>
- <a href="{$v["url"]}">{$v["title"]}</a><br />{$v["desc"]}<br />&nbsp;
+        // Card-like teaser; image is decorative (title + text already conveys info)
+        $content .= <<<EOM
+<div class="col" role="listitem">
+    <article class="card h-100 shadow-sm">
+        <div class="card-body p-3">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <a href="{$v["url"]}" class="stretched-link" aria-label="Open: {$v["title"]}">
+                        <img src="/images/{$v["img"]}" alt="" class="img-fluid" loading="lazy" decoding="async" width="48" height="48" />
+                    </a>
+                </div>
+                <div class="flex-grow-1">
+                    <h4 class="h6 mb-1">{$v["title"]}</h4>
+                    <p class="card-text small mb-0">{$v["desc"]}</p>
+                </div>
+            </div>
+        </div>
+    </article>
 </div>
 EOM;
 }
 
-$news = $get_news_by_tag("coop");
-
 $t->content = <<<EOM
 
-<h3>National Weather Service Cooperative Observer Program (COOP)</h3>
+<section aria-labelledby="coop-intro" class="mb-4">
+    <h2 id="coop-intro" class="h3">National Weather Service Cooperative Observer Program (COOP)</h2>
+    <p>The COOP network is comprised of volunteer observers reporting once-daily high and low air temperature, liquid precipitation, snowfall and snow depth. Explore popular applications below.</p>
+    <nav aria-label="COOP quick actions" class="mb-3">
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="current.phtml"><i class="fa fa-refresh" aria-hidden="true"></i> <span>Sortable Currents</span></a>
+            <a class="btn btn-primary" href="/request/coop/obs-fe.phtml"><i class="fa fa-cloud-download" aria-hidden="true"></i> <span>Download Observations</span></a>
+            <a class="btn btn-outline-secondary" href="/sites/locate.php?network=IA_COOP"><i class="fa fa-search" aria-hidden="true"></i> <span>Locate Sites</span></a>
+            <a class="btn btn-outline-secondary" href="cat.phtml"><i class="fa fa-eye" aria-hidden="true"></i> <span>View Obs by Day/Year</span></a>
+        </div>
+    </nav>
+</section>
 
-<p>The COOP network is generally comprised of volunteer observers
-reporting once-daily high and low air temperature, liquid precipitation,
-snow fall and snow depth.  Here are some popular IEM COOP apps.</p>
-
-<a class="btn btn-info" href="current.phtml">
-<i class="fa fa-refresh"></i> Sortable Currents</a>
-
-<a class="btn btn-primary" href="/request/coop/obs-fe.phtml">
-<i class="fa fa-cloud-download"></i> Download Observations</a>
-
-<a class="btn btn-info" href="/sites/locate.php?network=IA_COOP">
-<i class="fa fa-search"></i> Locate Sites</a>
-
-<a class="btn btn-info" href="cat.phtml">
-<i class="fa fa-eye"></i> View Obs by Day/Year</a>
-
-<h3>IEM Value-Added Climodat Dataset</h3>
-
-<p>The IEM takes these preliminary COOP reports, does some limited quality
-control, and attempts to estimate any missing data to provide a coherent
-dataset called <strong>"Climodat"</strong>.  Here are some popular IEM Climodat
-apps.</p>
-
-<a class="btn btn-info" href="/climodat/">
-<i class="fa fa-file"></i> Climodat Reports</a>
-
-<a class="btn btn-primary" href="/request/coop/fe.phtml">
-<i class="fa fa-cloud-download"></i> Download Quality Controlled</a>
-
-<a class="btn btn-info" href="/sites/locate.php?network=IACLIMATE">
-<i class="fa fa-search"></i> Locate Sites</a>
-
-<a class="btn btn-info" href="/GIS/apps/coop/gsplot.phtml">
-<i class="fa fa-image"></i> Growing Season Plotter</a>
+<section aria-labelledby="climodat" class="mb-4">
+    <h2 id="climodat" class="h3">IEM Value-Added Climodat Dataset</h2>
+    <p>The IEM processes preliminary COOP reports, applies limited quality control, and estimates some missing data to produce the coherent <strong>Climodat</strong> dataset. Popular Climodat applications:</p>
+    <nav aria-label="Climodat quick actions" class="mb-3">
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="/climodat/"><i class="fa fa-file" aria-hidden="true"></i> <span>Climodat Reports</span></a>
+            <a class="btn btn-primary" href="/request/coop/fe.phtml"><i class="fa fa-cloud-download" aria-hidden="true"></i> <span>Download Quality Controlled</span></a>
+            <a class="btn btn-outline-secondary" href="/sites/locate.php?network=IACLIMATE"><i class="fa fa-search" aria-hidden="true"></i> <span>Locate Sites</span></a>
+            <a class="btn btn-outline-secondary" href="/GIS/apps/coop/gsplot.phtml"><i class="fa fa-image" aria-hidden="true"></i> <span>Growing Season Plotter</span></a>
+        </div>
+    </nav>
+</section>
 
 
-<div class="row">
-<div class="col-md-5 col-sm-5">
+<div class="row g-4">
+<aside class="col-md-5" aria-labelledby="data-plots-heading">
 
-{$news}
-
-<h3>Data Plots</h3>
+<h2 id="data-plots-heading" class="h4">Data Plots</h2>
 <ul>
     <li><a href="/timemachine/?product=37">Iowa Precipitation Contour</a></li>
     <li><a href="/timemachine/?product=38">Midwest Precipitation Contour</a></li>
@@ -175,7 +177,7 @@ apps.</p>
     <li><a href="/data/coopHighLow.gif">High + Low Temperatures this morning</a></li>
 </ul>
 
-<h3>Data + Summaries</h3>
+<h2 class="h4">Data + Summaries</h2>
 
 <ul>
  <li>A <a href="/data/gis/shape/4326/iem/coopobs.zip">GIS shapefile</a> is 
@@ -191,7 +193,7 @@ apps.</p>
 
 </ul>
 
-<p><h3>Download Data</h3>
+<h2 class="h4">Download Data</h2>
 <ul>
   <li><a href="/request/coop/fe.phtml">Download Daily Oberservations</a>
     <br>Pick your site, pick a time period, and download the data.</li>
@@ -207,36 +209,14 @@ apps.</p>
   <li><a href="dl/normals.phtml">Daily Climate Normals</a>
     <br>Download daily normal high and low temperatures and average rainfall.</li>
 </ul>
-
-
-</div><div class="col-md-7 col-sm-7">
-
-
-<h3>Data Applications:</h3>
-
-<style>
-div.tease {
- margin: 5px;
- padding: 5px;
- width: 400px;
- background: #e8cc84;
- float: left;
-}
-div.tease img {
- margin-right: 5px;
- float: left;
-}
-div.tease a {
- font-weight: bold;
- padding: 5px;
-}
-</style>
-
-{$content}
-
+  
+</aside>
+<div class="col-md-7" aria-labelledby="data-apps-heading">
+    <h2 id="data-apps-heading" class="h4 mb-3">Data Applications</h2>
+    <div class="row row-cols-1 row-cols-sm-2 g-3" role="list">
+        {$content}
+    </div>
 </div>
-</div><!-- ./row -->
-
-<br clear="all" />
+</div><!-- /.row -->
 EOM;
 $t->render('full.phtml');

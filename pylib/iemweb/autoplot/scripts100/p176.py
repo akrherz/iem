@@ -118,26 +118,16 @@ def get_highcharts(ctx: dict) -> str:
     v2 = df2[cols].rename(columns=rename).to_json(orient="records")
     a = "High" if ctx["opt"] == "0" else "Low"
     b = "High" if ctx["opt"] == "1" else "Low"
-    series = (
-        """{
-        data: """
-        + v
-        + """,
+    series = f"""{{
+        data: {v},
         color: '#ff0000',
-        name: '"""
-        + a
-        + """ Temp Beat'
-    },{
-        data: """
-        + v2
-        + """,
+        name: '{a} Temp Beat'
+    }},{{
+        data: {v2},
         color: '#0000ff',
-        name: '"""
-        + b
-        + """ Temp Beat'
-    }
+        name: '{b} Temp Beat'
+    }}
     """
-    )
     containername = ctx["_e"]
     return (
         """
@@ -159,7 +149,7 @@ Highcharts.chart('"""
             pointFormat: 'Date: <b>{point.x:%b %d, %Y}</b>' +
                           '<br/>Margin: <b>{point.y}</b>' +
                           '<br />Ob: <b>{point.val}</b>'},
-        yAxis: {title: {text: 'Temperature Beat Margin F'}},
+        yAxis: {title: {text: 'Temperature Beat Margin °F'}},
         xAxis: {type: 'datetime'},
         title: {text: '"""
         + ctx["title"]
@@ -190,6 +180,6 @@ def plotter(ctx: dict):
     ax.scatter(df2["date"].values, df2["margin"].values, color="b")
     ax.set_ylim(-30, 30)
     ax.grid(True)
-    ax.set_ylabel(r"Temperature Beat Margin $^\circ$F")
+    ax.set_ylabel("Temperature Beat Margin °F")
 
     return fig, ctx["df"]

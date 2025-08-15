@@ -16,9 +16,10 @@ from datetime import date, datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -59,7 +60,8 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
     station = ctx["station"]
     gddbase = ctx["gddbase"]
@@ -71,22 +73,26 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     byear = bs.year
     eyear = today.year + 1
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
-    cursor.execute(
-        """
-        SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low
-        from alldata where station = %s and year > %s and day < %s and
-        high is not null and low is not null
-        """,
-        (base, ceil, station, byear, today),
+    res = conn.execute(
+        sql_helper("""
+        SELECT year, extract(doy from day), gddxx(:base, :ceil, high,low), low
+        from alldata where station = :station and year > :byear and
+        day < :today and high is not null and low is not null
+        """),
+        {
+            "base": base,
+            "ceil": ceil,
+            "station": station,
+            "byear": byear,
+            "today": today,
+        },
     )
 
     gdd = np.zeros((eyear - byear, 366), "f")
     freezes = np.zeros((eyear - byear), "f")
     freezes[:] = 400.0
 
-    for row in cursor:
+    for row in res:
         gdd[int(row[0]) - byear, int(row[1]) - 1] = row[2]
         if row[1] > 180 and row[3] < 32 and row[1] < freezes[row[0] - byear]:
             freezes[int(row[0]) - byear] = row[1]

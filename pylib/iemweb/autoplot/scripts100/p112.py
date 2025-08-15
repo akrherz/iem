@@ -139,23 +139,14 @@ def plotter(ctx: dict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
-    res = """\
+    res = f"""\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
+# Report Generated: {date.today().strftime("%d %b %Y")}
+# Climate Record: {bs} -> {date.today()}
+# Site Information: {ctx["_sname"]}
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-""" % (
-        date.today().strftime("%d %b %Y"),
-        bs,
-        date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
-    res += ("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID %s\n") % (
-        station,
-    )
-
+# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID {station}
+"""
     monthly = [{"40": [], "48": [], "50": [], "XX": []}] * 13
 
     db = {}
