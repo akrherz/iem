@@ -27,6 +27,7 @@ plot, but only considers a calendar day.</p>
 """
 
 from datetime import date, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -254,8 +255,8 @@ def plotter(ctx: dict):
         # Allow the output to contain more data
         if len(labels) >= 10:
             continue
-        sts = sts.replace(tzinfo=timezone.utc).astimezone(timezone(tzname))
-        ets = ets.replace(tzinfo=timezone.utc).astimezone(timezone(tzname))
+        sts = sts.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(tzname))
+        ets = ets.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(tzname))
         if varname in ["alti", "mslp"]:
             lbl = (
                 f"{row[varname]:.2f} to {row[deltacol]:.2f} -> "

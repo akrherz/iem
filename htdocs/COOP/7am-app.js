@@ -176,6 +176,12 @@ function updateMap() {
     coopLayer.setStyle(coopLayer.getStyle());
     azosLayer.setStyle(azosLayer.getStyle());
     updateURL();
+    // Announce change to assistive tech
+    const status = document.getElementById('status');
+    if (status) {
+        const label = renderattrElement?.selectedOptions?.[0]?.text || renderattr;
+        status.textContent = `Parameter updated: ${label}`;
+    }
 }
 
 function updateDate() {
@@ -213,6 +219,10 @@ function updateDate() {
         })
     );
     updateURL();
+    const status = document.getElementById('status');
+    if (status) {
+        status.textContent = `Date updated: ${fullDate}`;
+    }
 }
 
 function pretty(val) {

@@ -10,6 +10,9 @@ $mesosite = iemdb('mesosite');
 $t = new MyView();
 $t->iemss = True;
 $t->title = "Download Daily Summary Data";
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="daily.css">
+EOM;
 
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_ASOS";
 
@@ -71,97 +74,102 @@ $vars = array(
 );
 $varform = "";
 foreach($vars as $key => $val){
-    $varform .= sprintf(
-        '<br /><label for="%s" class="checkbox-inline"><input type="checkbox" name="var" value="%s" id="%s" class="sq-form-field" > '.
-        '[%s] %s</label>'. "\n",
-        $key, $key, $key, $key, $val,
-    );
+  // Bootstrap 5 form-check layout (do not alter name attr expected by backend)
+  $varform .= sprintf(
+    '<div class="col-12 col-sm-6 col-lg-4" role="listitem">'.
+    '<div class="form-check small">'.
+    '<input class="form-check-input" type="checkbox" name="var" value="%s" id="var_%s">'.
+    '<label class="form-check-label" for="var_%s">[%s] %s</label>'.
+    '</div></div>'."\n",
+    $key, $key, $key, $key, $val
+  );
 }
 
 
 $t->content = <<<EOM
-<style>
-label {
-    font-weight: normal !important;
-    margin-bottom: 5px;
-    display:inline-block;
-}
-input {
-    display:inline-block;
-}
-</style>
+<header class="mb-4">
+  <h1 class="h3 mb-3">IEM Computed Daily Summary of Observations</h1>
+  <p>This tool lets you download daily summaries computed from collected observations for a site or all sites in a network. For COOP networks the daily values reflect the once-daily reports. When requesting all stations, limit the date span to one year.</p>
+  <p>The definition of a <strong>day</strong> usually follows the local calendar day for each station's timezone, but some stations provide standardized local-time summaries which override computed totals.</p>
+  <p><a href="/cgi-bin/request/daily.py?help" class="btn btn-outline-info btn-sm"><i class="fa fa-file" aria-hidden="true"></i> Backend documentation</a></p>
+</header>
 
-<h3>IEM Computed Daily Summary of Observations</h3>
+<section aria-labelledby="networkSelectHeading" class="mb-4">
+  <h2 id="networkSelectHeading" class="h5">1. Choose Network</h2>
+  <form name="network" action="daily.phtml" class="row gy-2 gx-2 align-items-end" aria-describedby="networkHelp">
+    <div class="col-auto">
+      <label for="network" class="form-label">Network</label><br />
+      {$nselect}
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary btn-sm">Switch Network</button>
+    </div>
+    <div class="col-12"><p id="networkHelp" class="form-text mb-0">Switching networks updates available stations below.</p></div>
+  </form>
+</section>
 
-<p>This page allows you to download the IEM computed daily summary of whatever
-observations the IEM collected for a given observation site. You can also
-download data from COOP networks with this interface, in which case the
-"daily" data are effectively the once-daily observations.  If you request
-all stations, you can only request up to 1 year of data at a time.</p>
+<form target="_blank" name="iemss" action="/cgi-bin/request/daily.py" aria-labelledby="downloadHeading">
+  <h2 id="downloadHeading" class="h5 mb-3">2. Select Stations, Dates, and Variables</h2>
+  <div class="form2url mb-3"></div>
+  <input type="hidden" value="{$network}" name="network" />
 
-<p>The concept of a <strong>day</strong> here is unfortunately not straight
-forward. It is typically representing a calendar day for the timezone of the
-local observation station.  However, some sites have summary information that
-is valid for a local standard time day, which will overwrite any computed by
-the IEM daily totals.</p>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <h3 class="h6">Stations</h3>
+      <div id="iemss" data-network="{$network}" aria-live="polite" aria-busy="false"></div>
+    </div>
+    <div class="col-md-6">
+      <fieldset class="mb-4">
+        <legend class="h6">Date Range (inclusive)</legend>
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-lg-6">
+            <div class="border rounded p-2 h-100">
+              <div class="fw-semibold small mb-1">Start Date</div>
+              <div class="row g-2">
+                <div class="col-4">{$y1}</div>
+                <div class="col-4">{$m1}</div>
+                <div class="col-4">{$d1}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="border rounded p-2 h-100">
+              <div class="fw-semibold small mb-1">End Date</div>
+              <div class="row g-2">
+                <div class="col-4">{$y2}</div>
+                <div class="col-4">{$m2}</div>
+                <div class="col-4">{$d2}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="form-text mt-2 mb-0">For all stations limit span to <= 1 year for performance.</p>
+      </fieldset>
 
-<p><a href="/cgi-bin/request/daily.py?help" class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a>
-exists for those wishing to script against this service.</p>
-<p>Select network to download from:<br />
-<form name="network" action="daily.phtml">
-{$nselect}
-<input type="submit" value="Switch Network">
+      <fieldset class="mb-4" aria-describedby="varHelp">
+        <legend class="h6">Variables</legend>
+        <p id="varHelp" class="form-text">Values of <code>0.0001</code> inches represent trace precipitation.</p>
+        <div class="row g-1" role="list">
+          {$varform}
+        </div>
+      </fieldset>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="na" class="form-label">Missing Value Representation</label>
+          {$naselect}
+        </div>
+        <div class="col-md-6">
+          <label for="format" class="form-label">Download Format</label>
+          {$fmtselect}
+        </div>
+      </div>
+
+      <div>
+        <button type="submit" class="btn btn-success">Request Data</button>
+      </div>
+    </div>
+  </div>
 </form>
-
-<form target="_blank" name="iemss" action="/cgi-bin/request/daily.py">
-<div class="form2url"></div>
-<input type="hidden" value="{$network}" name="network" />
-
-<p>&nbsp;</p>
-
-<div class="row">
-<div class="col-md-6 col-sm-6">
-
-<div id="iemss" data-network="{$network}"></div>
-
-</div><div class="col-md-6 col-sm-6">
-
-<h4>Select inclusive date period:</h4>
-<table class="table table-striped">
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-  </tr>
-
-  <tr>
-    <th>Start:</th>
-    <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
-  </tr>
-
-  <tr>
-    <th>End:</th>
-    <td>{$y2}</td><td>{$m2}</td><td>{$d2}</td>
-  </tr>
-</table>
-
-<h4>Select from available daily variables</h4>
-
-<p><strong>Note</strong>: Values of 0.0001 inches are Trace Reports</p>
-
-{$varform}
-
-<h4>How to represent missing values:</h4>
-
-{$naselect}
-
-<h4>Download Data Format:</h4>
-
-{$fmtselect}
-
-<p><input type="submit" value="Request Data"></p>
-
-</div></div>
-</form>
-
 EOM;
 $t->render('full.phtml');

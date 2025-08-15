@@ -6,7 +6,7 @@ require_once "../../../include/cameras.inc.php";
 require_once "../../../include/iemprop.php";
 require_once "../../../include/forms.php";
 $camera_refresh = get_iemprop("webcam.interval");
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCRG";
 $overview = isset($_GET["overview"]);
 
 $thres = 999;
