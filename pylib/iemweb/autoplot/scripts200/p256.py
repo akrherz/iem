@@ -46,7 +46,6 @@ $ cat RTPBOU.txt | dcshef
 </p>
 """
 
-from datetime import date
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -118,7 +117,7 @@ def get_description():
             {
                 "type": "date",
                 "name": "date",
-                "default": date.today().strftime("%Y/%m/%d"),
+                "default": f"{utc():%Y/%m/%d}",
                 "label": "Date of Interest:",
             },
         ],
