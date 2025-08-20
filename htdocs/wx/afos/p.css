@@ -1,0 +1,27 @@
+/* AFOS product display styles */
+.afos-block { position: relative; margin-top: 1rem; }
+.afos-block:first-of-type { margin-top: 0.5rem; }
+.afos-pre { background:#f8f9fa; padding: .75rem; border:1px solid #dee2e6; border-radius:.25rem; font-size: .85rem; overflow-x:auto; }
+.afos-toolbar { position:absolute; top:.25rem; right:.25rem; display:flex; gap:.25rem; }
+.afos-copy.copied { color:#198754; border-color:#198754; }
+.afos-copy.copied::after { content:" ✓"; }
+
+/* Compact bulk form */
+.afos-bulk-wrapper { font-size: .8rem; }
+.afos-bulk-form .form-control, .afos-bulk-form .form-select { min-width: 110px; }
+@media (max-width: 575.98px) {
+    .afos-bulk-form .form-control, .afos-bulk-form .form-select { flex:1 1 45%; }
+}
+
+/* Compact labeled fields */
+.afos-bulk-form .afos-field { min-width: 110px; }
+.afos-bulk-form .form-label { font-weight: 600; }
+
+/* Help toggle */
+.afos-bulk-help-toggle { font-size: .85rem; text-decoration: underline; }
+#bulk-help { background: #fdfdfd; border-left: 3px solid #6c757d; padding: .6rem .85rem; font-size: .9rem; }
+
+/* Bulk Download emphasis */
+.afos-bulk-heading { font-size: .95rem; font-weight: 600; color:#212529; border-bottom: 1px solid #dee2e6; padding-bottom: .15rem; }
+.afos-bulk-title { display:inline-flex; align-items:center; gap:.35rem; letter-spacing:.25px; }
+.afos-bulk-title i { color:#0d6efd; }
