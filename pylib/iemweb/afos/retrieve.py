@@ -35,6 +35,11 @@ Return the last 5 Daily Summary Messages for Des Moines in text format.
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
 limit=5&pil=DSMDSM&fmt=text
 
+Same request, but in HTML format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
+limit=1&pil=DSMDSM&fmt=html
+
 Return all TORnado warnings issued between 20 and 21 UTC on 27 Apr 2011 as
 a zip file.
 
@@ -167,11 +172,22 @@ class MyModel(CGIModel):
             "The 6 character WMO Header to limit the search to.  This is "
             "typically only used when a PIL is ambiguous"
         ),
+        max_length=6,
+        min_length=4,  # Le Sigh
     )
+
+    @field_validator("pil", mode="after")
+    @classmethod
+    def check_pil(cls, v: list[str]):
+        """Ensure the length of each list member is valid."""
+        for pil in v:
+            if not (3 <= len(pil) <= 6):
+                raise ValueError(f"Invalid PIL length: {pil}")
+        return v
 
     @field_validator("sdate", "edate", mode="before")
     @classmethod
-    def allow_str_or_none(cls, v):
+    def allow_str_or_none(cls, v: str):
         """pydantic can't seem to handle this."""
         # pydantic/pydantic/issues/9308
         if 8 <= len(v) < 10:
@@ -205,7 +221,7 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-def special_metar_logic(conn, pils, limit, fmt, sio, order):
+def special_metar_logic(conn, pils, limit, fmt, sio: StringIO, order):
     """Special METAR logic."""
     params = {"pil": pils[0][3:].strip(), "limit": limit}
     sql = sql_helper(
@@ -216,10 +232,7 @@ def special_metar_logic(conn, pils, limit, fmt, sio, order):
     )
     res = conn.execute(sql, params)
     for row in res:
-        if fmt == "html":
-            sio.write("<pre>\n")
-        else:
-            sio.write("\001\n")
+        sio.write("<pre>\n" if fmt == "html" else "\001\n")
         if fmt == "html":
             sio.write(html_escape(row[0].replace("\r\r\n", "\n")))
         else:
@@ -228,9 +241,10 @@ def special_metar_logic(conn, pils, limit, fmt, sio, order):
             sio.write("</pre>\n")
         else:
             sio.write("\003\n")
-    if res.rowcount == 0:
+    # Turns out that res.rowcount is not reliable
+    if sio.tell() == 0:
         sio.write(f"ERROR: METAR lookup for {pils[0][3:].strip()} failed")
-    return [sio.getvalue().encode("ascii", "ignore")]
+    return sio.getvalue()
 
 
 def get_mckey(environ: dict) -> str | None:

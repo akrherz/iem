@@ -1,0 +1,42 @@
+# EditorConfig helps maintain consistent coding styles between editors and IDEs.
+# See https://editorconfig.org
+# Root marker
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+# Let linters/formatters (ruff, eslint) enforce line length
+max_line_length = off
+
+[*.{py,php,js,jsx,ts,tsx,cjs,mjs,sh,bash}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+# Preserve intentional double-space line breaks and trailing spaces in tables
+trim_trailing_whitespace = false
+insert_final_newline = true
+
+[Makefile]
+# Tabs are required for make recipes
+indent_style = tab
+
+[Dockerfile]
+indent_style = space
+indent_size = 4
+
+[*.{ini,conf}]
+indent_style = space
+indent_size = 4
