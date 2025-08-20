@@ -1,0 +1,15 @@
+/* Recent Interesting METAR Reports styles */
+/* Rule(s) applied: Bootstrap5, Accessibility */
+
+/* Ensure the region scrolls nicely if tall */
+.table-responsive { max-height: 70vh; overflow: auto; }
+
+/* Sticky header hint (Bootstrap adds .sticky-top logic) */
+thead.sticky-top th { background: #f8f9fa; }
+
+#recent-status { font-size: 0.875rem; }
+
+@media (max-width: 575.98px) {
+    #recent-heading { font-size: 1.05rem; }
+    #recent-desc { font-size: 0.9rem; }
+}
