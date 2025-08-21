@@ -6,6 +6,12 @@ require_once "../../../include/database.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="/wx/afos/p.css">
+EOM;
+$t->jsextra = <<<EOM
+<script type="module" src="/wx/afos/p.module.js"></script>
+EOM;
 
 $e = get_int404("e", null);
 // Ensure e is 12 characters long
@@ -144,7 +150,15 @@ if (is_null($e)) {
     $rs = exact_product($conn, $e, $pil, $bbb);
 }
 
-$content = "<h3>National Weather Service Raw Text Product</h3>";
+$bc_pil = htmlspecialchars($pil ?? '');
+$content = '<nav aria-label="breadcrumb"><ol class="breadcrumb mb-2">'
+    . '<li class="breadcrumb-item"><a href="/nws/text.php">NWS Text Products</a></li>'
+    . '<li class="breadcrumb-item active" aria-current="page">' . $bc_pil . '</li>'
+    . '</ol></nav>'
+    . '<h3 class="mb-3" aria-hidden="true">National Weather Service Text Product</h3>'
+    . '<div id="afos-heading" class="visually-hidden">AFOS product ' . $bc_pil . '</div>'
+    . '<div id="afos-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>'
+    . '<span id="utc-note" class="visually-hidden">Dates interpreted at 00:00 UTC</span>';
 
 if (is_null($rs) || pg_num_rows($rs) < 1) {
     if (!is_null($e)) {
@@ -169,7 +183,7 @@ if (is_null($rs) || pg_num_rows($rs) < 1) {
     }
 }
 if (is_null($rs) || pg_num_rows($rs) < 1) {
-    $content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
+    $content .= '<div class="alert alert-warning" role="alert">Sorry, could not find product.</div>';
 }
 if (pg_num_rows($rs) > 1) {
     $rows = pg_num_rows($rs);
@@ -318,49 +332,73 @@ EOM;
         $date2 =  date("d M Y", $basets);
         $year = date("Y", $basets);
         $year2 = intval($year) + 1;
-        $content .= <<<EOM
-<div class="row">
-<div class="col-md-7">
-<p>Displaying AFOS PIL: <strong>$pil</strong> 
-Product Timestamp: <strong>{$dstamp} UTC</strong>
-
-<p><a class="btn btn-primary" 
- href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
- Previous in Time</a>
-<a class="btn btn-primary" 
- href="p.php?pil=$pil">Latest Product</a>
-<a class="btn btn-primary" 
- href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
-
-<p><a class="btn btn-primary" 
- href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
- <a class="btn btn-primary" 
- href="{$pil_listlink}">View All {$pil3} Products for {$date2}</a>
-<a class="btn btn-primary"
- href="{$t->twitter_image}">View As Image</a>
-<a class="btn btn-primary" href="{$rawtext}">Download As Text</a></p>
-
-{$extratools}
-
-</div>
-<div class="col-md-5 border rounded p-3">
-<form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk">
-<input type="hidden" name="dl" value="1">
-<input type="hidden" name="limit" value="9999">
-<p><i class="fa fa-download"></i> <strong>Bulk Download</strong></p>
-<strong>PIL:</strong> <input type="text" size="6" name="pil" value="{$pil}">
-<select name="fmt">
- <option value="text">Single Text File (\\003 Delimited)</option>
- <option value="zip">Zip File of One Product per File</option>
-</select>
-<br /><strong>Start UTC Date @0z:</strong> <input type="date" min="1980-01-01"
- value="{$year}-01-01" name="sdate">
- <br /><strong>End UTC Date @0z:</strong> <input type="date" min="1980-01-01"
- value="{$year2}-01-01" name="edate">
-<br /><input type="submit" value="Download Please">
-</form>
-
-</div>
+                $content .= <<<EOM
+<div class="row g-4 align-items-start">
+    <div class="col-md-7 col-lg-8">
+        <p class="mb-1">Displaying AFOS PIL: <strong>$pil</strong><br>
+        Product Timestamp: <strong>{$dstamp} UTC</strong></p>
+        <div class="btn-group my-2 flex-wrap" role="group" aria-label="Product navigation">
+            <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left" aria-hidden="true"></i> Previous</a>
+            <a class="btn btn-outline-primary btn-sm" aria-label="Latest product" href="p.php?pil=$pil">Latest</a>
+            <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="d-flex flex-wrap gap-2 my-2">
+            <a class="btn btn-primary btn-sm" href="{$listlink}">All {$row["source"]} Products ({$date2})</a>
+            <a class="btn btn-primary btn-sm" href="{$pil_listlink}">All {$pil3} Products ({$date2})</a>
+            <a class="btn btn-secondary btn-sm" href="{$t->twitter_image}">Text as Image</a>
+            <a class="btn btn-secondary btn-sm" href="{$rawtext}">Download Text</a>
+        </div>
+        {$extratools}
+    </div>
+    <div class="col-md-5 col-lg-4">
+        <div class="border rounded p-2 bg-light afos-bulk-wrapper">
+            <form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk" aria-label="Bulk AFOS download" class="d-flex flex-wrap align-items-end gap-2 w-100 m-0 afos-bulk-form">
+                <input type="hidden" name="dl" value="1">
+                <input type="hidden" name="limit" value="9999">
+                <div class="d-flex flex-column afos-field">
+                    <label for="bulkPil" class="form-label small mb-0">3-6 Char PIL / AFOS ID</label>
+                    <input id="bulkPil" type="text" maxlength="6" class="form-control form-control-sm" name="pil" value="{$pil}" autocomplete="off">
+                </div>
+                <div class="d-flex flex-column afos-field">
+                    <label for="bulkFmt" class="form-label small mb-0">Format</label>
+                    <select id="bulkFmt" name="fmt" class="form-select form-select-sm">
+                        <option value="text">Text (^C delimited)</option>
+                        <option value="zip">Zip</option>
+                    </select>
+                </div>
+                <fieldset class="d-flex flex-wrap gap-2 m-0 p-0 border-0 afos-field">
+                    <legend class="visually-hidden">Download date range (UTC midnight)</legend>
+                    <div class="d-flex flex-column">
+                        <label for="bulkSdate" class="form-label small mb-0">Start</label>
+                        <input id="bulkSdate" type="date" min="1980-01-01" value="{$year}-01-01" name="sdate" class="form-control form-control-sm" aria-describedby="utc-note">
+                    </div>
+                    <div class="d-flex flex-column">
+                        <label for="bulkEdate" class="form-label small mb-0">End</label>
+                        <input id="bulkEdate" type="date" min="1980-01-01" value="{$year2}-01-01" name="edate" class="form-control form-control-sm" aria-describedby="utc-note">
+                    </div>
+                </fieldset>
+                <div class="d-flex flex-column">
+                    <button type="submit" class="btn btn-success btn-sm">Download</button>
+                </div>
+            </form>
+            <div class="d-flex justify-content-between align-items-center afos-bulk-heading mt-1" id="bulk-download-note" role="heading" aria-level="4">
+                <span class="afos-bulk-title"><i class="fa fa-download" aria-hidden="true"></i> Bulk Download</span>
+                <button type="button" class="btn btn-link btn-sm p-0 afos-bulk-help-toggle" aria-expanded="false" aria-controls="bulk-help">Help</button>
+            </div>
+            <div id="bulk-help" class="mt-1" hidden>
+                <p class="mb-1"><strong>Bulk Download Help</strong></p>
+                <p class="mb-1">This bulk download tool provides the NWS text
+                in a raw form, hopefully directly usable by your processing system.
+                You can either provide a complete 6-character PIL/AFOS ID or provide
+                the 3-character base ID (e.g., <code>AFD</code>). The start and end
+                dates represent 00 UTC for those dates.  The Zip format is useful as
+                the filenames will have the product timestamp, which is useful for
+                when the product format has ambiguous timestamps.
+                </p>
+                <p class="mb-1"><a href="/cgi-bin/afos/retrieve.py?help">Backend Documentation</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 
 EOM;
@@ -374,7 +412,7 @@ EOM;
         // data could have multiple XML messages, so we need to
         // parse each one
         $tokens = explode("<?xml", substr($row["data"], $pos));
-        $content .= sprintf("<pre>%s",
+    $content .= sprintf('<div class="afos-block" role="region" aria-label="Product XML segment"><div class="afos-toolbar"><button type="button" aria-label="Copy product text" class="btn btn-sm btn-outline-secondary afos-copy" data-copy-target="next">Copy</button></div><pre class="afos-pre">%s',
             htmlentities(substr($row["data"], 0, $pos))
         );
         foreach ($tokens as $token) {
@@ -391,7 +429,7 @@ EOM;
                 $content .= htmlentities($rawxml);
             }
         }
-        $content .= "</pre>";
+    $content .= "</pre></div>";
         continue;
     }
     $repr = htmlentities(preg_replace(
@@ -399,7 +437,7 @@ EOM;
         "",
         preg_replace("/\r\r\n/", "\n", $row["data"])
     ));
-    $content .= "<pre>{$repr}</pre>\n";
+    $content .= '<div class="afos-block" role="region" aria-label="Product text" ><div class="afos-toolbar"><button type="button" aria-label="Copy product text" class="btn btn-sm btn-outline-secondary afos-copy" data-copy-target="next">Copy</button></div><pre class="afos-pre">' . $repr . "</pre></div>\n";
 }
 
 $content .= $img;

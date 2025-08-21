@@ -6,41 +6,56 @@ $t = new MyView();
 $t->title = "Recent Interesting METAR Reports";
 
 $t->content = <<<EOM
- <ol class="breadcrumb">
-     <li><a href="/ASOS/">ASOS Mainpage</a></li>
-    <li class="active">Recent Interesting METAR Reports</li>
- </ol>
-<p>The IEM processes and archives a feed of METAR formatted weather observations.
-     These observations sometimes contain interesting things reported.  This page
-     lists out such recent occurences of a given phenomena. This page lists
-     out reports for the past 2 to 3 days.</p>
+<nav aria-label="Breadcrumb">
+    <ol class="breadcrumb mb-3">
+        <li class="breadcrumb-item"><a href="/ASOS/">ASOS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Recent Interesting METAR Reports</li>
+    </ol>
+</nav>
+<h1 class="h4 mb-3" id="recent-heading">Recent Interesting METAR Reports</h1>
+<p id="recent-desc">The IEM processes and archives a feed of METAR formatted weather observations. These observations sometimes contain interesting things reported. This page lists such recent occurrences of a given phenomena for roughly the past 2–3 days.</p>
 
- <form name="local">
- <p><strong>Select Report:</strong>
-     <select id="report" name="report">
-        <option value="snowdepth">Snow Depth Reports (4/xxx)</option>
-        <option value="fc">Funnel Cloud / Tornado / Waterspouts Reports (FC/+FC)</option>
-        <option value="gr">Hail Reports (GR)</option>
-        <option value="i1">Ice Accretion 1 Hour (I1nnn)</option>
-        <option value="i3">Ice Accretion 3 Hours (I3nnn)</option>
-        <option value="i6">Ice Accretion 6 Hours (I6nnn)</option>
-        <option value="pno">No Precipitation Reported (PNO)</option>
-        <option value="50">Wind Sustained/Gusts AOA 50 kts (US Only)</option>
-        <option value="50A">Wind Sustained/Gusts AOA 50 kts (Worldwide)</option>
-     </select>
- </form></o>
+<form name="local" class="row gy-2 gx-3 align-items-end mb-4" aria-describedby="recent-desc">
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <label for="report" class="form-label">Select Report Type</label>
+        <select id="report" name="report" class="form-select" aria-describedby="recent-desc">
+                <option value="snowdepth">Snow Depth Reports (4/xxx)</option>
+                <option value="fc">Funnel Cloud / Tornado / Waterspouts Reports (FC/+FC)</option>
+                <option value="gr">Hail Reports (GR)</option>
+                <option value="i1">Ice Accretion 1 Hour (I1nnn)</option>
+                <option value="i3">Ice Accretion 3 Hours (I3nnn)</option>
+                <option value="i6">Ice Accretion 6 Hours (I6nnn)</option>
+                <option value="pno">No Precipitation Reported (PNO)</option>
+                <option value="50">Wind Sustained/Gusts AOA 50 kts (US Only)</option>
+                <option value="50A">Wind Sustained/Gusts AOA 50 kts (Worldwide)</option>
+        </select>
+    </div>
+</form>
 
- <p><table class="table table-bordered table-striped" id="datatable">
-<thead class="sticky">
-<tr><th>ID</th><th>Network</th><th>UTC Valid</th><th>Value</th><th>METAR</th></tr>
-</thead>
- <tbody>
- </tbody>
- </table></p>
+<div id="recent-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
+<div class="table-responsive" role="region" aria-labelledby="recent-heading" aria-describedby="recent-desc">
+    <table class="table table-bordered table-striped table-sm align-middle mb-0" id="datatable">
+        <caption class="visually-hidden">Table of recent interesting METAR reports filtered by selected report type</caption>
+        <thead class="table-light sticky-top">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Network</th>
+                <th scope="col">UTC Valid</th>
+                <th scope="col">Value</th>
+                <th scope="col">METAR</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+EOM;
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="recent.css">
 EOM;
 $t->jsextra = <<<EOM
-<script src="recent.js"></script>
+<script src="recent.module.js" type="module"></script>
 EOM;
 
 $t->render('single.phtml');
