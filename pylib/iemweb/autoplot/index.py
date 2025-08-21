@@ -748,7 +748,8 @@ def generate_form(apid, fdict, headers, cookies):
     <div class="card-body">
         <div id="willload" class="text-center p-4">
             <div class="mb-3">
-                <i class="fa fa-chart-line fa-2x text-muted mb-2"></i>
+                     <i class="bi bi-graph-up fa-2x text-muted mb-2"
+                         aria-hidden="true"></i>
                 <p class="mb-2">Based on recent timings, plot generation
                 averages {timing_secs} seconds. Please wait while your
                 chart is being generated...</p>
@@ -829,12 +830,14 @@ const progressBar = setInterval(function () {{
                     </div>
                     <div class="mt-4 d-flex gap-2 flex-wrap">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fa fa-chart-line me-1"></i>
+                                     <i class="bi bi-graph-up me-1"
+                                         aria-hidden="true"></i>
                             Generate Plot
                         </button>
                         <button type="submit" name="_cb" value="1"
                                 class="btn btn-outline-warning">
-                            <i class="fa fa-refresh me-1"></i>
+                                     <i class="bi bi-arrow-repeat me-1"
+                                         aria-hidden="true"></i>
                             Force Update (bypass cache)
                         </button>
                     </div>
@@ -919,28 +922,34 @@ function onNetworkChange(newnetwork) {{
     <div class="card-body">
         <div class="d-flex gap-2 flex-wrap">
             <a href="{res["imguri"]}.txt" class="btn btn-primary">
-                <i class="fa fa-file-text me-1"></i>Direct Text Link
+                <i class="bi bi-file-text me-1" aria-hidden="true"></i>
+                Direct Text Link
             </a>
         """
     if meta.get("data"):
         res["dataextra"] += f"""
             <a href="{res["imguri"]}.csv" class="btn btn-primary">
-                <i class="fa fa-download me-1"></i>CSV Data
+                <i class="bi bi-download me-1" aria-hidden="true"></i>
+                CSV Data
             </a>
             <a href="{res["imguri"]}.xlsx" class="btn btn-success">
-                <i class="fa fa-file-excel me-1"></i>Excel Download
+                     <i class="bi bi-file-earmark-spreadsheet me-1"
+                         aria-hidden="true"></i>
+                     Excel Download
             </a>
         """
     if meta["maptable"]:
         res["dataextra"] += f"""
             <a href="{res["imguri"]}.geojson" class="btn btn-info">
-                <i class="fa fa-map me-1"></i>GeoJSON
+                <i class="bi bi-map me-1" aria-hidden="true"></i>
+                GeoJSON
             </a>
         """
     if meta.get("raster"):
         res["dataextra"] += f"""
             <a href="{res["imguri"]}.geotiff" class="btn btn-warning">
-                <i class="fa fa-globe me-1"></i>GeoTIFF
+                <i class="bi bi-globe me-1" aria-hidden="true"></i>
+                GeoTIFF
             </a>
         """
 
@@ -953,7 +962,7 @@ function onNetworkChange(newnetwork) {{
         """
     res["issues"] = """
 <div class="alert alert-info">
-    <i class="fa fa-info-circle me-2"></i>
+    <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
     If you notice plotting issues with the image above, please
     <a class="alert-link" href="/info/contacts.php">contact us</a>
     and provide the URL address currently shown by your web browser.
@@ -1097,7 +1106,8 @@ def generate(fdict, headers, cookies):
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h3 class="card-title mb-0">
-                    <i class="fa fa-chart-line me-2"></i>Automated Data Plotter
+                    <i class="bi bi-graph-up me-2" aria-hidden="true"></i>
+                    Automated Data Plotter
                 </h3>
             </div>
             <div class="card-body">
@@ -1108,11 +1118,14 @@ def generate(fdict, headers, cookies):
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="/plotting/auto/"
                        class="btn btn-outline-secondary btn-sm">
-                        <i class="fa fa-refresh me-1"></i>Reset App
+                                <i class="bi bi-arrow-repeat me-1"
+                                    aria-hidden="true"></i>
+                        Reset App
                     </a>
                     <a href="/explorer/"
                        class="btn btn-outline-primary btn-sm">
-                        <i class="fa fa-map me-1"></i>IEM Explorer (Simplified)
+                        <i class="bi bi-map me-1" aria-hidden="true"></i>
+                        IEM Explorer (Simplified)
                     </a>
                 </div>
             </div>
@@ -1141,7 +1154,8 @@ def generate(fdict, headers, cookies):
                         <div class="col-12 col-lg-4">
                             <button type="submit"
                                     class="btn btn-primary w-100">
-                                <i class="fa fa-arrow-right me-1"></i>
+                                          <i class="bi bi-arrow-right me-1"
+                                              aria-hidden="true"></i>
                                 Select Plot Type
                             </button>
                         </div>

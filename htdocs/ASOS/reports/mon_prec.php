@@ -89,6 +89,7 @@ foreach ($data as $key => $val) {
 
 $d = date("d M Y h a");
 $t->content = <<<EOM
+<a href="#monthly-precip-main" class="visually-hidden-focusable">Skip to main content</a>
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/ASOS/">ASOS Mainpage</a></li>
@@ -96,9 +97,8 @@ $t->content = <<<EOM
 </ol>
 </nav>
 
-<p>This table was generated at <strong>{$d}</strong> and is based
-on available ASOS data.  
-<strong>No attempt was made to estimate missing data.</strong></p>
+<h1 class="h4 mb-3">{$year} {$network} Monthly Precipitation</h1>
+<p>This table was generated at <strong>{$d}</strong> and is based on available ASOS data. <strong>No attempt was made to estimate missing data.</strong></p>
 
 <form name="change" class="mb-4">
 <div class="row align-items-end">
@@ -116,41 +116,45 @@ on available ASOS data.
 </div>
 </form>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Monthly Precipitation Data</h4>
-    <button id="create-grid" type="button" class="btn btn-success">Make Table Interactive</button>
-</div>
+<div id="monthly-precip-main">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Monthly Precipitation Data</h2>
+            <button id="create-grid" type="button" class="btn btn-success" aria-controls="tabulator-container precip-status" aria-expanded="false">Make Table Interactive</button>
+    </div>
+
+    <div id="precip-status" class="mb-3 visually-hidden" role="status" aria-live="polite"></div>
 
 <!-- Tabulator Table Controls (hidden initially) -->
-<div id="table-controls" class="d-none">
+<div id="table-controls" class="d-none" aria-hidden="true">
     <div class="d-flex flex-wrap align-items-center">
-        <div class="btn-group me-3 mb-2">
-            <button id="download-csv" class="btn btn-outline-primary">
-                <i class="fas fa-download"></i> Download CSV
+        <div class="btn-group me-3 mb-2" role="group" aria-label="Download data">
+            <button id="download-csv" type="button" class="btn btn-outline-primary">
+                <i class="bi bi-download" aria-hidden="true"></i> Download CSV
             </button>
-            <button id="download-json" class="btn btn-outline-primary">
-                <i class="fas fa-download"></i> Download JSON
+            <button id="download-json" type="button" class="btn btn-outline-primary">
+                <i class="bi bi-download" aria-hidden="true"></i> Download JSON
             </button>
         </div>
-        <div class="btn-group me-3 mb-2">
-            <button id="copy-clipboard" class="btn btn-outline-secondary">
-                <i class="fas fa-copy"></i> Copy to Clipboard
+        <div class="btn-group me-3 mb-2" role="group" aria-label="Utility actions">
+            <button id="copy-clipboard" type="button" class="btn btn-outline-secondary">
+                <i class="bi bi-clipboard" aria-hidden="true"></i> Copy
             </button>
-            <button id="clear-filters" class="btn btn-outline-warning">
-                <i class="fas fa-filter"></i> Clear Filters
+            <button id="clear-filters" type="button" class="btn btn-outline-warning">
+                <i class="bi bi-funnel" aria-hidden="true"></i> Clear Filters
             </button>
         </div>
     </div>
 </div>
 
 <!-- Modern Tabulator Table (hidden initially) -->
-<div id="tabulator-container" class="d-none">
+<div id="tabulator-container" class="d-none" aria-label="Interactive precipitation data table">
     <div id="precipitation-tabulator-table"></div>
 </div>
 
 <!-- Original Table (shown initially) -->
 <div id="original-table">
 <table class="table table-striped table-sm" id="datagrid">
+<caption class="text-start">Monthly and seasonal (MJJA) precipitation totals (inches) for stations in the {$network} network, year {$year}. M denotes missing.</caption>
 <thead class="sticky">
 <tr>
 <th>ID</th>
@@ -175,6 +179,6 @@ on available ASOS data.
 {$table}
 </tbody>
 </table>
-</div>
+</div><!-- /#monthly-precip-main -->
 EOM;
 $t->render('single.phtml');

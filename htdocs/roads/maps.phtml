@@ -47,7 +47,7 @@ $t->content = <<<EOM
 </div>
 <div class="card-body">
 <p class="card-text">
-<i class="fa fa-info-circle text-info"></i>
+<i class="bi bi-info-circle text-info" aria-hidden="true"></i>
 This interactive map displays current road conditions across Iowa. Data is updated regularly and shows the latest conditions as of <strong>{$valid}</strong>.
 Use the map controls to zoom, pan, and switch between different data layers.
 </p>
@@ -82,15 +82,15 @@ Use the map controls to zoom, pan, and switch between different data layers.
 <div class="mb-4">
 <h6 class="fw-bold">Map Controls</h6>
 <ul class="list-unstyled small">
-<li><i class="fa fa-mouse-pointer text-primary"></i> Click and drag to pan</li>
-<li><i class="fa fa-search-plus text-primary"></i> Mouse wheel to zoom</li>
-<li><i class="fa fa-layers text-primary"></i> Use layer switcher for different views</li>
+<li><i class="bi bi-cursor text-primary" aria-hidden="true"></i> Click and drag to pan</li>
+<li><i class="bi bi-zoom-in text-primary" aria-hidden="true"></i> Mouse wheel to zoom</li>
+<li><i class="bi bi-layers text-primary" aria-hidden="true"></i> Use layer switcher for different views</li>
 </ul>
 </div>
 
 <div class="alert alert-info">
 <small>
-<i class="fa fa-clock"></i>
+<i class="bi bi-clock" aria-hidden="true"></i>
 Road conditions are reported by Iowa DOT and updated as conditions change. 
 Always exercise caution when driving in adverse weather conditions.
 </small>
@@ -116,15 +116,15 @@ Always exercise caution when driving in adverse weather conditions.
 <div class="col-md-6">
 <h6 class="fw-bold">Available APIs:</h6>
 <ul class="list-unstyled">
-<li><a href="/api/#json" class="text-decoration-none"><i class="fa fa-code text-success"></i> GeoJSON Web Services</a></li>
-<li><a href="/ogc/" class="text-decoration-none"><i class="fa fa-globe text-info"></i> OGC WebMap Services</a></li>
+<li><a href="/api/#json" class="text-decoration-none"><i class="bi bi-code-slash text-success" aria-hidden="true"></i> GeoJSON Web Services</a></li>
+<li><a href="/ogc/" class="text-decoration-none"><i class="bi bi-globe2 text-info" aria-hidden="true"></i> OGC WebMap Services</a></li>
 </ul>
 </div>
 <div class="col-md-6">
 <h6 class="fw-bold">Related Tools:</h6>
 <ul class="list-unstyled">
-<li><a href="/roads/" class="text-decoration-none"><i class="fa fa-road text-warning"></i> Roads Main Page</a></li>
-<li><a href="/api/1/docs" class="text-decoration-none"><i class="fa fa-book text-primary"></i> API Documentation</a></li>
+<li><a href="/roads/" class="text-decoration-none"><i class="bi bi-signpost-2 text-warning" aria-hidden="true"></i> Roads Main Page</a></li>
+<li><a href="/api/1/docs" class="text-decoration-none"><i class="bi bi-journal-text text-primary" aria-hidden="true"></i> API Documentation</a></li>
 </ul>
 </div>
 </div>

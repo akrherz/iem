@@ -5,6 +5,7 @@ import {TabulatorFull as Tabulator} from 'https://unpkg.com/tabulator-tables@6.3
 // Application state
 let pdsTable = null;
 let originalData = [];
+let statusEl = null;
 
 // Common Tabulator configuration for PDS table
 const commonConfig = {
@@ -163,13 +164,20 @@ function initializeTable() {
         data: originalData
     });
 
-    // Show the new table and hide controls
-    document.getElementById('tabulator-container').classList.remove('d-none');
-    document.getElementById('table-controls').classList.remove('d-none');
+    // Show the new table and controls
+    const container = document.getElementById('tabulator-container');
+    container.classList.remove('d-none');
+    const controls = document.getElementById('table-controls');
+    controls.classList.remove('d-none');
+    controls.removeAttribute('aria-hidden');
+    if (statusEl) statusEl.textContent = 'Interactive table loaded. Use column headers to sort and filter inputs to refine results.';
     
     // Hide the original table and button
-    document.getElementById('original-table').style.display = 'none';
-    document.getElementById('makefancy').style.display = 'none';
+    const original = document.getElementById('original-table');
+    original.style.display = 'none';
+    const btn = document.getElementById('makefancy');
+    btn.style.display = 'none';
+    btn.setAttribute('aria-expanded', 'true');
 }
 
 // Setup table control event handlers
@@ -205,10 +213,12 @@ function setupControls() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+    statusEl = document.getElementById('pds-status');
     // Setup the "Make Table Interactive" button
     const makeFancyButton = document.getElementById('makefancy');
     if (makeFancyButton) {
         makeFancyButton.addEventListener('click', () => {
+            if (statusEl) statusEl.textContent = 'Initializing interactive table…';
             initializeTable();
         });
     }

@@ -38,32 +38,32 @@ navigate the archive.</p>
     <div class="col-sm-4" style="margin-bottom: 15px;">
     <select name="products" id="products"></select>	
     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-        <button class="btn btn-secondary btn-sm" data-offset="-1" data-unit="minute"><i class="fa fa-arrow-left"></i> Previous</button>
+    <button class="btn btn-secondary btn-sm" data-offset="-1" data-unit="minute"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</button>
         <button class="btn btn-secondary btn-sm" id="realtime">Show Latest</button>
-        <button class="btn btn-secondary btn-sm" data-offset="1" data-unit="minute">Next <i class="fa fa-arrow-right"></i></button>
+    <button class="btn btn-secondary btn-sm" data-offset="1" data-unit="minute">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
     </div>
     </div>
     <div class="col-sm-4" style="margin-bottom: 15px;">
         <label for="year_slider" style="display: flex; align-items: center; justify-content: space-between;">
-            <button data-offset="-1" data-unit="year" class="btn btn-secondary btn-sm" id="pyear"><i class="fa fa-arrow-left"></i></button>
+            <button data-offset="-1" data-unit="year" class="btn btn-secondary btn-sm" id="pyear"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
             <span class="year-label-text">Year</span>
-            <button data-offset="1" data-unit="year" class="btn btn-secondary btn-sm" id="nyear"><i class="fa fa-arrow-right"></i></button>
+            <button data-offset="1" data-unit="year" class="btn btn-secondary btn-sm" id="nyear"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </label>
         <div id="year_slider"></div>
     </div>
     <div class="col-sm-2" style="margin-bottom: 15px;">
         <label for="hour_slider" style="display: flex; align-items: center; justify-content: space-between;">
-            <button data-offset="-1" data-unit="hour" class="btn btn-secondary btn-sm" id="phour"><i class="fa fa-arrow-left"></i></button>
+            <button data-offset="-1" data-unit="hour" class="btn btn-secondary btn-sm" id="phour"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
             <span class="hour-label-text">Hour</span>
-            <button data-offset="1" data-unit="hour" class="btn btn-secondary btn-sm" id="nhour"><i class="fa fa-arrow-right"></i></button>
+            <button data-offset="1" data-unit="hour" class="btn btn-secondary btn-sm" id="nhour"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </label>
         <div id="hour_slider"></div>
     </div>
     <div class="col-sm-2" style="margin-bottom: 15px;">
         <label for="minute_slider" style="display: flex; align-items: center; justify-content: space-between;">
-            <button data-offset="-1" data-unit="minute" class="btn btn-secondary btn-sm" id="pminute"><i class="fa fa-arrow-left"></i></button>
+            <button data-offset="-1" data-unit="minute" class="btn btn-secondary btn-sm" id="pminute"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
             <span class="minute-label-text">Minute</span>
-            <button data-offset="1" data-unit="minute" class="btn btn-secondary btn-sm" id="nminute"><i class="fa fa-arrow-right"></i></button>
+            <button data-offset="1" data-unit="minute" class="btn btn-secondary btn-sm" id="nminute"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </label>
         <div id="minute_slider"></div>
     </div>
@@ -71,9 +71,9 @@ navigate the archive.</p>
 <div class="row">
     <div class="col-sm-12" style="margin-bottom: 15px;">
         <label for="day_slider" style="display: flex; align-items: center; justify-content: space-between;">
-            <button data-offset="-1" data-unit="day" class="btn btn-secondary btn-sm" id="pday"><i class="fa fa-arrow-left"></i></button>
+            <button data-offset="-1" data-unit="day" class="btn btn-secondary btn-sm" id="pday"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
             <span class="day-label-text">Day</span>
-            <button data-offset="1" data-unit="day" class="btn btn-secondary btn-sm" id="nday"><i class="fa fa-arrow-right"></i></button>
+            <button data-offset="1" data-unit="day" class="btn btn-secondary btn-sm" id="nday"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </label>
         <div id="day_slider"></div>
     </div>

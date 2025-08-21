@@ -7,91 +7,83 @@ $t = new MyView();
 $t->title = "ASOS/AWOS Network";
 
 $t->content = <<< EOM
-<h3>ASOS Network</h3><p>
+<h1 class="h4 mb-3">ASOS / AWOS Network</h1>
 
-<div class="card card-body float-end">
-<b><u>ASOS</u></b>
-<br>Reports: Hourly
-<br><a href="/sites/locate.php?network=IA_ASOS">Locations</a>
+<aside class="card card-body float-end ms-3 mb-3" role="complementary" aria-labelledby="asos-card-heading">
+  <h2 class="h6 mb-2" id="asos-card-heading">ASOS Quick Facts</h2>
+  <p class="mb-1">Reports: Hourly</p>
+  <p class="mb-0"><a href="/sites/locate.php?network=IA_ASOS">View Locations</a></p>
+</aside>
+
+<p>The Automated Surface Observing System (ASOS) is considered to be the flagship automated observing network. Located at airports, the ASOS stations provide essential observations for the National Weather Service (NWS), the Federal Aviation Administration (FAA), and the Department of Defense (DOD). The primary function of the ASOS stations are to take minute-by-minute observations and generate basic weather reports.<sup class="text-muted">[1]</sup></p>
+
+<p>Please see this <a href="/onsite/news.phtml?id=1469" class="btn btn-danger"><i class="bi bi-info-circle-fill" aria-hidden="true"></i> Important News Item</a> regarding wagering on ASOS temperatures.</p>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <section aria-labelledby="current-heading">
+      <h2 class="h5" id="current-heading">Current ASOS Data</h2>
+      <ul class="mb-4">
+        <li><a href="current.phtml">Sortable Current Conditions</a></li>
+        <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
+        <li><a href="/data/asos.gif">ASOS Mesonet</a></li>
+        <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
+        <li><a href="recent.phtml">Recent Interesting METAR Reports</a></li>
+        <li><a href="/data/relh.gif">Relative Humidity</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="one-minute-heading">
+      <h2 class="h5" id="one-minute-heading">1 Minute Archive</h2>
+      <p>The National Center for Environmental Information (NCEI) provides an archive of one minute interval observations from many US ASOS sites back to the year 2000. This archive is available <a href="https://www.ncei.noaa.gov/pub/data/asos-onemin/">here</a>, but in a difficult to use format. The IEM makes a best-guess effort at processing the mostly undocumented data format and updates the archive daily. This dataset is <strong>not realtime</strong> and is delayed by 18–36 hours or more due to NCEI availability.</p>
+      <ul class="mb-1">
+        <li><a href="/request/asos/1min.phtml">Download</a> these observations</li>
+        <li><a href="/plotting/auto/?q=211">Plot</a> these observations</li>
+      </ul>
+      <p class="mb-4">Data is available for some sites back to 2000.</p>
+    </section>
+
+    <section aria-labelledby="qc-heading">
+      <h2 class="h5" id="qc-heading">Quality Control</h2>
+      <ul>
+        <li><a href="/QC/madis/network.phtml?network=IA_ASOS">MADIS Raw QC Values</a></li>
+        <li><a href="precipnote.phtml">Note about ASOS Precipitation Timing</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="col-md-6">
+    <section aria-labelledby="historical-heading" class="mb-4">
+      <h2 class="h5" id="historical-heading">Historical Data</h2>
+      <ul class="mb-4">
+        <li><a href="/request/download.phtml">Download</a> raw observations from the archive</li>
+        <li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
+        <li><a href="/ASOS/reports/mon_prec.php">Monthly Precipitation</a> tables</li>
+        <li><a href="/request/asos/hourlyprecip.phtml">Download</a> computed hourly precipitation totals</li>
+        <li><a href="/request/daily.phtml">Download</a> computed daily summaries</li>
+        <li><a href="/climodat/">IEM Climodat</a> has monthly/yearly summaries of precipitation and temperature.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="comparisons-heading" class="mb-4">
+      <h2 class="h5" id="comparisons-heading">Comparisons</h2>
+      <ul>
+        <li><a href="/data/temps.gif">Temperatures vs RWIS Network</a></li>
+        <li><a href="/data/snet/Tcompare.gif">Temperatures vs SchoolNet Network</a></li>
+        <li><a href="/data/dewps.gif">Dew Points vs RWIS Network</a></li>
+        <li><a href="/data/snet/Dcompare.gif">Dew Points vs SchoolNet Network</a></li>
+        <li><a href="/data/winds.gif">Winds vs RWIS Network</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="references-heading">
+      <h2 class="h5" id="references-heading">References</h2>
+      <p class="mb-2"><sup class="text-muted">[1]</sup> Adapted from the <a href="https://www.weather.gov/media/asos/aum-toc.pdf">ASOS User's Guide</a></p>
+      <ul class="mb-0">
+        <li><a href="https://www.weather.gov/media/asos/ASOS%20Implementation/awpag27B6relnotes.pdf">All Weather Precipitation Gauge</a> install dates.</li>
+      </ul>
+    </section>
+  </div>
 </div>
-
-The Automated Surface Observing System (ASOS) is considered
-to be the flagship automated observing network.  Located at airports, the ASOS
-stations provide essential observations for the National Weather Service (NWS), the Federal Aviation Administration (FAA), and the Department of Defense (DOD).
-The primary function of the ASOS stations are to take minute-by-minute 
-observations and generate basic weather reports.<font class="ref">[1]</font>
-
-<p>Please see this <a href="/onsite/news.phtml?id=1469" class="btn btn-danger">
-<i class="fa fa-info"></i>
-Important News Item</a> regarding wagering on ASOS temperatures.</p>
-
-<div class="row">
-<div class="col-md-6">
-
-<P><h3>Current ASOS Data:</h3>
-<ul>
- <li><a href="current.phtml">Sortable Current Conditions</a></li>
- <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
- <li><a href="/data/asos.gif">ASOS Mesonet</a></li>
- <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-    <li><a href="recent.phtml">Recent Interesting METAR Reports</a></li>
-    <li><a href="/data/relh.gif">Relative Humidity</a></li>
-</ul>
-
-<h3>1 Minute Archive:</h3>
-
-<p>The National Center for Environmental Information (NCEI) provides an archive
-of one minute interval observations from many US ASOS sites back to the year 2000.
-This archive is available 
-<a href="https://www.ncei.noaa.gov/pub/data/asos-onemin/">here</a>, but in a terrible
-format!  The IEM makes a best-guess effort at processing the mostly undocumented
-data format and updates the archive daily.  This dataset is <strong>not realtime</strong>
-and is delayed by 18-36 hours or more due to NCEI availability.</p> 
-
-<ul>
- <li><a href="/request/asos/1min.phtml">Download</a> these observations</li>
- <li><a href="/plotting/auto/?q=211">Plot</a> these observations</li>
-</ul>
-<br />Data is available for some sites back to 2000.
-
-<p><h3>Quality Control:</h3>
-<ul>
- <li><a href="/QC/madis/network.phtml?network=IA_ASOS">MADIS Raw QC Values</a></li>
- <li><a href="precipnote.phtml">Note about ASOS Precipitation Timing</a></li>
- </ul>
-
-</div>
-<div class="col-md-6">
-
-<p><h3>Historical Data:</h3>
-<ul>
- <li><a href="/request/download.phtml">Download</a> raw observations from the archive</li>
- <li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
- <li><a href="/ASOS/reports/mon_prec.php">Monthly Precipitation</a> tables</li>
- <li><a href="/request/asos/hourlyprecip.phtml">Download</a> computed hourly precipitation totals</li>
- <li><a href="/request/daily.phtml">Download</a> computed daily summaries</li>
- <li><a href="/climodat/">IEM Climodat</a> has monthly/yearly summaries of 
-        precipitation and temperature.</li>
-</ul>
-
-<p><h3>Comparisons:</h3>
-<ul>
-  <li><a href="/data/temps.gif">Temperatures vs RWIS Network</a></li>
-  <li><a href="/data/snet/Tcompare.gif">Temperatures vs SchoolNet Network</a></li>
-  <li><a href="/data/dewps.gif">Dew Points vs RWIS Network</a></li>
-  <li><a href="/data/snet/Dcompare.gif">Dew Points vs SchoolNet Network</a></li>
-  <li><a href="/data/winds.gif">Winds vs RWIS Network</a></li>
-</ul>
-
-</div></div>
-
-<p><b>References:</b><br>
-<b>1</b> Adapted from the <a href="https://www.weather.gov/media/asos/aum-toc.pdf">ASOS User's Guide</a>
-
-<ul>
-<li><a href="https://www.weather.gov/media/asos/ASOS%20Implementation/awpag27B6relnotes.pdf">All Weather Precipitation Gauge</a> install dates.</li>
-</ul>
-
-<br><br>
 EOM;
 $t->render('single.phtml');

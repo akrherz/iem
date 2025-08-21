@@ -418,8 +418,8 @@ function createPhenomenaSummary(tableData, containerId) {
                     <button class="btn btn-link text-decoration-none p-0 fw-bold" type="button" 
                             data-bs-toggle="collapse" data-bs-target="#${containerId}-summary" 
                             aria-expanded="true" aria-controls="${containerId}-summary">
-                        <i class="fa fa-chart-bar me-2"></i>Phenomena Summary (${tableData.length} total events)
-                        <i class="fa fa-chevron-up ms-2 summary-chevron"></i>
+                        <i class="bi bi-bar-chart-fill me-2" aria-hidden="true"></i>Phenomena Summary (${tableData.length} total events)
+                        <i class="bi bi-chevron-up ms-2 summary-chevron" aria-hidden="true"></i>
                     </button>
                 </h6>
             </div>
@@ -427,12 +427,12 @@ function createPhenomenaSummary(tableData, containerId) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <small class="text-muted">
-                            <i class="fa fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
                             Click any combination to filter the table:
                         </small>
                         <button class="btn btn-sm btn-outline-secondary clear-filter-btn" type="button" style="display: none;" 
                                 title="Clear current filter and show all results">
-                            <i class="fa fa-times me-1"></i>Clear Filter
+                            <i class="bi bi-x-lg me-1" aria-hidden="true"></i>Clear Filter
                         </button>
                     </div>
                     <div class="phenomena-grid">
@@ -509,7 +509,7 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
     if (titleElement) {
         const originalText = titleElement.textContent.split(' (')[0]; // Remove any existing filter text
         const filteredCount = table.getDataCount("active");
-        titleElement.innerHTML = `<i class="fa fa-table me-2"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
+    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
     }
     
     // Update toolbar count
@@ -531,7 +531,7 @@ function clearPhenomenaFilter(containerId) {
     const titleElement = document.getElementById(containerId);
     if (titleElement) {
         const originalText = titleElement.textContent.split(' (')[0];
-        titleElement.innerHTML = `<i class="fa fa-table me-2"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')}`;
+    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')}`;
     }
     
     // Update toolbar count (no filter)
@@ -665,17 +665,17 @@ function setupTableConfigurations() {
         toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
-                    <i class="fa fa-table me-1"></i>
+                    <i class="bi bi-table me-1" aria-hidden="true"></i>
                     <span class="table-count">Table data</span>
                 </small>
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
                 <button type="button" class="btn btn-sm btn-success me-1" onclick="table1.download('xlsx', 'sbw-current-view.xlsx')" title="Export visible table data to Excel">
-                    <i class="fa fa-download me-1"></i>Excel
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>Excel
                 </button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="table1.download('csv', 'sbw-current-view.csv')" title="Export visible table data to CSV">
-                    <i class="fa fa-download me-1"></i>CSV
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>CSV
                 </button>
             </div>
         `;
@@ -722,17 +722,17 @@ function setupTableConfigurations() {
         toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
-                    <i class="fa fa-table me-1"></i>
+                    <i class="bi bi-table me-1" aria-hidden="true"></i>
                     <span class="table-count">Table data</span>
                 </small>
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
                 <button type="button" class="btn btn-sm btn-success me-1" onclick="table2.download('xlsx', 'events-current-view.xlsx')" title="Export visible table data to Excel">
-                    <i class="fa fa-download me-1"></i>Excel
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>Excel
                 </button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="table2.download('csv', 'events-current-view.csv')" title="Export visible table data to CSV">
-                    <i class="fa fa-download me-1"></i>CSV
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>CSV
                 </button>
             </div>
         `;
@@ -781,17 +781,17 @@ function setupTableConfigurations() {
         toolbarDiv.innerHTML = `${''}
             <div class="table-info">
                 <small class="text-muted">
-                    <i class="fa fa-table me-1"></i>
+                    <i class="bi bi-table me-1" aria-hidden="true"></i>
                     <span class="table-count">Table data</span>
                 </small>
             </div>
             <div class="table-exports">
                 <span class="badge bg-info me-2">Export Current View:</span>
                 <button type="button" class="btn btn-sm btn-success me-1" onclick="table3.download('xlsx', 'list-current-view.xlsx')" title="Export visible table data to Excel">
-                    <i class="fa fa-download me-1"></i>Excel
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>Excel
                 </button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="table3.download('csv', 'list-current-view.csv')" title="Export visible table data to CSV">
-                    <i class="fa fa-download me-1"></i>CSV
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>CSV
                 </button>
             </div>
         `;

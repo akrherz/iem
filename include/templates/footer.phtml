@@ -24,8 +24,8 @@ EOM;
 
 ?>
 <!-- footer -->
-<footer role="contentinfo">
-    <div class="container" id="iem-footer">
+<footer>
+    <div class="container" id="iem-footer" aria-label="Site footer">
         <div class="row">
 
             <!-- footer-associates -->
@@ -38,17 +38,19 @@ EOM;
             </section>
 
             <!-- footer-contact -->
-            <section class="footer-contact col-sm-12 col-md-3">
-                <p>
+            <section class="footer-contact col-sm-12 col-md-3" aria-labelledby="footer-contact-heading">
+                <h2 id="footer-contact-heading" class="visually-hidden">Contact</h2>
+                <address class="mb-2">
                     <strong>Department of Agronomy</strong><br>
                     <a href="https://maps.google.com/?q=716+Farm+House+Ln+Ames,+IA+50011">716 Farm House Ln<br>
                     Ames, IA 50011</a>
-                </p>
+                </address>
                 <a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a><br>
-            </section>	
+            </section>
 
             <!-- footer-social -->
-            <section class="footer-social col-sm-12 col-md-3">
+            <section class="footer-social col-sm-12 col-md-3" aria-labelledby="footer-social-heading">
+                <h2 id="footer-social-heading" class="visually-hidden">Social media</h2>
                 <ul class=" labeled">
                 <li><a href="https://www.facebook.com/IEM-157789644737/"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Facebook</a></li>
                 <li><a href="https://twitter.com/akrherz"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Twitter</a></li>
@@ -59,7 +61,8 @@ EOM;
             </section>	
 
             <!-- footer-legal -->
-            <section class="footer-legal col-sm-12 col-md-3">
+            <section class="footer-legal col-sm-12 col-md-3" aria-labelledby="footer-legal-heading">
+                <h2 id="footer-legal-heading" class="visually-hidden">Legal</h2>
                 <p>Copyright &copy; 2001-<?php echo date("Y"); ?><br>
                                 Iowa State University<br>
                                 of Science and Technology<br>

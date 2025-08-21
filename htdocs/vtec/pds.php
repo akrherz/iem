@@ -42,13 +42,15 @@ EOM;
 
 
 $t->content = <<<EOM
+<a href="#pds-main" class="visually-hidden-focusable">Skip to main content</a>
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
  <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
  <li class="breadcrumb-item active" aria-current="page">PDS List</li>
 </ol>
 </nav>
-<h3>Particularly Dangerous Situation Watch/Warnings</h3>
+<h1 class="h4 mb-3">Particularly Dangerous Situation Watch / Warnings</h1>
+<div id="pds-main">
 
 <p>This page presents the current and
 <strong>unofficial</strong> IEM
@@ -63,45 +65,45 @@ directly access it here:
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>
-&nbsp;
-<a class="btn btn-primary" href="/nws/pds_watches.php">SPC PDS Watches</a>
-&nbsp;
-</p>
+<a class="btn btn-primary ms-2" href="/nws/pds_watches.php">SPC PDS Watches</a></p>
 
 <p>
 This listing was generated at: <code>{$json['generated_at']}</code> and is
-regenerated hourly. <button id="makefancy" class="btn btn-success">Make Table Interactive</button></p>
+regenerated hourly. <button id="makefancy" class="btn btn-success" aria-controls="pds-tabulator-table pds-status" aria-expanded="false">Make Table Interactive</button></p>
+
+<div id="pds-status" class="visually-hidden" role="status" aria-live="polite"></div>
 
 <!-- Tabulator Table Controls (hidden initially) -->
-<div id="table-controls" class="d-none">
+<div id="table-controls" class="d-none" aria-hidden="true">
     <div class="d-flex flex-wrap align-items-center">
-        <div class="btn-group me-3 mb-2">
-            <button id="download-csv" class="btn btn-outline-primary">
-                <i class="fas fa-download"></i> Download CSV
+        <div class="btn-group me-3 mb-2" role="group" aria-label="Download data">
+            <button id="download-csv" type="button" class="btn btn-outline-primary">
+                <i class="bi bi-download" aria-hidden="true"></i> CSV
             </button>
-            <button id="download-json" class="btn btn-outline-primary">
-                <i class="fas fa-download"></i> Download JSON
+            <button id="download-json" type="button" class="btn btn-outline-primary">
+                <i class="bi bi-download" aria-hidden="true"></i> JSON
             </button>
         </div>
-        <div class="btn-group me-3 mb-2">
-            <button id="copy-clipboard" class="btn btn-outline-secondary">
-                <i class="fas fa-copy"></i> Copy to Clipboard
+        <div class="btn-group me-3 mb-2" role="group" aria-label="Utility actions">
+            <button id="copy-clipboard" type="button" class="btn btn-outline-secondary">
+                <i class="bi bi-clipboard" aria-hidden="true"></i> Copy
             </button>
-            <button id="clear-filters" class="btn btn-outline-warning">
-                <i class="fas fa-filter"></i> Clear Filters
+            <button id="clear-filters" type="button" class="btn btn-outline-warning">
+                <i class="bi bi-funnel" aria-hidden="true"></i> Clear Filters
             </button>
         </div>
     </div>
 </div>
 
 <!-- Modern Tabulator Table (hidden initially) -->
-<div id="tabulator-container" class="d-none">
+<div id="tabulator-container" class="d-none" aria-label="Interactive PDS events data table">
     <div id="pds-tabulator-table"></div>
 </div>
 
 <!-- Original Table (shown initially) -->
 <div id="original-table">
-<table class="table table-striped table-sm">
+<table class="table table-striped table-sm" id="pds-table">
+<caption class="text-start">Listing of PDS (Particularly Dangerous Situation) watch and warning events. PH = VTEC Phenomena, SIG = VTEC Significance.</caption>
 <thead class="sticky">
 <tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
 <th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>
@@ -110,7 +112,7 @@ regenerated hourly. <button id="makefancy" class="btn btn-success">Make Table In
 {$table}
 </tbody>
 </table>
-</div>
+</div><!-- /#pds-main -->
 
 EOM;
 $t->render("full.phtml");
