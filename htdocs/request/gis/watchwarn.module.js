@@ -1,5 +1,5 @@
 // watchwarn.module.js - NWS Watch, Warning, Advisory Download Interface
-// Provides form submission functionality for different data formats
+import { requireElement } from "/js/iemjs/domUtils.js";
 
 /**
  * Submit form with specified action URL and reset accept field
@@ -8,10 +8,8 @@
 const submitFormWithAction = (form, url) => {
     form.action = url;
     // Reset accept field to default 'shapefile' value for shapefile/KML requests
-    const acceptField = document.getElementById('accept');
-    if (acceptField) {
-        acceptField.value = 'shapefile';
-    }
+    const acceptField = requireElement('accept');
+    acceptField.value = 'shapefile';
     form.submit();
 };
 
@@ -20,10 +18,8 @@ const submitFormWithAction = (form, url) => {
  * Updates the hidden accept field before form submission for CSV/Excel downloads
  */
 const setAcceptAndSubmit = (form, acceptValue) => {
-    const acceptField = document.getElementById('accept');
-    if (acceptField) {
-        acceptField.value = acceptValue;
-    }
+    const acceptField = requireElement('accept');
+    acceptField.value = acceptValue;
     form.submit();
 };
 
