@@ -29,7 +29,6 @@ if ($this->jsani){
 EOM;
 }
 $headextra .= is_null($this->headextra) ? '': $this->headextra;
-$bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,4 +78,4 @@ EOM;
     <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
   </head>
 
-  <body<?php echo $bodyextra; ?>>
+  <body>

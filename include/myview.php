@@ -12,7 +12,6 @@ require_once dirname(__FILE__) . "/generators.php";
  */
 class MyView {
     protected $vars = array();
-    public ?string $bodyextra = null;
     public ?string $breadcrumbs = null;
     public ?string $content = null;
     public ?string $current_network = null;
