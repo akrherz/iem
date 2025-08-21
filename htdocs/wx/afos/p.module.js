@@ -1,7 +1,5 @@
 // Copy-to-clipboard behavior for AFOS product <pre> blocks
-// Avoid using `this`; rely on event targets. (Rule: avoid `this` confusion)
-
-const copyText = async (text) => {
+const copyText = (text) => {
     if (navigator.clipboard && window.isSecureContext) {
         return navigator.clipboard.writeText(text);
     }
