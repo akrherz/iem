@@ -4,7 +4,7 @@ require_once "../include/myview.php";
 $t = new MyView();
 $t->title = "Disclaimer";
 $t->content = <<< EOM
-<h3><i class="fa fa-exclamation-triangle"></i> Disclaimer</h3>
+<h3><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Disclaimer</h3>
 
 <p>While we use care to provide accurate weather/climatic information,
 errors may occur because of equipment or other failure. We therefore provide this

@@ -49,7 +49,7 @@ near term forecasts of temperatures and wind speed aloft.  More details on the
 product can be found with the <a href="https://weather.gov/directives/sym/pd01008012curr.pdf">NWS Directive 10-812</a>.</p>
 
 <p><a href="/cgi-bin/request/tempwind_aloft.py?help" class="btn btn-secondary">
-<i class="fa fa-file"></i> Backend documentation</a> exists for those wishing to script against this
+<i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a> exists for those wishing to script against this
 service. The archive dates back to 23 September 2004.</p>
 
 <p><strong>Related:</strong>

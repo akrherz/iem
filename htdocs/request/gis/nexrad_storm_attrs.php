@@ -40,11 +40,11 @@ $content = <<<EOM
  combination of selected RADARs and day interval.  If you select ALL RADARs,
  that counts as 150 toward that score.
  <a href="/cgi-bin/request/gis/nexrad_storm_attrs.py?help"
- class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a> exists
+ class="btn btn-info"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a> exists
  for those wishing to script against this service.</p>
 
 <p><a class="btn btn-secondary" href="#histograms" role="button">
-        <i class="fa fa-stats"></i> View Histograms</a>
+        <i class="bi bi-bar-chart" aria-hidden="true"></i> View Histograms</a>
  
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>

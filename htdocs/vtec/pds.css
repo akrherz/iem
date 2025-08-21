@@ -99,7 +99,7 @@
 }
 
 .tabulator .tabulator-row:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    background-color: rgba(var(--bs-primary-rgb), 0.12); /* Slightly higher contrast for accessibility */
 }
 
 .tabulator .tabulator-row .tabulator-cell {
@@ -185,15 +185,7 @@
 .alert-info {
     background: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1), rgba(var(--bs-primary-rgb), 0.1));
     border-color: var(--bs-info);
-    color: var(--bs-info-text);
-}
-
-/* Breadcrumb enhancement */
-.breadcrumb {
-    background: linear-gradient(135deg, var(--bs-light), rgba(var(--bs-primary-rgb), 0.05));
-    border-radius: 0.375rem;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1.5rem;
+    color: var(--bs-info-text-emphasis, #055160);
 }
 
 /* Page header styling */
@@ -233,4 +225,41 @@ code {
     font-family: 'Courier New', monospace;
     color: var(--bs-dark);
     border: 1px solid var(--bs-border-color);
+}
+
+/* Accessibility enhancements appended */
+/* Keyboard focus clarity */
+#makefancy:focus-visible,
+#table-controls .btn:focus-visible,
+.tabulator .tabulator-header .tabulator-col:focus-visible,
+.tabulator .tabulator-row .tabulator-cell:focus-visible {
+    outline: 3px solid var(--bs-warning);
+    outline-offset: 2px;
+}
+
+/* Visually hidden but focusable utility */
+.visually-hidden-focusable:not(:focus):not(:active) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    #makefancy,
+    #makefancy:hover,
+    #makefancy:active {
+        transition: none !important;
+        transform: none !important;
+    }
+    .tabulator-loader {
+        animation: none !important;
+        border-top-color: var(--bs-primary);
+    }
 }

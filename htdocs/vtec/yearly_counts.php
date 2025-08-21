@@ -202,10 +202,10 @@ The IEM retrospectively assigned VTEC events to some warnings prior to
 implementation in fall 2005.  Note: the numbers shown are the unique combinations
 of VTEC event ids and WFO, so a single tornado watch event issued by four
 WFOs would count as four in this summary, when summarizing all WFOs!</p>
-        
+
 <div class="alert alert-info">Hopefully, you can copy/paste this table into
 your favorite spreadsheet program for further analysis...</div>
-        
+
 $cachedwarning
 
 <p><h4>Option 1: All VTEC Events by Year</h4>

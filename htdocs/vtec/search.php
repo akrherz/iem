@@ -27,30 +27,33 @@ EOM;
 $t->title = "NWS Warning Search by Point or County/Zone";
 
 $t->content = <<<EOM
+<a href="#vtec-search-main" class="visually-hidden-focusable">Skip to main content</a>
+<h1 class="h4 mb-3">NWS Watch / Warning / Advisory Search</h1>
 <p>This application allows you to search for National Weather Service Watch,
 Warning, and Advisories using three different search methods:</p>
+<div id="vtec-search-status" class="visually-hidden" role="status" aria-live="polite"></div>
 
 <!-- Bootstrap Navigation Tabs -->
-<ul class="nav nav-tabs vtec-search-tabs" id="searchTabs" role="tablist">
+<ul class="nav nav-tabs vtec-search-tabs" id="searchTabs" role="tablist" aria-label="Search modes">
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="bypoint-tab" data-bs-toggle="tab" data-bs-target="#bypoint" type="button" role="tab" aria-controls="bypoint" aria-selected="false">
-            <i class="fa fa-map-marker-alt me-2"></i>Storm Based Warnings by Point
+            <i class="bi bi-geo-alt-fill me-2" aria-hidden="true"></i>Storm Based Warnings by Point
         </button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="byugc-tab" data-bs-toggle="tab" data-bs-target="#byugc" type="button" role="tab" aria-controls="byugc" aria-selected="false">
-            <i class="fa fa-map me-2"></i>Warnings by County/Zone or Point
+            <i class="bi bi-map me-2" aria-hidden="true"></i>Warnings by County/Zone or Point
         </button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="false">
-            <i class="fa fa-list me-2"></i>List by State/WFO
+            <i class="bi bi-list-ul me-2" aria-hidden="true"></i>List by State/WFO
         </button>
     </li>
 </ul>
 
 <!-- Tab Content -->
-<div class="tab-content" id="searchTabContent">
+<div class="tab-content" id="searchTabContent" id="vtec-search-main">
     <!-- Tab 1: Storm Based Warnings by Point -->
     <div class="tab-pane fade" id="bypoint" role="tabpanel" aria-labelledby="bypoint-tab">
         <div class="mt-3">
@@ -63,7 +66,7 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-4">
                     <div class="card vtec-card mb-3">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-cogs me-2"></i>Search Parameters</h6>
+                            <h6 class="card-title"><i class="bi bi-gear-fill me-2" aria-hidden="true"></i>Search Parameters</h6>
                             
                             <div class="coordinate-section">
                                 <strong>Enter coordinates manually:</strong><br />
@@ -96,14 +99,14 @@ Warning, and Advisories using three different search methods:</p>
                             </div>
                             
                             <button type="button" class="btn btn-primary w-100" id="manualpt">
-                                <i class="fa fa-sync me-2"></i>Update Results
+                                <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Update Results
                             </button>
                         </div>
                     </div>
                     
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-mouse-pointer me-2"></i>Interactive Map</h6>
+                            <h6 class="card-title"><i class="bi bi-cursor me-2" aria-hidden="true"></i>Interactive Map</h6>
                             <p class="card-text">Drag the marker to select coordinates:</p>
                             <div
                              id="map"
@@ -119,21 +122,21 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h4 id="table1title" class="card-title"><i class="fa fa-table me-2"></i>Search Results</h4>
+                            <h4 id="table1title" class="card-title"><i class="bi bi-table me-2" aria-hidden="true"></i>Search Results</h4>
                             
                             <div class="full-dataset-export mb-3">
                                 <div class="alert alert-info py-2">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong><i class="fa fa-database me-1"></i>Full Dataset Export</strong>
+                                            <strong><i class="bi bi-database me-1" aria-hidden="true"></i>Full Dataset Export</strong>
                                             <small class="d-block text-muted">Download complete results (all matching records)</small>
                                         </div>
                                         <div class="btn-group">
-                                            <button type="button" data-table="1" data-opt="excel" class="btn btn-outline-success btn-sm iemtool">
-                                                <i class="fa fa-file-excel me-1"></i>Excel
+                                            <button type="button" data-table="1" data-opt="excel" class="btn btn-outline-success btn-sm iemtool" aria-label="Download full dataset as Excel">
+                                                <i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i>Excel
                                             </button>
-                                            <button type="button" data-table="1" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool">
-                                                <i class="fa fa-file-csv me-1"></i>CSV
+                                            <button type="button" data-table="1" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool" aria-label="Download full dataset as CSV">
+                                                <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>CSV
                                             </button>
                                         </div>
                                     </div>
@@ -142,6 +145,7 @@ Warning, and Advisories using three different search methods:</p>
 
                             <div class="table-responsive">
                                 <table id="table1" data-order='[[ 3, "desc" ]]' class="table table-striped table-hover">
+                                <caption class="text-start">Storm based warnings results table. Columns list event metadata including issuance/expiration and event tags.</caption>
                                 <thead class="table-dark">
                                 <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
                                 <th>Expired</th><th>Issue Hail Tag</th><th>Issue Wind Tag</th>
@@ -191,7 +195,7 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-4">
                     <div class="card vtec-card mb-3">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-calendar me-2"></i>Date Range</h6>
+                            <h6 class="card-title"><i class="bi bi-calendar me-2" aria-hidden="true"></i>Date Range</h6>
                             <p class="card-text">These dates (at 00 UTC) define the issuance of the event, please do not
                             be too tight with these dates.</p>
                             <div class="mb-2">
@@ -207,7 +211,7 @@ Warning, and Advisories using three different search methods:</p>
 
                     <div class="card vtec-card mb-3">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-map-marked-alt me-2"></i>Manual Selection</h6>
+                            <h6 class="card-title"><i class="bi bi-geo-alt me-2" aria-hidden="true"></i>Manual Selection</h6>
                             <div class="mb-2">
                                 <label for="state" class="form-label">Select State:</label>
                                 <select name="state" id="state" class="form-select"></select>
@@ -217,14 +221,14 @@ Warning, and Advisories using three different search methods:</p>
                                 <select name="ugc" class="form-select"></select>
                             </div>
                             <button type="button" class="btn btn-primary w-100" id="manualugc">
-                                <i class="fa fa-sync me-2"></i>Update Results
+                                <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Update Results
                             </button>
                         </div>
                     </div>
 
                     <div class="card vtec-card mb-3">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-crosshairs me-2"></i>Manual Point Selection</h6>
+                            <h6 class="card-title"><i class="bi bi-crosshair me-2" aria-hidden="true"></i>Manual Point Selection</h6>
                             <p class="card-text">You can otherwise search by lat/lon point. The start and
                             end date set above are used with this option as well:</p>
                             
@@ -248,14 +252,14 @@ Warning, and Advisories using three different search methods:</p>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-primary w-100" id="manualpt2">
-                                <i class="fa fa-sync me-2"></i>Update Results
+                                <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Update Results
                             </button>
                         </div>
                     </div>
 
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-mouse-pointer me-2"></i>Interactive Map</h6>
+                            <h6 class="card-title"><i class="bi bi-cursor me-2" aria-hidden="true"></i>Interactive Map</h6>
                             <p class="card-text">Drag the marker to select coordinates:</p>
                             <div
                              id="map2"
@@ -271,21 +275,21 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h4 id="table2title" class="card-title"><i class="fa fa-table me-2"></i>Search Results</h4>
+                            <h4 id="table2title" class="card-title"><i class="bi bi-table me-2" aria-hidden="true"></i>Search Results</h4>
                             
                             <div class="full-dataset-export mb-3">
                                 <div class="alert alert-info py-2">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong><i class="fa fa-database me-1"></i>Full Dataset Export</strong>
+                                            <strong><i class="bi bi-database me-1" aria-hidden="true"></i>Full Dataset Export</strong>
                                             <small class="d-block text-muted">Download complete results (all matching records)</small>
                                         </div>
                                         <div class="btn-group">
-                                            <button type="button" data-table="2" data-opt="excel" class="btn btn-outline-success btn-sm iemtool">
-                                                <i class="fa fa-file-excel me-1"></i>Excel
+                                            <button type="button" data-table="2" data-opt="excel" class="btn btn-outline-success btn-sm iemtool" aria-label="Download full dataset as Excel">
+                                                <i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i>Excel
                                             </button>
-                                            <button type="button" data-table="2" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool">
-                                                <i class="fa fa-file-csv me-1"></i>CSV
+                                            <button type="button" data-table="2" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool" aria-label="Download full dataset as CSV">
+                                                <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>CSV
                                             </button>
                                         </div>
                                     </div>
@@ -294,6 +298,7 @@ Warning, and Advisories using three different search methods:</p>
 
                             <div class="table-responsive">
                                 <table id="table2" data-order='[[ 3, "desc" ]]' class="table table-striped table-hover">
+                                <caption class="text-start">Events by UGC or point results table. Columns show event identifiers and timing.</caption>
                                 <thead class="table-dark">
                                 <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
                                 <th>Expired</th></tr>
@@ -319,7 +324,7 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-4">
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h6 class="card-title"><i class="fa fa-cogs me-2"></i>Search Parameters</h6>
+                            <h6 class="card-title"><i class="bi bi-gear-fill me-2" aria-hidden="true"></i>Search Parameters</h6>
                             
                             <div class="radio-group mb-3">
                                 <div class="form-check">
@@ -364,7 +369,7 @@ Warning, and Advisories using three different search methods:</p>
                             </div>
 
                             <button type="button" class="btn btn-primary w-100" id="button3">
-                                <i class="fa fa-sync me-2"></i>Update Table
+                                <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Update Table
                             </button>
                         </div>
                     </div>
@@ -373,18 +378,19 @@ Warning, and Advisories using three different search methods:</p>
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">
-                            <h4 id="table3title" class="card-title"><i class="fa fa-table me-2"></i>Search Results</h4>
+                            <h4 id="table3title" class="card-title"><i class="bi bi-table me-2" aria-hidden="true"></i>Search Results</h4>
                             <div class="btn-group-export mb-3">
-                                <button type="button" data-table="3" data-opt="excel" class="btn btn-outline-success btn-sm iemtool">
-                                    <i class="fa fa-file-excel me-1"></i>Excel
+                                <button type="button" data-table="3" data-opt="excel" class="btn btn-outline-success btn-sm iemtool" aria-label="Download full dataset as Excel">
+                                    <i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i>Excel
                                 </button>
-                                <button type="button" data-table="3" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool">
-                                    <i class="fa fa-file-csv me-1"></i>CSV
+                                <button type="button" data-table="3" data-opt="csv" class="btn btn-outline-primary btn-sm iemtool" aria-label="Download full dataset as CSV">
+                                    <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>CSV
                                 </button>
                             </div>
 
                             <div class="table-responsive">
                                 <table id="table3" data-order='[[ 3, "desc" ]]' class="table table-striped table-hover">
+                                <caption class="text-start">List by state or WFO results table. Columns include WFO, locations, and issuance/expiration.</caption>
                                 <thead class="table-dark">
                                 <tr>
                                 <th>Event</th>

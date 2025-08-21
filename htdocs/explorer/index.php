@@ -151,16 +151,16 @@ $t->content = <<<EOM
     <div class="row isusm-data-template ddisplay"
     style="display:none; min-height: 0px; height: 100%; width: 100%;">
        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
-            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:{$YEAR}::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
+            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:{$YEAR}::_r:86.png"><i class="bi bi-thermometer-half" aria-hidden="true"></i> 4in Soil Temps</button>
             <button role="button" type="button" class="autoload"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:{$MAY1}%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:{$MAY1}%200000::_r:86.png"><i class="bi bi-droplet" aria-hidden="true"></i> Soil Moisture</button>
             <button role="button" type="button" class="autoload"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:{$MAY1}%200000::_r:86.png"><i class="fa fa-battery-half"></i> Available Soil Water</button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:{$MAY1}%200000::_r:86.png"><i class="bi bi-battery-half" aria-hidden="true"></i> Available Soil Water</button>
            <button role="button" type="button" class="autoload"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:{$MAY1}%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:{$MAY1}%200000::_r:43.png"><i class="bi bi-sun" aria-hidden="true"></i> Daily Solar Radiation</i></button>
 
        </div>
        <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
@@ -169,31 +169,31 @@ $t->content = <<<EOM
     <div class="row asos-data-template ddisplay"
      style="display:none; min-height: 0px; height: 100%; width: 100%;">
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:{$YEAR}::_r:86.png">
-            <i class="fa fa-leaf"></i> April Wind Speed</button>
+            <i class="bi bi-wind" aria-hidden="true"></i> April Wind Speed</button>
             
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:{$YEAR}::_r:43.png">
-            <i class="fa fa-fire"></i> Summer Dew Points</button>
+            <i class="bi bi-fire" aria-hidden="true"></i> Summer Dew Points</button>
             
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:{$YEAR}::var:heatindex::ytd:yes::inc:no::_r:43.png">
-            <i class="fa fa-table"></i> {$YEAR} Heat Index Hrs</button>
+            <i class="bi bi-table" aria-hidden="true"></i> {$YEAR} Heat Index Hrs</button>
 
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:{$MAY1}::edate:{$AUG31}::_r:43.png">
-            <i class="fa fa-calendar"></i> {$YEAR} Highs Calendar</button>
+            <i class="bi bi-calendar3" aria-hidden="true"></i> {$YEAR} Highs Calendar</button>
 
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:{$MAY1}::base:50::ceil:86::year2:2023::year3:2019::which:gdd::_r:43.png">
-            <i class="fa fa-fire"></i> {$YEAR} GS Accum GDD</button>
+            <i class="bi bi-fire" aria-hidden="true"></i> {$YEAR} GS Accum GDD</button>
 
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:{$MAY1}::base:50::ceil:86::year2:2023::year3:2019::which:precip::_r:43.png">
-            <i class="fa fa-tint"></i> {$YEAR} GS Accum Precip</button>
+            <i class="bi bi-droplet" aria-hidden="true"></i> {$YEAR} GS Accum Precip</button>
 
             <h3>Wind Roses</h3>
             <strong>Month/Season:</strong>
@@ -214,7 +214,7 @@ $t->content = <<<EOM
             </select>
             <button role="button" class="autoload"
             data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png">
-            <i class="fa fa-pie-chart"></i> View Windrose</button>
+            <i class="bi bi-pie-chart" aria-hidden="true"></i> View Windrose</button>
 
         </div>
         <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
@@ -223,43 +223,43 @@ $t->content = <<<EOM
     <div class="row coop-data-template ddisplay"
      style="display:none; min-height: 0px; height: 100%; width: 100%;">
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
-            ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
+            ><i class="bi bi-thermometer-half" aria-hidden="true"></i> Average Temperature</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/32/network:{network}::station:{station}::year:{$YEAR}::var:high::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43.png"
-            ><i class="fa fa-thermometer-quarter"></i> {$YEAR} High Departures</button>
+            ><i class="bi bi-thermometer-half" aria-hidden="true"></i> {$YEAR} High Departures</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
-            ><i class="fa fa-tint"></i> Daily Max Precip</button>
+            ><i class="bi bi-droplet" aria-hidden="true"></i> Daily Max Precip</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:spring::type:sum-precip::_e:{elem}.js"
-            ><i class="fa fa-tint"></i> Spring Season Precip</button>
+            ><i class="bi bi-droplet" aria-hidden="true"></i> Spring Season Precip</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/10/network:{network}::station:{station}::direction:below::varname:low::threshold:32::year:1893::_r:86::dpi:100.png"
-            ><i class="fa fa-tree"></i> Growing Season Days</button>
+            ><i class="bi bi-tree" aria-hidden="true"></i> Growing Season Days</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/142/network:{network}::station:{station}::p1:31::p2:91::p3:365::pvar:precip::how:diff::_r:86.png"
-            ><i class="fa fa-star-half-o"></i> Drought Monitoring</button>
+            ><i class="bi bi-star-half" aria-hidden="true"></i> Drought Monitoring</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/215/network:{network}::station:{station}::v:high::month:all::sy1:1930::ey1:1939::sy2:2012::ey2:2021::_r:43.png"
-            ><i class="fa fa-arrows-h"></i> 1930s vs 2010s</button>
+            ><i class="bi bi-arrows-angle-expand" aria-hidden="true"></i> 1930s vs 2010s</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/28/network:{network}::station:{station}::opt:rank::_r:43.png"
-            ><i class="fa fa-refresh"></i> Precip Status</button>
+            ><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Precip Status</button>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/176/network:{network}::station:{station}::opt:0::w:daily::_e:{elem}.js"
-            ><i class="fa fa-plus-circle"></i> Records Set by Year</button>
+            ><i class="bi bi-plus-circle" aria-hidden="true"></i> Records Set by Year</button>
 
             <h3>Trends</h3>
             <strong>Variable:</strong>
@@ -297,7 +297,7 @@ $t->content = <<<EOM
             </select>
 
             <button role="button" class="autoload"
-             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="fa fa-line-chart"></i> Create Chart</button>
+             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="bi bi-graph-up" aria-hidden="true"></i> Create Chart</button>
 
         </div>
         <div class="col-md-8 data-display" style="overflow-y: auto;"></div>

@@ -28,7 +28,7 @@ $t->content = <<<EOM
 <p>The IEM attempts a high fidelity processing and archival of river gauge
 observations and forecasts found within the NWS HML Products.</p>
 
-<p><a href="/cgi-bin/request/hml.py?help" class="btn btn-secondary"><i class="fa fa-file"></i> Backend documentation</a>
+<p><a href="/cgi-bin/request/hml.py?help" class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 exists for those wishing to script against this service. The HML archive dates back to 2012.</p>
 
 <form method="GET" action="/cgi-bin/request/hml.py" name="dl" target="_blank">

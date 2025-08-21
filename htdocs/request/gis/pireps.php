@@ -48,7 +48,7 @@ number of reports are simply unparsable.  This archive should not be
 considered 'complete'.</p>
 
 <div class="alert alert-info">
- <i class="fa fa-warning"></i> The PIREP parsing library that decodes the location information into a latitude
+ <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> The PIREP parsing library that decodes the location information into a latitude
  and longitude is crude.  It does not properly account for magnetic north and may
  also have errors with VOR baseline locations.  This download interface provides
  the raw undecoded PIREP reports, so users that have more sophisticated location
@@ -58,7 +58,7 @@ considered 'complete'.</p>
 <p>Due to filesize and speed, you can only request up to 120 days of data
 at a time!  If you request data with the spatial filter, you can download
 longer periods of data. <a href="/cgi-bin/request/gis/pireps.py?help"
-class="btn btn-secondary"><i class="fa fa-file"></i> Backend documentation</a>
+class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 exists for those wishing to script against this service.</p>
 
 <p><strong>Related:</strong>
