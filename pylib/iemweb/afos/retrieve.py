@@ -173,7 +173,6 @@ class MyModel(CGIModel):
             "typically only used when a PIL is ambiguous"
         ),
         max_length=6,
-        min_length=4,  # Le Sigh
     )
 
     @field_validator("pil", mode="after")
