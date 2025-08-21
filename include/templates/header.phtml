@@ -7,7 +7,8 @@ if ($this->refresh > 0){
   $refresh = sprintf("<meta http-equiv=\"refresh\" content=\"%s;\">",
     $this->refresh);
 }
-$headextra = is_null($this->headextra) ? '': $this->headextra;
+// Include headextra last so that CSS overrides work
+$headextra = "";
 if ($this->iemss){
   $headextra .= <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/10.6.1/ol.css" type="text/css">
@@ -27,6 +28,7 @@ if ($this->jsani){
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 EOM;
 }
+$headextra .= is_null($this->headextra) ? '': $this->headextra;
 $bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
 ?>
 <!DOCTYPE html>
