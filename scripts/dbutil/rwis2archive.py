@@ -33,24 +33,27 @@ def process_traffic(first_updated, last_updated):
     ipgconn, icursor = get_dbconnc("iem")
     rpgconn, rcursor = get_dbconnc("rwis")
     icursor.execute(
-        """SELECT l.nwsli as station, s.lane_id::int as lane_id, d.* from
-       rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
-       WHERE s.id = d.sensor_id and updated >= %s and updated < %s
-       and s.location_id = l.id""",
+        """
+    SELECT t.iemid, l.nwsli as station, s.lane_id::int as lane_id, d.* from
+    rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s,
+    stations t
+    WHERE t.id = l.nwsli and t.network = 'IA_RWIS' and
+    s.id = d.sensor_id and updated >= %s and updated < %s
+    and s.location_id = l.id""",
         (first_updated, last_updated),
     )
     deleted = 0
     inserts = 0
     for row in icursor:
         rcursor.execute(
-            "delete from alldata_traffic where station = %s and valid = %s",
-            (row["station"], row["valid"]),
+            "delete from alldata_traffic where iemid = %s and valid = %s",
+            (row["iemid"], row["valid"]),
         )
         deleted += rcursor.rowcount
         rcursor.execute(
-            """INSERT into alldata_traffic (station, valid,
+            """INSERT into alldata_traffic (station, iemid, valid,
             lane_id, avg_speed, avg_headway, normal_vol, long_vol, occupancy)
-            VALUES (%(station)s,%(valid)s,
+            VALUES (%(station)s,%(iemid)s,%(valid)s,
             %(lane_id)s, %(avg_speed)s, %(avg_headway)s, %(normal_vol)s,
             %(long_vol)s, %(occupancy)s)
             """,
@@ -77,7 +80,7 @@ def process_soil(first_updated, last_updated):
     rpgconn, rcursor = get_dbconnc("rwis")
 
     icursor.execute(
-        """SELECT l.nwsli as station, d.valid,
+        """SELECT t.iemid, l.nwsli as station, d.valid,
          max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
          max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
          max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
@@ -93,26 +96,27 @@ def process_soil(first_updated, last_updated):
          max(case when sensor_id = 60 then temp else null end) as tmpf_60in,
          max(case when sensor_id = 66 then temp else null end) as tmpf_66in,
          max(case when sensor_id = 72 then temp else null end) as tmpf_72in
-         from rwis_soil_data_log d, rwis_locations l
-         WHERE updated >= %s and updated < %s and d.location_id = l.id
-         GROUP by station, valid""",
+         from rwis_soil_data_log d, rwis_locations l, stations t
+         WHERE l.nwsli = t.id and t.network = 'IA_RWIS' and
+         updated >= %s and updated < %s and d.location_id = l.id
+         GROUP by station, iemid, valid""",
         (first_updated, last_updated),
     )
     deleted = 0
     inserts = 0
     for row in icursor:
         rcursor.execute(
-            "delete from alldata_soil where station = %s and valid = %s",
-            (row["station"], row["valid"]),
+            "delete from alldata_soil where iemid = %s and valid = %s",
+            (row["iemid"], row["valid"]),
         )
         deleted += rcursor.rowcount
         rcursor.execute(
             """INSERT into alldata_soil
-            (station, valid,
+            (station, iemid, valid,
             tmpf_1in, tmpf_3in, tmpf_6in, tmpf_9in, tmpf_12in, tmpf_18in,
             tmpf_24in, tmpf_30in, tmpf_36in, tmpf_42in, tmpf_48in, tmpf_54in,
             tmpf_60in, tmpf_66in, tmpf_72in) VALUES (
-            %(station)s,%(valid)s,
+            %(station)s,%(iemid)s,%(valid)s,
             %(tmpf_1in)s, %(tmpf_3in)s, %(tmpf_6in)s, %(tmpf_9in)s,
             %(tmpf_12in)s,
             %(tmpf_18in)s, %(tmpf_24in)s, %(tmpf_30in)s, %(tmpf_36in)s,
@@ -139,7 +143,8 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
     """Do the obs work."""
     res = iconn.execute(
         sql_helper("""
-        SELECT c.*, t.id as station, valid at time zone 'UTC' as utc_valid,
+        SELECT c.*, t.id as station,
+        t.iemid, valid at time zone 'UTC' as utc_valid,
         id || '_' || to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI')
         as chunk_key
         from current_log c, stations t
@@ -188,11 +193,11 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
         table = f"t{utc_valid.year}"
         rconn.execute(
             sql_helper(
-                """INSERT into {table} (station, valid, tmpf,
+                """INSERT into {table} (station, iemid, valid, tmpf,
             dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
             tfs1_text, tfs2_text, tfs3_text, pcpn, vsby, feel, relh)
             VALUES (:station,
-            :valid,:tmpf,:dwpf,round(:drct, 0),
+            :iemid,:valid,:tmpf,:dwpf,round(:drct, 0),
             :sknt,
             :tsf0,:tsf1,:tsf2,:tsf3,:rwis_subf,:gust,
             :scond0,:scond1,:scond2,:scond3,

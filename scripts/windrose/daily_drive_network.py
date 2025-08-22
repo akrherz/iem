@@ -42,8 +42,7 @@ def do_network(network):
         subprocess.call(
             [
                 "python",
-                "../dbutil/compute_alldata_sts.py",
-                "--dbname=rwis",
+                "../dbutil/compute_rwis_sts.py",
                 f"--network={network}",
             ],
         )
