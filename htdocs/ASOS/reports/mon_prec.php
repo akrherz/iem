@@ -89,7 +89,6 @@ foreach ($data as $key => $val) {
 
 $d = date("d M Y h a");
 $t->content = <<<EOM
-<a href="#monthly-precip-main" class="visually-hidden-focusable">Skip to main content</a>
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/ASOS/">ASOS Mainpage</a></li>
@@ -116,7 +115,7 @@ $t->content = <<<EOM
 </div>
 </form>
 
-<div id="monthly-precip-main">
+<div>
     <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="h5 mb-0">Monthly Precipitation Data</h2>
             <button id="create-grid" type="button" class="btn btn-success" aria-controls="tabulator-container precip-status" aria-expanded="false">Make Table Interactive</button>
@@ -179,6 +178,6 @@ $t->content = <<<EOM
 {$table}
 </tbody>
 </table>
-</div><!-- /#monthly-precip-main -->
+</div>
 EOM;
 $t->render('single.phtml');

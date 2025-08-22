@@ -7,7 +7,9 @@ higher.  For example, if a location was in a moderate risk and you asked
 this app to total slight risks, the moderate risk would count toward the
 slight risk total.</p>
 
-<p><i class="fa fa-info"></i> This autoplot currently only considers
+<p><i class="bi bi-info-circle" aria-hidden="true"></i>
+<span class="visually-hidden">Info</span>
+This autoplot currently only considers
 outlooks since 2002.  This app is also horribly slow for reasons I have
 yet to fully debug :(</p>
 

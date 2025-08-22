@@ -3,47 +3,35 @@
 <main role="main" id="main-content">
 <div class="container-fluid">
 <?php echo $this->breadcrumbs; ?>
-<table class="table table-striped table-sm">
-<thead>
-<tr>
-<th colspan="6" bgcolor="#CCCCCC">View Sortable Currents For Network</th></tr>
-</thead>
-<tbody><tr>
-<?php
-$d = Array(
-        "ASOS" => Array("url" => "/ASOS/current.phtml"),
-        "CoCoRaHS" => Array("url" => "/cocorahs/current.phtml"),
-        "COOP" => Array("url" => "/COOP/current.phtml"),
-        "Cellular COOP" => Array("url" => "/nws/ccoop_current.php"),
-        "DCP" => Array("url" => "/DCP/current.phtml"),
-        "DCP" => Array("url" => "/DCP/current.phtml"),
-        "ISU Soil Moisture" => Array("url" => "/agclimate/current.phtml"),
-        "Other" => Array("url" => "/other/current.phtml"),
-        "SCAN" => Array("url" => "/scan/current.phtml"),
-        "My Favorites" => Array("url" => "/my/current.phtml"),
-        "By State" => Array("url" => "/current/all.phtml"),
-        "RWIS" => Array("url" => "/RWIS/current.phtml"),
-        "RWIS Surface" => Array("url" => "/RWIS/currentSF.phtml"),
-        "RWIS Traffic" => Array("url" => "/RWIS/traffic.phtml"),
-        "RWIS Soil" => Array("url" => "/RWIS/soil.phtml"),
-        "By NWS WFO" => Array("url" => "/nws/obs.php"),
-        "USCRN" => Array("url" => "/current/uscrn.phtml"),
-);
-$i = 1;
-foreach($d as $key => $value){
-    echo "<th";
-    if ($this->current_network == $key){
-        echo " class=\"info\">$key</th>";
-    }else{
-        echo "><a href=\"". $value["url"] ."\">$key</a></th>";
+<div class="mb-4">
+  <h2 class="h5">View Sortable Currents For Network</h2>
+  <div class="row g-2">
+    <?php
+    $d = Array(
+      "ASOS" => Array("url" => "/ASOS/current.phtml"),
+      "CoCoRaHS" => Array("url" => "/cocorahs/current.phtml"),
+      "COOP" => Array("url" => "/COOP/current.phtml"),
+      "Cellular COOP" => Array("url" => "/nws/ccoop_current.php"),
+      "DCP" => Array("url" => "/DCP/current.phtml"),
+      "ISU Soil Moisture" => Array("url" => "/agclimate/current.phtml"),
+      "Other" => Array("url" => "/other/current.phtml"),
+      "SCAN" => Array("url" => "/scan/current.phtml"),
+      "My Favorites" => Array("url" => "/my/current.phtml"),
+      "By State" => Array("url" => "/current/all.phtml"),
+      "RWIS" => Array("url" => "/RWIS/current.phtml"),
+      "RWIS Surface" => Array("url" => "/RWIS/currentSF.phtml"),
+      "RWIS Traffic" => Array("url" => "/RWIS/traffic.phtml"),
+      "RWIS Soil" => Array("url" => "/RWIS/soil.phtml"),
+      "By NWS WFO" => Array("url" => "/nws/obs.php"),
+      "USCRN" => Array("url" => "/current/uscrn.phtml"),
+    );
+    foreach($d as $key => $value){
+      $active = ($this->current_network == $key) ? " btn-primary" : " btn-outline-primary";
+  echo "<div class=\"col-6 col-md-3 col-lg-2\"><a href=\"{$value['url']}\" class=\"btn{$active} w-100 mb-2 text-truncate\" title=\"{$key}\">{$key}</a></div>";
     }
-    if ($i % 6 == 0){
-        echo "</tr><tr>";
-    }
-    $i++;
-  }
-?>
-</tr></tbody></table>
+    ?>
+  </div>
+</div>
 <?php 
 if (!is_null($this->content)){
   echo "<div class=\"row\"><div class=\"col-md-12\">\n";

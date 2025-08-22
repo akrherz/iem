@@ -748,8 +748,9 @@ def generate_form(apid, fdict, headers, cookies):
     <div class="card-body">
         <div id="willload" class="text-center p-4">
             <div class="mb-3">
-                     <i class="bi bi-graph-up fa-2x text-muted mb-2"
-                         aria-hidden="true"></i>
+    <i class="bi bi-graph-up"
+    style="font-size:2rem;color:#6c757d;margin-bottom:0.5rem;"
+    aria-hidden="true"></i>
                 <p class="mb-2">Based on recent timings, plot generation
                 averages {timing_secs} seconds. Please wait while your
                 chart is being generated...</p>

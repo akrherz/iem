@@ -7,7 +7,7 @@ $t->title = "API Documentation";
 
 $t->content = <<< EOM
 
-<h2>IEM Web Services and APIs</h2>
+<h1 class="mb-4">IEM Web Services and APIs</h1>
 
 <div class="alert alert-warning">
 <p><strong>Disclaimer:</strong> All of these services are provided as-is and
@@ -22,46 +22,44 @@ open manner. This page presents details the IEM's various Web Services and
 Application Programming Interfaces (API). These services are structured into
 four categories.</p>
 
-<div class="row">
-<div class="col-md-3">
-<strong>API v1</strong><br />
-<a class="btn btn-primary" href="/api/1/docs"><i class="fa fa-info"></i> IEM API v1 Docs</a>
-represent a more formal API using the wonderful <a href="https://fastapi.tiangolo.com/">FastAPI</a>
-framework.  This API generates JSON Table Schema responses and is more geared toward smallish
-requests that can be serviced within a second or two.  The source code for these services
-is found within the <a href="https://github.com/akrherz/iem-web-services">iem-web-services repo</a>.
-
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">API v1</h2>
+        <a class="btn btn-primary mb-2" href="/api/1/docs"><i class="bi bi-info-circle" aria-hidden="true"></i> <span class="visually-hidden">Info</span> IEM API v1 Docs</a>
+        <p>Represents a more formal API using the <a href="https://fastapi.tiangolo.com/">FastAPI</a> framework. This API generates JSON Table Schema responses and is more geared toward smallish requests that can be serviced within a second or two. The source code for these services is found within the <a href="https://github.com/akrherz/iem-web-services">iem-web-services repo</a>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">Ad-hoc Services</h2>
+        <a class="btn btn-primary mb-2" href="#json"><i class="bi bi-info-circle" aria-hidden="true"></i> <span class="visually-hidden">Info</span> (Geo)-JSON Services</a>
+        <p>Represents a hodge-podge of services invented over the past many years that are not necessarily well thought out or structured. They individually have help pages that attempt to explain how to use them. The source code for these services is found with the main <a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">Ad-hoc CGI Services</h2>
+        <a class="btn btn-primary mb-2" href="#cgi"><i class="bi bi-info-circle" aria-hidden="true"></i> <span class="visually-hidden">Info</span> Scriptable CGI Services</a>
+        <p>Represents a collection of backends that often service various bulk data download portals. These services are heavily trafficked and typically emit simple CSV responses. None of these will do JSON, often due to various constraints. The source code for these services is found with the main <a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">OGC Services</h2>
+        <a class="btn btn-primary mb-2" href="/ogc/"><i class="bi bi-info-circle" aria-hidden="true"></i> <span class="visually-hidden">Info</span> OGC Services</a>
+        <p>Represents a collection of Open Geospatial Consortium services. The source code for these services is found with the main <a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.</p>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="col-md-3">
-<strong>Ad-hoc Services</strong><br />
-
-<a class="btn btn-primary" href="#json"><i class="fa fa-info"></i> (Geo)-JSON Services</a>
-represent a hodge-podge of services invented over the past many years that are not necessarily
-well thought out and nor structured.  They individually have help pages that attempt to explain
-how to use them. The source code for these services is found with the main
-<a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.
-
-</div>
-<div class="col-md-3">
-<strong>Ad-hoc CGI Services</strong><br />
-
-<a class="btn btn-primary" href="#cgi"><i class="fa fa-info"></i> Scriptable CGI Services</a>
-represent a collection of backends that often service various bulk data download portals.  These
-services are heavily trafficked and typically emit simple CSV responses.  None of these will
-do JSON, often due to various lame constraints. The source code for these services is found with the main
-<a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.
-
-</div>
-<div class="col-md-3">
-<strong>OGC Services</strong><br />
-
-<a class="btn btn-primary" href="/ogc/"><i class="fa fa-info"></i> OGC Services</a>
-represent a collection of Open Geospatial Consortium services.
-The source code for these services is found with the main
-<a href="https://github.com/akrherz/iem/tree/main/pylib/iemweb">iem repo</a>.
-
-</div>
-</div><!-- ./row -->
 
 <h3>But first, perhaps there are better alternatives!</h3>
 
@@ -85,7 +83,7 @@ not be implied as an endorsement. Of course, you can just search google for
 </blockquote>
 
 <h3>
-<a href="#json"><i class="fa fa-bookmark"></i></a>
+<a href="#json" aria-label="Jump to JSON Services"><i class="bi bi-bookmark" aria-hidden="true"></i></a>
 <a name="json"></a>(Geo)-JSON Services</h3>
 
 <div class="row">
@@ -196,7 +194,7 @@ not be implied as an endorsement. Of course, you can just search google for
 </div><!-- ./row -->
 
 <h3>
-<a href="#cgi"><i class="fa fa-bookmark"></i></a>
+<a href="#cgi" aria-label="Jump to CGI Services"><i class="bi bi-bookmark" aria-hidden="true"></i></a>
 <a name="cgi"></a>Scriptable CGI Services</h3>
 
 <p>Some of the IEM data services are not ammenable to being used within a API

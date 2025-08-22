@@ -10,20 +10,30 @@ $t->title = "ISU Soil Moisture Plots";
 $now = time();
 $d2 = time() - 5 * 86400;
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "BOOI4";
-$year1 = get_int404('year1', date("Y", $d2));
-$month1 = get_int404('month1', date("m", $d2));
-$day1 = get_int404('day1', date("d", $d2));
-$hour1 = get_int404('hour1', 0);
-
-$year2 = get_int404('year2', date("Y", $now));
-$month2 = get_int404('month2', date("m", $now));
-$day2 = get_int404('day2', date("d", $now));
-$hour2 = get_int404('hour2', date("H", $now));
-
 $opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : "1";
 
-$sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
-$ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
+if (isset($_GET["sts"])) {
+    $sts = new DateTime(xssafe($_GET["sts"]));
+    $ets = new DateTime(xssafe($_GET["ets"]));
+} else {
+    // Legacy CGI parameters
+    $year1 = get_int404('year1', date("Y", $d2));
+    $month1 = get_int404('month1', date("m", $d2));
+    $day1 = get_int404('day1', date("d", $d2));
+    $hour1 = get_int404('hour1', 0);
+
+    $year2 = get_int404('year2', date("Y", $now));
+    $month2 = get_int404('month2', date("m", $now));
+    $day2 = get_int404('day2', date("d", $now));
+    $hour2 = get_int404('hour2', 23);
+    $sts = new DateTime();
+    $sts->setDate($year1, $month1, $day1);
+    $sts->setTime($hour1, 0);
+    $ets = new DateTime();
+    $ets->setDate($year2, $month2, $day2);
+    $ets->setTime($hour2, 0);
+}
+
 $errmsg = "";
 if ($ets <= $sts) {
     $errmsg = "<div class=\"alert alert-warning\">Error, your requested" .
@@ -31,15 +41,15 @@ if ($ets <= $sts) {
         " and try once again.</div>";
 }
 
-$sselect = networkSelect("ISUSM", $station);
-$y1 = yearSelect(2012, $year1, "year1");
-$m1 = monthSelect($month1, "month1");
-$d1 = daySelect($day1, "day1");
-$h1 = hourSelect($hour1, "hour1");
-$y2 = yearSelect(2012, $year2, "year2");
-$m2 = monthSelect($month2, "month2");
-$d2 = daySelect($day2, "day2");
-$h2 = hourSelect($hour2, "hour2");
+$sselect = networkSelect("ISUSM", $station, array(), "station", FALSE, 'form-select w-100');
+$y1 = yearSelect(2012, $sts->format("Y"), "year1");
+$m1 = monthSelect($sts->format("m"), "month1");
+$d1 = daySelect($sts->format("d"), "day1");
+$h1 = hourSelect($sts->format("H"), "hour1");
+$y2 = yearSelect(2012, $ets->format("Y"), "year2");
+$m2 = monthSelect($ets->format("m"), "month2");
+$d2 = daySelect($ets->format("d"), "day2");
+$h2 = hourSelect($ets->format("H"), "hour2");
 
 // Retreive the autoplot description JSON
 $content = file_get_contents($INTERNAL_BASEURL . "/plotting/auto/meta/177.json");
@@ -90,77 +100,67 @@ damage of wiring.
 EOM;
 
 $thedescription = $desc[$opt];
-$oselect = make_select("opt", $opt, $ar);
+$oselect = make_select("opt", $opt, $ar, '', 'form-select w-100');
 
 $img = sprintf(
     "<img src=\"/plotting/auto/plot/177/network:ISUSM::" .
-        "station:%s::opt:%s::sts:%d-%02d-%02d%%20%02d00::" .
-        "ets:%d-%02d-%02d%%20%02d00.png" .
-        "\">",
+        "station:%s::opt:%s::sts:%s::" .
+        "ets:%s.png" .
+        "\" class=\"img-fluid\">",
     $station,
     $opt,
-    $year1,
-    $month1,
-    $day1,
-    $hour1,
-    $year2,
-    $month2,
-    $day2,
-    $hour2
+    $sts->format("Y-m-d Hi"),  // lame format, but alas
+    $ets->format("Y-m-d Hi")
 );
 if ($errmsg != "") {
     $img = $errmsg;
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
- <li class="active">Soil Moisture Plots</li>
-</ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Soil Moisture Plots</li>
+        </ol>
+    </nav>
 
-<h3>Soil Moisture and Precipitation Timeseries</h3>
+    <h1 class="mb-3">Soil Moisture and Precipitation Timeseries</h1>
+    <h2 class="h5">Plot Selection</h2>
+    <p>This application plots a timeseries of soil moisture and precipitation from
+        an ISU Soil Moisture station of your choice. Please select a start and end time
+        and click the 'Make Plot' button below.</p>
 
-<p>This application plots a timeseries of soil moisture and precipitation from
-a ISU Soil Moisture station of your choice.  Please select a start and end time
-and click the 'Make Plot' button below.
+        <form name="selector" method="GET" autocomplete="off">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label for="station" class="form-label">Station</label>
+                    {$sselect}
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="opt" class="form-label">Plot Option</label>
+                    {$oselect}
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="sts" class="form-label">Start Time (US Central)</label>
+                    <input type="datetime-local" id="sts" name="sts" class="form-control" value="{$sts->format('Y-m-d\TH:i')}" />
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="ets" class="form-label">End Time (US Central)</label>
+                    <input type="datetime-local" id="ets" name="ets" class="form-control" value="{$ets->format('Y-m-d\TH:i')}" />
+                </div>
+                <div class="col-12 mt-2 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary w-auto">Make Plot</button>
+                </div>
+            </div>
+        </form>
 
-<form name="selector" method="GET" name='getter'>
+    <div aria-live="polite">
+        {$img}
+    </div>
 
-<table class="table table-bordered">
-<thead>
-<tr>
-<th>Station</th><th>Plot Option</th>
-<td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th>
-</tr>
-</thead>
-
-<tbody>
-<tr><td rowspan='2'>{$sselect}</td>
- <td rowspan="2">{$oselect}</td>
-<td>Start Time</td>
-    <td>{$y1}</td>
-    <td>{$m1}</td>
-    <td>{$d1}</td>
-    <td>{$h1}</td>
-    </tr>
-<tr>
-<td>End Time</td>
-    <td>{$y2}</td>
-    <td>{$m2}</td>
-    <td>{$d2}</td>
-    <td>{$h2}</td>
-    </tr>
-
-</tbody>
-</table>
-
-<input type="submit" value="Make Plot">
-</form>
-
-
-<p>{$img}
-
-<p><strong>Plot Description:</strong> {$thedescription}
-</p>
+    <section class="mt-4">
+        <h2 class="h5">Plot Description</h2>
+        <p>{$thedescription}</p>
+    </section>
 EOM;
 $t->render('single.phtml');

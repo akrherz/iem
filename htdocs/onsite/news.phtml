@@ -11,9 +11,28 @@ $id = get_int404("id");
 $q = isset($_GET["q"]) ? pg_escape_string($dbconn, xssafe($_GET["q"])) : "";
 $tag = isset($_GET['tag']) ? pg_escape_string($dbconn, xssafe($_GET['tag'])) : null;
 $content = <<< EOM
-<p><form method="GET" action="news.phtml" name="searchnews">
-<b>Search Archive:</b> <input type="text" name="q" value="{$q}" size="20"><input type="submit" value="Go!">
-</form>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">News and Notes</li>
+  </ol>
+</nav>
+
+<h1 class="mb-4">News and Notes</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" action="news.phtml" name="searchnews" class="row g-3 align-items-end">
+      <div class="col-12 col-md-8">
+        <label for="search-query" class="form-label">Search Archive</label>
+        <input type="text" id="search-query" name="q" value="{$q}" class="form-control" placeholder="Enter search terms...">
+      </div>
+      <div class="col-12 col-md-4">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
 EOM;
 
 if ($id > 0) {
@@ -47,8 +66,13 @@ if ($id > 0) {
 if (pg_num_rows($result) == 1 && $id > 0) {
     $prev = $id - 1;
     $next = $id + 1;
-    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
-    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
+    $content .= '<nav aria-label="Article navigation" class="mb-3">';
+    $content .= '<div class="d-flex justify-content-between">';
+    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\" class=\"btn btn-outline-primary\">";
+    $content .= '<i class="bi bi-arrow-left" aria-hidden="true"></i> Previous Article</a>';
+    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$next\" class=\"btn btn-outline-primary\">";
+    $content .= 'Next Article <i class="bi bi-arrow-right" aria-hidden="true"></i></a>';
+    $content .= '</div></nav>';
 }
 
 function print_tags($str)
@@ -67,22 +91,30 @@ $title = "News and Notes";
 while ($row = pg_fetch_assoc($result)) {
     $id = $row["id"];
     $title = $row["title"];
-    $content .= '<div class="card border-success">';
-    $content .= "<div class=\"card-header bg-success text-white\"><span class=\"badge bg-light text-dark\">{$row["views"]} Views</span> " . $row["title"] . "</div>";
+    $content .= '<article class="card border-success mb-4">';
+    $content .= "<header class=\"card-header bg-success text-white d-flex justify-content-between align-items-center\">";
+    $content .= "<h2 class=\"h5 mb-0\">" . htmlspecialchars($row["title"]) . "</h2>";
+    $content .= "<span class=\"badge bg-light text-dark\" aria-label=\"{$row["views"]} page views\">{$row["views"]} Views</span>";
+    $content .= "</header>";
     $content .= "<div class=\"card-body\">";
+    
+    // Metadata section
+    $content .= '<div class="row g-2 mb-3">';
     $link = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
-    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Permalink: {$link}</button>";
-    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Date: " . $row["webdate"] . "</button>";
-    $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Author: " . $row["author"] . "</button>";
+    $content .= "<div class=\"col-12 col-md-auto\"><span class=\"badge bg-secondary\">Permalink: {$link}</span></div>";
+    $content .= "<div class=\"col-12 col-md-auto\"><span class=\"badge bg-secondary\">Date: " . htmlspecialchars($row["webdate"]) . "</span></div>";
+    $content .= "<div class=\"col-12 col-md-auto\"><span class=\"badge bg-secondary\">Author: " . htmlspecialchars($row["author"]) . "</span></div>";
     if (!is_null($row["tags"])) {
-        $content .= "<button type=\"button\" class=\"btn btn-secondary btn-sm\">Tags: " . print_tags($row["tags"]) . "</button>";
+        $content .= "<div class=\"col-12 col-md-auto\"><span class=\"badge bg-secondary\">Tags: " . print_tags($row["tags"]) . "</span></div>";
     }
+    $content .= '</div>';
+    
     if (strlen($row["url"]) > 0) {
-        $content .= "<br /><i>Link:</i> <a href=\"{$row["url"]}\">{$row["url"]}</a>\n";
+        $content .= "<div class=\"alert alert-info mb-3\"><strong>Link:</strong> <a href=\"{$row["url"]}\" target=\"_blank\" rel=\"noopener\">{$row["url"]}</a></div>\n";
     }
-    $content .= "<p>{$row["body"]}<p>";
+    $content .= "<div class=\"content\">{$row["body"]}</div>";
     $content .= "</div>";
-    $content .= "</div>";
+    $content .= "</article>";
 } // End of for
 
 if (pg_num_rows($result) == 1) {
@@ -94,8 +126,6 @@ if (pg_num_rows($result) == 0) {
     $content .= <<<EOM
     <div class="alert alert-danger">No news items were found based on your
     search parameters!
-    <a href="news.phtml" class="link link-danger">Here</a>
-    is the last news item posted.
     </div>
 EOM;
 }

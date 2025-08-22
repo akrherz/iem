@@ -1,14 +1,13 @@
 
-/**
- * Initialize modal functionality for soil temperature images
- */
+import { requireElement } from "/js/iemjs/domUtils.js";
+
 function initializeModal() {
     // Get the modal elements
-    const modal = document.getElementById("myModal");
-    const modalImg = document.getElementById("img01");
+    const modal = requireElement("myModal");
+    const modalImg = requireElement("img01");
     const span = document.getElementsByClassName("close")[0];
 
-    if (!modal || !modalImg || !span) {
+    if (!span) {
         return;
     }
 
