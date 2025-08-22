@@ -12,6 +12,12 @@ $url2 = sprintf("https://mtarchive.geol.iastate.edu/%s", gmdate('Y/m/d'));
 $u2 = sprintf("<a href=\"%s\">%s</a>\n", $url2, $url2);
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/archive/">Archive</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Data Schema</li>
+  </ol>
+</nav>
 
 <h3>Archived Data Schema</h3>
 

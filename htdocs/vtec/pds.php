@@ -42,7 +42,6 @@ EOM;
 
 
 $t->content = <<<EOM
-<a href="#pds-main" class="visually-hidden-focusable">Skip to main content</a>
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
  <li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
@@ -50,7 +49,7 @@ $t->content = <<<EOM
 </ol>
 </nav>
 <h1 class="h4 mb-3">Particularly Dangerous Situation Watch / Warnings</h1>
-<div id="pds-main">
+<div>
 
 <p>This page presents the current and
 <strong>unofficial</strong> IEM
@@ -112,7 +111,7 @@ regenerated hourly. <button id="makefancy" class="btn btn-success" aria-controls
 {$table}
 </tbody>
 </table>
-</div><!-- /#pds-main -->
+</div>
 
 EOM;
 $t->render("full.phtml");

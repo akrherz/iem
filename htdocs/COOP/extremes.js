@@ -194,7 +194,7 @@ function renderHeader() {
                 </div>
                 <div class="text-end">
                     <a href="${backLink}" class="btn btn-outline-primary btn-sm">
-                        <i class="fa fa-arrow-left"></i> Back to Date View
+                        <i class="bi bi-arrow-left" aria-hidden="true"></i><span class="visually-hidden">Back</span> Back to Date View
                     </a>
                 </div>
             </div>
@@ -1499,10 +1499,10 @@ function addExportButtons() {
         exportContainer.className = 'mb-2 d-flex gap-2';
         exportContainer.innerHTML = `${''}
             <button id="download-csv" class="btn btn-outline-success btn-sm">
-                <i class="fa fa-download"></i> Download CSV
+                <i class="bi bi-download" aria-hidden="true"></i><span class="visually-hidden">Download CSV</span> Download CSV
             </button>
             <button id="download-xlsx" class="btn btn-outline-primary btn-sm">
-                <i class="fa fa-download"></i> Download Excel
+                <i class="bi bi-download" aria-hidden="true"></i><span class="visually-hidden">Download Excel</span> Download Excel
             </button>
         `;
         

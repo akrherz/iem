@@ -6,40 +6,41 @@ $t = new MyView();
 $t->title = "ISUSM - Network Metadata";
 
 $t->content = <<<EOM
+
 <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Network Metadata</li>
-  </ol>
+       <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Network Metadata</li>
+       </ol>
 </nav>
 
-<h3>ISU Soil Moisture Network</h3>
+<h1 class="mb-3">ISU Soil Moisture Network Metadata</h1>
 
-<div class="alert alert-info">These stations were installed in 2013-2014 and
-        include soil moisture sensors.</div>
+<div class="alert alert-info">These stations were installed in 2013-2014 and include soil moisture sensors.</div>
 
-<h4>Campbell Scientific Sensor Package</h4>
+<h2 class="h5 mt-4">Campbell Scientific Sensor Package</h2>
 
 <ul>
- <li><a href="http://www.campbellsci.com/cr1000">CR1000 Data Logger</a></li>
- <li><a href="http://www.campbellsci.com/cm106">CM106 Tripod</a> (station mast)</li>
- <li><a href="http://www.campbellsci.com/cs300-pyranometer">CS300 Pyranometer</a>
-        (total incoming solar radiation)</li>
- <li><a href="http://www.campbellsci.com/03002-wind-sentry">03002 Wind Sentry</a>
-        (wind speed and direction @ approximately 10 feet AGL)</li>
- <li><a href="http://www.campbellsci.com/cs215-l">CS215 Air Temperature and Relative Humidity</a>
-        (@ approximately 5 feet AGL)</li>
- <li><a href="http://www.campbellsci.com/te525-l">TE525 Rain Gage</a></li>
- <li><a href="http://www.campbellsci.com/cs655">Campbell CS655 Water Content Reflectometers</a> (Soil Moisture, Temperature)</li>
+ <li><a href="https://www.campbellsci.com/cr1000" target="_blank" rel="noopener" aria-label="CR1000 Data Logger (opens in new tab)">CR1000 Data Logger</a></li>
+ <li><a href="https://www.campbellsci.com/cm106" target="_blank" rel="noopener" aria-label="CM106 Tripod (opens in new tab)">CM106 Tripod</a> (station mast)</li>
+ <li><a href="https://www.campbellsci.com/cs300-pyranometer" target="_blank" rel="noopener" aria-label="CS300 Pyranometer (opens in new tab)">CS300 Pyranometer</a> (total incoming solar radiation)</li>
+ <li><a href="https://www.campbellsci.com/03002-wind-sentry" target="_blank" rel="noopener" aria-label="03002 Wind Sentry (opens in new tab)">03002 Wind Sentry</a> (wind speed and direction @ approximately 10 feet AGL)</li>
+ <li><a href="https://www.campbellsci.com/cs215-l" target="_blank" rel="noopener" aria-label="CS215 Air Temperature and Relative Humidity (opens in new tab)">CS215 Air Temperature and Relative Humidity</a> (@ approximately 5 feet AGL)</li>
+ <li><a href="https://www.campbellsci.com/te525-l" target="_blank" rel="noopener" aria-label="TE525 Rain Gage (opens in new tab)">TE525 Rain Gage</a></li>
+ <li><a href="https://www.campbellsci.com/cs655" target="_blank" rel="noopener" aria-label="Campbell CS655 Water Content Reflectometers (opens in new tab)">Campbell CS655 Water Content Reflectometers</a> (Soil Moisture, Temperature)</li>
 </ul>
 
-<h3>Legacy ISU Ag Climate Network</h3>
+<h2 class="h5 mt-4">Legacy ISU Ag Climate Network</h2>
 
 <div class="alert alert-info">These stations were removed in spring 2014.</div>
 
+<div class="table-responsive mb-4">
 <table class="table table-striped">
 <caption>Station Id conversion table</caption>
-<tr><th>StationId:</th><th>Station Name:</th><th>Data Starts At:</th><th>Data Ends At:</th></tr>
+<thead>
+<tr><th scope="col">StationId</th><th scope="col">Station Name</th><th scope="col">Data Starts At</th><th scope="col">Data Ends At</th></tr>
+</thead>
+<tbody>
 <tr><td>a130209</td><td>Ames</td><td>Jul 01, 1986</td><td>Apr 23, 2014</td></tr>
 <tr><td>a131069</td><td>Calmar</td><td>Sep 21, 2001 </td><td>Jan 8, 2014</td></tr>  
 <tr><td>a131299</td><td>Castana</td><td>May 19, 1988</td><td>Jan 8, 2014</td></tr>
@@ -53,40 +54,44 @@ $t->content = <<<EOM
 <tr><td>a136949</td><td>Rhodes</td><td>May 17, 1999</td><td>Oct 11,2006</td></tr>
 <tr><td>a134309</td><td>Kanawha</td><td>Jun 19, 1997</td><td>Apr 23, 2014</td></tr>
 <tr><td>a135849</td><td>Muscatine</td><td>Mar 27, 2000</td><td>Apr 16, 2014</td></tr>
+</tbody>
 </table>
-
-<p>You can get lat/lon information from <a href="/sites/networks.php?network=ISUAG&format=html">this page</a>.
-
-<div class="row">
-    <div class="col-md-6 col-sm-6">
-    <h4>Units for Data</h4>
-
-<table class="table table-striped">
-<tr><td>Evapotranspiration</td><td>inches</td></tr>
-<tr><td>Precipation</td><td>inches</td></tr>
-<tr><td>Hourly Solar Radiation</td><td>Kilo calories per meter squared per hour</td></tr>
-<tr><td>Daily Solar Radiation</td><td>Langleys</td></tr>
-<tr><td>Temperatures</td><td>Fahrenhit</td></tr>
-<tr><td>Wind speeds</td><td>MPH</td></tr>
-<tr><td>Time</td><td>local time, either CST or CDT</td></tr>
-</table>
-
-<h4>Hardware Specs</h4>
-
-<p><strong>Soil Temperature</strong> The soil probe is 4 inches deep underneath
-a one square meter bare patch of soil.
-
-<p><strong>Temperature:</strong> All of our stations have either the Campbell 
-HMP35 or HMP45.  The 35 was discontinued and replaced with the 45. They are 
-mounted within a radiation grill at 2 meters height.
-
-<p><strong>Solar Radiation:</strong> LI-COR pyranometer, 
-model <a href="http://www.campbellsci.com/li200x-l">LI200X</a>.
-
 </div>
-<div class="col-md-6 bg-light border rounded p-3">
-<img src="/agclimate/images/campbell.jpg" class="img img-fluid" />
-</div>
+
+<p>You can get lat/lon information from <a href="/sites/networks.php?network=ISUAG&format=html">this page</a>.</p>
+
+<div class="row g-3">
+              <div class="col-12 col-md-6">
+              <h2 class="h5">Units for Data</h2>
+              <div class="table-responsive">
+              <table class="table table-striped">
+              <thead>
+              <tr><th scope="col">Measurement</th><th scope="col">Units</th></tr>
+              </thead>
+              <tbody>
+              <tr><td>Evapotranspiration</td><td>inches</td></tr>
+              <tr><td>Precipation</td><td>inches</td></tr>
+              <tr><td>Hourly Solar Radiation</td><td>Kilo calories per meter squared per hour</td></tr>
+              <tr><td>Daily Solar Radiation</td><td>Langleys</td></tr>
+              <tr><td>Temperatures</td><td>Fahrenhit</td></tr>
+              <tr><td>Wind speeds</td><td>MPH</td></tr>
+              <tr><td>Time</td><td>local time, either CST or CDT</td></tr>
+              </tbody>
+              </table>
+              </div>
+
+              <h2 class="h5 mt-4">Hardware Specs</h2>
+
+              <p><strong>Soil Temperature:</strong> The soil probe is 4 inches deep underneath a one square meter bare patch of soil.</p>
+
+              <p><strong>Temperature:</strong> All of our stations have either the Campbell HMP35 or HMP45. The 35 was discontinued and replaced with the 45. They are mounted within a radiation grill at 2 meters height.</p>
+
+              <p><strong>Solar Radiation:</strong> LI-COR pyranometer, model <a href="http://www.campbellsci.com/li200x-l" target="_blank" rel="noopener" aria-label="LI200X pyranometer (opens in new tab)">LI200X</a>.</p>
+
+              </div>
+              <div class="col-12 col-md-6 bg-light border rounded p-3 d-flex align-items-center justify-content-center">
+                     <img src="/agclimate/images/campbell.jpg" class="img-fluid rounded" alt="Campbell Scientific sensor package" />
+              </div>
 </div>
 
 EOM;

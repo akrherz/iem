@@ -196,9 +196,12 @@ def application(environ, start_response):
         "ets": environ["ets"],
     }
     sql = sql_helper(
-        "SELECT *, valid at time zone :tzname as obtime from {table} "
-        "WHERE station = ANY(:ids) and valid BETWEEN :sts and :ets "
-        "ORDER by valid ASC",
+        """
+        SELECT a.*, valid at time zone :tzname as obtime from
+        {table} a JOIN stations t on (a.iemid = t.iemid)
+        WHERE t.id = ANY(:ids) and valid BETWEEN :sts and :ets
+        ORDER by valid ASC
+        """,
         table=table,
     )
     with get_sqlalchemy_conn("rwis") as conn:
@@ -209,7 +212,7 @@ def application(environ, start_response):
     # default is to include all variables
     if not environ["vars"]:
         myvars = list(df.columns)
-        myvars.remove("station")
+        myvars.remove("iemid")
         myvars.remove("valid")
         myvars.remove("obtime")
     myvars.insert(0, "station")

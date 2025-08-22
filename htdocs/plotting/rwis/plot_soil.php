@@ -32,8 +32,8 @@ $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
 $ets = $sts + ($days * 86400.0);
 
 $dbconn = iemdb('rwis');
-$stname = iem_pg_prepare($dbconn, "SELECT * from alldata_soil
-WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
+$stname = iem_pg_prepare($dbconn, "SELECT a.* from alldata_soil a JOIN stations t on (a.iemid = t.iemid)
+WHERE t.id = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array(
     $station,
     date("Y-m-d H:i", $sts),

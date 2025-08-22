@@ -18,58 +18,50 @@ $t->content = <<<EOM
   </ol>
 </nav>
 
-<p>This page presents daily soil temperature analysis maps.  The left hand
-column plots combine ISU Soil Moisture Network observations and bias corrected
-NWS NAM forecast model analyses to produce a higher resolution plot. The values
-plotted represent a daily average with the ISUSM stations being averaged between the
-daily high and low value and the NAM Model representing an average of six hour
-interval data. The right
-hand plots are simple GFS forecast model outputs without any bias correction.</p>
+<h1 class="mb-3">County 4 inch Soil Temperature Maps</h1>
+<h2 class="h5">About These Maps</h2>
+<p>This page presents daily soil temperature analysis maps. The left column combines ISU Soil Moisture Network observations and bias-corrected NWS NAM forecast model analyses for higher resolution. The right column shows simple GFS forecast model outputs without bias correction.</p>
 
-<p><strong>Links:</strong> <a class="btn btn-outline-secondary" href="/timemachine/?product=57">Archive of This Map</a>
-<a class="btn btn-outline-secondary" href="/agclimate/hist/daily.php">Observation Download</a>
-<a class="btn btn-outline-secondary" href="/agclimate/#soil04t">Real-time Map</a>
-</p>
+<div class="mb-3">
+  <strong>Links:</strong>
+  <a class="btn btn-outline-secondary mb-1" href="/timemachine/?product=57">Archive of This Map</a>
+  <a class="btn btn-outline-secondary mb-1" href="/agclimate/hist/daily.php">Observation Download</a>
+  <a class="btn btn-outline-secondary mb-1" href="/agclimate/#soil04t">Real-time Map</a>
+</div>
 
 <!-- The Modal -->
-<div id="myModal" class="modal">
-
-  <!-- The Close Button -->
-  <span class="close">&times;</span>
-
-  <!-- Modal Content (The Image) -->
-  <img class="modal-content" id="img01">
-
-  <!-- Modal Caption (Image Text) -->
+<div id="myModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="caption">
+  <span class="close" aria-label="Close dialog">&times;</span>
+  <img class="modal-content" id="img01" alt="Soil temperature map preview">
   <div id="caption"></div>
 </div>
 
-<div class="row clickme">
-<div class="col-md-6">
-    <h3>Past Three Day Observations</h3>
-    <p><img src="/data/soilt_day1.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/soilt_day2.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/soilt_day3.png?{$nounce}" class="img img-fluid"></p>
-</div>
-<div class="col-md-6">
-    <h3>GFS Forecast</h3>
-    <p><img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f1.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f2.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f3.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f4.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f5.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f6.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f7.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f8.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f9.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f10.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f11.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f12.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f13.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f14.png?{$nounce}" class="img img-fluid"></p>
-    <p><img src="/data/forecast/gfs_soilt_day_f15.png?{$nounce}" class="img img-fluid"></p>
-</div>
+<div class="row g-3 clickme">
+  <div class="col-12 col-md-6">
+    <h2 class="h5">Past Three Day Observations</h2>
+    <img src="/data/soilt_day1.png?{$nounce}" class="img-fluid mb-3" alt="Soil temperature map for day 1">
+    <img src="/data/soilt_day2.png?{$nounce}" class="img-fluid mb-3" alt="Soil temperature map for day 2">
+    <img src="/data/soilt_day3.png?{$nounce}" class="img-fluid mb-3" alt="Soil temperature map for day 3">
+  </div>
+  <div class="col-12 col-md-6">
+    <h2 class="h5">GFS Forecast</h2>
+    <img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 0">
+    <img src="/data/forecast/gfs_soilt_day_f1.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 1">
+    <img src="/data/forecast/gfs_soilt_day_f2.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 2">
+    <img src="/data/forecast/gfs_soilt_day_f3.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 3">
+    <img src="/data/forecast/gfs_soilt_day_f4.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 4">
+    <img src="/data/forecast/gfs_soilt_day_f5.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 5">
+    <img src="/data/forecast/gfs_soilt_day_f6.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 6">
+    <img src="/data/forecast/gfs_soilt_day_f7.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 7">
+    <img src="/data/forecast/gfs_soilt_day_f8.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 8">
+    <img src="/data/forecast/gfs_soilt_day_f9.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 9">
+    <img src="/data/forecast/gfs_soilt_day_f10.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 10">
+    <img src="/data/forecast/gfs_soilt_day_f11.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 11">
+    <img src="/data/forecast/gfs_soilt_day_f12.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 12">
+    <img src="/data/forecast/gfs_soilt_day_f13.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 13">
+    <img src="/data/forecast/gfs_soilt_day_f14.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 14">
+    <img src="/data/forecast/gfs_soilt_day_f15.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 15">
+  </div>
 </div>
 
 EOM;

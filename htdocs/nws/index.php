@@ -5,9 +5,6 @@ $t = new MyView();
 $t->title = "NWS Related Information";
 
 $t->content = <<<EOM
-
-<a href="#nws-main" class="visually-hidden-focusable">Skip to main content</a>
-
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb mb-3">
     <li class="breadcrumb-item"><a href="/">IEM Homepage</a></li>
@@ -15,7 +12,7 @@ $t->content = <<<EOM
   </ol>
 </nav>
 <h1 class="h4 mb-4">NWS User's Mainpage</h1>
-<div role="main" id="nws-main">
+<div>
 
 <div class="row g-3">
 <div class="col-md-6">
@@ -354,7 +351,7 @@ about the IEM's text product archives.</p>
 </div>
 </div><!-- ./row -->
 
-</div><!-- /#nws-main -->
+</div>
 
 EOM;
 $t->render('single.phtml');

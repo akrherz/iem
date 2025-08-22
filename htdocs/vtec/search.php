@@ -27,7 +27,6 @@ EOM;
 $t->title = "NWS Warning Search by Point or County/Zone";
 
 $t->content = <<<EOM
-<a href="#vtec-search-main" class="visually-hidden-focusable">Skip to main content</a>
 <h1 class="h4 mb-3">NWS Watch / Warning / Advisory Search</h1>
 <p>This application allows you to search for National Weather Service Watch,
 Warning, and Advisories using three different search methods:</p>
@@ -53,7 +52,7 @@ Warning, and Advisories using three different search methods:</p>
 </ul>
 
 <!-- Tab Content -->
-<div class="tab-content" id="searchTabContent" id="vtec-search-main">
+<div class="tab-content" id="searchTabContent">
     <!-- Tab 1: Storm Based Warnings by Point -->
     <div class="tab-pane fade" id="bypoint" role="tabpanel" aria-labelledby="bypoint-tab">
         <div class="mt-3">

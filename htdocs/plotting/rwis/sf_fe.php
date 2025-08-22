@@ -69,7 +69,7 @@ if (strlen($station) > 0) {
     $nselect = networkSelect($network, $station);
 
     $c0 = iemdb('rwis');
-    $stname = iem_pg_prepare($c0, "SELECT * from sensors WHERE station = $1");
+    $stname = iem_pg_prepare($c0, "SELECT s.* from sensors s JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1");
     $r0 = pg_execute($c0, $stname, Array($station));
     $ns0 = "Sensor 1";
     $ns1 = "Sensor 2";

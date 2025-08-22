@@ -31,7 +31,8 @@ if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 $rwisdb = iemdb('rwis');
 $stname = iem_pg_prepare($rwisdb, <<<EOM
-    SELECT * FROM alldata WHERE station = $1 and valid >= $2 and valid < $3 
+    SELECT a.* FROM alldata a JOIN stations t on (a.iemid = t.iemid)
+    WHERE id = $1 and valid >= $2 and valid < $3 
     ORDER by valid ASC
 EOM);
 $minInterval = 20;
@@ -39,7 +40,9 @@ $result = pg_execute($rwisdb, $stname, array($station, $sts->format("Y-m-d H:i")
 
 $minInterval = 20;
 
-$stname = iem_pg_prepare($rwisdb, "SELECT * from sensors WHERE station = $1");
+$stname = iem_pg_prepare(
+    $rwisdb,
+    "SELECT s.* from sensors s JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1");
 $r1 = pg_execute($rwisdb, $stname, array($station));
 
 $ns0 = "Sensor 1";
