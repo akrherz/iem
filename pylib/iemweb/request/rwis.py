@@ -25,6 +25,12 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
 stations=_ALL&tz=America%2FChicago&what=excel&src=atmos&\
 sts=2024-07-01T00:00&ets=2024-07-02T00:00
 
+Same request, but add a latitude and longitude column
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
+stations=_ALL&tz=America%2FChicago&what=excel&src=atmos&\
+sts=2024-07-01T00:00&ets=2024-07-02T00:00&gis=true
+
 Provide all traffic data on 1 July 2024 for Iowa RWIS station RAVI4
 in CSV format:
 
@@ -195,14 +201,19 @@ def application(environ, start_response):
         "sts": environ["sts"],
         "ets": environ["ets"],
     }
+    gisextra = ""
+    if include_latlon:
+        gisextra = ", ST_X(geom) as longitude, ST_Y(geom) as latitude "
     sql = sql_helper(
         """
-        SELECT a.*, valid at time zone :tzname as obtime from
+        SELECT t.id as station, a.*, valid at time zone :tzname as obtime
+        {gisextra} from
         {table} a JOIN stations t on (a.iemid = t.iemid)
         WHERE t.id = ANY(:ids) and valid BETWEEN :sts and :ets
         ORDER by valid ASC
         """,
         table=table,
+        gisextra=gisextra,
     )
     with get_sqlalchemy_conn("rwis") as conn:
         df = pd.read_sql(sql, conn, params=params)
@@ -220,17 +231,6 @@ def application(environ, start_response):
     if include_latlon:
         myvars.insert(2, "longitude")
         myvars.insert(3, "latitude")
-
-        def get_lat(station):
-            """hack"""
-            return nt.sts[station]["lat"]
-
-        def get_lon(station):
-            """hack"""
-            return nt.sts[station]["lon"]
-
-        df["latitude"] = [get_lat(x) for x in df["station"]]
-        df["longitude"] = [get_lon(x) for x in df["station"]]
 
     output_columns = df.columns.intersection(myvars).tolist()
     sio = StringIO()
