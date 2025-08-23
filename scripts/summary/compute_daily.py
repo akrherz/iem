@@ -70,7 +70,7 @@ def get_rwis_obs(dt: date) -> pd.DataFrame:
     with get_sqlalchemy_conn("rwis") as conn:
         obsdf = pd.read_sql(
             sql_helper("""
-        select station, network, iemid, drct, sknt, gust, dwpf,
+        select t.id as station, network, d.iemid, drct, sknt, gust, dwpf,
         valid at time zone tzname as localvalid, valid, relh, feel from
         alldata d JOIN stations t on (t.id = d.station)
         where network ~* 'RWIS'
