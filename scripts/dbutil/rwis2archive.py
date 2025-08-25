@@ -1,7 +1,7 @@
 """
 Copy RWIS data from iem database to its final resting home in 'rwis'
 
-called from RUN_10_AFTER.sh
+called from RUN_10MIN.sh with 9 minute process timeout
 """
 
 import sys

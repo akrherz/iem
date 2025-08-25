@@ -1,4 +1,7 @@
-"""Generate a map of today's average high and low temperature"""
+"""Generate a map of climatology.
+
+Called from RUN_SUMMARY.sh
+"""
 
 from datetime import date
 
@@ -45,7 +48,7 @@ def main():
     mp.drawcounties()
     mp.plot_station(obs)
     pqstr = (
-        f"plot ac {today:%Y%m%D}0000 climate/iowa_today_avg_hilo_pt.png "
+        f"plot ac {today:%Y%m%d}0000 climate/iowa_today_avg_hilo_pt.png "
         "coop_avg_temp.png png"
     )
     mp.postprocess(view=False, pqstr=pqstr)

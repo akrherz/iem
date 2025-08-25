@@ -13,6 +13,7 @@ python process_hads_inbound.py &
 
 cd ../dbutil
 timeout -v 540 python asos2archive.py &
+timeout -v 540 python rwis2archive.py &
 
 cd ../ingestors
 OPENSSL_CONF=dotcams/openssl.conf python dot_truckcams.py &

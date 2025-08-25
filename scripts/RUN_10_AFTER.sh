@@ -123,8 +123,6 @@ python check_awos_online.py
 
 cd ../dbutil
 python mine_autoplot.py &
-# Try to prevent this from running over itself
-timeout 3300 python rwis2archive.py &
 
 cd ../current
 python q3_xhour.py --hours=6
