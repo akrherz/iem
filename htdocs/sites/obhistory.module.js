@@ -70,7 +70,7 @@ function showMETAR() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("metar_toggle").innerHTML = "<i class=\"fa fa-minus\"></i> Hide METARs";
+    document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide METARs";
 }
 
 function toggleMETAR() {
@@ -82,7 +82,7 @@ function toggleMETAR() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-        document.getElementById("metar_toggle").innerHTML = "<i class=\"fa fa-plus\"></i> Show METARs";
+    document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show METARs";
         document.getElementById("hmetar").value = "0";
     } else {
         // show
@@ -102,7 +102,7 @@ function showMADIS() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("madis_toggle").innerHTML = "<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS";
+    document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide High Frequency MADIS";
 }
 
 function toggleMADIS() {
@@ -114,7 +114,7 @@ function toggleMADIS() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-        document.getElementById("madis_toggle").innerHTML = "<i class=\"fa fa-plus\"></i> Show High Frequency MADIS";
+    document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show High Frequency MADIS";
         document.getElementById("hmadis").value = "0";
     } else {
         // Show

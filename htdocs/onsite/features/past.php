@@ -37,59 +37,71 @@ $rs = pg_execute($c, $stname, Array("{$year}-{$month}-01", "{$nyear}-{$nmonth}-0
 $num = pg_num_rows($rs);
 
 $linkbar = <<<EOM
-<div class="row">
-    <div class="col-md-4 col-sm-4">
-<a href="{$plink}" class="btn btn-secondary btn-lg"><i class="fa fa-arrow-left"></i> Previous Month</a> 
+<nav class="d-flex justify-content-between align-items-center mb-3" aria-label="Month navigation">
+    <div>
+        <a href="{$plink}" class="btn btn-outline-secondary btn-sm" aria-label="Previous month">&larr; Previous</a>
     </div>
-    <div class="col-md-4 col-sm-4"><h4>Features for {$mstr}</h4></div>
-    <div class="col-md-4 col-sm-4">
-  <a href="{$nlink}" class="btn btn-secondary btn-lg">Next Month  <i class="fa fa-arrow-right"></i></a> 
+    <div class="text-center flex-fill">
+        <h4 class="mb-0" aria-live="polite">Features for {$mstr}</h4>
     </div>
-</div>
+    <div class="text-end">
+        <a href="{$nlink}" class="btn btn-outline-secondary btn-sm" aria-label="Next month">Next &rarr;</a>
+    </div>
+</nav>
 EOM;
 
 while ($row = pg_fetch_assoc($rs)) {
     $valid = strtotime(substr($row["valid"], 0, 16));
+    $iso = date('c', $valid);
+    $alt = htmlspecialchars($row["title"], ENT_QUOTES);
     $p = printTags(explode(",", is_null($row["tags"]) ? "": $row["tags"]));
     $d = date("Y-m-d", $valid);
     $linktext = "";
     if ($row["appurl"] != "") {
-        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
+        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"bi bi-signal\" aria-hidden=\"true\"></i> Generate This Chart on Website</a>";
     }
-    $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
-    if ($row["mediasuffix"] == 'mp4') {
-        $media = <<<EOM
-        <video class="img-fluid" controls>
-          <source src="{$big}" type="video/mp4">
-          Your browser does not support the video tag.
-      </video>
+        $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
+        if ($row["mediasuffix"] == 'mp4') {
+                $media = <<<EOM
+                <figure class="figure">
+                    <video class="img-fluid" controls aria-label="Feature video for {$alt}">
+                        <source src="{$big}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <figcaption class="figure-caption small">{$row["caption"]}</figcaption>
+                </figure>
 EOM;
-    } else {
-        $media = <<<EOM
-      <a href="{$big}"><img src="{$big}" class="img-fluid"></a>
-      <br /><a href="{$big}">View larger image</a>
+        } else {
+                $media = <<<EOM
+                <figure class="figure">
+                    <a href="{$big}"><img src="{$big}" class="img-fluid rounded" alt="{$alt}"></a>
+                    <figcaption class="figure-caption small"><a href="{$big}">View larger image</a> — {$row["caption"]}</figcaption>
+                </figure>
 EOM;
-    }
-    $table .= <<<EOM
-<div class="row">
-  <div class="col-md-12"><div class="card card-body p-2">{$row["calhead"]}</large></div></div>
-</div>
+        }
 
-<div class="row">
-    <div class="col-md-6">
-    {$media}
-<br />{$row["caption"]}
+        $table .= <<<EOM
+<article class="mb-4">
+    <div class="card">
+        <div class="card-body p-2">
+            <h5 class="mb-0">{$row["calhead"]}</h5>
+        </div>
     </div>
-    <div class="col-md-6">
 
-<b><a href='cat.php?day={$d}'>{$row["title"]}</a></b>
-<br><font size='-1' style='color:black'>{$row["webdate"]}</font>
-<br>{$row["story"]}
-<br>Voting: Good - {$row["good"]} Bad - {$row["bad"]}
-<br />{$p}
-{$linktext}
+    <div class="row mt-2">
+        <div class="col-12 col-md-6"> 
+            {$media}
+        </div>
+        <div class="col-12 col-md-6">
+            <h3 id="feature-title-{$d}" class="h5"><a href='cat.php?day={$d}' class="stretched-link">{$row["title"]}</a></h3>
+            <p class="mb-1"><small class="text-muted"><time datetime="{$iso}">{$row["webdate"]}</time></small></p>
+            <div>{$row["story"]}</div>
+            <p class="mt-2 mb-1">Voting: <span class="me-2">Good - {$row["good"]}</span> <span>Bad - {$row["bad"]}</span></p>
+            <div>{$p}</div>
+            <div class="mt-2">{$linktext}</div>
+        </div>
     </div>
-</div>
+</article>
 
 EOM;
 }

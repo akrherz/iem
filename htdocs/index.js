@@ -12,7 +12,7 @@ function onFeatureData(data) {
     
     if (!data.can_vote) {
         if (featureMsg) {
-            featureMsg.innerHTML = '<i class="fa fa-check"></i> Thanks for voting!';
+            featureMsg.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> Thanks for voting!';
         }
         featureBtns.forEach(btn => {
             btn.disabled = true;

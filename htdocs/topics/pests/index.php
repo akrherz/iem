@@ -175,7 +175,7 @@ the backend that generates the maps/data here.</p>
 
 
 <div id="willload" style="height: 200px;">
-<p><span class="fa fa-arrow-down"></span>
+<p><span class="bi bi-arrow-down" aria-hidden="true"></span>
 This application takes about 10 seconds to generate a map.
 Hold on for the map is generating now!</p>
 <div class="progress">

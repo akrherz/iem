@@ -96,14 +96,14 @@ $t->content = <<<EOM
         <div class="btn-group" role="group" aria-label="Font size controls">
             <button id="fminus" class="btn btn-outline-secondary btn-sm" type="button" 
                 title="Decrease font size">
-                <i class="fa fa-minus"></i>
+                <i class="bi bi-dash" aria-hidden="true"></i>
             </button>
             <span class="btn btn-outline-secondary btn-sm disabled">
-                <i class="fa fa-text-height"></i>
+                <i class="bi bi-text-paragraph" aria-hidden="true"></i>
             </span>
             <button id="fplus" class="btn btn-outline-secondary btn-sm" type="button"
                 title="Increase font size">
-                <i class="fa fa-plus"></i>
+                <i class="bi bi-plus" aria-hidden="true"></i>
             </button>
         </div>
     </div>
@@ -120,7 +120,7 @@ $t->content = <<<EOM
             </div>
             <div class="col-md-2">
                 <button id="dlcsv" class="btn btn-success w-100" type="button">
-                    <i class="fa fa-download"></i> CSV
+                    <i class="bi bi-download" aria-hidden="true"></i> CSV
                 </button>
             </div>
         </div>

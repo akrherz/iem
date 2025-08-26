@@ -235,8 +235,8 @@ function addExportButtons(table) {
         container.id = 'clitable-export-buttons';
         container.className = 'mb-2 d-flex gap-2';
         container.innerHTML =
-            '<button id="clitable-csv" class="btn btn-outline-success btn-sm"><i class="fa fa-download"></i> Download CSV</button>' +
-            '<button id="clitable-xlsx" class="btn btn-outline-primary btn-sm"><i class="fa fa-download"></i> Download Excel</button>';
+            '<button id="clitable-csv" class="btn btn-outline-success btn-sm"><i class="bi bi-download" aria-hidden="true"></i> Download CSV</button>' +
+            '<button id="clitable-xlsx" class="btn btn-outline-primary btn-sm"><i class="bi bi-download" aria-hidden="true"></i> Download Excel</button>';
         const tabDiv = document.getElementById('tabulator-table');
         tabDiv.parentNode.insertBefore(container, tabDiv);
     }

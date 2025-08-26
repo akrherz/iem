@@ -39,9 +39,9 @@ $t->content = <<<EOM
 <div class="col-md-12">
 
 <div class="float-end">
-<i class="fa fa-text-size"></i>
-<button id="fminus" class="btn btn-secondary" type="button"><i class="fa fa-minus"></i></button>
-<button id="fplus" class="btn btn-secondary" type="button"><i class="fa fa-plus"></i></button>
+<i class="bi bi-type" aria-hidden="true"></i>
+<button id="fminus" class="btn btn-secondary" type="button"><i class="bi bi-dash" aria-hidden="true"></i></button>
+<button id="fplus" class="btn btn-secondary" type="button"><i class="bi bi-plus" aria-hidden="true"></i></button>
 </div>
 
 <p>The IEM processes the raw SHEF encoded data into its raw components which

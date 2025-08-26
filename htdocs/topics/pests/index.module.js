@@ -29,9 +29,9 @@ function hideImageLoad() {
     const url = theImageEl.src.replace(".png", "");
     theDataEl.innerHTML = 
         `<p>Download point data: <a href="${url}.txt" class="btn btn-primary">` +
-        '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
+        '<i class="bi bi-table" aria-hidden="true"></i> As CSV</a> &nbsp;' +
         `<a href="${url}.xlsx" class="btn btn-primary">` +
-        '<i class="fa fa-table"></i> As Excel</a></p>';
+        '<i class="bi bi-table" aria-hidden="true"></i> As Excel</a></p>';
 }
 
 /**

@@ -125,10 +125,13 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
- <li class="active">Top 10 Warnings by size</li>
-</ol>
+
+<nav aria-label="Breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Top 10 Warnings by size</li>
+    </ol>
+</nav>
 
 <h3>Top 10 NWS WFO Storm Based Warnings by Size</h3>
 
@@ -140,41 +143,58 @@ operational until 1 Oct 2007, so warning polygons prior to that date were only
 experimental at best.  The areas shown are computed using
 <a href="https://spatialreference.org/ref/epsg/9311/">EPSG:9311</a> (US National Atlas Equal Area).</p>
 
-<div class="alert alert-info">Please be patient for page to load...</div>
+<div class="alert alert-info" role="status" aria-live="polite">Please be patient for page to load...</div>
 
-<form name="selector" method="GET">
-<table class="table table-sm table-striped">
-<thead>
-<tr>
- <th>Select WFO:</th>
- <th>Limit Option:</th>
- <th>Time Period:</th>
-<td><td>
-<td><td>
-</tr>
-</head>
-<tbody>
-<tr><td>
-{$sselect}
-</td>
-
- <td>{$lselect}</td>
-   <td>{$tselect}</td>
-  <td><input type="submit" value="Giveme Giveme!"></td>
-  </tr>
-</table>
+<form name="selector" method="GET" aria-label="Filter warnings by WFO, type, and time period">
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-md-4">
+            <label for="wfo" class="form-label">Select WFO:</label>
+            {$sselect}
+        </div>
+        <div class="col-md-4">
+            <label for="limit" class="form-label">Limit Option:</label>
+            {$lselect}
+        </div>
+        <div class="col-md-4">
+            <label for="tlimit" class="form-label">Time Period:</label>
+            {$tselect}
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary" aria-label="Apply filters">Giveme Giveme!</button>
+        </div>
+    </div>
 </form>
 
-<h3>Top 10 Largest for WFO: {$wfo}</h3>
-<table class="table table-sm table-striped">
-<tr><th>Date Issued</th><th>Size (sq km)</th><th>WFO</th><th>Phenomena</th></tr>
-{$ltable}
+
+<h3 id="largest-table">Top 10 Largest for WFO: {$wfo}</h3>
+<table class="table table-sm table-striped" aria-labelledby="largest-table">
+    <thead>
+        <tr>
+            <th scope="col">Date Issued</th>
+            <th scope="col">Size (sq km)</th>
+            <th scope="col">WFO</th>
+            <th scope="col">Phenomena</th>
+        </tr>
+    </thead>
+    <tbody>
+        {$ltable}
+    </tbody>
 </table>
 
-<h3>Top 10 Smallest for WFO: {$wfo}</h3>
-<table class="table table-sm table-striped">
-<tr><th>Date Issued</th><th>Size (sq km)</th><th>WFO</th><th>Phenomena</th></tr>
-{$btable}
+
+<h3 id="smallest-table">Top 10 Smallest for WFO: {$wfo}</h3>
+<table class="table table-sm table-striped" aria-labelledby="smallest-table">
+    <thead>
+        <tr>
+            <th scope="col">Date Issued</th>
+            <th scope="col">Size (sq km)</th>
+            <th scope="col">WFO</th>
+            <th scope="col">Phenomena</th>
+        </tr>
+    </thead>
+    <tbody>
+        {$btable}
+    </tbody>
 </table>
 EOM;
 $t->render('single.phtml');

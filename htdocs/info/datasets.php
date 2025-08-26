@@ -57,7 +57,7 @@ foreach ($pages as $k => $page) {
     $tags .= sprintf("<a href=\"#%s\" class=\"btn btn-secondary\">%s</a>", $page, $page);
 }
 if ($tags == '') {
-    $tags = "<a href=\"/info/datasets/\" class=\"btn btn-secondary\"><i class=\"fa fa-th-list\"></i> List All Datasets</a>";
+    $tags = "<a href=\"/info/datasets/\" class=\"btn btn-secondary\"><i class=\"bi bi-list-ul\" aria-hidden=\"true\"></i> List All Datasets</a>";
 } else {
     $tags = "<strong>Documented Datasets:</strong> :" . $tags;
 }

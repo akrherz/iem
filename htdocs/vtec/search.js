@@ -485,10 +485,10 @@ function createPhenomenaSummary(tableData, containerId) {
     // Toggle chevron icon
     const collapseElement = document.getElementById(`${containerId}-summary`);
     collapseElement.addEventListener('show.bs.collapse', () => {
-        summaryDiv.querySelector('.summary-chevron').classList.replace('fa-chevron-down', 'fa-chevron-up');
+        summaryDiv.querySelector('.summary-chevron').classList.replace('bi-chevron-down', 'bi-chevron-up');
     });
     collapseElement.addEventListener('hide.bs.collapse', () => {
-        summaryDiv.querySelector('.summary-chevron').classList.replace('fa-chevron-up', 'fa-chevron-down');
+        summaryDiv.querySelector('.summary-chevron').classList.replace('bi-chevron-up', 'bi-chevron-down');
     });
 }
 
@@ -509,7 +509,7 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
     if (titleElement) {
         const originalText = titleElement.textContent.split(' (')[0]; // Remove any existing filter text
         const filteredCount = table.getDataCount("active");
-    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
+    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?bi-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
     }
     
     // Update toolbar count
@@ -531,7 +531,7 @@ function clearPhenomenaFilter(containerId) {
     const titleElement = document.getElementById(containerId);
     if (titleElement) {
         const originalText = titleElement.textContent.split(' (')[0];
-    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?fa-table me-2.*?>/, '')}`;
+    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?bi-table me-2.*?>/, '')}`;
     }
     
     // Update toolbar count (no filter)

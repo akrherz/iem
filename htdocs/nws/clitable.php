@@ -103,27 +103,27 @@ function departcolor($actual, $normal)
 function new_record($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
-    if ($actual === $record) return '<i class="fa fa-star-o"></i>';
-    if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
+    if ($actual === $record) return '<i class="bi bi-star" aria-hidden="true"></i>';
+    if ($actual > $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
     return "";
 }
 function new_record2($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
-    if ($actual == $record) return '<i class="fa fa-star-o"></i>';
-    if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
+    if ($actual == $record) return '<i class="bi bi-star" aria-hidden="true"></i>';
+    if ($actual < $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
 }
 function new_record3($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
     if ($actual == 0) return "";
-    if ($actual === $record) return '<i class="fa fa-star-o"></i>';
+    if ($actual === $record) return '<i class="bi bi-star" aria-hidden="true"></i>';
     // Careful of Trace
     if ($actual === "T"){
         if ($record > 0.001) return "";
-        return '<i class="fa fa-star"></i>';
+    return '<i class="bi bi-star-fill" aria-hidden="true"></i>';
     }
-    if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
+    if ($actual > $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
     return "";
 }
 foreach ($arr as $entry) {
@@ -162,7 +162,7 @@ foreach ($arr as $entry) {
     $ld = departure($row["low"], $row["low_normal"]);
     $table .= sprintf(
         "<tr data-record='%s'>
-        <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
+    <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"bi bi-card-list\" aria-hidden=\"true\"></i></a>
             %s</td>
             <td>%s%s</td><td nowrap>%s</td><td>%s</td>
             <td>%s</td><td>%s</td>
@@ -291,7 +291,7 @@ $t->content = <<<EOM
 </div>
 
 <div class="mb-3 d-flex flex-wrap gap-2">
-    <button id="makefancy" class="btn btn-outline-secondary"><i class="fa fa-table"></i> Make Table Interactive</button>
+    <button id="makefancy" class="btn btn-outline-secondary"><i class="bi bi-table" aria-hidden="true"></i> Make Table Interactive</button>
     <button id="makerecords" class="btn btn-outline-secondary" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
 </div>
 
@@ -299,8 +299,8 @@ $t->content = <<<EOM
 
 <div class="mt-3">
     <strong>Key:</strong> &nbsp;
-    <i class="fa fa-star-o"></i> Record Tied,
-    <i class="fa fa-star"></i> Record Set.
+    <i class="bi bi-star" aria-hidden="true"></i> Record Tied,
+    <i class="bi bi-star-fill" aria-hidden="true"></i> Record Set.
 </div>
 
 EOM;

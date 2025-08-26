@@ -98,13 +98,13 @@ back to 1951.</li>
 
 <p><h3>GIS Shapefiles:</h3>
 <ul>
-<li><a href="/request/gis/spc_mcd.phtml"><i class="fa fa-download"></i>
+<li><a href="/request/gis/spc_mcd.phtml"><i class="bi bi-download" aria-hidden="true"></i>
 SPC Mesoscale Discussion Shapefile Download</a></li>
 
-<li><a href="/request/gis/outlooks.phtml"><i class="fa fa-download"></i>
+<li><a href="/request/gis/outlooks.phtml"><i class="bi bi-download" aria-hidden="true"></i>
  SPC/WPC Outlook Shapefile Download</a></li>
 
-<li><a href="/request/gis/spc_watch.phtml"><i class="fa fa-download"></i>
+<li><a href="/request/gis/spc_watch.phtml"><i class="bi bi-download" aria-hidden="true"></i>
  SPC Watch Polygon Shapefile Download</a></li>
 
 <li>Past 24 hours of Storm Reports
@@ -137,7 +137,7 @@ This file is updated every minute.</li>
  Shapefile download of SPS polygons and IBW tags.</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
 
- <li><a href="/request/gis/wpc_mpd.phtml"><i class="fa fa-download"></i>
+<li><a href="/request/gis/wpc_mpd.phtml"><i class="bi bi-download" aria-hidden="true"></i>
 WPC Precip Discussion MPD Polygon Shapefile Download</a></li>
 
  </ul>

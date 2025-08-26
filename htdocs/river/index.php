@@ -69,7 +69,7 @@ foreach ($jobs as $key => $val) {
             "<tr><td style='background: %s;'>&nbsp;&nbsp;</td>" .
             "<td>%s</td>" .
                 "<th>%s<br />" .
-                "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>" .
+                "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"bi bi-graph-up-arrow\" aria-hidden=\"true\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>" .
                 "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
             $sevcol[$row["severity"]],
             ($key == "W" ? "Flood Warning" : "Flood Watch"),
@@ -118,7 +118,7 @@ Documentation on this webservice is
   </div>
   <div class="col-md-4{$c3}">
     <h4>3. Show all Available</h4>
-    <a href="?all" class="btn btn-primary"><i class="fa fa-globe"></i> View All</a>
+    <a href="?all" class="btn btn-primary"><i class="bi bi-globe" aria-hidden="true"></i> View All</a>
 
   </div>
 </div>
