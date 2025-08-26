@@ -120,11 +120,11 @@ function initializeTable() {
     downloadContainer.className = 'mb-3';
     downloadContainer.innerHTML = '<div class="btn-group" role="group" aria-label="Download options">' +
         '<button id="download-csv" class="btn btn-outline-success btn-sm">' +
-        '<i class="fas fa-file-csv"></i> Download CSV</button>' +
+    '<i class="bi bi-filetype-csv"></i> Download CSV</button>' +
         '<button id="download-xlsx" class="btn btn-outline-primary btn-sm">' +
-        '<i class="fas fa-file-excel"></i> Download Excel</button>' +
+    '<i class="bi bi-filetype-xls"></i> Download Excel</button>' +
         '<button id="download-json" class="btn btn-outline-info btn-sm">' +
-        '<i class="fas fa-file-code"></i> Download JSON</button>' +
+    '<i class="bi bi-filetype-json"></i> Download JSON</button>' +
         '</div>';
     
     document.getElementById('tabulator-container').insertBefore(downloadContainer, document.getElementById('snowfall-tabulator'));

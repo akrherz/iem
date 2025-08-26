@@ -71,7 +71,7 @@ function fallbackCopyToClipboard(text, button) {
 
 function showCopyFeedback(button, message) {
     const originalText = button.innerHTML;
-    button.innerHTML = `<i class="fa fa-check"></i> ${message}`;
+    button.innerHTML = `<i class="bi bi-check-lg"></i> ${message}`;
     button.classList.remove('btn-outline-primary');
     button.classList.add('btn-success');
     
@@ -94,9 +94,9 @@ function updateForm2UrlDisplay(div) {
         const curlCommand = escapeHtml(form2url(form));
         div.innerHTML = `<div class="alert alert-info">
             <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="mb-0"><i class="fa fa-terminal"></i> Automation Example with Curl</h5>
+                <h5 class="mb-0"><i class="bi bi-terminal"></i> Automation Example with Curl</h5>
                 <button type="button" class="btn btn-sm btn-outline-primary copy-curl-btn" data-command="${curlCommand}">
-                    <i class="fa fa-copy"></i> Copy
+                    <i class="bi bi-clipboard"></i> Copy
                 </button>
             </div>
             <p class="mb-2">This command and URL should replicate your current form selections:</p>

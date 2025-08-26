@@ -121,7 +121,7 @@ foreach ($arr as $entry) {
     }
     $table .= sprintf(
         "
-        <tr><td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
+        <tr><td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"bi bi-file-richtext\" alt=\"View Text\"></i></a>
             %s</td>
             <td>%s</td><td nowrap>%s</td><td>%s</td>
             <td>%s</td><td>%s</td><td>%s</td>

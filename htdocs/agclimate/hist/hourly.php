@@ -90,7 +90,7 @@ data only started in 2021 though. The default download is to provide the
 hourly data.</p>
 
 <p><a href="/cgi-bin/request/isusm.py?help" class="btn btn-info">
-<i class="fa fa-file"></i> Backend documentation</a> exists for those
+<i class="bi bi-file-earmark-text"></i> Backend documentation</a> exists for those
 wishing to script against this data service.</p>
 
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">

@@ -14,7 +14,7 @@ function revdiv(myid) {
     const channelElem = document.getElementById(`channel_${myid}`);
     if (window.getComputedStyle(elem).display === 'block') {
         elem.style.display = 'none';
-        channelElem.innerHTML = '<i class="fa fa-plus"></i>';
+    channelElem.innerHTML = '<i class="bi bi-plus-lg"></i>';
     } else {
         window.location.hash = `#channel_${myid}`;
         const parent = channelElem.parentElement;
@@ -22,7 +22,7 @@ function revdiv(myid) {
             parent.parentElement.classList.add('info');
         }
         elem.style.display = 'block';
-        channelElem.innerHTML = '<i class="fa fa-minus"></i>';
+    channelElem.innerHTML = '<i class="bi bi-dash-lg"></i>';
     }
 }
 

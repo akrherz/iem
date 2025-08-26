@@ -53,8 +53,8 @@ function addExportButtons(table) {
         container.id = 'ugcs-export-buttons';
         container.className = 'mb-2 d-flex gap-2';
         container.innerHTML =
-            '<button id="ugcs-csv" class="btn btn-outline-success btn-sm"><i class="fa fa-download"></i> Download CSV</button>' +
-            '<button id="ugcs-xlsx" class="btn btn-outline-primary btn-sm"><i class="fa fa-download"></i> Download Excel</button>';
+            '<button id="ugcs-csv" class="btn btn-outline-success btn-sm"><i class="bi bi-download"></i> Download CSV</button>' +
+            '<button id="ugcs-xlsx" class="btn btn-outline-primary btn-sm"><i class="bi bi-download"></i> Download Excel</button>';
         const tableDiv = document.getElementById('ugcs-table');
         tableDiv.parentNode.insertBefore(container, tableDiv);
     }

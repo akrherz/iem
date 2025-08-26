@@ -143,11 +143,11 @@ These images and data are in the public domain,
 the <a href="/disclaimer.php">disclaimer page</a> contains more details.</p>
 
 <p><a href="/cgi-bin/mywindrose.py?help" class="btn btn-primary">
-<i class="fa fa-file"></i> Backend Documentation
+<i class="bi bi-file-earmark-text"></i> Backend Documentation
 </a>
 exists for those that wish to script against the windrose image/data service.
 Additionally, <a href="/plotting/auto/?q=16" class="btn btn-primary">
-<i class="fa fa-line-chart"></i> Autoplot 16</a> allows for custom wind roses
+<i class="bi bi-graph-up"></i> Autoplot 16</a> allows for custom wind roses
 based on thresholds being met.</p>
 
 <form method="GET" name="windrose">
@@ -333,7 +333,7 @@ $content .= '
 
 if (isset($rose_uri)) {
     $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
-    $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data for chart</a><br />";
+    $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='bi bi-list'></i> View raw data for chart</a><br />";
     if ($fmt == 'pdf') {
         $content .= <<<EOM
 <object id="windrose-plot" src="{$rose_uri}" width="700px" height="700px">

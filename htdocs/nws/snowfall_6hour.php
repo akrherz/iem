@@ -115,7 +115,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
 
 <div class="mb-3">
     <button id="makefancy" class="btn btn-primary">
-        <i class="fas fa-table"></i> Make Table Interactive
+    <i class="bi bi-table"></i> Make Table Interactive
     </button>
 </div>
 
@@ -164,7 +164,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
                 </div>
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-search"></i> View Table
+                        <i class="bi bi-search"></i> View Table
                     </button>
                 </div>
             </div>
