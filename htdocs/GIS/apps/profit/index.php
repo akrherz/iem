@@ -21,7 +21,7 @@ EOM;
 $t->content = <<<EOM
 <div class="row">
   <div class="col-md-12">
-    <h3><i class="fa fa-bar-chart"></i> Iowa Corn/Soybean Profitability Map</h3>
+  <h3><i class="bi bi-bar-chart" aria-hidden="true"></i> Iowa Corn/Soybean Profitability Map</h3>
     <p class="lead">
       This interactive map shows estimates of profitability for corn and soybean production 
       across Iowa fields. Select a year to view profitability data for that growing season.
@@ -83,7 +83,7 @@ $t->content = <<<EOM
         <button class="btn btn-link p-0 text-decoration-none" type="button" id="disclaimer_btn" 
                 data-bs-toggle="collapse" data-bs-target="#disclaimerContent" 
                 aria-expanded="false" aria-controls="disclaimerContent">
-          <i class="fa fa-info-circle"></i> View Disclaimer
+          <i class="bi bi-info-circle" aria-hidden="true"></i> View Disclaimer
         </button>
       </div>
       <div class="collapse" id="disclaimerContent">

@@ -252,7 +252,7 @@ $t->content = <<<EOM
 
 <div class="mb-3">
 <a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary">
-<i class="fa fa-table"></i> View {$network} Network Table
+<i class="bi bi-table" aria-hidden="true"></i> View {$network} Network Table
 </a>
 </div>
 

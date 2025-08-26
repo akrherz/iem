@@ -187,7 +187,7 @@ if (is_null($rs) || pg_num_rows($rs) < 1) {
 }
 if (pg_num_rows($rs) > 1) {
     $rows = pg_num_rows($rs);
-    $content .= '<div class="alert alert-danger"><i class="fa fa-file"></i> ' .
+    $content .= '<div class="alert alert-danger"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> ' .
         "Found {$rows} products at the given pil and timestamp. Scroll down to see them all.</div>";
 }
 $extratools = "";
@@ -202,7 +202,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             $cc = strtolower($ccc);
             $extratools = <<<EOM
             <p><a class="btn btn-success" href="/nws/{$cc}table.php?station={$station}&opt=bystation&year={$year}">
-            <i class="fa fa-list"></i> Daily {$ccc} Table for {$station}</a></p>
+                <i class="bi bi-list-ul" aria-hidden="true"></i> Daily {$ccc} Table for {$station}</a></p>
 EOM;
         }
         $newe = date("YmdHi", $basets);
@@ -274,7 +274,8 @@ EOM;
             $t->twitter_image = "/plotting/auto/plot/227/pid:{$product_id}.png";
             $img = <<<EOM
 <p><a class="btn btn-primary"
- href="/plotting/auto/?q=227&pid={$product_id}"><i class="fa fa-icon"></i> Autoplot 227</a>
+ href="/plotting/auto/?q=227&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 227</a>
+ href="/plotting/auto/?q=227&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 227</a>
 generated the following image below.  You may find more customization options
 for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
@@ -287,7 +288,8 @@ EOM;
             $t->twitter_image = "/plotting/auto/plot/217/pid:{$product_id}.png";
             $img = <<<EOM
 <p><a class="btn btn-primary"
- href="/plotting/auto/?q=217&pid={$product_id}"><i class="fa fa-icon"></i> Autoplot 217</a>
+ href="/plotting/auto/?q=217&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 217</a>
+ href="/plotting/auto/?q=217&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 217</a>
 generated the following image below.  You may find more customization options
 , like removal of RADAR, for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/217/pid:{$product_id}::segnum:0.png"
@@ -338,9 +340,13 @@ EOM;
         <p class="mb-1">Displaying AFOS PIL: <strong>$pil</strong><br>
         Product Timestamp: <strong>{$dstamp} UTC</strong></p>
         <div class="btn-group my-2 flex-wrap" role="group" aria-label="Product navigation">
-            <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left" aria-hidden="true"></i> Previous</a>
+            <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</a>
             <a class="btn btn-outline-primary btn-sm" aria-label="Latest product" href="p.php?pil=$pil">Latest</a>
-            <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <div class="btn-group my-2 flex-wrap" role="group" aria-label="Product navigation">
+                <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</a>
+                <a class="btn btn-outline-primary btn-sm" aria-label="Latest product" href="p.php?pil=$pil">Latest</a>
+                <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
         <div class="d-flex flex-wrap gap-2 my-2">
             <a class="btn btn-primary btn-sm" href="{$listlink}">All {$row["source"]} Products ({$date2})</a>
@@ -382,7 +388,8 @@ EOM;
                 </div>
             </form>
             <div class="d-flex justify-content-between align-items-center afos-bulk-heading mt-1" id="bulk-download-note" role="heading" aria-level="4">
-                <span class="afos-bulk-title"><i class="fa fa-download" aria-hidden="true"></i> Bulk Download</span>
+                <span class="afos-bulk-title"><i class="bi bi-download" aria-hidden="true"></i> Bulk Download</span>
+                    <span class="afos-bulk-title"><i class="bi bi-download" aria-hidden="true"></i> Bulk Download</span>
                 <button type="button" class="btn btn-link btn-sm p-0 afos-bulk-help-toggle" aria-expanded="false" aria-controls="bulk-help">Help</button>
             </div>
             <div id="bulk-help" class="mt-1" hidden>

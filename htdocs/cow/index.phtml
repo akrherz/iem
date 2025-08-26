@@ -153,7 +153,7 @@ $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED" : "");
 $tagselect .= <<<EOM
 > <label for="windhailtag">When possible, verify SVR warnings against
 issuance WIND...HAIL tag</label>
- <a href="/nws/list_tags.php" target="_new"><i class="fa fa-link"></i> App listing per-WFO tags</a>
+ <a href="/nws/list_tags.php" target="_new"><i class="bi bi-link-45deg" aria-hidden="true"></i> App listing per-WFO tags</a>
 <br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y" 
 EOM;
 $tagselect .= (($limitwarns == 'Y') ? " CHECKED" : "");
@@ -221,7 +221,7 @@ if (isset($_GET["hail"])) {
 
 <h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
 
-<p><a href="#api" class="btn btn-primary"><i class="fa fa-download"></i> IEM Cow API Access</a></p>
+<p><a href="#api" class="btn btn-primary"><i class="bi bi-download" aria-hidden="true"></i> IEM Cow API Access</a></p>
 
 <p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
 educational purposes only.  This application allows you to view warnings

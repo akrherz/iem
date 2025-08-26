@@ -19,11 +19,11 @@ need.  Please do <a href="/info/contacts.php">contact us</a> with your
 questions!</p>
 
 <p>IEM's most popular applications:
-<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/"><i class="fa fa-signal me-1"></i>Automated Data Plotting</a>
-<a type="button" class="btn btn-success me-2 mb-2" href="/climodat/"><i class="fa fa-list-alt me-1"></i>Climodat</a>
-<a type="button" class="btn btn-success me-2 mb-2" href="/explorer/"><i class="fa fa-map me-1"></i>IEM Explorer</a>
-<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/?q=108"><i class="fa fa-signal me-1"></i>Single Site Graphs</a>
-<a type="button" class="btn btn-success me-2 mb-2" href="#nass"><i class="fa fa-list-alt me-1"></i>USDA NASS Products</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/"><i class="bi bi-graph-up-arrow me-1" aria-hidden="true"></i>Automated Data Plotting</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/climodat/"><i class="bi bi-card-list me-1" aria-hidden="true"></i>Climodat</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/explorer/"><i class="bi bi-map me-1" aria-hidden="true"></i>IEM Explorer</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="/plotting/auto/?q=108"><i class="bi bi-graph-up-arrow me-1" aria-hidden="true"></i>Single Site Graphs</a>
+<a type="button" class="btn btn-success me-2 mb-2" href="#nass"><i class="bi bi-card-list me-1" aria-hidden="true"></i>USDA NASS Products</a>
 </p>
 
 
@@ -264,7 +264,7 @@ are available for this data (search for NASS in the dropdown menu).</p>
 <p>The IEM also attempts to glean the Iowa Ag Reporting District data found in the
 weekly <a href="https://www.nass.usda.gov/Statistics_by_State/Iowa/Publications/Crop_Progress_&_Condition/">weekly crop progress</a>
 PDF reports.  You can download the IEM's entire database as this
-<a href="/cgi-bin/request/nass_iowa.py"><i class="fa fa-download me-1"></i>Excel file</a>.</p>
+<a href="/cgi-bin/request/nass_iowa.py"><i class="bi bi-download me-1" aria-hidden="true"></i>Excel file</a>.</p>
 
 <h4>Historical Freeze Risk</h4>
 
@@ -282,9 +282,9 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
 <h4>External Links</h4>
 <ul>
  <li><a href="https://iowaagriculture.gov/climatology-bureau">State of Iowa Climatologist</a></li>
- <li><a href="http://www.nass.usda.gov/Charts_and_Maps/Crop_Progress_&_Condition/index.asp">USDA Charts &amp; Maps of Crop Progress</a></li>
- <li><a href="http://www.nass.usda.gov/Publications/State_Crop_Progress_and_Condition/index.asp">USDA State Crop Progress &amp; Condition</a></li>
- <li><a href="http://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter
+ <li><a href="https://www.nass.usda.gov/Charts_and_Maps/Crop_Progress_&_Condition/index.asp">USDA Charts &amp; Maps of Crop Progress</a></li>
+ <li><a href="https://www.nass.usda.gov/Publications/State_Crop_Progress_and_Condition/index.asp">USDA State Crop Progress &amp; Condition</a></li>
+ <li><a href="https://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter
  your zipcode or click on the map)</li>
 </ul>
 EOM;

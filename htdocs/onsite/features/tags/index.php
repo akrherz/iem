@@ -127,7 +127,7 @@ EOM;
       {$media}
 EOM;
     if ($row["appurl"] != "") {
-        $content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
+    $content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"bi bi-signal\" aria-hidden=\"true\"></i> Generate This Chart on Website</a>";
     }
     $content .= "<br />" . $row["caption"];
     $content .= "</div><div class=\"col-md-7\">";
@@ -151,7 +151,7 @@ if (pg_num_rows($rs) == 0) {
 
 $t->content = <<<EOM
 <h3>Past IEM Features tagged: {$tag}</h3>
-<p><a href="index.php" class="btn btn-secondary"><i class="fa fa-th-list"></i>
+<p><a href="index.php" class="btn btn-secondary"><i class="bi bi-list" aria-hidden="true"></i>
 List all tags</a></p>
 
 {$winterextra}

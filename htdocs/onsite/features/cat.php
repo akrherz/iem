@@ -61,7 +61,7 @@ $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
 
 $linktext = "";
 if ($row["appurl"] != "") {
-    $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
+    $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"bi bi-signal\" aria-hidden=\"true\"></i> Generate This Chart on Website</a>";
 }
 
 $t->title = "$day Feature - " . $row["title"];
@@ -70,53 +70,56 @@ if ($row["mediasuffix"] == 'mp4') {
     $t->twitter_video = $big;
     $t->twitter_video_height = $row["media_height"];
     $t->twitter_video_width = $row["media_width"];
-    $media = <<<EOM
-  <video class="img-fluid" controls>
-    <source src="{$big}" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+        $iso = date('c', $valid);
+        $alt = htmlspecialchars($row["title"], ENT_QUOTES);
+        $media = <<<EOM
+    <figure class="figure">
+        <video class="img-fluid" controls aria-label="Feature video for {$alt}">
+            <source src="{$big}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <figcaption class="figure-caption small">{$row["caption"]}</figcaption>
+    </figure>
 EOM;
 } else {
-    $t->twitter_image = $big;
-    $media = <<<EOM
-<a href="{$big}"><img src="{$big}" class="img-fluid"></a>
-<br /><a href="{$big}">View larger image</a>
+        $t->twitter_image = $big;
+        $iso = date('c', $valid);
+        $alt = htmlspecialchars($row["title"], ENT_QUOTES);
+        $media = <<<EOM
+    <figure class="figure">
+        <a href="{$big}"><img src="{$big}" class="img-fluid rounded" alt="{$alt}"></a>
+        <figcaption class="figure-caption small"><a href="{$big}">View larger image</a> — {$row["caption"]}</figcaption>
+    </figure>
 EOM;
 }
 
 $content = <<<EOM
 
-<div class="row">
-    <div class="col-md-4">
-
-<button type="button" class="btn btn-secondary btn-lg">
-  <span class="fa fa-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1" class="text-white text-decoration-none">Previous Feature by Date</a> 
-</button>
+<nav class="d-flex justify-content-between align-items-center mb-3" aria-label="Feature navigation">
+    <div>
+        <a href="cat.php?day={$day}&offset=-1" class="btn btn-outline-secondary btn-sm" aria-label="Previous feature">&larr; Previous</a>
     </div>
-    <div class="col-md-4">
-<strong>IEM Daily Feature<br />{$prettyday}</strong>
+    <div class="text-center flex-fill">
+        <h4 class="mb-0">IEM Daily Feature<br /><small>{$prettyday}</small></h4>
     </div>
-    <div class="col-md-4">
-<button type="button" class="btn btn-secondary btn-lg">
-  <a href="cat.php?day={$day}&offset=1" class="text-white text-decoration-none">Next Feature by Date</a> 
-  <span class="fa fa-arrow-right"></span> 
-</button>
+    <div class="text-end">
+        <a href="cat.php?day={$day}&offset=1" class="btn btn-outline-secondary btn-sm" aria-label="Next feature">Next &rarr;</a>
     </div>
-</div>
+</nav>
 
-<!-- Begin Feature Display -->
+<article>
+    <header>
+        <h3>{$row["title"]}</h3>
+        <p><small class="text-muted">Posted: <time datetime="{$iso}">{$row["webdate"]}</time></small></p>
+    </header>
 
-<h3>{$row["title"]}</h3>
-<p><i>Posted:</i> {$row["webdate"]} </p>
-
-
-<div class="row">
-<div class="col-md-6">
-{$media}
-<br />{$row["caption"]}
-{$linktext}
-</div>
-<div class='col-md-6 bg-light p-3 rounded'>{$row["story"]}
+    <div class="row">
+        <div class="col-12 col-md-6">
+            {$media}
+            {$linktext}
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card bg-light p-3 rounded">{$row["story"]}
 EOM;
 if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0)) {
     $content .= "<br /><br /><b>Voting:</b>
@@ -125,12 +128,13 @@ if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 
     if ($row["abstain"] > 0) $content .= " <br />Abstain = " . $row["abstain"];
 }
 $content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $row["tags"]));
+$content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $row["tags"]));
 
 $content .= <<<EOM
 </div>
-         </div><!-- ./row -->
-         <div class="clearfix">&nbsp;</div>
-<div class="clearfix">&nbsp;</div>
+        </div><!-- ./row -->
+    </article>
+    <div class="my-3" aria-hidden="true">&nbsp;</div>
 EOM;
 $t->content = $content;
 $t->render('single.phtml');

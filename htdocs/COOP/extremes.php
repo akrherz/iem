@@ -76,7 +76,7 @@ $t->content = <<<EOM
     for that date.</p>
 
     <p><a href="/COOP/dl/normals.phtml" class="btn btn-primary">
-    <span class="fa fa-download"></span> Download Daily Climatology</a></p>
+    <i class="bi bi-download" aria-hidden="true"></i> Download Daily Climatology</a></p>
 
     <div id="api-info" class="alert alert-info" style="display: none;">
         <p class="mb-0">The data found in this table was derived from the following

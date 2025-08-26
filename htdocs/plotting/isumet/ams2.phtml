@@ -25,35 +25,60 @@ $ds = daySelect($day, "day");
 $ymd = sprintf("year=%s&month=%s&day=%s", $year, $month, $day);
 
 $t->content = <<< EOM
-<ol class="breadcrumb">
- <li><a href="/other/">Miscellaneous Stations</a></li>
- <li class="active">ISU AMS Station</li>	
-</ol>
+
+<nav aria-label="Breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/other/">Miscellaneous Stations</a></li>
+    <li class="breadcrumb-item active" aria-current="page">ISU AMS Station</li>
+  </ol>
+</nav>
 
 <p>You can plot 1 minute data for this location.  Note that 
 the archive <br> begins 8 Sep 2011.</p>
 
 
-  <form method="GET" action="ams2.phtml">
-{$ys} {$ms} {$ds}
 
-  <input type="submit" value="Make Plot"></form>
+  <form method="GET" action="ams2.phtml" class="row g-2 align-items-end" aria-label="Date selection for plotting">
+    <div class="col-auto">{$ys}</div>
+    <div class="col-auto">{$ms}</div>
+    <div class="col-auto">{$ds}</div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary" aria-label="Make Plot">Make Plot</button>
+    </div>
+  </form>
 
-<a href="{$dataurl}">View raw data file</a><br />
-<BR>
-<img src="1min.php?station=ot0010&{$ymd}" ALT="Time Series">
-<BR>
-<img src="1min_inside.php?station=ot0010&{$ymd}" ALT="Time Series">
-<br />
-<img src="rh.php?station=ot0010&{$ymd}" ALT="Time Series">
-<br />
-<img src="srad.php?station=ot0010&{$ymd}" ALT="Time Series">
-<BR>
-<img src="1min_V.php?station=ot0010&{$ymd}" ALT="Time Series">
-<BR>
-<img src="1min_P.php?station=ot0010&{$ymd}" ALT="Time Series">
-<br />
-<img src="1min.php?station=ot0010&{$ymd}&rh" ALT="Time Series">
+
+<a href="{$dataurl}" class="btn btn-outline-secondary mb-3" aria-label="View raw data file">View raw data file</a>
+
+<div class="row g-3">
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="1min.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: 1min" aria-describedby="desc-1min">
+    <div id="desc-1min" class="visually-hidden">Time series plot for 1 minute data</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="1min_inside.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: Inside" aria-describedby="desc-1min-inside">
+    <div id="desc-1min-inside" class="visually-hidden">Time series plot for inside data</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="rh.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: RH" aria-describedby="desc-rh">
+    <div id="desc-rh" class="visually-hidden">Time series plot for relative humidity</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="srad.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: Solar Radiation" aria-describedby="desc-srad">
+    <div id="desc-srad" class="visually-hidden">Time series plot for solar radiation</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="1min_V.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: Voltage" aria-describedby="desc-1min-v">
+    <div id="desc-1min-v" class="visually-hidden">Time series plot for voltage</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="1min_P.php?station=ot0010&{$ymd}" class="img-fluid rounded border" alt="Time Series: Pressure" aria-describedby="desc-1min-p">
+    <div id="desc-1min-p" class="visually-hidden">Time series plot for pressure</div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 mb-3">
+    <img src="1min.php?station=ot0010&{$ymd}&rh" class="img-fluid rounded border" alt="Time Series: 1min RH" aria-describedby="desc-1min-rh">
+    <div id="desc-1min-rh" class="visually-hidden">Time series plot for 1 minute relative humidity</div>
+  </div>
 </div>
 EOM;
 

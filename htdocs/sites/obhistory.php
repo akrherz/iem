@@ -318,9 +318,9 @@ $ds = daySelect(date("d", $date));
 $mbutton = (preg_match("/ASOS/", $network)) ?
     '<div class="btn-group-controls">' .
     '<button type="button" class="btn btn-success" id="metar_toggle">' .
-    '<i class="fa fa-plus"></i> Show METARs</button>' .
+    '<i class="bi bi-plus-lg" aria-hidden="true"></i> Show METARs</button>' .
     '<button type="button" class="btn btn-success" id="madis_toggle">' .
-    '<i class="fa fa-plus"></i> Show High Frequency MADIS</button>' .
+    '<i class="bi bi-plus-lg" aria-hidden="true"></i> Show High Frequency MADIS</button>' .
     '</div>'
     : "";
 
@@ -339,13 +339,13 @@ $content = <<<EOM
                         <div class="input-group">
                             <button type="button" id="prevbutton" class="btn btn-outline-secondary" 
                                 data-date="{$yesterday_param}" title="Previous Day">
-                                <i class="fa fa-arrow-left"></i>
+                                <i class="bi bi-arrow-left" aria-hidden="true"></i>
                             </button>
                             <input type="date" id="date_picker" name="date" class="form-control" 
                                 value="{$date_param}" min="{$startyear}-01-01" max="{$today_param}">
                             <button type="button" id="nextbutton" class="btn btn-outline-secondary" 
                                 data-date="{$tomorrow_param}" title="Next Day" {$next_disabled}>
-                                <i class="fa fa-arrow-right"></i>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>

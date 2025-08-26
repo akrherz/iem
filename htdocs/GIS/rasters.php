@@ -124,8 +124,7 @@ URL format is like so:</p>
 <h3>Lookup Table for {$rname}</h3>
 
 <div class="alert alert-info">Would it help you to have the information below
-in a different format?  Please <a class="alert-link" 
-href="/info/contacts.php">contact us <i class="fa fa-comment"></i></a> 
+in a different format?  Please <a class="alert-link" href="/info/contacts.php">contact us <i class="bi bi-chat-left-text" aria-hidden="true"></i></a> 
 if so!</div>
 
 <table class="table table-sm table-striped">

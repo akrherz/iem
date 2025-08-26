@@ -20,7 +20,7 @@ $t->title = "Webcams";
 $t->content = <<<EOM
 <div class="row">
   <div class="col-md-12">
-    <h3><i class="fa fa-camera"></i> Web Camera Interactive Viewer</h3>
+  <h3><i class="bi bi-camera" aria-hidden="true"></i> Web Camera Interactive Viewer</h3>
     <p class="lead">
       View current and historical webcam imagery from across Iowa. 
       Switch to archived mode to browse historical images.
@@ -40,7 +40,7 @@ $t->content = <<<EOM
       <div class="card-header">
         <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#helpContent" aria-expanded="false" aria-controls="helpContent">
-          <i class="fa fa-info-circle"></i> Help & Cool Archived Images
+          <i class="bi bi-info-circle" aria-hidden="true"></i> Help & Cool Archived Images
         </button>
       </div>
       <div class="collapse" id="helpContent">
