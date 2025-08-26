@@ -18,6 +18,8 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 import pygrib
+import pyproj
+from affine import Affine
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, pretty_bins
 from pyiem.reference import LATLON
@@ -92,6 +94,24 @@ def get_description():
     return desc
 
 
+def add_gridnav(res: dict, grb: pygrib.gribmessage):
+    """Add what we know."""
+    if res["affine"] is not None:
+        return
+    lat1 = grb["latitudeOfFirstGridPointInDegrees"]
+    lon1 = grb["longitudeOfFirstGridPointInDegrees"]
+    res["crs"] = pyproj.Proj(grb.projparams)
+    llx, lly = res["crs"](lon1, lat1)
+    res["affine"] = Affine(
+        grb["DxInMetres"],
+        0.0,
+        llx - grb["DxInMetres"] / 2.0,
+        0.0,
+        -grb["DyInMetres"],
+        lly + grb["DyInMetres"] * grb["Ny"] + grb["DyInMetres"] / 2.0,
+    )
+
+
 def get_data(ctx):
     """Do the computation!"""
     if ctx["csector"] in ["AK", "HI", "PR"]:
@@ -112,6 +132,10 @@ def get_data(ctx):
     total = 0
     mindt = None
     maxdt = None
+    res = {
+        "affine": None,
+        "crs": None,
+    }
     if ctx["w"] == "delta":
         mydir = f"{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
         ppath = mydir + (
@@ -124,6 +148,7 @@ def get_data(ctx):
                 raise NoDataFound("Failed to find RTMA for start time.")
             with pygrib.open(fn) as grbs:
                 grb = grbs.select(shortName="2t")[0]
+                add_gridnav(res, grb)
                 lats, lons = grb.latlons()
                 first = grb.values
         mydir = f"{ets:%Y/%m/%d}/model/rtma/{ets:%H}/"
@@ -139,6 +164,8 @@ def get_data(ctx):
                 grb = grbs.select(shortName="2t")[0]
                 second = grb.values
         return {
+            "affine": res["affine"],
+            "crs": res["crs"],
             "mindt": sts,
             "maxdt": ets,
             "missing_count": 0,
@@ -165,6 +192,7 @@ def get_data(ctx):
             try:
                 with pygrib.open(fn) as grbs:
                     grb = grbs.select(shortName="2t")[0]
+                    add_gridnav(res, grb)
                     if lons is None:
                         lats, lons = grb.latlons()
                         vals = grb.values
@@ -178,6 +206,8 @@ def get_data(ctx):
     if vals is None:
         raise NoDataFound("Failed to find any RTMA data, sorry.")
     return {
+        "affine": res["affine"],
+        "crs": res["crs"],
         "mindt": mindt,
         "maxdt": maxdt,
         "missing_count": missing_count,
@@ -189,12 +219,24 @@ def get_data(ctx):
     }
 
 
-def plotter(ctx: dict):
-    """Go"""
+def rectify_dates(ctx: dict):
+    """Work out some quirks."""
     ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
     ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=4):
         ctx["ets"] = ctx["sts"] + timedelta(days=4)
+
+
+def get_raster(ctx: dict):
+    """Generate what we need for a raster."""
+    rectify_dates(ctx)
+    res = get_data(ctx)
+    return np.flipud(res["vals"]), res["affine"], res["crs"].crs
+
+
+def plotter(ctx: dict):
+    """Go"""
+    rectify_dates(ctx)
     res = get_data(ctx)
     localmindt = res["mindt"].astimezone(ZoneInfo("America/Chicago"))
     localmaxdt = res["maxdt"].astimezone(ZoneInfo("America/Chicago"))
