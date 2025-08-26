@@ -72,7 +72,7 @@ def get_rwis_obs(dt: date) -> pd.DataFrame:
             sql_helper("""
         select t.id as station, network, d.iemid, drct, sknt, gust, dwpf,
         valid at time zone tzname as localvalid, valid, relh, feel from
-        alldata d JOIN stations t on (t.id = d.station)
+        alldata d JOIN stations t on (t.iemid = d.iemid)
         where network ~* 'RWIS'
         and valid between :sts and :ets and t.tzname is not null
         and date(valid at time zone tzname) = :dt

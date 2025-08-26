@@ -46,6 +46,9 @@ PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
     "single": "Plot Single VTEC Phenomena + Significance",
     "svrtor": "Plot Severe Thunderstorm + Tornado Warnings",
+    "winter": (
+        "Plot Winter Storm Warning, Winter Weather Advisory, Blizzard Warning"
+    ),
     "all": "Plot All VTEC Events",
 }
 PDICT3 = {
@@ -192,8 +195,8 @@ def munge_df(ctx, df: pd.DataFrame):
     baseline = pd.to_datetime(
         {
             "year": df["year"].to_numpy(),
-            "month": [month] * len(df.index),
-            "day": [1] * len(df.index),
+            "month": np.full(len(df.index), month),
+            "day": np.full(len(df.index), 1),
         }
     )
     df["xaxis"] = (df["date"] - baseline).dt.days
@@ -247,6 +250,13 @@ def plotter(ctx: dict):
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
         phenomena = "TO"
         significance = "W"
+    elif combo == "winter":
+        eventlimiter = (
+            " or (phenomena = 'BZ' and significance = 'W') "
+            " or (phenomena = 'WS' and significance = 'W') "
+        )
+        phenomena = "WW"
+        significance = "Y"
     if combo == "all":
         pslimiter = ""
     else:
@@ -299,6 +309,8 @@ def plotter(ctx: dict):
     title = vtec.get_ps_string(phenomena, significance)
     if combo == "svrtor":
         title = "Severe Thunderstorm + Tornado Warning"
+    elif combo == "winter":
+        title = "Winter Storm + Blizzard Warning & Winter Weather Advisory"
     elif combo == "all":
         title = "All VTEC Events"
     ptitle = f"NWS WFO: {ctx['_nt'].sts[station]['name']} ({station})"
