@@ -1270,23 +1270,23 @@ function migrateHashToURLParams(hash) {
     window.location.replace(url);
 }
 
+function parseLuxonDate(val) {
+    if (!val) return null;
+    let dt = window.luxon.DateTime.fromISO(val);
+    if (!dt.isValid) dt = window.luxon.DateTime.fromFormat(val, "yyyy-MM-dd HH:mm");
+    return dt.isValid ? dt : null;
+}
+
 // Custom datetime sorter using Luxon for proper date/time sorting
 function customDateTimeSorter(a, b) {
-    // Handle empty/null values
     if (!a && !b) return 0;
     if (!a) return 1;
     if (!b) return -1;
-    
-    // Parse dates using Luxon (accessed via window.luxon.DateTime)
-    const dateA = window.luxon.DateTime.fromFormat(a, "yyyy-MM-dd HH:mm");
-    const dateB = window.luxon.DateTime.fromFormat(b, "yyyy-MM-dd HH:mm");
-    
-    // Handle invalid dates
-    if (!dateA.isValid && !dateB.isValid) return 0;
-    if (!dateA.isValid) return 1;
-    if (!dateB.isValid) return -1;
-    
-    // Compare timestamps
+    const dateA = parseLuxonDate(a);
+    const dateB = parseLuxonDate(b);
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
     return dateA.toMillis() - dateB.toMillis();
 }
 
