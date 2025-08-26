@@ -38,7 +38,7 @@ function make_row($dict, $oddrow)
 
     $s .= <<<EOM
     <td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
-    <td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="fa fa-paperclip"></i></a>
+    <td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="bi bi-paperclip"></i></a>
     </td>
 EOM;
     $s .= "<td><a href=\"$sitesurl\">{$dict['sid']}</a></td>";

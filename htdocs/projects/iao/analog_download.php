@@ -38,7 +38,7 @@ $t->content = <<<EOM
 <p>This interface provides a download of one minute aggregates of available
 one second data from the "analog" sensors found on the Tall Towers.
 <a href="/cgi-bin/request/talltowers.py?help" class="btn btn-secondary">
-<i class="fa fa-file"></i> Backend documentation</a> exists for those who
+<i class="bi bi-file-earmark-text"></i> Backend documentation</a> exists for those who
 wish to script against the backend service.</p>
 
 <h4>Citation</h4>

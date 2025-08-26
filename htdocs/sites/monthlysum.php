@@ -221,7 +221,7 @@ $plot2 = sprintf(
 $t->jsextra = '<script src="monthlysum.js"></script>';
 $t->content = <<<EOM
 
-<p><button id="gogogo" role="button" class="btn btn-primary"><i class="fa fa-arrow-down"></i> View Monthly Charts</button></p>
+<p><button id="gogogo" role="button" class="btn btn-primary"><i class="bi bi-arrow-down"></i> View Monthly Charts</button></p>
 
 <p>The following tables present IEM computed monthly data summaries based on
 daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network={$network}">download interface</a>
@@ -229,7 +229,7 @@ exists for the daily summary information.  The climatology is provided by the
 nearest NCEI climate station (<a href="/sites/site.php?station={$metadata["ncei91"]}&amp;network=NCEI91">{$metadata["ncei91"]}</a>) within the current 1991-2020 
 dataset.</p>
 
-<p><i class="fa fa-table"></i> To load shown data into Microsoft Excel,
+<p><i class="bi bi-table"></i> To load shown data into Microsoft Excel,
 highlight the table information with your mouse and then copy/paste into Excel.</p>
 
 <h3><a name="precip"></a>Precipitation Totals [inch]</h3>
@@ -267,14 +267,14 @@ by the duration between observations.</p>
  <h3>Select month and year:</h3>
  <div class="row">
  <div class="col-sm-3">
- <a href="{$llink}" class="btn btn-secondary">{$ltext} <i class="fa fa-arrow-left"></i></a>
+ <a href="{$llink}" class="btn btn-secondary">{$ltext} <i class="bi bi-arrow-left"></i></a>
     </div>
     <div class="col-sm-6">
   {$ms} {$ys}
  <input type="submit" value="Generate Plot">
  </div>
  <div class="col-sm-3">
- <a href="{$nlink}" class="btn btn-secondary"><i class="fa fa-arrow-right"></i> {$ntext}</a>
+ <a href="{$nlink}" class="btn btn-secondary"><i class="bi bi-arrow-right"></i> {$ntext}</a>
 </div>
 </div>
 </form>
