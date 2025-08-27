@@ -343,10 +343,6 @@ EOM;
             <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</a>
             <a class="btn btn-outline-primary btn-sm" aria-label="Latest product" href="p.php?pil=$pil">Latest</a>
             <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
-            <div class="btn-group my-2 flex-wrap" role="group" aria-label="Product navigation">
-                <a class="btn btn-outline-primary btn-sm" aria-label="Previous product in time" href="p.php?dir=prev&pil=$pil&e=$newe"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</a>
-                <a class="btn btn-outline-primary btn-sm" aria-label="Latest product" href="p.php?pil=$pil">Latest</a>
-                <a class="btn btn-outline-primary btn-sm" aria-label="Next product in time" href="p.php?dir=next&pil=$pil&e=$newe">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
         <div class="d-flex flex-wrap gap-2 my-2">
             <a class="btn btn-primary btn-sm" href="{$listlink}">All {$row["source"]} Products ({$date2})</a>

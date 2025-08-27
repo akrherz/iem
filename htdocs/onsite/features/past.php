@@ -93,7 +93,7 @@ EOM;
             {$media}
         </div>
         <div class="col-12 col-md-6">
-            <h3 id="feature-title-{$d}" class="h5"><a href='cat.php?day={$d}' class="stretched-link">{$row["title"]}</a></h3>
+            <h3 id="feature-title-{$d}" class="h5"><a href='cat.php?day={$d}'>{$row["title"]}</a></h3>
             <p class="mb-1"><small class="text-muted"><time datetime="{$iso}">{$row["webdate"]}</time></small></p>
             <div>{$row["story"]}</div>
             <p class="mt-2 mb-1">Voting: <span class="me-2">Good - {$row["good"]}</span> <span>Bad - {$row["bad"]}</span></p>
