@@ -45,6 +45,7 @@ if ($offset == "-1") {
 $result = pg_execute($dbconn, $q, array($day->format("Y-m-d")));
 
 if (pg_num_rows($result) == 0) {
+    http_response_code(422);
     die("Feature Not Found");
 }
 

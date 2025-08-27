@@ -14,6 +14,7 @@ require_once "../../../include/database.inc.php";
 define("TWITTER_KEY", get_iemprop('bot.twitter.consumerkey'));
 define("TWITTER_SECRET", get_iemprop('bot.twitter.consumersecret'));
 if (TWITTER_KEY == null || TWITTER_SECRET == null) {
+    http_response_code(422);
     die("Twitter API keys not configured, please contact the IEM.");
 }
 
