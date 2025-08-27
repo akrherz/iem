@@ -18,10 +18,5 @@ whether to verify the data presented.</p>
 freely by anyone for any lawful purpose.  Attributing the Iowa Environmental
 Mesonet of Iowa State University would be appreciated.</p>
 
-<p>The IEM is a volunteer effort and receives no funds for facilities or
-staff from Iowa State University or the State of Iowa.  Users of the IEM
-must therefore recognize that the IEM may be discontinued at any time
-with little or no notice.</p>
-
 EOM;
 $t->render('single.phtml');

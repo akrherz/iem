@@ -9,7 +9,7 @@ $t->iem_resource = "ISUSM";
 $t->title = "ISU Soil Moisture Minute/Hourly Data Request";
 
 $nt = new NetworkTable("ISUSM");
-require_once "boxinc.phtml";
+require_once "../../../include/agclimate_boxinc.phtml";
 
 $yselect = yearSelect(2013, 2013, "year1");
 $mselect = monthSelect(1, "month1");

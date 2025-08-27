@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <title>NWS Text Product Finder</title>
     <style type="text/css">
         p {
             width: 800px;

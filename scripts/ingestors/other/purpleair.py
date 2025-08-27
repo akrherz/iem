@@ -6,8 +6,9 @@ Called from RUN_1MIN.sh
 import httpx
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.observation import Observation
-from pyiem.util import utc
+from pyiem.util import logger, utc
 
+LOG = logger()
 XREF = {
     "pm2_5_aqi_b": "pm2.5_aqi_b",
     "pm2_5_aqi": "pm2.5_aqi",
@@ -45,13 +46,16 @@ def main():
     """Go Main Go."""
     with httpx.Client() as client:
         try:
-            req = client.get(
+            resp = client.get(
                 "http://airqual.geol.iastate.edu/json?live=false", timeout=30
             )
+            resp.raise_for_status()
+            data = resp.json()
         except Exception as exp:
-            print(exp)
+            # System is flakey, this turns down the email noise some
+            lvl = LOG.warning if utc().minute > 50 else LOG.info
+            lvl(exp)
             return
-        data = req.json()
 
     save_other(data)
 

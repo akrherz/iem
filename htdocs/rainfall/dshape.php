@@ -27,6 +27,7 @@ if ($duration == 'year') {
 }
 $dbf = sprintf("%s/%s.dbf", $dir, $fp);
 if (!file_exists($dbf)) {
+    http_response_code(422);
     die("File not found: {$dbf}");
 }
 

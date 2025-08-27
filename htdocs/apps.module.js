@@ -1,5 +1,4 @@
 
-// Vanilla JS table filter for #table1 using #appFilter
 window.addEventListener('DOMContentLoaded', () => {
     const filterInput = document.getElementById('appFilter');
     const table = document.getElementById('table1');

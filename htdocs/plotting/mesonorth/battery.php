@@ -17,6 +17,7 @@ $dirRef = date("Y/m/d", $myTime);
 $filename = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
 if (!file_exists($filename))
 {
+    http_response_code(422);
     die("File Not Found");
 }
 $fcontents = file($filename);

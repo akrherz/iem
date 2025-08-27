@@ -21,7 +21,7 @@ $rs = pg_exec(
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
     $tags[$row["appid"]] = $row["t"];
 }
-$rs = pg_exec($dbconn, "SELECT * from iemapps i ORDER by appid ASC");
+$rs = pg_exec($dbconn, "SELECT * from iemapps ORDER by appid ASC");
 while ($row=pg_fetch_assoc($rs)){
     $tt = "";
     if (array_key_exists($row["appid"], $tags)){

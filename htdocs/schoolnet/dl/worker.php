@@ -3,30 +3,23 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1");
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2");
-$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : die("No hour1");
-$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2");
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1");
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2");
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1");
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2");
-$vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars");
-$sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : die("No Sample");
-$dl_option = isset($_GET["dl_option"]) ? xssafe($_GET["dl_option"]) : die("No dl_option");
-$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : die("No delim");
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2010;
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2010;
+$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : 0;
+$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : 0;
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
+$vars = isset($_GET["vars"]) ? $_GET["vars"] : ["tmpf"];
+$sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
+$dl_option = isset($_GET["dl_option"]) ? xssafe($_GET["dl_option"]) : "display";
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
 
-$ts1 = mktime($hour1, 0, 0, $month1, $day1, $year1) or
-    die("Invalid Date Format");
-$ts2 = mktime($hour2, 0, 0, $month2, $day2, $year2) or
-    die("Invalid Date Format");
-
-if ($ts1 >= $ts2) {
-    die("Error:  Your 'End Date' is before your 'Start Date'!");
-}
+$ts1 = mktime($hour1, 0, 0, $month1, $day1, $year1);
+$ts2 = mktime($hour2, 0, 0, $month2, $day2, $year2);
 
 $num_vars = count($vars);
-if ($num_vars == 0)  die("You did not specify data");
 
 $connection = iemdb("snet");
 
@@ -53,7 +46,7 @@ $d = array(
     "tab" => "\t"
 );
 
-$stations = $_GET["station"];
+$stations = isset($_GET["station"]) ? $_GET["station"] : ["SAMI4"];
 $stationSQL = "{". implode(",", $stations) . "}";
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata";
@@ -66,6 +59,7 @@ $stname = iem_pg_prepare($connection, $sqlStr);
 $rs = pg_execute($connection, $stname, array($stationSQL));
 
 if (pg_num_rows($rs) == 0) {
+    http_response_code(422);
     die("Did not find any data for this query!");
 } else if ($dl_option == "download") {
     header("Content-type: application/octet-stream");

@@ -4,7 +4,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/myview.php";
 define("IEM_APPID", 13);
-require_once "boxinc.phtml";
+require_once "../../../include/agclimate_boxinc.phtml";
 
 $t = new MyView();
 $t->iem_resource = "ISUSM";

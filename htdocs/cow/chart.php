@@ -43,6 +43,7 @@ $width = 130;
 $height = 122;
 $font = "/usr/share/fonts/liberation-serif/LiberationSerif-Bold.ttf";
 if (!file_exists($font)) {
+    http_response_code(422);
     die("Missing font");
 }
 

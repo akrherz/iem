@@ -11,22 +11,22 @@ require_once "../../../include/forms.php";
 
 $connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1 specified");
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2 specified");
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2 specified");
-$vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2020;
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2020;
+$vars = isset($_GET["vars"]) ? $_GET["vars"] : ['high'];
 
 $gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
-$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : "comma";
 $what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$stations = isset($_GET["station"]) ? $_GET["station"] : die("No station specified");
+$stations = isset($_GET["station"]) ? $_GET["station"] : "AMSI4";
 if (!is_array($stations)) {
     $stations = array($stations);
 }
@@ -45,12 +45,8 @@ if ($selectAll) {
 }
 $stationSQL = "{". implode(",", $stations) . "}";
 
-if (isset($_GET["day"]))
-    die("Incorrect CGI param, use day1, day2");
-
 $ts1 = new DateTime("{$year1}-{$month1}-{$day1}");
 $ts2 = new DateTime("{$year2}-{$month2}-{$day2}");
-
 
 $num_vars = count($vars);
 if ($num_vars == 0)  die("You did not specify data");

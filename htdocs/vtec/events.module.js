@@ -86,8 +86,8 @@ function getConfig() {
 
 function toggleFormVisibility() {
     const whichValue = document.querySelector('input[name="which"]:checked')?.value;
-    const wfoContainer = document.getElementById('wfo-select-container');
-    const stateContainer = document.getElementById('state-select-container');
+    const wfoContainer = requireElement('wfo-select-container');
+    const stateContainer = requireElement('state-select-container');
 
     if (whichValue === 'wfo') {
         wfoContainer.style.display = 'block';
@@ -120,25 +120,19 @@ class VTECEvents {
         toggleFormVisibility();
 
         // CSV Download
-        const downloadCsvBtn = document.getElementById('download-csv');
-        if (downloadCsvBtn) {
-            downloadCsvBtn.addEventListener('click', () => this.downloadCSV());
-        }
+        const downloadCsvBtn = requireElement('download-csv');
+        downloadCsvBtn.addEventListener('click', () => this.downloadCSV());
 
         // Copy to clipboard
-        const copyBtn = document.getElementById('copy-clipboard');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => this.copyToClipboard());
-        }
+        const copyBtn = requireElement('copy-clipboard');
+        copyBtn.addEventListener('click', () => this.copyToClipboard());
 
         // Listen for form submissions to reload data
-        const form = document.getElementById('vtec-form');
-        if (form) {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-                this.loadEvents();
-            });
-        }
+        const form = requireElement('vtec-form');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            this.loadEvents();
+        });
     }
 
     async loadEvents() {
@@ -166,7 +160,7 @@ class VTECEvents {
     }
 
     renderTable(events) {
-        const tableContainer = document.getElementById('vtec-table');
+        const tableContainer = requireElement('vtec-table');
 
         if (events.length === 0) {
             tableContainer.innerHTML =

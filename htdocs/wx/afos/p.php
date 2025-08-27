@@ -24,6 +24,7 @@ $bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : nu
 $dir = isset($_REQUEST['dir']) ? xssafe($_REQUEST['dir']) : null;
 
 if (is_null($pil) || trim($pil) == "") {
+    http_response_code(422);
     die("No 'pil' provided by URL, it is required.");
 }
 

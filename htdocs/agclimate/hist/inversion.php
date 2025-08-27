@@ -7,7 +7,7 @@ $t->title = "ISU Soil Moisture Inversion Data Request";
 require_once "../../../include/network.php";
 $nt = new NetworkTable("ISUSM");
 require_once "../../../include/forms.php";
-require_once "boxinc.phtml";
+require_once "../../../include/agclimate_boxinc.phtml";
 
 $yselect = yearSelect(2021, 2021, "year1");
 $mselect = monthSelect(1, "month1");

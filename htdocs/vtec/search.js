@@ -1,5 +1,62 @@
 /* global iemdata, ol, olSelectLonLat, Tabulator, bootstrap */
 
+let stateSelect = null;
+let stateSelect3 = null;
+let ugcSelect = null;
+let table1 = null;
+let table2 = null;
+let table3 = null;
+let table2IsByPoint = true;
+let marker1 = null;
+let marker2 = null;
+let edate = null;
+let sdate = null;
+let edate1 = null;
+let sdate1 = null;
+const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
+const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
+const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
+const BACKEND_EVENTS = "/json/vtec_events.py";
+const BACKEND_EVENTS_BYSTATE = "/json/vtec_events_bystate.py";
+
+const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
+        ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
+        ["CT", "Connecticut"], ["DE", "Delaware"], ["FL", "Florida"],
+        ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
+        ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
+        ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"],
+        ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"],
+        ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"],
+        ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
+        ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"],
+        ["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"],
+        ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"],
+        ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
+        ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"],
+        ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
+        ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"],
+        ["WY", "Wyoming"],
+        ["AM", "Atlantic Ocean AM"],
+        ["AN", "Atlantic Ocean AN"],
+        ["AS", "AS"],
+        ["DC", "Distict of Columbia"],
+        ["GM", "Gulf of Mexico"],
+        ["GU", "Guam"],
+        ["LC", "Lake St. Clair"],
+        ["LE", "Lake Erie"],
+        ["LH", "Lake Huron"],
+        ["LM", "Lake Michigan"],
+        ["LO", "Lake Ontario"],
+        ["LS", "Lake Superior"],
+        ["PH", "Hawaii PH Zones"],
+        ["PK", "Alaska PK Zones"],
+        ["PM", "Zones PM"],
+        ["PR", "Puerto Rico"],
+        ["PS", "Zones PS"],
+        ["PZ", "Pacific Ocean PZ"],
+        ["SL", "St. Lawrence River"]
+];
+
 // URL parameter management functions - removing hash linking approach
 function getURLParams() {
     return new URLSearchParams(window.location.search);
@@ -11,7 +68,6 @@ function updateURL(params) {
     window.history.replaceState({}, '', url);
 }
 
-// Helper functions for parameter setting (complexity reduction)
 function addByPointParams(params, newParams) {
     if (newParams.lon) params.set('lon', newParams.lon);
     if (newParams.lat) params.set('lat', newParams.lat);
@@ -65,64 +121,6 @@ function setModeParams(mode, newParams = {}) {
     
     updateURL(params);
 }
-
-let stateSelect = null;
-let stateSelect3 = null;
-let ugcSelect = null;
-let table1 = null;
-let table2 = null;
-let table3 = null;
-let table2IsByPoint = true;
-let marker1 = null;
-let marker2 = null;
-let edate = null;
-let sdate = null;
-let edate1 = null;
-let sdate1 = null;
-const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
-const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
-const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
-const BACKEND_EVENTS = "/json/vtec_events.py";
-const BACKEND_EVENTS_BYSTATE = "/json/vtec_events_bystate.py";
-
-
-const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
-        ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
-        ["CT", "Connecticut"], ["DE", "Delaware"], ["FL", "Florida"],
-        ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
-        ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
-        ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"],
-        ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"],
-        ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"],
-        ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
-        ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"],
-        ["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"],
-        ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"],
-        ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
-        ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"],
-        ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
-        ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"],
-        ["WY", "Wyoming"],
-        ["AM", "Atlantic Ocean AM"],
-        ["AN", "Atlantic Ocean AN"],
-        ["AS", "AS"],
-        ["DC", "Distict of Columbia"],
-        ["GM", "Gulf of Mexico"],
-        ["GU", "Guam"],
-        ["LC", "Lake St. Clair"],
-        ["LE", "Lake Erie"],
-        ["LH", "Lake Huron"],
-        ["LM", "Lake Michigan"],
-        ["LO", "Lake Ontario"],
-        ["LS", "Lake Superior"],
-        ["PH", "Hawaii PH Zones"],
-        ["PK", "Alaska PK Zones"],
-        ["PM", "Zones PM"],
-        ["PR", "Puerto Rico"],
-        ["PS", "Zones PS"],
-        ["PZ", "Pacific Ocean PZ"],
-        ["SL", "St. Lawrence River"]
-];
 
 /**
  * Replace HTML special characters with their entity equivalents
@@ -509,7 +507,7 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
     if (titleElement) {
         const originalText = titleElement.textContent.split(' (')[0]; // Remove any existing filter text
         const filteredCount = table.getDataCount("active");
-    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?bi-table me-2.*?>/, '')} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
+    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${escapeHTML(originalText)} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
     }
     
     // Update toolbar count
@@ -530,8 +528,10 @@ function clearPhenomenaFilter(containerId) {
     // Reset table title
     const titleElement = document.getElementById(containerId);
     if (titleElement) {
-        const originalText = titleElement.textContent.split(' (')[0];
-    titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText.replace(/.*?bi-table me-2.*?>/, '')}`;
+        let originalText = titleElement.textContent.split(' (')[0];
+        // Prevent DOM text interpreted as HTML
+        originalText = escapeHTML(originalText);
+        titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText}`;
     }
     
     // Update toolbar count (no filter)

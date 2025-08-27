@@ -5,7 +5,11 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$jobid = isset($_REQUEST["jobid"]) ? xssafe($_REQUEST["jobid"]) : die("No jobid provided!");
+$jobid = isset($_REQUEST["jobid"]) ? xssafe($_REQUEST["jobid"]) : null;
+if (is_null($jobid)) {
+    http_response_code(422);
+    die("jobid required");
+}
 $status = "PROCESSING";
 if ($jobid) {
     $mesosite = iemdb("mesosite");

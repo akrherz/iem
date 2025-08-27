@@ -13,7 +13,7 @@ $num = get_int404("num", 1);
 $t = new MyView();
 $t->title = "SPC $year Convective Watch $num";
 
-require_once "lib.php";
+require_once "../../../../include/rview_lib.php";
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'UTC'");
 

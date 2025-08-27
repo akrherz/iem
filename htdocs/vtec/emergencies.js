@@ -290,39 +290,31 @@ function makeDraggable(element) {
 function applyDateFilter() {
     let start = document.getElementById('startdate').value;
     let end = document.getElementById('enddate').value;
-    if (start) start = moment.utc(start, 'YYYY-MM-DD');
-    if (end) end = moment.utc(end, 'YYYY-MM-DD').endOf('day');
+    if (start) {
+        start = moment.utc(start, 'YYYY-MM-DD');
+    }
+    if (end) {
+        end = moment.utc(end, 'YYYY-MM-DD').endOf('day');
+    }
+    if (start === null || end === null) {
+        // If either date is null, we can't apply the filter
+        return;
+    }
 
     // Update the filter title
     const filterTitle = document.getElementById('filter-title');
-    if (start && end) {
-        const formattedStart = moment.utc(start).format('MMMM D, YYYY');
-        const formattedEnd = moment.utc(end).format('MMMM D, YYYY');
-        filterTitle.textContent = `Emergencies from ${formattedStart} to ${formattedEnd}`;
-    } else if (start) {
-        const formattedStart = moment.utc(start).format('MMMM D, YYYY');
-        filterTitle.textContent = `Emergencies since ${formattedStart}`;
-    } else if (end) {
-        const formattedEnd = moment.utc(end).format('MMMM D, YYYY');
-        filterTitle.textContent = `Emergencies until ${formattedEnd}`;
-    } else {
-        filterTitle.textContent = '';
-    }
+    const formattedStart = moment.utc(start).format('MMMM D, YYYY');
+    const formattedEnd = moment.utc(end).format('MMMM D, YYYY');
+    filterTitle.textContent = `Emergencies from ${formattedStart} to ${formattedEnd}`;
 
     const source = elayer.getSource();
     source.clear();
-    
-    // Helper functions for applyDateFilter complexity reduction
-    function isFeatureValidForDateRange(feature, startDate, endDate) {
+
+    function isFeatureValidForDateRange(feature) {
         const issue = moment.utc(feature.get('utc_issue'));
-        if (startDate?.isBefore?.(issue)) return false;
-        if (endDate?.isAfter?.(issue) === false) {
-            // If endDate exists but isAfter returns false, keep feature
-        }
-        if (endDate?.isAfter?.(issue)) return false;
-        return true;
+        return start.isBefore(issue) && end.isAfter(issue);
     }
-    
+
     function isToggleCheckedForType(type) {
         if (type === "TO") {
             const tornadoToggle = document.getElementById('toggleTornado');
@@ -335,7 +327,7 @@ function applyDateFilter() {
     }
     
     const addFeatureIfValid = function(feature, type) {
-        if (isFeatureValidForDateRange(feature, start, end) && isToggleCheckedForType(type)) {
+        if (isFeatureValidForDateRange(feature) && isToggleCheckedForType(type)) {
             source.addFeature(feature);
         }
     };

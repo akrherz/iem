@@ -50,6 +50,7 @@ if (isset($_REQUEST['location_group'])) {
 }
 
 if ($has_error) {
+    http_response_code(422);
     echo $error_message;
     exit;
 } else {
