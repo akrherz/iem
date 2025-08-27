@@ -30,12 +30,12 @@ def main(domain: str):
                         high_tmpk = nc.variables["high_tmpk"][_doy, :]
                         low_tmpk = nc.variables["low_tmpk"][_doy, :]
                         p01d = nc.variables["p01d"][_doy, :]
-                        power_swdn = nc.variables["swdn"][_doy, :]
+                        power_swdn = nc.variables["power_swdn"][_doy, :]
                     else:
                         high_tmpk += nc.variables["high_tmpk"][_doy, :]
                         low_tmpk += nc.variables["low_tmpk"][_doy, :]
                         p01d += nc.variables["p01d"][_doy, :]
-                        power_swdn += nc.variables["swdn"][_doy, :]
+                        power_swdn += nc.variables["power_swdn"][_doy, :]
         with ncopen(climofn, "a") as climonc:
             climonc.variables["high_tmpk"][doy, :] = high_tmpk / count
             climonc.variables["low_tmpk"][doy, :] = low_tmpk / count

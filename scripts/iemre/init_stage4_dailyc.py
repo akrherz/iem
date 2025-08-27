@@ -21,7 +21,7 @@ def init_year(ts):
         LOG.info("Cowardly refusing to overwrite %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "StageIV Climatology %s" % (ts.year,)
+    nc.title = f"StageIV Climatology {ts:%Y}"
     nc.platform = "Grided Climatology"
     nc.description = "StageIV"
     nc.institution = "Iowa State University, Ames, IA, USA"

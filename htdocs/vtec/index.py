@@ -1,4 +1,4 @@
-"""implemented in pylib/iemweb/vtec/findex.py"""
+"""implemented in pylib/iemweb/vtec/index.py"""
 
 from iemweb.vtec.index import application
 
