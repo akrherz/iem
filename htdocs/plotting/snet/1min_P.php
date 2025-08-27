@@ -15,9 +15,9 @@ $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "SKCI4";
-$year = get_int404("year", die("No Year set"));
-$month = get_int404("month", die("No Month set"));
-$day = get_int404("day", die("No Day set"));
+$year = get_int404("year", 2018);
+$month = get_int404("month", 1);
+$day = get_int404("day", 1);
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 

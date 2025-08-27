@@ -57,7 +57,6 @@ def get_description():
 
 def get_highcharts(ctx: dict) -> dict:
     """Highcharts Output"""
-    station = ctx["station"]
     varname = ctx["var"]
     get_data(ctx)
     df = ctx["df"]
@@ -70,12 +69,8 @@ def get_highcharts(ctx: dict) -> dict:
         ),
     }
     j["title"] = {
-        "text": "%s [%s] %s %sF"
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            PDICT[varname],
-            int(ctx.get("threshold", 32)),
+        "text": (
+            f"{ctx['_sname']} {PDICT[varname]} {ctx.get('threshold', 32):.0f}F"
         )
     }
     j["yAxis"] = {"title": {"text": "Accumulated Days"}, "startOnTick": False}

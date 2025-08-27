@@ -7,7 +7,7 @@ require_once "../../../../include/iemmap.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/mlib.php";
 require_once "../../../../include/forms.php";
-require_once "../rview/lib.php";
+require_once "../../../../include/rview_lib.php";
 require_once "../../../../include/vendor/mapscript.php";
 
 $t = new MyView();

@@ -1,9 +1,10 @@
-"""Do apache calls for php content and ensure HTTP 200s."""
+"""Smoke test PHP calls through the webserver."""
 
 import os
 
 import httpx
 import pytest
+from bs4 import BeautifulSoup
 
 # These mapscript apps need /mesonet/data/gis/static content
 PUNTING = [
@@ -54,6 +55,11 @@ def test_php(app):
     # 302 redirect
     # 503 Service Temporarily Unavailable
     assert resp.status_code in [503, 422, 301, 302, 200]
+
+    # Test that the HTML generated is well formed.
+    if resp.status_code == 200 and "html" in resp.headers["Content-Type"]:
+        soup = BeautifulSoup(resp.text, "lxml")
+        assert soup.find("title") is not None
 
 
 @pytest.mark.parametrize("url", get_urls())

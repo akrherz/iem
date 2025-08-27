@@ -1,15 +1,19 @@
 <?php
-//Generate a RADAR image with webcams overlain for some *UTC* timestamp!
+// Generate a RADAR image with webcams overlain for some *UTC* timestamp!
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/cameras.inc.php";
 require_once "../../include/vendor/mapscript.php";
+require_once "../../include/forms.php";
 
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */
-$network = isset($_GET["network"])
-    ? substr($_GET["network"], 0, 4) : die("No \$network Set");
+$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 4) : null;
+if (is_null($network)) {
+    http_response_code(422);
+    die("network not found, ERROR");
+}
 $ts = null;
 
 if ($network == "KCRG") {

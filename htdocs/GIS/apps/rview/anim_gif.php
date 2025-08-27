@@ -6,7 +6,11 @@ require_once "../../../../include/memcache.php";
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
 
-$fts = isset($_GET["fts"]) ? intval($_GET["fts"]) : exit();
+$fts = isset($_GET["fts"]) ? intval($_GET["fts"]) : null;
+if (is_null($fts)) {
+    http_response_code(422);
+    die("fts not found, ERROR");
+}
 
 $memcache = MemcacheSingleton::getInstance();
 $urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts={$fts}");

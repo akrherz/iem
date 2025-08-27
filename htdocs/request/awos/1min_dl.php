@@ -27,19 +27,19 @@ $sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
 $what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 $tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]) : 'UTC';
 
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1 specified");
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2 specified");
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2 specified");
-$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : die("No hour1 specified");
-$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2 specified");
-$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : die("No minute1 specified");
-$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : die("No minute2 specified");
-$vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2020;
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2020;
+$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : 0;
+$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : 0;
+$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : 0;
+$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : 0;
+$vars = isset($_GET["vars"]) ? $_GET["vars"] : ["tmpf"];
 
-$stations = $_GET["station"];
+$stations = isset($_GET["station"]) ? $_GET["station"] : ["BNW"];
 $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value === "_ALL") {
@@ -54,13 +54,9 @@ if ($selectAll) {
     $stations = array_keys($nt->table);
 }
 
-if (isset($_GET["day"]))
-    die("Incorrect CGI param, use day1, day2");
 
-$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1) or
-    die("Invalid Date Format");
-$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2) or
-    die("Invalid Date Format");
+$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1);
+$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2);
 
 if ($selectAll && $day1 != $day2)
     $ts2 = $ts1 + 86400;

@@ -4,7 +4,8 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 define("IEM_APPID", 12);
 require_once "../../../include/myview.php";
-include_once "boxinc.phtml";
+require_once "../../../include/agclimate_boxinc.phtml";
+
 $t = new MyView();
 $t->iem_resource = "ISUSM";
 $t->title = "ISU AgClimate Legacy Daily Data Request";

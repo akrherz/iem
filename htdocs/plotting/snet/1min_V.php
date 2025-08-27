@@ -2,22 +2,22 @@
 /* Generate a 1 minute plot of wind, and peak gust */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
-include_once("../../../include/network.php");
-include_once("../../../include/mlib.php");
-include_once("../../../include/database.inc.php");
-include("../../../include/jpgraph/jpgraph.php");
-include("../../../include/jpgraph/jpgraph_line.php");
-include("../../../include/jpgraph/jpgraph_scatter.php");
-include("../../../include/jpgraph/jpgraph_date.php");
-include("../../../include/jpgraph/jpgraph_led.php");
+require_once "../../../include/network.php";
+require_once "../../../include/mlib.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "SKCI4";
-$year = get_int404("year", die("No Year set"));
-$month = get_int404("month", die("No Month set"));
-$day = get_int404("day", die("No Day set"));
+$year = get_int404("year", 2018);
+$month = get_int404("month", 1);
+$day = get_int404("day", 1);
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 

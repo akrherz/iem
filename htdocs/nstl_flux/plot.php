@@ -6,10 +6,14 @@ require_once "../../include/jpgraph/jpgraph.php";
 require_once "../../include/jpgraph/jpgraph_line.php";
 require_once "../../include/jpgraph/jpgraph_date.php";
 /* We need to get some CGI vars! */
-$year = isset($_GET['year']) ? xssafe($_GET['year']) : die();
-$month = isset($_GET['month']) ? xssafe($_GET['month']) : die();
-$day = isset($_GET['day']) ? xssafe($_GET['day']) : die();
-$pvar = isset($_GET['pvar']) ? xssafe($_GET['pvar']) : die();
+$year = isset($_GET['year']) ? xssafe($_GET['year']) : null;
+$month = isset($_GET['month']) ? xssafe($_GET['month']) : null;
+$day = isset($_GET['day']) ? xssafe($_GET['day']) : null;
+$pvar = isset($_GET['pvar']) ? xssafe($_GET['pvar']) : null;
+if (is_null($year) || is_null($month) || is_null($day) || is_null($pvar)) {
+    http_response_code(422);
+    die("Missing year, month, day, pvar");
+}
 $sts = mktime(0, 0, 0, $month, $day, $year);
 
 $vars = array();

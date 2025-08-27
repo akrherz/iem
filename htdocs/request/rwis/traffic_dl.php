@@ -12,18 +12,18 @@ $delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : "comma";
 $sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
 $what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1 specified");
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2 specified");
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2 specified");
-$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : die("No hour1 specified");
-$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2 specified");
-$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : die("No minute1 specified");
-$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : die("No minute2 specified");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2020;
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2020;
+$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : 0;
+$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : 0;
+$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : 0;
+$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : 0;
 
-$stations = $_GET["station"];
+$stations = isset($_GET["station"]) ? $_GET["station"] : ["RAMI4"];
 $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
@@ -41,13 +41,8 @@ if ($selectAll) {
 
 $stationSQL = "{". implode(",", $stations) . "}";
 
-if (isset($_GET["day"]))
-    die("Incorrect CGI param, use day1, day2");
-
-$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1) or
-    die("Invalid Date Format");
-$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2) or
-    die("Invalid Date Format");
+$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1);
+$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2);
 
 if ($selectAll && $day1 != $day2)
     $ts2 = $ts1 + 86400;
@@ -61,7 +56,7 @@ $vars = array(
 );
 $num_vars = count($vars);
 
-$sqlStr = "SELECT station, ";
+$sqlStr = "SELECT t.id as station, ";
 for ($i = 0; $i < $num_vars; $i++) {
     $sqlStr .= $vars[$i] . " as var{$i}, ";
 }
@@ -75,9 +70,12 @@ if (!array_key_exists($delim, $d)) {
     xssafe("<tag>");
 }
 
-$sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata_traffic";
-$sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";
-$sqlStr .= " and station = ANY($1) ORDER by valid ASC";
+$sqlStr .= <<<EOM
+ to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata_traffic a JOIN stations t
+ on (a.iemid = t.iemid)
+ WHERE valid >= '{$sqlTS1}' and valid <= '{$sqlTS2}'
+ and t.id = ANY($1) and t.network = 'IA_RWIS' ORDER by valid ASC
+EOM;
 
 /**
  * Must handle different ideas for what to do...

@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 $t = new MyView();
-require_once "lib.php";
+require_once "../../include/mos_lib.php";
 $mosdb = iemdb("mos");
 pg_exec($mosdb, "SET TIME ZONE 'UTC'");
 

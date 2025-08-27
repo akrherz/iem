@@ -27,6 +27,7 @@ if (is_null($station)) {
     $firstval = null;
     $fpath = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat";
     if (!file_exists($fpath)) {
+        http_response_code(422);
         die("File not found");
     }
     $fcontents = file($fpath);
@@ -40,6 +41,7 @@ if (is_null($station)) {
 } else {
     $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat";
     if (!file_exists($fn)){
+        http_response_code(422);
         die("File not found");
     }
     $fcontents = file($fn);

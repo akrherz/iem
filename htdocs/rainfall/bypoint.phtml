@@ -16,10 +16,11 @@ $wepp_stname = iem_pg_prepare($wepp, "select rainfall / 25.4 as inch,
     valid from daily_rainfall
     WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
 
-$method = isset($_GET["method"]) ? xssafe($_GET["method"]) : die('$method not specified');
+$method = isset($_GET["method"]) ? xssafe($_GET["method"]) : "geocode";
 $syear = get_int404("syear", 0);
 $eyear = get_int404("eyear", 0);
 if ($syear == 0 || $eyear == 0) {
+    http_response_code(422);
     die("Please supply both syear and eyear.");
 }
 $view = isset($_GET["view"]) ? xssafe($_GET["view"]) : "online";

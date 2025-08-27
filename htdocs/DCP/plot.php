@@ -9,10 +9,10 @@ require_once "../../include/jpgraph/jpgraph_date.php";
 $nt = new NetworkTable('IA_DCP');
 $pgconn = iemdb("hads");
 
-$station = isset($_REQUEST['station']) ? xssafe($_REQUEST["station"]) : die("No station");
-$varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']) : die("No var");
-$sday = isset($_REQUEST['sday']) ? strtotime(xssafe($_REQUEST['sday'])) : die("No sday");
-$eday = isset($_REQUEST['eday']) ? strtotime(xssafe($_REQUEST['eday'])) : die("No eday");
+$station = isset($_REQUEST['station']) ? xssafe($_REQUEST["station"]) : 'AESI4';
+$varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']) : 'tmpf';
+$sday = isset($_REQUEST['sday']) ? strtotime(xssafe($_REQUEST['sday'])) : strtotime("2010-01-01");
+$eday = isset($_REQUEST['eday']) ? strtotime(xssafe($_REQUEST['eday'])) : strtotime("2010-01-02");
 
 $stname = iem_pg_prepare(
     $pgconn,

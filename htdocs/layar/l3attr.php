@@ -5,6 +5,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $postgis = iemdb("radar");
 
+header("Content-type: application/json");
 
 /* Figure out what was requested */
 $center_lat = isset($_GET["lat"]) ? floatval(xssafe($_GET["lat"])): 58.1;
