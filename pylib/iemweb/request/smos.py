@@ -7,14 +7,6 @@ Documentation for /cgi-bin/request/smos.py
 
 This allows downloading of the IEM archived SMOS data for the midwest.
 
-Examples:
----------
-
-Download all 2024 data for a point near Ames
-
-https://mesonet.agron.iastate.edu/cgi-bin/request/smos.py?\
-sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&lat=42.0&lon=-93.0
-
 """
 
 from pydantic import AwareDatetime, Field
