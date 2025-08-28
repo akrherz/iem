@@ -29,7 +29,7 @@ WEB
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/kcciradar.map&amp;"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/iemaccess.map&amp;"
    "wms_srs" "EPSG:26915"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"
@@ -38,24 +38,6 @@ WEB
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
   END
-END
-
-#------------------------------------------------------
-#
-LAYER
-  NAME kcci
-  STATUS OFF
-  DATA "/mesonet/data/gis/images/26915/KCCI_N0R.tif"
-  TYPE RASTER
-  PROJECTION
-    "init=epsg:26915"
-  END
-  METADATA
-    "wms_title" "KCCI RADAR"
-    "wms_srs"   "EPSG:26915"
-    "wms_extent" "200000 4400000 710000 4900000"
-  END
-  OFFSITE 0 0 0
 END
 
 END

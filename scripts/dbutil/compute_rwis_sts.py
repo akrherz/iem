@@ -24,7 +24,7 @@ def main(network: str):
 
     acursor.execute(
         """
-        SELECT s.id, min(day), max(day) from alldata c JOIN
+        SELECT s.id, min(date(valid)), max(date(valid)) from alldata c JOIN
         stations s on (c.iemid = s.iemid) WHERE s.network = %s
         GROUP by s.id ORDER by min ASC
         """,

@@ -27,6 +27,7 @@ from datetime import date as dateobj
 
 import numpy as np
 from pydantic import Field
+from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import MRMS_IEMRE, PRISM800, get_nav
 from pyiem.iemre import (
     daily_offset,
@@ -83,6 +84,8 @@ def application(environ, start_response):
     lat = environ["lat"]
     lon = environ["lon"]
     domain = get_domain(lon, lat)
+    if domain is None:
+        raise NoDataFound("Location is outside of IEMRE domains!")
     nav = get_nav("iemre", domain)
 
     i, j = nav.find_ij(lon, lat)
@@ -97,10 +100,6 @@ def application(environ, start_response):
 
     if not os.path.isfile(fn):
         return [json.dumps(res).encode("ascii")]
-
-    if i is None or j is None:
-        data = {"error": "Coordinates outside of domain"}
-        return [json.dumps(data).encode("ascii")]
 
     if dt.year > 1980 and domain == "":
         ncfn = f"/mesonet/data/prism/{dt.year}_daily.nc"

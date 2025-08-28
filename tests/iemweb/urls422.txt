@@ -30,6 +30,7 @@
 /geojson/convective_sigmet.py?sts=2025-04-01T00:00:00Z
 /geojson/convective_sigmet.py?ets=2025-04-01T00:00:00Z
 /geojson/convective_sigmet.py?sts=2021-04-01T00:00:00Z&ets=2025-04-01T23:59:59Z
+/iemre/daily.py?lat=89.0&lon=0.0&date=2024-01-01
 /iemre/hourly.py?lat=0&lon=0&date=2024-01-01
 /json/nwstext_center_date.py?center=KDMX
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01
