@@ -35,12 +35,10 @@ ROOT={$u}
 |- base folder full of various images for the date 
 |- GIS
    |- NWS coop obs shapefile and road conditions shapefile per update
-   |- kcci
-      |- KCCI LiveSuper DopplerHD radar imagery
    |- sat
       |- GOES Conus Satellite imagery TIF
-   |- {akcomp,hicomp,prcomp,uscomp}
-      |- NEXRAD composites
+   |- {akcomp,gucomp,hicomp,prcomp,uscomp}
+      |- NEXRAD mosaics
    | - hrrr reflectivity imagery
    | - mrms imagery
    | - ifc Iowa Flood Center precipitation imagery

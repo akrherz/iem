@@ -15,7 +15,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
@@ -44,6 +44,33 @@ PDICT = {
     "gdd51": "Growing Degree Days (base 51)",
     "gdd52": "Growing Degree Days (base 52)",
 }
+PDICT2 = {
+    "yes": "Truncate dataset to the start of current month",
+    "no": "Do not truncate dataset",
+}
+# Default is to sum and then divide by number of months
+PDICT_AGG_MIN = ["min_high", "min_low"]
+PDICT_AGG_MAX = ["max_high", "max_low"]
+PDICT_AGG_SUM = [
+    "total_precip",
+    "cdd65",
+    "hdd65",
+    "gdd32",
+    "gdd41",
+    "gdd46",
+    "gdd48",
+    "gdd50",
+    "gdd51",
+    "gdd52",
+]
+PDICT_AGG_SUM_THEN_DIVIDE = [
+    "avg_temp",
+    "avg_high",
+    "avg_low",
+    "avg_range",
+    "avg_rad",
+]
+
 
 UNITS = {
     "total_precip": "inch",
@@ -126,6 +153,13 @@ def get_description():
             "name": "year",
             "label": "Year to Highlight on the Chart",
         },
+        {
+            "type": "select",
+            "options": PDICT2,
+            "default": "yes",
+            "name": "truncate",
+            "label": "Truncate Dataset",
+        },
     ]
     return desc
 
@@ -146,32 +180,28 @@ def compute_months_and_offsets(start, count):
     return months, offsets
 
 
-def combine(df, months, offsets) -> pd.DataFrame:
-    """combine"""
-    # To allow for periods that cross years! We create a second dataframe with
-    # the year shifted back one!
-    df_shift = df.copy()
-    df_shift.index = df_shift.index - 1
+def combine(df: pd.DataFrame, months: list, offsets: list) -> pd.DataFrame:
+    """Combine the months in the way we need to get one value per year."""
 
-    # We create the xaxis dataset
-    xdf = df[df["month"] == months[0]].copy()
-    for i, month in enumerate(months):
-        if i == 0:
-            continue
-        if offsets[i] == 1:
-            thisdf = df_shift[df_shift["month"] == month]
-        else:
-            thisdf = df[df["month"] == month]
-        # Do our combinations, we divide out later when necessary
-        for v in PDICT:
-            xdf[v] = xdf[v] + thisdf[v]
-        tmpdf = pd.DataFrame({"a": xdf["max_high"], "b": thisdf["max_high"]})
-        xdf["max_high"] = tmpdf.max(axis=1)
+    # We create the yearly dataframe
+    yearlydf = df[df["month"] == months[0]].copy().set_index("year")
+    for month, offset in zip(months[1:], offsets[1:], strict=True):
+        second = df[df["month"] == month].copy()
+        if offset == 1:
+            second["year"] = second["year"] - 1
+        second = second.set_index("year")
+        for col in PDICT_AGG_MAX:
+            yearlydf[col] = yearlydf[col].combine(second[col], np.maximum)
+        for col in PDICT_AGG_MIN:
+            yearlydf[col] = yearlydf[col].combine(second[col], np.minimum)
+        for col in PDICT_AGG_SUM:
+            yearlydf[col] = yearlydf[col] + second[col]
+        for col in PDICT_AGG_SUM_THEN_DIVIDE:
+            yearlydf[col] = yearlydf[col] + second[col]
     if len(months) > 1:
-        for col in ["temp", "rad", "range"]:
-            xdf[f"avg_{col}"] = xdf[f"avg_{col}"] / float(len(months))
-
-    return xdf
+        for col in PDICT_AGG_SUM_THEN_DIVIDE:
+            yearlydf[col] = yearlydf[col] / float(len(months))
+    return yearlydf
 
 
 def plotter(ctx: dict):
@@ -188,15 +218,18 @@ def plotter(ctx: dict):
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     # Compute the monthly totals
+    endts = today.replace(day=1)
+    if ctx["truncate"] == "no":
+        endts = today + timedelta(days=1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         SELECT year, month, avg((high+low)/2.) as avg_temp,
         avg(high) as avg_high, min(high) as min_high,
         avg(low) as avg_low, max(low) as max_low,
         sum(precip) as total_precip, max(high) as max_high,
         min(low) as min_low,
-        sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
+        sum(case when high >= :threshold then 1 else 0 end) as days_high_aoa,
         avg(coalesce(merra_srad, hrrr_srad)) as avg_rad,
         avg(high - low) as avg_range,
         sum(cdd(high, low, 65)) as cdd65,
@@ -208,29 +241,33 @@ def plotter(ctx: dict):
         sum(gddxx(50, 86, high, low)) as gdd50,
         sum(gddxx(51, 86, high, low)) as gdd51,
         sum(gddxx(52, 86, high, low)) as gdd52
-        from alldata WHERE station = %s and day < %s GROUP by year, month
-        """,
+        from alldata WHERE station = :station and day < :sts
+        GROUP by year, month ORDER by year, month
+        """),
             conn,
-            params=(threshold, station, today.replace(day=1)),
-            index_col="year",
+            params={
+                "threshold": threshold,
+                "station": station,
+                "sts": endts,
+            },
+            index_col=None,
         )
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     xdf = combine(df, months1, offsets1)
     ydf = combine(df, months2, offsets2)
     if xdf.empty or ydf.empty:
         raise NoDataFound("Sorry, could not find data.")
 
-    df = pd.DataFrame(
-        {
-            f"{varname1}_1": xdf[varname1],
-            f"{varname2}_2": ydf[varname2],
-        }
-    )
+    df = pd.DataFrame()
+    df[f"{varname1}_1"] = xdf[varname1]
+    df[f"{varname2}_2"] = ydf[varname2]
+    df = df.dropna()
     xdata = df[f"{varname1}_1"]
     ydata = df[f"{varname2}_2"]
     if xdata.isna().all() or ydata.isna().all():
         raise NoDataFound("No Data Found.")
-    df = df.dropna()
     title = (
         f"{df.index.min()}-{df.index.max()} {ctx['_sname']}\n"
         "Comparison of Monthly Periods, Quadrant Frequency Labelled"
@@ -247,7 +284,9 @@ def plotter(ctx: dict):
     )
     ax.grid(True)
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(xdata, ydata)
+    h_slope, intercept, r_value, _, _ = stats.linregress(
+        xdata.to_numpy(), ydata.to_numpy()
+    )
     y = h_slope * np.arange(xdata.min(), xdata.max()) + intercept
     ax.plot(
         np.arange(xdata.min(), xdata.max()),
@@ -279,7 +318,7 @@ def plotter(ctx: dict):
     )
     ax.axhline(y, linestyle="--", color="g")
     ax.axvline(x, linestyle="--", color="g")
-    ur = len(df[(xdata >= x) & (ydata >= y)].index)
+    ur = ((xdata >= x) & (ydata >= y)).sum()
     val = ur / float(len(df.index)) * 100.0
     ax.text(
         0.95,
@@ -291,7 +330,7 @@ def plotter(ctx: dict):
         ha="right",
         zorder=2,
     )
-    lr = len(df[(xdata >= x) & (ydata < y)].index)
+    lr = ((xdata >= x) & (ydata < y)).sum()
     val = lr / float(len(df.index)) * 100.0
     ax.text(
         0.95,
@@ -303,7 +342,7 @@ def plotter(ctx: dict):
         ha="right",
         zorder=2,
     )
-    ll = len(df[(xdata < x) & (ydata < y)].index)
+    ll = ((xdata < x) & (ydata < y)).sum()
     val = ll / float(len(df.index)) * 100.0
     ax.text(
         0.05,
@@ -315,7 +354,7 @@ def plotter(ctx: dict):
         ha="left",
         zorder=2,
     )
-    ul = len(df[(xdata < x) & (ydata >= y)].index)
+    ul = ((xdata < x) & (ydata >= y)).sum()
     val = ul / float(len(df.index)) * 100.0
     ax.text(
         0.05,

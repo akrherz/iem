@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <IMSFACADE>
   <SERVICES>
-    <SERVICE name="KCCI SuperDoppler (26915)">
-      <PROPERTIES imagetype="PNG8" mapfile="/opt/iem/htdocs/GIS/maps/kcciradar.map"/>
-    </SERVICE>
     <SERVICE name="US RADAR (4326)">
       <PROPERTIES imagetype="PNG8" mapfile="/opt/iem/htdocs/GIS/maps/usradar.map"/>
     </SERVICE>

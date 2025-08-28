@@ -8,7 +8,7 @@ HH=$(date -u +'%H')
 HH=${HH#0}
 LHH=$(date +'%H')
 
-python dl/midwest_winter_roads.py &
+python cache/midwest_winter_roads.py &
 python dl/download_ndfd.py &
 
 # Run at 0, 1, and 2 UTC
