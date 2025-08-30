@@ -72,7 +72,18 @@ def process(cursor, station, df, meta):
                 ]
         if None in newvals.values():
             LOG.warning(
-                "Skipping %s as there are missing values still", row["day"]
+                "Skipping station: %s day: %s as there are missing values",
+                station,
+                row["day"],
+            )
+            continue
+        if newvals["low"] > newvals["high"]:
+            LOG.warning(
+                "Error station: %s day: %s low: %.0f > high: %.0f",
+                station,
+                row["day"],
+                newvals["low"],
+                newvals["high"],
             )
             continue
         LOG.info(
