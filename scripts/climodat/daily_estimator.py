@@ -210,6 +210,13 @@ def update_database(cursor, table: str, df: pd.DataFrame):
 
     # Debug print a nice table of the data that gets inserted below
     for row in df.itertuples(index=True):
+        if row.low > row.high:
+            LOG.warning(
+                "Culling %s low: %s > high: %s", row.Index, row.low, row.high
+            )
+            df.at[row.Index, "low"] = None
+            df.at[row.Index, "temp_estimated"] = True
+            df.at[row.Index, "high"] = None
         LOG.info(
             "%s Hi[%s,%2s]=%3s Lo=%3s Pcp[%s,%2s]=%6s Snow=%6s Snowd=%6s",
             row.Index,
