@@ -175,7 +175,7 @@ def plotter(ctx: dict, conn=None):
     title = PDICT.get(direction, "").replace(
         "Temperature", PDICT2.get(varname)
     )
-    units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
+    units = "°F" if not varname.startswith("snow") else "inch"
     (fig, ax) = figure_axes(
         title=ctx["_sname"], subtitle=f"{title} {threshold}{units}", apctx=ctx
     )

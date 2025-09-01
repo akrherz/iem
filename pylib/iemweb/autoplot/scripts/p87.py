@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.artist import setp
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -96,13 +96,13 @@ def plotter(ctx: dict):
         data = np.ma.zeros((24, 52), "f")
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                f"""
+                sql_helper("""
             WITH data as (
-                SELECT valid at time zone %s + '10 minutes'::interval as v
+                SELECT valid at time zone :tzname + '10 minutes'::interval as v
                 from alldata where
-                station = %s and
-                array_to_string(wxcodes, '') LIKE '%%{code}%%'
-                and valid > %s and valid < %s),
+                station = :station and
+                array_to_string(wxcodes, '|') LIKE :wxcode
+                and valid > :sts and valid < :ets),
             agg as (
                 SELECT distinct extract(week from v)::int as week,
                 extract(doy from v)::int as doy,
@@ -112,22 +112,28 @@ def plotter(ctx: dict):
             SELECT week, year, hour, count(*) from agg
             WHERE week < 53
             GROUP by week, year, hour
-            """,
+            """),
                 conn,
-                params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
+                params={
+                    "tzname": ctx["_nt"].sts[station]["tzname"],
+                    "station": station,
+                    "sts": sts,
+                    "ets": ets,
+                    "wxcode": f"%{code}%",
+                },
                 index_col=None,
             )
     else:
         data = np.ma.zeros((24, 366), "f")
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                f"""
+                sql_helper("""
             WITH data as (
-                SELECT valid at time zone %s + '10 minutes'::interval as v
+                SELECT valid at time zone :tzname + '10 minutes'::interval as v
                 from alldata where
-                station = %s and
-                array_to_string(wxcodes, '') LIKE '%%{code}%%'
-                and valid > %s and valid < %s),
+                station = :station and
+                array_to_string(wxcodes, '|') LIKE :wxcode
+                and valid > :sts and valid < :ets),
             agg as (
                 SELECT distinct
                 extract(doy from v)::int as doy,
@@ -136,9 +142,15 @@ def plotter(ctx: dict):
                 from data)
             SELECT doy, year, hour, count(*) from agg
             GROUP by doy, year, hour
-            """,
+            """),
                 conn,
-                params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
+                params={
+                    "tzname": ctx["_nt"].sts[station]["tzname"],
+                    "station": station,
+                    "sts": sts,
+                    "ets": ets,
+                    "wxcode": f"%{code}%",
+                },
                 index_col=None,
             )
     if df.empty:
@@ -174,7 +186,9 @@ def plotter(ctx: dict):
     lax = fig.add_axes((0.11, 0.1, 0.7, 0.15))
     if groupby == "week":
         ax.set_xticks(np.arange(0, 55, 7))
-        lax.bar(np.arange(0, 52), np.ma.sum(data, 0), facecolor="tan")
+        lax.bar(
+            np.arange(0, 52), np.ma.sum(data, 0).filled(0), facecolor="tan"
+        )
         lax.set_xlim(-0.5, 51.5)
         lax.set_xticks(np.arange(0, 55, 7))
         lax.set_xticklabels(

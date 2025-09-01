@@ -132,7 +132,7 @@ def plotter(ctx: dict):
     title = (
         f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days\n"
         f"{tl} {threshold}"
-        r"$^\circ$F"
+        "°F"
     )
     fig = figure(title=title, apctx=ctx)
     # Main plot gets 75% of vertical space
@@ -294,7 +294,7 @@ def plotter(ctx: dict):
         )
     )
     ax.set_ylabel(
-        (r"Days with %s %s %s$^\circ$F")
+        ("Days with %s %s %s°F")
         % (
             varname.capitalize(),
             "At or Above" if direction == "above" else "Below",
