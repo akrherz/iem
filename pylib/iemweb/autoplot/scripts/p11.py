@@ -145,7 +145,7 @@ def plotter(ctx: dict):
             va="center",
         )
     ax.grid(True)
-    ll = r"$^\circ$F" if varname != "rh" else "%"
+    ll = "°F" if varname != "rh" else "%"
     ax.set_ylabel(f"{PDICT2[varname]} {ll}")
     ax.set_xlabel(
         f"Days meeting emphasis: {len(hits)}, "

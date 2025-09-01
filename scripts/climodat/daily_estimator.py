@@ -22,7 +22,7 @@ import pandas as pd
 import xarray as xr
 from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_grids
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
@@ -56,7 +56,7 @@ def init_df(state, dt: date):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, dt)
-        i, j = IEMRE.find_ij(entry["lon"], entry["lat"])
+        i, j = get_nav("iemre", "").find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
                 "day": dt,
@@ -210,7 +210,7 @@ def update_database(cursor, table: str, df: pd.DataFrame):
 
     # Debug print a nice table of the data that gets inserted below
     for row in df.itertuples(index=True):
-        if row.low > row.high:
+        if pd.notnull(row.low) and pd.notnull(row.high) and row.low > row.high:
             LOG.warning(
                 "Culling %s low: %s > high: %s", row.Index, row.low, row.high
             )

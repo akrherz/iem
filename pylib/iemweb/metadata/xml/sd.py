@@ -1,6 +1,15 @@
-"""Generate the Starfish Fungis XML"""
+"""..title:: Generate the Starfish Fungis XML
 
-from pyiem.exceptions import IncompleteWebRequest
+Example Requests
+----------------
+
+Generate the metadata XML for the ISUSM site at the ISU Ag Farm
+
+https://mesonet.agron.iastate.edu/metadata/xml/sd.py?station=BOOI4
+
+"""
+
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.webutil import iemapp
@@ -8,14 +17,14 @@ from pyiem.webutil import iemapp
 IEM = "https://mesonet.agron.iastate.edu/metadata/xml"
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Do Something"""
-    if "station" not in environ:
-        raise IncompleteWebRequest("Missing station identifier")
     network = environ.get("network", "ISUSM")
     nt = NetworkTable(network, only_online=False)
-    station = environ.get("station", "AEEI4")
+    station = environ.get("station", "QQQI4")
+    if station not in nt.sts:
+        raise NoDataFound("No metadata found for station")
     xs = """<?xml version="1.0" encoding="UTF-8"?>
 <sfl:SensorDeployment xmlns:xlink="http://www.w3.org/1999/xlink"
 xmlns:sfl="http://sawi.gst.com/nmpa/schema/sfl.xsd"

@@ -179,8 +179,10 @@ def plotter(ctx: dict):
         zorder=3,
         lw=2,
         color="brown",
-        label=r"%s %s, %.2f$^\circ$F"
-        % (calendar.month_abbr[effective_date.month], effective_date.year, lv),
+        label=(
+            f"{calendar.month_abbr[effective_date.month]} "
+            f"{effective_date:%Y}, {lv:.2f}°F"
+        ),
     )
     # For historical, we can additionally plot the month values
     today = date.today().replace(day=1)
@@ -192,7 +194,7 @@ def plotter(ctx: dict):
             color="brown",
             linestyle="-.",
             zorder=2,
-            label=r"%s %s Final, %.2f$^\circ$F"
+            label="%s %s Final, %.2f°F"
             % (
                 calendar.month_abbr[effective_date.month],
                 effective_date.year,
@@ -208,12 +210,12 @@ def plotter(ctx: dict):
         label=(
             f"{calendar.month_abbr[oldmonth.month]} {oldmonth.year}, "
             f"{prevavg[-1]:.2f}"
-            r"$^\circ$F"
+            "°F"
         ),
     )
 
     ax.set_xlim(1, days)
-    ax.set_ylabel(r"Month to Date Average Temp $^\circ$F")
+    ax.set_ylabel("Month to Date Average Temp °F")
     ax.set_xlabel("Day of Month")
     ax.grid(True)
     ax.legend(loc="best", fontsize=10)
