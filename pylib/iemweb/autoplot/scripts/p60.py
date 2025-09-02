@@ -294,6 +294,8 @@ def plotter(ctx: dict):
     cmap.set_bad("white")
     if ctx["w"] != "freq" and ctx["var"] == "relh":
         bins = np.arange(0, 101, 5, dtype="f")
+    elif df[ctx["w"]].min() < 5 and df[ctx["w"]].max() > 95:
+        bins = np.arange(0, 101, 10, dtype="f")
     else:
         bins = pretty_bins(df[ctx["w"]].min(), df[ctx["w"]].max())
     norm = mpcolors.BoundaryNorm(bins, cmap.N)

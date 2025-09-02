@@ -1,15 +1,19 @@
 """Compute the regional values.
 
+For non-PRISM periods, we use the IEMRE analysis.  A crude check found PRISM
+to agree much better with the official data at NCEI than what my clunky routine
+was doing.
+
 Run from RUN_NOON.sh
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 import click
 import geopandas as gpd
 import numpy as np
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
-from pyiem.grid import nav
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
+from pyiem.grid.nav import get_nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.util import convert_value, logger, mm2inch, ncopen
@@ -30,6 +34,15 @@ def update_database(cursor, stid, valid, row):
         LOG.info("Skipping %s as has missing data %s", stid, row)
         return
     table = f"alldata_{stid[:2]}"
+    LOG.info(
+        "%s hi:%3.0f lo:%3.0f precip:%.2f snow:%3.1f snowd:%3.1f",
+        stid,
+        row["high"],
+        row["low"],
+        row["precip"],
+        round(zero(row["snow"]), 1),
+        round(zero(row["snowd"]), 1),
+    )
 
     def do_update(_row):
         """Do the database work, please."""
@@ -59,37 +72,48 @@ def update_database(cursor, stid, valid, row):
         do_update(row)
 
 
-def do_day(cursor, valid):
+def do_day(cursor, valid: date):
     """Process a day please"""
     idx = daily_offset(valid)
     with ncopen(get_daily_ncname(valid.year), "r", timeout=300) as nc:
-        high = convert_value(
-            nc.variables["high_tmpk_12z"][idx, :, :], "degK", "degF"
-        )
-        low = convert_value(
-            nc.variables["low_tmpk_12z"][idx, :, :], "degK", "degF"
-        )
-        precip = mm2inch(nc.variables["p01d_12z"][idx, :, :])
-        snow = mm2inch(nc.variables["snow_12z"][idx, :, :])
-        snowd = mm2inch(nc.variables["snowd_12z"][idx, :, :])
+        snow = mm2inch(nc.variables["snow_12z"][idx])
+        snowd = mm2inch(nc.variables["snowd_12z"][idx])
+    if valid.year < 1981 or (date.today() - valid).days < 4:
+        ncfn = get_daily_ncname(valid.year)
+        with ncopen(ncfn) as nc:
+            high = convert_value(
+                nc.variables["high_tmpk_12z"][idx], "degK", "degF"
+            )
+            low = convert_value(
+                nc.variables["low_tmpk_12z"][idx], "degK", "degF"
+            )
+            precip = mm2inch(nc.variables["p01d_12z"][idx])
+    else:
+        ncfn = f"/mesonet/data/prism/{valid:%Y}_daily.nc"
+        with ncopen(ncfn) as nc:
+            high = convert_value(nc.variables["tmax"][idx], "degC", "degF")
+            low = convert_value(nc.variables["tmin"][idx], "degC", "degF")
+            precip = mm2inch(nc.variables["ppt"][idx])
+    LOG.info("Used %s for hi,lo,pcp", ncfn)
 
     # get the geometries and stations to update
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
-            """
+            sql_helper("""
             SELECT t.id, c.geom from stations t JOIN climodat_regions c on
             (t.iemid = c.iemid) ORDER by t.id ASC
-            """,
+            """),
             conn,
             index_col="id",
             geom_col="geom",
-        )
-    czs = CachingZonalStats(nav.IEMRE.affine_image)
+        )  # type: ignore
+    czs = CachingZonalStats(get_nav("iemre", "").affine_image)
+    stsnow = czs.gen_stats(np.flipud(snow), gdf["geom"])
+    stsnowd = czs.gen_stats(np.flipud(snowd), gdf["geom"])
+    czs = CachingZonalStats(get_nav("prism800", "").affine_image)
     sthigh = czs.gen_stats(np.flipud(high), gdf["geom"])
     stlow = czs.gen_stats(np.flipud(low), gdf["geom"])
     stprecip = czs.gen_stats(np.flipud(precip), gdf["geom"])
-    stsnow = czs.gen_stats(np.flipud(snow), gdf["geom"])
-    stsnowd = czs.gen_stats(np.flipud(snowd), gdf["geom"])
 
     for i, sid in enumerate(gdf.index.values):
         data = {
