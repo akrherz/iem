@@ -19,17 +19,38 @@ Changelog
 Example Requests
 ----------------
 
+Request all Iowa DCP data, which is limited to a 24 hour period.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=_ALL&network=IA_DCP&sts=2023-11-10T00:00Z&ets=2023-11-11T00:00Z\
+&what=dl
+
 Provide all DNKI4 data for the month of November 2023
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
 stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=txt
 
-Same request, but do a threshold search for when the SHEF var RG is greater
-than 0.5
+Same request, but in HTML format
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
-stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=txt&\
-threshold=0.5&thresholdvar=RG
+stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=html
+
+Same request, but in Excel format
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=excel
+
+Provide all DSXI4 data for 1 Jan 2025
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=DSXI4&sts=2025-01-01T00:00Z&ets=2025-01-02T00:00Z&what=txt
+
+Run the threshold search for when HGIRG exceeds 10.81
+for AESI4 in early Sep 2025
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=AESI4&sts=2025-09-01T00:00Z&ets=2025-09-03T00:00Z&what=txt&\
+threshold=10.81&thresholdvar=RG
 
 """
 
@@ -125,21 +146,18 @@ class Schema(CGIModel):
         return None if value == "" else value
 
 
-def threshold_search(table: pd.DataFrame, threshold, thresholdvar):
+def threshold_search(table: pd.DataFrame, threshold, thresholdvar: str):
     """Do the threshold searching magic"""
-    cols = list(table.columns.values)
-    searchfor = f"HGI{thresholdvar.upper()}"
-    cols5 = [s[:5] for s in cols]
-    try:
-        mycol = cols[cols5.index(searchfor)]
-    except ValueError:
+    cols = table.columns.to_list()
+    searchfor = f"HGI{thresholdvar.upper()}ZZ"
+    if searchfor not in cols:
         return pd.DataFrame()
     above = False
     maxrunning = -99
     maxvalid = None
     res = []
     for (station, valid), row in table.iterrows():
-        val = row[mycol]
+        val = row[searchfor]
         if val > threshold and not above:
             res.append(
                 dict(
@@ -147,7 +165,7 @@ def threshold_search(table: pd.DataFrame, threshold, thresholdvar):
                     utc_valid=valid,
                     event="START",
                     value=val,
-                    varname=mycol,
+                    varname=searchfor,
                 )
             )
             above = True
@@ -161,7 +179,7 @@ def threshold_search(table: pd.DataFrame, threshold, thresholdvar):
                     utc_valid=maxvalid,
                     event="MAX",
                     value=maxrunning,
-                    varname=mycol,
+                    varname=searchfor,
                 )
             )
             res.append(
@@ -170,7 +188,7 @@ def threshold_search(table: pd.DataFrame, threshold, thresholdvar):
                     utc_valid=valid,
                     event="END",
                     value=val,
-                    varname=mycol,
+                    varname=searchfor,
                 )
             )
             above = False
@@ -188,9 +206,12 @@ def application(environ, start_response):
     delimiter = DELIMITERS[environ["delim"]]
     stations = environ["stations"]
     if "_ALL" in stations and environ["network"] is not None:
-        stations = list(NetworkTable(environ["network"][:10]).sts.keys())
-        if (environ["ets"] - environ["sts"]) > timedelta(hours=24):
-            environ["ets"] = environ["sts"] + timedelta(hours=24)
+        stations = list(
+            NetworkTable(environ["network"][:10], only_online=False).sts.keys()
+        )
+        environ["ets"] = min(
+            environ["ets"], environ["sts"] + timedelta(hours=24)
+        )
     if len(stations) > 1 and (environ["ets"] - environ["sts"]) > timedelta(
         days=365
     ):
@@ -228,20 +249,12 @@ def application(environ, start_response):
             table, environ["threshold"], environ["thresholdvar"]
         )
 
-    sio = StringIO()
-    if environ["what"] == "txt":
-        headers = [
-            ("Content-type", "application/octet-stream"),
-            ("Content-Disposition", "attachment; filename=hads.txt"),
-        ]
-        start_response("200 OK", headers)
-        table.to_csv(sio, sep=delimiter)
-        return [sio.getvalue().encode("ascii")]
     if environ["what"] == "html":
         headers = [("Content-type", "text/html")]
         start_response("200 OK", headers)
+        sio = StringIO()
         table.to_html(sio)
-        return [sio.getvalue().encode("ascii")]
+        return [sio.getvalue().encode("utf-8")]
     if environ["what"] == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
@@ -253,6 +266,12 @@ def application(environ, start_response):
         ]
         start_response("200 OK", headers)
         return [bio.getvalue()]
-    start_response("200 OK", [("Content-type", "text/plain")])
+    # The default for what = dl and txt
+    sio = StringIO()
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=hads.txt"),
+    ]
+    start_response("200 OK", headers)
     table.to_csv(sio, sep=delimiter)
-    return [sio.getvalue().encode("ascii")]
+    return [sio.getvalue().encode("utf-8")]
