@@ -8,7 +8,6 @@ $mapFile = "../../data/gis/base4326.map";
 
 $beginYear = 1995;
 $endYear = intval(date("Y"));
-$yearsPerRow = 4;
 
 $twidth = 160 - 2;
 $theight = 140 - 2;
@@ -30,7 +29,7 @@ $dt = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}");
 /* This is our final image!  */
 $map2 = new mapObj($mapFile);
 $map2->imagecolor->setrgb(155, 155, 155);
-$map2->setSize($twidth * $cols + 11, $theight * 5 + $header + 13);
+$map2->setSize($twidth * $cols + 11, $theight * 6 + $header + 13);
 $img2 = $map2->prepareImage();
 
 /* Title Bar */
@@ -41,13 +40,13 @@ $bar640t->draw($map2, $img2);
 /* Draw the title */
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = new pointObj();
-$point->setXY(80, 10);
+$point->setXY(80, 16);
 $d = $dt->format("d M h:i A");
 $point->draw($map2, $tlayer, $img2, 0, "NEXRAD by Year for Time: $d");
 
 /* Draw the subtitle */
 $point = new pointObj();
-$point->setXY(80, 27);
+$point->setXY(80, 31);
 $d = date("d M Y h:i A T");
 $point->draw($map2, $tlayer, $img2, 1, " map generated $d");
 
@@ -124,7 +123,7 @@ for ($year = $beginYear; $year <= $endYear; $year++) {
 
     $tlayer = $map->getLayerByName("bar640t-title");
     $point = new pointObj();
-    $point->setXY(2, 8);
+    $point->setXY(2, 12);
     $point->draw($map, $tlayer, $img, 1, "$year");
 
     $map->drawLabelCache($img);
