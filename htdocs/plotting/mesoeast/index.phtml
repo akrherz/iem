@@ -5,21 +5,27 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "IEM NE Ames Time Series";
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
-$myTime = mktime(0, 0, 0, $month, $day, $year);
+if (isset($_GET["year"])) {
+    $year = get_int404("year", date("Y"));
+    $month = get_int404("month", date("m"));
+    $day = get_int404("day", date("d"));
+    $myTime = mktime(0, 0, 0, $month, $day, $year);
+} else {
+    $myTime = strtotime(isset($_GET["date"]) ? xssafe($_GET["date"]) : "now");
+}
+
+$year = date("Y", $myTime);
+$month = date("m", $myTime);
+$day = date("d", $myTime);
 
 $dirRef = date("Y/m/d", $myTime);
 $dataurl = "/archive/data/$dirRef/text/ot/ot0006.dat";
 
-$ys = yearSelect(2003, $year);
-$ms = monthSelect($month);
-$ds = daySelect($day);
-
+$valDate = date("Y-m-d", $myTime);
 $titleDate = date("M d, Y", $myTime);
-
 $dirRef = date("Y/m/d", $myTime);
+$prevDate = date("Y-m-d", strtotime('-1 day', $myTime));
+$nextDate = date("Y-m-d", strtotime('+1 day', $myTime));
 $thisMax = -99;
 $thisMin = 99;
 $maxGust = 0;
@@ -78,18 +84,19 @@ $t->content = <<<EOM
                 </div>
                 <div class="card-body">
                     <form method="GET" class="d-flex flex-column gap-3">
-                        <div class="row g-2">
-                            <div class="col-4">
-                                <label for="year" class="form-label small">Year</label>
-                                {$ys}
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <a href="?date={$prevDate}" class="btn btn-outline-secondary btn-sm" title="Previous day">
+                                    <i class="bi bi-arrow-left"></i>
+                                </a>
                             </div>
-                            <div class="col-4">
-                                <label for="month" class="form-label small">Month</label>
-                                {$ms}
+                            <div class="col">
+                                <input type="date" class="form-control" name="date" value="{$valDate}">
                             </div>
-                            <div class="col-4">
-                                <label for="day" class="form-label small">Day</label>
-                                {$ds}
+                            <div class="col-auto">
+                                <a href="?date={$nextDate}" class="btn btn-outline-secondary btn-sm" title="Next day">
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
