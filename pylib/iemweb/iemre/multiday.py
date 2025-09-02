@@ -29,7 +29,7 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 from pydantic import Field
-from pyiem.grid.nav import MRMS_IEMRE, PRISM800, get_nav
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import (
     daily_offset,
     get_daily_mrms_ncname,
@@ -167,7 +167,7 @@ def application(environ, start_response):
         cprecip = cnc.variables["p01d"][coffset1:coffset2, j, i] / 25.4
 
     if ts1.year > 1980 and domain == "":
-        i2, j2 = PRISM800.find_ij(lon, lat)  # type: ignore
+        i2, j2 = get_nav("prism", "").find_ij(lon, lat)
         if i2 is None or j2 is None:
             prism_precip = [None] * (offset2 - offset1)
         else:
@@ -177,7 +177,7 @@ def application(environ, start_response):
         prism_precip = [None] * (offset2 - offset1)
 
     if ts1.year > 2000 and domain == "":
-        i2, j2 = MRMS_IEMRE.find_ij(lon, lat)  # type: ignore
+        i2, j2 = get_nav("mrms_iemre", "").find_ij(lon, lat)
         with ncopen(get_daily_mrms_ncname(ts1.year)) as nc:
             mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
     else:

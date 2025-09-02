@@ -6,7 +6,7 @@ from datetime import datetime
 
 import click
 import numpy as np
-from pyiem.grid.nav import PRISM800
+from pyiem.grid.nav import get_nav
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -21,6 +21,7 @@ def init_year(ts: datetime, ci: bool):
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite file %s.", fn)
         sys.exit()
+    prism_nav = get_nav("PRISM", "")
     nc = ncopen(fn, "w")
     nc.title = f"PRISM Daily Data for {ts:%Y}"
     nc.platform = "Grided Observations"
@@ -35,8 +36,8 @@ def init_year(ts: datetime, ci: bool):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", PRISM800.ny)
-    nc.createDimension("lon", PRISM800.nx)
+    nc.createDimension("lat", prism_nav.ny)
+    nc.createDimension("lon", prism_nav.nx)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
     nc.createDimension("bnds", 2)
@@ -49,11 +50,11 @@ def init_year(ts: datetime, ci: bool):
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
     # We want to store the center of the grid cell
-    lat[:] = PRISM800.y_points
+    lat[:] = prism_nav.y_points
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
-    lat_bnds[:, 0] = PRISM800.y_edges[:-1]
-    lat_bnds[:, 1] = PRISM800.y_edges[1:]
+    lat_bnds[:, 0] = prism_nav.y_edges[:-1]
+    lat_bnds[:, 1] = prism_nav.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -61,11 +62,11 @@ def init_year(ts: datetime, ci: bool):
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon.bounds = "lon_bnds"
-    lon[:] = PRISM800.x_points
+    lon[:] = prism_nav.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
-    lon_bnds[:, 0] = PRISM800.x_edges[:-1]
-    lon_bnds[:, 1] = PRISM800.x_edges[1:]
+    lon_bnds[:, 0] = prism_nav.x_edges[:-1]
+    lon_bnds[:, 1] = prism_nav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts:%Y}-01-01 00:00:0.0"
