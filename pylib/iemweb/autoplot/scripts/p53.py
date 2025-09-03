@@ -29,9 +29,9 @@ PDICT = {
     "mslp": "Mean Sea Level Pressure",
 }
 UNITS = {
-    "tmpf": r"$^\circ$F",
-    "dwpf": r"$^\circ$F",
-    "feel": r"$^\circ$F",
+    "tmpf": "°F",
+    "dwpf": "°F",
+    "feel": "°F",
     "sknt": "knots",
     "gust": "knots",
     "alti": "inches",
