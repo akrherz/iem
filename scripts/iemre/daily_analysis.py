@@ -185,7 +185,7 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
             continue
         res = None
         aggfunc = np.ma.max
-        if vname in ["p01d_12", "p01d", "rsds"]:
+        if vname in ["p01d_12z", "p01d", "rsds"]:
             aggfunc = np.ma.sum  # was np.nansum, better check this
         elif vname.startswith("low"):
             aggfunc = np.ma.min
