@@ -10,6 +10,7 @@ This is tricky as some variables we can compute sooner than others.
 
 import subprocess
 from datetime import date, datetime, timedelta, timezone
+from typing import cast
 
 import click
 import numpy as np
@@ -27,7 +28,7 @@ from pyiem.iemre import (
     hourly_offset,
     set_grids,
 )
-from pyiem.util import convert_value, logger, ncopen, utc
+from pyiem.util import convert_value, logger, ncopen
 from scipy.stats import zscore
 
 LOG = logger()
@@ -58,7 +59,7 @@ def generic_gridder(df, idx, domain: str):
                 # can't QC data that is all equal
                 if len(box.index) < 4 or box[idx].min() == box[idx].max():
                     continue
-                z = np.abs(zscore(box[idx]))
+                z = np.abs(cast("np.ndarray", zscore(box[idx])))
                 # Compute where the standard dev is +/- 2std
                 bad = box[z > 1.5]
                 df.loc[bad.index, idx] = np.nan
@@ -88,18 +89,27 @@ def generic_gridder(df, idx, domain: str):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def copy_iemre_hourly(ts: datetime, ds, domain: str):
-    """Lots of work to do here..."""
-    # Get noon of the day
-    sts = datetime(
-        ts.year, ts.month, ts.day, 12, tzinfo=DOMAINS[domain]["tzinfo"]
+def compute_daily_pairs(
+    dt: date, domain: str, is_12z: bool
+) -> list[tuple[datetime, datetime]]:
+    """Figure out the pairs.
+
+    The 12z variant is a bit different and will include the end timestamp
+    """
+    # Compute a timestamp at noon within the local calendar date
+    noon_local = datetime(
+        dt.year, dt.month, dt.day, 12, tzinfo=DOMAINS[domain]["tzinfo"]
     )
-    sts = sts.replace(hour=1 if sts.dst() else 0)
-    ets = sts + timedelta(hours=23)
+    if is_12z:
+        ets = noon_local.replace(hour=7)
+        sts = ets - timedelta(hours=23)
+    else:
+        sts = noon_local.replace(hour=1 if noon_local.dst() else 0)
+        ets = sts + timedelta(hours=23)
     # Logic below needs UTC
     sts = sts.astimezone(timezone.utc)
     ets = ets.astimezone(timezone.utc)
-    LOG.info("Using %s to %s for %s localday", sts, ets, domain)
+    LOG.info("Using %s to %s for %s[is_12z: %s]", sts, ets, domain, is_12z)
     pairs = [(sts, ets)]
     if sts.year != ets.year:
         # These are inclusive
@@ -107,17 +117,13 @@ def copy_iemre_hourly(ts: datetime, ds, domain: str):
             (sts, sts.replace(hour=23)),
             (ets.replace(hour=0), ets),
         ]
-    ets = utc(ts.year, ts.month, ts.day, 12)
-    # 13z yesterday
-    sts = ets - timedelta(hours=23)
-    pairs12z = [(sts, ets)]
-    if sts.year != ets.year:
-        # 13z to 23z (inclusve)
-        # 0z to 12z (inclusive)
-        pairs12z = [
-            (sts, sts + timedelta(hours=10)),
-            (sts + timedelta(hours=11), ets),
-        ]
+    return pairs
+
+
+def copy_iemre_hourly(ts: date, ds, domain: str):
+    """Lots of work to do here..."""
+    pairs = compute_daily_pairs(ts, domain, is_12z=False)
+    pairs12z = compute_daily_pairs(ts, domain, is_12z=True)
 
     # One Off
     for vname in ["min_rh", "max_rh"]:
@@ -155,6 +161,10 @@ def copy_iemre_hourly(ts: datetime, ds, domain: str):
             uwnd = nc.variables["uwnd"]
             vwnd = nc.variables["vwnd"]
             for offset in range(tidx1, tidx2 + 1):
+                # Skip this offset if values are all masked
+                if uwnd[offset].mask.all() or vwnd[offset].mask.all():
+                    LOG.info("Skipping masked wind data at %s", offset)
+                    continue
                 # Assuming zeros, I think was a bad life choice
                 val = np.hypot(uwnd[offset], vwnd[offset])
                 if runningsum is None:
