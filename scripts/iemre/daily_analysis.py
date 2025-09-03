@@ -10,6 +10,7 @@ This is tricky as some variables we can compute sooner than others.
 
 import subprocess
 from datetime import date, datetime, timedelta, timezone
+from typing import cast
 
 import click
 import numpy as np
@@ -58,7 +59,7 @@ def generic_gridder(df, idx, domain: str):
                 # can't QC data that is all equal
                 if len(box.index) < 4 or box[idx].min() == box[idx].max():
                     continue
-                z = np.abs(zscore(box[idx]))
+                z = np.abs(cast("np.ndarray", zscore(box[idx])))
                 # Compute where the standard dev is +/- 2std
                 bad = box[z > 1.5]
                 df.loc[bad.index, idx] = np.nan
@@ -160,6 +161,10 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
             uwnd = nc.variables["uwnd"]
             vwnd = nc.variables["vwnd"]
             for offset in range(tidx1, tidx2 + 1):
+                # Skip this offset if values are all masked
+                if uwnd[offset].mask.all() or vwnd[offset].mask.all():
+                    LOG.info("Skipping masked wind data at %s", offset)
+                    continue
                 # Assuming zeros, I think was a bad life choice
                 val = np.hypot(uwnd[offset], vwnd[offset])
                 if runningsum is None:
