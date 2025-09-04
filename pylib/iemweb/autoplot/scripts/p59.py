@@ -128,24 +128,24 @@ def plotter(ctx: dict):
 
     # Compute components in MPS
     u, v = wind_components(
-        (df["sknt"].values * units("knot")).to(units("meter / second")),
-        df["drct"].values * units("degree"),
+        (df["sknt"].to_numpy() * units("knot")).to(units("meter / second")),
+        df["drct"].to_numpy() * units("degree"),
     )
     df["u"] = u.m
     df["v"] = v.m
     gdf = df.groupby(by="doy").mean()
     ctx["u"] = (
-        (gdf["u"].values * units("meter / second"))
+        (gdf["u"].to_numpy() * units("meter / second"))
         .to(XREF_UNITS[ctx["units"]])
         .m
     )
     ctx["v"] = (
-        (gdf["v"].values * units("meter / second"))
+        (gdf["v"].to_numpy() * units("meter / second"))
         .to(XREF_UNITS[ctx["units"]])
         .m
     )
     ctx["mag"] = (
-        (gdf["sknt"].values * units("knot")).to(XREF_UNITS[ctx["units"]]).m
+        (gdf["sknt"].to_numpy() * units("knot")).to(XREF_UNITS[ctx["units"]]).m
     )
 
     df2 = pd.DataFrame(

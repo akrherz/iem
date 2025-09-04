@@ -176,6 +176,18 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
     if hours > 0:
         ds["wind_speed"].values = runningsum / hours
     # -----------------------------------------------------------------
+    aggfuncs = {
+        "high_tmpk": np.ma.max,
+        "low_tmpk": np.ma.min,
+        "p01d": np.ma.sum,
+        "high_soil4t": np.ma.max,
+        "avg_dwpk": np.ma.mean,
+        "rsds": np.ma.sum,
+        "low_soil4t": np.ma.min,
+        "high_tmpk_12z": np.ma.max,
+        "low_tmpk_12z": np.ma.min,
+        "p01d_12z": np.ma.sum,
+    }
     for vname in (
         "high_tmpk low_tmpk p01d high_soil4t avg_dwpk rsds "
         "low_soil4t high_tmpk_12z low_tmpk_12z p01d_12z"
@@ -184,13 +196,7 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
             # Done via other means
             continue
         res = None
-        aggfunc = np.ma.max
-        if vname in ["p01d_12z", "p01d", "rsds"]:
-            aggfunc = np.ma.sum  # was np.nansum, better check this
-        elif vname.startswith("low"):
-            aggfunc = np.ma.min
-        elif vname.startswith("avg"):
-            aggfunc = np.ma.mean
+        aggfunc = aggfuncs[vname]
         ncvarname = (
             vname.replace("high_", "")
             .replace("low_", "")

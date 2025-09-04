@@ -3,7 +3,25 @@
 Documentation for /cgi-bin/request/raster2netcdf.py
 ---------------------------------------------------
 
-To be written.
+The IEM is perhaps more clever than its own good and stores some RASTER data
+as the color index value within 8-bit PNG files.  This service converts these
+to more conventional NetCDF files with the actual values.
+
+Changelog
+---------
+
+- 2025-09-04: Updated docs and testing.
+- 2025-09-04: A request for a file resource that does not exist will now
+  return a 404 HTTP status code.
+
+Example Usage
+-------------
+
+Generate a NetCDF file for the N0R product valid at 2017-10-25 12:00 UTC
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?\
+dstr=201710251200&prod=composite_n0r
+
 """
 
 import os
@@ -14,10 +32,12 @@ from io import BytesIO
 import netCDF4
 import numpy as np
 from PIL import Image
-from pydantic import Field
-from pyiem.database import get_dbconn
+from pydantic import Field, field_validator
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.util import archive_fetch
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 
 class Schema(CGIModel):
@@ -25,16 +45,28 @@ class Schema(CGIModel):
 
     dstr: str = Field(
         "201710251200",
-        description="UTC Datetime to request data for",
+        description="UTC Datetime (YYYYmmddHHMI) to request data for",
         max_length=12,
+        pattern=r"^\d{12}$",
     )
-    prod: str = Field("", description="Product to request", max_length=100)
+    prod: str = Field(..., description="Product to request", max_length=100)
+
+    @field_validator("dstr", mode="before")
+    @classmethod
+    def validate_dstr(cls, val):
+        """Ensure this converts to a datetime."""
+        # This will raise a ValueError anyway
+        datetime.strptime(val, "%Y%m%d%H%M")
+        return val
 
 
-def get_gridinfo(filename, xpoints, ypoints):
+def get_gridinfo(ppath: str, xpoints, ypoints):
     """Figure out the grid navigation, sigh"""
-    with open(f"{filename[:-4]}.wld", encoding="ascii") as fh:  # skipcq
-        lines = fh.readlines()
+    with archive_fetch(f"{ppath[:-4]}.wld") as fn:
+        if fn is None:
+            raise IncompleteWebRequest("No world file found")
+        with open(fn) as fh:
+            lines = fh.readlines()
     dx = float(lines[0])
     dy = float(lines[3])
     west = float(lines[4])
@@ -45,28 +77,34 @@ def get_gridinfo(filename, xpoints, ypoints):
     return lons, lats
 
 
-def get_table(prod):
+@with_sqlalchemy_conn("mesosite")
+def get_table(prod: str, conn: Connection | None = None):
     """Return our lookup table"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
-    xref = [1.0e20] * 256
-    cursor.execute(
-        "SELECT id, filename_template, units, cf_long_name "
-        "from iemrasters where name = %s",
-        (prod,),
+    res = conn.execute(
+        sql_helper("""
+    SELECT id, filename_template, units, cf_long_name
+    from iemrasters where name = :prod and filename_template is not null
+        """),
+        {"prod": prod},
     )
-    if cursor.rowcount == 0:
-        raise IncompleteWebRequest("Unknown product")
-    (rid, template, units, long_name) = cursor.fetchone()
-    cursor.execute(
-        """
+    rid = None
+    for row in res.mappings():
+        rid = row["id"]
+        template = row["filename_template"]
+        units = row["units"]
+        long_name = row["cf_long_name"]
+    if rid is None:
+        raise IncompleteWebRequest("Unknown prod")
+    res = conn.execute(
+        sql_helper("""
         SELECT coloridx, value from iemrasters_lookup
-        WHERE iemraster_id = %s and value is not null
+        WHERE iemraster_id = :rid and value is not null
         ORDER by coloridx ASC
-    """,
-        (rid,),
+    """),
+        {"rid": rid},
     )
-    for row in cursor:
+    xref = [1.0e20] * 256
+    for row in res:
         xref[row[0]] = row[1]
     return np.array(xref), template, units, long_name
 
@@ -89,22 +127,23 @@ def make_netcdf(xpoints, ypoints, lons, lats):
     return tmpobj.name
 
 
-def do_work(valid, prod, start_response):
+def do_work(valid: datetime, prod: str, start_response):
     """Our workflow"""
     # Get lookup table
     xref, template, units, long_name = get_table(prod)
-    if template is None:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return b"ERROR: The IEM Archives do not have this file available"
     # Get RASTER
-    fn = valid.strftime(template)
-    if not os.path.isfile(fn):
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return b"ERROR: The IEM Archives do not have this file available"
-    raster = np.flipud(np.array(Image.open(fn)))
+    ppath = valid.strftime(template).replace("/mesonet/ARCHIVE/data", "")
+    with archive_fetch(ppath) as fh:
+        if fh is None:
+            start_response(
+                "404 File Not Found", [("Content-type", "text/plain")]
+            )
+            return b"ERROR: The IEM Archives do not have this file available"
+        with Image.open(fh) as img:
+            raster = np.flipud(np.array(img))
     (ypoints, xpoints) = raster.shape
     # build lat, lon arrays
-    lons, lats = get_gridinfo(fn, xpoints, ypoints)
+    lons, lats = get_gridinfo(ppath, xpoints, ypoints)
     # create netcdf file
     tmpname = make_netcdf(xpoints, ypoints, lons, lats)
     with netCDF4.Dataset(tmpname, "a") as nc:
@@ -136,12 +175,5 @@ def application(environ, start_response):
     """Do great things"""
     dstr = environ["dstr"]
     prod = environ["prod"]
-    if prod == "":
-        raise IncompleteWebRequest("prod is required")
-    try:
-        valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(
-            tzinfo=timezone.utc
-        )
-    except Exception as exp:
-        raise IncompleteWebRequest("dstr not in form %Y%m%d%H%M") from exp
+    valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
     return [do_work(valid, prod, start_response)]

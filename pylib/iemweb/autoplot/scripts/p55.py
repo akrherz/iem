@@ -141,9 +141,9 @@ def plotter(ctx: dict):
         ymin = df[[f"iem_{c}", f"ncei91_{c}", f"ncei81_{c}"]].min().min()
         ax[i].set_ylim(bottom=ymin - 2)
 
-    ax[0].set_ylabel(r"High Temp $^\circ$F")
-    ax[1].set_ylabel(r"Low Temp $^\circ$F")
-    ax[2].set_ylabel(r"Average Temp $^\circ$F")
+    ax[0].set_ylabel("High Temp °F")
+    ax[1].set_ylabel("Low Temp °F")
+    ax[2].set_ylabel("Average Temp °F")
 
     ax[2].legend(
         loc="lower center",

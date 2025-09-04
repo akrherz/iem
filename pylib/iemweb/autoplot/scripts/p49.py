@@ -20,8 +20,8 @@ from pyiem.plot import figure_axes
 from iemweb.autoplot import ARG_STATION
 
 PDICT = {
-    "high": "High Temp (F)",
-    "low": "Low Temp (F)",
+    "high": "High Temp (°F)",
+    "low": "Low Temp (°F)",
     "precip": "Precip (inch)",
     "snow": "Snowfall (inch)",
     "snowd": "Snow Depth (inch)",

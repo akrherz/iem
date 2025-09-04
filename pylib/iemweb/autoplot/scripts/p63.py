@@ -55,7 +55,7 @@ def plotter(ctx: dict):
     lyears = [0] * (eyear - syear)
     precords = {}
     pyears = [0] * (eyear - syear)
-    expect = [0] * (eyear - syear)
+    expect = [0.0] * (eyear - syear)
 
     for row in cursor:
         sday = row["sday"]

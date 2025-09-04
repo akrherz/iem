@@ -79,15 +79,15 @@ def plotter(ctx: dict):
         index=pd.Series(range(1, 13), name="month"),
     )
     for _varname in PDICT:
-        for _agg in ["min", "max"]:
+        for _agg in [min, max]:
             df2 = df[[_varname, "month", "year"]]
             df2 = df2[
                 df[_varname] == df.groupby("month")[_varname].transform(_agg)
             ].copy()
             df2 = df2.rename(
                 columns={
-                    "year": f"{_agg}_{_varname}_year",
-                    _varname: f"{_agg}_{_varname}",
+                    "year": f"{_agg.__name__}_{_varname}_year",
+                    _varname: f"{_agg.__name__}_{_varname}",
                 },
             ).set_index("month")
             resdf = resdf.join(df2)
@@ -155,7 +155,7 @@ def plotter(ctx: dict):
         ax2.set_ylabel("Measurable Precip Days")
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(top=resdf[col].max() * 1.2)
-    ylabel = r"Temperature $^\circ$F"
+    ylabel = "Temperature °F"
     if varname in ["total_precip"]:
         ylabel = "Precipitation [inch]"
     elif varname in ["rain_days"]:

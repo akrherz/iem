@@ -101,7 +101,7 @@ def plotter(ctx: dict):
     status_limiter = "and status = 'NEW'"
     if ctx["agg"] == "max":
         status_limiter = ""
-    sql = f"""
+    sql = """
     WITH data as (
         SELECT wfo, eventid, vtec_year,
         min(polygon_begin) as min_issue,
@@ -129,7 +129,7 @@ def plotter(ctx: dict):
             f"{state_names[state]}.\n"
         )
 
-        sql = f"""
+        sql = """
         WITH data as (
             SELECT wfo, eventid, vtec_year,
             min(polygon_begin) as min_issue,
@@ -148,7 +148,14 @@ def plotter(ctx: dict):
         """
         params["state"] = state
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(sql_helper(sql), conn, params=params, index_col=None)
+        df = pd.read_sql(
+            sql_helper(
+                sql, status_limiter=status_limiter, wfo_limiter=wfo_limiter
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()

@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
+import numpy as np
 import pandas as pd
 from matplotlib import ticker
 from matplotlib.artist import setp
@@ -146,11 +147,11 @@ def plotter(ctx: dict):
     ).dt.total_seconds()
     df = df.set_index("utc_valid")
 
-    def ceilingfunc(row):
+    def ceilingfunc(row: dict) -> float:
         """Our logic to compute a ceiling"""
         c = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
         if "OVC" not in c:
-            return None
+            return np.nan
         pos = c.index("OVC")
         larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
         if pd.isnull(larr[pos]):

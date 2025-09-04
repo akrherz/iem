@@ -125,7 +125,7 @@ def plotter(ctx: dict):
     H, xedges, yedges = np.histogram2d(
         df["week"].to_numpy(),
         df["delta"].to_numpy(),
-        [list(range(54)), list(bins)],
+        [np.arange(54), list(bins)],
     )
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
@@ -171,7 +171,7 @@ def plotter(ctx: dict):
     H, xedges, yedges = np.histogram2d(
         df["sknt"].to_numpy(),
         df["delta"].to_numpy(),
-        [list(range(31)), list(bins)],
+        [np.arange(31), list(bins)],
     )
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)
