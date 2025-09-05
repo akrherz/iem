@@ -2,22 +2,24 @@
 <!-- Mobile navbar: Simple single row with logo, search, and hamburger -->
 <nav class="navbar-site d-block d-lg-none" aria-label="Utility navigation">
     <div class="container">
-        <div class="mobile-navbar-row">
-            <div class="mobile-logo">
+        <div class="mobile-navbar-row d-flex align-items-center">
+            <div class="mobile-logo me-2">
                 <a href="/" title="Home">
                     <img src="/images/logo_small.png" alt="IEM" height="30">
                 </a>
             </div>
             
-            <div class="mobile-search">
+            <div class="mobile-search flex-fill me-2">
                 <form action="/search" method="GET" role="search">
                     <input name="q" aria-label="Search" title="Search" placeholder="Search 'DSM' 'autoplot 100' 'street address'" type="text" class="form-control form-control-sm">
                 </form>
             </div>
             
-            <div class="mobile-menu">
-                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mobile-nav-collapse" aria-controls="mobile-nav-collapse" aria-expanded="false" aria-label="Toggle navigation menu">
+            <div class="mobile-menu d-flex align-items-center">
+                <!-- Utility toggler removed per design: keep only primary-nav toggler -->
+                <button type="button" class="navbar-toggler p-1 ms-2" data-bs-toggle="collapse" data-bs-target="#navbar-menu-collapse" aria-controls="navbar-menu-collapse" aria-expanded="false" aria-label="Toggle primary navigation">
                     <span class="navbar-toggler-icon"></span>
+                    <span class="visually-hidden">Primary navigation</span>
                 </button>
             </div>
         </div>
@@ -71,8 +73,8 @@
             <a href="/"><img style="height: 50px;" alt="IEM" class="img-fluid float-start" src="/images/logo_small.png" /></a>
         </div>
         
-        <!-- Main navigation menu (collapsible on mobile) -->
-        <div class="navbar-collapse collapse" id="navbar-menu-collapse">
+    <!-- Main navigation menu (collapsible on mobile) -->
+    <div class="navbar-collapse collapse" id="navbar-menu-collapse">
             <ul class="nav navbar-nav">
         
 <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" 
