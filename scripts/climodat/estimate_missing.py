@@ -54,10 +54,12 @@ def process(cursor, station, df, meta):
             if pd.notna(row[col]):
                 continue
             if col in ["high", "low"]:
+                # We should take both values, can't have a mix
                 newvals["temp_estimated"] = True
-            elif col == "precip":
-                newvals["precip_estimated"] = True
-            units = "f" if col != "precip" else "in"
+                newvals["high"] = estimated.loc[row["day"]][f"{prefix}_high_f"]
+                newvals["low"] = estimated.loc[row["day"]][f"{prefix}_low_f"]
+                continue
+            newvals["precip_estimated"] = True
             if (
                 col == "precip"
                 and prefix == "12z"
@@ -67,9 +69,7 @@ def process(cursor, station, df, meta):
                     "prism_precip_in"
                 ]
             else:
-                newvals[col] = estimated.loc[row["day"]][
-                    f"{prefix}_{col}_{units}"
-                ]
+                newvals[col] = estimated.loc[row["day"]][f"{prefix}_{col}_in"]
         if None in newvals.values():
             LOG.warning(
                 "Skipping station: %s day: %s as there are missing values",
