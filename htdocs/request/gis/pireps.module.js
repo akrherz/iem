@@ -12,7 +12,7 @@ const initPireps = () => {
 
     const getFilterParts = () => {
         const parts = [];
-        if (artcc && artcc.value && artcc.value !== "_ALL") {
+        if (artcc?.value !== "_ALL") {
             parts.push(`ARTCC=${artcc.value}`);
         }
         const spatialEnabled = document.querySelector("input[name='filter']").checked;
@@ -47,8 +47,8 @@ const initPireps = () => {
                 el.classList.remove('is-invalid');
             }
         };
-        const d = parseFloat(degrees.value);
-        setInvalid(degrees, Number.isNaN(d) || d < 0);
+        const degreesValue = parseFloat(degrees.value);
+        setInvalid(degrees, Number.isNaN(degreesValue) || degreesValue < 0);
         const lonv = parseFloat(lon.value);
         setInvalid(lon, Number.isNaN(lonv) || lonv < -180 || lonv > 180);
         const latv = parseFloat(lat.value);
