@@ -136,8 +136,8 @@ def run(environ, start_response):
     spatialsql = ""
     if environ["filter"]:
         spatialsql = (
-            "ST_Distance(geom::geometry, ST_SetSRID(ST_Point(:lon, :lat), "
-            "4326)) <= :distance and "
+            "ST_Distance(geom::geometry, ST_Point(:lon, :lat, 4326) "
+            ") <= :distance and "
         )
     else:
         if (environ["ets"] - environ["sts"]).days > 120:

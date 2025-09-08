@@ -5,6 +5,7 @@ require_once "../../../include/forms.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();
+$t->iemss = True;
 $t->iem_resource = "PIREPS";
 $t->title = "Download PIREPs";
 $artcc = Array(
@@ -34,12 +35,12 @@ $artcc = Array(
 $artccSelect = make_select("artcc", "_ALL", $artcc);
 
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">Archived Pilot Reports (PIREPs)</li>
-</ul>
-</p>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Archived Pilot Reports (PIREPs)</li>
+    </ol>
+</nav>
 
 <p>The IEM attempts to process a feed of Pilot Reports (PIREPs). This
 processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/pirep.py">PyIEM Library</a>.
@@ -70,15 +71,17 @@ exists for those wishing to script against this service.</p>
 </p>
 
 <form method="GET" action="/cgi-bin/request/gis/pireps.py">
+<div class="form2url"></div>
+
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
+<div class="table-responsive">
 <table class="table">
 <thead>
     <tr>
     <th colspan="6">Time Interval</th>
     <th>Format</th>
-    <th>Spatial Filter (Optional)</th>
-    <th>ARTCC Filter (Optional)</th>
+    <th>Filters (Optional)</th>
     </tr>
 </thead>
 <tr>
@@ -86,24 +89,69 @@ exists for those wishing to script against this service.</p>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
     <td rowspan="3">
-    <select name="fmt">
-        <option value="shp">ESRI Shapefile</option>
-        <option value="csv">Comma Delimited</option>
-    </select>
+        <select name="fmt" class="form-select form-select-sm">
+            <option value="shp">ESRI Shapefile</option>
+            <option value="csv">Comma Delimited</option>
+        </select>
     </td>
     <td rowspan="3">
-        <input type="checkbox" name="filter" value="1" id="filter">
-        <label for="filter">Enable Spatial Filter</label><br />
-        <div id="spatialfilter" style="display: none;">
-        Filter reports to a Latitude + Longitude circle of
-        <input type="text" name="degrees" size="5" value="3.0">
-        degrees to point
-        <input type="text" name="lon" size="10" value="-91.99"> East and
-        <input type="text" name="lat" size="10" value="41.99"> North
+        <div class="card border-secondary p-2">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">Filters (optional)</h6>
+                    <div class="form-text">Use either ARTCC, Lon/Lat, or both.</div>
+                </div>
+                <div id="filter-summary" class="text-end">
+                    <span class="badge bg-secondary">No filters</span>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="filter" value="1" id="filter">
+                    <label class="form-check-label" for="filter">Enable Lon/Lat Filter</label>
+                </div>
+
+                <div id="spatialfilter" class="d-none mb-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-auto">
+                            <label for="degrees" class="form-label mb-0 visually-hidden">Radius (degrees)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Radius</span>
+                                <input class="form-control" type="text" id="degrees" name="degrees" size="5" value="3.0" aria-label="degrees">
+                                <span class="input-group-text">deg</span>
+                            </div>
+                            <div class="invalid-feedback">Enter a radius in degrees (&gt;=0).</div>
+                        </div>
+
+                        <div class="col-auto">
+                            <label for="lon" class="form-label mb-0 visually-hidden">Longitude</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Lon</span>
+                                <input class="form-control" type="text" id="lon" name="lon" size="10" value="-91.99" aria-label="longitude">
+                            </div>
+                            <div class="invalid-feedback">Longitude must be between -180 and 180.</div>
+                        </div>
+
+                        <div class="col-auto">
+                            <label for="lat" class="form-label mb-0 visually-hidden">Latitude</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Lat</span>
+                                <input class="form-control" type="text" id="lat" name="lat" size="10" value="41.99" aria-label="latitude">
+                            </div>
+                            <div class="invalid-feedback">Latitude must be between -90 and 90.</div>
+                        </div>
+                    </div>
+                    <div class="form-text mt-2">Filter reports to a latitude/longitude circle centered at the point (Lon, Lat) with the radius in degrees.</div>
+                </div>
+
+                <div class="mb-1">
+                    <label for="artcc" class="form-label mb-1">ARTCC Filter</label>
+                    <div>{$artccSelect}</div>
+                    <div class="form-text">Optional: pick an ARTCC to further restrict results. You may use this with or without the Lon/Lat filter.</div>
+                </div>
+            </div>
         </div>
-    </td>
-    <td rowspan="3">
-        {$artccSelect}
     </td>
 </tr>
 
@@ -146,10 +194,13 @@ $content .= "
      ". minuteSelect(59, "minute2") ."
     </td>
   </tr>
-</table>";
+</table>
+</div>";
 
 $content .= <<<EOM
-<p><input type="submit" value="Giveme data right now!">
+<p>
+    <button type="submit" class="btn btn-success">Giveme data right now!</button>
+</p>
 </form>
 
 <h4>Shapefile DBF schema:</h4>
@@ -196,12 +247,7 @@ Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
 EOM;
 $t->content = $content;
 $t->jsextra = <<<EOM
-<script>
-$("input[name='filter']").click(function(){
-    var display = (this.checked) ? "block": "none";
-    $("#spatialfilter").css("display", display);
-});
-</script>
+<script type="module" src="pireps.module.js"></script>
 EOM;
 
 $t->render('single.phtml');

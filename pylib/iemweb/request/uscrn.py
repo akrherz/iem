@@ -14,6 +14,24 @@ Changelog
 
 - 2025-02-26: Initial implementation
 
+Example Requests
+----------------
+
+Provide the August 2020 data fo USCRN station 96404
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/uscrn.py?\
+stations=96404&sts=2020-08-01T00:00Z&ets=2020-08-31T23:59Z
+
+Same request, but an Excel spreadsheet
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/uscrn.py?\
+stations=96404&sts=2020-08-01T00:00Z&ets=2020-08-31T23:59Z&format=excel
+
+Same request, but JSON output
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/uscrn.py?\
+stations=96404&sts=2020-08-01T00:00Z&ets=2020-08-31T23:59Z&format=json
+
 """
 
 from io import BytesIO, StringIO
