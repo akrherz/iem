@@ -10,6 +10,8 @@ to more conventional NetCDF files with the actual values.
 Changelog
 ---------
 
+- 2025-09-09: Implemented a four process per web server node throttle, service
+  will return a 503 HTTP status code if the throttle is exceeded.
 - 2025-09-04: Updated docs and testing.
 - 2025-09-04: A request for a file resource that does not exist will now
   return a 404 HTTP status code.
@@ -31,6 +33,7 @@ from io import BytesIO
 
 import netCDF4
 import numpy as np
+import posix_ipc
 from PIL import Image
 from pydantic import Field, field_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -38,6 +41,13 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import archive_fetch
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
+
+# Limit processing to 4 at a time
+SEMAPHORE = posix_ipc.Semaphore(
+    f"/raster2netcdf_throttle_{os.getuid()}",
+    flags=posix_ipc.O_CREAT,
+    initial_value=4,
+)
 
 
 class Schema(CGIModel):
@@ -173,7 +183,21 @@ def do_work(valid: datetime, prod: str, start_response):
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do great things"""
-    dstr = environ["dstr"]
-    prod = environ["prod"]
-    valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
-    return [do_work(valid, prod, start_response)]
+    try:
+        SEMAPHORE.acquire(timeout=0)
+    except posix_ipc.BusyError:
+        start_response(
+            "503 Service Temporarily Unavailable",
+            [("Content-type", "text/plain")],
+        )
+        return [b"ERROR: Too many requests, throttled"]
+    try:
+        dstr = environ["dstr"]
+        prod = environ["prod"]
+        valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(
+            tzinfo=timezone.utc
+        )
+        res = do_work(valid, prod, start_response)
+    finally:
+        SEMAPHORE.release()
+    return res
