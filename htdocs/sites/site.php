@@ -66,7 +66,7 @@ IEM Sites Move Request
 Review with suggested location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}&suggested_lat={$newlat}&suggested_lon={$newlon}
 Original location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
 EOM;
-    if ((($delta > 0.001) && ($delta < 0.5)) || (strpos($email, '@') > 0)) {
+    if ((($delta > 0.0001) && ($delta < 0.5)) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }
     // We are doing a GET request, so we don't want folks to bookmark this
