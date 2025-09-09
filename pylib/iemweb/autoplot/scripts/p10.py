@@ -62,6 +62,43 @@ def get_description():
     return desc
 
 
+def print_top10(ax, df: pd.DataFrame):
+    """Print the top 10"""
+
+    text = "Fall Season\nEarliest    | Latest\n"
+    for season in ["fall", "spring"]:
+        earliest = []
+        for _, row in (
+            df.sort_values(by=f"{season}_sday", ascending=True)
+            .head(10)
+            .iterrows()
+        ):
+            earliest.append(f"{row[f'{season}_date']:%Y-%b-%d}")
+        latest = []
+        for _, row in (
+            df.sort_values(by=f"{season}_sday", ascending=False)
+            .head(10)
+            .iterrows()
+        ):
+            latest.append(f"{row[f'{season}_date']:%Y-%b-%d}")
+        for early, late in zip(earliest, latest, strict=True):
+            text += f"{early:10s} | {late:10s}\n"
+        if season == "fall":
+            text += "\n\n\nSpring Season\nEarliest    | Latest\n"
+
+    ax.text(
+        1.1,
+        0.5,
+        text,
+        transform=ax.transAxes,
+        fontsize=10,
+        fontfamily="monospace",
+        va="center",
+        ha="left",
+        bbox=dict(boxstyle="round", fc="wheat", ec="0.5", alpha=0.7),
+    )
+
+
 @with_sqlalchemy_conn("coop")
 def plotter(ctx: dict, conn=None):
     """Go"""
@@ -134,7 +171,11 @@ def plotter(ctx: dict, conn=None):
     df = pd.DataFrame(rows)
     if df.empty:
         raise NoDataFound("No data found for query.")
+    for col in ["spring_date", "fall_date"]:
+        df[col] = pd.to_datetime(df[col])
     df["season"] = df["fall"] - df["spring"]
+    df["fall_sday"] = df["fall_date"].dt.strftime("%m%d")
+    df["spring_sday"] = df["spring_date"].dt.strftime("%m%d")
     today = date.today()
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
@@ -179,7 +220,7 @@ def plotter(ctx: dict, conn=None):
     (fig, ax) = figure_axes(
         title=ctx["_sname"], subtitle=f"{title} {threshold}{units}", apctx=ctx
     )
-    ax.set_position([0.1, 0.1, 0.8, 0.7])
+    ax.set_position([0.08, 0.1, 0.6, 0.8])
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
@@ -238,9 +279,12 @@ def plotter(ctx: dict, conn=None):
     )
 
     ax.grid(True)
-    ax.legend(ncol=4, fontsize=14, labelspacing=2, loc=(0.1, 0.91))
+    ax.legend(ncol=4, loc=(0.01, 0.91))
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_ylim(min(spring) - 5, max(fall) + 30)
     ax.set_xlim(min(years) - 1, max(years) + 1)
+
+    print_top10(ax, df)
+
     return fig, df, res
