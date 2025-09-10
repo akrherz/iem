@@ -7,7 +7,6 @@ will be from the start of the two year period that crosses 1 January.
 
 from datetime import date, datetime, timedelta
 
-import httpx
 import pandas as pd
 from matplotlib.dates import DateFormatter, DayLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -15,6 +14,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.json.climodat_stclimo import run as climodat_stclimo_run
 
 PDICT = {
     "maxmin": "Daily Maximum / Minimums",
@@ -128,16 +128,8 @@ def plotter(ctx: dict):
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
     )
-    try:
-        resp = httpx.get(
-            "http://iem.local/json/climodat_stclimo.py",
-            params={"station": station},
-            timeout=30,
-        )
-        resp.raise_for_status()
-    except Exception as exp:
-        raise NoDataFound(f"Failed to fetch data: {exp}") from exp
-    df = pd.DataFrame(resp.json()["climatology"])
+    climo = climodat_stclimo_run(station, bs.year, be.year + 1)
+    df = pd.DataFrame(climo["climatology"])
     if df.empty:
         raise NoDataFound("Climatology was not found.")
     df["valid"] = pd.to_datetime(

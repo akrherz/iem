@@ -13,20 +13,21 @@ jobs:
       run:
         # Ensures environment gets sourced right
         shell: bash -l -e {0}
-    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_IEM_DATA }}) Test Web (${{ matrix.TEST_WEB }})
+    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_TEST_DATA }}) Test Web (${{ matrix.TEST_WEB }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         PYTHON_VERSION: ["3.13"]
-        WITH_IEM_DATA: ["YES", "NO"]
+        WITH_TEST_DATA: ["test_data", "no_test_data"]
         TEST_WEB: ["YES", "NO"]
         exclude:
+          # This combination is not all that useful
           - PYTHON_VERSION: "3.13"
             TEST_WEB: "NO"
-            WITH_IEM_DATA: "NO"
+            WITH_TEST_DATA: "no_test_data"
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
-      WITH_IEM_DATA: ${{ matrix.WITH_IEM_DATA }}
+      WITH_TEST_DATA: ${{ matrix.WITH_TEST_DATA }}
       TEST_WEB: ${{ matrix.TEST_WEB }}
     steps:
     - uses: actions/checkout@v5
@@ -36,19 +37,21 @@ jobs:
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
-    - name: Run IEM Database Container
+    # Required for all matrix jobs
+    - name: Run IEM Database Container label:${{ env.WITH_TEST_DATA }}
       run: |
-        IMAGE_TAG=$([[ ${{ matrix.WITH_IEM_DATA }} == 'YES' ]] && echo "test_data" || echo "no_test_data")
-        docker run -d --name iem_database -p 5432:5432 ghcr.io/akrherz/iem_database:$IMAGE_TAG
+        docker run -d --name iem_database -p 5432:5432 ghcr.io/akrherz/iem_database:${{ env.WITH_TEST_DATA }}
         until docker exec iem_database pg_isready -h localhost; do
           sleep 6
         done
 
+    # Required for all matrix jobs
     - name: Run Memcached container
       run: |
         docker run -d --name iem_memcached -p 11211:11211 memcached:1.6.9
 
-    # setup conda-forge with micromamba
+    # All three matrix jobs will fight over the cache write, but it is a
+    # harmless warning
     - name: Setup Python
       uses: mamba-org/setup-micromamba@v2
       with:
@@ -62,6 +65,11 @@ jobs:
         environment-name: prod
         cache-environment: true
 
+    # conda-forge does not have everything we need, yet
+    - name: Install Python requirements from pip
+      run: |
+        python -m pip install -r pip_requirements.txt
+
     - name: Clone ci_tooling
       run: |
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
@@ -71,25 +79,24 @@ jobs:
       run: |
         cp config/settings.inc.php.in config/settings.inc.php
 
-    # conda-forge does not have everything we need, yet
-    - name: Install Python requirements from pip
-      run: |
-        python -m pip install -r pip_requirements.txt
-
+    # All jobs need to have directories laid out
     - name: Setup Directory Paths
       run: sh .github/setuppaths.sh
 
+    # Only one job needs to load the test data
     - name: Setup IEM Data
-      if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
+      if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
       run: sh .github/setupdata.sh
 
     # Get apache running, which is needed to build mod_wsgi
     - name: Configure IEM Webfarm Server
+      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         cd .ci_tooling
         . iemwebfarm.sh
 
     - name: Configure Webfarm Server
+      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
@@ -117,31 +124,31 @@ jobs:
       run: pytest -n 4 tests/test_php.py
 
     # - name: Setup upterm session
-    #  if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+    #  if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
     #  uses: lhotari/action-upterm@v1
     #  with:
     #    limit-access-to-actor: true
 
     - name: Run IEMWeb Python Check
-      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
       run: |
         export PYTHONPATH=/opt/iem/pylib
-        python -m pytest --mpl --cov=iemweb -n 4 tests/iemweb/
+        python -m pytest --mpl --cov=iemweb --durations=10 -n 4 -W error::FutureWarning tests/iemweb/
         python -m coverage xml
 
     - name: Upload to Codecov
-      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
       uses: codecov/codecov-action@v5
       with:
         files: coverage.xml
 
     - name: View Apache Logs
-      if: ${{ failure() }}
+      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
 
     - name: View PHP-FPM Logs
-      if: ${{ failure() }}
+      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
       run: |
         sudo cat /var/log/php*-fpm.log

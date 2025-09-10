@@ -39,7 +39,6 @@ https://mesonet.agron.iastate.edu/search.py?q=100%20Main%20St%20Ames%20Iowa
 # Local
 import re
 
-import httpx
 import pandas as pd
 
 # Third Party
@@ -47,6 +46,8 @@ from commonregex import CommonRegex
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
 from pyiem.webutil import iemapp
+
+from iemweb.geocoder import geocode
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{4,6}$", re.IGNORECASE)
 STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.IGNORECASE)
@@ -67,16 +68,11 @@ def station_df_handler(df: pd.DataFrame) -> str:
     return f"/sites/site.php?station={r1['id']}&network={r1['network']}"
 
 
-def geocoder(q):
+def geocoder(q: str) -> str:
     """Attempt geocoding."""
-    resp = httpx.get(
-        "http://iem.local/cgi-bin/geocoder.py",
-        params={"address": q},
-        timeout=30,
-    )
-    if resp.status_code != 200:
+    lat, lon = geocode(q)
+    if lat is None or lon is None:
         return "/sites/locate.php"
-    lat, lon = resp.text.split(",")
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
             sql_helper("""SELECT id, network,

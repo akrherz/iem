@@ -139,8 +139,13 @@ def run(environ: dict) -> str:
         )
         if environ["include_text"]:
             try:
+                # This request is outside this repo, so no need for internal
+                # API routing
                 resp = httpx.get(
-                    f"http://iem.local/api/1/nwstext/{product_ids[0]}",
+                    (
+                        "http://mesonet.agron.iastate.edu/"
+                        f"api/1/nwstext/{product_ids[0]}"
+                    ),
                     timeout=5,
                 )
                 resp.raise_for_status()

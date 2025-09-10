@@ -232,7 +232,7 @@ def get_mckey(scriptnum, fdict: dict, fmt: str):
     return mckey
 
 
-def workflow(mc, environ, fmt):
+def workflow(mc, environ: dict, fmt: str):
     """we need to return a status and content"""
     # q is the full query string that was rewritten to use by apache
     q = environ.get("q", "")
@@ -263,7 +263,10 @@ def workflow(mc, environ, fmt):
             TELEMETRY(
                 (utc() - start_time).total_seconds(),
                 500,
-                environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
+                # In testing, perhaps both could be None
+                environ.get(
+                    "X-Forwarded-For", environ.get("REMOTE_ADDR", "127.0.0.1")
+                )
                 .split(",")[0]
                 .strip(),
                 environ.get("SCRIPT_NAME"),

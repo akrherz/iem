@@ -146,10 +146,9 @@ def plotter(ctx: dict):
             params["station"] = station
             params["lat"] = meta["lat"]
             params["lon"] = meta["lon"]
-            dfs.append(
-                pd.read_sql(
-                    sql_helper(
-                        """
+            df = pd.read_sql(
+                sql_helper(
+                    """
                 WITH data as (
                     SELECT sday, day,
                     sum(precip) OVER (PARTITION by station ORDER by day ASC
@@ -174,11 +173,12 @@ def plotter(ctx: dict):
                 :station as station, :lat as lat, :lon as lon
                 from data d, stats s WHERE d.day = :date
             """
-                    ),
-                    conn,
-                    params=params,
-                )
+                ),
+                conn,
+                params=params,
             )
+            if not df.empty:
+                dfs.append(df)
     if not dfs:
         raise NoDataFound("Did not find any data.")
     df = pd.concat(dfs)

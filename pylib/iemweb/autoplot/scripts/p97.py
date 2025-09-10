@@ -462,10 +462,11 @@ def get_data(ctx):
             if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
                 # We need to compute our own GDD Climatology, Le Sigh
                 df = replace_gdd_climo(ctx, df, table, date1, date2)
-            dfs.append(df)
-    df = pd.concat(dfs)
-    if df.empty:
+            if not df.empty:
+                dfs.append(df)
+    if not dfs:
         raise NoDataFound("No Data Found.")
+    df = pd.concat(dfs)
     # Drop any entries with NaN
     df = df[~pd.isna(df[ctx["var"]])]
     if df.empty:

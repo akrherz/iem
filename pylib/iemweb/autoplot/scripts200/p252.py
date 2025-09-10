@@ -184,17 +184,17 @@ def plotter(ctx: dict):
     )
     if ctx["popt"] == "contour":
         mp.contourf(
-            df["lon"],
-            df["lat"],
-            df["frequency"],
+            df["lon"].to_numpy(),
+            df["lat"].to_numpy(),
+            df["frequency"].to_numpy(),
             np.arange(0, 101, 10),
             cmap=ctx["cmap"],
             extend="neither",
         )
     mp.plot_values(
-        df["lon"],
-        df["lat"],
-        df["frequency"].values,
+        df["lon"].to_numpy(),
+        df["lat"].to_numpy(),
+        df["frequency"].to_numpy(),
         fmt="%.0f",
         labelbuffer=5,
     )

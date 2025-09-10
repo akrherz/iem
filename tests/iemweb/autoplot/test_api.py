@@ -12,7 +12,8 @@ from werkzeug.test import Client
 def genmod():
     """Generate modules to test against."""
     for plot in autoplot_data["plots"]:
-        yield from plot["options"]
+        for entry in plot["options"]:
+            yield f"{entry['id']}"
 
 
 def test_fourcolons():
@@ -29,11 +30,11 @@ def test_threecolons():
     assert res["year"] == "2025"
 
 
-@pytest.mark.parametrize("entry", genmod())
-def test_autoplot_calls_via_frontend(entry: dict):
+@pytest.mark.parametrize("apid", genmod())
+def test_autoplot_calls_via_frontend(apid: str):
     """Just import things."""
     c = Client(meta_app)
-    meta = c.get(f"?p={entry['id']}").json
+    meta = c.get(f"?p={apid}").json
     fmts = ["png"]
     if meta["highcharts"]:
         fmts.append("js")
@@ -43,7 +44,7 @@ def test_autoplot_calls_via_frontend(entry: dict):
         fmts.append("geotiff")
     for fmt in fmts:
         c = Client(autoplot_app)
-        res = c.get(f"?p={entry['id']}&fmt={fmt}&cb=1")
+        res = c.get(f"?p={apid}&fmt={fmt}&cb=1")
         # Crude check that numpy arrays are not being str rendered
         if fmt == "js":
             assert res.text.find("np.") == -1

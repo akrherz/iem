@@ -230,8 +230,10 @@ def plotter(ctx: dict):
                     g
                     if not g["hit"].any()
                     else g.loc[: g.low[g["hit"]].index[0]]
-                )
+                ),
+                include_groups=False,
             )
+            .reset_index()
             .transform(lambda g: g)
             .reset_index(drop=True)
             .set_index("day")
