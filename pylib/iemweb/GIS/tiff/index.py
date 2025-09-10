@@ -145,10 +145,10 @@ def workflow(key, tmpdir, ts: datetime | None):
             valid = datetime.strptime(ts, "%Y%m%d%H%M")
         except Exception as exp:
             raise IncompleteWebRequest("Invalid ts provided") from exp
-        testfn = valid.strftime(meta["re"])
-        with archive_fetch(testfn) as testfn:
+        ppath = valid.strftime(meta["re"])
+        with archive_fetch(ppath) as testfn:
             if testfn is None:
-                raise FileNotFoundError("Failed to find file for service.")
+                raise FileNotFoundError(f"Failed to find {ppath} for service.")
             with subprocess.Popen(
                 [
                     "gdalwarp",
@@ -181,11 +181,11 @@ def application(environ, start_response):
                 res = workflow(service, tmpdir, ts)
                 start_response("200 OK", headers)
                 return [res]
-            except FileNotFoundError:
+            except FileNotFoundError as exp:
                 start_response(
                     "400 Bad Request", [("Content-type", "text/plain")]
                 )
-                return [b"File not found for service/ts combination."]
+                return [f"File not found for service/ts combination: {exp}"]
 
     valid = utc(environ["year"], environ["month"], environ["day"])
 

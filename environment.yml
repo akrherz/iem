@@ -21,6 +21,8 @@ dependencies:
   # various places
   - gdal
   - libgdal-pg
+  # For grib to TIFF conversion
+  - libgdal-grib
   # important
   - geopandas
   # Get stuff
