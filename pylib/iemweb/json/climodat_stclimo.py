@@ -25,8 +25,9 @@ import json
 from datetime import datetime
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 
 class Schema(CGIModel):
@@ -40,7 +41,8 @@ class Schema(CGIModel):
     syear: int = Field(1800, description="Start Year")
 
 
-def run(conn, station, syear, eyear):
+@with_sqlalchemy_conn("coop")
+def run(station, syear, eyear, conn: Connection | None = None) -> dict:
     """Do something"""
     res = conn.execute(
         sql_helper("""
@@ -129,7 +131,7 @@ def run(conn, station, syear, eyear):
                 min_range=row["min_range"],
             )
         )
-    return json.dumps(data)
+    return data
 
 
 def get_key(environ):
@@ -151,8 +153,7 @@ def application(environ, start_response):
     syear = environ["syear"]
     eyear = environ["eyear"]
 
-    with get_sqlalchemy_conn("coop") as conn:
-        res = run(conn, station, syear, eyear)
+    res = run(station, syear, eyear)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return res
+    return json.dumps(res)

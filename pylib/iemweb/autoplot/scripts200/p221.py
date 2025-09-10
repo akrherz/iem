@@ -86,7 +86,7 @@ def add_forecast(img, ctx, valid, fhour, x, y):
     """Overlay things."""
     ts = valid - timedelta(hours=fhour)
     if ts >= utc():
-        return None
+        return
     ppath = ts.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
     with archive_fetch(ppath) as gribfn:
         if gribfn is None:

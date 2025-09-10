@@ -1033,8 +1033,13 @@ def generate_trending():
     res += '<table class="table table-striped table-bordered">\n'
     res += "<tr><th>Plot</th><th>Requests</th></tr>\n"
     try:
+        # This is external API, so no need for internal routing
         data = httpx.get(
-            "http://iem.local/api/1/iem/trending_autoplots.json", timeout=5
+            (
+                "http://mesonet.agron.iastate.edu"
+                "/api/1/iem/trending_autoplots.json"
+            ),
+            timeout=5,
         ).json()
         for entry in data["data"][:5]:
             label = "Unknown"
