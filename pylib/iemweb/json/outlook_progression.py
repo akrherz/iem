@@ -88,14 +88,19 @@ class Schema(CGIModel):
     )
 
 
-def dowork(environ: dict) -> pd.DataFrame:
+def dowork(
+    outlook_type: str,
+    valid: date,
+    lon: float,
+    lat: float,
+) -> pd.DataFrame:
     """Actually do stuff"""
     params = {
-        "outlook_type": environ["outlook_type"],
-        "sts": environ["valid"],
-        "ets": environ["valid"] + timedelta(days=1),
-        "lon": environ["lon"],
-        "lat": environ["lat"],
+        "outlook_type": outlook_type,
+        "sts": valid,
+        "ets": valid + timedelta(days=1),
+        "lon": lon,
+        "lat": lat,
     }
     with get_sqlalchemy_conn("postgis") as conn:
         # Figure out the outlooks for this date
@@ -110,7 +115,7 @@ def dowork(environ: dict) -> pd.DataFrame:
         )
         domain["category"] = (
             "CATEGORICAL"
-            if environ["outlook_type"] != "F"
+            if outlook_type != "F"
             else "FIRE WEATHER CATEGORICAL"
         )
         # For reasons I can not figure out, postgresql would not pick the
@@ -163,7 +168,12 @@ def dowork(environ: dict) -> pd.DataFrame:
 def application(environ, start_response):
     """Answer request."""
     fmt = environ["fmt"]
-    outlooks = dowork(environ)
+    outlooks = dowork(
+        environ["outlook_type"],
+        environ["valid"],
+        environ["lon"],
+        environ["lat"],
+    )
 
     if fmt == "json":
         res = {

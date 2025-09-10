@@ -17,7 +17,6 @@ GDD Climatology.
 
 from datetime import date, timedelta
 
-import httpx
 import matplotlib.dates as mdates
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -25,6 +24,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.json.climodat_dd import run as climodat_dd_run
 
 
 def get_description():
@@ -73,19 +73,15 @@ def plotter(ctx: dict):
         cnt = len(df[(df["temp_hour"] > 1) & (df["temp_hour"] < 12)].index)
         if cnt / len(df.index) > 0.5:
             is_morning = True
-    try:
-        # Sub-optimal need to actually have data.
-        edate = ctx["sdate"] + timedelta(days=7)
-        resp = httpx.get(
-            "http://iem.local/json/climodat_dd.py?"
-            f"station={ctx['station']}&gddbase=50&gddceil=86&"
-            f"sdate={ctx['sdate']:%Y-%m-%d}&edate={edate:%Y-%m-%d}",
-            timeout=60,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-    except Exception as exp:
-        raise NoDataFound("Backend API failure, no data.") from exp
+    # Sub-optimal need to actually have data.
+    edate = ctx["sdate"] + timedelta(days=7)
+    data = climodat_dd_run(
+        ctx["station"],
+        ctx["sdate"],
+        edate,
+        50,
+        86,
+    )
     if "gfs" not in data or "ndfd" not in data:
         raise NoDataFound("No GFS or NDFD data found!")
     gfsdf = pd.DataFrame(data["gfs"])

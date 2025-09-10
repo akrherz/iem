@@ -94,7 +94,7 @@ def compute(taxis, highs, lows, gddbase, gddceil):
     return res, total
 
 
-def run(station, sdate, edate, gddbase, gddceil):
+def run(station, sdate, edate, gddbase, gddceil) -> dict:
     """Do something"""
     with get_sqlalchemy_conn("coop") as conn:
         res = conn.execute(
@@ -140,7 +140,7 @@ def run(station, sdate, edate, gddbase, gddceil):
                 data[f"{model}_sdate"] = f"{gdds[0]['date']}"
                 data[f"{model}_edate"] = f"{gdds[-1]['date']}"
 
-    return json.dumps(data)
+    return data
 
 
 def get_mckey(environ):
@@ -168,4 +168,4 @@ def application(environ, start_response):
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return res.encode("ascii")
+    return json.dumps(res)

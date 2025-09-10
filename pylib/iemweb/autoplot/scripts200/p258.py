@@ -7,7 +7,6 @@ service.
 
 from datetime import date
 
-import httpx
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
@@ -16,6 +15,7 @@ from pyiem.util import utc
 
 from iemweb.autoplot.scripts200.p200 import ISSUANCE
 from iemweb.autoplot.scripts200.p220 import COLORS
+from iemweb.json.outlook_progression import dowork
 
 PDICT = {
     "C": "Convective",
@@ -79,22 +79,12 @@ def compute_slots(outlook_type: str, valid: date) -> list:
 
 def plotter(ctx: dict):
     """Go"""
-    try:
-        resp = httpx.get(
-            "http://iem.local/json/outlook_progression.py",
-            params={
-                "lat": ctx["lat"],
-                "lon": ctx["lon"],
-                "valid": ctx["valid"].strftime("%Y-%m-%d"),
-                "outlook_type": ctx["outlook_type"],
-                "fmt": "json",
-            },
-        )
-        resp.raise_for_status()
-        jdata = resp.json()
-        outlooks = pd.DataFrame(jdata["outlooks"])
-    except Exception as exp:
-        raise NoDataFound("Error retrieving data") from exp
+    outlooks = dowork(
+        ctx["outlook_type"],
+        ctx["valid"],
+        ctx["lon"],
+        ctx["lat"],
+    )
     if outlooks.empty:
         raise NoDataFound("No outlooks found for this point and date.")
 
