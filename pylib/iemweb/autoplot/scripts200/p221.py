@@ -28,7 +28,8 @@ FONTSIZE = 32
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": False, "description": __doc__}
-    sts = utc() - timedelta(hours=5)
+    # Lame default to cut down on CI time :/
+    sts = utc() + timedelta(hours=5)
     desc["arguments"] = [
         dict(
             type="select",
@@ -84,6 +85,8 @@ def mp_factory(ctx):
 def add_forecast(img, ctx, valid, fhour, x, y):
     """Overlay things."""
     ts = valid - timedelta(hours=fhour)
+    if ts >= utc():
+        return None
     ppath = ts.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
     with archive_fetch(ppath) as gribfn:
         if gribfn is None:

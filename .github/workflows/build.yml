@@ -133,7 +133,7 @@ jobs:
       if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
       run: |
         export PYTHONPATH=/opt/iem/pylib
-        python -m pytest --mpl --cov=iemweb -n 4 tests/iemweb/
+        python -m pytest --mpl --cov=iemweb --durations=10 -n 4 -W error::FutureWarning tests/iemweb/
         python -m coverage xml
 
     - name: Upload to Codecov

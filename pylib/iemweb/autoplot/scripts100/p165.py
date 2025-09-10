@@ -280,17 +280,17 @@ def plotter(ctx: dict):
     )
     if ctx.get("p") is None and ctx.get("sday") is not None:
         mp.contourf(
-            df2["lon"],
-            df2["lat"],
-            df2["percentile"],
+            df2["lon"].to_numpy(),
+            df2["lat"].to_numpy(),
+            df2["percentile"].to_numpy(),
             np.arange(0, 101, 10),
             cmap=ctx["cmap"],
             extend="neither",
         )
         mp.plot_values(
-            df2["lon"],
-            df2["lat"],
-            df2["percentile"].values,
+            df2["lon"].to_numpy(),
+            df2["lat"].to_numpy(),
+            df2["percentile"].to_numpy(),
             fmt="%.0f",
             labelbuffer=5,
         )

@@ -427,6 +427,8 @@ def finalize_map(ctx):
             clip_on=False,
         )
     else:
+        if np.ma.is_masked(ctx["p01d"]) and ctx["p01d"].mask.all():
+            raise NoDataFound("Data was found, but all missing")
         ctx["mp"].imshow(
             ctx["p01d"],
             affine,

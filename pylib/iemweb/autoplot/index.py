@@ -23,6 +23,7 @@ from pyiem.webutil import ensure_list, iemapp
 
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
+from iemweb.autoplot.meta import get_metadict
 
 sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
@@ -573,16 +574,7 @@ def generate_form(apid, fdict, headers, cookies):
     fmt = fdict.get("_fmt")
     # This should be instant, but the other end may be doing a thread
     # restart, which takes a bit of time.
-    try:
-        resp = httpx.get(
-            f"http://iem.local/plotting/auto/meta/{apid}.json",
-            timeout=60,
-        )
-        resp.raise_for_status()
-    except Exception as exp:
-        LOG.exception(exp)
-        return res
-    meta = resp.json()
+    meta = get_metadict(int(apid))
     res["frontend"] = meta.get("frontend")
     if meta.get("description"):
         res["description"] = (

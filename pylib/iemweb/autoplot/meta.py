@@ -36,7 +36,7 @@ def get_timing(pidx: int) -> float:
     return timing if timing is not None else -1
 
 
-def do_json(pidx: int):
+def get_metadict(pidx: int) -> dict:
     """Do what needs to be done for JSON requests."""
     if pidx == 0:
         data = autoplot_data
@@ -72,7 +72,7 @@ def do_json(pidx: int):
                 label="Image Resolution (DPI) (50 to 500)",
             )
         )
-    return json.dumps(data)
+    return data
 
 
 @iemapp(
@@ -84,7 +84,7 @@ def do_json(pidx: int):
 def application(environ, start_response):
     """Our Application!"""
     pidx = environ["p"]
-    output = do_json(pidx)
+    output = get_metadict(pidx)
 
     start_response("200 OK", [("Content-type", "application/json")])
-    return output
+    return json.dumps(output)

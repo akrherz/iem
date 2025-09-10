@@ -13,8 +13,6 @@ https://mesonet.agron.iastate.edu/cgi-bin/geocoder.py\
 
 """
 
-from io import StringIO
-
 import httpx
 from pydantic import Field, model_validator
 from pyiem.webutil import CGIModel, iemapp
@@ -36,20 +34,13 @@ class MyModel(CGIModel):
         return self
 
 
-@iemapp(help=__doc__, schema=MyModel)
-def application(environ, start_response):
-    """Go main go"""
-    if environ["address"]:
-        address = environ["address"].strip()
-    else:
-        address = f"{environ['street']}, {environ['city']}".strip()
-
+def geocode(address: str) -> tuple[float | None, float | None]:
+    """Return lat/lon tuple or None if not found."""
     params = {
         "address": address,
         "benchmark": "Public_AR_Current",
         "format": "json",
     }
-    sio = StringIO()
     try:
         resp = httpx.get(SERVICE, params=params, timeout=10)
         resp.raise_for_status()
@@ -59,10 +50,20 @@ def application(environ, start_response):
             # Census uses coordinates {"x": lon, "y": lat}
             lat = matches[0]["coordinates"]["y"]
             lon = matches[0]["coordinates"]["x"]
-            sio.write(f"{lat},{lon}")
-        else:
-            sio.write("ERROR")
+            return (lat, lon)
     except Exception:  # pragma: no cover - defensive, return generic error
-        sio.write("ERROR")
+        return (None, None)
+    return (None, None)
+
+
+@iemapp(help=__doc__, schema=MyModel)
+def application(environ, start_response):
+    """Go main go"""
+    if environ["address"]:
+        address = environ["address"].strip()
+    else:
+        address = f"{environ['street']}, {environ['city']}".strip()
+
+    lat, lon = geocode(address)
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [sio.getvalue().encode("ascii")]
+    return f"{lat},{lon}" if lat is not None else "ERROR"

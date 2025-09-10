@@ -296,10 +296,12 @@ def plotter(ctx: dict):
                 f"valid:{valid:%Y-%m-%d%%20%H%M}.csv"
             )
             with httpx.Client() as client:
-                res = client.get(uri, timeout=60)
-                if res.status_code != 200:
-                    raise NoDataFound("Failed to fetch data")
-                sio = StringIO(res.text)
+                try:
+                    resp = client.get(uri, timeout=60)
+                    resp.raise_for_status()
+                except Exception as exp:
+                    raise NoDataFound("Failed to fetch data") from exp
+                sio = StringIO(resp.text)
                 statsdf = pd.read_csv(sio).set_index("key")
         else:
             statsdf = pd.DataFrame({"key": ugcdf["ps"].unique()}).set_index(
