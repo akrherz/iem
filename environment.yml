@@ -39,6 +39,8 @@ dependencies:
   - metpy>=1.0.0
   # yup
   - netcdf4
+  # Transient dep for pyIEM, which is pip installed
+  - nh3
   # yup
   - numpy
   # racoon
