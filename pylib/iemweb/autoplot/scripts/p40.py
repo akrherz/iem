@@ -13,7 +13,7 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.util import utc
@@ -198,15 +198,18 @@ def plotter(ctx: dict):
     vsby = np.ones((1, days * 24)) * -1
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
-            SELECT valid at time zone 'UTC' as valid,
-            skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby,
-            extract(epoch from (valid - %s))/3600. as hours
-            from alldata where station = %s and valid BETWEEN %s and %s
+            sql_helper(
+                """
+                SELECT valid at time zone 'UTC' as valid,
+                skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby,
+                extract(epoch from (valid - :sts))/3600. as hours
+            from alldata where station = :station
+            and valid BETWEEN :sts and :ets
             and report_type = 3 ORDER by valid ASC
-        """,
+        """
+            ),
             conn,
-            params=(sts, station, sts, ets),
+            params={"sts": sts, "ets": ets, "station": station},
             index_col=None,
         )
 

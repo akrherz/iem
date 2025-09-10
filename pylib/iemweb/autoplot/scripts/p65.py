@@ -8,7 +8,7 @@ import calendar
 from datetime import date, datetime, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
@@ -52,12 +52,13 @@ def plotter(ctx: dict):
     s = "ASC" if mydir == "cold" else "DESC"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             with ranks as (
                 select day, high, low,
         rank() OVER (PARTITION by year ORDER by high {s}) as high_rank,
         rank() OVER (PARTITION by year ORDER by low {s}) as low_rank
-                from alldata where station = %s and month = %s),
+                from alldata where station = :station and month = :month),
             highs as (
                 SELECT extract(day from day) as dom, count(*) from ranks
                 where high_rank = 1 GROUP by dom),
@@ -69,8 +70,10 @@ def plotter(ctx: dict):
             l.count as low_count from
             highs h FULL OUTER JOIN lows l on (h.dom = l.dom) ORDER by h.dom
         """,
+                s=s,
+            ),
             conn,
-            params=(station, month),
+            params={"station": station, "month": month},
         )
 
     fig = figure(apctx=ctx)

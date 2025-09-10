@@ -115,7 +115,7 @@ def plotter(ctx: dict):
     ax.set_ylabel("Frequency [%]")
     ax.set_ylim(0, 100)
     ax.set_xlim(min(tmpf) - 3, max(tmpf) + 3)
-    ax.set_xlabel(r"Air Temperature $^\circ$F")
+    ax.set_xlabel("Air Temperature °F")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
 
     return fig, df

@@ -11,7 +11,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
@@ -56,10 +56,11 @@ def plotter(ctx: dict):
     sql = "in ('BKN','OVC')" if which == "cloudy" else "= 'CLR'"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         WITH data as (
-        SELECT valid at time zone %s + '10 minutes'::interval as v,
-        tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = %s
+        SELECT valid at time zone :tzname + '10 minutes'::interval as v,
+        tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = :station
         and valid > '1973-01-01'
         and tmpf is not null and tmpf > -99 and tmpf < 150),
 
@@ -72,15 +73,20 @@ def plotter(ctx: dict):
         cloudy as (
         select extract(week from v) as w,
         extract(hour from v) as hr,
-        avg(tmpf) from data WHERE skyc1 {sql} or skyc2 {sql} or
-        skyc3 {sql} or skyc4 {sql} GROUP by w, hr)
+        avg(tmpf) from data WHERE skyc1 {op} or skyc2 {op} or
+        skyc3 {op} or skyc4 {op} GROUP by w, hr)
 
         SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
         from cloudy l JOIN climo c on
         (l.w = c.w and l.hr = c.hr)
         """,
+                op=sql,
+            ),
             conn,
-            params=(ctx["_nt"].sts[station]["tzname"], station),
+            params={
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "station": station,
+            },
         )
 
     for _, row in df.iterrows():
@@ -107,7 +113,7 @@ def plotter(ctx: dict):
         cmap=get_cmap(ctx["cmap"]),
     )
     a = fig.colorbar(cs)
-    a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
+    a.ax.set_ylabel("Temperature Departure °F")
     ax.grid(True)
     ax.set_ylim(-0.5, 23.5)
     ax.set_ylabel(f"Local Hour of Day, {ctx['_nt'].sts[station]['tzname']}")

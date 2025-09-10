@@ -9,6 +9,7 @@ import glob
 import os
 import subprocess
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 import click
 import httpx
@@ -47,8 +48,8 @@ def process(tarfn):
         os.remove(grbfn)
 
 
-def fetch_rda(year, month):
-    """Get data please from RDA"""
+def fetch_gdex(year, month):
+    """Get data please from GDEX"""
     days = ["0109", "1019"]
     lastday = (date(year, month, 1) + timedelta(days=35)).replace(
         day=1
@@ -56,7 +57,7 @@ def fetch_rda(year, month):
     days.append(f"20{lastday.day}")
     for day in days:
         uri = (
-            "https://data.rda.ucar.edu/ds608.0/3HRLY/"
+            "https://data.gdex.ucar.edu/ds608.0/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
         tmpfn = f"{TMP}/narr.tar"
@@ -64,6 +65,11 @@ def fetch_rda(year, month):
             httpx.stream("GET", uri, timeout=30) as resp,
             open(tmpfn, "wb") as fh,
         ):
+            if resp.status_code != 200:
+                LOG.warning(
+                    "Fetching %s returned %s, aborting", uri, resp.status_code
+                )
+                return
             for chunk in resp.iter_bytes(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
@@ -74,7 +80,7 @@ def fetch_rda(year, month):
     subprocess.call(
         [
             "python",
-            "/opt/iem/scripts/climodat/narr_solarrad.py",
+            Path(__file__).parent.parent / "climodat" / "narr_solarrad.py",
             f"--year={year}",
             f"--month={month}",
         ]
@@ -82,7 +88,7 @@ def fetch_rda(year, month):
     subprocess.call(
         [
             "python",
-            "/opt/iem/scripts/iemre/merge_narr.py",
+            Path(__file__).parent.parent / "iemre" / "merge_narr.py",
             f"--year={year}",
             f"--month={month}",
         ]
@@ -94,7 +100,7 @@ def fetch_rda(year, month):
 @click.option("--month", type=int, required=True)
 def main(year: int, month: int):
     """Go Main Go"""
-    fetch_rda(year, month)
+    fetch_gdex(year, month)
 
 
 if __name__ == "__main__":
