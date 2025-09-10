@@ -13,9 +13,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 
 def get_description():
@@ -33,38 +34,37 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("asos")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor()
     station = ctx["zstation"]
 
-    cursor.execute(
-        """
-    WITH obs as (select valid at time zone %s + '10 minutes'::interval as v,
+    res = conn.execute(
+        sql_helper("""
+    WITH obs as (
+        select valid at time zone :tzname + '10 minutes'::interval as v,
     tmpf from alldata
-    WHERE station = %s and tmpf >= -90 and tmpf < 150),
+    WHERE station = :station and tmpf >= -90 and tmpf < 150),
     s as (SELECT generate_series(0, 23, 1) || ' hours' as series),
     daily as (select s.series, v + s.series::interval as t, tmpf from obs, s),
     sums as (select series, date(t), max(tmpf), min(tmpf) from daily
     GROUP by series, date)
 
     SELECT series, avg(max), avg(min) from sums GROUP by series
-    """,
-        (ctx["_nt"].sts[station]["tzname"], station),
+    """),
+        {"tzname": ctx["_nt"].sts[station]["tzname"], "station": station},
     )
-    if cursor.rowcount == 0:
-        raise NoDataFound("No Data found.")
-
     rows = []
     hrs = range(25)
     highs = [None] * 25
     lows = [None] * 25
-    for row in cursor:
+    for row in res:
         i = int(row[0].split()[0])
         highs[24 - i] = row[1]
         lows[24 - i] = row[2]
         rows.append(dict(offset=(24 - i), avg_high=row[1], avg_low=row[2]))
+    if not rows:
+        raise NoDataFound("No data found.")
     rows.append(dict(offset=0, avg_high=highs[24], avg_low=lows[24]))
     highs[0] = highs[24]
     lows[0] = lows[24]
@@ -79,7 +79,7 @@ def plotter(ctx: dict):
         hrs, np.array(highs) - highs[0], label="High Temp", lw=2, color="r"
     )
     ax.plot(hrs, np.array(lows) - lows[0], label="Low Temp", lw=2, color="b")
-    ax.set_ylabel(r"Average Temperature Difference $^\circ$F")
+    ax.set_ylabel("Average Temperature Difference °F")
     ax.set_xlim(0, 24)
     ax.set_xticks((0, 4, 8, 12, 16, 20, 24))
     ax.set_xticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM", "Mid"))

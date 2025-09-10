@@ -129,7 +129,6 @@ if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 
     if ($row["abstain"] > 0) $content .= " <br />Abstain = " . $row["abstain"];
 }
 $content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $row["tags"]));
-$content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $row["tags"]));
 
 $content .= <<<EOM
 </div>

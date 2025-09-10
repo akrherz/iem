@@ -1,6 +1,15 @@
-"""Generation of faked METAR collective.
+""".. title:: Iowa METAR Collective of AWOS Sites
 
-/AWOS/iowa_metar_collective.txt
+This used to be interesting, but not really any longer as the IEM has no
+special METAR feed anymore.
+
+Usage Examples
+--------------
+
+Get the obs
+
+https://mesonet.agron.iastate.edu/AWOS/metar_collective.py
+
 """
 
 from io import StringIO
@@ -11,14 +20,13 @@ from pyiem.util import utc
 from pyiem.webutil import iemapp
 
 
-def add_output(sio):
+def add_output(sio: StringIO) -> None:
     """Do as I say"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             sql_helper("""
-            select raw from current c JOIn stations t on (t.iemid = c.iemid)
-            WHERE t.network = 'IA_ASOS' and
-            valid > now() - '2 hours'::interval
+            select raw from current c JOIN stations t on (t.iemid = c.iemid)
+            WHERE t.network = 'IA_ASOS' and valid > now() - '2 hours'::interval
             and id not in ('CWI', 'FOD', 'SUX', 'MCW', 'MIW', 'IOW', 'AMW',
             'DSM', 'LWD', 'DBQ', 'CID', 'DVN', 'EST', 'OTM', 'ALO', 'SPW',
             'BRL') ORDER by id ASC
@@ -28,11 +36,10 @@ def add_output(sio):
     sio.write("000 \r\r\n")
     sio.write(f"SAUS80 KIEM {utc():%d%H%M}\r\r\n")
     sio.write("METAR \r\r\n")
-    for _, row in df.iterrows():
-        sio.write(f"{row['raw']}=\r\r\n")
+    sio.write("\r\r\n".join(str(row.raw) for row in df.itertuples()))
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(_environ, start_response):
     """Do Something"""
     headers = [("Content-type", "text/plain")]
