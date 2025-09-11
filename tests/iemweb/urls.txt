@@ -31,6 +31,7 @@
 /geojson/sbw.geojson?sts=202405260500&ets=202405270500&wfos=
 /geojson/sbw.geojson?sts=202405260500&ets=202405270500&wfo=DMX
 /geojson/sbw.geojson?sts=202405260500&ets=202405270500&wfos=DMX,OAX
+/GIS/tiff/index.py?year=2000&month=1&day=1
 /json/cf6.py?station=KDSM&year=2024&fmt=json
 /json/cf6.py?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=csv

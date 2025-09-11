@@ -89,29 +89,41 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data was found.")
     # saturation vapor pressure
     # Convert sea level pressure to station pressure
-    df["pressure"] = mcalc.add_height_to_pressure(
-        df["slp"].values * units("millibars"),
-        ctx["_nt"].sts[station]["elevation"] * units("m"),
-    ).to(units("millibar"))
+    df["pressure"] = (
+        mcalc.add_height_to_pressure(
+            df["slp"].to_numpy() * units("millibars"),
+            ctx["_nt"].sts[station]["elevation"] * units("m"),
+        )
+        .to(units("millibar"))
+        .m
+    )
     # Compute the mixing ratio
     df["mixing_ratio"] = mcalc.mixing_ratio_from_relative_humidity(
-        df["pressure"].values * units("millibars"),
-        df["tmpf"].values * units("degF"),
-        df["relh"].values * units("percent"),
-    )
+        df["pressure"].to_numpy() * units("millibars"),
+        df["tmpf"].to_numpy() * units("degF"),
+        df["relh"].to_numpy() * units("percent"),
+    ).m
     # Compute the saturation mixing ratio
     df["saturation_mixingratio"] = mcalc.saturation_mixing_ratio(
-        df["pressure"].values * units("millibars"),
-        df["tmpf"].values * units("degF"),
+        df["pressure"].to_numpy() * units("millibars"),
+        df["tmpf"].to_numpy() * units("degF"),
+    ).m
+    df["vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].to_numpy() * units("millibars"),
+            df["mixing_ratio"].to_numpy() * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
     )
-    df["vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["mixing_ratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
-    df["saturation_vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["saturation_mixingratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
+    df["saturation_vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].to_numpy() * units("millibars"),
+            df["saturation_mixingratio"].to_numpy() * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
+    )
     df["vpd"] = df["saturation_vapor_pressure"] - df["vapor_pressure"]
 
     daily = (

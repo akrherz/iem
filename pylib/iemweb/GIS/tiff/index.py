@@ -12,6 +12,10 @@ Get a RTMA grid as a GeoTIFF
 https://mesonet.agron.iastate.edu/GIS/tiff/index.py?\
 service=rtma&ts=202509090000
 
+Return the most recent 5km FFG as a GeoTIFF
+
+https://mesonet.agron.iastate.edu/GIS/tiff/index.py?service=5kmffg
+
 """
 
 import logging
@@ -132,33 +136,33 @@ def workflow(key, tmpdir, ts: datetime | None):
         found = False
         for offset in range(0, 25, meta["modulo"]):
             ts = valid - timedelta(hours=offset)
-            testfn = ts.strftime(meta["re"])
-            with archive_fetch(testfn) as testfn:
-                if testfn is not None:
+            ppath = ts.strftime(meta["re"])
+            with archive_fetch(ppath, method="head") as fn:
+                if fn is not None:
                     found = True
+                    valid = ts
                     break
         if not found:
             raise FileNotFoundError("Failed to find recent file for service")
-
     else:
         try:
             valid = datetime.strptime(ts, "%Y%m%d%H%M")
         except Exception as exp:
             raise IncompleteWebRequest("Invalid ts provided") from exp
-        ppath = valid.strftime(meta["re"])
-        with archive_fetch(ppath) as testfn:
-            if testfn is None:
-                raise FileNotFoundError(f"Failed to find {ppath} for service.")
-            with subprocess.Popen(
-                [
-                    "gdalwarp",
-                    testfn,
-                    f"{tmpdir}/test.tiff",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            ) as cmd:
-                cmd.stdout.read()
+    ppath = valid.strftime(meta["re"])
+    with archive_fetch(ppath) as testfn:
+        if testfn is None:
+            raise FileNotFoundError(f"Failed to find {ppath} for service.")
+        with subprocess.Popen(
+            [
+                "gdalwarp",
+                testfn,
+                f"{tmpdir}/test.tiff",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ) as cmd:
+            cmd.stdout.read()
     with open(f"{tmpdir}/test.tiff", "rb") as fh:  # skipcq
         return fh.read()
 
@@ -173,7 +177,8 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             (
                 "Content-Disposition",
-                f"attachment; filename={service}_{ts}.tiff",
+                f"attachment; filename={service}_"
+                f"{'latest' if ts is None else ts}.tiff",
             ),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:

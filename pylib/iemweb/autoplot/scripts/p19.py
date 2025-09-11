@@ -115,8 +115,6 @@ def plotter(ctx: dict):
             rows.append(dict(high=yedge, low=xedge, count=hist[i, j]))
     df = pd.DataFrame(rows)
     ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     years = float(datetime.now().year - ab.year)
     hist = np.ma.array(hist / years)
     hist.mask = np.where(hist < (1.0 / years), True, False)
@@ -183,8 +181,8 @@ def plotter(ctx: dict):
     cax = fig.add_axes((0.07, 0.08, 0.5, 0.01))
     fig.colorbar(res, label="Days per Year", orientation="horizontal", cax=cax)
     ax.grid(True)
-    ax.set_ylabel(r"High Temperature $^{\circ}\mathrm{F}$")
-    ax.set_xlabel(r"Low Temperature $^{\circ}\mathrm{F}$")
+    ax.set_ylabel("High Temperature °F")
+    ax.set_xlabel("Low Temperature °F")
 
     xmax = ar[0][0]
     ymax = ar[0][1]
@@ -221,7 +219,7 @@ def plotter(ctx: dict):
     ax.text(
         ax.get_xlim()[1],
         32,
-        r"32$^\circ$F",
+        "32°F",
         va="center",
         ha="right",
         color="white",
@@ -233,7 +231,7 @@ def plotter(ctx: dict):
     ax.text(
         32,
         ax.get_ylim()[1],
-        r"32$^\circ$F",
+        "32°F",
         va="top",
         ha="center",
         color="white",
