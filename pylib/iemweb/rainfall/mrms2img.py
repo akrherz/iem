@@ -21,7 +21,7 @@ import tempfile
 import zipfile
 
 import numpy as np
-from imageio import imread
+from imageio.v2 import imread
 from osgeo import gdal, osr
 from pydantic import Field
 from pyiem.exceptions import NoDataFound

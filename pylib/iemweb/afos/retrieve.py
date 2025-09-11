@@ -55,6 +55,10 @@ recent data, no archive support with this API.
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=MTRDSM
 
+Same request, but in HTML format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=MTRDSM&fmt=html
+
 Use the WAR pil shortcut to retrieve a number of Des Moines products
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=WARDSM
@@ -62,6 +66,10 @@ https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=WARDSM
 Return the last AFDDMX product in text format
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=text
+
+Same request, but in HTML format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=html
 
 Return a zip file of AFDDMX products during 2024
 

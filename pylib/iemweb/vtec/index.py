@@ -205,17 +205,13 @@ def application(environ, start_response):
             value = tokens[i + 1]
             if token == "event":
                 m = VTEC_RE.match(value)
-                if m is None:
-                    start_response(
-                        "404 Not Found", [("Content-type", "text/html")]
-                    )
-                    return [b"Invalid VTEC Event"]
-                vtec = m.groupdict()
-                urlparams["wfo"] = vtec["wfo4"]
-                urlparams["phenomena"] = vtec["phenomena"]
-                urlparams["significance"] = vtec["significance"]
-                urlparams["eventid"] = vtec["eventid"]
-                urlparams["year"] = vtec["year"]
+                if m is not None:
+                    vtec = m.groupdict()
+                    urlparams["wfo"] = vtec["wfo4"]
+                    urlparams["phenomena"] = vtec["phenomena"]
+                    urlparams["significance"] = vtec["significance"]
+                    urlparams["eventid"] = vtec["eventid"]
+                    urlparams["year"] = vtec["year"]
             if token in ["tab", "update"]:
                 urlparams[token] = value
             if token == "radar":

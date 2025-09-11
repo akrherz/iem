@@ -35,12 +35,14 @@ def test_index_http_redirect():
     """Test the redirect for non https requests."""
     builder = EnvironBuilder(
         path="/vtec/event/2024-O-NEW-KDMX-TO-W-0045",
-        base_url="http://iem.local/vtec/",
+        base_url="https://iem.local/vtec/",
     )
     environ = builder.get_environ()
-    environ["SCRIPT_URI"] = "/vtec/event/2024-O-NEW-KDMX-TO-W-0045"
-    (_app_iter, status, _headers) = run_wsgi_app(index_app, environ)
+    environ["SCRIPT_URI"] = "/vtec/event/2024-O-NEW-KDMX-TO-W-0045/bah/bah"
+    (_app_iter, status, headers) = run_wsgi_app(index_app, environ)
     assert status == "301 Moved Permanently"
+    ans = "/vtec/?wfo=KDMX&phenomena=TO&significance=W&eventid=0045&year=2024"
+    assert headers["Location"] == ans
 
 
 def test_index_redirect():

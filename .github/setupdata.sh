@@ -34,6 +34,9 @@ https://mesonet.agron.iastate.edu/onsite/iemre/ndfd_current.nc
 curl -o /mesonet/data/iemre/gfs_current.nc \
 https://mesonet.agron.iastate.edu/onsite/iemre/gfs_current.nc
 
+curl -o /opt/iem/htdocs/vtec/assets.json \
+https://mesonet.agron.iastate.edu/vtec/assets.json
+
 # A corrupted RTMA file
 mkdir -p /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00
 echo > /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00/rtma2p5_ru.t0000z.2dvaranl_ndfd.grb2

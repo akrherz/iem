@@ -133,17 +133,13 @@ def workflow(key, tmpdir, ts: datetime | None):
     if ts is None:
         # Go to 0z tomorrow and work backwards
         valid = (utc() + timedelta(days=1)).replace(hour=0, minute=0)
-        found = False
         for offset in range(0, 25, meta["modulo"]):
             ts = valid - timedelta(hours=offset)
             ppath = ts.strftime(meta["re"])
             with archive_fetch(ppath, method="head") as fn:
                 if fn is not None:
-                    found = True
                     valid = ts
                     break
-        if not found:
-            raise FileNotFoundError("Failed to find recent file for service")
     else:
         try:
             valid = datetime.strptime(ts, "%Y%m%d%H%M")
@@ -188,9 +184,10 @@ def application(environ, start_response):
                 return [res]
             except FileNotFoundError as exp:
                 start_response(
-                    "400 Bad Request", [("Content-type", "text/plain")]
+                    "422 Unprocessable Entity",
+                    [("Content-type", "text/plain")],
                 )
-                return [f"File not found for service/ts combination: {exp}"]
+                return f"File not found for service/ts combination: {exp}"
 
     valid = utc(environ["year"], environ["month"], environ["day"])
 
