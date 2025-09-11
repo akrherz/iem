@@ -83,8 +83,6 @@ def plotter(ctx: dict):
 
     gstats = df["gdd"].describe()
     pstats = df["total_precip"].describe()
-    if "mean" not in pstats:
-        raise NoDataFound("ERROR: No Data Found")
 
     df["precip_sigma"] = (df["total_precip"] - pstats["mean"]) / pstats["std"]
     df["gdd_sigma"] = (df["gdd"] - gstats["mean"]) / gstats["std"]
@@ -111,8 +109,8 @@ def plotter(ctx: dict):
         [y1, y2],
         label=f"Slope={h_slope:.2f} R$^2$={(r_value**2):.2f}",
     )
-    xmax = df.gdd_sigma.abs().max() + 0.25
-    ymax = df.precip_sigma.abs().max() + 0.25
+    xmax = df["gdd_sigma"].abs().max() + 0.25
+    ymax = df["precip_sigma"].abs().max() + 0.25
     ax.set_xlim(0 - xmax, xmax)
     ax.set_ylim(0 - ymax, ymax)
     events = df.query(f"distance > 2.5 or year == {year:.0f}")

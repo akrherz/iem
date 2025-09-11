@@ -1,17 +1,40 @@
-"""Generate QR codes on-the-fly."""
+""".. title:: QR Code Generator
+
+Generate a QR code for a given query string.
+
+Example Usage
+-------------
+
+https://mesonet.agron.iastate.edu/plotting/auto/gen_qrcode.py?\
+q=network:WFO::wfo:DMX::var:tmpf::year1:2023::month1:5::day1:1::hour1&p=1
+
+"""
 
 # stdlib
 import hashlib
 from io import BytesIO
 
 import qrcode
-
-# third party
-from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import iemapp
+from pydantic import Field
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
 
 HTTP200 = "200 OK"
+
+
+class MyModel(CGIModel):
+    p: str = Field(
+        None,
+        title="Plot Type",
+        description="The plot type to use, if any",
+    )
+    q: str = Field(
+        ...,
+        title="Query String",
+        description="The query string to encode in the QR code.",
+        min_length=1,
+        max_length=2048,
+    )
 
 
 def q2uri(qstr, pval):
@@ -29,18 +52,15 @@ def q2uri(qstr, pval):
     return uri[:-1]
 
 
-@iemapp()
-def application(environ, start_response):
+@iemapp(help=__doc__, schema=MyModel)
+def application(environ: dict, start_response):
     """Our Application!"""
-    # HACK
-    qstr = environ.get("q", "")
-    if qstr == "":
-        raise IncompleteWebRequest("No query string provided")
-    if environ.get("q", "").find("network:WFO::wfo:PHEB") > -1:
-        environ["q"] = environ["q"].replace("network:WFO", "network:NWS")
-    if environ.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
-        environ["q"] = environ["q"].replace("network:WFO", "network:NWS")
-    uri = q2uri(environ.get("q"), environ.get("p"))
+    qstr = environ["q"]
+    if qstr.find("network:WFO::wfo:PHEB") > -1:
+        qstr = qstr.replace("network:WFO", "network:NWS")
+    if qstr.find("network:WFO::wfo:PAAQ") > -1:
+        qstr = qstr.replace("network:WFO", "network:NWS")
+    uri = q2uri(qstr, environ["p"])
     mckey = hashlib.sha256(uri.encode("utf-8")).hexdigest()
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]
