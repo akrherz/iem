@@ -18,8 +18,6 @@ def get_mods_and_urls():
         package.__path__, prefix
     ):
         mod = importlib.import_module(modname)
-        if not hasattr(mod, "application"):
-            continue
         doc = mod.__doc__
         # Typically apache mod_rewrite is not available
         if doc.find("NODOCTEST") > 0:
@@ -33,10 +31,13 @@ def get_mods_and_urls():
             yield mod, f"?{cgi}"
 
 
-@pytest.mark.parametrize("arg", get_mods_and_urls())
-def test_docutils_publish_string(arg):
+@pytest.mark.parametrize(("mod", "cgi"), get_mods_and_urls())
+def test_docutils_publish_string(mod, cgi):
     """Test that docutils can render __doc__ without any warnings."""
-    res = publish_string(source=arg[0].__doc__, writer_name="html").decode(
+    # mark cgi as used so linters don't complain; it's only relevant
+    # for test ids
+    _ = cgi
+    res = publish_string(source=mod.__doc__, writer_name="html").decode(
         "utf-8"
     )
     pos = res.find("System Message")
@@ -45,10 +46,12 @@ def test_docutils_publish_string(arg):
     assert res.find("System Message") == -1
 
 
-@pytest.mark.parametrize("arg", get_mods_and_urls())
-def test_urls(arg):
-    """Test what urls.txt tells us to."""
-    c = Client(arg[0].application)
-    res = c.get(arg[1], headers={"Referer": "http://iem.local"})
+@pytest.mark.parametrize(("mod", "cgi"), get_mods_and_urls())
+def test_urls(mod, cgi):
+    """Test what is found via introspection."""
+    if not hasattr(mod, "application"):
+        return
+    c = Client(mod.application)
+    res = c.get(cgi, headers={"Referer": "http://iem.local"})
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]

@@ -1,11 +1,34 @@
 """iemweb utility functions."""
 
-from datetime import datetime
-
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
 
 from iemweb import error_log
+
+MONTH_LOOKUP = {
+    "jan": [1],
+    "feb": [2],
+    "mar": [3],
+    "apr": [4],
+    "may": [5],
+    "jun": [6],
+    "jul": [7],
+    "aug": [8],
+    "sep": [9],
+    "oct": [10],
+    "nov": [11],
+    "dec": [12],
+    "all": list(range(1, 13)),
+    "water_year": list(range(1, 13)),
+    "fall": [9, 10, 11],
+    "winter": [12, 1, 2],
+    "octmar": [10, 11, 12, 1, 2, 3],
+    "spring": [3, 4, 5],
+    "spring2": [4, 5, 6],
+    "summer": [6, 7, 8],
+    "gs": [5, 6, 7, 8, 9],
+    "mjj": [5, 6, 7],
+}
 
 
 def get_ct(environ: dict) -> str:
@@ -62,25 +85,7 @@ def month2months(month: str) -> list[int]:
     Returns:
         list: A list of ints (months)
     """
-    if month in ["all", "water_year"]:
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "octmar":
-        months = [10, 11, 12, 1, 2, 3]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "spring2":
-        months = [4, 5, 6]
-    elif month == "summer":
-        months = [6, 7, 8]
-    elif month == "gs":
-        months = [5, 6, 7, 8, 9]
-    elif month == "mjj":
-        months = [5, 6, 7]
-    else:
-        fmt = "%b" if len(month) == 3 else "%m"
-        months = [datetime.strptime(f"2000-{month}-01", f"%Y-{fmt}-%d").month]
-    return months
+    month = month.lower().strip()
+    if month in MONTH_LOOKUP:
+        return MONTH_LOOKUP[month]
+    return [int(month)]
