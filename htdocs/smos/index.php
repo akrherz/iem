@@ -4,7 +4,6 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
-// custom code in smosmap.js that will need replaced...
 $OL = "10.6.1";
 $t = new MyView();
 $t->title = "SMOS Data";
@@ -15,13 +14,6 @@ $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script src="smosmap.js?v=2"></script>
-<style type='text/css'>
-        #map {
-            width: 100%;
-            height: 200px;
-            border: 2px solid black;
-        }
-</style>
 EOM;
 
 $y1select = yearSelect(2010, 2010, "year1");
@@ -40,7 +32,7 @@ orbiting satellite operated by the European Space Agency.  The satellite provide
 estimates of soil moisture in the approximate top 5 centimeters of soil and the
 amount of vegetation on the land surface.  
 <a href="mailto:bkh@iastate.edu">Dr Brian Hornbuckle</a> leads a 
-<a href="http://bkh.public.iastate.edu/research/index.html">local research
+<a href="https://faculty.sites.iastate.edu/bkh/research">local research
 team</a> here at Iowa State that works with this data.  The IEM collects processed
 data from this satellite, generates analysis plots, and makes the raw data available.
 
@@ -81,6 +73,7 @@ to request a point outside of the domain.  Data is available since
 </table>
 </div><div class="col-md-6">
 <div id="map"
+ style="width: 100%; height: 250px; border: 2px solid black"
  data-initial-lat="42.0"
  data-initial-lon="-93.0"
  data-lat-input="lat"

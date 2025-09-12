@@ -1,10 +1,8 @@
 <?php
-/*
- * Generate Watch by county placefile
- */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-$alpha = isset($_GET["alpha"]) ? intval($_GET["alpha"]) : 255;
+require_once "../../../include/forms.php";
+$alpha = get_int404("alpha", 255);
 
 $dbconn = iemdb("postgis");
 

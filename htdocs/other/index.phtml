@@ -226,19 +226,4 @@ are freely available to others.
 
 EOM;
 
-// Add JavaScript to enhance form elements with Bootstrap 5 classes
-$t->jsextra = <<<EOM
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add Bootstrap 5 classes to select elements
-    const selects = document.querySelectorAll('select');
-    selects.forEach(select => {
-        if (!select.classList.contains('form-select')) {
-            select.classList.add('form-select');
-        }
-    });
-});
-</script>
-EOM;
-
 $t->render('single.phtml');

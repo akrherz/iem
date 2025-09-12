@@ -54,10 +54,10 @@ def do_temp_rh(sid, row):
         "2",
     ]
     temps = [
-        p2(row["tair_c_avg"], 1, -90, 90),
+        p2(row["tair_c_avg_qc"], 1, -90, 90),
     ]
     rhs = [
-        p(row["rh_avg"], 1, 0, 100),
+        p(row["rh_avg_qc"], 1, 0, 100),
     ]
     if sid in INVERSION:
         with get_sqlalchemy_conn("isuag") as conn:
@@ -72,7 +72,7 @@ def do_temp_rh(sid, row):
             for foot, col in [[1.5, "15"], [5, "5"], [10, "10"]]:
                 depth_mm = convert_value(foot * 12, "inch", "meter")
                 heights.append(f"{depth_mm:.3f}")
-                temps.append(p2(row2[f"tair_{col}_c_avg"], 1, -90, 90))
+                temps.append(p2(row2[f"tair_{col}_c_avg_qc"], 1, -90, 90))
                 rhs.append("")
 
     return "%s#%s#%s" % (
@@ -90,10 +90,10 @@ def do_soil_moisture(row):
     moisture = []
     for depth in [2, 4, 6, 8, 12, 16, 20, 24, 30, 40]:
         # CS655
-        t = data.get(f"t{depth}_c_avg")
-        sv_t = data.get(f"sv_t{depth}")
-        vwc = data.get(f"vwc{depth}")
-        sv_vwc = data.get(f"sv_vwc{depth}")
+        t = data.get(f"t{depth}_c_avg_qc")
+        sv_t = data.get(f"sv_t{depth}_qc")
+        vwc = data.get(f"vwc{depth}_qc")
+        sv_vwc = data.get(f"sv_vwc{depth}_qc")
         if pd.isna([t, sv_t, vwc, sv_vwc]).all():
             continue
         depth_mm = convert_value(depth, "inch", "meter")
@@ -139,52 +139,53 @@ def use_table(sio):
             conn,
             index_col=None,
         )
-    if obsdf[obsdf["is_last"]].empty:
-        return
-    lastob = obsdf[obsdf["is_last"]].set_index("station")
-    hrtotal = (
-        obsdf[["station", "rain_in_tot", "slrkj_tot"]].groupby("station").sum()
-    )
-    for sid, row in lastob.iterrows():
-        hr_row = hrtotal.loc[sid]
-        sio.write(
-            ("%s,%.4f,%.4f,%s,%.1f,%s,%s,%s,%s,3#%s#%s#%s\n")
-            % (
-                sid,
-                nt.sts[sid]["lat"],
-                nt.sts[sid]["lon"],
-                row["utc_valid"].strftime(ISO8601),
-                nt.sts[sid]["elevation"],
-                do_soil_moisture(row),
-                p(hr_row["slrkj_tot"] * 1000.0 / 3600.0, 1, 0, 1600),
-                do_temp_rh(sid, row),
-                p(
-                    (nan(hr_row["rain_in_tot"]) * units("inch"))
-                    .to(units("cm"))
-                    .m,
-                    2,
-                    0,
-                    100,
-                ),
-                p(
-                    (nan(row["ws_mph"]) * units("mph"))
-                    .to(units("meter / second"))
-                    .m,
-                    2,
-                    0,
-                    100,
-                ),
-                p(
-                    (nan(row["ws_mph_max"]) * units("mph"))
-                    .to(units("meter / second"))
-                    .m,
-                    2,
-                    0,
-                    100,
-                ),
-                p(row["winddir_d1_wvt"], 2, 0, 360),
-            )
+    if not obsdf[obsdf["is_last"]].empty:
+        lastob = obsdf[obsdf["is_last"]].set_index("station")
+        hrtotal = (
+            obsdf[["station", "rain_in_tot", "slrkj_tot"]]
+            .groupby("station")
+            .sum()
         )
+        for sid, row in lastob.iterrows():
+            hr_row = hrtotal.loc[str(sid)]
+            sio.write(
+                ("%s,%.4f,%.4f,%s,%.1f,%s,%s,%s,%s,3#%s#%s#%s\n")
+                % (
+                    sid,
+                    nt.sts[sid]["lat"],
+                    nt.sts[sid]["lon"],
+                    row["utc_valid"].strftime(ISO8601),
+                    nt.sts[sid]["elevation"],
+                    do_soil_moisture(row),
+                    p(hr_row["slrkj_tot"] * 1000.0 / 3600.0, 1, 0, 1600),
+                    do_temp_rh(sid, row),
+                    p(
+                        (nan(hr_row["rain_in_tot"]) * units("inch"))
+                        .to(units("cm"))
+                        .m,
+                        2,
+                        0,
+                        100,
+                    ),
+                    p(
+                        (nan(row["ws_mph"]) * units("mph"))
+                        .to(units("meter / second"))
+                        .m,
+                        2,
+                        0,
+                        100,
+                    ),
+                    p(
+                        (nan(row["ws_mph_max"]) * units("mph"))
+                        .to(units("meter / second"))
+                        .m,
+                        2,
+                        0,
+                        100,
+                    ),
+                    p(row["winddir_d1_wvt"], 2, 0, 360),
+                )
+            )
 
 
 def do_output(sio):

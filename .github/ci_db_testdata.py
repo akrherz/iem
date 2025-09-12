@@ -7,10 +7,39 @@ some mucking with the database to improve coverage.
 """
 
 from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
 
 LOG = logger()
+
+
+@with_sqlalchemy_conn("isuag")
+def create_realtime_isuag(conn: Connection = None) -> None:
+    """Create the realtime table if needed."""
+    nt = NetworkTable("ISUSM")
+    for sid in nt.sts:
+        conn.execute(
+            sql_helper("""
+    insert into sm_minute (station, valid, tair_c_avg_qc) values
+    (:sid, now(), :tmpc)"""),
+            {"sid": sid, "tmpc": 20.0},
+        )
+    conn.commit()
+
+
+@with_sqlalchemy_conn("iem")
+def create_iemaccess_isuag(conn: Connection = None) -> None:
+    """Create the realtime table if needed."""
+    nt = NetworkTable("ISUSM")
+    for sid in nt.sts:
+        conn.execute(
+            sql_helper("""
+    insert into current (iemid, valid, tmpf) values
+    (:iemid, now(), :tmpf)"""),
+            {"iemid": nt.sts[sid]["iemid"], "tmpf": 20.0},
+        )
+    conn.commit()
 
 
 @with_sqlalchemy_conn("id3b")
@@ -44,6 +73,8 @@ def main():
     """Go Main."""
     ldm_product_log()
     nexrad_attributes()
+    create_realtime_isuag()
+    create_iemaccess_isuag()
 
 
 if __name__ == "__main__":

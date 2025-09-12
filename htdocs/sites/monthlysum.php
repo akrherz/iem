@@ -218,7 +218,7 @@ $plot2 = sprintf(
     $network
 );
 
-$t->jsextra = '<script src="monthlysum.js"></script>';
+$t->jsextra = '<script src="monthlysum.module.js" type="module"></script>';
 $t->content = <<<EOM
 
 <p><button id="gogogo" role="button" class="btn btn-primary"><i class="bi bi-arrow-down"></i> View Monthly Charts</button></p>
