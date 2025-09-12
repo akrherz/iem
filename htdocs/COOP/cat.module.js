@@ -1,4 +1,3 @@
-// Vanilla JavaScript - no jQuery
 let currentmode = true;
 
 /**

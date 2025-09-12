@@ -247,17 +247,6 @@ $content .= sprintf(
     $bins[5],
     $missive,
 );
-$jsextra = <<<EOM
-$(document).ready(function(){
-    $("input[name=setbins]").click(function(){
-        if (this.checked){
-            $("#showbins").show();
-        } else {
-            $("#showbins").hide();
-        }
-    });
-});
-EOM;
 
 $content .= "<br /><strong>Bar Convention of Plot:</strong>";
 $content .= '<br /><input type="radio" id="met" name="conv" value="from"';
@@ -349,13 +338,7 @@ EOM;
           selections above</a>";
 }
 $t->jsextra = <<<EOM
-<script>
-  $('#windrose-plot').load(function(){
-    $('#img-loading').css('display', 'none');	
-    });
-
-{$jsextra}
-</script>
+<script src="dyn_windrose.module.js" type="module"></script>
 EOM;
 
 $t->content = $content;

@@ -43,31 +43,43 @@ $t->title = "COOP HPD FisherPorter Precip";
 
 $sselect = networkSelect("IA_HPD", $station);
 $t->content = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/COOP/">COOP Data</a></li>
-<li class="active">Fisher Porter Rain Gauge Data</li>
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/COOP/">COOP Data</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Fisher Porter Rain Gauge Data</li>
+    </ol>
+</nav>
 
 <p>The IEM maintains an archive of processed rain gauge data from the "Fisher Porter"
-equipment that is run at some NWS COOP locations in Iowa.  There is considerable
+equipment that is run at some NWS COOP locations in Iowa. There is considerable
 delay to the availability of this data from
-<a href="https://www.ncei.noaa.gov/pub/data/hpd/data/">NCEI</a>.  Currently, a process
+<a href="https://www.ncei.noaa.gov/pub/data/hpd/data/">NCEI</a>. Currently, a process
 runs on the 15th each month and downloads data for the previous 3rd, 6th, and 12th month
 to the current date.</p>
 
 <p><strong>Updated 3 Feb 2023:</strong> As it stands currently, I can not find
-this datasource available from NCEI.  So there's no data in this archive since
+this datasource available from NCEI. So there's no data in this archive since
 ~Feb 2021.</p>
 
-<form method="GET" name="st">
-<table class="table table-bordered">
-<tr><th>Select Station:</th><th>Select Date</th></tr>
-<tr><td>{$sselect}</td><td>{$yselect} {$mselect} {$dselect}</td></tr>
-<tr><td colspan="2"><input type="submit"></td></tr>
-</table>
+<form method="GET" name="st" class="mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+            <label for="station" class="form-label">Select Station</label>
+            {$sselect}
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Select Date</label>
+            <div class="d-flex gap-2">{$yselect} {$mselect} {$dselect}</div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Show</button>
+        </div>
+    </div>
 </form>
 
+<div class="table-responsive">
 {$table}
+</div>
 
 EOM;
 $t->render('single.phtml');

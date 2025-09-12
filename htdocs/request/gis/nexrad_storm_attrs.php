@@ -6,18 +6,7 @@ require_once "../../../include/forms.php";
 
 $t = new MyView();
 $t->jsextra = <<<EOM
-<script>
-$('select[name=station]').change( function() {
-    nexrad = $('select[name=station]').val();
-    $('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
-    window.location.href = "#"+ nexrad;
-});
-
-var tokens = window.location.href.split('#');
-if (tokens.length == 2 && tokens[1].length == 3){
-    $('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
-}
-</script>
+<script src="nexrad_storm_attrs.module.js" type="module"></script>
 EOM;
 $t->title = "Download NEXRAD Storm Attributes Shapefile";
 $content = <<<EOM

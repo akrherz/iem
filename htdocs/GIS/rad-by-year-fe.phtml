@@ -11,8 +11,8 @@ $minute = get_int404("minute", 0);
 $sz = isset($_GET["sz"]) ? floatval($_GET["sz"]) : 2.5;
 
 /* Do areal extents */
-$map_x = isset($_GET["map_x"]) ? intval($_GET["map_x"]): 0;
-$map_y = isset($_GET["map_y"]) ? intval($_GET["map_y"]): 0;
+$map_x = get_int404("map_x", 0);
+$map_y = get_int404("map_y", 0);
 $ul_x = -126.0;
 $ul_y = 50.0;
 $lr_y = 24.0;

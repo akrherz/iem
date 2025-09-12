@@ -1,5 +1,3 @@
-// Tabulator-based Hourly Precipitation Accumulator
-// Replaces ExtJS implementation with modern Tabulator
 import {TabulatorFull as Tabulator} from 'https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator_esm.min.mjs';
 
 // Network configurations

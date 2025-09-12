@@ -1,18 +1,15 @@
 <?php
-/*
- * Attempt to actually document the RASTERs the IEM produces and stores
- * within its archives
- */
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 82);
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
+require_once "../../include/forms.php";
 $t = new MyView();
 $mesosite = iemdb("mesosite");
 
 $t->title = "GIS RASTER Documentation";
 
-$rid = isset($_GET["rid"]) ? intval($_GET["rid"]) : 1;
+$rid = get_int404("rid", 1);
 
 $table = "";
 $rs = pg_query($mesosite, "SELECT * from iemrasters ORDER by name ASC");
@@ -80,60 +77,73 @@ if ($rid > 0) {
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/GIS/">GIS Mainpage</a></li>
- <li class="active">IEM RASTER Information</li>
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/GIS/">GIS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">IEM RASTER Information</li>
+    </ol>
+</nav>
 
 <p>The IEM produces a number of RASTER images meant for GIS use. These RASTERs
-are typically provided on the IEM website as 8 bit PNG images.  This means there
-are 256 slots available for a binned value to be placed.  This page attempts to
-document these RASTER images and provide the lookup table of PNG index to an 
-actual value. Click on the item in the "Label" column to get the lookup 
-table below.</p>
+are typically provided on the IEM website as 8 bit PNG images. This means there
+are 256 slots available for a binned value to be placed. This page documents
+these RASTER images and provides the lookup table of PNG index to an actual
+value. Click on the item in the "Label" column to get the lookup table below.</p>
 
-<p><table class="table table-sm table-striped">
-<thead><tr><th>Label</th><th>Description</th><th>Units</th></tr></thead>
-<tbody>
-{$table}
-</tbody>
+<div class="table-responsive">
+<table class="table table-sm table-striped">
+    <thead>
+        <tr><th>Label</th><th>Description</th><th>Units</th></tr>
+    </thead>
+    <tbody>
+        {$table}
+    </tbody>
 </table>
+</div>
 
-<h3>Programatic Access to this RASTER source</h3>
+<h3>Programmatic access to this RASTER source</h3>
 
-<p>The IEM generated RASTERs are stored in a programatic way that should allow
-for easy scripted download of the archive.  This section documents the URL
-format template used with the time shown in UTC.  The string format
-modifiers below are <a href="https://docs.python.org/2/library/time.html#time.strftime">pythonic strftime values</a>.</p>
+<p>The IEM generated RASTERs are stored in a programmatic way that should allow
+for easy scripted download of the archive. This section documents the URL
+template used with the time shown in UTC. The string format modifiers below
+are <a href="https://docs.python.org/2/library/time.html#time.strftime">pythonic strftime values</a>.</p>
 
-<pre>{$urltemplate}</pre>
+<pre class="p-2 bg-light border">{$urltemplate}</pre>
 
-<p>A general web service also exists to convert these RASTERs to netCDF "on-the-fly".  The
-URL format is like so:</p>
+<p>A general web service also exists to convert these RASTERs to netCDF "on-the-fly".
+The URL format is like so:</p>
 
-<pre>{$EXTERNAL_BASEURL}/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
+<pre class="p-2 bg-light border">{$EXTERNAL_BASEURL}/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
 
-<p>Try the netCDF Conversion!
-<form method="GET" name="try" action="/cgi-bin/request/raster2netcdf.py">
-<input type="hidden" name="prod" value="{$rname}">
-<label for="ts">UTC Timestamp (%Y%m%d%H%M):</label>
-<input id="ts" type="text" name="dstr" value="201710250000">
-<input type="submit" value="Generate!">
-</form></p>
+<h4>Try the netCDF conversion</h4>
+<form method="GET" name="try" action="/cgi-bin/request/raster2netcdf.py" class="row g-2 align-items-end">
+    <input type="hidden" name="prod" value="{$rname}">
+    <div class="col-auto">
+        <label for="ts" class="form-label">UTC Timestamp (%Y%m%d%H%M)</label>
+        <input id="ts" type="text" name="dstr" value="201710250000" class="form-control">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Generate</button>
+    </div>
+</form>
 
-<h3>Lookup Table for {$rname}</h3>
+<h3 class="mt-4">Lookup Table for {$rname}</h3>
 
 <div class="alert alert-info">Would it help you to have the information below
-in a different format?  Please <a class="alert-link" href="/info/contacts.php">contact us <i class="bi bi-chat-left-text" aria-hidden="true"></i></a> 
+in a different format? Please <a class="alert-link" href="/info/contacts.php">contact us <i class="bi bi-chat-left-text" aria-hidden="true"></i></a>
 if so!</div>
 
+<div class="table-responsive">
 <table class="table table-sm table-striped">
-<thead><tr><th>Color Index</th><th>Value ({$runits})</th><th>Red</th><th>Green</th>
-<th>Blue</th><th>HEX</th></tr></thead>
-<tbody>
-{$table2}
-</tbody>
+    <thead>
+        <tr><th>Color Index</th><th>Value ({$runits})</th><th>Red</th><th>Green</th>
+        <th>Blue</th><th>HEX</th></tr>
+    </thead>
+    <tbody>
+        {$table2}
+    </tbody>
 </table>
+</div>
 
 EOM;
 $t->render('single.phtml');

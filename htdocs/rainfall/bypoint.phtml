@@ -5,7 +5,6 @@ require_once "../../include/forms.php";
 require_once "../../include/station.php";
 require_once "../../include/myview.php";
 
-/* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
 
@@ -160,5 +159,9 @@ if ($view == "download") {
 
 $t = new MyView();
 $t->title = "Rainfall by Point";
-$t->content = "<pre>\n{$data}\n</pre>";
+$t->content = <<<EOM
+<pre>
+{$data}
+</pre>
+EOM;
 $t->render("single.phtml");
