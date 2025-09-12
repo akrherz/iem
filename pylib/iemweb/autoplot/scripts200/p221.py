@@ -8,15 +8,19 @@ NEXRAD base reflectivity.
 please be patient!
 """
 
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
+from functools import partial
 from io import BytesIO
+from multiprocessing import Pool
 
 import matplotlib.colors as mpcolors
 import numpy as np
 import pygrib
+import pyproj
+from affine import Affine
 from PIL import Image
 from pyiem.plot import MapPlot, ramp2df
-from pyiem.util import archive_fetch, utc
+from pyiem.util import LOG, archive_fetch, utc
 
 PDICT = {
     "sector": "Plot by State / Sector",
@@ -29,7 +33,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": False, "description": __doc__}
     # Lame default to cut down on CI time :/
-    sts = utc() + timedelta(hours=5)
+    sts = utc() + timedelta(hours=10)
     desc["arguments"] = [
         dict(
             type="select",
@@ -55,6 +59,7 @@ def get_description():
             type="datetime",
             name="valid",
             default=sts.strftime("%Y/%m/%d %H00"),
+            max=sts.strftime("%Y/%m/%d %H00"),
             label="Plot Valid At (UTC Timestamp):",
             min="2014/01/01 0000",
         ),
@@ -82,27 +87,45 @@ def mp_factory(ctx):
     )
 
 
-def add_forecast(img, ctx, valid, fhour, x, y):
+def forecast2image(
+    ctx: dict, valid: datetime, fhour: int
+) -> list[int, bytes | None]:
     """Overlay things."""
     ts = valid - timedelta(hours=fhour)
     if ts >= utc():
-        return
+        return fhour, None
     ppath = ts.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
     with archive_fetch(ppath) as gribfn:
         if gribfn is None:
-            return
-        with pygrib.open(gribfn) as grbs:
-            try:
-                gs = grbs.select(
+            return fhour, None
+        try:
+            with pygrib.open(gribfn) as grbs:
+                grb = grbs.select(
                     shortName="refd", level=1000, forecastTime=fhour * 60
+                )[0]
+                pparams = grb.projparams
+                lat1 = grb["latitudeOfFirstGridPointInDegrees"]
+                lon1 = grb["longitudeOfFirstGridPointInDegrees"]
+                llx, lly = pyproj.Proj(pparams)(lon1, lat1)
+                # The reprojected first grid cell is the centroid
+                # not the outer edge
+                aff = Affine(
+                    grb["DxInMetres"],
+                    0.0,
+                    llx - grb["DxInMetres"] / 2.0,
+                    0.0,
+                    -grb["DyInMetres"],
+                    lly
+                    + grb["DyInMetres"] * grb["Ny"]
+                    + grb["DyInMetres"] / 2.0,
                 )
-            except ValueError:
-                return
-            ref = gs[0]["values"]
-    # HRRR anything below -9 is missing
+
+                ref = grb["values"]
+        except Exception as exp:
+            LOG.exception(exp)
+            return fhour, None
     ref = np.where(ref < -9, -100, ref)
-    if "lats" not in ctx:
-        ctx["lats"], ctx["lons"] = gs[0].latlons()
+    # HRRR anything below -9 is missing
     mp = mp_factory(ctx)
     mp.fig.text(
         0.1,
@@ -110,11 +133,11 @@ def add_forecast(img, ctx, valid, fhour, x, y):
         f"HRRR Init:{ts:%d/%H} Forecast Hour:{fhour}",
         fontsize=FONTSIZE,
     )
-    mp.pcolormesh(
-        ctx["lons"],
-        ctx["lats"],
+    mp.imshow(
         ref,
-        range(-30, 96, 4),
+        affine=aff,
+        crs=pparams,
+        clevs=range(-30, 96, 4),
         cmap=ctx["cmap"],
         clip_on=False,
         clevstride=5,
@@ -123,11 +146,8 @@ def add_forecast(img, ctx, valid, fhour, x, y):
         mp.drawcounties()
     buf = BytesIO()
     mp.fig.savefig(buf, format="png")
-    buf.seek(0)
-    with Image.open(buf).resize((512, 386)) as tmp:
-        img.paste(tmp, (x, y))
-    buf.close()
     mp.close()
+    return fhour, buf.getvalue()
 
 
 def add_obs(img, ctx, valid):
@@ -166,8 +186,17 @@ def plotter(ctx: dict):
     img = Image.new("RGB", (width * 4, height * 4))
 
     add_obs(img, ctx, valid)
-    for fhour in range(1, 16):
-        row = fhour // 4
-        col = fhour % 4
-        add_forecast(img, ctx, valid, fhour, width * col, height * row)
+    func = partial(forecast2image, ctx, valid)
+    # We are generally CPU bound here reading those nasty grib2 files :/
+    with Pool(4) as pool:
+        for fhour, buf in pool.imap_unordered(func, range(1, 16)):
+            if buf is None:
+                continue
+            x = (fhour % 4) * width
+            y = (fhour // 4) * height
+            bio = BytesIO(buf)
+            bio.seek(0)
+            with Image.open(bio).resize((512, 386)) as tmp:
+                img.paste(tmp, (x, y))
+
     return img

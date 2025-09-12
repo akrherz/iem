@@ -43,11 +43,13 @@ def get_currents():
             valid = row[1]
 
     # Go get daily values
-    cursor2.execute(
-        "SELECT station, tair_c_max from sm_daily where valid = %s", (valid,)
-    )
-    for row in cursor2:
-        data[row[0]]["high"] = c2f(row[1])
+    if valid is not None:
+        cursor2.execute(
+            "SELECT station, tair_c_max_qc from sm_daily where valid = %s",
+            (valid.date(),),
+        )
+        for row in cursor2:
+            data[row[0]]["high"] = c2f(row[1])
 
     cursor.close()
     dbconn.close()
