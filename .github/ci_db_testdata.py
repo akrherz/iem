@@ -25,6 +25,12 @@ def create_realtime_isuag(conn: Connection = None) -> None:
     (:sid, now(), :tmpc)"""),
             {"sid": sid, "tmpc": 20.0},
         )
+        conn.execute(
+            sql_helper("""
+    insert into sm_daily (station, valid, tair_c_max_qc) values
+    (:sid, now(), :tmpc)"""),
+            {"sid": sid, "tmpc": 20.0},
+        )
     conn.commit()
 
 

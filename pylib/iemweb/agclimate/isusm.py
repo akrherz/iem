@@ -44,7 +44,8 @@ def get_currents():
 
     # Go get daily values
     cursor2.execute(
-        "SELECT station, tair_c_max from sm_daily where valid = %s", (valid,)
+        "SELECT station, tair_c_max_qc from sm_daily where valid = %s",
+        (valid,),
     )
     for row in cursor2:
         data[row[0]]["high"] = c2f(row[1])

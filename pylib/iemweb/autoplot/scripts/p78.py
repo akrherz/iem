@@ -104,21 +104,29 @@ def plotter(ctx: dict):
         if row["slp"] < 6:
             drops.append(tmpf)
     # Convert sea level pressure to station pressure
-    df["pressure"] = mcalc.add_height_to_pressure(
-        df["slp"].values * units("millibars"),
-        ctx["_nt"].sts[station]["elevation"] * units("m"),
-    ).to(units("millibar"))
+    df["pressure"] = (
+        mcalc.add_height_to_pressure(
+            df["slp"].values * units("millibars"),
+            ctx["_nt"].sts[station]["elevation"] * units("m"),
+        )
+        .to(units("millibar"))
+        .m
+    )
     # compute mixing ratio
     df["mixingratio"] = mcalc.mixing_ratio_from_relative_humidity(
         df["pressure"].values * units("millibars"),
         df["tmpf"].values * units("degF"),
         df["relh"].values * units("percent"),
-    )
+    ).m
     # compute pressure
-    df["vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["mixingratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
+    df["vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].values * units("millibars"),
+            df["mixingratio"].values * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
+    )
 
     qtiles = (
         df.drop(columns="local_date")
@@ -142,7 +150,7 @@ def plotter(ctx: dict):
             qtiles["dwpf"].values * units("degF"),
         )
         * 100.0
-    )
+    ).m
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
@@ -180,7 +188,7 @@ def plotter(ctx: dict):
     y2.set_ylim(0, 100)
     ax.set_ylim(xmin, xmax)
     ax.set_xlim(xmin, xmax)
-    ax.set_xlabel(r"Air Temperature $^\circ$F")
+    ax.set_xlabel("Air Temperature °F")
 
     if ctx.get("date"):
         df2 = df[df["local_date"] == ctx["date"]]

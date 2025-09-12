@@ -162,7 +162,7 @@ def plotter(ctx: dict):
         pltdf[col],
         positions=[0.5],
         widths=[0.5],
-        vert=False,
+        orientation="vertical",
         patch_artist=True,
         boxprops=boxprops,
         whiskerprops=whiskerprops,

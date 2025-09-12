@@ -88,21 +88,29 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     # Convert sea level pressure to station pressure
-    df["pressure"] = mcalc.add_height_to_pressure(
-        df["slp"].values * units("millibars"),
-        ctx["_nt"].sts[station]["elevation"] * units("m"),
-    ).to(units("millibar"))
+    df["pressure"] = (
+        mcalc.add_height_to_pressure(
+            df["slp"].values * units("millibars"),
+            ctx["_nt"].sts[station]["elevation"] * units("m"),
+        )
+        .to(units("millibar"))
+        .m
+    )
     # compute mixing ratio
     df["mixingratio"] = mcalc.mixing_ratio_from_relative_humidity(
         df["pressure"].values * units("millibars"),
         df["tmpf"].values * units("degF"),
         df["relh"].values * units("percent"),
-    )
+    ).m
     # compute pressure
-    df["vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["mixingratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
+    df["vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].values * units("millibars"),
+            df["mixingratio"].values * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
+    )
 
     ptiles = (
         df[["dwpf", "t"]]
@@ -174,7 +182,7 @@ def plotter(ctx: dict):
     ]
     ax.set_title("\n".join(titles), size=10)
 
-    ax.set_ylabel("Dew Point [F]")
+    ax.set_ylabel("Dew Point [°F]")
     ax.set_ylim(ymin["dwpf"].min() - 10, ymax["dwpf"].max() + 10)
     ax.yaxis.set_major_locator(mticker.MultipleLocator(5))
     ax.set_xlim(-5, 365)
