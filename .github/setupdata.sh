@@ -40,3 +40,7 @@ https://mesonet.agron.iastate.edu/vtec/assets.json
 # A corrupted RTMA file
 mkdir -p /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00
 echo > /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00/rtma2p5_ru.t0000z.2dvaranl_ndfd.grb2
+
+# A corrupted HRRR refd file
+mkdir -p /mesonet/ARCHIVE/data/2024/01/01/model/hrrr/00
+echo > /mesonet/ARCHIVE/data/2024/01/01/model/hrrr/00/hrrr.t00z.refd.grib2
