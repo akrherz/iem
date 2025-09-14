@@ -16,14 +16,14 @@ def get_services(package_name):
             yield from get_services(f"{package_name}.{name}")
             continue
         if hasattr(mod, "application"):
-            yield mod
+            yield mod.application, f"{package_name}.{name}"
 
 
-@pytest.mark.parametrize("service", get_services("iemweb"))
-def test_all(service):
+@pytest.mark.parametrize(("application", "appname"), get_services("iemweb"))
+def test_all(application, appname: str):
     """Test all apps."""
-    c = Client(service.application)
-    res = c.get("/")
+    c = Client(application)
+    res = c.get(f"/?{appname}")
     # 422 when a required parameter was not provided, which is fine
     # 301 when the app is upset about being approached via http
     assert res.status_code in [200, 301, 422]

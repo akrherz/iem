@@ -133,7 +133,7 @@ def workflow(key, tmpdir, ts: datetime | None):
     if ts is None:
         # Go to 0z tomorrow and work backwards
         valid = (utc() + timedelta(days=1)).replace(hour=0, minute=0)
-        for offset in range(0, 25, meta["modulo"]):
+        for offset in range(0, 36, meta["modulo"]):
             ts = valid - timedelta(hours=offset)
             ppath = ts.strftime(meta["re"])
             with archive_fetch(ppath, method="head") as fn:

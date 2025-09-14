@@ -36,16 +36,14 @@ https://mesonet.agron.iastate.edu/search.py?q=100%20Main%20St%20Ames%20Iowa
 
 """
 
-# Local
 import re
 
 import pandas as pd
-
-# Third Party
 from commonregex import CommonRegex
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.geocoder import geocode
 
@@ -53,6 +51,12 @@ AFOS_RE = re.compile(r"^[A-Z0-9]{4,6}$", re.IGNORECASE)
 STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.IGNORECASE)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.IGNORECASE)
 PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.IGNORECASE)
+
+
+class MyModel(CGIModel):
+    """See how we are called."""
+
+    q: str = Field(..., title="Search Query")
 
 
 def station_df_handler(df: pd.DataFrame) -> str:
@@ -177,12 +181,12 @@ of supported search values.</p>
     return [TEMPLATE.render(ctx).encode("utf-8")]
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, schema=MyModel)
 def application(environ, start_response):
     """Here we are, answer with a redirect in most cases."""
     # Ensure we have only latin-1 characters per URL requirements
     q = (
-        environ.get("q", "")
+        environ["q"]
         .strip()
         .encode("latin-1", "replace")
         .decode("utf-8", "replace")

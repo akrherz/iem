@@ -292,7 +292,7 @@ def plotter(ctx: dict):
         bins,
         cmap=cmap,
         clip_on=False,
-        units=r"$^\circ$F",
+        units="°F",
         spacing="proportional",
         extend="both",
     )

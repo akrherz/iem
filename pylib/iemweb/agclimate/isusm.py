@@ -1,20 +1,37 @@
-"""
-Generate various plots for ISUSM data
+""".. title:: Unknown ISUAG Plotting
+
+Unsure if this is used anymore, alas.
+
+Usage Examples
+--------------
+
+Plot dew point
+
+https://mesonet.agron.iastate.edu/agclimate/isusm.py?v=dwpf
+
 """
 
 from io import BytesIO
 
+from pydantic import Field
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import c2f
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 CTX = {
-    "tmpf": {"title": "2m Air Temperature [F]"},
+    "tmpf": {"title": "2m Air Temperature [°F]"},
     "rh": {"title": "2m Air Humidity [%]"},
-    "high": {"title": "Today's High Temp [F]"},
+    "high": {"title": "Today's High Temp [°F]"},
+    "dwpf": {"title": "2m Dew Point Temperature [°F]"},
 }
+
+
+class MyModel(CGIModel):
+    """See how we are called."""
+
+    v: str = Field("tmpf", description="Variable to plot")
 
 
 def get_currents():
@@ -26,7 +43,7 @@ def get_currents():
     data = {}
     cursor.execute(
         """
-    SELECT id, valid, tmpf, relh from current c JOIN stations t on
+    SELECT id, valid, tmpf, relh, dwpf from current c JOIN stations t on
     (t.iemid = c.iemid) WHERE valid > now() - '3 hours'::interval and
     t.network = 'ISUSM'
     """
@@ -36,6 +53,7 @@ def get_currents():
         data[row[0]] = {
             "tmpf": row[2],
             "rh": row[3],
+            "dwpf": row[4],
             "valid": row[1],
             "high": None,
         }
@@ -93,10 +111,10 @@ def plot(data, v):
     return mp
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=MyModel)
 def application(environ, start_response):
     """Go Main Go"""
-    v = environ.get("v", "tmpf")
+    v = environ["v"]
     data = get_currents()
     mp = plot(data, v)
     bio = BytesIO()
