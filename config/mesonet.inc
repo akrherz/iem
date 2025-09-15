@@ -27,6 +27,7 @@
 # Search functionality
 RewriteRule ^/search /search.py [QSA]
 
+  Redirect /geojson/spc_outlooks.py https://mesonet.agron.iastate.edu/api/
   Redirect /data/mwcomp.phtml https://mesonet.agron.iastate.edu/current/mwcomp.phtml
   Redirect /RWIS/current.php https://mesonet.agron.iastate.edu/RWIS/current.phtml
   Redirect /schoolnet/current.php https://mesonet.agron.iastate.edu/schoolnet/current.phtml
@@ -361,6 +362,3 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule pl_(.*)_(.*).xml pl.py?network=$1&station=$2 [QSA]
     RewriteRule sd_(.*)_(.*).xml sd.py?network=$1&station=$2 [QSA]
   </Directory>
-
-  # 16 Jan 2023: puzzling number of hosts have this to valid URIs
-  Redirect permanent /gis/ /GIS/

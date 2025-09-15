@@ -177,7 +177,7 @@ def guess_network(station):
     return res
 
 
-def get_station_info(environ):
+def get_station_info(environ: dict) -> tuple[str, str, str]:
     """Determine some metadata we need to process this form request."""
     station = environ["station"].upper()
     network = environ.get("network")
@@ -208,14 +208,6 @@ def application(environ, start_response):
             send_error(environ, "Unknown station identifier", start_response)
         ]
     tzname = nt.sts[station]["tzname"] if network != "RAOB" else "UTC"
-    if environ["sts"] is None or environ["ets"] is None:
-        return [
-            send_error(
-                environ,
-                "You must provide both a start and end time",
-                start_response,
-            )
-        ]
     for key in ["sts", "ets"]:
         if environ[key].tzinfo is None:
             environ[key] = environ[key].replace(tzinfo=ZoneInfo(tzname))

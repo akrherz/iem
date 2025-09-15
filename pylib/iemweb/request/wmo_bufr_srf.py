@@ -117,7 +117,7 @@ def application(environ, start_response):
         return get_data(environ["sts"], environ["ets"], stations, fmt)
     headers = [
         ("Content-type", EXL),
-        ("Content-disposition", "attachment; Filename=mos.xlsx"),
+        ("Content-disposition", "attachment; Filename=wmo_bufr_srf.xlsx"),
     ]
     start_response("200 OK", headers)
     return [get_data(environ["sts"], environ["ets"], stations, fmt)]

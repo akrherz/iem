@@ -112,10 +112,16 @@ def dbsave(df):
 
 def main():
     """Go Main Go."""
-    procdate = httpx.get(
-        "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/procdate.txt",
-        timeout=30,
-    ).text.strip()
+    try:
+        resp = httpx.get(
+            "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/procdate.txt",
+            timeout=60,
+        )
+        resp.raise_for_status()
+        procdate = resp.text.strip()
+    except Exception as exp:
+        LOG.warning("Aborting as fetch procdate.txt: %s", exp)
+        return
     iemprocdate = get_properties().get("ncei.climdiv.procdate")
     if iemprocdate is not None and iemprocdate == procdate:
         LOG.info("Nothing to do, procdate %s", procdate)

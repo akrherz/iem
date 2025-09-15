@@ -21,8 +21,8 @@ def create_realtime_isuag(conn: Connection = None) -> None:
     for sid in nt.sts:
         conn.execute(
             sql_helper("""
-    insert into sm_minute (station, valid, tair_c_avg_qc) values
-    (:sid, now(), :tmpc)"""),
+    insert into sm_minute (station, valid, tair_c_avg_qc, sv_t2_qc) values
+    (:sid, now(), :tmpc, :tmpc)"""),
             {"sid": sid, "tmpc": 20.0},
         )
         conn.execute(
@@ -31,6 +31,14 @@ def create_realtime_isuag(conn: Connection = None) -> None:
     (:sid, now(), :tmpc)"""),
             {"sid": sid, "tmpc": 20.0},
         )
+        if sid in ["CRFI4", "BOOI4", "CAMI4"]:
+            conn.execute(
+                sql_helper("""
+        insert into sm_inversion (station, valid, tair_15_c_avg_qc) values
+        (:sid, now(), :tmpc)"""),
+                {"sid": sid, "tmpc": 20.0},
+            )
+
     conn.commit()
 
 
@@ -43,7 +51,10 @@ def create_iemaccess_isuag(conn: Connection = None) -> None:
             sql_helper("""
     insert into current (iemid, valid, tmpf) values
     (:iemid, now(), :tmpf)"""),
-            {"iemid": nt.sts[sid]["iemid"], "tmpf": 20.0},
+            {
+                "iemid": nt.sts[sid]["iemid"],
+                "tmpf": 20.0 if sid[2] > "F" else None,
+            },
         )
     conn.commit()
 
