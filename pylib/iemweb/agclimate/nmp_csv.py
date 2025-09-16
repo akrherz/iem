@@ -106,11 +106,7 @@ def do_soil_moisture(row):
 
     if not depths:
         return ""
-    return "%s#%s#%s" % (
-        ";".join(depths),
-        ";".join(temps),
-        ";".join(moisture),
-    )
+    return f"{';'.join(depths)}#{';'.join(temps)}#{';'.join(moisture)}"
 
 
 def use_table(sio):
