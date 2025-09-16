@@ -21,9 +21,14 @@ def create_realtime_isuag(conn: Connection = None) -> None:
     for sid in nt.sts:
         conn.execute(
             sql_helper("""
-    insert into sm_minute (station, valid, tair_c_avg_qc, sv_t2_qc) values
-    (:sid, now(), :tmpc, :tmpc)"""),
-            {"sid": sid, "tmpc": 20.0},
+    insert into sm_minute (station, valid, tair_c_avg_qc, sv_t2_qc,
+    sv_vwc2_qc) values
+    (:sid, now(), :tmpc, :tmpc, :vwc)"""),
+            {
+                "sid": sid,
+                "tmpc": None if sid == "AMFI4" else 20.0,
+                "vwc": None if sid == "AMFI4" else 0.2,
+            },
         )
         conn.execute(
             sql_helper("""

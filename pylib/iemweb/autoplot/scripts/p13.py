@@ -94,7 +94,7 @@ def plotter(ctx: dict):
     sm = cm.ScalarMappable(norm, cmap)
     sm.set_array(bins)
     cb = fig.colorbar(sm, extend="neither", ax=ax)
-    cb.set_label(r"Summer Avg Temperature Departure $^\circ$F")
+    cb.set_label("Summer Avg Temperature Departure °F")
 
     yticks = []
     yticklabels = []
