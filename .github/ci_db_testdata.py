@@ -26,7 +26,7 @@ def create_realtime_isuag(conn: Connection = None) -> None:
     (:sid, now(), :tmpc, :tmpc, :vwc)"""),
             {
                 "sid": sid,
-                "tmpc": None if sid == "AMFI4" else 20.0,
+                "tmpc": None if sid == "AHDI4" else 20.0,
                 "vwc": None if sid == "AMFI4" else 0.2,
             },
         )

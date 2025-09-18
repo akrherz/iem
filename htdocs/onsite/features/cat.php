@@ -23,17 +23,17 @@ if (is_null($day)) {
 
 $dbconn = iemdb("mesosite");
 $stname1 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
-              to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
+              to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid < $1 ORDER by valid DESC limit 1");
 $stname2 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
-              to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
+              to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE date(valid) = $1");
 $stname3 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
-              to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
+              to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
-              WHERE valid > ($1::date + '1 day'::interval) 
+              WHERE valid > ($1::date + '1 day'::interval)
               ORDER by valid ASC limit 1");
 
 $q = $stname2;
@@ -120,7 +120,8 @@ $content = <<<EOM
             {$linktext}
         </div>
         <div class="col-12 col-md-6">
-            <div class="card bg-light p-3 rounded">{$row["story"]}
+            <div class="bg-light p-3 rounded">
+                    {$row["story"]}
 EOM;
 if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0)) {
     $content .= "<br /><br /><b>Voting:</b>
