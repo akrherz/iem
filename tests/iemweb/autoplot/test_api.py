@@ -4,6 +4,7 @@ import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.autoplot import application as autoplot_app
 from iemweb.autoplot.autoplot import parser
+from iemweb.autoplot.index import application as index_app
 from iemweb.autoplot.meta import application as meta_app
 from pyiem.exceptions import IncompleteWebRequest
 from werkzeug.test import Client
@@ -28,6 +29,14 @@ def test_threecolons():
     assert res["network"] == "WFO"
     assert res["wfo"] == ""
     assert res["year"] == "2025"
+
+
+@pytest.mark.parametrize("apid", genmod())
+def test_autoplot_calls_index(apid: str):
+    """Test the HTML generation via the User frontdoor."""
+    c = Client(index_app)
+    resp = c.get(f"?q={apid}")
+    assert resp.status_code == 200
 
 
 @pytest.mark.parametrize("apid", genmod())

@@ -6,6 +6,7 @@
 /autoplot/index.py?q=109&by=state&sdate=2025%2F01%2F01+0000&edate=&var=count&w=set&phenomenav1=FF&significancev1=W&phenomenav2=SV&significancev2=W&phenomenav3=SV&significancev3=W&phenomenav4=SV&significancev4=W&e=all&cmap=jet&_r=t&dpi=100&_fmt=png
 /autoplot/index.py?_wait=no&q=15&year=2019&varname=high&station=IATDSM&network=scnr
 /autoplot/index.py?_wait=no&q=-15
+/autoplot/index.py?_wait=no&q=54&network1=IA_ASOS&zstation1=ALO&network2=iaASOS&zstation2=OLZ
 /cgi-bin/mywindrose.py?nsector=36&station=_OAX&network=RAOB&day1=1&day2=31&month1=5&month2=5&year1=1947&year2=2018&hour1=12&hour2=12&minute1=0&minute2=0&units=mph&fmt=png&dpi=100&conv=from&monthlimit=1&justdata=true
 /cgi-bin/request/asos.py?station=OKC%0A&data=tmpf&data=dwpf&data=relh&data=sknt&data=mslp&year1=2023&month1=1&day1=1&year2=2023&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&elev=no&missing=M&trace=T&direct=yes&report_type=3
 /cgi-bin/request/coop.py?network=%22IA%22CLIMATE&stations=%22IA%220000&year1=1988&month1=1&day1=1&year2=2024&month2=12&day2=31&vars%5B%5D=high&vars%5B%5D=highc&vars%5B%5D=low&vars%5B%5D=lowc&vars%5B%5D=precip&vars%5B%5D=precipmm&model=apsim&what=view&delim=comma&gis=no&scenario_year=2023

@@ -3,7 +3,8 @@
 import os
 
 import pytest
-from iemweb.autoplot.index import application
+from iemweb.autoplot.index import application, networkselect_handler
+from pyiem.exceptions import BadWebRequest
 from werkzeug.test import Client
 
 
@@ -32,3 +33,9 @@ def test_cookie_set_to_all():
     cl.set_cookie("station_WFO", "_ALL")
     res = cl.get("?q=72")
     assert res.status_code == 200
+
+
+def test_bad_network():
+    """Test the provision of a bad network."""
+    with pytest.raises(BadWebRequest):
+        networkselect_handler("XXXX<script>", {"network": ""}, {"pltvars": []})
