@@ -9,8 +9,9 @@ import click
 import httpx
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.util import get_properties, logger
+from sqlalchemy.engine import Connection
 
 LOG = logger()
 PROPS = get_properties()
@@ -50,7 +51,8 @@ def get_df(year, sts, topic):
     return pd.DataFrame(data["data"])
 
 
-def process(df):
+@with_sqlalchemy_conn("coop")
+def process(df: pd.DataFrame, conn: Connection | None = None):
     """Do some work"""
     # Try to get a number
     df["num_value"] = pd.to_numeric(df["Value"], errors="coerce")
@@ -59,7 +61,6 @@ def process(df):
         df["load_time"].str.slice(0, 19), format="%Y-%m-%d %H:%M:%S"
     ).dt.tz_localize(ZoneInfo("America/New_York"))
     df = df.replace({np.nan: None, "": None})
-    pgconn, cursor = get_dbconnc("coop")
     deleted = 0
     inserted = 0
     dups = 0
@@ -71,43 +72,55 @@ def process(df):
         cc = "is not distinct from" if row["week_ending"] is None else "="
         cf = "is not distinct from" if row["county_ansi"] is None else "="
         # Uniqueness by short_desc, year, state_alpha, week_ending
-        cursor.execute(
-            "SELECT load_time from nass_quickstats where year = %s "
-            "and short_desc = %s and state_alpha = %s "
-            f"and week_ending {cc} %s and freq_desc = %s and "
-            f"county_ansi {cf} %s",
-            (
-                row["year"],
-                row["short_desc"],
-                row["state_alpha"],
-                row["week_ending"],
-                row["freq_desc"],
-                row["county_ansi"],
+        res = conn.execute(
+            sql_helper(
+                """
+    SELECT load_time from nass_quickstats where year = :yr
+    and short_desc = :sd and state_alpha = :sa
+    and week_ending {cc} :we and freq_desc = :fd and
+    county_ansi {cf} :ca
+                       """,
+                cc=cc,
+                cf=cf,
             ),
+            {
+                "yr": row["year"],
+                "sd": row["short_desc"],
+                "sa": row["state_alpha"],
+                "we": row["week_ending"],
+                "fd": row["freq_desc"],
+                "ca": row["county_ansi"],
+            },
         )
-        if cursor.rowcount > 0:
-            lt = cursor.fetchone()["load_time"]
+        if res.rowcount > 0:
+            lt = res.mappings().fetchone()["load_time"]
             if lt == row["load_time"].to_pydatetime():
                 dups += 1
                 continue
-            cursor.execute(
-                "DELETE from nass_quickstats where year = %s "
-                "and short_desc = %s and "
-                f"state_alpha = %s and week_ending {cc} %s and freq_desc = %s "
-                f"and county_ansi {cf} %s",
-                (
-                    row["year"],
-                    row["short_desc"],
-                    row["state_alpha"],
-                    row["week_ending"],
-                    row["freq_desc"],
-                    row["county_ansi"],
+            conn.execute(
+                sql_helper(
+                    """
+    DELETE from nass_quickstats where year = :yr
+                and short_desc = :sd and state_alpha = :sa
+                and week_ending {cc} :we and freq_desc = :fd
+                and county_ansi {cf} :ca
+                """,
+                    cc=cc,
+                    cf=cf,
                 ),
+                {
+                    "yr": row["year"],
+                    "sd": row["short_desc"],
+                    "sa": row["state_alpha"],
+                    "we": row["week_ending"],
+                    "fd": row["freq_desc"],
+                    "ca": row["county_ansi"],
+                },
             )
-            deleted += cursor.rowcount
+            deleted += res.rowcount
         inserted += 1
-        cursor.execute(
-            """
+        conn.execute(
+            sql_helper("""
             INSERT into nass_quickstats(
             short_desc,
             sector_desc,
@@ -129,35 +142,35 @@ def process(df):
             value,
             cv,
             county_ansi,
-            num_value) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (
-                row["short_desc"],
-                row["sector_desc"],
-                row["group_desc"],
-                row["commodity_desc"],
-                row["class_desc"],
-                row["prodn_practice_desc"],
-                row["util_practice_desc"],
-                row["statisticcat_desc"],
-                row["unit_desc"],
-                row["agg_level_desc"],
-                row["state_alpha"],
-                row["year"],
-                row["freq_desc"],
-                row["begin_code"],
-                row["end_code"],
-                row["week_ending"],
-                row["load_time"],
-                row["Value"],
-                row["CV (%)"],
-                row["county_ansi"],
-                row["num_value"],
-            ),
+            num_value) VALUES (:p1, :p2, :p3, :p4, :p5, :p6, :p7, :p8, :p9,
+            :p10, :p11, :p12, :p13, :p14, :p15, :p16, :p17, :p18, :p19, :p20,
+            :p21)
+            """),
+            {
+                "p1": row["short_desc"],
+                "p2": row["sector_desc"],
+                "p3": row["group_desc"],
+                "p4": row["commodity_desc"],
+                "p5": row["class_desc"],
+                "p6": row["prodn_practice_desc"],
+                "p7": row["util_practice_desc"],
+                "p8": row["statisticcat_desc"],
+                "p9": row["unit_desc"],
+                "p10": row["agg_level_desc"],
+                "p11": row["state_alpha"],
+                "p12": row["year"],
+                "p13": row["freq_desc"],
+                "p14": row["begin_code"],
+                "p15": row["end_code"],
+                "p16": row["week_ending"],
+                "p17": row["load_time"],
+                "p18": row["Value"],
+                "p19": row["CV (%)"],
+                "p20": row["county_ansi"],
+                "p21": row["num_value"],
+            },
         )
-    cursor.close()
-    pgconn.commit()
+    conn.commit()
     LOG.warning("Del %s, Inserted %s, Dups %s rows", deleted, inserted, dups)
 
 
