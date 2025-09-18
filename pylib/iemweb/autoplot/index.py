@@ -156,12 +156,12 @@ onClick="mapFactory('{network}', '{name}');">Show Map</button>
 """
 
 
-def networkselect_handler(value, arg, res):
+def networkselect_handler(value: str, arg: dict, res: dict) -> str:
     """Select a station from a given network."""
     if not isinstance(arg["network"], list):
         res["pltvars"].append(f"network:{arg['network']}")
-        if not NETWORK_RE.match(arg["network"]):
-            raise BadWebRequest("Invalid network provided")
+    if not NETWORK_RE.match(value):
+        raise BadWebRequest("Invalid network provided")
     return station_select(
         arg["network"],
         value,
@@ -193,9 +193,8 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
     networkcgi = "network"
     if arg["name"][-1].isdigit():
         networkcgi += arg["name"][-1]
+    # get the default network set with this autoplot
     network = arg.get("network", "IA_ASOS")
-    if not NETWORK_RE.match(network):
-        raise BadWebRequest("Invalid network provided")
     network = html_escape(fdict.get(networkcgi, network))
     if not NETWORK_RE.match(network):
         raise BadWebRequest("Invalid network provided")

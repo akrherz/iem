@@ -1,6 +1,7 @@
 /afos/retrieve.py?sdate=2024-1-31&edate=2024-1-1&pil=DSMDSM
 /afos/retrieve.py?sdate=2024-01-31&edate=2024-03-01&pil=DSMDSM&ttaaii=
 /afos/retrieve.py?pil=MTRZZZ
+/autoplot/index.py
 /cgi-bin/request/asos.py?station=AMW&data=all&year1=2020&month1=7&day1=1&year2=2020&month2=7&day2=28&tz=Etc%2FUTC&format=onlytdf&latlon=yes&elev=no&missing=empty&trace=null&direct=no&report_type=1&report_type=3&report_type=4
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=salus&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=dndc&what=excel&delim=comma&gis=no&scenario_year=2023
