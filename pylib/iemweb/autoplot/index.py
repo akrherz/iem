@@ -697,10 +697,15 @@ def generate_form(apid, fdict, headers, cookies):
     res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
     if fdict.get("_wait") != "yes":
         if fmt == "text":
-            content = httpx.get(
-                f"http://iem.local{res['imguri']}.txt",
-                timeout=300,
-            ).text
+            try:
+                resp = httpx.get(
+                    f"http://iem.local{res['imguri']}.txt",
+                    timeout=300,
+                )
+                resp.raise_for_status()
+                content = resp.text
+            except Exception:
+                content = "Exception encountered generating text"
             res["image"] = f"<pre>\n{content}</pre>"
         elif fmt == "js":
             res["image"] = (
