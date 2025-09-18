@@ -77,10 +77,8 @@ def plotter(ctx: dict):
     hvals = df["high_freq"].rolling(7, min_periods=1).mean().values
     lvals = df["low_freq"].rolling(7, min_periods=1).mean().values
     title = (
-        f"{ctx['_sname']}\nFreq of Temp between {minv}"
-        r"$^\circ$F and "
-        f"{maxv}"
-        r"$^\circ$F of NCEI-81 Average"
+        f"{ctx['_sname']}\nFreq of Temp between {minv}°F and {maxv}°F "
+        "of NCEI-81 Average"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

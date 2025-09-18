@@ -49,7 +49,7 @@ def plot_gdd(ts):
         data,
         np.arange(-80, 81, 20),
         cmap=get_cmap("RdBu_r"),
-        units=r"$^\circ$F",
+        units="°F",
         spacing="proportional",
     )
     mp.drawcounties()

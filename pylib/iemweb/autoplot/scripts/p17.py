@@ -289,7 +289,7 @@ def do_temperature_plot(ctx) -> bool:
                 np.nanmin([df["climo_low"].min(), df["min_tmpf"].min()]) - 5,
                 np.nanmax([df["climo_high"].max(), df["max_tmpf"].max()]) + 5,
             )
-    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.set_ylabel("Temperature °F")
     return hasdata
 
 
@@ -432,7 +432,7 @@ def do_dwpf_plot(ctx) -> bool:
                 )
                 + 5,
             )
-    ax.set_ylabel(PDICT[ctx["p"]] + r" $^\circ$F")
+    ax.set_ylabel(f"{PDICT[ctx['p']]} °F")
     return hasdata
 
 

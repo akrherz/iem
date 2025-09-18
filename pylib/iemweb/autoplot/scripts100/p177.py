@@ -184,7 +184,7 @@ def make_inversion_plot(ctx):
     ax.plot(df["valid"], c2f(df["tair_5_c_avg_qc"].values), label="5 feet")
     ax.plot(df["valid"], c2f(df["tair_10_c_avg_qc"].values), label="10 feet")
     ax.grid(True)
-    ax.set_ylabel(r"Air Temperature $^\circ$F")
+    ax.set_ylabel("Air Temperature °F")
     ax.set_title(f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries")
     apply_xaxis_formatting(ax, ctx)
     ax.legend(loc="best", ncol=3, fontsize=10)
@@ -200,7 +200,7 @@ def make_inversion_plot(ctx):
     )
     ax.grid(True)
     ax.set_title("10 Foot Temperature minus 1.5 Foot Temperature")
-    ax.set_ylabel(r"Air Temperature Diff $^\circ$F")
+    ax.set_ylabel("Air Temperature Diff °F")
     apply_xaxis_formatting(ax, ctx)
 
     ax = axes[2]
@@ -410,7 +410,7 @@ def make_daily_rainfall_soil_rh(ctx):
         align="center",
     )
     ax.set_ylim(np.min(vals) - 5, np.max(vals) + 5)
-    ax.set_ylabel(r"4 Inch Soil Temp [$^\circ$F]")
+    ax.set_ylabel("4 Inch Soil Temp [°F]")
     common(ax)
 
     ax = fig.add_axes((0.1, 0.1, 0.8, 0.2))
@@ -421,10 +421,8 @@ def make_daily_rainfall_soil_rh(ctx):
             color="blue",
             align="center",
         )
-    else:
-        ax.text(0.5, 0.5, "Relative Humidity Missing", transform=ax.transAxes)
-    ax.set_ylim(0, 100)
-    ax.set_ylabel("Average\nRelative Humidity [%]")
+        ax.set_ylim(0, 100)
+        ax.set_ylabel("Average\nRelative Humidity [%]")
     common(ax)
 
     return fig, df
@@ -480,7 +478,7 @@ def make_daily_plot(ctx):
     )
     ax.axhline(50, lw=1.5, c="k")
     ax.grid(True)
-    ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
+    ax.set_ylabel("4 inch Soil Temperature [°F]")
     apply_xaxis_formatting(ax, ctx)
     ax.legend(loc="best", ncol=2, fontsize=10)
     return fig, df
@@ -639,11 +637,9 @@ def make_daily_water_change_plot(ctx):
     ax[0].set_ylim(bottom=0)
 
     # Second plot
-    bars = ax[1].bar(df["valid"].values, df["change"].values, fc="b", ec="b")
+    bars = ax[1].bar(df["valid"].values, df["change"].values, color="b")
     for mybar in bars:
-        if mybar.get_y() < 0:
-            mybar.set_facecolor("r")
-            mybar.set_edgecolor("r")
+        mybar.set_color("r" if mybar.get_y() < 0 else "b")
     ax[1].set_ylabel("Soil Water Change [inch]")
     ax[1].xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
     interval = int(len(df.index) / 7.0 + 1)
@@ -795,7 +791,7 @@ def plot2(ctx):
     apply_xaxis_formatting(ax, ctx)
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle="--", lw=2, color="tan")
-    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.set_ylabel("Temperature [°F]")
     return fig, df
 
 
@@ -831,9 +827,9 @@ def plot_at(ctx):
     if df["ws_mph_max_qc"].max() > 0.1:
         ax = fig.subplots(2, 1, sharex=True)
     else:
-        ax = [fig.add_axes([0.1, 0.1, 0.8, 0.8])]
+        ax = [fig.add_axes((0.1, 0.1, 0.8, 0.8))]
     ax[0].plot(df.index, c2f(df["tair_c_avg_qc"]), color="r", label="Air Temp")
-    ax[0].set_ylabel(r"Temperature [$^\circ$F]")
+    ax[0].set_ylabel("Temperature [°F]")
     dwpf = dewpoint_from_relative_humidity(
         units("degC") * df["tair_c_avg_qc"].values,
         units("percent") * df["rh_avg_qc"].values,
@@ -846,8 +842,9 @@ def plot_at(ctx):
     ax[0].legend(loc="best")
 
     ax2 = ax[0].twinx()
-    ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
-    ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
+    if not pd.isna(df["slrkj_tot_qc"]).all():
+        ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
+        ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
     apply_xaxis_formatting(ax[0], ctx)
 
     if df["ws_mph_max_qc"].max() > 0.1:
@@ -921,7 +918,7 @@ def plot_meteogram(ctx):
         )
         ax.plot(df2.index.values, dwpf, color="g", label="Dew Point")
     ax.grid(True)
-    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.set_ylabel("Temperature [°F]")
     ax.legend(loc="best", ncol=2)
 
     # ----------------
@@ -1032,7 +1029,7 @@ def plot1(ctx):
     if not d50t.isnull().all():
         ax[1].plot(valid, c2f(d50t), linewidth=2, color="black", label="50in")
     ax[1].grid(True)
-    ax[1].set_ylabel(r"Soil Temperature $^\circ$F")
+    ax[1].set_ylabel("Soil Temperature [°F]")
     box = ax[1].get_position()
     ax[1].set_position(
         [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
@@ -1068,7 +1065,7 @@ def plot1(ctx):
         loc="center",
         ncol=3,
     )
-    ax[2].set_ylabel(r"Temperature $^\circ$F")
+    ax[2].set_ylabel("Temperature [°F]")
 
     ax[2].set_zorder(ax2.get_zorder() + 1)
     ax[2].patch.set_visible(False)

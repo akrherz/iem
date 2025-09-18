@@ -40,12 +40,11 @@ def get_df(year, sts, topic):
     if sts is not None:
         params["load_time__GE"] = sts.strftime("%Y-%m-%d %H:%M:%S")
     params.update(topic)
-    resp = httpx.get(SERVICE, params=params, timeout=300)
-    if resp.status_code != 200:
-        if resp.status_code == 400:
-            LOG.debug("Got status_code=400 (no data) %s", resp.url)
-        else:
-            LOG.warning("Got status_code %s %s", resp.status_code, resp.url)
+    try:
+        resp = httpx.get(SERVICE, params=params, timeout=300)
+        resp.raise_for_status()
+    except Exception as exp:
+        LOG.warning("Error fetching NASS data: %s", exp)
         return None
     data = resp.json()
     return pd.DataFrame(data["data"])

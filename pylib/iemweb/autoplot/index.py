@@ -28,6 +28,7 @@ from iemweb.autoplot.meta import get_metadict
 sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
     sn_contig.pop(_sn, None)
+NETWORK_RE = re.compile(r"^[A-Z0-9_\-]+$")
 DATE_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})$")
 SDAY_RE = re.compile(r"^(\d{2})(\d{2})$")
 DATETIME_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2}) (\d{1,2})(\d{2})$")
@@ -159,6 +160,8 @@ def networkselect_handler(value, arg, res):
     """Select a station from a given network."""
     if not isinstance(arg["network"], list):
         res["pltvars"].append(f"network:{arg['network']}")
+    if not NETWORK_RE.match(arg["network"]):
+        raise BadWebRequest("Invalid network provided")
     return station_select(
         arg["network"],
         value,
@@ -191,7 +194,11 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
     if arg["name"][-1].isdigit():
         networkcgi += arg["name"][-1]
     network = arg.get("network", "IA_ASOS")
+    if not NETWORK_RE.match(network):
+        raise BadWebRequest("Invalid network provided")
     network = html_escape(fdict.get(networkcgi, network))
+    if not NETWORK_RE.match(network):
+        raise BadWebRequest("Invalid network provided")
     netselect = make_select(
         networkcgi, network, networks, jscallback="onNetworkChange"
     )
@@ -1097,6 +1104,8 @@ def generate(fdict, headers, cookies):
         apid = int(fdict.get("q", 0))
     except ValueError:
         apid = 0
+    if apid < 0 or apid > 1_000:  # arb
+        raise BadWebRequest("Invalid plot id")
     res = generate_form(apid, fdict, headers, cookies)
     content = f"""
 <div class="row">

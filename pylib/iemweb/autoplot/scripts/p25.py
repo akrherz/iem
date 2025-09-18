@@ -112,7 +112,7 @@ def plotter(ctx: dict):
         0.98,
         "\n".join(
             [
-                "High Temp\n" + rf"$\mu$ = {mu:.1f}$^\circ$F",
+                "High Temp\n" + rf"$\mu$ = {mu:.1f}°F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(highs)}",
             ]
@@ -149,7 +149,7 @@ def plotter(ctx: dict):
         0.98,
         "\n".join(
             [
-                "Low Temp\n" + rf"$\mu$ = {mu:.1f}$^\circ$F",
+                "Low Temp\n" + rf"$\mu$ = {mu:.1f}°F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(lows)}",
             ]
@@ -163,8 +163,8 @@ def plotter(ctx: dict):
     ax.grid(True)
     extra = ""
     if plotted32:
-        extra = r" (32$^\circ$F highlighted in green)"
-    ax.set_xlabel(r"Temperature $^\circ$F" + extra)
+        extra = " (32°F highlighted in green)"
+    ax.set_xlabel(f"Temperature °F{extra}")
     ax.set_ylabel("Probability")
 
     return fig, df

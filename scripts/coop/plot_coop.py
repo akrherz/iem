@@ -48,8 +48,7 @@ def plot_hilo(valid):
         )
 
     mp = MapPlot(
-        title=(r"%s NWS COOP 24 Hour High/Low Temperature [$^\circ$F]")
-        % (valid.strftime("%-d %b %Y"),),
+        title=f"{valid:%-d %b %Y} NWS COOP 24 Hour High/Low Temperature [°F]",
         subtitle="Reports valid between 6 and 9 AM",
         axisbg="white",
         figsize=(10.24, 7.68),
@@ -57,9 +56,7 @@ def plot_hilo(valid):
     mp.plot_station(data)
     mp.drawcounties()
 
-    pqstr = "plot ac %s0000 coopHighLow.gif coopHighLow.gif gif" % (
-        valid.strftime("%Y%m%d"),
-    )
+    pqstr = f"plot ac {valid:%Y%m%d}0000 coopHighLow.gif coopHighLow.gif gif"
 
     mp.postprocess(pqstr=pqstr)
     mp.close()

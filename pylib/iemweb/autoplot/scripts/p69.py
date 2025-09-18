@@ -121,7 +121,7 @@ def plotter(ctx: dict):
             metric = rf"{ctx['mag']}$\sigma$"
             smul = ctx["mag"]
         elif ctx["unit"] == "degrees":
-            metric = rf"{ctx['mag']}$^\circ$F"
+            metric = f"{ctx['mag']}°F"
             offset = ctx["mag"]
     op = "+" if ctx["which"] == "above" else "-"
     comp = ">" if ctx["which"] == "above" else "<"
