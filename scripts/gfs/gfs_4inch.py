@@ -50,7 +50,7 @@ def gen_plot(cdf, dt, day, soilt, lons, lats, fx):
         soilt,
         np.arange(10, 101, 5),
         cmap=get_cmap("jet"),
-        units=r"$^\circ$F",
+        units="°F",
     )
     mp.plot_values(
         cdf["lon"],

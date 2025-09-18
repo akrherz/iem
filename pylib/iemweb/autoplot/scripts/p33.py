@@ -96,7 +96,7 @@ def plotter(ctx: dict):
     mv = df["largest_change"].mean()
     ax.axhline(mv, lw=2, color="k")
     ax.grid(True)
-    ax.set_ylabel(r"Largest Low Temp Drop $^\circ$F, " + f"Avg: {mv:.1f}")
+    ax.set_ylabel(f"Largest Low Temp Drop °F, Avg: {mv:.1f}")
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     ax = fig.add_axes((0.58, 0.12, 0.4, 0.32))
@@ -106,7 +106,7 @@ def plotter(ctx: dict):
     )
     ax.set_xticks([1, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(month_abbr[1:], rotation=45)
-    ax.set_ylabel(r"Drop $^\circ$F")
+    ax.set_ylabel("Drop °F")
     ax.set_xlabel("On Date")
     ax.grid(True)
 
@@ -115,8 +115,8 @@ def plotter(ctx: dict):
         df["low"].values,
         df["largest_change"].values,
     )
-    ax.set_ylabel(r"Drop $^\circ$F")
-    ax.set_xlabel(r"At Temperature $^\circ$F")
+    ax.set_ylabel("Drop °F")
+    ax.set_xlabel("At Temperature °F")
     ax.grid(True)
 
     return fig, df

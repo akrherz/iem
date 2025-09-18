@@ -6,6 +6,25 @@ Documentation for /cgi-bin/request/wmo_bufr_srf.py
 This application provides access to the IEM processed archives of stations
 reporting via the WMO BUFR Surface.
 
+Example Requests
+----------------
+
+Return data for WIGOS station 0-756-1-456700 for 17 Sep 2025
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/wmo_bufr_srf.py?\
+stations=0-756-1-456700&sts=2025-09-17T00:00Z&ets=2025-09-17T23:59Z&format=csv
+
+Same request, but Excel
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/wmo_bufr_srf.py?\
+stations=0-756-1-456700&sts=2025-09-17T00:00Z&ets=2025-09-17T23:59Z&\
+format=excel
+
+Same request, but JSON
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/wmo_bufr_srf.py?\
+stations=0-756-1-456700&sts=2025-09-17T00:00Z&ets=2025-09-17T23:59Z&format=json
+
 """
 
 from io import BytesIO, StringIO

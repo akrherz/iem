@@ -169,7 +169,7 @@ def get_df(ctx):
             .round(1)
         )
     )
-    units = r"$^\circ$F" if varname != "relh" else "%"
+    units = "°F" if varname != "relh" else "%"
     if varname == "p01i":
         units = "inch"
     elif varname == "vsby":
@@ -202,7 +202,7 @@ def get_highcharts(ctx: dict) -> str:
         for dt in pd.date_range("2000/1/1", "2000/1/1 23:59", freq="1h")
     ]
     ylabels.append("")  # shrug
-    title = ctx["title"].replace(r"$^\circ$", "&deg;").replace("\n", "<br />")
+    title = ctx["title"].replace("\n", "<br />")
     containername = ctx["_e"]
 
     return f"""

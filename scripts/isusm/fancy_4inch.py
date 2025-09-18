@@ -185,7 +185,7 @@ def main(days: int):
         nam,
         np.arange(10, 101, 5),
         cmap=get_cmap("jet"),
-        units=r"$^\circ$F",
+        units="°F",
     )
     mp.plot_values(
         df["lon"],

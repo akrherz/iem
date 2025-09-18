@@ -120,7 +120,7 @@ def plotter(ctx: dict):
     ).fillna(0)
 
     label = "AOA" if mydir == "above" else "below"
-    units = "inch" if varname == "precip" else r"$^\circ$F"
+    units = "inch" if varname == "precip" else "°F"
     title = (
         f"{ctx['_sname']} [{syear}-{eyear}] ::"
         f"Frequency of {days} Consec Days "

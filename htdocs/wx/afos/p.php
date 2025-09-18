@@ -318,7 +318,7 @@ EOM;
         $t->twitter_card = "summary_large_image";
         $dstamp = date("Y-m-d H:i", $basets);
         $listlink = sprintf(
-            "list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s",
+            "/wx/afos/list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s",
             $row["source"],
             date("d", $basets),
             date("m", $basets),
@@ -326,7 +326,7 @@ EOM;
         );
         $pil3 = substr($pil, 0, 3);
         $pil_listlink = sprintf(
-            "list.phtml?by=pil&pil=%s&amp;day=%s&amp;month=%s&amp;year=%s",
+            "/wx/afos/list.phtml?by=pil&pil=%s&amp;day=%s&amp;month=%s&amp;year=%s",
             $pil3,
             date("d", $basets),
             date("m", $basets),
