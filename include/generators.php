@@ -7,9 +7,9 @@ require_once dirname(__FILE__) . "/memcache.php";
 
 /**
  * Generate a listing of recent citations for a given IEM resource
- * 
+ *
  * Result is cached for 1 hour
- * 
+ *
  * @param string $label The IEM resource label
  * @return string HTML
  */
@@ -250,7 +250,7 @@ EOM;
     $s .= <<<EOF
 <div class="card mb-3">
     <div class="card-header">
-    
+
 <div class='row'>
     <div class='col-12 col-sm-4'><b>IEM Daily Feature</b>
         <a href="/feature_rss.php"><img src="/images/rss.gif" /></a></div>
@@ -263,28 +263,24 @@ EOM;
          </div>
     </div>
 </div>
-    
+
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-12 col-md-5">
-                <h4>{$row["title"]}</h4>
-                <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
-                {$tagtext}
-                <div class="mt-2">{$row["story"]}</div>
+        <h4>{$row["title"]}</h4>
+        <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
+        {$tagtext}
+
+        <div class="card float-end ms-3 mb-3" style="max-width: 400px;">
+            <div class="card-img-top">
+                {$imgiface}
             </div>
-            <div class="col-12 col-md-7">
-                <div class="card">
-                    <div class="card-img-top">
-                        {$imgiface}
-                    </div>
-                    <div class="card-body">
-                        <span>{$row["caption"]}</span>
-                        {$linktext}
-                    </div>
-                </div>
+            <div class="card-body">
+                <span>{$row["caption"]}</span>
+                {$linktext}
             </div>
         </div>
+
+        <div class="mt-2">{$row["story"]}</div>
 
 EOF;
 
@@ -297,13 +293,13 @@ EOF;
         <div class="mt-3">
         <div class="row g-2">
         <div class="col-12 col-sm-3 d-flex align-items-center"><strong><span id="feature_msg">Rate Feature</span></strong></div>
-        <div class="col-12 col-sm-3"> 
+        <div class="col-12 col-sm-3">
 <button class="btn btn-success w-100 feature_btn" type="button" data-voting="good">Good (<span id="feature_good_votes">$good</span> votes)</button>
         </div>
-        <div class="col-12 col-sm-3"> 
+        <div class="col-12 col-sm-3">
 <button class="btn btn-danger w-100 feature_btn" type="button" data-voting="bad">Bad (<span id="feature_bad_votes">$bad</span> votes)</button>
         </div>
-        <div class="col-12 col-sm-3"> 
+        <div class="col-12 col-sm-3">
 <button class="btn btn-warning w-100 feature_btn" type="button" data-voting="abstain">Abstain (<span id="feature_abstain_votes">$abstain</span> votes)</button>
         </div>
         </div>
@@ -322,9 +318,9 @@ EOF;
     $s .= <<<EOF
         $vtext
         $fbtext
-            
+
         <br /><strong>Previous Years' Features</strong>
-            
+
 EOF;
     // Find previous years' features
     $stname = iem_pg_prepare(
@@ -377,9 +373,9 @@ EOF;
 $get_recent_news = cacheable("recentnews", 120)(function(){
     $pgconn = iemdb("mesosite");
     $rs = pg_query($pgconn, "SELECT * from news ORDER by entered DESC LIMIT 5");
-    
+
     $today = new DateTime();
-    
+
     $news = "";
     while ($row = pg_fetch_assoc($rs)){
         $ts = new DateTime(substr($row["entered"],0,16));
