@@ -160,8 +160,8 @@ def networkselect_handler(value, arg, res):
     """Select a station from a given network."""
     if not isinstance(arg["network"], list):
         res["pltvars"].append(f"network:{arg['network']}")
-    if not NETWORK_RE.match(arg["network"]):
-        raise BadWebRequest("Invalid network provided")
+        if not NETWORK_RE.match(arg["network"]):
+            raise BadWebRequest("Invalid network provided")
     return station_select(
         arg["network"],
         value,
