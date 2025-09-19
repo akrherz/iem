@@ -74,25 +74,25 @@ PDICT_AGG_SUM_THEN_DIVIDE = [
 
 UNITS = {
     "total_precip": "inch",
-    "avg_temp": "F",
-    "max_high": "F",
-    "avg_high": "F",
-    "min_high": "F",
-    "max_low": "F",
-    "avg_low": "F",
-    "min_low": "F",
-    "avg_range": "F",
+    "avg_temp": "°F",
+    "max_high": "°F",
+    "avg_high": "°F",
+    "min_high": "°F",
+    "max_low": "°F",
+    "avg_low": "°F",
+    "min_low": "°F",
+    "avg_range": "°F",
     "days_high_aoa": "days",
     "avg_rad": "MJ/d",
-    "cdd65": "F",
-    "hdd65": "F",
-    "gdd32": "F",
-    "gdd41": "F",
-    "gdd46": "F",
-    "gdd48": "F",
-    "gdd50": "F",
-    "gdd51": "F",
-    "gdd52": "F",
+    "cdd65": "°F",
+    "hdd65": "°F",
+    "gdd32": "°F",
+    "gdd41": "°F",
+    "gdd46": "°F",
+    "gdd48": "°F",
+    "gdd50": "°F",
+    "gdd51": "°F",
+    "gdd52": "°F",
 }
 
 
@@ -164,7 +164,7 @@ def get_description():
     return desc
 
 
-def compute_months_and_offsets(start, count):
+def compute_months_and_offsets(start: int, count: int) -> tuple[list, list]:
     """Figure out an array of values"""
     months = [start]
     offsets = [0]
@@ -253,12 +253,10 @@ def plotter(ctx: dict):
             index_col=None,
         )
     if df.empty:
-        raise NoDataFound("No Data Found.")
+        raise NoDataFound("Database query resulted in no data found.")
 
     xdf = combine(df, months1, offsets1)
     ydf = combine(df, months2, offsets2)
-    if xdf.empty or ydf.empty:
-        raise NoDataFound("Sorry, could not find data.")
 
     df = pd.DataFrame()
     df[f"{varname1}_1"] = xdf[varname1]

@@ -14,6 +14,7 @@ from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -100,7 +101,7 @@ def print_top10(ax, df: pd.DataFrame):
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn=None):
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
     station = ctx["station"]
     threshold = ctx["threshold"]
