@@ -4,8 +4,11 @@ confusing amount of configuration options.  The biggest source of the
 confusion is the interplay between the statistic chosen and the dates/times
 provided.  This table summarizes that interplay.<br />
 
-<table>
-<thead><tr><th>Statistic</th><th>Uses</th><th>Application</th></tr></thead>
+<div class="table-responsive">
+<table class="table table-striped table-bordered">
+<thead class="table-dark">
+<tr><th>Statistic</th><th>Uses</th><th>Application</th></tr>
+</thead>
 <tbody>
 <tr>
 <td>Days Since</td>
@@ -70,7 +73,9 @@ number of Tornado Warnings during June.  Please note that only the
 average plot works when summarizing by polygons.</td>
 </tr>
 
+</tbody>
 </table>
+</div>
 
 <p>In general, it will produce
 a map of either a single NWS Weather Forecast Office (WFO) or for a
@@ -99,7 +104,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import get_cmap
@@ -112,6 +117,7 @@ from pyiem.reference import (
 )
 from pyiem.util import utc
 from rasterstats import zonal_stats
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -119,6 +125,7 @@ PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "state": "Plot by State",
     "fema": "Plot by FEMA Region",
+    "conus": "Plot for Contiguous US",
 }
 PDICT2 = {
     "yearcount": "Count of Events for Given Year",
@@ -263,7 +270,8 @@ def get_description():
     return desc
 
 
-def get_raster(ctx: dict):
+@with_sqlalchemy_conn("postgis")
+def get_raster(ctx: dict, conn: Connection | None = None):
     """polygon workflow"""
     if ctx["geo"] == "ugc":
         raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
@@ -314,6 +322,8 @@ def get_raster(ctx: dict):
         (west, south, east, north) = wfo_bounds[station[-3:]]
     elif t == "fema":
         (west, south, east, north) = fema_region_bounds[int(ctx["fema"])]
+    elif t == "conus":
+        (west, south, east, north) = (-125, 24, -66.5, 49)
     else:
         (west, south, east, north) = state_bounds[state]
     # buffer by 2 degrees so to hopefully get all polys
@@ -347,8 +357,8 @@ def get_raster(ctx: dict):
         "sdate": f"{sdate:%m%d}",
         "edate": f"{edate:%m%d}",
         "wfo": station,
-        "phenomena": phenomena,
-        "significance": significance,
+        "ph": phenomena,
+        "sig": significance,
         "west": west,
         "south": south,
         "east": east,
@@ -356,29 +366,27 @@ def get_raster(ctx: dict):
         "sts": sts,
         "ets": ets,
     }
-    with get_sqlalchemy_conn("postgis") as conn:
-        # Until geopandas gets typed
-        df: pd.DataFrame = gpd.read_postgis(
-            sql_helper(
-                """
-        SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
-        extract(epoch from :ets - issue) / 86400. as days
-        from sbw where {wfolimiter} {daylimiter}
-        phenomena = :phenomena and status = 'NEW'
-        and significance = :significance
-        and ST_Within(geom,
-            ST_MakeEnvelope(:west, :south, :east, :north, 4326))
-        and ST_IsValid(geom)
-        and issue >= :sts and issue <= :ets ORDER by issue ASC
-        """,
-                wfolimiter=wfolimiter,
-                daylimiter=daylimiter,
-            ),
-            conn,
-            params=params,
-            geom_col="geom",
-            index_col=None,
-        )  # type: ignore
+    df: pd.DataFrame = gpd.read_postgis(
+        sql_helper(
+            """
+    SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
+    extract(epoch from :ets - issue) / 86400. as days
+    from sbw where {wfolimiter} {daylimiter}
+    phenomena = :ph and status = 'NEW'
+    and significance = :sig
+    and ST_Within(geom,
+        ST_MakeEnvelope(:west, :south, :east, :north, 4326))
+    and ST_IsValid(geom)
+    and issue >= :sts and issue <= :ets ORDER by issue ASC
+    """,
+            wfolimiter=wfolimiter,
+            daylimiter=daylimiter,
+        ),
+        conn,
+        params=params,
+        geom_col="geom",
+        index_col=None,
+    )  # type: ignore
     if df.empty:
         raise NoDataFound("No data found for query.")
     zs = zonal_stats(
@@ -494,54 +502,53 @@ def get_raster(ctx: dict):
     return counts, affine, "EPSG:4326"
 
 
-def do_ugc(ctx: dict):
+@with_sqlalchemy_conn("postgis")
+def do_ugc(ctx: dict, conn: Connection | None = None):
     """Do UGC based logic."""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
     varname = ctx["v"]
     station = ctx["station"][:4]
     state = ctx["state"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     t = ctx["t"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
+    sdate: date = ctx["sdate"]
+    edate: date = ctx["edate"]
     year = ctx["year"]
     year2 = ctx["year2"]
     df = None
     states = [state]
     if t == "fema":
         states = fema_region2states(ctx["fema"])
+    sqlfilter = ""
+    if t == "cwa":
+        sqlfilter = "wfo = :wfo and "
+    elif t in ["state", "fema"]:
+        sqlfilter = "substr(ugc, 1, 2) = ANY(:states) and "
+    query_params = {
+        "wfo": station if len(station) == 3 else station[1:],
+        "states": states,
+        "ph": phenomena,
+        "sig": significance,
+        "sdate": sdate,
+        "edate": edate,
+        "year": year,
+    }
     if varname in ["lastyear", "days"]:
-        if t == "cwa":
-            cursor.execute(
+        res = conn.execute(
+            sql_helper(
                 """
-            select ugc, max(issue at time zone 'UTC') from warnings
-            WHERE wfo = %s and phenomena = %s and significance = %s and
-            issue >= %s and issue < %s
-            GROUP by ugc
-            """,
-                (
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                    sdate,
-                    edate,
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-            select ugc, max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
-            and significance = %s and issue >= %s and issue < %s
-            GROUP by ugc
-            """,
-                (states, phenomena, significance, sdate, edate),
-            )
+        select ugc, max(issue at time zone 'UTC') from warnings
+        WHERE {sqlfilter} phenomena = :ph and significance = :sig and
+        issue >= :sdate and issue < :edate
+        GROUP by ugc
+        """,
+                sqlfilter=sqlfilter,
+            ),
+            query_params,
+        )
         rows = []
         data = {}
-        for row in cursor:
+        for row in res:
             days = int(
                 (edate - row[1].replace(tzinfo=timezone.utc)).total_seconds()
                 / 86400.0
@@ -555,72 +562,43 @@ def do_ugc(ctx: dict):
         ctx["title"] = f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} {tt}"
         datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
-        if t == "cwa":
-            cursor.execute(
+        res = conn.execute(
+            sql_helper(
                 """
-            select ugc, count(*) from warnings
-            WHERE vtec_year = %s and wfo = %s and phenomena = %s
-            and significance = %s GROUP by ugc
-            """,
-                (
-                    year,
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-            select ugc, count(*) from warnings
-            WHERE vtec_year = %s and substr(ugc, 1, 2) = ANY(%s)
-            and phenomena = %s
-            and significance = %s GROUP by ugc
-            """,
-                (year, states, phenomena, significance),
-            )
+        select ugc, count(*) from warnings
+        WHERE {sqlfilter} vtec_year = :year and phenomena = :ph
+        and significance = :sig GROUP by ugc
+        """,
+                sqlfilter=sqlfilter,
+            ),
+            query_params,
+        )
         rows = []
         data = {}
-        for row in cursor:
+        for row in res:
             rows.append(dict(count=row[1], year=year, ugc=row[0]))
             data[row[0]] = row[1]
         ctx["title"] = f"Count for {year}"
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "events":
-        if t == "cwa":
-            cursor.execute(
+        res = conn.execute(
+            sql_helper(
                 """
-            with data as (
-                select distinct ugc, date(issue) from warnings
-                WHERE wfo = %s and phenomena = %s and significance = %s
-                and issue >= %s and issue < %s
-            )
-            SELECT ugc, count(*) from data GROUP by ugc
-            """,
-                (
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                    sdate,
-                    edate,
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-            with data as (
-                select distinct ugc, date(issue) from warnings
-                WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
-                and significance = %s
-                and issue >= %s and issue < %s)
-            SELECT ugc, count(*) from data GROUP by ugc
-            """,
-                (states, phenomena, significance, sdate, edate),
-            )
+        with data as (
+            select distinct ugc, date(issue) from warnings
+            WHERE {sqlfilter} phenomena = :ph and significance = :sig
+            and issue >= :sdate and issue < :edate
+        )
+        SELECT ugc, count(*) from data GROUP by ugc
+        """,
+                sqlfilter=sqlfilter,
+            ),
+            query_params,
+        )
         rows = []
         data = {}
-        for row in cursor:
+        for row in res:
             rows.append(dict(count=row[1], year=year, ugc=row[0]))
             data[row[0]] = row[1]
         ctx["title"] = (
@@ -629,37 +607,22 @@ def do_ugc(ctx: dict):
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "total":
-        if t == "cwa":
-            cursor.execute(
+        res = conn.execute(
+            sql_helper(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
             max(issue at time zone 'UTC') from warnings
-            WHERE wfo = %s and phenomena = %s and significance = %s
-            and issue >= %s and issue <= %s
+            WHERE {sqlfilter} phenomena = :ph and significance = :sig
+            and issue >= :sdate and issue <= :edate
             GROUP by ugc
             """,
-                (
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                    sdate,
-                    edate,
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-            select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
-            and significance = %s and issue >= %s and issue < %s
-            GROUP by ugc
-            """,
-                (states, phenomena, significance, sdate, edate),
-            )
+                sqlfilter=sqlfilter,
+            ),
+            query_params,
+        )
         rows = []
         data = {}
-        for row in cursor:
+        for row in res:
             rows.append(
                 dict(
                     count=row[1],
@@ -677,15 +640,16 @@ def do_ugc(ctx: dict):
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "hour":
-        cursor.execute(
-            """
+        res = conn.execute(
+            sql_helper("""
         WITH data as (
         SELECT ugc, issue at time zone tzname as v
         from warnings w JOIN stations t
         ON (w.wfo =
             (case when length(t.id) = 4 then substr(t.id, 1, 3) else t.id end))
         WHERE t.network = 'WFO' and
-        phenomena = %s and significance = %s and issue >= %s and issue < %s),
+        phenomena = :ph and significance = :sig and
+        issue >= :sdate and issue < :edate),
         agg as (
             SELECT ugc, extract(hour from v) as hr, count(*) from data
             GROUP by ugc, hr),
@@ -694,14 +658,14 @@ def do_ugc(ctx: dict):
             from agg)
 
         SELECT ugc, hr from ranks where rank = 1
-        """,
-            (phenomena, significance, sdate, edate),
+        """),
+            query_params,
         )
         rows = []
         data = {}
         ctx["labels"] = {}
         midnight = datetime(2000, 1, 1)
-        for row in cursor:
+        for row in res:
             rows.append(dict(hour=int(row[1]), ugc=row[0]))
             data[row[0]] = row[1]
             ctx["labels"][row[0]] = (
@@ -712,45 +676,24 @@ def do_ugc(ctx: dict):
         )
         datavar = "hour"
     elif varname == "yearavg":
-        if t == "cwa":
-            cursor.execute(
+        res = conn.execute(
+            sql_helper(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
             max(issue at time zone 'UTC') from warnings
-            WHERE wfo = %s and phenomena = %s and significance = %s
-            and issue >= %s and issue <= %s
+            WHERE {sqlfilter} phenomena = :ph and significance = :sig
+            and issue >= :sdate and issue <= :edate
             GROUP by ugc
             """,
-                (
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                    date(year, 1, 1),
-                    date(year2 + 1, 1, 1),
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-            select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
-            and significance = %s and issue >= %s and issue < %s
-            GROUP by ugc
-            """,
-                (
-                    states,
-                    phenomena,
-                    significance,
-                    date(year, 1, 1),
-                    date(year2 + 1, 1, 1),
-                ),
-            )
+                sqlfilter=sqlfilter,
+            ),
+            query_params,
+        )
         rows = []
         data = {}
         minv = datetime(2050, 1, 1)
         maxv = datetime(1986, 1, 1)
-        for row in cursor:
+        for row in res:
             if row[2] < minv:
                 minv = row[2]
             if row[3] > maxv:
@@ -771,73 +714,42 @@ def do_ugc(ctx: dict):
     else:  # period
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
-                "and (to_char(issue, 'mmdd') >= :sdate "
-                "or to_char(issue, 'mmdd') < :edate) "
+                "and (to_char(issue, 'mmdd') >= :sday "
+                "or to_char(issue, 'mmdd') < :eday) "
             )
         else:
             daylimiter = (
-                "and to_char(issue, 'mmdd') >= :sdate "
-                "and to_char(issue, 'mmdd') < :edate "
+                "and to_char(issue, 'mmdd') >= :sday "
+                "and to_char(issue, 'mmdd') < :eday "
             )
         aggstat = varname.replace("period", "")
-        params = {
-            "wfo": station if len(station) == 3 else station[1:],
-            "phenomena": phenomena,
-            "significance": significance,
-            "sts": date(year, 1, 1),
-            "ets": date(year2 + 1, 1, 1),
-            "sdate": sdate.strftime("%m%d"),
-            "edate": edate.strftime("%m%d"),
-            "states": states,
-        }
-        if t == "cwa":
-            with get_sqlalchemy_conn("postgis") as conn:
-                df = pd.read_sql(
-                    sql_helper(
-                        """WITH data as (
-                select ugc, vtec_year as year,
-                count(*), min(issue at time zone 'UTC') as nv,
-                max(issue at time zone 'UTC') as mv from warnings
-                WHERE wfo = :wfo and phenomena = :phenomena and
-                significance = :significance
-                and issue >= :sts and issue <= :ets {daylimiter}
-                GROUP by ugc, year
-                )
-                SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
-                min(nv) as minvalid, max(mv) as maxvalid,
-                count(*)::int as years from data GROUP by ugc
-                """,
-                        daylimiter=daylimiter,
-                        aggstat=aggstat,
-                    ),
-                    conn,
-                    params=params,
-                    index_col="ugc",
-                )
-        else:
-            with get_sqlalchemy_conn("postgis") as conn:
-                df = pd.read_sql(
-                    sql_helper(
-                        """WITH data as (
-                select ugc, vtec_year as year,
-                count(*), min(issue at time zone 'UTC') as nv,
-                max(issue at time zone 'UTC') as mv from warnings
-                WHERE substr(ugc, 1, 2) = ANY(:states)
-                and phenomena = :phenomena
-                and significance = :significance and issue >= :sts and
-                issue < :ets {daylimiter} GROUP by ugc, year
-                )
-                SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
-                min(nv) as minvalid, max(mv) as maxvalid,
-                count(*)::int as years from data GROUP by ugc
-                """,
-                        daylimiter=daylimiter,
-                        aggstat=aggstat,
-                    ),
-                    conn,
-                    params=params,
-                    index_col="ugc",
-                )
+        query_params["sts"] = date(year, 1, 1)
+        query_params["ets"] = date(year2 + 1, 1, 1)
+        query_params["sday"] = sdate.strftime("%m%d")
+        query_params["eday"] = edate.strftime("%m%d")
+        df = pd.read_sql(
+            sql_helper(
+                """WITH data as (
+        select ugc, vtec_year as year,
+        count(*), min(issue at time zone 'UTC') as nv,
+        max(issue at time zone 'UTC') as mv from warnings
+        WHERE {sqlfilter} phenomena = :ph and
+        significance = :sig
+        and issue >= :sts and issue <= :ets {daylimiter}
+        GROUP by ugc, year
+        )
+        SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
+        min(nv) as minvalid, max(mv) as maxvalid,
+        count(*)::int as years from data GROUP by ugc
+        """,
+                daylimiter=daylimiter,
+                aggstat=aggstat,
+                sqlfilter=sqlfilter,
+            ),
+            conn,
+            params=query_params,
+            index_col="ugc",
+        )
         if df.empty:
             raise NoDataFound("No events found for query.")
         df["minvalid"] = pd.to_datetime(df["minvalid"])
@@ -903,8 +815,6 @@ def do_ugc(ctx: dict):
     ctx["bins"] = bins
     ctx["data"] = data
     ctx["df"] = df
-    cursor.close()
-    pgconn.close()
 
 
 def plotter(ctx: dict):
@@ -935,6 +845,8 @@ def plotter(ctx: dict):
         )
     elif t == "fema":
         subtitle = f"Plotted for FEMA Region {ctx['fema']}, {subtitle}"
+    elif t == "conus":
+        subtitle = f"Plotted for Contiguous US, {subtitle}"
     else:
         subtitle = f"Plotted for {state_names[state]}, {subtitle}"
     title = (
@@ -955,7 +867,6 @@ def plotter(ctx: dict):
     )
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
-    cmap.set_over("white")
     if geo == "ugc":
         if ctx["v"] == "hour":
             cl = [

@@ -290,6 +290,7 @@ EOF;
         $vtext = "";
     } else {
         $vtext = <<<EOM
+        <br clear="all" \>
         <div class="mt-3">
         <div class="row g-2">
         <div class="col-12 col-sm-3 d-flex align-items-center"><strong><span id="feature_msg">Rate Feature</span></strong></div>

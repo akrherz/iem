@@ -43,6 +43,9 @@ def get_df(year, sts, topic):
     params.update(topic)
     try:
         resp = httpx.get(SERVICE, params=params, timeout=300)
+        # Shrug, getting a Bad Request when there is no data
+        if resp.status_code == 400:
+            return None
         resp.raise_for_status()
     except Exception as exp:
         LOG.warning("Error fetching NASS data: %s", exp)
