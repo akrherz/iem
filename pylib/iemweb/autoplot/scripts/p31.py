@@ -138,7 +138,7 @@ def get_description():
         dict(
             type="int",
             name="fdays",
-            default="1",
+            default=1,
             label="Number of Days in Forward Period (following middle):",
         ),
         dict(
@@ -258,7 +258,7 @@ def plotter(ctx: dict):
     subtitle = (
         ""
         if ctx["thres"] is None
-        else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
+        else f"\nBack Threshold of at least {ctx['thres']:.0f} °F"
     )
     tt = syear
     if ctx["_nt"].sts[station]["archive_begin"] is not None:
@@ -324,7 +324,7 @@ def plotter(ctx: dict):
         ax.axhline(df[col].mean(), lw=2, color=c)
 
     ax.grid(True)
-    ax.set_ylabel(r"Temperature Change $^\circ$F")
+    ax.set_ylabel("Temperature Change °F")
     ax.set_ylim(0 - extreme, extreme)
     xloc = (ax.get_xlim()[1] + ax.get_xlim()[0]) / 2.0
     ax.text(

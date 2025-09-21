@@ -10,11 +10,12 @@ import os
 import re
 
 from pydantic import Field, field_validator
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 from iemweb.mlib import rectify_wfo
 from iemweb.util import error_log
@@ -70,30 +71,29 @@ class Schema(CGIModel):
         return rectify_wfo(value)
 
 
-def get_data(vtecinfo: dict):
+@with_sqlalchemy_conn("postgis")
+def get_data(vtecinfo: dict, conn: Connection | None = None):
     """Get aux data from the database about this event."""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
-    cursor.execute(
-        (
+    res = conn.execute(
+        sql_helper(
             "SELECT max(product_ids[cardinality(product_ids)]) as r, "
             "sumtxt(name::text || ', ') as cnties, "
             "max(case when is_emergency then 1 else 0 end), "
             "max(case when is_pds then 1 else 0 end), "
             "max(updated at time zone 'UTC') from "
-            "warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = %s "
-            "and w.wfo = %s and phenomena = %s and significance = %s "
-            "and eventid = %s"
+            "warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = :yr "
+            "and w.wfo = :wfo and phenomena = :ph and significance = :sig "
+            "and eventid = :eventid"
         ),
-        (
-            vtecinfo["year"],
-            vtecinfo["wfo"][-3:],
-            vtecinfo["phenomena"],
-            vtecinfo["significance"],
-            int(vtecinfo["eventid"]),
-        ),
+        {
+            "yr": vtecinfo["year"],
+            "wfo": vtecinfo["wfo"][-3:],
+            "ph": vtecinfo["phenomena"],
+            "sig": vtecinfo["significance"],
+            "eventid": int(vtecinfo["eventid"]),
+        },
     )
-    row = cursor.fetchone()
+    row = res.fetchone()
     vtecinfo["report"] = (
         "" if row[0] is None else html_escape(row[0].replace("\001", ""))
     )
@@ -101,8 +101,6 @@ def get_data(vtecinfo: dict):
     vtecinfo["is_emergency"] = row[2] == 1
     vtecinfo["is_pds"] = row[3] == 1
     vtecinfo["updated"] = utc() if row[4] is None else row[4]
-    cursor.close()
-    pgconn.close()
 
 
 def as_html(vtecinfo: dict):

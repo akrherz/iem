@@ -183,13 +183,11 @@ def plotter(ctx: dict):
     ax.grid(True)
     ax.set_xlim(left=-0.01)
     ax.set_xlabel("Total Precipitation [inch], Avg: %.2f" % (np.average(xs),))
-    ax.set_ylabel(
-        r"Average Temperature $^\circ$F, " + f"Avg: {np.average(ys):.1f}"
-    )
+    ax.set_ylabel(f"Average Temperature °F, Avg: {np.average(ys):.1f}")
     ax2 = fig.add_axes((0.67, 0.55, 0.28, 0.35))
     ax2.scatter(df["soi3m"].values, df["tmpf"].values)
     ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
-    ax2.set_ylabel(r"Avg Temp $^\circ$F")
+    ax2.set_ylabel("Avg Temp °F")
     slp, intercept, r_value, _, _ = stats.linregress(
         df["soi3m"].values, df["tmpf"].values
     )
@@ -199,7 +197,7 @@ def plotter(ctx: dict):
     ax2.text(
         0.97,
         0.9,
-        "R$^2$=%.2f" % (r_value**2,),
+        f"R$^2$={r_value**2:.2f}",
         ha="right",
         transform=ax2.transAxes,
         bbox=dict(color="white"),

@@ -112,7 +112,7 @@ def plotter(ctx: dict):
     ax[0].plot(
         df.index.values, df["avg_low"].values, color="b", label="Climate Low"
     )
-    ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")
+    ax[0].set_ylabel("Temperature °F")
 
     ax[0].plot(
         df.index.values,
@@ -140,7 +140,7 @@ def plotter(ctx: dict):
             color="b",
             label="Low Diff",
         )
-        ax[1].set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
+        ax[1].set_ylabel("Temp Difference °F")
     else:
         ax[1].plot(
             df.index.values,

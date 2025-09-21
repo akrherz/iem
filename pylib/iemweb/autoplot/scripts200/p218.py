@@ -9,12 +9,10 @@ informatiom also provides the coldest high temperature and warmest low
 temperature, both of which are not found within the raw CLI text product.
 """
 
-# Local
 from dataclasses import dataclass
 from datetime import date, timedelta
 from math import pi
 
-# third party
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle

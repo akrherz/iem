@@ -1,6 +1,5 @@
 """Ingest Iowa DOT RWIS data provided by DTN."""
 
-# third party
 import httpx
 import numpy as np
 import pandas as pd
