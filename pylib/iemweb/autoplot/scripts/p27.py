@@ -99,8 +99,8 @@ def plotter(ctx: dict):
 
     ax.set_ylim(-1, max(doy2 - doy) + 4)
     ax.set_xlim(min(doy) - 4, max(doy) + 4)
-    ax.set_ylabel(f"Days until first sub {t2}" + r"$^{\circ}\mathrm{F}$")
-    ax.set_xlabel(f"First day of sub {t1}" + r"$^{\circ}\mathrm{F}$")
+    ax.set_ylabel(f"Days until first sub {t2}°F")
+    ax.set_xlabel(f"First day of sub {t1}°F")
 
     ax.grid(True)
 

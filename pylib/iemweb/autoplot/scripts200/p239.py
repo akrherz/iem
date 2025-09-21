@@ -273,7 +273,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((anchorx, anchory + 2 * height + 4 * pad, width, height))
     bling(df, ax, "days_low_a70", dcol)
     ax.axvline(df["days_low_a70"].mean())
-    ax.set_xlabel(r"Days Low >= 70 $^\circ$F")
+    ax.set_xlabel("Days Low >= 70°F")
     ax.set_ylabel("Departure [bu/ac]")
 
     ax = fig.add_axes(
@@ -281,7 +281,7 @@ def plotter(ctx: dict):
     )
     bling(df, ax, "days_low_b60", dcol)
     ax.axvline(df["days_low_b60"].mean())
-    ax.set_xlabel(r"Days Low < 60 $^\circ$F")
+    ax.set_xlabel("Days Low < 60°F")
 
     ax = fig.add_axes((anchorx, anchory + 3 * height + 6 * pad, width, height))
     bling(df, ax, "avg_merra_srad", dcol)

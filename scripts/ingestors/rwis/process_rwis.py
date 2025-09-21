@@ -1,13 +1,11 @@
 """Process the IDOT RWIS Data files"""
 
-# stdlib
 import json
 import os
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 
-# third party
 import httpx
 import numpy as np
 import pandas as pd

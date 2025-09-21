@@ -8,7 +8,6 @@ from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import NoDataFound
 from pyiem.plot import centered_bins, get_cmap
 from pyiem.plot.geoplot import MapPlot
 
@@ -96,9 +95,6 @@ def plotter(ctx: dict):
             params={"date2": date2, "date1": date1},
             index_col="station",
         )
-    if df.empty:
-        raise NoDataFound("No Data Found.")
-
     mp = MapPlot(
         apctx=ctx,
         title=(
@@ -108,15 +104,16 @@ def plotter(ctx: dict):
         nocaption=True,
     )
     # Encapsulate most of the data
-    rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
-    if rng != 0:
-        mp.contourf(
-            df["lon"].values,
-            df["lat"].values,
-            df[varname].values,
-            centered_bins(rng, bins=10),
-            cmap=get_cmap(ctx["cmap"]),
-            units="inch" if varname == "precip" else "F",
-        )
+    if not df.empty:
+        rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
+        if rng != 0:
+            mp.contourf(
+                df["lon"].values,
+                df["lat"].values,
+                df[varname].values,
+                centered_bins(rng, bins=10),
+                cmap=get_cmap(ctx["cmap"]),
+                units="inch" if varname == "precip" else "°F",
+            )
 
     return mp.fig, df

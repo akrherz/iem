@@ -40,6 +40,9 @@ def process_features(features):
     rows = []
     for feat in features:
         props = feat["attributes"]
+        if props["NWS_ID"] is None:
+            LOG.info("Skipping null NWS_ID %s", feat)
+            continue
         valid = (
             datetime(1970, 1, 1)
             + timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
@@ -85,7 +88,7 @@ def main():
     cursor = pgconn.cursor()
     updates = 0
     for nwsli, row in df.iterrows():
-        if pd.isnull(nwsli) or pd.isnull(row["location_id"]):
+        if pd.isnull(row["location_id"]):
             continue
         location_id = int(row["location_id"])
         cursor.execute(

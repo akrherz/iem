@@ -10,6 +10,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
@@ -63,25 +64,29 @@ def get_description():
     return desc
 
 
-def print_top10(ax, df: pd.DataFrame):
+def print_top10(ax: Axes, df: pd.DataFrame):
     """Print the top 10"""
 
     text = "Fall Season\nEarliest    | Latest\n"
     for season in ["fall", "spring"]:
         earliest = []
+        sdaycol = f"{season}_sday"
+        datecol = f"{season}_date"
         for _, row in (
-            df.sort_values(by=f"{season}_sday", ascending=True)
+            df[df[datecol].notna()]
+            .sort_values(by=sdaycol, ascending=True)
             .head(10)
             .iterrows()
         ):
-            earliest.append(f"{row[f'{season}_date']:%Y-%b-%d}")
+            earliest.append(f"{row[datecol]:%Y-%b-%d}")
         latest = []
         for _, row in (
-            df.sort_values(by=f"{season}_sday", ascending=False)
+            df[df[datecol].notna()]
+            .sort_values(by=sdaycol, ascending=False)
             .head(10)
             .iterrows()
         ):
-            latest.append(f"{row[f'{season}_date']:%Y-%b-%d}")
+            latest.append(f"{row[datecol]:%Y-%b-%d}")
         for early, late in zip(earliest, latest, strict=True):
             text += f"{early:10s} | {late:10s}\n"
         if season == "fall":

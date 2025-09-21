@@ -1,7 +1,5 @@
 # cronscript for 50 minutes after the hour
 
-python cache/cache_autoplots.py &
-
 python dl/download_rtma_ru.py --valid=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H'):00:00 &
 
 python dl/download_ndfd.py &
@@ -21,7 +19,7 @@ HH=$(date +%H)
 if [ "$HH" -eq "22" ]
     then
         cd ../climodat
-        python hrrr_solarrad.py --date=$(date +'%Y-%m-%d')	
+        python hrrr_solarrad.py --date=$(date +'%Y-%m-%d')
 fi
 
 # END

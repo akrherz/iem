@@ -1,9 +1,6 @@
 """Centralized Testing Stuff."""
 
-# third party
 import pytest
-
-# This repo
 from pyiem.database import get_dbconnc
 
 

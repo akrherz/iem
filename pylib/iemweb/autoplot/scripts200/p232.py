@@ -7,10 +7,10 @@ will limit which potential headlines events are overlaid on the chart.
 from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
-# third party
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -69,13 +69,13 @@ def get_description():
     return desc
 
 
-def plot(ax, obs, col):
+def plot(ax: Axes, obs, col):
     """Plot simple."""
     ax.scatter(obs.utc_valid, obs[col], marker="o", s=40, color="b", zorder=3)
-    ax.set_ylabel(r"Feels Like Temperature [$^\circ$F]", color="b")
+    ax.set_ylabel("Feels Like Temperature [°F]", color="b")
 
 
-def plot_bz(ax, obs):
+def plot_bz(ax: Axes, obs):
     """Do the magic with plotting for BZ."""
     ax.scatter(obs.utc_valid, obs.vsby, marker="o", s=40, color="b", zorder=2)
     ax.set_ylabel("Visibility [mile]", color="b")

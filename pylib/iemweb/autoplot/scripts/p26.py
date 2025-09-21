@@ -271,12 +271,12 @@ def plotter(ctx: dict):
         labels = calendar.month_abbr[7:]
         labels.extend(calendar.month_abbr[1:7])
         ax.set_xticklabels(labels)
-    ax.set_ylabel(ctx["ylabel"] + r" $^\circ$F")
+    ax.set_ylabel(f"{ctx['ylabel']} °F")
     ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)
     ax.text(
         ax.get_xlim()[1],
         ctx["t"],
-        f"{ctx['t']:.0f}" + r"$^\circ$F",
+        f"{ctx['t']:.0f}°F",
         va="center",
     )
     ax.grid(True)

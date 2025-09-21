@@ -147,7 +147,6 @@ def get_highcharts(ctx: dict) -> str:
     add_ctx(ctx)
     ptinterval = "10" if ctx["decadal"] else "1"
     containername = ctx["_e"]
-    ylabel = ctx["ylabel"].replace(r"$^\circ$", "")
     return f"""
 Highcharts.chart('{containername}', {{
     title: {{text: '{ctx["title"]}'}},
@@ -155,7 +154,7 @@ Highcharts.chart('{containername}', {{
     chart: {{zoomType: 'x'}},
     tooltip: {{shared: true}},
     xAxis: {{title: {{text: '{ctx["xlabel"]}'}}}},
-    yAxis: {{title: {{text: '{ylabel}'}}}},
+    yAxis: {{title: {{text: '{ctx["ylabel"]}'}}}},
     series: [{{
         name: '{ctx["ptype"]}',
         type: 'column',
@@ -352,7 +351,7 @@ def add_ctx(ctx):
     if ptype.find("days") == 0 and ptype.find("avg") == -1:
         ctx["subtitle"] += f" ({threshold})"
 
-    units = r"$^\circ$F"
+    units = "°F"
     if ctx["ptype"].find("precip") > 0:
         units = "inches"
     elif ctx["ptype"].find("days") > 0:

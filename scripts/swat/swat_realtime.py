@@ -10,7 +10,6 @@ We are generating the format directly used by the distrubuted SWAT. Notes:
 Run from RUN_2AM.sh
 """
 
-# stdlib
 import glob
 import os
 import subprocess
@@ -19,8 +18,6 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-
-# third party
 from geopandas import read_postgis
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.grid import nav
