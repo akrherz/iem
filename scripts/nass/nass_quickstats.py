@@ -18,10 +18,16 @@ PROPS = get_properties()
 TOPICS = [
     {"commodity_desc": "CORN", "statisticcat_desc": "PROGRESS"},
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "PROGRESS"},
+    {"commodity_desc": "SORGHUM", "statisticcat_desc": "PROGRESS"},
+    {"commodity_desc": "WHEAT", "statisticcat_desc": "PROGRESS"},
     {"commodity_desc": "CORN", "statisticcat_desc": "YIELD"},
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "YIELD"},
+    {"commodity_desc": "SORGHUM", "statisticcat_desc": "YIELD"},
+    {"commodity_desc": "WHEAT", "statisticcat_desc": "YIELD"},
     {"commodity_desc": "CORN", "statisticcat_desc": "CONDITION"},
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "CONDITION"},
+    {"commodity_desc": "SORGHUM", "statisticcat_desc": "CONDITION"},
+    {"commodity_desc": "WHEAT", "statisticcat_desc": "CONDITION"},
     {"commodity_desc": "SOIL", "statisticcat_desc": "MOISTURE"},
     {"commodity_desc": "FIELDWORK", "statisticcat_desc": "DAYS SUITABLE"},
 ]
