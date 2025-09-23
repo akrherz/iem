@@ -72,15 +72,19 @@ def get_netcdf(valid, source) -> np.ndarray | None:
     )
     auth = httpx.NetRCAuth()
     with httpx.Client(auth=auth, follow_redirects=False) as client:
-        resp = client.get(url, timeout=10)
-        if resp.status_code in (301, 302, 303, 307, 308):
-            url = resp.headers["Location"]
-            LOG.info("Redirected to %s", url)
-            resp = client.get(url, timeout=120, follow_redirects=True)
-            if resp.status_code in (400, 404):  # Out of time bounds or no data
-                LOG.info("Got %d, no data for %s", resp.status_code, valid)
-                return None
-        resp.raise_for_status()
+        try:
+            resp = client.get(url, timeout=10)
+            if resp.status_code in (301, 302, 303, 307, 308):
+                url = resp.headers["Location"]
+                LOG.info("Redirected to %s", url)
+                resp = client.get(url, timeout=120, follow_redirects=True)
+                if resp.status_code in (400, 404):  # Out of time bounds or nd
+                    LOG.info("Got %d, no data for %s", resp.status_code, valid)
+                    return None
+            resp.raise_for_status()
+        except Exception as exp:
+            LOG.info("Got exception %s for %s", exp, url)
+            return None
     # Check content-type return header
     ct = resp.headers.get("content-type", "")
     if not ct.startswith("application/x-netcdf"):
