@@ -5,11 +5,19 @@ from iemweb.onsite.features.vote import application as vote_app
 from werkzeug.test import Client
 
 
+def test_invalid_request():
+    """Test request without a URL set."""
+    client = Client(content_app, response_wrapper=None)
+    response = client.get("")
+    assert response.status_code == 422
+    assert "Missing parameters" in response.text
+
+
 def test_content_nofile():
     """Test the generated image placeholder."""
     client = Client(content_app, response_wrapper=None)
-    response = client.get("/onsite/features/2022/03/220325.png")
-    assert response.status_code == 200
+    response = client.get("/onsite/features/2000/03/220325.png")
+    assert response.status_code == 404
 
 
 def test_content_hasfile():

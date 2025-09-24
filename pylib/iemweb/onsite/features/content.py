@@ -6,11 +6,10 @@ from datetime import date
 from io import BytesIO
 
 from matplotlib.figure import Figure
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
-
-from iemweb import error_log
+from sqlalchemy.engine import Connection
 
 PATTERN = re.compile(
     "^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
@@ -19,22 +18,17 @@ PATTERN = re.compile(
 )
 
 
-def dblog(environ: dict, yymmdd: str):
+@with_sqlalchemy_conn("mesosite")
+def dblog(yymmdd: str, conn: Connection | None = None):
     """Log this request"""
-    try:
-        with get_dbconn("mesosite") as pgconn:
-            cursor = pgconn.cursor()
-            dt = date(
-                2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
-            )
-            cursor.execute(
-                "UPDATE feature SET views = views + 1 WHERE date(valid) = %s",
-                (dt,),
-            )
-            cursor.close()
-            pgconn.commit()
-    except Exception as exp:
-        error_log(environ, str(exp))
+    dt = date(2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6]))
+    conn.execute(
+        sql_helper(
+            "UPDATE feature SET views = views + 1 WHERE date(valid) = :dt"
+        ),
+        {"dt": dt},
+    )
+    conn.commit()
 
 
 def get_content_type(val):
@@ -119,6 +113,9 @@ def application(environ, start_response):
                 f"bytes {stripe.start}-{secondval}/{totalsize}",
             )
         )
-    dblog(environ, data["yymmdd"])
-    start_response(status, headers)
+    try:
+        dblog(data["yymmdd"])
+    finally:
+        # Swallow exception
+        start_response(status, headers)
     return [resdata[stripe]]

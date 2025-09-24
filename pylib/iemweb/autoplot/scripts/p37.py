@@ -303,7 +303,7 @@ def plot_temps(ax, mosdata, month1, month, obs, model):
     ax.set_xlim(0, days + 0.5)
     ax.set_xticks(range(1, days + 1, 2))
 
-    ax.set_ylabel(r"Temperature $^{\circ}\mathrm{F}$")
+    ax.set_ylabel("Temperature °F")
 
     return df
 
