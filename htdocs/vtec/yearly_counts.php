@@ -96,7 +96,7 @@ if (is_null($phenomena) || is_null($significance)) {
     $pcodes = $memcache->get("vtec_counts_pcodes_$wfo");
     $cachedwarning = '<div class="alert alert-warning">This information was cached
                 within the past 24 hours and may not be up to the moment.</div>';
-    if ($clobber || !$data) {
+    if ($clobber || !$data || !$pcodes) {
         list($data, $pcodes) = get_data();
         $memcache->set("vtec_counts_data_$wfo", $data, 86400);
         $memcache->set("vtec_counts_pcodes_$wfo", $pcodes, 86400);
@@ -196,9 +196,9 @@ $content = <<<EOM
 
 <p>This page presents the number of VTEC events issued by either all of the
 NWS or a selected WFO.  These numbers are based on the IEM maintained archive
-and are not official.  Please be careful of the presentation of zeros, as 
+and are not official.  Please be careful of the presentation of zeros, as
 some VTEC products were only recently added and don't go back prior to 2005.
-The IEM retrospectively assigned VTEC events to some warnings prior to 
+The IEM retrospectively assigned VTEC events to some warnings prior to
 implementation in fall 2005.  Note: the numbers shown are the unique combinations
 of VTEC event ids and WFO, so a single tornado watch event issued by four
 WFOs would count as four in this summary, when summarizing all WFOs!</p>
@@ -210,7 +210,7 @@ $cachedwarning
 
 <p><h4>Option 1: All VTEC Events by Year</h4>
 <form method="GET" name="wfo">
-Limit Numbers by WFO: 
+Limit Numbers by WFO:
 EOM;
 $allWFO = array("_ALL" => array(
     "id" => "_ALL",
@@ -230,7 +230,7 @@ $content .= <<<EOM
 
 <h4>$wfoMsg</h4>
 
-$table 
+$table
 
 EOM;
 $t->content = $content;
