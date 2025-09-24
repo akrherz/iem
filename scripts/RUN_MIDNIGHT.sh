@@ -31,7 +31,7 @@ python check_afos.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 cd ../iemre
 python grid_rsds.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
-cd ../dbutil 
+cd ../dbutil
 python hads_delete_dups.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 python hads_delete_dups.py --date=$(date -u --date '35 day ago' +'%Y-%m-%d')
 
@@ -53,7 +53,3 @@ then
     cd ../climodat
     python merra_solarrad.py --year=$YYYY --month=$MM
 fi
-
-# Move content to offlining
-cd ../util
-python autolapses2box.py
