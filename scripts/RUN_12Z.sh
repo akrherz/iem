@@ -27,9 +27,6 @@ python compute_daily.py --date=$(date -u --date '2 days ago' +'%Y-%m-%d')
 cd ../dailyb
 python spammer.py
 
-cd ../util
-sh BACKUP.sh
-
 cd ../uscrn
 python compute_uscrn_pday.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 python compute_uscrn_pday.py --date=$(date --date '7 days ago' +'%Y-%m-%d')
