@@ -28,34 +28,7 @@ $t->content = <<<EOM
                 <h4 class="card-title mb-0">Multi-RADAR Multi-Sensor (MRMS) Archiving</h4>
             </div>
             <div class="card-body">
-                <p>The IEM maintains some unique archiving of the 
-                <a href="https://www.nssl.noaa.gov/projects/mrms/">MRMS Project</a>.
-                The archive beginning date and variable coverage varies with the links below.
-                There is a helpful <a href="https://www.nssl.noaa.gov/projects/mrms/operational/tables.php">Grib Table</a> and
-                you should use the <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website</a>
-                for realtime data.</p>
-
-                <ul>
-                    <li><a href="https://mrms.agron.iastate.edu">~Complete Hourly Zip Files</a>
-                    <br /><code>Oct 2019 - present</code> This is the main landing site to look for the IEM's hourly MRMS zip
-                    files. For fast access, it contains the most recent 40 TB worth of MRMS data
-                    with pointers to content that has been placed on the CyBox storage.
-                        <br />These are based on whatever was provided by the LDM NCEP feed and
-                      there is no mechanism attempted to repair any holes (quasi rare) from the
-                      LDM feed.</li>
-
-                  <li><a href="https://mtarchive.geol.iastate.edu/{$d}/mrms/ncep/">Mtarchive Daily Selected Files</a>
-                  <br />contains
-                  selected grib2 files of interest and has a more aggressive process that attempts to fill
-                  in holes based on NCEP LDM or HTTP outages. This archive goes back to the beginning
-                  of MRMS, but the number of data types archived varies.</li>
-
-                  <li><a href="http://metfs1.agron.iastate.edu/data/mrms/">Current MRMS Files</a>
-                  <br /> provides
-                  files in a staging area before they are zipped up and uploaded to CyBox at
-                  the link above. This link does not provide anything more than the
-                  <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website</a> does.</li>
-                </ul>
+            See <a href="/archive/mrms.php">IEM MRMS archive page</a>.
             </div>
         </div>
 
@@ -173,7 +146,7 @@ $t->content = <<<EOM
             <div class="card-body">
                 <ul>
                     <li><a href="/timemachine/">Archived IEM Product Browser</a>
-                      <br />This "time machine" interface allows for quick browsing of IEM Products.</li> 
+                      <br />This "time machine" interface allows for quick browsing of IEM Products.</li>
 
                     <li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
                      <br />Excellent archive of the NWS DIFAX products.</li>
@@ -186,7 +159,7 @@ $t->content = <<<EOM
 
                     <li><a href="/archive/data/">IEM Generated Plots</a>
                       <br>Images and data products mostly displayed in real time on the current
-                    data page. Iowa Mesonet plots, hourly precip plots, mesonet stats and 
+                    data page. Iowa Mesonet plots, hourly precip plots, mesonet stats and
                     COOP precip plots are examples.</li>
 
                     <li><a href="/archive/gempak/">IEM Data in GEMPAK Format</a>
@@ -207,7 +180,7 @@ $t->content = <<<EOM
                     <br />Lots of great statistics on snowfall and snow depth.</li>
 
                     <li><a href="http://www.pals.iastate.edu/archivewx/data/">PALS WX Image Archive</a><br />The PALS website generates hourly plots of US weather. Of interest are
-                    archives of RUC, ETA, and AVN model plots. National radar summaries, 
+                    archives of RUC, ETA, and AVN model plots. National radar summaries,
                     surface plots and other plots.</li>
 
                     <li><a href="ftp://ftp.wcc.nrcs.usda.gov/support/climate/wind_daily">NRCS wind climatologies (1961-1990)</a></li>
