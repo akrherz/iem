@@ -19,9 +19,6 @@ fi
 cd ../hads
 python compute_hads_pday.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
 
-cd ../util
-python daily_archive_backup.py &
-
 # Run this twice as to account for some timezones west of Hawaii
 cd ../summary
 python compute_daily.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')

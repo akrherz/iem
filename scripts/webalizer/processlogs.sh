@@ -4,7 +4,7 @@
 # datateam
 # sustainablecorn
 # weatherim
-# 
+#
 # RPM requirements for this workflow
 # yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
 
@@ -70,10 +70,6 @@ do
         gzip ${PREF}-${yyyymmdd}.log
     fi
 done
-
-# Step 5, copy files to staging for cloud storage
-rsync -a --rsync-path "mkdir -p /stage/IEMWWWLogs/$yyyy/$mm && rsync " \
- ./*-${yyyymmdd}.log.gz akrherz-desktop.agron.iastate.edu:/stage/IEMWWWLogs/$yyyy/$mm/
 
 # Step 6, mv files to local cache
 mkdir -p ../save/$yyyy/$mm
