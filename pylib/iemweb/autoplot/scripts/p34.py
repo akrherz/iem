@@ -170,7 +170,7 @@ def plotter(ctx: dict):
     ax.bar(np.arange(1, 367), maxperiod[1:], fc="b", ec="b")
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
-    ttitle = rf"{threshold}$^\circ$F"
+    ttitle = f"{threshold}°F"
     if ctx["which"] == "average":
         ttitle = f"Average ({ADICT[ctx['climo']]})"
     title = (

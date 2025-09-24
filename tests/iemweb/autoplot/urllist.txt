@@ -58,6 +58,8 @@
 32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:ptile::cmap:jet::_r:t::dpi:100.png
 32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_soilm4_avg::y2:2023::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:t::dpi:100.png
 34/network:IACLIMATE::station:IATAME::var:high_over::which:average::climo:1951::threshold:32::_r:43::dpi:100.png
+34/network:IACLIMATE::station:IATAME::var:high_under::which:average::climo:nce81::threshold:32::_r:43::dpi:100.png
+34/network:IACLIMATE::station:IATAME::var:high_under::which:average::climo:nce91::threshold:32::_r:43::dpi:100.png
 37/network:IA_ASOS::zstation:AMW::month:8::year:2024::model:NBE::var:wsp::_r:t::dpi:100::_cb:1.png
 37/network:IA_ASOS::zstation:AMW::month:8::year:2024::model:GFS::var:t::_r:t::dpi:100.png
 38/network:IACLIMATE::station:IATAME::var:best::climo:era5land_srad::year:2024::_r:t::dpi:100.png

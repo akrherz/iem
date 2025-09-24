@@ -14,6 +14,14 @@ Request CF6 data for January 1st, 2024:
 
 https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01
 
+Same request, but JSON(P)
+
+https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01&callback=foo
+
+Same request, but return as a comma delimited file
+
+https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01&fmt=csv
+
 """
 
 from datetime import date
