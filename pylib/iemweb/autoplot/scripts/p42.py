@@ -20,9 +20,11 @@ from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.database import get_dbconnc
+from matplotlib.axes import Axes
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from sqlalchemy.engine import Connection
 
 from iemweb.util import month2months
 
@@ -122,7 +124,7 @@ def get_description():
     return desc
 
 
-def plot(ax, xbase, valid, tmpf, lines: list) -> bool:
+def plot(ax, xbase, valid: list, tmpf, lines: list, tzinfo) -> bool:
     """Our plotting function"""
     if len(valid) < 2:
         return True
@@ -146,8 +148,11 @@ def plot(ax, xbase, valid, tmpf, lines: list) -> bool:
 
     delta = (valid[-1] - valid[0]).total_seconds()
     mylbl = (
-        f"{valid[0].year}\n{int(delta / 86400):.0f}d"
-        f"{((delta % 86400) / 3600.0):.0f}h"
+        f"{valid[0].year} "
+        f"{int(delta / 86400):.0f}d{((delta % 86400) / 3600.0):.0f}h "
+        f"({delta / 3600.0:.1f} hrs)\n"
+        f"{valid[0].astimezone(tzinfo).strftime('%Y-%m-%d %I:%M %p')} "
+        f"{valid[-1].astimezone(tzinfo).strftime('%Y-%m-%d %I:%M %p')}"
     )
     seconds = [(v - xbase).total_seconds() for v in valid]
     line = ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0]
@@ -165,18 +170,33 @@ def plot(ax, xbase, valid, tmpf, lines: list) -> bool:
     return True
 
 
-def plot_text(ax, lines):
+def plot_text(ax: Axes, lines: list):
     """Add text to ax"""
-    for line in lines:
-        ax.text(
-            line.labelx,
-            line.labely,
-            line.mylbl,
-            ha="center",
-            va="center",
+    ypos = 0.92
+    interval = None
+    for line in lines[::-1]:
+        if interval is None:
+            rank = 1
+        elif line.interval < interval:
+            rank += 1
+        interval = line.interval
+        ax.annotate(
+            f"#{rank}. {line.mylbl}",
+            xy=(line.labelx, line.labely),
+            xytext=(1.03, ypos),  # Point to SW corner
+            textcoords="axes fraction",
+            ha="left",
+            va="bottom",
             bbox={"color": line.get_color()},
             color="white",
+            arrowprops=dict(
+                arrowstyle="->",
+                relpos=(0, 0),
+                color=line.get_color(),
+            ),
+            annotation_clip=False,
         )
+        ypos -= 0.1
 
 
 def compute_xlabels(ax, xbase):
@@ -205,23 +225,15 @@ def compute_xlabels(ax, xbase):
     ax.set_xticklabels(xticklabels)
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("asos")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn, cursor = get_dbconnc("asos")
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     mydir = ctx["dir"]
     varname = ctx["var"]
     month = ctx["m"]
 
-    year_limiter = ""
-    y1, y2 = None, None
-    if "yrange" in ctx:
-        y1, y2 = ctx["yrange"].split("-")
-        year_limiter = (
-            f" and valid >= '{int(y1)}-01-01' and "
-            f"valid < '{int(y2) + 1}-01-01' "
-        )
     months = month2months(month)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -229,19 +241,35 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     tzname = ctx["_nt"].sts[station]["tzname"]
     tzinfo = ZoneInfo(tzname)
-    rnd = 0 if varname not in ["mslp", "vsby"] else 2
-    cursor.execute(
-        f"""
+    params = {
+        "rnd": 0 if varname not in ["mslp", "vsby"] else 2,
+        "station": station,
+        "tzname": tzname,
+        "months": months,
+    }
+    year_limiter = ""
+    y1, y2 = None, None
+    if "yrange" in ctx:
+        y1, y2 = ctx["yrange"].split("-")
+        year_limiter = " and valid >= :yr1 and valid < :yr2 "
+        params["yr1"] = date(int(y1), 1, 1)
+        params["yr2"] = date(int(y2) + 1, 1, 1)
+    res = conn.execute(
+        sql_helper(
+            """
         SELECT valid at time zone 'UTC' as utc_valid,
-        round({varname}::numeric,{rnd}) as d
-        from alldata where station = %s {year_limiter}
+        round({varname}::numeric, :rnd) as d
+        from alldata where station = :station {year_limiter}
         and {varname} is not null and
-        extract(month from valid at time zone %s) = ANY(%s)
+        extract(month from valid at time zone :tzname) = ANY(:months)
         ORDER by valid ASC
         """,
-        (station, tzname, months),
+            varname=varname,
+            year_limiter=year_limiter,
+        ),
+        params,
     )
-    units = r"$^\circ$F"
+    units = "°F"
     if varname == "mslp":
         units = "mb"
     elif varname == "vsby":
@@ -275,28 +303,31 @@ def plotter(ctx: dict):
         f"{MDICT.get(month)} :: Streaks {PDICT2[varname]} {label} {units}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes((0.07, 0.25, 0.6, 0.65))
+    ax = fig.add_axes((0.07, 0.1, 0.5, 0.8))
 
     threshold = timedelta(hours=3)
-    reset_valid = datetime(1910, 1, 1, tzinfo=tzinfo)
+    reset_valid = datetime(1900, 1, 1, tzinfo=tzinfo)
     xbase = reset_valid
 
     op2 = operator.lt if mydir == "below" else operator.le
-    for row in cursor:
-        valid = row["utc_valid"].replace(tzinfo=timezone.utc)
-        ireset = False
+    for row in res.mappings():
+        valid: datetime = row["utc_valid"].replace(tzinfo=timezone.utc)
         # This is tricky, we need to resolve when time resets.
         if valid > reset_valid:
+            if valids:
+                if not plot(ax, xbase, valids, tmpf, lines, tzinfo):
+                    break
+                valids = []
+                tmpf = []
             _tmp = (
                 datetime(valid.year, months[-1], 1) + timedelta(days=32)
             ).replace(day=1)
             if month in ["winter", "octmar"]:
                 _tmp = _tmp.replace(year=valid.year + 1)
             reset_valid = datetime(_tmp.year, _tmp.month, 1, tzinfo=tzinfo)
-            xbase = datetime(_tmp.year - 1, _tmp.month, 1, tzinfo=tzinfo)
-            ireset = True
-        if ireset or (valids and ((valid - valids[-1]) > threshold)):
-            if not plot(ax, xbase, valids, tmpf, lines):
+            xbase = datetime(valid.year, valid.month, 1, tzinfo=tzinfo)
+        if valids and ((valid - valids[-1]) > threshold):
+            if not plot(ax, xbase, valids, tmpf, lines, tzinfo):
                 break
             valids = []
             tmpf = []
@@ -306,13 +337,12 @@ def plotter(ctx: dict):
         else:
             valids.append(valid)
             tmpf.append(row["d"])
-            if not plot(ax, xbase, valids, tmpf, lines):
+            if not plot(ax, xbase, valids, tmpf, lines, tzinfo):
                 break
             valids = []
             tmpf = []
-    pgconn.close()
 
-    plot(ax, xbase, valids, tmpf, lines)
+    plot(ax, xbase, valids, tmpf, lines, tzinfo)
     compute_xlabels(ax, xbase)
     rows = []
     for line in lines:
@@ -333,25 +363,5 @@ def plotter(ctx: dict):
         "* Due to timezones and leapday, there is some ambiguity"
         " with the plotted dates"
     )
-    ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.7, -0.165),
-        fancybox=True,
-        shadow=True,
-        ncol=5,
-        fontsize=12,
-        columnspacing=1,
-    )
     plot_text(ax, lines)
-    label = "Start                     End   Hours\n"
-    for line in lines:
-        sts = line.period_start.astimezone(tzinfo)
-        ets = line.period_end.astimezone(tzinfo)
-        label += (
-            f" {sts.strftime('%m/%d/%y %I:%M %p')} "
-            f"{ets.strftime('%m/%d/%y %I:%M %p')} "
-            f"{line.interval.total_seconds() / 3600.0:4.0f}\n"
-        )
-    label += tzname
-    fig.text(0.99, 0.9, label, ha="right", va="top", fontsize=10)
     return fig, df
