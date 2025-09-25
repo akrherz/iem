@@ -146,9 +146,7 @@ def plotter(ctx: dict):
     rng = min([max([df["delta"].max(), 0 - df["delta"].min()]), 12])
     ax[0].set_ylim(0 - rng - 2, rng + 2)
     ax[0].grid(True)
-    ax[0].set_ylabel(
-        f"{'Low' if varname == 'low' else 'High'} Temp Diff " + r"$^\circ$F"
-    )
+    ax[0].set_ylabel(f"{'Low' if varname == 'low' else 'High'} Temp Diff °F")
     ax[0].text(
         -0.01,
         1.02,
@@ -194,9 +192,7 @@ def plotter(ctx: dict):
     ax[1].grid(True)
     ax[1].set_xlim(left=-0.25)
     ax[1].set_xlabel(f"Average Wind Speed [kts] for {station1}")
-    ax[1].set_ylabel(
-        f"{'Low' if varname == 'low' else 'High'} Temp Diff " + r"$^\circ$F"
-    )
+    ax[1].set_ylabel(f"{'Low' if varname == 'low' else 'High'} Temp Diff °F")
     ax[1].text(
         -0.01,
         1.02,

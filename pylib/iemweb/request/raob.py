@@ -22,7 +22,7 @@ sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from io import StringIO
 
 from pydantic import Field
@@ -99,24 +99,6 @@ def fetcher(station, sts, ets, conn: Connection = None):
             )
         )
     return sio.getvalue().encode("ascii", "ignore")
-
-
-def friendly_date(form, key):
-    """More forgiving date conversion"""
-    val = form.get(key)
-    try:
-        val = val.strip()
-        if len(val.split()) == 1:
-            dt = datetime.strptime(val, "%m/%d/%Y")
-        else:
-            dt = datetime.strptime(val, "%m/%d/%Y %H:%M")
-        dt = dt.replace(tzinfo=timezone.utc)
-    except Exception:
-        return (
-            f"Invalid {key} date provided, should be '%m/%d/%Y %H:%M'"
-            " in UTC timezone"
-        )
-    return dt
 
 
 @iemapp(help=__doc__, schema=Schema, default_tz="UTC")
