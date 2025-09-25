@@ -86,6 +86,7 @@
 52/for:wfo::network:WFO::station:DMX::ugc:IAC169::sdate:2020-01-18::days:10::_r:t::dpi:100::_cb:1.png
 52/for:wfo::network:WFO::station:XXX::ugc:IAC169::sdate:2015-01-01::days:10::_r:t::dpi:100.png
 54/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::varname:low::cmap:Greens::_r:t::dpi:100.png
+54/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::varname:high::cmap:Greens::_r:t::dpi:100.png
 56/how:week::start:jan::opt:wfo::state:IA::network:WFO::station:DMX::phenomena:TO::significance:W::_r:t::dpi:100.png
 56/how:week::start:jan::opt:fema::state:IA::network:WFO::station:DMX::fema:7::phenomena:TO::significance:W::_r:t::dpi:100.png
 59/network:IA_ASOS::station:CSQ::units:mph::_r:t::dpi:100.png

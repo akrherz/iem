@@ -2,6 +2,14 @@
 
 Return to `API Services </api/#cgi>`_
 
+Example Requests
+----------------
+
+Return the flux data for station NSTL11 for 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/nlaeflux.py?station=NSTL11&\
+syear=2024&smonth=1&sday=1&eyear=2024&emonth=12&eday=31
+
 """
 
 import pandas as pd
