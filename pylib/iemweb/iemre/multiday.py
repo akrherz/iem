@@ -11,6 +11,11 @@ Reanalysis project.
 Changelog
 ---------
 
+- 2025-09-26: Added ``forecast`` option to include an IEM calculated daily
+  forecast from the GFS and NWS NDFD models.
+- 2025-09-26: Multi-year responses are supported with the caveat that MRMS
+  and PRISM data is all null in this case due to performance issues.
+- 2025-09-26: The date1 parameter is now sdate and date2 parameter is edate
 - 2025-01-02: Service cleanups
 
 Example Usage
@@ -18,42 +23,90 @@ Example Usage
 
 Get 1-2 January 2024 data for Ames, IA:
 
-https://mesonet.agron.iastate.edu/iemre/multiday.py?date1=2024-01-01&\
-date2=2024-01-02&lat=42.0308&lon=-93.6319
+https://mesonet.agron.iastate.edu/iemre/multiday.py?sdate=2024-01-01&\
+edate=2024-01-02&lat=42.0308&lon=-93.6319
 
 """
 
 import json
 import warnings
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+from pathlib import Path
 
 import numpy as np
-from pydantic import Field
+import pandas as pd
+from pydantic import Field, PrivateAttr, model_validator
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import (
     daily_offset,
     get_daily_mrms_ncname,
-    get_daily_ncname,
     get_dailyc_ncname,
     get_domain,
+    get_gid,
 )
-from pyiem.util import convert_value, ncopen
+from pyiem.reference import ISO8601
+from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
+
+from iemweb.json.climodat_dd import compute_taxis
 
 warnings.simplefilter("ignore", UserWarning)
-json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
-json.encoder.c_make_encoder = None
+
+
+# Custom JSON encoder to handle NumPy types and format floats to 2 decimals
+class NumpyEncoder(json.JSONEncoder):
+    def encode(self, obj):
+        if isinstance(obj, dict):
+            return super().encode(
+                {k: self._convert_item(v) for k, v in obj.items()}
+            )
+        elif isinstance(obj, list):
+            return super().encode([self._convert_item(item) for item in obj])
+        else:
+            return super().encode(self._convert_item(obj))
+
+    def _convert_item(self, obj):
+        if isinstance(obj, (np.floating, float)):
+            # Handle NaN and infinite values
+            if np.isnan(obj) or np.isinf(obj):
+                return None
+            return round(float(obj), 2)
+        elif isinstance(obj, (np.integer, int)):
+            return int(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {k: self._convert_item(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_item(item) for item in obj]
+        else:
+            return obj
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    _domain: str = PrivateAttr(None)
+    _gid: int = PrivateAttr(None)
+    _i: int = PrivateAttr(None)
+    _j: int = PrivateAttr(None)
+
     callback: str = Field(None, description="JSONP callback function name")
-    date1: date = Field(
+    forecast: bool = Field(
+        default=False,
+        description=(
+            "Include GFS and NWS NDFD (for CONUS requests) IEM "
+            "computed daily forecasts."
+        ),
+    )
+    sdate: date = Field(
         ..., description="Start date for the data request, YYYY-MM-DD"
     )
-    date2: date = Field(
-        ..., description="End date for the data request, YYYY-MM-DD"
+    edate: date = Field(
+        default=date.today() - timedelta(days=1),
+        description="Inclusive end date for the data request, YYYY-MM-DD",
     )
     lat: float = Field(
         ...,
@@ -68,145 +121,198 @@ class Schema(CGIModel):
         le=180,
     )
 
-
-def clean(val, precision=2):
-    """My filter"""
-    if val is None or np.isnan(val) or np.ma.is_masked(val):
-        return None
-    return round(float(val), precision)
-
-
-def send_error(start_response, msg):
-    """Send an error when something bad happens(tm)"""
-    headers = [("Content-type", "application/json")]
-    start_response("500 Internal Server Error", headers)
-    return json.dumps({"error": msg}).encode("ascii")
+    @model_validator(mode="after")
+    def ensure_domain(self):
+        """Ensure the point is within a domain."""
+        domain = get_domain(self.lon, self.lat)
+        if domain is None:
+            raise ValueError("Point is outside all IEMRE domains")
+        self._domain = domain  # skipcq
+        self._gid = get_gid(self.lon, self.lat, domain)  # skipcq
+        self._i, self._j = get_nav("iemre", domain).find_ij(
+            self.lon, self.lat
+        )  # skipcq
 
 
-@iemapp(help=__doc__, schema=Schema)
+def get_iemre(
+    conn: Connection, ts1: date, ts2: date, model: Schema
+) -> pd.DataFrame:
+    """Get IEMRE data from the database."""
+    return pd.read_sql(
+        sql_helper("""
+    select *,
+    to_char(valid, 'YYYY-MM-DD') as date,
+    null as climate_daily_high_f,
+    null as climate_daily_low_f,
+    null as climate_daily_precip_in,
+    null as mrms_precip_in,
+    null as prism_precip_in
+    from iemre_daily
+    where gid = :gid and valid >= :sdate and valid <= :edate ORDER by valid asc
+        """),
+        conn,
+        params={"gid": model._gid, "sdate": ts1, "edate": ts2},
+        index_col="valid",
+    )
+
+
+def add_forecast(res: dict, model: Schema):
+    """Include forecast info into res."""
+    for fxmodel in ["gfs", "ndfd"]:
+        if fxmodel == "ndfd" and model._domain != "":
+            continue
+        res[f"{fxmodel}_forecast"] = []
+        extra = "" if model._domain == "" else f"_{model._domain}"
+        ncfn = f"/mesonet/data/iemre{extra}/{fxmodel}_current.nc"
+        if not Path(ncfn).exists():
+            continue
+        with ncopen(ncfn) as nc:
+            taxis = compute_taxis(nc.variables["time"])
+            highs = convert_value(
+                nc.variables["high_tmpk"][:, model._j, model._i],
+                "degK",
+                "degF",
+            )
+            lows = convert_value(
+                nc.variables["low_tmpk"][:, model._j, model._i],
+                "degK",
+                "degF",
+            )
+            for t, h, lo in zip(taxis, highs, lows, strict=True):
+                res[f"{fxmodel}_forecast"].append(
+                    {"date": f"{t:%Y-%m-%d}", "high_f": h, "low_f": lo}
+                )
+
+
+def get_mckey(environ: dict):
+    """Figure out the memcache key."""
+    model: Schema = environ["_cgimodel_schema"]
+    return (
+        f"iemre/multiday/{model._domain}/{environ['sdate']:%Y%m%d}"  # skipcq
+        f"/{environ['edate']:%Y%m%d}/{model._i}/{model._j}"  # skipcq
+        f"/{environ['forecast']}"  # skipcq
+    )
+
+
+@iemapp(
+    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=3600
+)
 def application(environ, start_response):
     """Go Main Go"""
-    ts1 = environ["date1"]
-    ts2 = environ["date2"]
+    begin_ts = utc()
+    model: Schema = environ["_cgimodel_schema"]
+    ts1: date = environ["sdate"]
+    ts2: date = environ["edate"]
     if ts1 > ts2:
         (ts1, ts2) = (ts2, ts1)
-    if ts1.year != ts2.year:
-        return [
-            send_error(start_response, "multi-year query not supported yet...")
-        ]
-    # Make sure we aren't in the future
-    tsend = date.today()
-    if ts2 > tsend:
-        ts2 = datetime.now() - timedelta(days=1)
 
-    lon = environ["lon"]
-    lat = environ["lat"]
-    domain = get_domain(lon, lat)
-    if domain is None:
-        return [
-            send_error(
-                start_response,
-                "Point not within any domain",
-            )
-        ]
-    nav = get_nav("iemre", domain)
-    i, j = nav.find_ij(lon, lat)
-    if i is None or j is None:
-        return [
-            send_error(
-                start_response,
-                "Point not within any domain",
-            )
-        ]
-    offset1 = daily_offset(ts1)
-    offset2 = daily_offset(ts2) + 1
-    tslice = slice(offset1, offset2)
+    is_single_year = ts1.year == ts2.year
 
-    # Get our netCDF vars
-    with ncopen(get_daily_ncname(ts1.year, domain=domain)) as nc:
-        hightemp = convert_value(
-            nc.variables["high_tmpk"][tslice, j, i], "degK", "degF"
-        )
-        high12temp = convert_value(
-            nc.variables["high_tmpk_12z"][tslice, j, i],
-            "degK",
-            "degF",
-        )
-        lowtemp = convert_value(
-            nc.variables["low_tmpk"][tslice, j, i], "degK", "degF"
-        )
-        avgdwpf = convert_value(
-            nc.variables["avg_dwpk"][tslice, j, i], "degK", "degF"
-        )
-        low12temp = convert_value(
-            nc.variables["low_tmpk_12z"][tslice, j, i], "degK", "degF"
-        )
-        high_soil4t = convert_value(
-            nc.variables["high_soil4t"][tslice, j, i], "degK", "degF"
-        )
-        low_soil4t = convert_value(
-            nc.variables["low_soil4t"][tslice, j, i], "degK", "degF"
-        )
-        precip = nc.variables["p01d"][tslice, j, i] / 25.4
-        precip12 = nc.variables["p01d_12z"][tslice, j, i] / 25.4
-        # Solar radiation is average W/m2, we want MJ/day
-        srad = nc.variables["rsds"][tslice, j, i] / 1e6 * 86400.0
+    res = {
+        "generated_at": utc().strftime(ISO8601),
+        "iemre_domain": model._domain,
+        "iemre_i": model._i,
+        "iemre_j": model._j,
+        "data": [],
+        "timing_seconds": 0,
+    }
+
+    extra = "" if model._domain == "" else f"_{model._domain}"
+    with get_sqlalchemy_conn(f"iemre{extra}") as conn:
+        iemredf = get_iemre(conn, ts1, ts2, model)
+
+    # Ensure our arrays align, I hope
+    tslice = None
+    if is_single_year:
+        offset1 = daily_offset(iemredf.index[0])
+        offset2 = daily_offset(iemredf.index[-1]) + 1
+        tslice = slice(offset1, offset2)
+
+    if iemredf.empty:
+        res["timing_seconds"] = (utc() - begin_ts).total_seconds()
+        start_response("200 OK", [("Content-type", "application/json")])
+        return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]
+
+    iemredf["daily_high_f"] = convert_value(
+        iemredf["high_tmpk"].to_numpy(), "degK", "degF"
+    )
+    iemredf["12z_high_f"] = convert_value(
+        iemredf["high_tmpk_12z"].to_numpy(), "degK", "degF"
+    )
+    iemredf["daily_low_f"] = convert_value(
+        iemredf["low_tmpk"].to_numpy(), "degK", "degF"
+    )
+    iemredf["12z_low_f"] = convert_value(
+        iemredf["low_tmpk_12z"].to_numpy(), "degK", "degF"
+    )
+    iemredf["avg_dewpoint_f"] = convert_value(
+        iemredf["avg_dwpk"].to_numpy(), "degK", "degF"
+    )
+    iemredf["soil4t_high_f"] = convert_value(
+        iemredf["high_soil4t"].to_numpy(), "degK", "degF"
+    )
+    iemredf["soil4t_low_f"] = convert_value(
+        iemredf["low_soil4t"].to_numpy(), "degK", "degF"
+    )
+    iemredf["daily_precip_in"] = convert_value(
+        iemredf["p01d"].to_numpy(), "mm", "in"
+    )
+    iemredf["12z_precip_in"] = convert_value(
+        iemredf["p01d_12z"].to_numpy(),
+        "mm",
+        "in",
+    )
+    iemredf["solar_mj"] = iemredf["rsds"].to_numpy() / 1e6 * 86400.0
 
     # Get our climatology vars
-    c2000 = ts1.replace(year=2000)
-    coffset1 = daily_offset(c2000)
-    c2000 = ts2.replace(year=2000)
-    coffset2 = daily_offset(c2000) + 1
-    with ncopen(get_dailyc_ncname(domain=domain)) as cnc:
+    with ncopen(get_dailyc_ncname(domain=model._domain)) as cnc:
         chigh = convert_value(
-            cnc.variables["high_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
+            cnc.variables["high_tmpk"][:, model._j, model._i], "degK", "degF"
         )
         clow = convert_value(
-            cnc.variables["low_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
+            cnc.variables["low_tmpk"][:, model._j, model._i], "degK", "degF"
         )
-        cprecip = cnc.variables["p01d"][coffset1:coffset2, j, i] / 25.4
+        cprecip = convert_value(
+            cnc.variables["p01d"][:, model._j, model._i], "mm", "in"
+        )
+        for dt in iemredf.index:
+            doy = dt.timetuple().tm_yday - 1
+            iemredf.at[dt, "climate_daily_high_f"] = chigh[doy]
+            iemredf.at[dt, "climate_daily_low_f"] = clow[doy]
+            iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
 
-    if ts1.year > 1980 and domain == "":
-        i2, j2 = get_nav("prism", "").find_ij(lon, lat)
-        if i2 is None or j2 is None:
-            prism_precip = [None] * (offset2 - offset1)
-        else:
+    if is_single_year and ts1.year > 1980 and model._domain == "":
+        i2, j2 = get_nav("prism", "").find_ij(environ["lon"], environ["lat"])
+        if i2 is not None and j2 is not None:
+            res["prism_grid_i"] = i2
+            res["prism_grid_j"] = j2
             with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
-                prism_precip = nc.variables["ppt"][tslice, j2, i2] / 25.4
-    else:
-        prism_precip = [None] * (offset2 - offset1)
+                iemredf["prism_precip_in"] = convert_value(
+                    nc.variables["ppt"][tslice, j2, i2], "mm", "in"
+                )
 
-    if ts1.year > 2000 and domain == "":
-        i2, j2 = get_nav("mrms_iemre", "").find_ij(lon, lat)
-        with ncopen(get_daily_mrms_ncname(ts1.year)) as nc:
-            mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
-    else:
-        mrms_precip = [None] * (offset2 - offset1)
-
-    res = {"data": []}
-
-    for i in range(hightemp.shape[0]):
-        now = ts1 + timedelta(days=i)
-        res["data"].append(
-            {
-                "date": now.strftime("%Y-%m-%d"),
-                "mrms_precip_in": clean(mrms_precip[i]),
-                "prism_precip_in": clean(prism_precip[i]),
-                "daily_high_f": clean(hightemp[i]),
-                "12z_high_f": clean(high12temp[i]),
-                "climate_daily_high_f": clean(chigh[i]),
-                "daily_low_f": clean(lowtemp[i]),
-                "12z_low_f": clean(low12temp[i]),
-                "avg_dewpoint_f": clean(avgdwpf[i]),
-                "soil4t_high_f": clean(high_soil4t[i]),
-                "soil4t_low_f": clean(low_soil4t[i]),
-                "climate_daily_low_f": clean(clow[i]),
-                "daily_precip_in": clean(precip[i]),
-                "12z_precip_in": clean(precip12[i]),
-                "climate_daily_precip_in": clean(cprecip[i]),
-                "solar_mj": clean(srad[i]),
-            }
+    if is_single_year and ts1.year > 2000 and model._domain == "":
+        i2, j2 = get_nav("mrms_iemre", "").find_ij(
+            environ["lon"], environ["lat"]
         )
+        res["mrms_iemre_grid_i"] = i2
+        res["mrms_iemre_grid_j"] = j2
+        with ncopen(get_daily_mrms_ncname(ts1.year)) as nc:
+            iemredf["mrms_precip_in"] = convert_value(
+                nc.variables["p01d"][tslice, j2, i2], "mm", "in"
+            )
 
+    cols = (
+        "date mrms_precip_in prism_precip_in daily_high_f 12z_high_f "
+        "climate_daily_high_f daily_low_f 12z_low_f avg_dewpoint_f "
+        "soil4t_high_f soil4t_low_f climate_daily_low_f daily_precip_in "
+        "12z_precip_in climate_daily_precip_in solar_mj"
+    ).split()
+
+    res["data"] = iemredf[cols].to_dict(orient="records")
+    if environ["forecast"]:
+        add_forecast(res, model)
+
+    res["timing_seconds"] = (utc() - begin_ts).total_seconds()
     start_response("200 OK", [("Content-type", "application/json")])
-    return [json.dumps(res).encode("ascii")]
+    return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]

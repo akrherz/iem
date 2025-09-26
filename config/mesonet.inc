@@ -134,7 +134,7 @@ RewriteRule ^/search /search.py [QSA]
     Redirect permanent /data/gis/images/unproj /data/gis/images/4326
       Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
   </Directory>
-    
+
   Alias "/onsite/lapses" "/mesonet/share/lapses"
   Alias "/onsite/windrose" "/mesonet/share/windrose"
   Alias "/onsite/iemre" "/mesonet/data/iemre"
@@ -156,7 +156,7 @@ RewriteRule ^/search /search.py [QSA]
   Alias "/climodat/reports" "/mesonet/share/climodat/reports"
   Alias "/climodat/ks" "/mesonet/share/climodat/ks"
 
-  Alias "/pickup"    "/mesonet/share/pickup"  
+  Alias "/pickup"    "/mesonet/share/pickup"
   <Directory "/mesonet/share/pickup">
     AllowOverride All
     Options FollowSymLinks Indexes MultiViews
@@ -202,7 +202,7 @@ RewriteRule ^/search /search.py [QSA]
   <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
   </Directory>
-  
+
   <Directory "/opt/iem/htdocs/agclimate">
     # Lots of old links out there to bad URIs
     RewriteRule index\.(html|pl|php)$ /agclimate/ [R]
@@ -211,7 +211,7 @@ RewriteRule ^/search /search.py [QSA]
     Redirect /agclimate/daily_pics https://mesonet.agron.iastate.edu/data/agclimate
     Redirect /agclimate/info.txt https://mesonet.agron.iastate.edu/agclimate/info.phtml
 
-    # 
+    #
     RewriteRule smplot/([0-9]{1,12})/(.*).png$ isusm.py?t=$1&v=$2
     RewriteRule isusm.csv nmp_csv.py
   </Directory>
@@ -291,7 +291,7 @@ RewriteRule ^/search /search.py [QSA]
   <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule hourly/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) hourly.py?date=$1&lat=$2&lon=$3&format=$4
-    RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?date1=$1&date2=$2&lat=$3&lon=$4&format=$5
+    RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?sdate=$1&edate=$2&lat=$3&lon=$4&format=$5
     RewriteRule cum/([0-9\-]+)/([0-9\-]+)/(shp) cum.py?date0=$1&date1=$2&format=$3&base=50&ceil=86
     RewriteRule cumcounty/([0-9]+)/([0-9\-]+)/([0-9\-]+)/([0-9]+)/([0-9]+)/(json) cum.py?county=$1&date0=$2&date1=$3&format=$6&base=$4&ceil=$5
   </Directory>
