@@ -62,10 +62,9 @@ class NumpyEncoder(json.JSONEncoder):
             return super().encode(
                 {k: self._convert_item(v) for k, v in obj.items()}
             )
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             return super().encode([self._convert_item(item) for item in obj])
-        else:
-            return super().encode(self._convert_item(obj))
+        return super().encode(self._convert_item(obj))
 
     def _convert_item(self, obj):
         if isinstance(obj, (np.floating, float)):
@@ -73,16 +72,15 @@ class NumpyEncoder(json.JSONEncoder):
             if np.isnan(obj) or np.isinf(obj):
                 return None
             return round(float(obj), 2)
-        elif isinstance(obj, (np.integer, int)):
+        if isinstance(obj, (np.integer, int)):
             return int(obj)
-        elif isinstance(obj, np.ndarray):
+        if isinstance(obj, np.ndarray):
             return obj.tolist()
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             return {k: self._convert_item(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             return [self._convert_item(item) for item in obj]
-        else:
-            return obj
+        return obj
 
 
 class Schema(CGIModel):
