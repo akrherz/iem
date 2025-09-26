@@ -125,11 +125,9 @@ class Schema(CGIModel):
         domain = get_domain(self.lon, self.lat)
         if domain is None:
             raise ValueError("Point is outside all IEMRE domains")
-        self._domain = domain  # skipcq
-        self._gid = get_gid(self.lon, self.lat, domain)  # skipcq
-        self._i, self._j = get_nav("iemre", domain).find_ij(
-            self.lon, self.lat
-        )  # skipcq
+        self._domain = domain
+        self._gid = get_gid(self.lon, self.lat, domain)
+        self._i, self._j = get_nav("iemre", domain).find_ij(self.lon, self.lat)
 
 
 def get_iemre(
@@ -186,9 +184,9 @@ def get_mckey(environ: dict):
     """Figure out the memcache key."""
     model: Schema = environ["_cgimodel_schema"]
     return (
-        f"iemre/multiday/{model._domain}/{environ['sdate']:%Y%m%d}"  # skipcq
-        f"/{environ['edate']:%Y%m%d}/{model._i}/{model._j}"  # skipcq
-        f"/{environ['forecast']}"  # skipcq
+        f"iemre/multiday/{model._domain}/{environ['sdate']:%Y%m%d}"
+        f"/{environ['edate']:%Y%m%d}/{model._i}/{model._j}"
+        f"/{environ['forecast']}"
     )
 
 
@@ -219,17 +217,17 @@ def application(environ, start_response):
     with get_sqlalchemy_conn(f"iemre{extra}") as conn:
         iemredf = get_iemre(conn, ts1, ts2, model)
 
+    if iemredf.empty:
+        res["timing_seconds"] = (utc() - begin_ts).total_seconds()
+        start_response("200 OK", [("Content-type", "application/json")])
+        return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]
+
     # Ensure our arrays align, I hope
     tslice = None
     if is_single_year:
         offset1 = daily_offset(iemredf.index[0])
         offset2 = daily_offset(iemredf.index[-1]) + 1
         tslice = slice(offset1, offset2)
-
-    if iemredf.empty:
-        res["timing_seconds"] = (utc() - begin_ts).total_seconds()
-        start_response("200 OK", [("Content-type", "application/json")])
-        return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]
 
     iemredf["daily_high_f"] = convert_value(
         iemredf["high_tmpk"].to_numpy(), "degK", "degF"
