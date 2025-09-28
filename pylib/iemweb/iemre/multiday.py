@@ -134,7 +134,7 @@ def get_iemre(
     conn: Connection, ts1: date, ts2: date, model: Schema
 ) -> pd.DataFrame:
     """Get IEMRE data from the database."""
-    return pd.read_sql(
+    df = pd.read_sql(
         sql_helper("""
     select *,
     to_char(valid, 'YYYY-MM-DD') as date,
@@ -142,7 +142,8 @@ def get_iemre(
     null as climate_daily_low_f,
     null as climate_daily_precip_in,
     null as mrms_precip_in,
-    null as prism_precip_in
+    null as prism_precip_in,
+    null as avg_dewpoint_f
     from iemre_daily
     where gid = :gid and valid >= :sdate and valid <= :edate ORDER by valid asc
         """),
@@ -150,6 +151,33 @@ def get_iemre(
         params={"gid": model._gid, "sdate": ts1, "edate": ts2},
         index_col="valid",
     )
+
+    # Convert numeric columns with NULLs from object dtype to float64 with
+    # np.nan
+    numeric_columns = [
+        "high_tmpk",
+        "low_tmpk",
+        "high_tmpk_12z",
+        "low_tmpk_12z",
+        "avg_dwpk",
+        "high_soil4t",
+        "low_soil4t",
+        "p01d",
+        "p01d_12z",
+        "rsds",
+        "climate_daily_high_f",
+        "climate_daily_low_f",
+        "climate_daily_precip_in",
+        "mrms_precip_in",
+        "prism_precip_in",
+        "avg_dewpoint_f",
+    ]
+
+    for col in numeric_columns:
+        if col in df.columns and df[col].dtype == "object":
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df
 
 
 def add_forecast(res: dict, model: Schema):
