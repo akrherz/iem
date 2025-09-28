@@ -219,7 +219,11 @@ def get_mckey(environ: dict):
 
 
 @iemapp(
-    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=3600
+    help=__doc__,
+    content_tye="application/json",
+    schema=Schema,
+    memcachekey=get_mckey,
+    memcacheexpire=3600,
 )
 def application(environ, start_response):
     """Go Main Go"""
@@ -339,4 +343,4 @@ def application(environ, start_response):
 
     res["timing_seconds"] = (utc() - begin_ts).total_seconds()
     start_response("200 OK", [("Content-type", "application/json")])
-    return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]
+    return json.dumps(res, cls=NumpyEncoder).encode("ascii")
