@@ -293,31 +293,39 @@ def application(environ, start_response):
     iemredf["solar_mj"] = iemredf["rsds"].to_numpy() / 1e6 * 86400.0
 
     # Get our climatology vars
-    with ncopen(get_dailyc_ncname(domain=model._domain)) as cnc:
-        chigh = convert_value(
-            cnc.variables["high_tmpk"][:, model._j, model._i], "degK", "degF"
-        )
-        clow = convert_value(
-            cnc.variables["low_tmpk"][:, model._j, model._i], "degK", "degF"
-        )
-        cprecip = convert_value(
-            cnc.variables["p01d"][:, model._j, model._i], "mm", "in"
-        )
-        for dt in iemredf.index:
-            doy = dt.timetuple().tm_yday - 1
-            iemredf.at[dt, "climate_daily_high_f"] = chigh[doy]
-            iemredf.at[dt, "climate_daily_low_f"] = clow[doy]
-            iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
+    ncfn = Path(get_dailyc_ncname(domain=model._domain))
+    if ncfn.exists():
+        with ncopen(ncfn) as cnc:
+            chigh = convert_value(
+                cnc.variables["high_tmpk"][:, model._j, model._i],
+                "degK",
+                "degF",
+            )
+            clow = convert_value(
+                cnc.variables["low_tmpk"][:, model._j, model._i],
+                "degK",
+                "degF",
+            )
+            cprecip = convert_value(
+                cnc.variables["p01d"][:, model._j, model._i], "mm", "in"
+            )
+            for dt in iemredf.index:
+                doy = dt.timetuple().tm_yday - 1
+                iemredf.at[dt, "climate_daily_high_f"] = chigh[doy]
+                iemredf.at[dt, "climate_daily_low_f"] = clow[doy]
+                iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
 
     if is_single_year and ts1.year > 1980 and model._domain == "":
         i2, j2 = get_nav("prism", "").find_ij(environ["lon"], environ["lat"])
         if i2 is not None and j2 is not None:
             res["prism_grid_i"] = i2
             res["prism_grid_j"] = j2
-            with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
-                iemredf["prism_precip_in"] = convert_value(
-                    nc.variables["ppt"][tslice, j2, i2], "mm", "in"
-                )
+            ncfn = Path(f"/mesonet/data/prism/{ts1.year}_daily.nc")
+            if ncfn.exists():
+                with ncopen(ncfn) as nc:
+                    iemredf["prism_precip_in"] = convert_value(
+                        nc.variables["ppt"][tslice, j2, i2], "mm", "in"
+                    )
 
     if is_single_year and ts1.year > 2000 and model._domain == "":
         i2, j2 = get_nav("mrms_iemre", "").find_ij(
@@ -325,10 +333,12 @@ def application(environ, start_response):
         )
         res["mrms_iemre_grid_i"] = i2
         res["mrms_iemre_grid_j"] = j2
-        with ncopen(get_daily_mrms_ncname(ts1.year)) as nc:
-            iemredf["mrms_precip_in"] = convert_value(
-                nc.variables["p01d"][tslice, j2, i2], "mm", "in"
-            )
+        ncfn = Path(get_daily_mrms_ncname(ts1.year))
+        if ncfn.exists():
+            with ncopen(ncfn) as nc:
+                iemredf["mrms_precip_in"] = convert_value(
+                    nc.variables["p01d"][tslice, j2, i2], "mm", "in"
+                )
 
     cols = (
         "date mrms_precip_in prism_precip_in daily_high_f 12z_high_f "

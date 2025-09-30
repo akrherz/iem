@@ -141,19 +141,16 @@ def plotter(ctx: dict):
     df = df[hits].sort_values("sday")
     ypos = 0.85
     xpos = 0.83
-    fmt = "%.0f" if varname != "precip" else "%.2f"
     fig.text(xpos, ypos + 0.03, "End Date of Streak")
     fig.text(xpos - 0.015, ypos, "Earliest Dates   ", rotation=90, va="top")
-    for day, row in df.head(10).iterrows():
+    for day, _row in df.head(10).iterrows():
         ypos -= 0.03
-        txt = fmt % row["trail"]
-        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')} {txt}")
+        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')}")
 
     ypos -= 0.1
     fig.text(xpos - 0.015, ypos, "Latest Dates   ", rotation=90, va="top")
-    for day, row in df.tail(10).iloc[::-1].iterrows():
+    for day, _row in df.tail(10).iloc[::-1].iterrows():
         ypos -= 0.03
-        txt = fmt % row["trail"]
-        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')} {txt}")
+        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')}")
 
     return fig, freq

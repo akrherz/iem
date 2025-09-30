@@ -276,7 +276,6 @@ EOM;
             $img = <<<EOM
 <p><a class="btn btn-primary"
  href="/plotting/auto/?q=227&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 227</a>
- href="/plotting/auto/?q=227&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 227</a>
 generated the following image below.  You may find more customization options
 for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
@@ -289,7 +288,6 @@ EOM;
             $t->twitter_image = "/plotting/auto/plot/217/pid:{$product_id}.png";
             $img = <<<EOM
 <p><a class="btn btn-primary"
- href="/plotting/auto/?q=217&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 217</a>
  href="/plotting/auto/?q=217&pid={$product_id}"><i class="bi bi-bar-chart" aria-hidden="true"></i> Autoplot 217</a>
 generated the following image below.  You may find more customization options
 , like removal of RADAR, for this image by visiting that autoplot.</p>
