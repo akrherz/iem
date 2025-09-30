@@ -96,7 +96,7 @@ def plotter(ctx: dict):
     months = calendar.month_abbr[1:] + calendar.month_abbr[1:]
     ax.set_xticklabels(months)
 
-    ax.set_ylabel(r"High Temperature $^\circ$F")
+    ax.set_ylabel("High Temperature °F")
     ax.set_xlim(min(df["max_jday"]) - 1, max(df["max_jday"] + height) + 1)
     ax.grid(True)
 

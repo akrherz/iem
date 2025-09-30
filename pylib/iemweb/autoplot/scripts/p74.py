@@ -101,7 +101,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No data found for query")
     df.index.name = "year"
-    tt = r"$^\circ$F" if varname != "precip" else "inch"
+    tt = "°F" if varname != "precip" else "inch"
     title = (
         f"{ctx['_sname']} {df.index.min():.0f}-{df.index.max():.0f} "
         "Number of Days\n"

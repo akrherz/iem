@@ -9,7 +9,6 @@ import calendar
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
@@ -36,9 +35,7 @@ def get_description():
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
-    varname = ctx["var"]
-    if PDICT.get(varname) is None:
-        raise NoDataFound("Failed to find data.")
+    varname = ctx["var"][:10]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -78,7 +75,7 @@ def plotter(ctx: dict):
     )
     ax[0].legend(loc="best", fontsize=10, ncol=2)
 
-    ax[0].set_ylabel(r"Temperature Std. Deviation $^\circ$F")
+    ax[0].set_ylabel("Temperature Std. Deviation °F")
     ax[0].grid(True)
 
     ax[1].plot(
