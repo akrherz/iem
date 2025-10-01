@@ -269,24 +269,6 @@ def cmap_handler(fdict, value, arg, res):
         f'value="on"{checked}> Reverse Colormap?'
     )
     res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
-    res["extrascripts"] += """
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
-"""
-    res["jsextra"] += """
-function formatState (data, escape) {
-    return '<div><img src="/pickup/cmaps/' + data.value +
-        '.png" /> ' + data.text + '</div>';
-};
-document.querySelectorAll('.cmapselect').forEach((el) => {
-    new TomSelect(el, {
-        maxOptions: 1000,
-        render: {
-            option: formatState,
-            item: formatState
-        }
-    });
-});
-    """
     return s
 
 
@@ -313,7 +295,7 @@ def datetypes_handler(arg, value):
     return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
-def sday_handler(value: str, arg, res):
+def sday_handler(value: str, arg: dict):
     """Handler for datetime instances."""
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "0101")
@@ -324,71 +306,39 @@ def sday_handler(value: str, arg, res):
     if not SDAY_RE.match(value):
         raise BadWebRequest("Invalid sdate format")
 
-    res["jsextra"] += f"""
-flatpickr("#{dpname}", {{
-    dateFormat: "m/d",
-    defaultDate: "{int(value[:2])}/{int(value[2:])}",
-    minDate: "{int(vmin[:2])}/{int(vmin[2:])}",
-    maxDate: "{int(vmax[:2])}/{int(vmax[2:])}",
-    allowInput: true,
-    onChange: function(selectedDates, dateStr, instance) {{
-        // Update hidden field in MMDD format
-        if (selectedDates.length) {{
-            const d = selectedDates[0];
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            document.getElementById("alt_{dpname}").value = mm + dd;
-        }}
-    }},
-    onReady: function(selectedDates, dateStr, instance) {{
-        // Set hidden field on load
-        if (selectedDates.length) {{
-            const d = selectedDates[0];
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            document.getElementById("alt_{dpname}").value = mm + dd;
-        }}
-    }}
-}});
-    """
     return (
-        f'<input type="text" id="{dpname}" autocomplete="off"> (mm/dd)'
-        f'<input type="hidden" name="{arg["name"]}" value="{value}" '
-        f'id="alt_{dpname}">'
+        f'<input type="text" id="{dpname}" autocomplete="off" class="apfp" '
+        f'name="{arg["name"]}" '
+        f'data-defaultDate="{value}" '
+        f'data-minDate="{vmin}" '
+        f'data-maxDate="{vmax}" '
+        'data-sday="true" data-dateFormat="md">(mmdd)'
     )
 
 
-def date_handler(value: str, arg, res):
+def date_handler(value: str, arg: dict):
     """Handler for datetime instances."""
-    # Rule: jQuery UI → flatpickr, no jQuery, modern JS, preserve UX
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "1893/1/1")
     vmax = arg.get("max", utc().strftime("%Y/%m/%d"))
 
-    # flatpickr expects yyyy-mm-dd
     def _ymd(val: str):
         rectified = val.replace("-", "/")
         if not DATE_RE.match(rectified):
             raise BadWebRequest("Invalid date format")
         parts = [int(x) for x in rectified.split("/")]
-        return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
+        return f"{parts[0]:04d}/{parts[1]:02d}/{parts[2]:02d}"
 
-    res["jsextra"] += f"""
-flatpickr("#{dpname}", {{
-    dateFormat: "Y/m/d",
-    defaultDate: "{_ymd(value)}",
-    minDate: "{_ymd(vmin)}",
-    maxDate: "{_ymd(vmax)}",
-    allowInput: true
-}});
-    """
     return (
         f'<input type="text" name="{arg["name"]}" id="{dpname}" '
+        'class="apfp" data-dateFormat="Y/m/d" '
+        f'data-defaultDate="{_ymd(value)}" value="{_ymd(value)}" '
+        f'data-minDate="{_ymd(vmin)}" data-maxDate="{_ymd(vmax)}" '
         f'autocomplete="off"> (YYYY/mm/dd)'
     )
 
 
-def datetime_handler(value, arg, res):
+def datetime_handler(value, arg):
     """Handler for datetime instances."""
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
@@ -408,19 +358,12 @@ def datetime_handler(value, arg, res):
         h, mi = int(timepart[:2]), int(timepart[2:])
         return f"{y:04d}-{m:02d}-{d:02d} {h:02d}{mi:02d}"
 
-    res["jsextra"] += f"""
-flatpickr("#{dpname}", {{
-    enableTime: true,
-    dateFormat: "Y/m/d Hi",
-    time_24hr: true,
-    allowInput: true,
-    defaultDate: "{_to_fp(value)}",
-    minDate: "{_to_fp(vmin)}",
-    maxDate: "{_to_fp(vmax)}"
-}});
-    """
     return (
-        f'<input type="text" name="{arg["name"]}" id="{dpname}" '
+        f'<input type="text" name="{arg["name"]}" id="{dpname}" class="apfp" '
+        'data-enableTime="true" data-dateFormat="Y/m/d Hi" '
+        f'data-defaultDate="{_to_fp(value)}" '
+        f'data-minDate="{_to_fp(vmin)}" data-maxDate="{_to_fp(vmax)}" '
+        'data-allowInput="true" data-time24hr="true" '
         'autocomplete="off"> (YYYY/mm/dd HH24MI)'
     )
 
@@ -541,20 +484,12 @@ def dat_handler(fdict, res):
                 f"{compute_dat_label(feat['attributes'])} </option>\n"
             )
     ss += "</select>"
-    res["jsextra"] += f"""
-flatpickr("#dat", {{
-    dateFormat: "Y/m/d",
-    defaultDate: "{dt}",
-    minDate: "2001-01-01",
-    maxDate: "{utc():%Y-%m-%d}",
-    allowInput: true,
-    onChange: function(selectedDates, dateStr, instance) {{
-        onNetworkChange(dateStr);
-    }}
-}});
-    """
     return (
-        f'<input type="text" name="dat" id="dat" autocomplete="off"> '
+        f'<input type="text" name="dat" id="dat" autocomplete="off" '
+        f'value="{dt}" '
+        'class="apfp" data-enableTime="false" data-dateFormat="Y/m/d" '
+        'data-allowInput="true" data-mindate="2001/01/01" data-onc="true" '
+        f'data-defaultDate="{dt}" data-maxDate="{utc():%Y-%m-%d}"> '
         f"(YYYY/mm/dd) &nbsp; {ss}"
     )
 
@@ -562,11 +497,11 @@ flatpickr("#dat", {{
 def generate_form(apid, fdict, headers, cookies):
     """Generate out the form, oh boy!"""
     res = {
+        "title": "IEM Autoplot",
         "nassmsg": "",
         "description": "",
         "imguri": f"/plotting/auto/plot/{apid}/",
         "pltvars": [],
-        "jsextra": "",
         "formhtml": "",
         "image": "",
         "extrascripts": "",
@@ -581,6 +516,7 @@ def generate_form(apid, fdict, headers, cookies):
     # This should be instant, but the other end may be doing a thread
     # restart, which takes a bit of time.
     meta = get_metadict(int(apid))
+    res["title"] = f"{apid}. {meta['title']}"
     res["frontend"] = meta.get("frontend")
     if meta.get("description"):
         res["description"] = (
@@ -659,11 +595,11 @@ def generate_form(apid, fdict, headers, cookies):
                 showvalue=arg.get("showvalue", False),
             )
         elif arg["type"] == "datetime":
-            form = datetime_handler(value, arg, res)
+            form = datetime_handler(value, arg)
         elif arg["type"] == "date":
-            form = date_handler(value, arg, res)
+            form = date_handler(value, arg)
         elif arg["type"] == "sday":
-            form = sday_handler(value, arg, res)
+            form = sday_handler(value, arg)
         elif arg["type"] == "dat":
             form = dat_handler(fdict, res)
         # Handle the fun that is having it be optional
@@ -749,7 +685,8 @@ def generate_form(apid, fdict, headers, cookies):
         </h4>
     </div>
     <div class="card-body">
-        <div id="willload" class="text-center p-4">
+        <div id="willload" class="text-center p-4"
+         data-timingsecs={timing_secs}>
             <div class="mb-3">
     <i class="bi bi-graph-up"
     style="font-size:2rem;color:#6c757d;margin-bottom:0.5rem;"
@@ -772,20 +709,6 @@ def generate_form(apid, fdict, headers, cookies):
         </div>
     </div>
 </div>
-            """
-            res["jsextra"] += f"""
-let timing = 0;
-const progressBar = setInterval(function () {{
-        if (timing >= {timing_secs} ||
-            document.getElementById('willload').style.display === 'none') {{
-                clearInterval(progressBar);
-        }}
-        const width = (timing / {timing_secs}) * 100;
-        const timingBar = document.getElementById('timingbar');
-        timingBar.style.width = width + '%';
-        timingBar.setAttribute('aria-valuenow', width);
-        timing = timing + 0.2;
-}}, 200);
             """
         elif fmt == "pdf":
             res["image"] = f"""
@@ -850,68 +773,6 @@ const progressBar = setInterval(function () {{
         </div>
     </div>
 </div>
-<style>
-.apopts .apdiv:nth-of-type(odd) {{
-  background-color: #f8f9fa;
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-  margin: 0.25rem 0;
-}}
-.apopts .apdiv:nth-of-type(even) {{
-  background-color: #ffffff;
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-  margin: 0.25rem 0;
-  border: 1px solid #e9ecef;
-}}
-.apdiv {{
-  margin-bottom: 0.5rem;
-}}
-.apdiv label {{
-  text-align: right;
-  padding-right: 1rem;
-}}
-@media (max-width: 576px) {{
-  .apdiv label {{
-    text-align: left;
-    padding-right: 0;
-    margin-bottom: 0.5rem;
-  }}
-}}
-.optcontrol {{
-  margin-right: 0.75rem;
-}}
-.ui-datepicker-year, .ui-datepicker-month {{
-  color: #000;
-}}
-.sday .ui-datepicker-year {{
-  display: none;
-}}
-.popup {{
-    background-color: rgba(0, 0, 0, 0.75);
-    color: #FFF;
-    font-weight: bold;
-    font-size: 1.2em;
-    padding: 1.25rem;
-    z-index: 10002;
-    border-radius: 0.375rem;
-}}
-.highcharts-root {{
-  font-size: 16px !important;
-}}
-</style>
-<script>
-function onNetworkChange(newnetwork) {{
-    const waitInput = document.getElementById('_wait');
-    if (waitInput) {{
-        waitInput.value = 'yes';
-    }}
-    const myForm = document.getElementById('myForm');
-    if (myForm) {{
-        myForm.submit();
-    }}
-}}
-</script>
 {res["nassmsg"]}
     """
     if meta.get("report"):
@@ -1197,57 +1058,20 @@ def generate(fdict, headers, cookies):
 
     """
     return {
-        "title": "Automated Data Plotter",
+        "title": res["title"],
         "content": content,
         "jsextra": f"""
-<script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script
- src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js">
-</script>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
 <script src="/js/select2.js?v=3"></script>
-<script>
-function hideImageLoad() {{
-    const willload = document.getElementById('willload');
-    if (willload) {{
-        willload.style.display = 'none';
-    }}
-}}
-
-document.addEventListener('DOMContentLoaded', function() {{
-    {res["jsextra"]}
-
-    // Handle optional controls
-    document.querySelectorAll('.optcontrol').forEach(function(control) {{
-        control.addEventListener('change', function() {{
-            const targetEl = document.getElementById(this.name);
-            if (targetEl) {{
-                targetEl.style.display = this.checked ? 'block' : 'none';
-            }}
-        }});
-    }});
-
-    // Handle image load events
-    const theImage = document.getElementById('theimage');
-    if (theImage) {{
-        theImage.addEventListener('load', hideImageLoad);
-        theImage.addEventListener('error', hideImageLoad);
-
-        // Check if image is already loaded (cached)
-        if (theImage.complete) {{
-            hideImageLoad();
-        }}
-    }}
-}});
-</script>
+<script type="module" src="/plotting/auto/index.module.js"></script>
         """,
         "headextra": f"""
  <link rel="stylesheet" type="text/css"
- href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
+ href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
 <link
  href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
  rel="stylesheet">
@@ -1260,10 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {{
 <link type="text/css"
  href="/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.css"
  rel="stylesheet" />
-<style>
-.cmapselect{{
-    width: 400px; }}
-</style>
+<link type="text/css" href="/plotting/auto/index.css" rel="stylesheet" />
  {res["headextra"]}
         """,
     }
@@ -1282,7 +1103,7 @@ def remove_all_cookies(headers, cookiestr):
 
 
 @iemapp(parse_times=False, allowed_as_list=["ltype"])
-def application(environ, start_response):
+def application(environ: dict, start_response: callable) -> list[bytes]:
     """mod-wsgi handler."""
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]

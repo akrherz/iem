@@ -36,6 +36,15 @@ def get_timing(pidx: int) -> float:
     return timing if timing is not None else -1
 
 
+def find_title(pidx: int) -> str:
+    """Figure out the title of this autoplot, le sigh."""
+    for section in autoplot_data["plots"]:
+        for option in section["options"]:
+            if option["id"] == pidx:
+                return option["label"]
+    return "Autoplot Title Unset?"
+
+
 def get_metadict(pidx: int) -> dict:
     """Do what needs to be done for JSON requests."""
     if pidx == 0:
@@ -47,6 +56,7 @@ def get_metadict(pidx: int) -> dict:
             timing = -1
         mod = import_script(pidx)
         data = mod.get_description()
+        data["title"] = find_title(pidx)
         defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
         data["maptable"] = hasattr(mod, "geojson")
         data["highcharts"] = hasattr(mod, "get_highcharts")

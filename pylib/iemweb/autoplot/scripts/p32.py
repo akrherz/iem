@@ -55,13 +55,13 @@ def get_description():
             "type": "sday",
             "name": "sday",
             "default": "0101",
-            "label": "Inclusive Start Day of Year to Plot (MMDD):",
+            "label": "Inclusive Start Day of Year to Plot:",
         },
         {
             "type": "sday",
             "name": "eday",
             "default": "1231",
-            "label": "Inclusive End Day of Year to Plot (MMDD):",
+            "label": "Inclusive End Day of Year to Plot:",
         },
         {
             "type": "year",
