@@ -1,5 +1,9 @@
 """iemweb utility functions."""
 
+import fcntl
+import os
+from pathlib import Path
+
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
 
@@ -29,6 +33,36 @@ MONTH_LOOKUP = {
     "gs": [5, 6, 7, 8, 9],
     "mjj": [5, 6, 7],
 }
+
+
+def acquire_slot(name: str, max_processes: int):
+    """Try to acquire one of 4 processing slots using file locks."""
+    lock_dir = Path("/tmp") / name
+    lock_dir.mkdir(exist_ok=True)
+    for i in range(max_processes):
+        lock_file = lock_dir / f"slot_{i}.lock"
+        try:
+            fd = os.open(lock_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)  # Non-blocking
+            return fd  # Successfully acquired slot i
+        except OSError:
+            # Slot is busy, try next one
+            try:
+                os.close(fd)
+            except Exception:
+                pass
+            continue
+    return None  # All slots busy
+
+
+def release_slot(fd):
+    """Release the processing slot."""
+    if fd is not None:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+        except Exception:
+            pass
 
 
 def get_ct(environ: dict) -> str:

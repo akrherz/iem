@@ -57,8 +57,6 @@ dependencies:
   - pillow
   # for downstream installs
   - pip
-  # throttling
-  - posix_ipc
   # for psql and friends
   - postgresql
   # database

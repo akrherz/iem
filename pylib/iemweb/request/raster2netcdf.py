@@ -33,7 +33,6 @@ from io import BytesIO
 
 import netCDF4
 import numpy as np
-import posix_ipc
 from PIL import Image
 from pydantic import Field, field_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -42,12 +41,7 @@ from pyiem.util import archive_fetch
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
-# Limit processing to 4 at a time
-SEMAPHORE = posix_ipc.Semaphore(
-    f"/raster2netcdf_throttle_{os.getuid()}",
-    flags=posix_ipc.O_CREAT,
-    initial_value=4,
-)
+from iemweb.util import acquire_slot, release_slot
 
 
 class Schema(CGIModel):
@@ -183,21 +177,20 @@ def do_work(valid: datetime, prod: str, start_response):
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do great things"""
-    try:
-        SEMAPHORE.acquire(timeout=0)
-    except posix_ipc.BusyError:
+    slot_fd = acquire_slot("raster2netcdf", 4)
+    if slot_fd is None:
         start_response(
             "503 Service Temporarily Unavailable",
             [("Content-type", "text/plain")],
         )
         return [b"ERROR: Too many requests, throttled"]
+
     try:
         dstr = environ["dstr"]
         prod = environ["prod"]
         valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(
             tzinfo=timezone.utc
         )
-        res = do_work(valid, prod, start_response)
+        return [do_work(valid, prod, start_response)]
     finally:
-        SEMAPHORE.release()
-    return res
+        release_slot(slot_fd)
