@@ -125,7 +125,7 @@ function initImageHandlers() {
  */
 function initColormapSelects() {
     document.querySelectorAll('.cmapselect').forEach(el => {
-        new tomSelect(el, {
+        window.ts = new tomSelect(el, {
             maxOptions: 1000,
             render: {
                 option: formatState,
