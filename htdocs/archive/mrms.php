@@ -18,12 +18,48 @@ $t->content = <<<EOM
 
 <h4>Archive Changelog</h4>
 <ul>
+  <li><strong>30 Sep 2025</strong>: Document the "Path Forward" for the MRMS hourly zip
+  files.</li>
   <li><strong>24 Sep 2025</strong>: Attempting to consolidate documentation on this
   page and start to document an upcoming archive data removal of hourly zip files
   per Iowa State cloud storage changes.</li>
 </ul>
 
-<h4>Archive Info</h4>
+<div class="row g-4">
+  <div class="col-md-12">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="card-title mb-0"><i class="bi bi-arrow-right-circle"></i> "Path Forward" for MRMS hourly zip archive</h5>
+      </div>
+      <div class="card-body">
+
+<p class="card-text">The IEM has been providing an
+archive of <a href="https://mrmsm.agron.iastate.edu">hourly MRMS zip files</a> since September
+2019.  This archive consisted of some modest local storage caching recent data
+and then the rest being made available via cloud storage.  Due to a quota change
+with the cloud storage, this archive is no longer viable in its entirety. So here
+is a listing of the path forward for this archive.</p>
+
+<p class="card-text"><strong>27 Sep 2019 - 30 Oct 2020</strong>:  This portion of the archive is not
+available via the NOAA AWS OpenData MRMS archive.  The data also represents a period
+prior to a <a
+href="https://mesonet.agron.iastate.edu/wx/afos/p.php?pil=PNSWSH&e=202009101318">major MRMS upgrade</a>
+that happened, which makes it not as seemlessly comparable with MRMS data after.  NOAA
+made a decision to not backfill this data to AWS OpenData for this reason.  There
+is space locally to continue to host this data and it will be kept around until
+perhaps better things are made available from NOAA...</p>
+
+<p class="card-text"><strong>Nov 2020 - Present</strong>: This portion of the archive should be
+available via the <a href="https://registry.opendata.aws/noaa-mrms-pds/">NOAA AWS
+OpenData MRMS archive</a>.  There is limited utility for it to be kept around, but
+some folks may have a usage for the convience factor of having everything zipped up
+in one file.  So going forward, a very limited cache will be kept around, which should
+be a month or two of data.  Presently, a cross checking process is running to ensure
+the AWS archive contains everything found within this archive.  So you will notice
+files start being removed once the cross check completes.</p>
+
+</div></div></div>
+
 
 <div class="row g-4">
   <div class="col-md-6">
@@ -57,26 +93,6 @@ which helps with knowing what is available and grib file units.</p>
         obsoleted much of the utility of IEM's raw grib product archives. However, this
         archive does not include what the IEM archived prior to Oct 2020 back to about
         Sep 2019.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header">
-        <h5 class="card-title mb-0"><i class="bi bi-archive"></i> Complete Hourly Zip Archives</h5>
-      </div>
-      <div class="card-body">
-        <p class="card-text">Starting September 2019, the IEM started creating hourly zip file archives
-        of all MRMS products distributed over LDM on the <a href="https://mrms.agron.iastate.edu">mrms.agron.iastate.edu</a>
-        website. This service utilized an <i>unlimited</i> ISU campus storage option called CyBox.</p>
-        <div class="alert alert-warning mt-3" role="alert">
-          <i class="bi bi-exclamation-triangle"></i> <strong>Important:</strong> This service will no longer be unlimited starting
-          in January 2026 and the archive is too large to host within existing infrastructure
-          at ISU. So much of the archive <strong>will be deleted</strong> starting in 2026.
-          Thankfully, most of this archive is already at AWS OpenData, but the IEM is
-          attempting to get the archive prior to Oct 2020 uploaded there prior to deletion!
-        </div>
       </div>
     </div>
   </div>
