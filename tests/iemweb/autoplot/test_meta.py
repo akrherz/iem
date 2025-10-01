@@ -1,6 +1,11 @@
 """Test the metadata service."""
 
-from iemweb.autoplot.meta import get_metadict, get_timing
+from iemweb.autoplot.meta import find_title, get_metadict, get_timing
+
+
+def test_find_title():
+    """Test what we get with an invalid pid."""
+    assert "Unset?" in find_title(-1)
 
 
 def test_simple():

@@ -1,0 +1,62 @@
+.apopts .apdiv:nth-of-type(odd) {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin: 0.25rem 0;
+}
+
+.apopts .apdiv:nth-of-type(even) {
+    background-color: #ffffff;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin: 0.25rem 0;
+    border: 1px solid #e9ecef;
+}
+
+.apdiv {
+    margin-bottom: 0.5rem;
+}
+
+.apdiv label {
+    text-align: right;
+    padding-right: 1rem;
+}
+
+@media (max-width: 576px) {
+    .apdiv label {
+        text-align: left;
+        padding-right: 0;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.optcontrol {
+    margin-right: 0.75rem;
+}
+
+.ui-datepicker-year,
+.ui-datepicker-month {
+    color: #000;
+}
+
+.sday .ui-datepicker-year {
+    display: none;
+}
+
+.popup {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 1.25rem;
+    z-index: 10002;
+    border-radius: 0.375rem;
+}
+
+.highcharts-root {
+    font-size: 16px !important;
+}
+
+.cmapselect {
+    width: 400px;
+}
