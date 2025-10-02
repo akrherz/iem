@@ -1064,6 +1064,10 @@ def generate(fdict, headers, cookies):
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
+<!-- needed for main select -->
+<script
+ src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js">
+</script>
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
 <script src="/js/select2.js?v=3"></script>
