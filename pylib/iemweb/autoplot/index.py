@@ -1071,7 +1071,7 @@ def generate(fdict, headers, cookies):
 {res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
 <script src="/js/select2.js?v=3"></script>
-<script type="module" src="/plotting/auto/index.module.js"></script>
+<script type="module" src="/plotting/auto/index.module.js?v=2"></script>
         """,
         "headextra": f"""
  <link rel="stylesheet" type="text/css"

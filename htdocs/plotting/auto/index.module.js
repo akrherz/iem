@@ -1,6 +1,7 @@
 
 import flatpickr from 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/+esm';
 import tomSelect from 'https://cdn.jsdelivr.net/npm/tom-select@2.4.3/+esm'
+import { requireInputElement, requireElement } from '/js/iemjs/domUtils.js';
 
 /**
  * Format state for colormap select dropdown
@@ -15,14 +16,9 @@ export function formatState(data) {
  * Handle network change events - submit form with wait indicator
  */
 export function onNetworkChange() {
-    const waitInput = document.getElementById('_wait');
-    if (waitInput) {
-        waitInput.value = 'yes';
-    }
-    const myForm = document.getElementById('myForm');
-    if (myForm) {
-        myForm.submit();
-    }
+    const waitInput = requireInputElement('_wait');
+    waitInput.value = 'yes';
+    requireElement('myForm').submit();
 }
 
 /**
@@ -144,6 +140,11 @@ function init() {
     initDateInputs();
     initImageHandlers();
     initColormapSelects();
+
+    // Make functions available globally for HTML onclick handlers
+    window.onNetworkChange = onNetworkChange;
+    window.hideImageLoad = hideImageLoad;
+    window.formatState = formatState;
 }
 
 // Initialize when DOM is ready
