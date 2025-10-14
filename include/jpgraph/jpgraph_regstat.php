@@ -82,7 +82,7 @@ class Spline {
 
         // Binary search to find interval
         while( $max-$min > 1 ) {
-            $k = ($max+$min) / 2;
+            $k = (int) floor(($max+$min) / 2); //MiToTeam: explicit type casting
             if( $this->xdata[$k] > $xpoint )
             $max=$k;
             else
@@ -152,7 +152,7 @@ class Bezier {
         $datax = array();
         $datay = array();
         for ($i = 0; $i < $steps; $i++) {
-            list($datumx, $datumy) = $this->GetPoint((double) $i / (double) $steps);
+            list($datumx, $datumy) = $this->GetPoint((float) $i / (float) $steps); //MiToTeam: Non-canonical scalar type casts (php 8.5)
             $datax[$i] = $datumx;
             $datay[$i] = $datumy;
         }
@@ -182,7 +182,7 @@ class Bezier {
         $newy = 0.0;
 
         $muk = 1.0;
-        $munk = (double) pow(1-$mu,(double) $n);
+        $munk = (float) pow(1-$mu, (float) $n); //MiToTeam: Non-canonical scalar type casts (php 8.5)
 
         for ($k = 0; $k <= $n; $k++) {
             $nn = $n;
@@ -195,11 +195,11 @@ class Bezier {
                 $blend *= $nn;
                 $nn--;
                 if ($kn > 1) {
-                    $blend /= (double) $kn;
+                    $blend /= (float) $kn; //MiToTeam: Non-canonical scalar type casts (php 8.5)
                     $kn--;
                 }
                 if ($nkn > 1) {
-                    $blend /= (double) $nkn;
+                    $blend /= (float) $nkn; //MiToTeam: Non-canonical scalar type casts (php 8.5)
                     $nkn--;
                 }
             }

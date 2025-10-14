@@ -650,11 +650,12 @@ class PiePlot3D extends PiePlot {
             // Now print possible labels and add csim
             $this->value->ApplyFont($img);
             $margin = $img->GetFontHeight()/2 + $this->value->margin ;
+            $labelpoasadj = $this->ilabelposadj === 'auto' ? 1.0 : $this->ilabelposadj; //MiToTeam: 'auto' can not be used as float
             for($i=0; $i < count($data); ++$i ) {
                 $la = $labeldata[$i][0];
-                $x = $labeldata[$i][1] + cos($la*M_PI/180)*($d+$margin)*$this->ilabelposadj;
-                $y = $labeldata[$i][2] - sin($la*M_PI/180)*($h+$margin)*$this->ilabelposadj;
-                if( $this->ilabelposadj >= 1.0 ) {
+                $x = $labeldata[$i][1] + cos($la*M_PI/180)*($d+$margin)*$labelpoasadj;
+                $y = $labeldata[$i][2] - sin($la*M_PI/180)*($h+$margin)*$labelpoasadj;
+                if( $labelpoasadj >= 1.0 ) {
                     if( $la > 180 && $la < 360 ) $y += $z;
                 }
                 if( $this->labeltype == 0 ) {

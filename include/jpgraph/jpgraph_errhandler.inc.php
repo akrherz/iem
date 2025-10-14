@@ -181,8 +181,11 @@ class JpGraphExceptionL extends JpGraphException {
 }
 
 // Setup the default handler
-global $__jpg_OldHandler;
-$__jpg_OldHandler = set_exception_handler(array('JpGraphException','defaultHandler'));
+if (! \mitoteam\jpgraph\MtJpGraph::isSkipExceptionHandler())
+{
+  global $__jpg_OldHandler;
+  $__jpg_OldHandler = set_exception_handler(array('JpGraphException','defaultHandler'));
+}
 
 //
 // First of all set up a default error handler

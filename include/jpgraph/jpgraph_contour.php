@@ -31,6 +31,8 @@ class Contour {
     private $invert = true;
     private $highcontrast = false, $highcontrastbw = false;
 
+    private $edges = array(); //MiToTeam: explicit class member declared
+
     /**
      * Create a new contour level "algorithm machine".
      * @param $aMatrix    The values to find the contour from
@@ -387,7 +389,8 @@ class Contour {
 class ContourPlot extends Plot {
 
     private $contour, $contourCoord, $contourVal, $contourColor;
-    private $nbrCountours = 0 ;
+    private $nbrContours = 0 ; //MiToTeam: was $nbrCountours in original sources
+
     private $dataMatrix = array();
     private $invertLegend = false;
     private $interpFactor = 1;
