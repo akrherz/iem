@@ -146,7 +146,7 @@ class PlotMark {
     }
 
     function AddCSIMCircle($x,$y,$r) {
-        $x = round($x); $y=round($y); $r=round($r);
+        $x = round((float)$x); $y=round((float)$y); $r=round((float)$r); //MiToTeam: explicit type casting
         $this->csimareas="";
         if( !empty($this->csimtarget) ) {
             $this->csimareas .= "<area shape=\"circle\" coords=\"$x,$y,$r\" href=\"".htmlentities($this->csimtarget)."\"";
@@ -318,8 +318,8 @@ class PlotMark {
         }
 
         $weight = $this->weight;
-        $dx=round($width/2,0);
-        $dy=round($width/2,0);
+        $dx=round((float)$width/2,0); //MiToTeam: explicit type casting
+        $dy=round((float)$width/2,0); //MiToTeam: explicit type casting
         $pts=0;
 
         switch( $this->type ) {

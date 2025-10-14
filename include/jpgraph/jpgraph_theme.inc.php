@@ -2,7 +2,7 @@
 //=======================================================================
 // File:        JPGRAPH_THEME.INC.PHP
 // Description: Class to define graph theme
-// Created:     2010-09-29 
+// Created:     2010-09-29
 // Ver:         $Id: jpgraph_theme.inc.php 83 2010-10-01 11:24:19Z atsushi $
 //
 // Copyright (c) Asial Corporation. All rights reserved.
@@ -15,18 +15,18 @@ foreach (glob(dirname(__FILE__) . '/themes/*.php') as $theme_class_script) {
 }
 
 //===================================================
-// CLASS 
-// Description: 
+// CLASS
+// Description:
 //===================================================
 abstract class Theme {
     protected $color_index;
-    public $graph;
-    
+    protected $graph; //MiToTeam: explicit class member declared
+
     function __construct() {
         $this->color_index = 0;
     }
     /**
-    * 
+    *
     */
     abstract function GetColorList();
 
@@ -38,7 +38,7 @@ abstract class Theme {
 
     /**
     *
-    */   
+    */
     function SetupPlot($plot) {
         if (is_array($plot)) {
             foreach ($plot as $obj) {
@@ -79,13 +79,13 @@ abstract class Theme {
     /**
     *
     */
-    function GetThemeColors($num = 30) { 
+    function GetThemeColors($num = 30) {
         $result_list = array();
 
         $old_index = $this->color_index;
         $this->color_index = 0;
         $count = 0;
-  
+
         $i = 0;
         while (true) {
             for ($j = 0; $j < count($this->GetColorList()); $j++) {
@@ -98,7 +98,7 @@ abstract class Theme {
         }
 
         $this->color_index = $old_index;
-        
+
         return $result_list;
     }
 

@@ -171,7 +171,7 @@ class Legend {
     }
 
     function HasItems() {
-        return (boolean)(count($this->txtcol));
+        return (bool)(count($this->txtcol)); //MiToTeam: Non-canonical scalar type casts (php 8.5)
     }
 
     function Stroke($aImg) {
