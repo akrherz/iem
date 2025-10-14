@@ -843,21 +843,13 @@ class AccBarPlot extends BarPlot {
             // would in most cases give to large y-value.
             $y=0;
             if( !isset($this->plots[0]->coords[0][$i]) ) {
-                if(mitoteam\jpgraph\MtJpGraph::isExtendedMode()) {
-                    continue; //MiToTeam: ignore different number of datapoints
-                } else {
-                    JpGraphError::RaiseL(2014);
-                }
+                JpGraphError::RaiseL(2014);
             }
             if( $this->plots[0]->coords[0][$i] > 0 )
             $y=$this->plots[0]->coords[0][$i];
             for( $j = 1; $j < $this->nbrplots; $j++ ) {
                 if( !isset($this->plots[$j]->coords[0][$i]) ) {
-                    if(mitoteam\jpgraph\MtJpGraph::isExtendedMode()) {
-                        continue; //MiToTeam: ignore different number of datapoints
-                    } else {
-                        JpGraphError::RaiseL(2014);
-                    }
+                    JpGraphError::RaiseL(2014);
                 }
                 if( $this->plots[$j]->coords[0][$i] > 0 )
                 $y += $this->plots[$j]->coords[0][$i];
