@@ -26,7 +26,7 @@
     "@eslint/js": "^9.37.0",
     "@types/ol": "^7.0.0",
     "eslint": "^9.37.0",
-    "eslint-plugin-jsdoc": "^60.8.3",
+    "eslint-plugin-jsdoc": "^61.1.2",
     "globals": "^16.4.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
