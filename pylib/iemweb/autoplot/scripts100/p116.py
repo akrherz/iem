@@ -9,7 +9,7 @@ from datetime import date
 
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -37,6 +37,12 @@ def get_description():
             default=y20,
             label="For plotting, year to start 20 years of plot",
         ),
+        {
+            "type": "int",
+            "name": "base",
+            "label": "CDD/HDD Base Temperature °F",
+            "default": 60,
+        },
     ]
     return desc
 
@@ -47,20 +53,20 @@ def plotter(ctx: dict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT year, month, sum(precip) as sum_precip,
             avg(high) as avg_high,
             avg(low) as avg_low,
-            sum(cdd(high,low,60)) as cdd60,
+            sum(cdd(high,low,:base)) as cdd,
             sum(cdd(high,low,65)) as cdd65,
-            sum(hdd(high,low,60)) as hdd60,
+            sum(hdd(high,low,:base)) as hdd,
             sum(hdd(high,low,65)) as hdd65,
             sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
             sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-            from alldata WHERE station = %s GROUP by year, month
-        """,
+            from alldata WHERE station = :station GROUP by year, month
+        """),
             conn,
-            params=(station,),
+            params={"station": station, "base": ctx["base"]},
             index_col=None,
         )
     if df.empty:
@@ -85,7 +91,8 @@ def plotter(ctx: dict):
     )
 
     second = (
-        f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} (base=60) "
+        f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} "
+        f"(base={ctx['base']}) "
         f"FOR STATION {station}\n"
         "YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    "
         "SEP    OCT    NOV    DEC\n"
@@ -104,7 +111,7 @@ def plotter(ctx: dict):
             row = df.loc[ts]
             val = row[f"{varname}65"]
             res += f"{val:7.0f}"
-            val = row[f"{varname}60"]
+            val = row[f"{varname}"]
             second += f"{val:7.0f}"
         res += "\n"
         second += "\n"
@@ -115,7 +122,7 @@ def plotter(ctx: dict):
         df2 = df[df["month"] == mo]
         val = df2[f"{varname}65"].mean()
         res += f"{val:7.0f}"
-        val = df2[varname + "60"].mean()
+        val = df2[varname].mean()
         second += f"{val:7.0f}"
     res += "\n"
     second += "\n"
@@ -126,14 +133,14 @@ def plotter(ctx: dict):
     title = f"[{station}] {ctx['_nt'].sts[station]['name']} ({y1}-{y1 + 20})"
     fig, ax = figure_axes(
         title=title,
-        subtitle=f"{PDICT[varname]} base=60" + r"$^\circ$F",
+        subtitle=f"{PDICT[varname]} base={ctx['base']}°F",
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
     if filtered.empty:
         raise NoDataFound("No data for specified period")
-    df2 = filtered[["month", "year", varname + "60"]].pivot(
-        index="year", columns="month", values=f"{varname}60"
+    df2 = filtered[["month", "year", varname]].pivot(
+        index="year", columns="month", values=varname
     )
     sns.heatmap(df2, annot=True, fmt=".0f", linewidths=0.5, ax=ax)
 
