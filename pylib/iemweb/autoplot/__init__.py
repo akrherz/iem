@@ -102,7 +102,10 @@ daily_opts = [
     },
     {
         "id": 172,
-        "label": "Accumulated Year to Date / Period Precip / Snowfall",
+        "label": (
+            "Accumulated Year to Date / Period Precip / Snowfall "
+            "/ CDD / GDD / HDD"
+        ),
     },
     {
         "id": 149,
