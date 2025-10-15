@@ -1,6 +1,6 @@
 """
 This chart presents year to date accumulated
-precipitation for a station of your choice.  The year with the highest and
+variable for a station of your choice.  The year with the highest and
 lowest accumulation is shown along with the envelop of observations and
 long term average.  You can optionally plot up to three additional years
 of your choice.</p>
@@ -26,8 +26,25 @@ from pyiem.plot import figure_axes
 from iemweb.autoplot import ARG_STATION
 
 PDICT = {
+    "cdd": "Cooling Degree Days",
+    "gdd": "Growing Degree Days",
+    "hdd": "Heating Degree Days",
     "precip": "Precipitation",
     "snow": "Snow",
+}
+SQLCOL = {
+    "cdd": "cdd(high, low, :base)",
+    "gdd": "gddxx(:base, :ceil, high, low)",
+    "hdd": "hdd(high, low, :base)",
+    "precip": "precip",
+    "snow": "snow",
+}
+TITLES = {
+    "cdd": "Cooling Degree Days (base: %(base)s°F)",
+    "gdd": "Growing Degree Days (base: %(base)s°F, ceil: %(ceil)s°F)",
+    "hdd": "Heating Degree Days (base: %(base)s°F)",
+    "precip": "Precipitation [inch]",
+    "snow": "Snow [inch]",
 }
 
 
@@ -43,8 +60,20 @@ def get_description():
             options=PDICT,
             name="var",
             default="precip",
-            label="Accumulate Precipitation or Snow?",
+            label="Variable to accumulate?",
         ),
+        {
+            "type": "int",
+            "name": "base",
+            "default": 50,
+            "label": "CDD/GDD/HDD Base Temperature °F",
+        },
+        {
+            "type": "int",
+            "name": "ceil",
+            "default": 86,
+            "label": "GDD Ceiling Temperature °F",
+        },
         dict(
             type="year",
             name="year1",
@@ -80,7 +109,7 @@ def get_description():
         ),
         dict(
             type="int",
-            default="3",
+            default=3,
             label="Number of missing days to allow before excluding year",
             name="m",
         ),
@@ -88,8 +117,12 @@ def get_description():
     return desc
 
 
-def cull_missing(df, colname, missingdays):
+def cull_missing(df: pd.DataFrame, dt: date, colname: str, missingdays: int):
     """Figure out which years need to go from the analysis."""
+    incomplete_years = df.groupby("binyear").first()["sday"] != f"{dt:%m%d}"
+    incomplete_years = incomplete_years[incomplete_years].index.tolist()
+    if incomplete_years:
+        df = df[~df["binyear"].isin(incomplete_years)]
     df2 = df[["binyear", colname]]
     nancounts = df2.groupby("binyear").agg(lambda x: x.isnull().sum())
     # cull anything with more than 3 days NaN
@@ -130,7 +163,7 @@ def plotter(ctx: dict):
             sql_helper(
                 """
             with obs as (
-                SELECT day, {varname}, sday,
+                SELECT day, {col} as {varname}, sday,
                 case when sday >= :sday then year else year - 1 end as binyear
                 from alldata WHERE station = :stid
             )
@@ -140,10 +173,16 @@ def plotter(ctx: dict):
                 as accum
             from obs ORDER by day ASC
         """,
+                col=SQLCOL[ctx["var"]],
                 varname=ctx["var"],
             ),
             conn,
-            params={"sday": sdate.strftime("%m%d"), "stid": station},
+            params={
+                "sday": sdate.strftime("%m%d"),
+                "base": ctx["base"],
+                "ceil": ctx["ceil"],
+                "stid": station,
+            },
             index_col="day",
         )
     if df.empty:
@@ -158,14 +197,15 @@ def plotter(ctx: dict):
         doy_trunc = today_doy + offset - sdate_doy
         df = df[df["row"] <= doy_trunc]
 
-    df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
+    df, cullyears = cull_missing(df, ctx["sdate"], ctx["var"], ctx["m"])
     if df.empty:
         raise NoDataFound("No data found for variable.")
     if not climo.empty:
         df = df.join(climo, how="left", on="sday")
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
-    title = f"Accumulated {PDICT[ctx['var']]}{extra} after {sdate:%-d %B}"
+    tt = TITLES[ctx["var"]] % ctx
+    title = f"Accumulated {tt}{extra} after {sdate:%-d %B}"
     subtitle = f"{ctx['_sname']} ({df['binyear'].min()}-{date.today().year})"
     if cullyears:
         subtitle += (
@@ -236,7 +276,7 @@ def plotter(ctx: dict):
             lw=2,
         )
     # NCEI91 Climatology
-    if not climo.empty:
+    if not climo.empty and ctx["var"] in ["precip", "snow"]:
         df2 = df[df["binyear"] == 2000]
         acc = df2[f"c{ctx['var']}"].cumsum()
         maxval = acc.max()
@@ -249,7 +289,7 @@ def plotter(ctx: dict):
             lw=2,
         )
 
-    ax.set_ylabel(PDICT[ctx["var"]] + " [inch]")
+    ax.set_ylabel(tt)
     ax.grid(True)
     ax.legend(loc=2)
     xticks = []
