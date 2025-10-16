@@ -24,6 +24,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.scripts.p9 import get_df
 from iemweb.json.climodat_dd import run as climodat_dd_run
 
 
@@ -101,19 +102,19 @@ def plotter(ctx: dict):
         raise NoDataFound("No data found!")
     df["sday"] = df.index.strftime("%m%d")
 
-    v1 = df.index.strftime("%m%d").values[0]
-    v2 = df.index.strftime("%m%d").values[-1]
-    # Climo
-    url = (
-        "http://iem.local/plotting/auto/plot/9/network:"
-        f"{ctx['station'][:2]}CLIMATE::station:{ctx['station']}::year:2023::"
-        f"var:gdd::base:50::ceiling:86::w:ytd::sday:{v1}::eday:{v2}."
-        "csv"
+    climodf = get_df(
+        {
+            "station": ctx["station"],
+            "network": f"{ctx['station'][:2]}CLIMATE",
+            "year": 2023,
+            "sday": df.index.to_pydatetime()[0],
+            "eday": df.index.to_pydatetime()[-1],
+            "var": "gdd",
+            "base": 50,
+            "ceiling": 86,
+            "w": "ytd",
+        }
     )
-    try:
-        climodf = pd.read_csv(url, dtype={"sday": str}).set_index("sday")
-    except Exception as exp:
-        raise NoDataFound("Failed to load climatology, aborting.") from exp
     df = df.merge(climodf, left_on="sday", right_index=True)
 
     xaxis = df.index.values

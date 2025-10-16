@@ -33,20 +33,52 @@ $t->iemselect2 = true;
 $t->title = "Site Wind Roses";
 $t->sites_current = "windrose";
 $t->iem_resource = "WINDROSE";
+$t->jsextra = <<<EOM
+<script type="module" src="/sites/windrose.module.js"></script>
+EOM;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="/sites/windrose.css" />
+EOM;
 
 $content = <<<EOM
-<h3>Wind Roses</h4>
+<h2 class="mb-3">Wind Roses</h2>
 
-<div class="alert alert-warning">Scroll down this page for monthly climatologies!</div>
+<div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+    <div>
+        <strong>Scroll down</strong> to view monthly climatologies and detailed breakdowns.
+    </div>
+</div>
 
-<p>Wind roses are an information packed plot providing frequencies of 
-wind direction and wind speed.  A wind rose can quickly indicate the dominant
-wind directions and the direction of strongest wind speeds.  The IEM has generated
-these wind roses based on our archive.  The archive does contain errors and
-non representative data, so please use care when using these plots.  In 
-general, data from the airports is of good quality and representative of the 
-local surrounding area. These images and data are in the public domain,
-the <a href="/disclaimer.php">disclaimer page</a> contains more details.</p>
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <p class="lead">Wind roses are information-packed plots providing frequencies of
+        wind direction and wind speed. They quickly indicate dominant
+        wind directions and the direction of strongest wind speeds.</p>
+
+        <p>The IEM has generated these wind roses based on our archive. The archive does
+        contain errors and non-representative data, so please use care when using these plots.
+        In general, data from airports is of good quality and representative of the
+        local surrounding area.</p>
+
+        <p class="text-muted small">These images and data are in the public domain.
+        The <a href="/disclaimer.php">disclaimer page</a> contains more details.</p>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-tools me-2"></i>Dynamic Wind Rose Tool
+            </div>
+            <div class="card-body">
+                <p class="card-text">Create custom wind roses over any time period</p>
+                <a href="dyn_windrose.phtml?station=$station&network=$network"
+                   class="btn btn-primary w-100">
+                    <i class="bi bi-graph-up me-2"></i>Launch Tool
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 EOM;
 
 $rosedata_uri = "/cgi-bin/mywindrose.py?nsector=36&station=$station&network=$network"
@@ -55,13 +87,41 @@ $rosedata_uri = "/cgi-bin/mywindrose.py?nsector=36&station=$station&network=$net
 
 
 if (file_exists("/mesonet/share/windrose/{$network}/{$station}/{$station}_yearly.png")) {
-    $content .= "<p><h4>Yearly Climatology:</h4>
-    <div class='row'><div class='col-md-12'><a href='{$rosedata_uri}&month1=1' class='btn btn-primary' role='button' rel='nofollow'><i class='bi bi-list-ul' aria-hidden='true'></i> View raw data</a>
-  <br /><br /><img src=\"/onsite/windrose/{$network}/{$station}/{$station}_yearly.png\" class='img-fluid'>
-  </div></div>";
+    $content .= <<<EOM
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h4 class="mb-0"><i class="bi bi-calendar-range me-2"></i>Yearly Climatology</h4>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <a href='{$rosedata_uri}&month1=1'
+               class='btn btn-outline-primary'
+               role='button'
+               rel='nofollow'>
+                <i class='bi bi-table' aria-hidden='true'></i> View Raw Data
+            </a>
+        </div>
+        <figure class="figure">
+            <img src="/onsite/windrose/{$network}/{$station}/{$station}_yearly.png"
+                 class="img-fluid rounded shadow-sm"
+                 alt="Yearly wind rose for {$station}"
+                 loading="lazy">
+            <figcaption class="figure-caption text-center mt-2">
+                All-time wind rose based on available historical data
+            </figcaption>
+        </figure>
+    </div>
+</div>
 
-    $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
-         <div class='row'>";
+<div class="card">
+    <div class="card-header bg-light">
+        <h4 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Monthly Climatology</h4>
+        <small class="text-muted">Click any thumbnail to view full-size image</small>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+EOM;
+
     for ($mon = 1; $mon < 13; $mon++) {
         $ts = mktime(0, 0, 0, $mon, 1, 2006);
         $url = sprintf(
@@ -72,15 +132,73 @@ if (file_exists("/mesonet/share/windrose/{$network}/{$station}/{$station}_yearly
             strtolower(date("M", $ts))
         );
         $rosedata = $rosedata_uri . "&month1={$mon}&monthlimit=1";
-        $content .= "<div class='col-md-4'><strong>" . date("F", $ts) . "</strong> 
-    <a href='{$rosedata}' class='btn btn-primary' role='button' rel='nofollow'><i class='bi bi-list-ul' aria-hidden='true'></i> View raw data</a>
-  <br /><br /><a href=\"$url\"><img src=\"$url\" class='img-fluid'></a></div>\n";
-        if ($mon % 3 == 0) $content .= "</div>";
-        if ($mon % 3 == 0 && $mon != 12) $content .= "<div class='row'>";
+        $monthName = date("F", $ts);
+
+        $content .= <<<EOM
+            <div class='col-md-6 col-lg-4'>
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary bg-opacity-10">
+                        <strong class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar-month me-2"></i>{$monthName}</span>
+                            <a href='{$rosedata}'
+                               class='btn btn-sm btn-outline-primary'
+                               role='button'
+                               rel='nofollow'
+                               title='View raw data for {$monthName}'>
+                                <i class='bi bi-table'></i>
+                            </a>
+                        </strong>
+                    </div>
+                    <div class="card-body p-2">
+                        <a href="{$url}"
+                           class="d-block position-relative overflow-hidden rounded"
+                           data-bs-toggle="modal"
+                           data-bs-target="#imageModal"
+                           data-bs-image="{$url}"
+                           data-bs-title="{$monthName} Wind Rose">
+                            <img src="{$url}"
+                                 class="img-fluid hover-zoom"
+                                 alt="{$monthName} wind rose"
+                                 loading="lazy">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+EOM;
     }
-    $content .= "</div>";
+
+    $content .= <<<EOM
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Wind Rose</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="modalImage" class="img-fluid" alt="Wind rose">
+            </div>
+        </div>
+    </div>
+</div>
+
+EOM;
+
 } else {
-    $content .= "<div class=\"alert alert-danger\">Sorry, no wind roses are available for this site.</div>";
+    $content .= <<<EOM
+<div class="alert alert-danger d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+    <div>
+        <strong>No Data Available</strong> - Sorry, no wind roses are available for this site.
+    </div>
+</div>
+EOM;
 }
 
 $t->content = $content;

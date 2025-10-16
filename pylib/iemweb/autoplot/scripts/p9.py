@@ -8,9 +8,10 @@ from datetime import date, datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -81,6 +82,61 @@ def get_description():
     return desc
 
 
+@with_sqlalchemy_conn("coop")
+def get_df(ctx: dict, conn: Connection | None = None) -> pd.DataFrame:
+    """Compute things."""
+    varname = ctx["var"]
+    base = ctx["base"]
+    ceiling = ctx["ceiling"]
+    year = ctx["year"]
+    glabel = f"{varname}{base}{ceiling}"
+
+    gfunc = "gddxx(:base, :ceil, high, low)"
+    if varname in ["hdd", "cdd"]:
+        gfunc = f"{varname}(high, low, :base)"
+    elif varname == "sdd":
+        gfunc = "case when high > :ceil then high - :ceil else 0 end"
+
+    obsdf = pd.read_sql(
+        sql_helper(
+            """SELECT year, sday, {gfunc} as {glabel} from alldata WHERE
+        station = :sid and year > 1892 and sday != '0229'
+        and sday >= :sday and sday <= :eday ORDER by day ASC
+        """,
+            gfunc=gfunc,
+            glabel=glabel,
+        ),
+        conn,
+        params={
+            "sid": ctx["station"],
+            "sday": f"{ctx['sday']:%m%d}",
+            "eday": f"{ctx['eday']:%m%d}",
+            "base": ctx["base"],
+            "ceil": ctx["ceiling"],
+        },
+    )
+    if obsdf.empty:
+        raise NoDataFound("No data Found.")
+    if ctx["w"] == "ytd":
+        obsdf["accum"] = obsdf[["year", glabel]].groupby("year").cumsum()
+        glabel = "accum"
+
+    sdaydf = (
+        obsdf[["sday", glabel]]
+        .groupby("sday")
+        .describe(percentiles=[0.05, 0.25, 0.75, 0.95])
+    ).unstack(level=-1)
+
+    # collapse the multi-index for columns
+    retdf = sdaydf.reset_index().pivot(
+        index="sday", columns="level_1", values=0
+    )
+    retdf[f"{year}{glabel}"] = obsdf[obsdf["year"] == year].set_index("sday")[
+        glabel
+    ]
+    return retdf
+
+
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
@@ -89,57 +145,27 @@ def plotter(ctx: dict):
     base = ctx["base"]
     ceiling = ctx["ceiling"]
     varname = ctx["var"]
+    glabel = f"{varname}{base}{ceiling}"
+    retdf = get_df(ctx)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
     syear = max(ab.year, 1893)
 
-    glabel = f"{varname}{base}{ceiling}"
-    gfunc = f"gddxx({base}, {ceiling}, high, low)"
     title = f"base={base}/ceil={ceiling}"
     if varname in ["hdd", "cdd"]:
-        gfunc = f"{varname}(high, low, {base})"
         title = f"base={base}"
     elif varname == "sdd":
-        gfunc = f"case when high > {ceiling} then high - {ceiling} else 0 end"
         title = f"base={ceiling}"
-    with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            sql_helper(
-                """SELECT year, sday, {gfunc} as {glabel} from alldata WHERE
-            station = :sid and year > 1892 and sday != '0229'
-            and sday >= :sday and sday <= :eday ORDER by day ASC
-            """,
-                gfunc=gfunc,
-                glabel=glabel,
-            ),
-            conn,
-            params={
-                "sid": station,
-                "sday": f"{ctx['sday']:%m%d}",
-                "eday": f"{ctx['eday']:%m%d}",
-            },
-        )
-    if df.empty:
-        raise NoDataFound("No data Found.")
 
     if ctx["w"] == "ytd":
-        df["accum"] = df[["year", glabel]].groupby("year").cumsum()
         glabel = "accum"
-    df2 = (
-        df[["sday", glabel]]
-        .groupby("sday")
-        .describe(percentiles=[0.05, 0.25, 0.75, 0.95])
-    )
-    df2 = df2.unstack(level=-1)
     tt = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
     title = (
         f"({syear}-{thisyear}) [{tt}] {ctx['_sname']}\n"
         f"{year} {PDICT[varname]} ({title})"
     )
-    # collapse the multi-index for columns
-    retdf = df2.reset_index().pivot(index="sday", columns="level_1", values=0)
     # avoid leap year
     xaxis = pd.to_datetime(
         "2001" + retdf.reset_index()["sday"], format="%Y%m%d"
@@ -147,24 +173,23 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.plot(
         xaxis,
-        df2[(glabel, "mean")],
+        retdf["mean"],
         color="r",
         zorder=2,
         lw=2.0,
         label="Average",
     )
-    _data = df[df["year"] == year][[glabel, "sday"]].sort_values(by="sday")
     ax.scatter(
-        pd.to_datetime("2001" + _data["sday"], format="%Y%m%d"),
-        _data[glabel],
+        pd.to_datetime("2001" + retdf.index, format="%Y%m%d"),
+        retdf[f"{year}{glabel}"],
         color="b",
         zorder=2,
         label=f"{year}",
     )
     ax.bar(
         xaxis,
-        df2[(glabel, "95%")] - df2[(glabel, "5%")],
-        bottom=df2[(glabel, "5%")],
+        retdf["95%"] - retdf["5%"],
+        bottom=retdf["5%"],
         ec="tan",
         fc="tan",
         zorder=1,
@@ -172,8 +197,8 @@ def plotter(ctx: dict):
     )
     ax.bar(
         xaxis,
-        df2[(glabel, "75%")] - df2[(glabel, "25%")],
-        bottom=df2[(glabel, "25%")],
+        retdf["75%"] - retdf["25%"],
+        bottom=retdf["25%"],
         ec="lightblue",
         fc="lightblue",
         zorder=1,
@@ -183,7 +208,7 @@ def plotter(ctx: dict):
     if varname == "gdd" and ctx["w"] == "daily":
         ax.set_ylim(-0.25, 40)
     ax.grid(True)
-    ax.set_ylabel(f"{PDICT2[ctx['w']]}" + r" $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(f"{PDICT2[ctx['w']]} °F")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-d %b"),
     )

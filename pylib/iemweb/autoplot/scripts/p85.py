@@ -13,6 +13,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot import ARG_ZSTATION
+
 PDICT = {
     "above": "At or Above",
     "below": "Below",
@@ -35,12 +37,12 @@ PDICT3 = {
 }
 UNITS = {
     "alti": "inches",
-    "dwpf": "F",
-    "feel": "F",
+    "dwpf": "°F",
+    "feel": "°F",
     "p01i": "inches",
     "mslp": "mb",
     "relh": "%",
-    "tmpf": "F",
+    "tmpf": "°F",
     "vsby": "miles",
     "sknt": "knots",
     "gust": "knots",
@@ -56,13 +58,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
+        ARG_ZSTATION,
         dict(type="month", name="month", default=7, label="Month:"),
         {
             "type": "select",
