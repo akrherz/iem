@@ -19,8 +19,8 @@ from pyiem.plot import figure_axes
 PDICT = {
     "tmpf": "Air Temp (F)",
     "alti": "Altimeter (in)",
-    "dwpf": "Dew Point Temp (F)",
-    "feel": "Feels Like Temp (F)",
+    "dwpf": "Dew Point Temp (°F)",
+    "feel": "Feels Like Temp (°F)",
     "mslp": "Mean Sea Level Pressure (mb)",
     "relh": "Relative Humidity (%)",
 }
@@ -106,7 +106,7 @@ def plotter(ctx: dict):
     hist, xedges, yedges = np.histogram2d(
         obs["week"].to_numpy(),
         obs["delta"].to_numpy(),
-        [list(range(54)), list(bins)],
+        [np.arange(54), np.array(bins)],
     )
     # create a dataframe from this 2d histogram
     x, y = np.meshgrid(xedges[:-1], yedges[:-1])

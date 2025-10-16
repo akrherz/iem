@@ -18,10 +18,10 @@ from pyiem.plot import figure
 from pyiem.util import utc
 
 PDICT = {
-    "tmpf": "Air Temperature [F]",
+    "tmpf": "Air Temperature [°F]",
     "alti": "Altimeter [inch]",
-    "dwpf": "Dew Point Temperature [F]",
-    "feel": "Feels Like Temperature [F]",
+    "dwpf": "Dew Point Temperature [°F]",
+    "feel": "Feels Like Temperature [°F]",
     "relh": "Relative Humidity [%]",
     "mslp": "Sea Level Pressure [mb]",
     "vsby": "Visibility [miles]",

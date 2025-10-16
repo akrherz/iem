@@ -39,6 +39,13 @@ ARG_STATION = {
     "label": "Select Station (STC000? are climate district, ST0000 state avg)",
     "network": "IACLIMATE",
 }
+ARG_ZSTATION = {
+    "type": "zstation",
+    "name": "zstation",
+    "default": "AMW",
+    "network": "IA_ASOS",
+    "label": "Select Station:",
+}
 ARG_FEMA = {
     "type": "fema",
     "name": "fema",
