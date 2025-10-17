@@ -4,7 +4,7 @@ over all of the years in the period of record.  In most cases, you can
 access the raw data for these plots
 <a href="/climodat/" class="link link-info">here.</a>  For the variables
 comparing the daily temperatures against average, the average is taken
-from the NCEI current 1981-2010 climatology.
+from the NCEI current 1991-2020 climatology.
 
 <p>This page presents a number of statistical measures.  In general, these
 can be summarized as:
@@ -341,7 +341,7 @@ def add_ctx(ctx):
 
     ctx["tavg"] = tavg
     # End interval is inclusive
-    ctx["a1981_2010"] = df.loc[1981:2010, ptype].mean()
+    ctx["a1991_2020"] = df.loc[1991:2020, ptype].mean()
     ctx["ptype"] = ptype
     ctx["station"] = station
     ctx["threshold"] = threshold
@@ -390,8 +390,8 @@ def plotter(ctx: dict):
             mybar.set_color(colorbelow)
     lbl = "Avg: " + precision % (ctx["avgv"],)
     ax.axhline(ctx["avgv"], lw=2, color="k", zorder=2, label=lbl)
-    lbl = "1981-2010: " + precision % (ctx["a1981_2010"],)
-    ax.axhline(ctx["a1981_2010"], lw=2, color="brown", zorder=2, label=lbl)
+    lbl = "1991-2020: " + precision % (ctx["a1991_2020"],)
+    ax.axhline(ctx["a1991_2020"], lw=2, color="brown", zorder=2, label=lbl)
     if len(ctx["tavg"]) > 30:
         ax.plot(
             ctx["df"].index.values,
