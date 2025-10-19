@@ -73,6 +73,7 @@ class Schema(CGIModel):
         description=(
             "Legacy UTC end timestamp parameter in the form of YYYYmmddHHMM"
         ),
+        ge=utc(1986, 1, 1),
     )
     states: ListOrCSVType = Field(
         default=None,
@@ -86,6 +87,7 @@ class Schema(CGIModel):
         description=(
             "Legacy UTC start timestamp parameter in the form of YYYYmmddHHMM"
         ),
+        ge=utc(1986, 1, 1),
     )
     ts: AwareDatetime = Field(
         default=None,
@@ -93,6 +95,7 @@ class Schema(CGIModel):
             "If sts and ets are not provided, this is the timestamp to "
             "request data for."
         ),
+        ge=utc(1986, 1, 1),
     )
     wfo: str = Field(
         default=None,
