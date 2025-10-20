@@ -110,7 +110,7 @@ def plotter(ctx: dict):
     ax[1].set_ylabel("Probability Density")
     ax[1].axvline(32, lw=2)
     ax[1].grid(True)
-    ax[1].set_xlabel(r"Temperature $^\circ$F, 32 degrees highlighted")
+    ax[1].set_xlabel("Temperature °F, 32 degrees highlighted")
 
     ax[2].hist(
         np.array(df2["doy"], "f"),

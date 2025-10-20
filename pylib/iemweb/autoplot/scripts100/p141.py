@@ -24,10 +24,10 @@ STATIONS = {
 }
 
 PLOTS = {
-    "gdd": "Growing Degree Days [F]",
+    "gdd": "Growing Degree Days [°F]",
     "rain": "Precipitation [in]",
-    "maxt": "Daily Maximum Temperature [F]",
-    "mint": "Daily Minimum Temperature [F]",
+    "maxt": "Daily Maximum Temperature [°F]",
+    "mint": "Daily Minimum Temperature [°F]",
 }
 
 
@@ -113,7 +113,7 @@ def plotter(ctx: dict):
     """Go"""
     location = ctx["location"]
     ptype = ctx["ptype"]
-    sdate = datetime.strptime(ctx["sdate"], "%b%d")
+    sdate = datetime.strptime(f"2000{ctx['sdate']}", "%Y%b%d")
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
     cdf = load("/opt/iem/scripts/yieldfx/baseline", location, sdate)
 

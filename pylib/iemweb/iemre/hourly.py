@@ -57,6 +57,7 @@ class Schema(CGIModel):
         self._i, self._j = get_nav("iemre", domain).find_ij(
             self.lon, self.lat
         )  # skipcq
+        return self
 
 
 def myrounder(val, precision):

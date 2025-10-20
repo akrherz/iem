@@ -43,7 +43,7 @@ def get_description():
         dict(
             type="int",
             name="threshold",
-            default="90",
+            default=90,
             label="Enter Threshold:",
         ),
         dict(
@@ -85,7 +85,7 @@ def plotter(ctx: dict):
             sql_helper(
                 """
             with data as (
-                SELECT extract(year from day + ':months months'::interval)
+                SELECT extract(year from (day + :offset))
                     as season,
                 high, low, day from alldata WHERE station = :station
                 and day >= '1893-01-01'),
@@ -109,7 +109,7 @@ def plotter(ctx: dict):
             ),
             conn,
             params={
-                "months": 6 if season == "winter" else 0,
+                "offset": timedelta(days=183) if season == "winter" else 0,
                 "station": station,
                 "soff": 1 if season == "winter" else 0,
                 "thresh": threshold,

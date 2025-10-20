@@ -13,12 +13,14 @@ from typing import cast
 import geopandas as gpd
 import numpy as np
 from affine import Affine
-from pyiem import iemre, util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import MRMS_IEMRE
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import daily_offset, get_daily_mrms_ncname
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
+from pyiem.util import convert_value, ncopen
 
 
 def get_description():
@@ -50,16 +52,16 @@ def get_raster(ctx: dict):
     dt: date = ctx["date"]
     sector = ctx["sector"]
     threshold = ctx["threshold"]
-    threshold_mm = util.convert_value(threshold, "inch", "millimeter")
+    threshold_mm = convert_value(threshold, "inch", "millimeter")
 
-    idx1 = iemre.daily_offset(dt)
-    ncfn = iemre.get_daily_mrms_ncname(dt.year)
+    idx1 = daily_offset(dt)
+    ncfn = get_daily_mrms_ncname(dt.year)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data found.")
     ncvar = "p01d"
 
     # Get the state weight
-    with util.get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.GeoDataFrame.from_postgis(
             "SELECT the_geom from states where state_abbr = %s",
             conn,
@@ -94,7 +96,7 @@ def get_raster(ctx: dict):
 
     grid = np.zeros((jslice.stop - jslice.start, islice.stop - islice.start))
     total = np.zeros((jslice.stop - jslice.start, islice.stop - islice.start))
-    with util.ncopen(ncfn) as nc:
+    with ncopen(ncfn) as nc:
         for idx in range(idx1, max(-1, idx1 - 91), -1):
             total += nc.variables[ncvar][idx, jslice, islice].filled(0)
             grid = np.where(
@@ -103,11 +105,11 @@ def get_raster(ctx: dict):
             steps += 1
     # Do we need to do a previous year?
     if steps < 90:
-        ncfn = iemre.get_daily_mrms_ncname(dt.year - 1)
+        ncfn = get_daily_mrms_ncname(dt.year - 1)
         if not os.path.isfile(ncfn):
             raise NoDataFound("No data found.")
-        with util.ncopen(ncfn) as nc:
-            idx1 = iemre.daily_offset(date(dt.year - 1, 12, 31))
+        with ncopen(ncfn) as nc:
+            idx1 = daily_offset(date(dt.year - 1, 12, 31))
             while steps < 91:
                 total += nc.variables[ncvar][idx, jslice, islice]
                 grid = np.where(

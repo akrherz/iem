@@ -263,7 +263,7 @@ def plotter(ctx: dict):
 
     ax.grid(True)
     ax.legend(ncol=5)
-    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.set_ylabel("Temperature °F")
     ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
     days = 1
     if ctx["eday"] - ctx["sday"] < timedelta(days=71):
