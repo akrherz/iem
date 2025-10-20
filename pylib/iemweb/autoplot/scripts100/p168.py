@@ -14,7 +14,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem import util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -36,7 +36,7 @@ def plotter(ctx: dict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    with util.get_sqlalchemy_conn("coop") as conn:
+    with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
         with data as (

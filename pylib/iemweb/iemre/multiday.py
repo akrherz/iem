@@ -128,6 +128,7 @@ class Schema(CGIModel):
         self._domain = domain
         self._gid = get_gid(self.lon, self.lat, domain)
         self._i, self._j = get_nav("iemre", domain).find_ij(self.lon, self.lat)
+        return self
 
 
 def get_iemre(

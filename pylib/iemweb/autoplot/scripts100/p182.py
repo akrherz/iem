@@ -14,12 +14,18 @@ from datetime import datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
-from pyiem import iemre, util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import MRMS_IEMRE
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import (
+    daily_offset,
+    get_daily_mrms_ncname,
+    get_dailyc_mrms_ncname,
+)
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
+from pyiem.util import mm2inch, ncopen
 
 
 def get_description():
@@ -67,14 +73,14 @@ def plotter(ctx: dict):
             "Sorry, this does not support multi-state plots yet."
         )
 
-    idx0 = iemre.daily_offset(window_sts)
-    idx1 = iemre.daily_offset(dt)
-    ncfn = iemre.get_daily_mrms_ncname(dt.year)
+    idx0 = daily_offset(window_sts)
+    idx1 = daily_offset(dt)
+    ncfn = get_daily_mrms_ncname(dt.year)
     ncvar = "p01d"
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data for that year, sorry.")
     # Get the state weight
-    with util.get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.GeoDataFrame.from_postgis(
             "SELECT the_geom from states where state_abbr = %s",
             conn,
@@ -101,10 +107,10 @@ def plotter(ctx: dict):
         islice = slice(nav.x0, nav.x0 + nav.xsz)
     if hasdata is not None:
         hasdata = np.flipud(hasdata)
-    with util.ncopen(ncfn) as nc:
-        today = util.mm2inch(nc.variables[ncvar][idx1, jslice, islice])
+    with ncopen(ncfn) as nc:
+        today = mm2inch(nc.variables[ncvar][idx1, jslice, islice])
         if (idx1 - idx0) < 32:
-            p01d = util.mm2inch(
+            p01d = mm2inch(
                 np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0)
             )
         else:
@@ -112,21 +118,21 @@ def plotter(ctx: dict):
             for i in range(idx0, idx1, 10):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
-                    p01d = util.mm2inch(
+                    p01d = mm2inch(
                         np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
                     )
                 else:
-                    p01d += util.mm2inch(
+                    p01d += mm2inch(
                         np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
                     )
 
     # Get climatology
-    ncfn = iemre.get_dailyc_mrms_ncname()
+    ncfn = get_dailyc_mrms_ncname()
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Missing {ncfn}")
-    with util.ncopen(ncfn) as nc:
+    with ncopen(ncfn) as nc:
         if (idx1 - idx0) < 32:
-            c_p01d = util.mm2inch(
+            c_p01d = mm2inch(
                 np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0)
             )
         else:
@@ -134,11 +140,11 @@ def plotter(ctx: dict):
             for i in range(idx0, idx1, 10):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
-                    c_p01d = util.mm2inch(
+                    c_p01d = mm2inch(
                         np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
                     )
                 else:
-                    c_p01d += util.mm2inch(
+                    c_p01d += mm2inch(
                         np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
                     )
 

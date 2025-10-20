@@ -37,9 +37,7 @@ def test_docutils_publish_string(mod, cgi):
     # mark cgi as used so linters don't complain; it's only relevant
     # for test ids
     _ = cgi
-    res = publish_string(source=mod.__doc__, writer_name="html").decode(
-        "utf-8"
-    )
+    res = publish_string(source=mod.__doc__, writer="html").decode("utf-8")
     pos = res.find("System Message")
     if pos > 0:
         print(res[pos : pos + 100])

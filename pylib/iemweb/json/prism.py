@@ -63,16 +63,15 @@ class Schema(CGIModel):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_dates(cls, values):
+    def validate_dates(self):
         """Ensure we have valid dates."""
         if (
-            values.sdate is not None
-            and values.edate is not None
-            and values.sdate > values.edate
+            self.sdate is not None
+            and self.edate is not None
+            and self.sdate > self.edate
         ):
             raise ValueError("sdate must be before edate")
-        return values
+        return self
 
 
 def myrounder(val, precision):
