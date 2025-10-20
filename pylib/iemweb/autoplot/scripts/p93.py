@@ -311,7 +311,7 @@ def plotter(ctx: dict):
     ax2.set_yticklabels([f"{s:.0f}" for s in np.arange(0, ymax, dy) / 24])
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
-    unit = r"$^\circ$F" if varname != "gust" else "MPH"
+    unit = "°F" if varname != "gust" else "MPH"
     ax.set_xlabel(f"{VDICT[varname].split('::')[0]} {unit}")
     ax.legend(loc=legloc, scatterpoints=1)
     return fig, rdf

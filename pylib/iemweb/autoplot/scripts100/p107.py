@@ -365,7 +365,7 @@ def plotter(ctx: dict):
     ax[0].axhline(
         df[varname].mean(), lw=2, label=f"Avg: {df[varname].mean():.2f}"
     )
-    ylabel = r"Temperature $^\circ$F"
+    ylabel = "Temperature °F"
     if varname in ["precip"]:
         ylabel = "Precipitation [inch]"
     elif varname in ["snow"]:
@@ -376,9 +376,9 @@ def plotter(ctx: dict):
     elif varname.find("days") > -1:
         ylabel = "Days"
     elif varname == "gdd":
-        ylabel = f"Growing Degree Days ({gddbase},{gddceil}) " + r"$^\circ$F"
+        ylabel = f"Growing Degree Days ({gddbase},{gddceil}) °F"
     elif varname.find("soilm") > -1:
-        ylabel = "Soil Moisture $kg/kg$"
+        ylabel = r"Soil Moisture $kg/kg$"
     ax[0].set_ylabel(ylabel)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)

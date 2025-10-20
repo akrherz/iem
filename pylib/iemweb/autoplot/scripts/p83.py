@@ -22,7 +22,7 @@ PDICT = {
     "low": "Average Low Temperature",
     "precip": "Total Precipitation",
 }
-UNITS = {"high": r"$^\circ$F", "low": r"$^\circ$F", "precip": "inch"}
+UNITS = {"high": "°F", "low": "°F", "precip": "inch"}
 
 
 def get_description():

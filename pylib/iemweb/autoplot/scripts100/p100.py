@@ -175,7 +175,7 @@ def plotter(ctx: dict):
         ax.set_ylim(data.min() - 5, data.max() + 5)
 
     ax.set_xlabel("Year")
-    units = r"$^\circ$F"
+    units = "°F"
     if ptype.find("days") > 0:
         units = "days"
     elif ptype.find("precip") > 0:
