@@ -7,6 +7,7 @@ the daily standard deviation departures.
 """
 
 from datetime import date, timedelta
+from typing import TYPE_CHECKING
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -15,6 +16,9 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 PDICT = {"abs": "Departure in degrees", "sigma": "Depature in sigma"}
 
@@ -88,7 +92,7 @@ def plotter(ctx: dict):
             },
             index_col="day",
         )
-    if df.empty or df["stddev_high"].min() == 0:
+    if df.empty or df["high"].isna().all():
         raise NoDataFound("No Data Found.")
     df.index.name = "Date"
     df["high_sigma"] = (df["high"] - df["avg_high"]) / df["stddev_high"]
@@ -100,7 +104,7 @@ def plotter(ctx: dict):
         title=title,
         subtitle=f"NCEI 1991-2020 Climatology Source: {clstation}",
     )
-    ax = fig.subplots(2, 1, sharex=True)
+    ax: list[Axes] = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(
         df.index.values,

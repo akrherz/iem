@@ -80,9 +80,7 @@ def plotter(ctx: dict):
             v = ax[i].violinplot(vals, **vopts)
             meanval2 = vals.mean()
             ax[i].plot([j, j + 0.4], [meanval2, meanval2], c=colors[1])
-            ax[i].text(
-                j, meanval2, rf"{meanval2:.0f}$^\circ$", c=colors[1], ha="left"
-            )
+            ax[i].text(j, meanval2, f"{meanval2:.0f}°", c=colors[1], ha="left")
             b = v["bodies"][0]
             m = np.mean(b.get_paths()[0].vertices[:, 0])
             b.get_paths()[0].vertices[:, 0] = np.clip(
@@ -99,7 +97,7 @@ def plotter(ctx: dict):
                 ax[i].text(
                     j,
                     meanval,
-                    rf"{meanval:.0f}$^\circ$",
+                    f"{meanval:.0f}°",
                     c=colors[0],
                     ha="right",
                 )
@@ -124,7 +122,7 @@ def plotter(ctx: dict):
         ax[i].set_xticklabels([calendar.month_abbr[m] for m in months])
         ax[i].grid(axis="y")
         ax[i].axhline(32, ls="--", color="purple", alpha=0.8, lw=0.5)
-        ax[i].text(len(months) - 0.3, 32, r"32$^\circ$", color="purple")
+        ax[i].text(len(months) - 0.3, 32, "32°", color="purple")
 
     pr0 = Rectangle((0, 0), 1, 1, fc="r")
     pr1 = Rectangle((0, 0), 1, 1, fc="b")
@@ -134,7 +132,7 @@ def plotter(ctx: dict):
         ncol=2,
         loc=(0.1, -0.35),
     )
-    ax[0].set_ylabel(r"Daily High Temp $^\circ$F")
-    ax[1].set_ylabel(r"Daily Low Temp $^\circ$F")
+    ax[0].set_ylabel("Daily High Temp °F")
+    ax[1].set_ylabel("Daily Low Temp °F")
 
     return fig, pd.DataFrame(res)

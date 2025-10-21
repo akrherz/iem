@@ -19,6 +19,7 @@ autoplot and presents the spring season values.</p>
 """
 
 from datetime import date, datetime, timedelta
+from typing import Any
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -221,7 +222,7 @@ def plotter(ctx: dict):
 
     # Create the cell text as an enpty list of 4 columns by 11 rows
     celltext = [[""] * 4 for _ in range(11)]
-    cellcolors = [["white"] * 4 for _ in range(11)]
+    cellcolors: list[list[Any]] = [["white"] * 4 for _ in range(11)]
     # create 12 jet colors to use to color the cells by month of the year
     colors = get_cmap("jet")(np.arange(12) / 12.0)
     # set the alpha to 0.5
@@ -255,7 +256,7 @@ def plotter(ctx: dict):
     table = ax2.table(
         celltext,
         cellColours=cellcolors,
-        colLabels=[f"{t}" + r"$^\circ$F" for t in thresholds],
+        colLabels=[f"{t} °F" for t in thresholds],
         rowLabels=["Min", *list(range(10, 100, 10)), "Max"],
         loc="center",
     )
