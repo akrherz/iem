@@ -51,6 +51,8 @@ def test_autoplot_calls_via_frontend(apid: str):
         fmts.append("csv")
     if meta.get("raster"):
         fmts.append("geotiff")
+    if meta.get("maptable"):
+        fmts.append("geojson")
     for fmt in fmts:
         c = Client(autoplot_app)
         res = c.get(f"?p={apid}&fmt={fmt}&cb=1")

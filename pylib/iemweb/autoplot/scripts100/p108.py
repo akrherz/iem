@@ -310,13 +310,12 @@ def plotter(ctx: dict):
     xmax = np.nanmax(sacc, 0)
     if whichplots in ["all", "sdd"]:
         ax4.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
-        ax4.set_ylabel(r"SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
+        ax4.set_ylabel("SDD Base 86 °F", fontsize=16)
         ax4.grid(True)
 
     if whichplots in ["all", "gdd"]:
         ax1.set_ylabel(
-            f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} "
-            r"$^{\circ}\mathrm{F}$",
+            f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} °F",
             fontsize=16,
         )
 

@@ -139,7 +139,7 @@ def plotter(ctx: dict):
     ax.grid(True, zorder=11)
     ax.set_ylabel(f"{PDICT[varname]} Frequency [%]")
     ax.set_ylim(0, 100)
-    ax.set_xlabel(r"Air Temperature $^\circ$F")
+    ax.set_xlabel("Air Temperature °F")
     if df2["t"].min() < 30:
         ax.axvline(32, lw=2, color="k")
         ax.text(32, -4, "32", ha="center")

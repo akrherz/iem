@@ -126,8 +126,8 @@ def plotter(ctx: dict):
     )
     ax.set_ylim(len(vals), -0.5)
     ax.grid(True)
-    ax.set_yticklabels(labels)
     ax.set_yticks(np.arange(len(vals)))
+    ax.set_yticklabels(labels)
     ax.set_position([0.5, 0.1, 0.45, 0.83])
     ax.set_xticks([0, 10, 25, 50, 75, 90, 100])
 

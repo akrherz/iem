@@ -166,13 +166,16 @@ def plotter(ctx: dict):
 
     minyear = df["year"].min()
     maxyear = df["year"].max()
-    ax.set_yticks(range(minyear, maxyear + 1))
     ylabels = []
+    yticks = []
     for yr in range(minyear, maxyear + 1):
-        if yr % 5 == 0:
-            ylabels.append(f"{yr} {yearmax.at[yr, 'delta']:.0f}")
-        else:
-            ylabels.append(f"{yearmax.at[yr, 'delta']:.0f}")
+        if yr in yearmax.index:
+            if yr % 5 == 0:
+                ylabels.append(f"{yr} {yearmax.at[yr, 'delta']:.0f}")
+            else:
+                ylabels.append(f"{yearmax.at[yr, 'delta']:.0f}")
+            yticks.append(yr)
+    ax.set_yticks(yticks)
     ax.set_yticklabels(ylabels, fontsize=10)
 
     ax.set_ylim(minyear - 0.5, maxyear + 0.5)
