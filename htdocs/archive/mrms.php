@@ -34,7 +34,7 @@ $t->content = <<<EOM
       <div class="card-body">
 
 <p class="card-text">The IEM has been providing an
-archive of <a href="https://mrmsm.agron.iastate.edu">hourly MRMS zip files</a> since September
+archive of <a href="https://mrms.agron.iastate.edu">hourly MRMS zip files</a> since September
 2019.  This archive consisted of some modest local storage caching recent data
 and then the rest being made available via cloud storage.  Due to a quota change
 with the cloud storage, this archive is no longer viable in its entirety. So here
