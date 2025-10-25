@@ -11,16 +11,16 @@ pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 $year = get_int404("year", 2006);
 if ($year == 0) die("ERROR: invalid \$year set");
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
+$wfo = get_str404("wfo", "MPX", 3);
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
-$lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]) : 'n';
+$phenomena = get_str404("phenomena", "SV", 2);
+$significance = get_str404("significance", "W", 1);
+$lastsvs = get_str404("lastsvs", 'n');
 
 $stname = iem_pg_prepare(
     $connect,
     "SELECT array_to_json(product_ids) as ja ".
-    "from warnings WHERE vtec_year = $1 and wfo = $2 and ". 
+    "from warnings WHERE vtec_year = $1 and wfo = $2 and ".
     "phenomena = $3 and eventid = $4 and significance = $5 ".
     "ORDER by cardinality(product_ids) DESC LIMIT 1"
 );

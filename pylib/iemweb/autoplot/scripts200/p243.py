@@ -201,7 +201,7 @@ def plotter(ctx: dict):
         params["sig"] = "W"
         subtitle = "Svr T'Storm + Tornado + Flash Flood Warnings"
 
-    sql = f"""
+    sql = """
         SELECT
         vtec_year as yr,
         extract(month from issue)::int as mo,
@@ -214,7 +214,7 @@ def plotter(ctx: dict):
     """
     if opt == "bystate":
         # Yes, double counting
-        sql = f"""
+        sql = """
             SELECT
             vtec_year as yr,
             extract(month from issue)::int as mo,
@@ -229,7 +229,7 @@ def plotter(ctx: dict):
         # NB quasi hack here as we have some redundant ETNs for a given year
         # so the groupby helps some.
         daily = pd.read_sql(
-            sql_helper(sql),
+            sql_helper(sql, offset=offset, wfo_limiter=wfo_limiter),
             conn,
             params=params,
             index_col=None,

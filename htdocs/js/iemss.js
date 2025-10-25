@@ -76,17 +76,17 @@ function setupFilterByText(selectElement, textboxElement, selectSingleMatch = fa
         value: option.value,
         text: option.textContent
     }));
-    
+
     // Store original options on the element
     selectElement.dataset.originalOptions = JSON.stringify(options);
-    
+
     const handleFilter = () => {
         const search = textboxElement.value.trim();
         const regex = new RegExp(search, 'gi');
-        
+
         // Clear current options
         selectElement.innerHTML = '';
-        
+
         // Filter and add matching options
         options.forEach(optionData => {
             if (optionData.text.match(regex) !== null) {
@@ -96,16 +96,16 @@ function setupFilterByText(selectElement, textboxElement, selectSingleMatch = fa
                 selectElement.appendChild(option);
             }
         });
-        
+
         // Auto-select if single match
         if (selectSingleMatch && selectElement.options.length === 1) {
             selectElement.options[0].selected = true;
         }
-        
+
         // Update counts after filtering
         updateStationCounts();
     };
-    
+
     textboxElement.addEventListener('input', handleFilter);
     textboxElement.addEventListener('change', handleFilter);
 }
@@ -113,7 +113,7 @@ function setupFilterByText(selectElement, textboxElement, selectSingleMatch = fa
 function sortListing(option) {
     const stationsIn = document.getElementById('stations_in');
     const options = Array.from(stationsIn.options);
-    
+
     options.sort((a, b) => {
         let at = a.textContent;
         let bt = b.textContent;
@@ -123,11 +123,11 @@ function sortListing(option) {
         }
         return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
     });
-    
+
     // Clear and re-add sorted options
     stationsIn.innerHTML = '';
     options.forEach(opt => stationsIn.appendChild(opt));
-    
+
     // Update counts after sorting
     updateStationCounts();
 }
@@ -139,12 +139,12 @@ function moveSelectedOptions(fromSelect, toSelect) {
         option.selected = false;
         toSelect.appendChild(option);
     });
-    
+
     // If moving to stations_out (right side), select all options there
     if (toSelect.id === 'stations_out') {
         selectAllOptions(toSelect);
     }
-    
+
     updateStationCounts();
     return false;
 }
@@ -154,12 +154,12 @@ function moveAllOptions(fromSelect, toSelect) {
     options.forEach(option => {
         toSelect.appendChild(option);
     });
-    
+
     // If moving to stations_out (right side), select all options there
     if (toSelect.id === 'stations_out') {
         selectAllOptions(toSelect);
     }
-    
+
     updateStationCounts();
     return false;
 }
@@ -170,18 +170,66 @@ function selectAllOptions(selectElement) {
     });
 }
 
+/**
+ * Display a Bootstrap alert message in the iemss container
+ * @param {string} message - The message to display
+ * @param {string} type - Bootstrap alert type (warning, danger, info, success)
+ * @param {number} duration - How long to show the alert in milliseconds (0 = don't auto-dismiss)
+ */
+function showIemssAlert(message, type = 'warning', duration = 5000) {
+    const cardBody = document.querySelector('.iemss-container .card-body');
+    if (!cardBody) return;
+
+    // Remove any existing alerts
+    const existingAlerts = cardBody.querySelectorAll('.iemss-alert');
+    existingAlerts.forEach(alert => alert.remove());
+
+    // Create the alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show iemss-alert`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>${message}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    // Insert at the top of card-body
+    cardBody.insertBefore(alertDiv, cardBody.firstChild);
+
+    // Scroll alert into view
+    alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Auto-dismiss after duration if specified
+    if (duration > 0) {
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                // Use Bootstrap's alert dismissal if available
+                if (bootstrap?.Alert) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                    bsAlert.close();
+                } else {
+                    // Fallback to manual removal with fade effect
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }
+            }
+        }, duration);
+    }
+}
+
 // Update station count displays
 function updateStationCounts() {
     const stationsIn = document.getElementById('stations_in');
     const stationsOut = document.getElementById('stations_out');
     const availableCount = document.getElementById('available-count');
     const selectedCount = document.getElementById('selected-count');
-    
+
     if (availableCount && stationsIn) {
         const count = stationsIn.options.length;
         availableCount.textContent = `Available: ${count.toLocaleString()} station${count !== 1 ? 's' : ''}`;
     }
-    
+
     if (selectedCount && stationsOut) {
         const count = stationsOut.options.length;
         selectedCount.textContent = `Selected: ${count.toLocaleString()} station${count !== 1 ? 's' : ''}`;
@@ -222,7 +270,7 @@ function setupIemssFormSubmission(iemssElement) {
             if (stationsOut) {
                 selectAllOptions(stationsOut);
                 if (stationsOut.options.length === 0) {
-                    alert("No stations listed in 'Selected Stations'!");
+                    showIemssAlert("No stations listed in 'Selected Stations'!");
                     event.preventDefault();
                     return false;
                 }

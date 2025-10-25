@@ -3,12 +3,12 @@ require_once '../../config/settings.inc.php';
 $JQUERYUI = "1.12.1";
 require_once '../../include/myview.php';
 require_once "../../include/cameras.inc.php";
-require_once "../../include/forms.php"; 
+require_once "../../include/forms.php";
 define("IEM_APPID", 117);
 $t = new MyView();
 
-$java = isset($_GET["java"]) ? xssafe($_GET["java"]): 'script';
-$cid = isset($_GET['cid']) ? xssafe($_GET['cid']): 'ISUC-006';
+$java = get_str404("java", 'script');
+$cid = get_str404('cid', 'ISUC-006');
 
 $frames  = get_int404('frames', 12);
 $interval = get_int404('interval', 300);
@@ -119,7 +119,7 @@ $t->headextra = $headextra;
 $t->content = <<<EOM
 {$wmessage}
 
-<p>Still images are saved from the SchoolNet8 web cameras every 5 minutes.  
+<p>Still images are saved from the SchoolNet8 web cameras every 5 minutes.
 This page gives you a tool to build animations from this archive of images.</p>
 
 

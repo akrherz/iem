@@ -4,8 +4,8 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 /* Script to generate a loop of whatever */
-$prod = isset($_GET['prod']) ? xssafe($_GET['prod']) : 'mesonet';
-$java = isset($_GET['java']) ? xssafe($_GET['java']) : 'none';
+$prod = get_str404('prod', 'mesonet');
+$java = get_str404('java', 'none');
 $frames = get_int404('frames', 10);
 
 $products = array(

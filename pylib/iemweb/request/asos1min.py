@@ -182,7 +182,9 @@ def application(environ, start_response):
                 raise IncompleteWebRequest(
                     f"Unknown variable {varname} specified in request."
                 )
-        res = conn.execution_options(stream_results=True).execute(
+        res = conn.execution_options(
+            stream_results=True, max_row_buffer=10_000
+        ).execute(
             sql_helper("""
     select *,
     to_char(valid at time zone :tz, 'YYYY-MM-DD hh24:MI') as local_valid

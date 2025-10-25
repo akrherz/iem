@@ -14,7 +14,7 @@ $t = new MyView();
 $t->iemselect2 = true;
 $t->title = "Satellite Cloud Product";
 $t->sites_current = "scp";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
+$sortdir = get_str404("sortdir", "asc");
 $year = get_int404("year", gmdate("Y"));
 $month = get_int404("month", gmdate("m"));
 $day = get_int404("day", gmdate("d"));
@@ -95,7 +95,7 @@ $table = <<<EOM
 <th rowspan="2" class="rl">SCP Valid UTC</th>
 <th rowspan="2" class="rl">METAR Valid Local</th>
 $header<th colspan="2">ASOS METAR Report</th></tr>
-<tr>$header2<th>Levels ft</th><th>METAR</th></tr> 
+<tr>$header2<th>Levels ft</th><th>METAR</th></tr>
 </thead>
 <tbody>
 EOM;
@@ -152,12 +152,12 @@ tbody>tr:nth-child(even) {
 
 <h3>Satellite Cloud Product</h3>
 
-<p><a href="https://www.nesdis.noaa.gov/">NESDIS</a> produces a 
+<p><a href="https://www.nesdis.noaa.gov/">NESDIS</a> produces a
 <a href="https://www.ospo.noaa.gov/Products/atmosphere/soundings/index.html">Satellite Cloud Product</a> (SCP)
 that supplements the ASOS ceilometer readings.  This page merges the SCP data
 with the METAR observations for a given <strong>UTC date</strong>. Cloud level
 values are presented in feet above ground level.  <strong>ECA</strong> represents
-estimated cloud amount expressed in percentage. An 
+estimated cloud amount expressed in percentage. An
 <a href="/api/1/docs#/default/service_scp_json_get">IEM Web Service</a> provided
 the following <a href="$exturi">JSON dataset</a> for this page. Data is available
 for some sites back to 1993.</p>

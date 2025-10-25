@@ -13,7 +13,7 @@ $day = get_int404("day", date("d"));
 $hour = get_int404("hour", date("H"));
 $minute = get_int404("minute", date("i"));
 $isarchive = isset($_GET["archive"]);
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI";
+$network = get_str404("network", "KCCI");
 
 $ts = time();
 if ($isarchive) {

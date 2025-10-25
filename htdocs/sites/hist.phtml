@@ -21,8 +21,8 @@ if ($year > intval(gmdate("Y"))) {
 }
 $month = get_int404('month', date("m", time() - 86400));
 $day = get_int404('day', 1);
-$mode = isset($_GET['mode']) ? xssafe($_GET['mode']) : 'monthly';
-$sortvar = isset($_GET['sortvar']) ? xssafe($_GET['sortvar']) : 'id';
+$mode = get_str404('mode', 'monthly');
+$sortvar = get_str404('sortvar', 'id');
 if ($sortvar == 'station') {
     $sortvar = 'id';
 }
@@ -230,7 +230,7 @@ The bars are the observations and the dots are climatology.
 
 <h3>Daily Rainfall</h3>
 <img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" class="img-fluid">
-<br /><strong>Description:</strong> This chart is of daily precipitation for the month. 
+<br /><strong>Description:</strong> This chart is of daily precipitation for the month.
 The red line would be an average month while the blue line and bars are observations.
 
 <h3>Daily Average Wind Speeds</h3>
@@ -242,11 +242,11 @@ EOM;
     // We want a table of obs for one day!
     $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
     $htmlout = <<<EOM
-     
+
 <p>This table lists out IEM computed daily summary values for this network.
 These values are derived from available observations and specialized summary
 products that some of the observation sites produce.  The time zone reported
-for the peak winds are hopefully the local valid time 
+for the peak winds are hopefully the local valid time
 (<strong>{$metadata["tzname"]}</strong>) at the site. There
 is a <a href="/request/daily.phtml?network={$network}">download interface</a> for most of this
 summary information.</p>
@@ -317,7 +317,7 @@ $t->sites_current = "calendar";
 $htmlout .= <<< EOM
   <p>The data presented here provided by <a href="/api/">IEM API</a>
   webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
-  exists as well.</p> 
+  exists as well.</p>
 EOM;
 
 $content = <<<EOM
@@ -336,9 +336,9 @@ $ds = daySelect($day);
 if ($mode == "monthly") {
     $content .= <<<EOM
 <h2>Data Calendar for {$metadata["name"]}</h2>
-<p>The calendar chart below shows the daily reported climate variables.  
-You can click on a date to display the values for all sites for that day. 
-Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong> 
+<p>The calendar chart below shows the daily reported climate variables.
+You can click on a date to display the values for all sites for that day.
+Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong>
 timezone. Wind speeds are in mph and temperatures in Fahrenheit.  Values
 flagged with a <i>(E)</i> are estimated by the IEM.</p>
   <p>Year: &nbsp; {$ys}
@@ -348,7 +348,7 @@ flagged with a <i>(E)</i> are estimated by the IEM.</p>
 EOM;
 } else {
     $content .= <<<EOM
-  <h2>{$nicedate} Summary for {$network}</h2> 
+  <h2>{$nicedate} Summary for {$network}</h2>
   <p>Switch date shown:<br /><input type="hidden" value="daily" name="mode">
   {$ys} {$ms} {$ds}
   <input type="submit" value="Switch Date"></form>
