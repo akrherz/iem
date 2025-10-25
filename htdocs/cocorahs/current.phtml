@@ -7,8 +7,8 @@ require_once "../../include/mlib.php";
 $t = new MyView();
 
 define("IEM_APPID", 56);
-$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_COCORAHS';
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
+$network = get_str404('network', 'IA_COCORAHS');
+$sortcol = get_str404('sortcol', 'ts');
 
 function ffmt($val){
     if (is_null($val)) return "M";
@@ -31,7 +31,7 @@ with today as (
 month as (
     SELECT iemid,
     sum(case when precip is not null then 1 else 0 end) as count,
-    sum(precip) as pmonth from 
+    sum(precip) as pmonth from
     cocorahs_$year s WHERE day >= $2 GROUP by iemid)
 
 select t.*, m.pmonth, m.count,
@@ -82,7 +82,7 @@ $cols = array(
 
 $baseurl2 = "current.phtml?sortcol=";
 $content = <<<EOM
-<p>Sorted by: {$cols[$sortcol]}. 
+<p>Sorted by: {$cols[$sortcol]}.
 The number of observations missing for this month is shown in parenthesis.
 
 <form method="GET" action="current.phtml" name="stctrl">

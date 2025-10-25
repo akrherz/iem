@@ -9,7 +9,7 @@ require_once "../../include/vendor/mapscript.php";
 
 $pgconn = iemdb("mesosite");
 
-$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_ASOS';
+$network = get_str404('network', 'IA_ASOS');
 
 $extra_networks = array(
     "_ALL_" => "All Networks",
@@ -105,7 +105,7 @@ if ($network == '_ALL_') {
     }
 }
 
-$format = isset($_GET['format']) ? xssafe($_GET['format']) : 'html';
+$format = get_str404('format', 'html');
 $nohtml = isset($_GET['nohtml']);
 
 $table = "";
@@ -270,7 +270,7 @@ if (!$nohtml || $format == 'shapefile') {
 
 <div class="card float-end" style="width: 300px;">
 <div class="card-body">
-<a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
+<a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly
 added stations.
 
 <div class="mt-3">

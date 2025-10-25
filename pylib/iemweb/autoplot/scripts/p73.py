@@ -15,11 +15,16 @@ from datetime import date
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import (
+    get_sqlalchemy_conn,
+    sql_helper,
+    with_sqlalchemy_conn,
+)
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
@@ -98,15 +103,18 @@ def get_description():
     return desc
 
 
-def get_ugc_name(ugc, defaultwfo):
+@with_sqlalchemy_conn("postgis")
+def get_ugc_name(ugc, defaultwfo, conn: Connection | None = None):
     """Return the WFO and county name."""
-    cursor = get_dbconn("postgis").cursor()
-    cursor.execute(
-        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+    res = conn.execute(
+        sql_helper(
+            "SELECT name, wfo from ugcs where ugc = :ugc and end_ts is null"
+        ),
+        {"ugc": ugc},
     )
-    if cursor.rowcount == 0:
+    if res.rowcount == 0:
         return "Unknown", defaultwfo
-    return cursor.fetchone()
+    return res.fetchone()
 
 
 def plotter(ctx: dict):

@@ -13,14 +13,14 @@ results are found with shorter time windows of time to compute the
 percentiles.
 """
 
-from datetime import date
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.util import fitbox
@@ -77,7 +77,7 @@ def get_description():
     return desc
 
 
-def print_table(fig, df, varname):
+def print_table(fig, df: pd.DataFrame, varname):
     """Add a pretty table."""
     monofont = get_monofont()
     ranks = df[varname].quantile(np.arange(0, 1.0001, 0.0025))
@@ -109,33 +109,36 @@ def print_table(fig, df, varname):
 def plotter(ctx: dict):
     """Go"""
     station = ctx["zstation"]
-    dt = ctx["date"]
+    dt: datetime = ctx["date"]
     opt = ctx["opt"]
     varname = ctx["v"]
 
     tzname = ctx["_nt"].sts[station]["tzname"]
+    params = {
+        "station": station,
+        "tzname": tzname,
+        "sday": f"{dt:%m%d}",
+        "week": f"{dt:%V}",
+        "month": dt.month,
+    }
 
     # Resolve how to limit the query data
     limiter = ""
     if opt == "day":
-        limiter = (
-            f" and to_char(valid at time zone '{tzname}', 'mmdd') = "
-            f"'{dt.strftime('%m%d')}' "
-        )
+        limiter = " and to_char(valid at time zone :tzname, 'mmdd') = :sday "
         subtitle = (
-            f"For Date of {dt.strftime('%-d %b')}, "
-            f"{dt.strftime('%-d %b %Y')} plotted in bottom panel"
+            f"For Date of {dt:%-d %b}, {dt:%-d %b %Y} plotted in bottom panel"
         )
         datefmt = "%I %p"
     elif opt == "week":
-        limiter = f" and extract(week from valid) = {dt.strftime('%V')} "
+        limiter = " and extract(week from valid) = :week "
         subtitle = (
             f"For ISO Week of {dt.strftime('%V')}, "
             f"week of {dt.strftime('%-d %b %Y')} plotted in bottom panel"
         )
         datefmt = "%-d %b"
     elif opt == "month":
-        limiter = f" and extract(month from valid) = {dt.strftime('%m')} "
+        limiter = " and extract(month from valid) = :month "
         subtitle = (
             f"For Month of {dt.strftime('%B')}, "
             f"{dt.strftime('%b %Y')} plotted in bottom panel"
@@ -148,16 +151,21 @@ def plotter(ctx: dict):
     # Load up all the values, since we need pandas to do some heavy lifting
     with get_sqlalchemy_conn("asos") as conn:
         obsdf = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             select valid at time zone 'UTC' as utc_valid,
-            extract(year from valid at time zone %s)::int as year,
-            extract(hour from valid at time zone %s +
+            extract(year from valid at time zone :tzname)::int as year,
+            extract(hour from valid at time zone :tzname +
                 '10 minutes'::interval)::int as hr, {varname}
-            from alldata WHERE station = %s and {varname} is not null {limiter}
+            from alldata WHERE station = :station
+            and {varname} is not null {limiter}
             and report_type = 3 ORDER by valid ASC
         """,
+                varname=varname,
+                limiter=limiter,
+            ),
             conn,
-            params=(tzname, tzname, station),
+            params=params,
             index_col=None,
         )
     if obsdf.empty:

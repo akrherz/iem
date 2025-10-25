@@ -18,7 +18,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
+$network = get_str404("network", "IA_ASOS");
 
 $t = new MyView();
 $t->iemselect2 = TRUE;
@@ -53,8 +53,8 @@ $t->content = <<<EOM
     <div class="col-12">
         <div class="alert alert-info" role="alert">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>About this tool:</strong> The IEM collects information from many sites organized into 
-            networks based on their geography and/or the organization who administers the network. 
+            <strong>About this tool:</strong> The IEM collects information from many sites organized into
+            networks based on their geography and/or the organization who administers the network.
             This application provides metadata and site-specific applications you may find useful.
         </div>
     </div>
@@ -78,7 +78,7 @@ $t->content = <<<EOM
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-6 mb-3">
         <div class="card">
             <div class="card-header bg-success text-white">
@@ -121,7 +121,7 @@ $t->content = <<<EOM
                 <div class="alert alert-light border-0 rounded-0 mb-0">
                     <small class="text-muted">
                         <i class="bi bi-lightbulb me-1"></i>
-                        <strong>Tip:</strong> Green dots represent stations online with current data. 
+                        <strong>Tip:</strong> Green dots represent stations online with current data.
                         Yellow dots are stations that are no longer active. Click on a dot to select a station.
                     </small>
                 </div>

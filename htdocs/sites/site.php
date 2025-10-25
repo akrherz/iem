@@ -47,8 +47,8 @@ if (
 
     $newlat = floatval($_GET["lat"]);
     $newlon = floatval($_GET["lon"]);
-    $email = isset($_GET["email"]) ? xssafe($_GET["email"]) : 'n/a';
-    $name = isset($_GET["name"]) ? xssafe($_GET["name"]) : "n/a";
+    $email = get_str404("email", 'n/a');
+    $name = get_str404("name", "n/a");
     $delta = (
         ($newlat - $metadata["lat"]) ** 2 +
         ($newlon - $metadata["lon"]) ** 2) ** 0.5;
@@ -76,12 +76,12 @@ EOM;
 if (isset($_GET["moved"])) {
     $moved_lat = isset($_GET["suggested_lat"]) ? sprintf("%.5f", floatval($_GET["suggested_lat"])) : null;
     $moved_lon = isset($_GET["suggested_lon"]) ? sprintf("%.5f", floatval($_GET["suggested_lon"])) : null;
-    
+
     $coord_info = "";
     if ($moved_lat && $moved_lon) {
         $coord_info = " The red circle on the map shows your suggested location (Lat: {$moved_lat}, Lon: {$moved_lon}).";
     }
-    
+
     $alertmsg = <<<EOM
 <div class="alert alert-success">Thanks! Your suggested move was submitted for
 evaluation.{$coord_info}</div>
@@ -99,8 +99,8 @@ $suggested_coordinates_info = "";
 if ($suggested_lat && $suggested_lon) {
     $suggested_coordinates_info = <<<EOM
 <div class="alert alert-info">
-<strong>Suggested Location Review:</strong> The blue marker shows the current database location, 
-and the red circle shows a suggested new location (Lat: {$suggested_lat}, Lon: {$suggested_lon}) 
+<strong>Suggested Location Review:</strong> The blue marker shows the current database location,
+and the red circle shows a suggested new location (Lat: {$suggested_lat}, Lon: {$suggested_lon})
 submitted for review.
 </div>
 EOM;
@@ -265,10 +265,10 @@ $t->content = <<<EOM
 </div>
 <div class="card-body">
 
-<div id="mymap" style="height: 400px; width: 100%;" 
-data-initial-lat="{$lat}" 
+<div id="mymap" style="height: 400px; width: 100%;"
+data-initial-lat="{$lat}"
 data-initial-lon="{$lon}"
-data-suggested-lat="{$suggested_lat}" 
+data-suggested-lat="{$suggested_lat}"
 data-suggested-lon="{$suggested_lon}"
 data-lat-input="newlat"
 data-lon-input="newlon"

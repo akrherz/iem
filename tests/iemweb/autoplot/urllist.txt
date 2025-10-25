@@ -399,6 +399,9 @@
 212/network:RAOB::station:_OAX::year:2024::hour:both::var:pwater_in::level:300::_r:t::dpi:100::_cb:1.png
 212/network:RAOB::station:_OAX::year:2024::hour:both::var:height::level:500::_r:t::dpi:100.png
 212/network:RAOB::station:_OAX::year:2024::hour:afternoon::var:height::level:500::_r:t::dpi:100.png
+213/network:IA_ASOS::zstation:AMW::date:2020-10-25::v:tmpf::opt:week::cmap:hsv::_r:t::dpi:100.png
+213/network:IA_ASOS::zstation:AMW::date:2020-10-25::v:relh::opt:day::cmap:hsv::_r:t::dpi:100.png
+213/network:IA_ASOS::zstation:IKV::date:2020-10-25::v:relh::opt:year::cmap:hsv::_r:t::dpi:100.png
 215/network:IACLIMATE::station:IATAME::v:avgt::month:mar::sy1:1981::ey1:2010::sy2:1991::ey2:2020::_r:43::dpi:100.png
 216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 216/network:IA_ASOS::station:AMW::var:high::dir:below::threshold:32::_r:t::dpi:100.png

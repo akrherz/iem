@@ -13,6 +13,7 @@ import pandas as pd
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -33,7 +34,7 @@ def get_description():
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn=None):
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
     station = ctx["station"]
     today = datetime.now()

@@ -14,7 +14,7 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 $t = new MyView();
 $t->iemselect2 = true;
-$dir = isset($_GET["dir"]) ? xssafe($_GET["dir"]) : "";
+$dir = get_str404("dir", "");
 
 $filename = "/mesonet/share/pics/{$station}/{$station}.jpg";
 $puri = "pics/{$station}/{$station}.jpg";
@@ -59,7 +59,7 @@ $t->content = <<<EOM
 <h3>Directional Photos</h3>
 
 <p>This application shows you photos of the observation site if they are
-available.  In general, the IEM only has photos for some of the sites in 
+available.  In general, the IEM only has photos for some of the sites in
 Iowa...</p>
 
 <p><a href="pics.php?network={$network}&station={$station}">Site Photo</a>

@@ -40,7 +40,6 @@ def plotter(ctx: dict):
     station = ctx["station"][:4]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    params = {"wfo": station}
     sqllim = "wfo = :wfo and " if station != "_ALL" else ""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -54,7 +53,7 @@ def plotter(ctx: dict):
                 sqllim=sqllim,
             ),
             conn,
-            params=params,
+            params={"wfo": station},
             index_col=None,
         )
     if df.empty:

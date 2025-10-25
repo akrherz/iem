@@ -14,11 +14,11 @@ $year = date("Y");
 $day = date("Y-m-d", time() - 86400);
 
 // Get things set via CGI
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "IATAME";
-$pest = isset($_GET["pest"]) ? xssafe($_GET["pest"]) : "seedcorn_maggot";
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "$year-01-01";
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : $day;
+$network = get_str404("network", "IACLIMATE");
+$station = get_str404("station", "IATAME");
+$pest = get_str404("pest", "seedcorn_maggot");
+$sdate = get_str404("sdate", "$year-01-01");
+$edate = get_str404("edate", $day);
 $edatechecked = isset($_GET["edate"]) ? "" : "checked";
 
 // Folks may have this page bookmarked and thus get a wonky combination of

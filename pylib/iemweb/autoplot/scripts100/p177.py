@@ -4,7 +4,7 @@ ISU Soil Moisture Network.
 """
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -90,18 +90,23 @@ def make_inversion_timing(ctx):
     ctx["sts"] = ctx["sts"].replace(hour=0, minute=0)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            "SELECT valid at time zone 'UTC' as utc_valid, "
-            "tair_10_c_avg_qc, tair_15_c_avg_qc "
-            "from sm_inversion where station = %s and "
-            "valid >= %s and valid < %s and tair_10_c_avg_qc is not null and "
-            "tair_15_c_avg_qc is not null ORDER by valid ASC",
+            sql_helper("""
+    SELECT valid at time zone 'UTC' as utc_valid, tair_10_c_avg_qc,
+    tair_15_c_avg_qc from sm_inversion where station = :station and
+    valid >= :sts and valid < :ets and tair_10_c_avg_qc is not null and
+    tair_15_c_avg_qc is not null ORDER by valid ASC
+            """),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
         )
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
     df = df.assign(
-        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(ZoneInfo("UTC")),
+        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(timezone.utc),
         valid=lambda df_: df_.utc_valid.dt.tz_convert(CENTRAL),
         delta=lambda df_: (
             c2f(df_.tair_10_c_avg_qc) - c2f(df_.tair_15_c_avg_qc)
@@ -130,21 +135,9 @@ def make_inversion_timing(ctx):
     ax.set_xticks(np.arange(0, 1441, 120))
     # hours of the day
     ax.set_xticklabels(
-        [
-            "Mid",
-            "2 AM",
-            "4 AM",
-            "6 AM",
-            "8 AM",
-            "10 AM",
-            "Noon",
-            "2 PM",
-            "4 PM",
-            "6 PM",
-            "8 PM",
-            "10 PM",
-            "Mid",
-        ]
+        (
+            "Mid|2 AM|4 AM|6 AM|8 AM|10 AM|Noon|2 PM|4 PM|6 PM|8 PM|10 PM|Mid"
+        ).split("|")
     )
     ax.grid(True)
     ax.set_xlabel(f"{ctx['sts'].year} Local Time (US Central)")
@@ -162,10 +155,15 @@ def make_inversion_plot(ctx):
     """Generate an inversion plot"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            "SELECT * from sm_inversion where station = %s and "
-            "valid >= %s and valid < %s ORDER by valid ASC",
+            sql_helper("""
+        SELECT * from sm_inversion where station = :station and
+        valid >= :sts and valid < :ets ORDER by valid ASC"""),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
         )
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
@@ -488,12 +486,19 @@ def make_hourly_plot(ctx, vname):
     """Generate a plot of battery"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            f"""SELECT valid, {vname} from sm_hourly
-    where station = %s and valid >= %s and valid < %s
+            sql_helper(
+                """SELECT valid, {vname} from sm_hourly
+    where station = :station and valid >= :sts and valid < :ets
     and {vname} is not null ORDER by valid ASC
             """,
+                vname=vname,
+            ),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
         )
     title = "Battery Voltage"
     label = "Battery Voltage [V]"
