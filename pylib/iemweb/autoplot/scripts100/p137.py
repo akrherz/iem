@@ -128,7 +128,7 @@ def plotter(ctx: dict):
     ax[0].set_title(
         f"{ab.year}-{year + 3} {ctx['_sname']}\n91 Day Average Temperatures"
     )
-    ax[0].set_ylabel(r"Trailing 91 Day Avg T $^{\circ}$F")
+    ax[0].set_ylabel("Trailing 91 Day Avg T °F")
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
     ax[0].grid(True)
 
@@ -142,7 +142,7 @@ def plotter(ctx: dict):
             ax[0].text(
                 dt,
                 val - 1,
-                f"{dt:%-d %b} {val:.1f}" + r"$^\circ$F",
+                f"{dt:%-d %b} {val:.1f}°F",
                 ha="center",
                 va="top",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
@@ -153,7 +153,7 @@ def plotter(ctx: dict):
             ax[0].text(
                 dt,
                 val + 1,
-                f"{dt:%-d %b} {val:.1f}" + r"$^\circ$F",
+                f"{dt:%-d %b} {val:.1f}°F",
                 ha="center",
                 va="bottom",
                 bbox=dict(color="white", boxstyle="square,pad=0"),

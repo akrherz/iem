@@ -209,7 +209,6 @@ def get_data(ctx):
 
 def plotter(ctx: dict):
     """Go"""
-    station = ctx["station"]
     threshold = ctx["threshold"]
     varname = ctx["var"]
     year = ctx["year"]
@@ -217,12 +216,7 @@ def plotter(ctx: dict):
     df = ctx["df"]
     obs = ctx["obs"]
 
-    title = ("%s [%s]\n" + r"%s %.0f$^\circ$F") % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        PDICT[varname],
-        threshold,
-    )
+    title = f"{ctx['_sname']}\n{PDICT[varname]} {threshold:.0f}°F"
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.1, 0.1, 0.7, 0.8])

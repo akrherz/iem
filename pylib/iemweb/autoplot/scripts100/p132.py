@@ -193,7 +193,7 @@ def plotter(ctx: dict):
     ax.set_xlabel(
         "Precipitation [inch]"
         if varname in ["total_precip"]
-        else r"Temperature $^\circ$F"
+        else "Temperature °F"
     )
 
     return fig, df

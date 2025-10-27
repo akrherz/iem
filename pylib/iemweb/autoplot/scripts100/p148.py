@@ -77,6 +77,13 @@ def get_description():
             label="Which variable to plot?",
             options=PDICT2,
         ),
+        {
+            "type": "year",
+            "default": 1800,
+            "min": 1800,
+            "name": "syear",
+            "label": "Start year of plot (if data exists):",
+        },
     ]
     return desc
 
@@ -278,9 +285,8 @@ def plotter(ctx: dict):
         va="center",
     )
     ax.grid(True)
-    ax.set_xlim(
-        ctx["df"].index.values.min() - 1, ctx["df"].index.values.max() + 1
-    )
+    xmin = max(ctx["syear"], ctx["df"].index.values.min() - 1)
+    ax.set_xlim(xmin, ctx["df"].index.values.max() + 1)
     ax.set_ylabel(PDICT2[ctx["varname"]])
     if ctx["varname"] not in ["precip", "snow", "snowd"]:
         ax.set_ylim(

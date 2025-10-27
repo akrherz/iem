@@ -304,6 +304,6 @@ def plotter(ctx: dict):
     ax.legend(loc=2)
     ax.grid(True)
     ax.set_xlim(-50, 32)
-    ax.set_xlabel(r"Wind Chill Temperature $^\circ$F")
+    ax.set_xlabel("Wind Chill Temperature °F")
     ax.set_ylabel("Total Time Hours [expressed in days]")
     return fig, ctx["df"]

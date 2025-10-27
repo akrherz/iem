@@ -120,16 +120,7 @@ def plotter(ctx: dict):
     ax.set_yticks((0, 4, 8, 12, 16, 20))
     ax.set_xticks(range(0, 55, 7))
     ax.set_xticklabels(
-        (
-            "Jan 1",
-            "Feb 19",
-            "Apr 8",
-            "May 27",
-            "Jul 15",
-            "Sep 2",
-            "Oct 21",
-            "Dec 9",
-        )
+        "Jan 1|Feb 19|Apr 8|May 27|Jul 15|Sep 2|Oct 21|Dec 9".split("|")
     )
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
 
