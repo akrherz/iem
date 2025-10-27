@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 
 from pydantic import Field
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 
 class Schema(CGIModel):
@@ -19,21 +20,22 @@ class Schema(CGIModel):
     )
 
 
-def do(environ, headers, vote):
+@with_sqlalchemy_conn("mesosite")
+def do(environ: dict, headers, vote, conn: Connection | None = None):
     """Do Something, yes do something"""
     cookie = SimpleCookie(environ.get("HTTP_COOKIE", ""))
     myoid = 0
     if "foid" in cookie:
         myoid = int(cookie["foid"].value)
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "SELECT to_char(valid, 'YYmmdd')::int as oid, good, bad, abstain "
-        "from feature WHERE valid < now() ORDER by valid DESC LIMIT 1"
+    res = conn.execute(
+        sql_helper(
+            "SELECT to_char(valid, 'YYmmdd')::int as oid, good, bad, abstain "
+            "from feature WHERE valid < now() ORDER by valid DESC LIMIT 1"
+        )
     )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         return {"good": 0, "bad": 0, "abstain": 0, "can_vote": False}
-    row = cursor.fetchone()
+    row = res.mappings().fetchone()
     foid = row["oid"]
     d = {
         "good": row["good"],
@@ -47,10 +49,28 @@ def do(environ, headers, vote):
     if myoid < foid and vote in ["good", "bad", "abstain"]:
         # Allow this vote
         d[vote] += 1
-        cursor.execute(
-            f"UPDATE feature SET {vote} = {vote} + 1 WHERE "  # skipcq
-            "to_char(valid, 'YYmmdd')::int = %s",
-            (foid,),
+        for _ in range(10):
+            conn.execute(
+                sql_helper(
+                    """
+    insert into weblog(uri, referer, http_status, x_forwarded_for)
+    values (:uri, :referer, :status, :xff)
+    """
+                ),
+                {
+                    "uri": environ.get("REQUEST_URI", ""),
+                    "referer": environ.get("HTTP_REFERER", ""),
+                    "status": 404,
+                    "xff": environ.get("HTTP_X_FORWARDED_FOR", ""),
+                },
+            )
+        conn.execute(
+            sql_helper(
+                "UPDATE feature SET {vote} = {vote} + 1 WHERE "
+                "to_char(valid, 'YYmmdd')::int = :oid",
+                vote=vote,
+            ),
+            {"oid": foid},
         )
         # Now we set a cookie
         expiration = datetime.now() + timedelta(days=4)
@@ -61,10 +81,8 @@ def do(environ, headers, vote):
             "%a, %d-%b-%Y %H:%M:%S CST"
         )
         headers.append(("Set-Cookie", cookie.output(header="")))
-        cursor.close()
-        pgconn.commit()
+        conn.commit()
         d["can_vote"] = False
-    pgconn.close()
     return d
 
 

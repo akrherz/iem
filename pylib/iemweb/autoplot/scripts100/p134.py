@@ -240,7 +240,7 @@ def plotter(ctx: dict):
         )
     norm = mpcolors.BoundaryNorm(ramp, cmap.N)
     ColorbarBase(cax, norm=norm, cmap=cmap, orientation="horizontal")
-    units = "inch" if varname in ["wettest", "driest"] else r"$^\circ$F"
+    units = "inch" if varname in ["wettest", "driest"] else "°F"
     fig.text(0.47, 0.88, units)
     bboxprops = dict(color="tan", alpha=0.5, boxstyle="round")
     ax.barh(

@@ -223,8 +223,8 @@ def plotter(ctx: dict):
     # require values , not nan
     df2 = df[df[dfcol].notnull()].sort_values(dfcol, ascending=False)
 
-    ylabel = r"Temperature $^\circ$F"
-    units = r"$^\circ$F"
+    ylabel = "Temperature °F"
+    units = "°F"
     if varname in ["precip"]:
         ylabel = "Precipitation [inch]"
         units = "[inch]"
