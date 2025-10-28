@@ -1,6 +1,5 @@
 """
-Computes the frequency of having a day within
-a month with an overcast sky reported at a given time of the day.  There
+Computes the frequency of having an overcast sky reported.  There
 are a number of caveats to this plot as sensors and observing techniques
 have changed over the years!  The algorithm specifically looks for the
 OVC condition to be reported in the METAR observation.
@@ -13,6 +12,11 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+PDICT = {
+    "single": "Compute for single hour of the day",
+    "all": "Compute over all hours of the day",
+}
 
 
 def get_description():
@@ -27,6 +31,13 @@ def get_description():
             label="Select Station:",
             network="IA_ASOS",
         ),
+        {
+            "type": "select",
+            "name": "which",
+            "default": "single",
+            "label": "Plot Single or All Hours",
+            "options": PDICT,
+        },
         dict(
             type="hour", name="hour", label="Select Hour of Day:", default=12
         ),
@@ -52,25 +63,27 @@ def plotter(ctx: dict):
     hour = ctx["hour"]
     year = ctx["year"]
     month = ctx["month"]
+    hr_limiter = (
+        "and extract(hour from (valid at time zone :tzname) + "
+        "'10 minutes'::interval ) = :hour"
+    )
+    tt = f"at {datetime(2000, 1, 1, hour, 0):%-I %p}"
+    if ctx["which"] == "all":
+        hr_limiter = ""
+        tt = "for all hours of day"
     with get_sqlalchemy_conn("asos") as conn:
-        # This could use report_type=3, but its not all that slow and already
-        # accounts for double-accounting.
         df = pd.read_sql(
-            sql_helper("""
-            WITH obs as (
-                SELECT to_char(valid, 'YYYYmmdd') as yyyymmdd,
-                SUM(case when (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC'
-                            or skyc4 = 'OVC') then 1 else 0 end)
-                from alldata where station = :station and valid > '1951-01-01'
-                and extract(hour from (valid at time zone :tzname) +
-                    '10 minutes'::interval ) = :hour
-                GROUP by yyyymmdd)
-
-            SELECT substr(o.yyyymmdd,1,4)::int as year,
-            substr(o.yyyymmdd,5,2)::int as month,
-            sum(case when o.sum >= 1 then 1 else 0 end) as hits, count(*)
-            from obs o GROUP by year, month ORDER by year ASC, month ASC
-        """),
+            sql_helper(
+                """
+    SELECT extract(year from (valid at time zone :tzname))::int as year,
+    extract(month from (valid at time zone :tzname))::int as month,
+    SUM(case when (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC'
+        or skyc4 = 'OVC') then 1 else 0 end) as hits, count(*)
+    from alldata where station = :station and valid > '1951-01-01'
+    {hr_limiter} and report_type = 3 GROUP by year, month order by year, month
+        """,
+                hr_limiter=hr_limiter,
+            ),
             conn,
             params={
                 "station": station,
@@ -88,8 +101,7 @@ def plotter(ctx: dict):
     title = (
         f"({df['year'].min():.0f}-{datetime.now().year}) "
         f"{ctx['_sname']}\n"
-        f"Frequency of {datetime(2000, 1, 1, hour, 0):%I %p} "
-        "Cloud Observation of Overcast"
+        f"Frequency of Overcast Cloud Observation {tt}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
