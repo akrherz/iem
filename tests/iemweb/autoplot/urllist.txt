@@ -75,6 +75,7 @@
 44/plot:line::opt:fema::network:WFO::station:DMX::state:IA::fema:7::limit:no::c:svrtor::phenomena:TO::significance:W::syear:1986::eyear:2024::s:jan1::_r:t::dpi:100.png
 44/plot:bar::opt:state::network:WFO::station:_ALL::state:VA::fema:7::limit:no::c:single::phenomena:FW::significance:W::syear:1986::eyear:2024::s:jul1::_r:43::dpi:100.png
 44/plot:bar::opt:wfo::network:WFO::station:DLH::state:IA::fema:7::limit:no::c:winter::phenomena:TO::significance:W::syear:1986::eyear:2025::s:jul1::_r:43::dpi:100.png
+45/network:IA_ASOS::zstation:DSM::year:2020::which:all.png
 48/ugc:IAC169::phenomena:TO::significance:W::_r:t::dpi:100.png
 50/network:WFO::station:OAX::state:IA::opt:wfo::p:count::agg:issuance::date1:2010-04-01::date2:2025-01-29::_r:43::dpi:100.png
 50/network:WFO::station:DMX::state:IA::opt:state::p:count::agg:max::date1:2010-04-01::date2:2025-01-29::_r:43::dpi:100.png
