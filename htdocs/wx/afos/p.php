@@ -384,7 +384,6 @@ EOM;
             </form>
             <div class="d-flex justify-content-between align-items-center afos-bulk-heading mt-1" id="bulk-download-note" role="heading" aria-level="4">
                 <span class="afos-bulk-title"><i class="bi bi-download" aria-hidden="true"></i> Bulk Download</span>
-                    <span class="afos-bulk-title"><i class="bi bi-download" aria-hidden="true"></i> Bulk Download</span>
                 <button type="button" class="btn btn-link btn-sm p-0 afos-bulk-help-toggle" aria-expanded="false" aria-controls="bulk-help">Help</button>
             </div>
             <div id="bulk-help" class="mt-1" hidden>

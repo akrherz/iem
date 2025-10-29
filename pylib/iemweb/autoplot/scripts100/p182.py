@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import MRMS_IEMRE
 from pyiem.grid.zs import CachingZonalStats
@@ -82,15 +82,15 @@ def plotter(ctx: dict):
     # Get the state weight
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.GeoDataFrame.from_postgis(
-            "SELECT the_geom from states where state_abbr = %s",
+            sql_helper("SELECT the_geom from states where state_abbr = :st"),
             conn,
-            params=(sector,),
+            params={"st": sector},
             index_col=None,
             geom_col="the_geom",
         )
     czs = CachingZonalStats(MRMS_IEMRE.affine_image)
     czs.gen_stats(
-        np.zeros((MRMS_IEMRE.ny, MRMS_IEMRE.nx)),
+        np.zeros((int(MRMS_IEMRE.ny), int(MRMS_IEMRE.nx))),
         df["the_geom"],
     )
     hasdata = None

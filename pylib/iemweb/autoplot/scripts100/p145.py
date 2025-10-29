@@ -157,7 +157,7 @@ def plotter(ctx: dict):
 
     ax.grid(True)
     if varname == "tsoil":
-        ax.set_ylabel(r"Daily Avg Temp $^{\circ}\mathrm{F}$")
+        ax.set_ylabel("Daily Avg Temp [°F]")
         ax.set_xlabel(
             "* pre-2014 data provided by "
             f"[{oldstation}] {oldnt.sts[oldstation]['name']}"

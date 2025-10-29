@@ -3,7 +3,7 @@
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -39,15 +39,15 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT year, month,
             sum(case when precip > 0.009 then 1 else 0 end) as precip_days,
             sum(case when snow > 0.009 then 1 else 0 end) as snow_days
-            from alldata WHERE station = %s
+            from alldata WHERE station = :station
             GROUP by year, month
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=["year", "month"],
         )
     if df.empty:
