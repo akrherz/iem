@@ -97,7 +97,7 @@ def plotter(ctx: dict):
         ("Percentage [%%], Ave: %.1f%%") % (df[pvar + "_freq[%]"].mean(),)
     )
     v = int(mag) if pvar != "precip" else round(mag, 2)
-    units = " inch" if pvar == "precip" else r"$^\circ$F"
+    units = " inch" if pvar == "precip" else "°F"
     ax.set_title(
         ("%s [%s] Daily %s\n%s+%s %s Than %s [%s]")
         % (

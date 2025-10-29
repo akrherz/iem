@@ -143,7 +143,7 @@ def plotter(ctx: dict):
     ax.text(
         0.02,
         0.92,
-        r"$\frac{^\circ}{decade} = %.2f,R^2=%.2f, avg = %.1f$"
+        r"$\frac{°}{decade} = %.2f,R^2=%.2f, avg = %.1f$"
         % (slp * 10.0, r**2, m),
         va="bottom",
         transform=ax.transAxes,

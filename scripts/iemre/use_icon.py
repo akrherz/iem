@@ -75,15 +75,14 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
     """
     Download the necessary GRIB files for the ICON model.
     """
-    baseurl = (
-        f"https://opendata.dwd.de/weather/nwp/icon/grib/{model_valid:%H}/"
-    )
+    baseurl = "https://opendata.dwd.de/weather/nwp/icon/grib/"
     fhour = (valid - model_valid).total_seconds() // 3600
     for var, meta in META.items():
         filename = f"{var}.grib2.bz2"
         fhour_off = fhour - meta.get("offset", 0)
         url = (
-            f"{baseurl}{meta['gname']}/icon_global_icosahedral_single-level_"
+            f"{baseurl}{model_valid:%H}/{meta['gname']}/"
+            "icon_global_icosahedral_single-level_"
             f"{model_valid:%Y%m%d%H}_{fhour_off:03.0f}_{meta['gname'].upper()}"
             ".grib2.bz2"
         )
@@ -96,7 +95,7 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
                     mv2 = model_valid - timedelta(hours=6)
                     fo2 = fhour_off + 6
                     url = (
-                        f"{baseurl}{meta['gname']}/"
+                        f"{baseurl}{mv2:%H}/{meta['gname']}/"
                         "icon_global_icosahedral_single-level_"
                         f"{mv2:%Y%m%d%H}_{fo2:03.0f}_{meta['gname'].upper()}"
                         ".grib2.bz2"
@@ -130,7 +129,7 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
                     stderr.decode("utf-8"),
                     stdout.decode("utf-8"),
                 )
-        except httpx.RequestError as e:
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
             LOG.error("Failed to download %s: %s", filename, e)
 
 

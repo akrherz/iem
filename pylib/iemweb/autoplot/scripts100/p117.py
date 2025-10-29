@@ -2,9 +2,8 @@
 
 from datetime import date
 
-import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -51,13 +50,13 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT year, month, sum(case when high > 86 then 1 else 0 end)
             as days, sum(case when high > 86 then high - 86 else 0 end) as sdd
-            from alldata WHERE station = %s GROUP by year, month
-        """,
+            from alldata WHERE station = :station GROUP by year, month
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     sdd = df.pivot(index="year", columns="month", values="sdd")
@@ -77,8 +76,8 @@ def plotter(ctx: dict):
         res += "%5s" % (yr,)
         total = 0
         for mo in range(5, 10):
-            val = df.at[yr, "%sdays" % (mo,)]
-            if np.isnan(val):
+            val = df.at[yr, f"{mo}days"]
+            if pd.isna(val):
                 res += "%6s" % ("M",)
             else:
                 res += "%6i" % (val,)
@@ -86,8 +85,8 @@ def plotter(ctx: dict):
         res += "%6i   " % (total,)
         total = 0
         for mo in range(5, 10):
-            val = df.at[yr, "%ssdd" % (mo,)]
-            if np.isnan(val):
+            val = df.at[yr, f"{mo}sdd"]
+            if pd.isna(val):
                 res += "%6s" % ("M",)
             else:
                 res += "%6i" % (val,)
@@ -102,13 +101,13 @@ def plotter(ctx: dict):
     res += "MEANS"
     tot = 0
     for mo in range(5, 10):
-        val = df["%sdays" % (mo,)].mean()
+        val = df[f"{mo}days"].mean()
         tot += val
         res += "%6.1f" % (val,)
     res += "%6.1f   " % (tot,)
     tot = 0
     for mo in range(5, 10):
-        val = df["%ssdd" % (mo,)].mean()
+        val = df[f"{mo}sdd"].mean()
         tot += val
         res += "%6.1f" % (val,)
     res += "%6.1f\n" % (tot,)

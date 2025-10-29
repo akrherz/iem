@@ -11,7 +11,7 @@ from datetime import date
 
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -35,9 +35,9 @@ FMT = {
 LABELS = {
     "precip": "Monthly Liquid Precip Totals [inches] (snow is melted)",
     "snow": "Monthly Snow Fall [inches]",
-    "avg_high": "Monthly Average High Temperatures [F]",
-    "avg_low": "Monthly Average Low Temperatures [F]",
-    "avg_temp": "Monthly Average Temperatures [F] (High + low)/2",
+    "avg_high": "Monthly Average High Temperatures [°F]",
+    "avg_low": "Monthly Average Low Temperatures [°F]",
+    "avg_temp": "Monthly Average Temperatures [°F] (High + low)/2",
 }
 
 
@@ -93,7 +93,7 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("coop") as conn:
         # Prevent trace values from accumulating
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT year, month,
             case when month in (10, 11, 12) then year + 1 else year end
             as water_year,
@@ -101,11 +101,11 @@ def plotter(ctx: dict):
             round(sum(snow)::numeric, 2) as snow,
             avg(high) as avg_high, avg(low) as avg_low,
             avg((high+low)/2.) as avg_temp, max(day) as max_day from
-            alldata WHERE station = %s
+            alldata WHERE station = :station
             GROUP by year, water_year, month ORDER by year ASC, month ASC
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:

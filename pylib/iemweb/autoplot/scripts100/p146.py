@@ -101,6 +101,6 @@ def plotter(ctx: dict):
     ax.legend(loc=2)
 
     ax.grid(True)
-    ax.set_ylabel(r"Temperature [$^\circ$F]")
+    ax.set_ylabel("Temperature [°F]")
 
     return fig, resdf
