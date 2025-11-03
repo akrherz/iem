@@ -23,11 +23,11 @@
   },
   "homepage": "https://github.com/akrherz/iem#readme",
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.39.1",
     "@types/ol": "^7.0.0",
-    "eslint": "^9.38.0",
-    "eslint-plugin-jsdoc": "^61.1.9",
-    "globals": "^16.4.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jsdoc": "^61.1.12",
+    "globals": "^16.5.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
