@@ -15,7 +15,7 @@ FINAL = "/mesonet/share/pickup/wwa/"
 URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
 
 
-def get_uri(uri, localfn):
+def get_uri(uri: str, localfn: str):
     """Fetch the remote resource to a local file"""
     req = httpx.get(uri, timeout=1200)
     if req.status_code != 200:

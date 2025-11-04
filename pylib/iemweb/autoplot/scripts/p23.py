@@ -5,6 +5,7 @@ temperature or precipitation departures and El Nino index values.
 
 from datetime import date, datetime, timedelta
 
+import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -111,7 +112,11 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["date"] = pd.to_datetime(
-        {"year": df["year"], "month": df["month"], "day": [1] * len(df.index)}
+        {
+            "year": df["year"].to_numpy(),
+            "month": df["month"].to_numpy(),
+            "day": np.ones(len(df.index)),
+        }
     )
     df = df.set_index("date")
     df["nino34"] = ndf["anom_34"]

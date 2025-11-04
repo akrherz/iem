@@ -115,9 +115,7 @@ def plotter(ctx: dict):
         align="center",
     )
     for i, row in climo.iterrows():
-        ax[0].text(
-            i - 0.2, row["freq"] + 1, "%.0f" % (row["freq"],), ha="center"
-        )
+        ax[0].text(i - 0.2, row["freq"] + 1, f"{row['freq']:.0f}", ha="center")
 
     thisyear = df[df["year"] == year]
     if not thisyear.empty:

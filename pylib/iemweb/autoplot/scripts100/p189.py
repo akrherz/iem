@@ -15,7 +15,7 @@ December within the three year period.
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy.stats import linregress
@@ -115,7 +115,7 @@ META = {
     },
     "spring_avg_temp": {
         "title": "Spring [MAM] Average Temperature",
-        "ylabel": "Temperature [F]",
+        "ylabel": "Temperature [°F]",
         "xlabel": "Year",
         "func": "avg((high+low)/2.)",
         "month_bounds": "and month in (3,4,5)",
@@ -123,7 +123,7 @@ META = {
     },
     "fall_avg_temp": {
         "title": "Fall [SON] Average Temperature",
-        "ylabel": "Temperature [F]",
+        "ylabel": "Temperature [°F]",
         "xlabel": "Year",
         "func": "avg((high+low)/2.)",
         "month_bounds": "and month in (9,10,11)",
@@ -139,7 +139,7 @@ META = {
     },
     "gdd50": {
         "title": "Growing Degree Days (1 May - 1 Oct) (base=50)",
-        "ylabel": "GDD Units [F]",
+        "ylabel": "GDD Units [°F]",
         "xlabel": "Year",
         "func": "sum(gddxx(50, 86, high, low))",
         "month_bounds": "and month in (5,6,7,8,9)",
@@ -147,7 +147,7 @@ META = {
     },
     "hdd65": {
         "title": "Heating Degree Days (1 Oct - 1 May) (base=65)",
-        "ylabel": "HDD Units [F]",
+        "ylabel": "HDD Units [°F]",
         "xlabel": "Year",
         "func": "sum(hdd65(high,low))",
         "month_bounds": "and month in (10,11,12,1,2,3,4)",
@@ -160,32 +160,27 @@ def yearly_plot(ctx):
     """
     Make a yearly plot of something
     """
-    st = ctx["station"][:2]
-
     if ctx["plot_type"] == "frost_free":
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"""
+                sql_helper("""
             select fall.year as yr, fall.s - spring.s as data from
             (select year, max(extract(doy from day)) as s
-            from alldata_{st} where station = %s and
-            month < 7 and low <= 32 and year >= %s and
-            year <= %s GROUP by year) as spring,
+            from alldata where station = :station and
+            month < 7 and low <= 32 and year >= :fyear and
+            year <= :lyear GROUP by year) as spring,
             (select year, min(extract(doy from day)) as s
-            from alldata_{st} where station = %s and
-            month > 7 and low <= 32 and year >= %s and
-            year <= %s GROUP by year) as fall
+            from alldata where station = :station and
+            month > 7 and low <= 32 and year >= :fyear and
+            year <= :lyear GROUP by year) as fall
             WHERE spring.year = fall.year ORDER by fall.year ASC
-            """,
+            """),
                 conn,
-                params=(
-                    ctx["station"],
-                    ctx["first_year"],
-                    ctx["last_year"],
-                    ctx["station"],
-                    ctx["first_year"],
-                    ctx["last_year"],
-                ),
+                params={
+                    "station": ctx["station"],
+                    "fyear": ctx["first_year"],
+                    "lyear": ctx["last_year"],
+                },
             )
     else:
         off = META[ctx["plot_type"]]["valid_offset"]
@@ -193,12 +188,17 @@ def yearly_plot(ctx):
         bnds = META[ctx["plot_type"]]["month_bounds"]
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"SELECT extract(year from (day {off})) as yr, "
-                f"{func} as data "
-                f"from alldata_{st} WHERE station = %s {bnds} "
-                "GROUP by yr ORDER by yr ASC",
+                sql_helper(
+                    """
+    SELECT extract(year from (day {off})) as yr, {func} as data "
+    from alldata WHERE station = :station {bnds}
+    GROUP by yr ORDER by yr ASC""",
+                    off=off,
+                    func=func,
+                    bnds=bnds,
+                ),
                 conn,
-                params=(ctx["station"],),
+                params={"station": ctx["station"]},
             )
     df = df[(df["yr"] >= ctx["first_year"]) & (df["yr"] <= ctx["last_year"])]
     if df.empty:

@@ -10,9 +10,10 @@ import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -50,38 +51,45 @@ def get_description():
             type="int",
             default=50,
             name="gddbase",
-            label="Growing Degree Day base (F)",
+            label="Growing Degree Day base (°F)",
         ),
         dict(
             type="int",
             default=86,
             name="gddceil",
-            label="Growing Degree Day ceiling (F)",
+            label="Growing Degree Day ceiling (°F)",
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     year = ctx["year"]
     gdd1 = ctx["gdd1"]
     gdd2 = ctx["gdd2"]
 
-    cursor.execute(
-        "SELECT day, gddxx(%s, %s, high, low) as gdd "
-        "from alldata WHERE year = %s and station = %s ORDER by day ASC",
-        (ctx["gddbase"], ctx["gddceil"], year, station),
+    res = conn.execute(
+        sql_helper(
+            "SELECT day, gddxx(:base, :ceil, high, low) as gdd "
+            "from alldata WHERE year = :year and station = :st "
+            "ORDER by day ASC"
+        ),
+        {
+            "base": ctx["gddbase"],
+            "ceil": ctx["gddceil"],
+            "year": year,
+            "st": station,
+        },
     )
     days = []
     gdds = []
-    for row in cursor:
-        gdds.append(float(row["gdd"]))
-        days.append(row["day"])
-    pgconn.close()
+    for row in res:
+        gdds.append(float(row[1]))
+        days.append(row[0])
     yticks = []
     yticklabels = []
     jan1 = datetime(year, 1, 1)

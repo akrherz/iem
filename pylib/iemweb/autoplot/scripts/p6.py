@@ -19,9 +19,9 @@ from sqlalchemy.engine import Connection
 
 PDICT = {
     "sum-precip": "Total Precipitation [inch]",
-    "avg-high": "Average Daily High [F]",
-    "avg-low": "Average Daily Low [F]",
-    "avg-t": "Average Daily Temp [F]",
+    "avg-high": "Average Daily High [°F]",
+    "avg-low": "Average Daily Low [°F]",
+    "avg-t": "Average Daily Temp [°F]",
     "avg-era5land_srad": "Average Daily Solar Radiation (ERA5Land) [MJ m-2]",
 }
 
@@ -88,8 +88,8 @@ def plotter(ctx: dict, conn: Connection) -> tuple:
     )
     if df.empty:
         raise NoDataFound("No Data Found")
-    climo_avg = df.at[0, "avg_" + ptype_climo]
-    climo_std = df.at[0, "std_" + ptype_climo]
+    climo_avg = float(df.at[0, f"avg_{ptype_climo}"])
+    climo_std = float(df.at[0, f"std_{ptype_climo}"])
     df = pd.read_sql(
         sql_helper(
             """
