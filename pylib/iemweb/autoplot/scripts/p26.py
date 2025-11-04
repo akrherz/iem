@@ -12,9 +12,10 @@ from datetime import date, datetime, timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -55,10 +56,9 @@ def get_description():
     return desc
 
 
-def add_ctx(ctx):
+@with_sqlalchemy_conn("coop")
+def add_ctx(ctx, conn: Connection | None = None):
     """Get the raw infromations we need"""
-    pgconn, cursor = get_dbconnc("coop")
-
     today = date.today()
     thisyear = today.year
     year = ctx["year"]
@@ -72,30 +72,34 @@ def add_ctx(ctx):
     startyear = int(ab.year)
     data = np.ma.ones((thisyear - startyear + 1, 366)) * 199
     if half == "fall":
-        cursor.execute(
-            f"""SELECT
+        res = conn.execute(
+            sql_helper(
+                """SELECT
             day - (
                 (case when month > 6 then year else year - 1 end)::text ||
                 '-07-01')::date as dt,
             case when month > 6 then year else year - 1 end as yr, {varname}
-            from alldata WHERE station = %s and low is not null and
-            high is not null and day >= %s ORDER by day ASC""",
-            (station, date(startyear, 7, 1)),
+            from alldata WHERE station = :station and low is not null and
+            high is not null and day >= :sday ORDER by day ASC""",
+                varname=varname,
+            ),
+            {"station": station, "sday": date(startyear, 7, 1)},
         )
     else:
-        cursor.execute(
-            f"""SELECT extract(doy from day) - 1 as dt,
+        res = conn.execute(
+            sql_helper(
+                """SELECT extract(doy from day) - 1 as dt,
             year as yr, {varname} from
-            alldata WHERE station = %s and high is not null and
-            low is not null and year >= %s ORDER by day ASC""",
-            (station, startyear),
+            alldata WHERE station = :station and high is not null and
+            low is not null and year >= :syear ORDER by day ASC""",
+                varname=varname,
+            ),
+            {"station": station, "syear": startyear},
         )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
-    for row in cursor:
+    for row in res.mappings():
         data[int(row["yr"] - startyear), int(row["dt"])] = row[varname]
-    pgconn.close()
     data.mask = np.where(data == 199, True, False)
 
     doys = []

@@ -71,7 +71,7 @@ def plotter(ctx: dict):
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         "# Report Generated: %s\n"
         "# Climate Record: %s -> %s\n"
-        "# Site Information: [%s] %s\n"
+        "# Site Information: %s\n"
         "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
         "515.294.5978\n"
         "# First occurance of record consecutive number of days\n"
@@ -80,8 +80,7 @@ def plotter(ctx: dict):
         date.today().strftime("%d %b %Y"),
         bs,
         date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
+        ctx["_sname"],
     )
     res += "#   %-27s %-27s  %-27s %-27s\n" % (
         " Low Cooler Than",

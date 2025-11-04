@@ -188,7 +188,8 @@ class MyModel(CGIModel):
     def check_pil(cls, v: list[str]):
         """Ensure the length of each list member is valid."""
         for pil in v:
-            if not (3 <= len(pil) <= 6):
+            # The enclosing parenthesis here is a lame code smell
+            if not (3 <= len(pil) <= 6):  # skipcq
                 raise ValueError(f"Invalid PIL length: {pil}")
         return v
 

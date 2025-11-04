@@ -37,7 +37,7 @@ def plotter(ctx: dict):
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         "# Report Generated: %s\n"
         "# Climate Record: %s -> %s\n"
-        "# Site Information: [%s] %s\n"
+        "# Site Information: %s\n"
         "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
         "515.294.5978\n"
         "# Number of days exceeding given temperature thresholds\n"
@@ -48,8 +48,7 @@ def plotter(ctx: dict):
         date.today().strftime("%d %b %Y"),
         bs,
         date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
+        ctx["_sname"],
     )
     res += ("YEAR %4s %4s %4s %4s %4s %4s %4s %4s %4s\n") % (
         -20,

@@ -137,7 +137,7 @@ def plotter(ctx: dict, conn: Connection = None):
                 txt = ax.text(
                     i,
                     j - 0.5,
-                    "%.0f" % (lastyear[i, j],),
+                    f"{lastyear[i, j]:.0f}",
                     fontsize=9,
                     va="bottom",
                     ha="center",

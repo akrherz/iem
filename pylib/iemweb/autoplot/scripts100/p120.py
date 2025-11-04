@@ -22,10 +22,10 @@ def get_description():
     desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         ARG_STATION,
-        dict(type="int", name="t1", default=32, label="First Threshold (F)"),
-        dict(type="int", name="t2", default=28, label="Second Threshold (F)"),
-        dict(type="int", name="t3", default=26, label="Third Threshold (F)"),
-        dict(type="int", name="t4", default=22, label="Fourth Threshold (F)"),
+        dict(type="int", name="t1", default=32, label="First Threshold (°F)"),
+        dict(type="int", name="t2", default=28, label="Second Threshold (°F)"),
+        dict(type="int", name="t3", default=26, label="Third Threshold (°F)"),
+        dict(type="int", name="t4", default=22, label="Fourth Threshold (°F)"),
         dict(
             type="year",
             name="syear",
@@ -52,10 +52,10 @@ def plotter(ctx: dict):
     df = pd.DataFrame(
         {
             "dates": pd.date_range("2000/01/29", "2000/06/30"),
-            "%scnts" % (thresholds[0],): 0,
-            "%scnts" % (thresholds[1],): 0,
-            "%scnts" % (thresholds[2],): 0,
-            "%scnts" % (thresholds[3],): 0,
+            f"{thresholds[0]}cnts": 0,
+            f"{thresholds[1]}cnts": 0,
+            f"{thresholds[2]}cnts": 0,
+            f"{thresholds[3]}cnts": 0,
         },
         index=range(29, 183),
     )
@@ -91,7 +91,7 @@ def plotter(ctx: dict):
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
-# Site Information: [%s] %s
+# Site Information: %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # Low Temperature exceedence probabilities
 # (On a certain date, what is the chance a temperature below a certain
@@ -101,8 +101,7 @@ def plotter(ctx: dict):
         date.today().strftime("%d %b %Y"),
         max([bs, date(ctx["syear"], 1, 1)]),
         min([date.today(), date(ctx["eyear"] - 1, 12, 31)]),
-        station,
-        ctx["_nt"].sts[station]["name"],
+        ctx["_sname"],
         thresholds[0] + 1,
         thresholds[1] + 1,
         thresholds[2] + 1,
