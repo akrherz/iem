@@ -24,12 +24,14 @@ PDICT = {
     "high": "High Temperature",
     "low": "Low Temperature",
     "precip": "Precipitation",
+    "snow": "Snowfall",
     "era5land_soilt4_avg": "0-10cm ERA5Land Avg Soil Temperature",
 }
 UNITS = {
     "high": "F",
     "low": "F",
     "precip": "inch",
+    "snow": "inch",
     "era5land_soilt4_avg": "F",
 }
 

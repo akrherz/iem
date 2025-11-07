@@ -45,15 +45,14 @@ def plotter(ctx: dict):
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
-# Site Information: [%s] %s
+# Site Information: %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # OF DAYS EACH YEAR WHERE MIN >=32 F
 """ % (
         date.today().strftime("%d %b %Y"),
         ctx["_nt"].sts[station]["archive_begin"],
         date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
+        ctx["_sname"],
     )
 
     for _, row in df.iterrows():

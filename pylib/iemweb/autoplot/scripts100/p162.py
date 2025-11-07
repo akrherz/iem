@@ -10,7 +10,7 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
@@ -36,15 +36,15 @@ def plotter(ctx: dict):
     station = ctx["zstation"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             select extract(doy from valid) as doy,
             greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
-            WHERE station = %s and
+            WHERE station = :station and
             (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
             and valid > '1973-01-01' and report_type = 3
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:
@@ -105,16 +105,7 @@ def plotter(ctx: dict):
     ax.set_xlabel("Week of the Year")
     ax.set_xticks(np.arange(1, 55, 7))
     ax.set_xticklabels(
-        (
-            "Jan 1",
-            "Feb 19",
-            "Apr 8",
-            "May 27",
-            "Jul 15",
-            "Sep 2",
-            "Oct 21",
-            "Dec 9",
-        )
+        "Jan 1,Feb 19,Apr 8,May 27,Jul 15,Sep 2,Oct 21,Dec 9".split(",")
     )
     b = fig.colorbar(c)
     b.set_label("Hourly Obs per week per year")

@@ -29,7 +29,7 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
@@ -81,14 +81,20 @@ def plotter(ctx: dict):
     data = np.zeros((24, days))
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
-        SELECT valid at time zone %s as ts,
+            sql_helper("""
+        SELECT valid at time zone :tzname as ts,
         skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
-        from alldata where station = %s and valid >= %s and valid < %s
+        from alldata where station = :station
+        and valid >= :sts and valid < :ets
         and vsby is not null and report_type = 3 ORDER by valid ASC
-        """,
+        """),
             conn,
-            params=(tzname, station, sts, ets),
+            params={
+                "tzname": tzname,
+                "station": station,
+                "sts": sts,
+                "ets": ets,
+            },
             index_col=None,
         )
 

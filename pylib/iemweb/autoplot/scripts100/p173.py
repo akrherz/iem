@@ -12,6 +12,7 @@ date.
 import calendar
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -166,9 +167,9 @@ def add_context(ctx):
         ctx["ncols"] = 3
         df["fake_date"] = pd.to_datetime(
             {
-                "year": [2000] * len(df.index),
-                "month": df["month"],
-                "day": df["day"],
+                "year": np.ones(len(df.index)) * 2000,
+                "month": df["month"].to_numpy(),
+                "day": df["day"].to_numpy(),
             }
         )
         df = df.set_index("fake_date")
