@@ -4,7 +4,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -37,27 +37,27 @@ def plotter(ctx: dict):
     # 0.01, 0.5, 1, 2, 3, 4
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT year, month,
-            sum(case when precip >= %s then 1 else 0 end) as cat1,
-            sum(case when precip >= %s then 1 else 0 end) as cat2,
-            sum(case when precip >= %s then 1 else 0 end) as cat3,
-            sum(case when precip >= %s then 1 else 0 end) as cat4,
-            sum(case when precip >= %s then 1 else 0 end) as cat5,
-            sum(case when precip >= %s then 1 else 0 end) as cat6
-            from alldata WHERE station = %s GROUP by year, month
+            sum(case when precip >= :cat1 then 1 else 0 end) as cat1,
+            sum(case when precip >= :cat2 then 1 else 0 end) as cat2,
+            sum(case when precip >= :cat3 then 1 else 0 end) as cat3,
+            sum(case when precip >= :cat4 then 1 else 0 end) as cat4,
+            sum(case when precip >= :cat5 then 1 else 0 end) as cat5,
+            sum(case when precip >= :cat6 then 1 else 0 end) as cat6
+            from alldata WHERE station = :station GROUP by year, month
             ORDER by year, month
-        """,
+        """),
             conn,
-            params=(
-                CATS[0],
-                CATS[1],
-                CATS[2],
-                CATS[3],
-                CATS[4],
-                CATS[5],
-                station,
-            ),
+            params={
+                "cat1": CATS[0],
+                "cat2": CATS[1],
+                "cat3": CATS[2],
+                "cat4": CATS[3],
+                "cat5": CATS[4],
+                "cat6": CATS[5],
+                "station": station,
+            },
             index_col=["year", "month"],
         )
 

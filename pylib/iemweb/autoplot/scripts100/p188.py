@@ -46,13 +46,13 @@ def get_description():
             type="int",
             name="thres",
             default=32,
-            label="Temperature Threshold (F) for initial date of exceedence",
+            label="Temperature Threshold (°F) for initial date of exceedence",
         ),
         dict(
             type="int",
             name="thres2",
             default=60,
-            label="Temperature Threshold (F) to count days above/below",
+            label="Temperature Threshold (°F) to count days above/below",
         ),
         dict(
             type="year",
@@ -89,7 +89,7 @@ def plotter(ctx: dict):
             thres,
             thres2,
         )
-        ctx["ax1_ylabel"] = r"Max High Temperature $^\circ$F"
+        ctx["ax1_ylabel"] = "Max High Temperature °F"
         ctx["ax2_xlabel"] = "Date of First Sub %.0f Low" % (thres,)
     else:
         sql = """
@@ -111,7 +111,7 @@ def plotter(ctx: dict):
             f"Min low after first {thres:.0f}+ high, "
             f"days below {thres2:.0f} till 1 Jun"
         )
-        ctx["ax1_ylabel"] = r"Min Low Temperature $^\circ$F"
+        ctx["ax1_ylabel"] = "Min Low Temperature °F"
         ctx["ax2_xlabel"] = f"Date of First {thres:.0f} High"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
