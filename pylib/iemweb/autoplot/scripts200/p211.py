@@ -280,7 +280,7 @@ def make_meteo_plot(ctx):
         label="Dew Point",
     )
     ax.grid(True)
-    ax.set_ylabel(r"Temperature [$^\circ$F]")
+    ax.set_ylabel("Temperature [°F]")
     do_xaxis(ctx, ax, False)
 
     # -----------------------------

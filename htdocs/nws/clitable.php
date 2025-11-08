@@ -8,11 +8,11 @@ require_once "../../include/network.php";
 
 $nt = new NetworkTable("NWSCLI");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : 'KDSM';
+$station = get_str404("station", 'KDSM');
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", null);
 $day = get_int404("day", null);
-$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : "bystation";
+$opt = get_str404("opt", "bystation");
 
 $ys = yearSelect(2001, $year, "year");
 $ms = monthSelect($month, "month");

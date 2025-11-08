@@ -10,13 +10,13 @@ $t = new MyView();
 $t->title = "NWS COOP Daily Climatology";
 
 // Get URL parameters with defaults
-$tbl = isset($_GET["tbl"]) ? substr(xssafe($_GET["tbl"]), 0, 10) : "climate";
+$tbl = substr(get_str404("tbl", "climate"), 0, 10);
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
-$network = isset($_GET['network']) ? substr($_GET['network'], 0, 9) : 'IACLIMATE';
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : null;
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']) : 'ASC';
+$sortcol = get_str404("sortcol", "station");
+$network = substr(get_str404("network", "IACLIMATE"), 0, 9);
+$station = get_str404("station", null);
+$sortdir = get_str404("sortdir", "ASC");
 
 // Build render variables array
 $render_vars = array(

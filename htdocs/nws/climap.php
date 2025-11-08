@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Produce a map of CLI parsed data for a single day
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 76);
@@ -8,8 +8,8 @@ require_once "../../include/forms.php";
 force_https();
 
 // Handle URL parameters for date and variable selection
-$date_param = isset($_GET["date"]) ? xssafe($_GET["date"]) : date("Y-m-d");
-$var_param = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
+$date_param = get_str404("date", date("Y-m-d"));
+$var_param = get_str404("var", "high");
 
 // Validate date parameter
 $valid_date = $date_param;
@@ -20,12 +20,12 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_param) || !strtotime($date_param)
 // Define available render variables with their display names
 $render_vars = [
     "high" => "High Temperature",
-    "high_depart" => "High Temperature Departure", 
+    "high_depart" => "High Temperature Departure",
     "high_record" => "Record High Temperature",
     "high_normal" => "Normal High Temperature",
     "low" => "Low Temperature",
     "low_depart" => "Low Temperature Departure",
-    "low_record" => "Record Low Temperature", 
+    "low_record" => "Record Low Temperature",
     "low_normal" => "Normal Low Temperature",
     "precip" => "Precipitation",
     "precip_month" => "Precipitation this month",
@@ -33,7 +33,7 @@ $render_vars = [
     "precip_jan1_normal" => "Precipitation since January 1 Normal",
     "precip_jan1_depart" => "Precipitation since January 1 Departure",
     "precip_jun1" => "Precipitation since June 1",
-    "precip_jun1_normal" => "Precipitation since June 1 Normal", 
+    "precip_jun1_normal" => "Precipitation since June 1 Normal",
     "precip_dec1" => "Precipitation since December 1",
     "precip_dec1_normal" => "Precipitation since December 1 Normal",
     "precip_record" => "Precipitation Record",
@@ -42,14 +42,14 @@ $render_vars = [
     "snowdepth" => "Snow Depth [inch]",
     "snow_month" => "Snowfall this month",
     "snow_jun1" => "Snowfall since June 1",
-    "snow_jul1" => "Snowfall since July 1", 
+    "snow_jul1" => "Snowfall since July 1",
     "snow_jul1_depart" => "Snowfall since July 1 Departure",
     "snow_dec1" => "Snowfall since December 1",
     "snow_record" => "Snowfall Record",
     "resultant_wind_speed" => "Resultant Wind Speed [mph]",
     "resultant_wind_direction" => "Resultant Wind Direction",
     "highest_wind_speed" => "Highest Wind Speed [mph]",
-    "highest_wind_direction" => "Highest Wind Direction", 
+    "highest_wind_direction" => "Highest Wind Direction",
     "highest_gust_speed" => "Highest Wind Gust [mph]",
     "highest_gust_direction" => "Highest Gust Direction",
     "average_wind_speed" => "Average Wind Speed [mph]"
@@ -94,7 +94,7 @@ $t->content = <<<EOM
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Map of NWS Daily CLI Reports</h4>
         <div class="btn-group" role="group" aria-label="Font size controls">
-            <button id="fminus" class="btn btn-outline-secondary btn-sm" type="button" 
+            <button id="fminus" class="btn btn-outline-secondary btn-sm" type="button"
                 title="Decrease font size">
                 <i class="bi bi-dash" aria-hidden="true"></i>
             </button>

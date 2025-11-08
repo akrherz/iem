@@ -12,11 +12,11 @@ $nt = new NetworkTable("WFO");
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
-$clobber = isset($_REQUEST["clobber"]);
-$wfo = isset($_REQUEST["wfo"]) ? strtoupper(substr(xssafe($_REQUEST["wfo"]), 0, 4)) : "_ALL";
+$clobber = array_key_exists("clobber", $_REQUEST);
+$wfo = strtoupper(substr(get_str404("wfo", "_ALL"), 0, 4));
 $wfo3 = unrectify_wfo($wfo);
-$phenomena = isset($_REQUEST["phenomena"]) ? strtoupper(substr(xssafe($_REQUEST["phenomena"]), 0, 2)) : null;
-$significance = isset($_REQUEST["significance"]) ? strtoupper(substr(xssafe($_REQUEST["significance"]), 0, 1)) : null;
+$phenomena = strtoupper(substr(get_str404("phenomena", null), 0, 2));
+$significance = strtoupper(substr(get_str404("significance", null), 0, 1));
 $wfoLimiter = "";
 $wfoMsg = "Data for all WFOs shown";
 if ($wfo != "_ALL") {

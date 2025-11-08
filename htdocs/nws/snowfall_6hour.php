@@ -20,14 +20,14 @@ $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 $now = new DateTime(sprintf("%s-%s-%s 12:00", $year, $month, $day), new DateTimeZone("UTC"));
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
-$w = isset($_REQUEST["w"]) ? xssafe($_REQUEST["w"]) : "all";
-$state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
+$wfo = get_str404("wfo", "DMX");
+$w = get_str404("w", "all");
+$state = get_str404("state", "IA");
 // side logic for when $w is not set
-if (!isset($_REQUEST["w"])){
-    if (isset($_REQUEST["wfo"])){
+if (!array_key_exists("w", $_REQUEST)){
+    if (array_key_exists("wfo", $_REQUEST)){
         $w = "wfo";
-    } else if (isset($_REQUEST["state"])){
+    } else if (array_key_exists("state", $_REQUEST)){
         $w = "state";
     }
 }
@@ -174,7 +174,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
 
 <h3>Six Hour Snowfall</h3>
 
-<p>Values are in inches. <span class="badge bg-info">T</span> indicates a trace of snowfall. 
+<p>Values are in inches. <span class="badge bg-info">T</span> indicates a trace of snowfall.
 The table will refresh every 6 minutes.</p>
 
 <!-- Tabulator container (initially hidden) -->

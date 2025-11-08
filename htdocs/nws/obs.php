@@ -9,10 +9,10 @@ require_once "../../include/station.php";
 
 $t = new MyView();
 
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "peak";
-$metar = isset($_GET["metar"]) ? xssafe($_GET['metar']) : "no";
-$sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
+$sortcol = get_str404("sortcol", "peak");
+$metar = get_str404("metar", "no");
+$sorder = get_str404("sorder", "desc");
+$wfo = get_str404("wfo", 'DMX');
 
 $t->refresh = 60;
 $t->title = "Obs by NWS Forecast Office";
@@ -164,7 +164,7 @@ $t->content = <<<EOM
 
 </form>
 
-<p>Sorted by column <b>{$vals[$sortcol]}</b>. 
+<p>Sorted by column <b>{$vals[$sortcol]}</b>.
 Timestamps displayed are for <strong>{$tzname}</strong> timezone.
 
 <form method="GET" action="/my/current.phtml">
@@ -197,7 +197,7 @@ Timestamps displayed are for <strong>{$tzname}</strong> timezone.
   <th><a href="{$uri}phour">Last Hour</a></th>
   <th><a href="{$uri}pday">Today</a></th>
 </tr></thead>
-<tbody>  
+<tbody>
 {$table}
 </tbody>
 </table>

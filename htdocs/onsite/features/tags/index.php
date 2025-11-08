@@ -10,7 +10,7 @@ $pgconn = iemdb('mesosite');
 
 
 /* If nothing specified for a tag! */
-if (!isset($_GET["tag"])) {
+if (!array_key_exists("tag", $_GET)) {
     $rs = pg_exec($pgconn, "SELECT tags from feature WHERE tags is not null");
     $tags = array();
     while ($row = pg_fetch_assoc($rs)) {
@@ -56,7 +56,7 @@ EOM;
     die();
 }
 
-$tag = isset($_GET["tag"]) ? xssafe($_GET["tag"]) : "";
+$tag = get_str404("tag", "");
 $t->title = "Features Tagged: $tag";
 
 $winterextra = "";
@@ -86,8 +86,8 @@ previous winter seasons that these maps are available for:
 EOM;
 }
 
-$stname = iem_pg_prepare($pgconn, "SELECT *, 
-      to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
+$stname = iem_pg_prepare($pgconn, "SELECT *,
+      to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
       to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
       to_char(valid, 'YYYY-MM-DD') as permalink from feature
       WHERE tags ~* $1
@@ -123,7 +123,7 @@ EOM;
     $content .= <<<EOM
 <hr />
 <div class="row">
-<div class="col-md-5">	
+<div class="col-md-5">
       {$media}
 EOM;
     if ($row["appurl"] != "") {

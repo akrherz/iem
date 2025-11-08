@@ -21,25 +21,25 @@ $skycover = array(
     255 => "MISSING"
 );
 
-$gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
-$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
-$sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
-$what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
-$tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]) : 'UTC';
+$gis = get_str404("gis", 'no');
+$delim = get_str404("delim", ",");
+$sample = get_str404("sample", "1min");
+$what = get_str404("what", 'dl');
+$tz = get_str404("tz", 'UTC');
 
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2020;
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2020;
-$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : 0;
-$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : 0;
-$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : 0;
-$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : 0;
-$vars = isset($_GET["vars"]) ? $_GET["vars"] : ["tmpf"];
+$day1 = get_int404("day1", 1);
+$day2 = get_int404("day2", 1);
+$month1 = get_int404("month1", 1);
+$month2 = get_int404("month2", 2);
+$year1 = get_int404("year1", 2020);
+$year2 = get_int404("year2", 2020);
+$hour1 = get_int404("hour1", 0);
+$hour2 = get_int404("hour2", 0);
+$minute1 = get_int404("minute1", 0);
+$minute2 = get_int404("minute2", 0);
+$vars = array_key_exists("vars", $_GET) ? $_GET["vars"] : ["tmpf"];
 
-$stations = isset($_GET["station"]) ? $_GET["station"] : ["BNW"];
+$stations = array_key_exists("station", $_GET) ? $_GET["station"] : ["BNW"];
 $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value === "_ALL") {

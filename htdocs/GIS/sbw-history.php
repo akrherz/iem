@@ -11,7 +11,7 @@ $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
 
 /* Figure out what our VTEC is! */
-$vtec = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : '2008.KICT.SV.W.0345';
+$vtec = get_str404("vtec", "2008.KICT.SV.W.0345");
 
 list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $vtec);
 $utcnow = new DateTime('now', new DateTimeZone("UTC"));
@@ -31,7 +31,7 @@ $stname = iem_pg_prepare(
     ST_xmax(geom), ST_ymax(geom),
     ST_xmin(geom), ST_ymin(geom), *,
     round((ST_area2d(ST_transform(geom,9311))/1000000)::numeric,0 ) as area
-    from sbw WHERE phenomena = $1 and 
+    from sbw WHERE phenomena = $1 and
     eventid = $2 and wfo = $3 and significance = $4 and vtec_year = $5
     ORDER by polygon_begin ASC
 EOM);

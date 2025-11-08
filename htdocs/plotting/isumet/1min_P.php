@@ -8,7 +8,7 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : null;
+$station = get_str404("station", null);
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0) {
     $myTime = strtotime($year . "-" . $month . "-" . $day);

@@ -3,11 +3,11 @@ require_once "../../include/forms.php";
 /*
  * Generate an image used for the COW output
  */
-$ae = isset($_GET["ae"]) ? xssafe($_GET["ae"]) : "AAA";
-$aw = isset($_GET["aw"]) ? xssafe($_GET["aw"]) : "AAA";
-$b = isset($_GET["b"]) ? xssafe($_GET["b"]) : "BBB";
-$c = isset($_GET["c"]) ? xssafe($_GET["c"]) : "CCC";
-$d = isset($_GET["d"]) ? xssafe($_GET["d"]) : "DDD";
+$ae = get_str404("ae", "AAA");
+$aw = get_str404("aw", "AAA");
+$b = get_str404("b", "BBB");
+$c = get_str404("c", "CCC");
+$d = get_str404("d", "DDD");
 
 function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
 {

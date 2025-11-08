@@ -14,7 +14,7 @@ require_once "../../../include/jpgraph/jpgraph_led.php";
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
-$station = isset($_GET["station"]) ? $_GET["station"] : "SKCI4";
+$station = get_str404("station", "SKCI4");
 $year = get_int404("year", 2018);
 $month = get_int404("month", 1);
 $day = get_int404("day", 1);

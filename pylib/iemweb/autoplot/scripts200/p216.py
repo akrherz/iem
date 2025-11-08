@@ -34,12 +34,12 @@ PDICT2 = {
     "max_gust": "Daily Max Wind Gust",
 }
 UNITS = {
-    "high": "F",
-    "low": "F",
-    "max_dwpf": "F",
-    "min_dwpf": "F",
-    "max_feel": "F",
-    "min_feel": "F",
+    "high": "°F",
+    "low": "°F",
+    "max_dwpf": "°F",
+    "min_dwpf": "°F",
+    "max_feel": "°F",
+    "min_feel": "°F",
     "max_sknt": "kts",
     "max_gust": "kts",
 }

@@ -14,8 +14,8 @@ $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
 $days = get_int404("days", 2);
-$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
+$station = get_str404("station", "");
+$network = get_str404("network", "IA_RWIS");
 $nt = new NetworkTable($network);
 
 $sts = time() - (3. * 86400.);

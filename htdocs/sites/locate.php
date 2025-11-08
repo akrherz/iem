@@ -3,11 +3,11 @@
 $OL = "10.6.1";
 define("IEM_APPID", 5);
 require_once "../../include/forms.php";
-if (isset($_GET["station"]) && isset($_GET["network"])) {
+if (array_key_exists("station", $_GET) && array_key_exists("network", $_GET)) {
     $uri = sprintf(
         "site.php?station=%s&network=%s",
-        xssafe($_REQUEST["station"]),
-        xssafe($_REQUEST["network"])
+        get_str404("station", ""),
+        get_str404("network", "")
     );
     header("Location: $uri");
     exit();

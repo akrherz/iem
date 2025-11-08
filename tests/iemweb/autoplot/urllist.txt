@@ -184,6 +184,7 @@
 97/d:sector::sector:IA::network:WFO::wfo:DMX::var:precip_depart::gddbase:50::gddceil:86::date1:2024-06-01::usdm:no::date2:2025-07-23::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 99/network:IACLIMATE::station:IATAME::year:2024::delta:sigma::_r:t::dpi:100::_cb:1.png
 102/network:WFO::station:DMX::year:2006::eyear:2025::_r:t::dpi:100.png
+102/network:WFO::station:DMX::year:2025::eyear:2025::_r:t::dpi:100.png
 102/network:WFO::station:DMX::ltype:TORNADO::year:2006::eyear:2025::_r:t::dpi:100.png
 104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
 106/network:IA_ASOS::zstation:AMW::var:tmpf::opt:tmpf_above::date:2020-09-06::month:all::threshold:80::_r:t::dpi:100::_cb:1.png

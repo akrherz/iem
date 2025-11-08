@@ -1,12 +1,13 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 154);
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
-$lat = isset($_GET['lat']) ? floatval($_GET['lat']) : 41.53;
-$lon = isset($_GET['lon']) ? floatval($_GET['lon']) : -93.653;
+require_once "../../include/forms.php";
+$lat = get_float404('lat', 41.53);
+$lon = get_float404('lon', -93.653);
 $t = new MyView();
 $OL = "10.6.1";
 $t->jsextra = <<<EOM
@@ -57,16 +58,16 @@ Warning, and Advisories using three different search methods:</p>
     <div class="tab-pane fade" id="bypoint" role="tabpanel" aria-labelledby="bypoint-tab">
         <div class="mt-3">
             <p class="section-description">The official warned area for some products the NWS issues is a polygon.
-            This section allows you to specify a point on the map below by dragging the 
+            This section allows you to specify a point on the map below by dragging the
             marker to where you are interested in. Once you stop dragging the marker, the
             grid will update and provide a listing of storm based warnings found.</p>
-            
+
             <div class="row">
                 <div class="col-md-4">
                     <div class="card vtec-card mb-3">
                         <div class="card-body">
                             <h6 class="card-title"><i class="bi bi-gear-fill me-2" aria-hidden="true"></i>Search Parameters</h6>
-                            
+
                             <div class="coordinate-section">
                                 <strong>Enter coordinates manually:</strong><br />
                                 <div class="mt-2">
@@ -78,7 +79,7 @@ Warning, and Advisories using three different search methods:</p>
                                     <input id="lon" value="{$lon}" class="form-control coordinate-input">
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="buffer" class="form-label">Approximate Location Buffer Radius:</label>
                                 <select name="buffer" class="form-select">
@@ -87,7 +88,7 @@ Warning, and Advisories using three different search methods:</p>
                                     <option value="0.1">~10 miles (0.10 deg)</option>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-2">
                                 <label for="sdate1" class="form-label">Start Date:</label>
                                 <input name="sdate1" type="date" id="sdate1" class="form-control">
@@ -96,13 +97,13 @@ Warning, and Advisories using three different search methods:</p>
                                 <label for="edate1" class="form-label">End Date:</label>
                                 <input name="edate1" type="date" id="edate1" class="form-control">
                             </div>
-                            
+
                             <button type="button" class="btn btn-primary w-100" id="manualpt">
                                 <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Update Results
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="card vtec-card">
                         <div class="card-body">
                             <h6 class="card-title"><i class="bi bi-cursor me-2" aria-hidden="true"></i>Interactive Map</h6>
@@ -117,12 +118,12 @@ Warning, and Advisories using three different search methods:</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">
                             <h4 id="table1title" class="card-title"><i class="bi bi-table me-2" aria-hidden="true"></i>Search Results</h4>
-                            
+
                             <div class="full-dataset-export mb-3">
                                 <div class="alert alert-info py-2">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -163,24 +164,24 @@ Warning, and Advisories using three different search methods:</p>
     <div class="tab-pane fade" id="byugc" role="tabpanel" aria-labelledby="byugc-tab">
         <div class="mt-3">
             <div class="section-description">
-                <p>The NWS issues watch, warnings, and advisories (WWA) for counties/parishes. For 
-                some products (like winter warnings), they issue for forecast zones. In many parts of the country, these zones are exactly the 
-                same as the counties/parishes. When you get into regions with topography, 
+                <p>The NWS issues watch, warnings, and advisories (WWA) for counties/parishes. For
+                some products (like winter warnings), they issue for forecast zones. In many parts of the country, these zones are exactly the
+                same as the counties/parishes. When you get into regions with topography,
                 then zones will start to differ to the local counties.</p>
 
-                <p>This application allows you to search the IEM's archive of NWS WWA products.  
-                Our archive is not complete, but there are no known holes since 12 November 2005. 
-                This archive is of those products that contain VTEC codes, which are nearly all 
-                WWAs that the NWS issues for. There are Severe Thunderstorm, Tornado, and 
-                Flash Flood Warnings included in this archive for dates prior to 2005. These  
+                <p>This application allows you to search the IEM's archive of NWS WWA products.
+                Our archive is not complete, but there are no known holes since 12 November 2005.
+                This archive is of those products that contain VTEC codes, which are nearly all
+                WWAs that the NWS issues for. There are Severe Thunderstorm, Tornado, and
+                Flash Flood Warnings included in this archive for dates prior to 2005. These
                 were retroactively assigned VTEC event identifiers by the IEM based on some
                 hopefully intelligent logic.</p>
             </div>
-            
-            <div class="alert alert-warning">Please note: NWS forecast offices have 
+
+            <div class="alert alert-warning">Please note: NWS forecast offices have
             changed over the years, this application may incorrectly label old warnings as coming from
             an office that did not exist at the time.
-                    
+
                 <br /><strong>Also note:</strong> This particular search interface will return
                     <strong>false-positives</strong> for some warnings that are now fully polygon/storm based. The IEM
                     database tracks the UGC areas associated with the storm based warnings. So querying
@@ -230,7 +231,7 @@ Warning, and Advisories using three different search methods:</p>
                             <h6 class="card-title"><i class="bi bi-crosshair me-2" aria-hidden="true"></i>Manual Point Selection</h6>
                             <p class="card-text">You can otherwise search by lat/lon point. The start and
                             end date set above are used with this option as well:</p>
-                            
+
                             <div class="coordinate-section">
                                 <div class="mb-2">
                                     <label for="lat2" class="form-label">Latitude (deg N):</label>
@@ -241,7 +242,7 @@ Warning, and Advisories using three different search methods:</p>
                                     <input id="lon2" value="{$lon}" class="form-control coordinate-input">
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="buffer2" class="form-label">Approximate Location Buffer Radius:</label>
                                 <select name="buffer2" class="form-select">
@@ -270,12 +271,12 @@ Warning, and Advisories using three different search methods:</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">
                             <h4 id="table2title" class="card-title"><i class="bi bi-table me-2" aria-hidden="true"></i>Search Results</h4>
-                            
+
                             <div class="full-dataset-export mb-3">
                                 <div class="alert alert-info py-2">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -324,7 +325,7 @@ Warning, and Advisories using three different search methods:</p>
                     <div class="card vtec-card">
                         <div class="card-body">
                             <h6 class="card-title"><i class="bi bi-gear-fill me-2" aria-hidden="true"></i>Search Parameters</h6>
-                            
+
                             <div class="radio-group mb-3">
                                 <div class="form-check">
                                     <input type="radio" name="by3" value="state" checked="checked" id="bystate" class="form-check-input"/>
@@ -350,7 +351,7 @@ Warning, and Advisories using three different search methods:</p>
                                     <input type="radio" name="single3" value="all" id="all3" class="form-check-input">
                                     <label for="all3" class="form-check-label"><strong>All VTEC Events</strong></label>
                                 </div>
-                                
+
                                 <div class="mt-2">
                                     <label for="ph3" class="form-label">Select VTEC Phenomena:</label>
                                     <select name="ph" id="ph3" class="form-select"></select>
@@ -373,7 +374,7 @@ Warning, and Advisories using three different search methods:</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8">
                     <div class="card vtec-card">
                         <div class="card-body">

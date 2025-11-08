@@ -8,11 +8,11 @@ require_once "../../include/network.php";
 
 $nt = new NetworkTable("NWSCLI");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : 'KDSM';
+$station = get_str404("station", 'KDSM');
 $year = get_int404("year", date("Y"));
 $month = get_int404("month");
 $day = get_int404("day");
-$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : "bystation";
+$opt = get_str404("opt", "bystation");
 
 $ys = yearSelect(2001, $year, "year");
 $ms = monthSelect($month, "month");
@@ -163,15 +163,15 @@ $t->content = <<<EOM
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/climate/">Climate Data</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Tabular CF6 Report Data</li>		
+    <li class="breadcrumb-item active" aria-current="page">Tabular CF6 Report Data</li>
 </ol>
 </nav>
 
 <div class="row">
-    <div class="col-md-3">This application lists out parsed data from 
+    <div class="col-md-3">This application lists out parsed data from
     National Weather Service issued daily climate reports.  These reports
     contain 24 hour totals for a period between midnight <b>local standard time</b>.
-    This means that during daylight saving time, this period is from 1 AM to 
+    This means that during daylight saving time, this period is from 1 AM to
     1 AM local daylight time!
     </div>
     <div class="col-md-6 bg-light p-3 rounded">

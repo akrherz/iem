@@ -6,7 +6,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$station = isset($_GET["station"]) ? xssafe($_GET['station']) : null;
+$station = get_str404("station", null);
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));

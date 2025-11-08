@@ -1,5 +1,5 @@
 <?php
-/* Generate a 1 minute plot of precip and pressure */
+// Generate a 1 minute plot of precip and pressure
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/network.php";
@@ -14,7 +14,7 @@ require_once "../../../include/jpgraph/jpgraph_led.php";
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "SKCI4";
+$station = get_str404("station", "SKCI4");
 $year = get_int404("year", 2018);
 $month = get_int404("month", 1);
 $day = get_int404("day", 1);
@@ -26,7 +26,7 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
 $pcol = "";
-$stname = iem_pg_prepare($dbconn, "SELECT * $pcol from $tbl 
+$stname = iem_pg_prepare($dbconn, "SELECT * $pcol from $tbl
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {

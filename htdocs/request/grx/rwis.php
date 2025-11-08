@@ -4,7 +4,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
 
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
+$network = get_str404("network", "IA_RWIS");
 
 header("Content-type: text/plain");
 // Generate placefiles, whatever
@@ -14,9 +14,9 @@ echo <<<EOM
 Title: {$network}
 Refresh: 5
 Color: 200 200 255
-IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png" 
-IconFile: 2, 15, 15, 8, 8, "{$EXTERNAL_BASEURL}/request/grx/cloudcover.png" 
-IconFile: 3, 25, 25, 12, 12, "{$EXTERNAL_BASEURL}/request/grx/rwis_cr.png" 
+IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png"
+IconFile: 2, 15, 15, 8, 8, "{$EXTERNAL_BASEURL}/request/grx/cloudcover.png"
+IconFile: 3, 25, 25, 12, 12, "{$EXTERNAL_BASEURL}/request/grx/rwis_cr.png"
 Font: 1, 11, 1, "Courier New"
 
 EOM;
@@ -104,14 +104,14 @@ foreach ($jobj["data"] as $bogus => $iemob) {
     );
 
     echo "Object: " . $mydata["lat"] . "," . $mydata["lon"] . "
-  Threshold: 999 
+  Threshold: 999
   Icon: 0,0,000,3," . pcolor($mydata["pave_avg"]) . "
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
-  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: {$mydata['tmpf']}F (Dew: " . $mydata["dwpf"] . "F)\\nVsby: {$mydata['vsby']}\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\" 
+  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: {$mydata['tmpf']}F (Dew: " . $mydata["dwpf"] . "F)\\nVsby: {$mydata['vsby']}\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\"
   Threshold: 150
   Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \"
   Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \"
- End: 
+ End:
 
 ";
 }

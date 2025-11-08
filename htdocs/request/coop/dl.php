@@ -10,23 +10,23 @@ require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 
 $connection = iemdb("coop");
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
-$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : 1;
-$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : 1;
-$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : 1;
-$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : 2;
-$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : 2020;
-$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : 2020;
-$vars = isset($_GET["vars"]) ? $_GET["vars"] : ['high'];
+$network = substr(get_str404("network", "IACLIMATE"), 0, 10);
+$day1 = get_int404("day1", 1);
+$day2 = get_int404("day2", 1);
+$month1 = get_int404("month1", 1);
+$month2 = get_int404("month2", 2);
+$year1 = get_int404("year1", 2020);
+$year2 = get_int404("year2", 2020);
+$vars = array_key_exists("vars", $_GET) ? $_GET["vars"] : ['high'];
 
-$gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
-$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : "comma";
-$what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
+$gis = get_str404("gis", 'no');
+$delim = get_str404("delim", "comma");
+$what = get_str404("what", 'dl');
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$stations = isset($_GET["station"]) ? $_GET["station"] : "AMSI4";
+$stations = array_key_exists("station", $_GET) ? $_GET["station"] : "AMSI4";
 if (!is_array($stations)) {
     $stations = array($stations);
 }
@@ -58,14 +58,14 @@ $nicedate = $ts1->format("Y-m-d");
 
 $d = array("space" => " ", "comma" => ",", "tab" => "\t");
 
-$sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid, 
- extract(doy from day) as doy, 
+$sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid,
+ extract(doy from day) as doy,
  gddxx(50, 86, high, low) as gdd_50_86,
  gddxx(40, 86, high, low) as gdd_40_86,
  round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
- round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc, 
+ round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
  round((precip * 25.4)::numeric,1) as precipmm
- from $table WHERE day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' 
+ from $table WHERE day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "'
  and station = ANY($1) ORDER by day ASC";
 
 /**
@@ -82,9 +82,9 @@ if ($what == "download") {
 if (in_array('daycent', $vars)) {
     /*
      * > Daily Weather Data File (use extra weather drivers = 0):
-     * > 
+     * >
      * > 1 1 1990 1 7.040 -10.300 0.000
-     * > 
+     * >
 > NOTES:
 > Column 1 - Day of month, 1-31
 > Column 2 - Month of year, 1-12
@@ -97,7 +97,7 @@ if (in_array('daycent', $vars)) {
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
     $stname = iem_pg_prepare($connection, "SELECT extract(doy from day) as doy, high, low, precip,
-        month, year, extract(day from day) as lday 
+        month, year, extract(day from day) as lday
         from $table WHERE station = ANY($1) and day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
     $rs = pg_execute($connection, $stname, array($stationSQL));
     echo "Daily Weather Data File (use extra weather drivers = 0):\n";
@@ -206,7 +206,7 @@ year          day           radn          maxt          mint          rain
     );
     $stname = iem_pg_prepare($connection, "select max(avg) as h, min(avg) as l from
             (SELECT extract(month from valid) as month, avg((high+low)/2.)
-             from climate51 
+             from climate51
              WHERE station = ANY($1) GROUP by month) as foo ");
     $rs = pg_execute($connection, $stname, array($stationSQL));
     $row = pg_fetch_assoc($rs, 0);

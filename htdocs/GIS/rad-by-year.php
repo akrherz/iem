@@ -23,7 +23,7 @@ $month = get_int404("month", date("m", $ts));
 $year = get_int404("year", date("Y", $ts));
 $hour = get_int404("hour", date("H", $ts));
 $minute = get_int404("minute", date("i", $ts));
-$extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : array(-105, 40, -97, 47);
+$extents = array_key_exists("BBOX", $_GET) ? explode(",", $_GET["BBOX"]) : array(-105, 40, -97, 47);
 $dt = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}");
 
 /* This is our final image!  */

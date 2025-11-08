@@ -9,12 +9,12 @@ $t->title = "ISU Soil Moisture Plots";
 
 $now = time();
 $d2 = time() - 5 * 86400;
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "BOOI4";
-$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : "1";
+$station = get_str404("station", "BOOI4");
+$opt = get_str404("opt", "1");
 
-if (isset($_GET["sts"])) {
-    $sts = new DateTime(xssafe($_GET["sts"]));
-    $ets = new DateTime(xssafe($_GET["ets"]));
+if (array_key_exists("sts", $_GET)) {
+    $sts = new DateTime(get_str404("sts", null));
+    $ets = new DateTime(get_str404("ets", null));
 } else {
     // Legacy CGI parameters
     $year1 = get_int404('year1', date("Y", $d2));

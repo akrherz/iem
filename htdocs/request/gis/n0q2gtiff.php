@@ -9,12 +9,12 @@ date_default_timezone_set('UTC');
 putenv("TZ=GMT");
 /* This bad boy converts a PNG to a geo-tiff */
 
-$dstr = isset($_GET["dstr"]) ? xssafe($_GET["dstr"]) : null;
+$dstr = get_str404("dstr", null);
 if (is_null($dstr)) {
     http_response_code(422);
     die("Invalid date format");
 }
-$sector = isset($_GET["sector"]) ? substr(xssafe($_GET["sector"]), 1, 2) : "us";
+$sector = substr(get_str404("sector", "us"), 1, 2);
 $year = intval(substr($dstr, 0, 4));
 $month = intval(substr($dstr, 4, 2));
 $day = intval(substr($dstr, 6, 2));

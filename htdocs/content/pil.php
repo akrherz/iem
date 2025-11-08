@@ -2,7 +2,7 @@
 require "../../include/forms.php";
 require_once "../../include/memcache.php";
 // Generate Cheezy PIL image
-$pil = isset($_REQUEST["pil"]) ? substr(xssafe($_REQUEST["pil"]), 0, 6) : 'AFDDMX';
+$pil = substr(get_str404("pil", 'AFDDMX'), 0, 6);
 
 // Try to get it from memcached
 $memcache = MemcacheSingleton::getInstance();

@@ -6,14 +6,14 @@ require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : 'DMX';
+$wfo = substr(get_str404("wfo", 'DMX'), 0, 4);
 $year = get_int404("year", intval(date("Y")));
-$state = isset($_GET['state']) ? substr(xssafe($_GET["state"]), 0, 2) : 'IA';
-$which = isset($_GET["which"]) ? $_GET["which"] : 'wfo';
-$significance = isset($_GET["s"]) ? xssafe($_GET["s"]) : "";
-$phenomena = isset($_GET["p"]) ? xssafe($_GET["p"]) : "";
-$pon = (isset($_GET["pon"]) && $_GET["pon"] == "on");
-$son = (isset($_GET["son"]) && $_GET["son"] == "on");
+$state = substr(get_str404('state', 'IA'), 0, 2);
+$which = get_str404("which", 'wfo');
+$significance = get_str404("s", "");
+$phenomena = get_str404("p", "");
+$pon = (get_str404("pon", null) == "on");
+$son = (get_str404("son", null) == "on");
 
 
 if ($which == 'wfo') {
@@ -142,7 +142,7 @@ $t->content = <<<EOM
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="card border">
                                     <div class="card-header bg-light">
@@ -175,7 +175,7 @@ $t->content = <<<EOM
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row mt-3">
                             <div class="col-12 text-center">
                                 <button type="submit" class="btn btn-primary btn-lg">

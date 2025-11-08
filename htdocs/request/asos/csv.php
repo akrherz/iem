@@ -11,12 +11,14 @@ pg_exec($asos, "SET TIME ZONE 'UTC'");
 
 $stations = array("AMW");
 
-if (isset($_GET["lat"]) && isset($_GET["lon"])) {
+if (array_key_exists("lat", $_GET) && array_key_exists("lon", $_GET)) {
     /* Figure out what station(s) fits the bill */
-    $sql = sprintf("SELECT id, 
+    $lat = get_float404("lat", null);
+    $lon = get_float404("lon", null);
+    $sql = sprintf("SELECT id,
       ST_DistanceSphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
       WHERE network ~* 'ASOS' ORDER by dist ASC
-      LIMIT 5", xssafe($_GET["lon"]), xssafe($_GET["lat"]));
+      LIMIT 5", $lon, $lat);
     $rs = pg_exec($mesosite, $sql);
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $stations[$i] = $row["id"];
@@ -26,21 +28,21 @@ if (isset($_GET["lat"]) && isset($_GET["lon"])) {
 $result = "id,valid,tmpf,dwpf,sknt,drct,phour,alti,gust,lon,lat\n";
 $prepared = null;
 foreach ($stations as $k => $id) {
-    if (isset($_REQUEST["date"])) {
-        $ts = strtotime($_REQUEST["date"]);
+    if (array_key_exists("date", $_REQUEST)) {
+        $ts = strtotime(get_str404("date", null));
         if (is_null($prepared)) {
             $stname = iem_pg_prepare($asos, sprintf("SELECT station as id, valid,
             max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
-            max(p01i) as phour, max(alti) as alti, max(gust) as gust, 
+            max(p01i) as phour, max(alti) as alti, max(gust) as gust,
             max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from alldata t, stations s
             where s.id = $1 and s.network ~* 'ASOS'
-            and t.station = s.id and t.valid BETWEEN '%s'::date 
-            and '%s'::date + '9 days'::interval GROUP by station, valid 
+            and t.station = s.id and t.valid BETWEEN '%s'::date
+            and '%s'::date + '9 days'::interval GROUP by station, valid
             ORDER by valid ASC", date("Y-m-d", $ts), date("Y-m-d", $ts)));
         }
         $rs = pg_execute($asos, $stname, array($id));
     } else {
-        $rs = pg_exec($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf, 
+        $rs = pg_exec($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf,
       max(sknt) as sknt, max(drct) as drct,
       max(phour) as phour, max(alti) as alti, max(gust) as gust,
       max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from current_log c, stations s

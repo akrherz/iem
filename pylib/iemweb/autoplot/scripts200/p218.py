@@ -180,7 +180,7 @@ def gauge(ax, row, col, params):
         -0.05 if col == "high" else pi + 0.05,
         2,
         f"Record: "
-        rf"{miss(row[col + '_record'])}$^\circ$F"
+        f"{miss(row[col + '_record'])}°F"
         f"\n{', '.join([str(s) for s in row[col + '_record_years']])}",
         va="top",
         ha="left" if col == "high" else "right",
@@ -188,7 +188,7 @@ def gauge(ax, row, col, params):
     ax.text(
         pi / 2,
         3.25,
-        "Avg:\n" + f"{miss(row[f'{col}_normal'])}" + r"$^\circ$F",
+        "Avg:\n" + f"{miss(row[f'{col}_normal'])}°F",
         ha="center",
     )
     ax.set_rorigin(-4.5)
@@ -208,7 +208,7 @@ def gauge(ax, row, col, params):
     ax.text(
         theta,
         -4.5,
-        rf"{row[col]}$^\circ$F" + f"\n@{row[col + '_time']} LST",
+        f"{row[col]}°F\n@{row[col + '_time']} LST",
         ha="center",
         va="top",
         fontsize=14,

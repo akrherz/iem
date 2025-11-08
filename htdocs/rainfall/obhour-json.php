@@ -1,12 +1,13 @@
 <?php
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
 $iem = iemdb("iem");
 $mesosite = iemdb("mesosite");
 
-$network = isset($_GET["network"]) ? substr($_GET["network"], 0, 20) : "IA_ASOS";
-$tstr = isset($_GET["ts"]) ? $_GET["ts"] : gmdate("YmdHi");
+$network = substr(get_str404("network", "IA_ASOS"), 0, 20);
+$tstr = get_str404("ts", gmdate("YmdHi"));
 $ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 
 $data = array();
