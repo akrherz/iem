@@ -5,18 +5,18 @@ require_once dirname(__FILE__) . "/network.php";
 
 /**
  * Generate a UGC (Universal Geographic Code) selection dropdown for a state
- * 
+ *
  * Creates a select element containing counties and zones for the specified state,
  * fetched from the ugcs database table. Each option displays the UGC code,
  * name, and type (County/Zone).
- * 
+ *
  * @param string $state Two-letter state code (case-insensitive)
  * @param string $selected Currently selected UGC code
  * @return string Complete HTML select element with UGC options
- * 
+ *
  * @example Basic usage:
  *   echo ugcStateSelect('IA', 'IAC001');
- * 
+ *
  * @example With zone selection:
  *   echo ugcStateSelect('mn', 'MNZ001');
  */
@@ -27,14 +27,14 @@ function ugcStateSelect($state, $selected)
     $stname = iem_pg_prepare($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
         . " and substr(ugc,1,2) = $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($state));
-    
+
     // Build options array from database results
     $options = array();
     while ($row = pg_fetch_assoc($rs)) {
         $z = (substr($row["ugc"], 2, 1) == "Z") ? "Zone" : "County";
         $options[$row["ugc"]] = "[" . $row["ugc"] . "] " . $row["name"] . " ($z)";
     }
-    
+
     return make_select("ugc", $selected, $options);
 }
 
@@ -53,32 +53,32 @@ function selectNetworkType($nettype, $selected)
         $dbconn,
         "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($nettype));
-    
+
     // Build options array from database results
     $options = array();
     while ($row = pg_fetch_assoc($rs)) {
         $options[$row["id"]] = $row["name"];
     }
-    
+
     return make_select("network", $selected, $options, "", "iemselect2");
 }
 
 
 /**
  * Create a network selection dropdown
- * 
+ *
  * Generates a select element containing all available networks from the database,
- * with optional extra options. Uses the modernized make_select function for 
+ * with optional extra options. Uses the modernized make_select function for
  * proper HTML generation and escaping.
- * 
+ *
  * @param string $selected The currently selected network ID (case-insensitive)
  * @param array $extra Additional options to include at the top of the list.
  *                     Array keys are option values, array values are option labels
  * @return string Complete HTML select element with network options
- * 
+ *
  * @example Basic usage:
  *   echo selectNetwork('IA_ASOS');
- * 
+ *
  * @example With extra options:
  *   $extras = array('_ALL_' => 'All Networks', 'CUSTOM' => 'Custom Selection');
  *   echo selectNetwork('IA_ASOS', $extras);
@@ -88,28 +88,28 @@ function selectNetwork($selected, $extra = array())
     $selected = strtoupper($selected);
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
-    
+
     // Build options array starting with extra options
     $options = array();
     foreach ($extra as $idx => $sid) {
         $options[$idx] = "[{$idx}] {$sid}";
     }
-    
+
     // Add database results to options array
     while ($row = pg_fetch_assoc($rs)) {
         $options[$row["id"]] = "[{$row['id']}] {$row['name']}";
     }
-    
+
     return make_select("network", $selected, $options, "", "iemselect2");
 }
 
 /**
  * Generate a multiple selection box for network stations
- * 
+ *
  * Creates a select element with multiple selection capability containing
  * network stations and optional extra entries.
- * 
- * @param string|array $network Network identifier(s) 
+ *
+ * @param string|array $network Network identifier(s)
  * @param string $selected Currently selected value
  * @param array $extra Additional options to include (key => value pairs)
  * @param string $label Name attribute for the select element
@@ -123,17 +123,17 @@ function networkMultiSelect(
 ) {
     $nt = new NetworkTable($network);
     $options = array();
-    
+
     // Add extra options first
     foreach ($extra as $idx => $sid) {
         $options[$idx] = "[$idx] $sid";
     }
-    
+
     // Add options from network table
     foreach ($nt->table as $sid => $tbl) {
         $options[$sid] = "[$sid] " . $tbl["name"];
     }
-    
+
     // Use standardized make_select with multiple selection and size attributes
     return make_select(
         $label,           // name
@@ -172,13 +172,13 @@ function networkSelect(
     $size = 1,
 ) {
     $nt = new NetworkTable($network, FALSE, $only_online);
-    
+
     // Build options array from network table
     $options = array();
     foreach ($nt->table as $sid => $tbl) {
         $options[$sid] = make_sname($tbl);
     }
-    
+
     // Add extra options
     foreach ($extra as $idx => $sid) {
         if (is_array($sid)) {
@@ -190,7 +190,7 @@ function networkSelect(
         }
         $options[$sid] = make_sname($tbl);
     }
-    
+
     return make_select(
         $selectName,
         $selected,
@@ -207,19 +207,19 @@ function networkSelect(
 
 /**
  * Generate a network station selection dropdown with auto-submit on change
- * 
- * Creates a select element for stations within a specific network that 
+ *
+ * Creates a select element for stations within a specific network that
  * automatically submits the form when selection changes. Includes support
  * for extra station entries.
- * 
+ *
  * @param string $network Network identifier (case-insensitive)
  * @param string $selected Currently selected station ID
  * @param array $extra Additional station entries to include (station_id => value pairs)
  * @return string Complete HTML select element with auto-submit functionality
- * 
+ *
  * @example Basic usage:
  *   echo networkSelectAuto('IA_ASOS', 'KAMW');
- * 
+ *
  * @example With extra stations:
  *   $extras = array('CUSTOM1' => 'Custom Station 1');
  *   echo networkSelectAuto('IA_ASOS', 'KAMW', $extras);
@@ -229,7 +229,7 @@ function networkSelectAuto($network, $selected, $extra = array())
     $network = strtoupper($network);
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    
+
     // Build options array from network table
     $options = array();
     foreach ($cities as $sid => $tbl) {
@@ -237,7 +237,7 @@ function networkSelectAuto($network, $selected, $extra = array())
         $sname = make_sname($tbl);
         $options[$sid] = $sname;
     }
-    
+
     // Add extra station entries
     foreach ($extra as $idx => $sid) {
         $nt->loadStation($sid);
@@ -306,6 +306,22 @@ function get_int404($name, $default = null)
     return intval($val);
 }
 
+// Ensure we are getting float values from request or we 405
+function get_float404($name, $default = null)
+{
+    if (!array_key_exists($name, $_REQUEST)) {
+        return $default;
+    }
+    $val = $_REQUEST[$name];
+    if ($val != "0" && empty($val)) return $default;
+    if (!is_numeric($val)) {
+        // passed up to iemwebfarm handler
+        http_response_code(405);
+        die();
+    }
+    return floatval($val);
+}
+
 function make_checkboxes($name, $selected, $ar)
 {
     $myselected = $selected;
@@ -332,13 +348,13 @@ function make_checkboxes($name, $selected, $ar)
 
 /**
  * Create a HTML select element with options using modern DOM generation
- * 
+ *
  * This function generates a complete HTML select element with proper escaping
  * and attribute handling. Supports single/multiple selection, optgroups,
  * JavaScript callbacks, and CSS styling.
- * 
+ *
  * @param string $name The name attribute for the select element
- * @param string|array $selected The selected value(s). Can be a single value 
+ * @param string|array $selected The selected value(s). Can be a single value
  *                               or array for multiple selections
  * @param array $ar The options array. Simple key=>value pairs create options.
  *                  Nested arrays create optgroups with the key as group label
@@ -349,22 +365,22 @@ function make_checkboxes($name, $selected, $ar)
  * @param bool $showvalue Whether to display option values in brackets before labels
  * @param bool $appendbrackets Whether to append '[]' to name for multiple selects
  * @param array $extraAttrs Optional additional HTML attributes as key=>value pairs
- * 
+ *
  * @return string Complete HTML select element as string
- * 
+ *
  * @example Basic usage:
  *   $options = array('val1' => 'Label 1', 'val2' => 'Label 2');
  *   echo make_select('myselect', 'val1', $options);
- * 
+ *
  * @example With optgroups:
  *   $options = array(
  *       'Group 1' => array('g1v1' => 'Group 1 Value 1'),
  *       'Group 2' => array('g2v1' => 'Group 2 Value 1')
  *   );
  *   echo make_select('grouped', 'g1v1', $options);
- * 
+ *
  * @example Multiple selection with callback:
- *   echo make_select('multi', array('val1', 'val3'), $options, 
+ *   echo make_select('multi', array('val1', 'val3'), $options,
  *                    'handleChange', 'form-control', TRUE);
  */
 function make_select(
@@ -383,21 +399,21 @@ function make_select(
     if (!is_array($selected)) {
         $myselected = array($selected);
     }
-    
+
     // Create DOM document
     $dom = new DOMDocument('1.0', 'UTF-8');
     $dom->formatOutput = false; // Keep compact for web output
-    
+
     // Create select element
     $select = $dom->createElement('select');
-    
+
     // Set name attribute with optional brackets for multiple selection
     $nameAttr = $name;
     if ($multiple !== FALSE && $appendbrackets !== FALSE) {
         $nameAttr .= '[]';
     }
     $select->setAttribute('name', $nameAttr);
-    
+
     // Set additional attributes
     if ($jscallback !== "") {
         $select->setAttribute('onChange', $jscallback . '(this.value)');
@@ -408,61 +424,61 @@ function make_select(
     if ($multiple !== FALSE) {
         $select->setAttribute('multiple', 'multiple');
     }
-    
+
     // Set any extra attributes
     foreach ($extraAttrs as $attr => $value) {
         $select->setAttribute($attr, $value);
     }
-    
+
     // Process array options
     foreach ($ar as $key => $val) {
         if (is_array($val)) {
             // Create optgroup for nested arrays
             $optgroup = $dom->createElement('optgroup');
             $optgroup->setAttribute('label', $key);
-            
+
             foreach ($val as $k2 => $v2) {
                 $option = $dom->createElement('option');
                 $option->setAttribute('value', $k2);
-                
+
                 $displayText = $showvalue ? "[$k2] $v2" : $v2;
                 $option->textContent = $displayText;
-                
+
                 if (in_array($k2, $myselected)) {
                     $option->setAttribute('selected', 'selected');
                 }
-                
+
                 $optgroup->appendChild($option);
             }
-            
+
             $select->appendChild($optgroup);
         } else {
             // Create regular option
             $option = $dom->createElement('option');
             $option->setAttribute('value', $key);
-            
+
             $displayText = $showvalue ? "[$key] $val" : $val;
             $option->textContent = $displayText;
-            
+
             if (in_array($key, $myselected)) {
                 $option->setAttribute('selected', 'selected');
             }
-            
+
             $select->appendChild($option);
         }
     }
-    
+
     $dom->appendChild($select);
     return $dom->saveHTML($select);
 }
 
 /**
  * Generate a US state and territory selection dropdown
- * 
+ *
  * Creates a select element containing all US states, territories, and districts.
  * Each option displays the state code and full name. Optionally includes an
  * "All Available" option. Uses the standardized make_select() function.
- * 
+ *
  * @param string $selected Currently selected state code
  * @param string $jscallback JavaScript function to call on change (optional)
  * @param string $name HTML name attribute for the select element
@@ -470,7 +486,7 @@ function make_select(
  * @param bool $multiple Whether to allow multiple selections
  * @param bool $all Whether to include "All Available" option at top
  * @return string Complete HTML select element with state options
- * 
+ *
  * @example Basic usage:
  *   echo stateSelect('IA');  // Iowa selected
  * @example With callback:
@@ -542,23 +558,23 @@ function stateSelect(
         "WI" => "Wisconsin",
         "WY" => "Wyoming",
     );
-    
+
     // Build options array
     $options = array();
     if ($all) {
         $options["_ALL"] = "All Available";
     }
-    
+
     foreach ($states as $key => $val) {
         $options[$key] = "[$key] $val";
     }
-    
+
     // Additional attributes for size
     $extraAttrs = array();
     if ($size > 1) {
         $extraAttrs['size'] = $size;
     }
-    
+
     return make_select(
         $name,
         $selected,
@@ -574,14 +590,14 @@ function stateSelect(
 
 /**
  * Generate a Weather Forecast Office (WFO) selection dropdown
- * 
+ *
  * Creates a select element containing all Weather Forecast Offices using
  * the global $wfos array. Each option displays the WFO code and city name.
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param string $selected Currently selected WFO code
  * @return string Complete HTML select element with WFO options
- * 
+ *
  * @example Basic usage:
  *   echo wfoSelect('DMX');  // Des Moines WFO
  */
@@ -589,32 +605,32 @@ function wfoSelect($selected)
 {
     global $wfos;
     reset($wfos);
-    
+
     // Build options array from global $wfos
     $options = array();
     foreach ($wfos as $key => $value) {
         $options[$key] = "[$key] " . $value["city"];
     }
-    
+
     return make_select(
         'wfo',           // name
-        $selected,       // selected value 
+        $selected,       // selected value
         $options         // options array
     );
 }
 
 /**
  * Generate a minute selection dropdown with custom interval
- * 
+ *
  * Creates a select element for selecting minutes with customizable skip interval.
  * Supports JavaScript/HTML attributes for enhanced functionality.
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param int $selected Currently selected minute value (0-59)
  * @param string $name Name attribute for the select element
  * @param int $skip Interval between minute options (default: 1)
  * @return string Complete HTML select element with minute options
- * 
+ *
  * @example Basic usage:
  *   echo minuteSelect(30, 'start_minute');  // 30 selected, every minute
  * @example With 5-minute intervals:
@@ -629,7 +645,7 @@ function minuteSelect($selected, $name, $skip = 1)
     for ($i = 0; $i < 60; $i = $i + $skip) {
         $options[$i] = (string)$i;
     }
-        
+
     return make_select(
         $name,          // name
         $selected,      // selected value
@@ -640,14 +656,14 @@ function minuteSelect($selected, $name, $skip = 1)
 
 /**
  * Generate a 24-hour selection dropdown (0-23)
- * 
+ *
  * Creates a select element for selecting hours of the day in 24-hour format.
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param int $selected Currently selected hour value (0-23)
  * @param string $name Name attribute for the select element
  * @return string Complete HTML select element with 24-hour options
- * 
+ *
  * @example Basic usage:
  *   echo hour24Select(14, 'start_hour');  // 14 (2 PM) selected
  */
@@ -658,7 +674,7 @@ function hour24Select($selected, $name)
     for ($i = 0; $i < 24; $i++) {
         $options[$i] = (string)$i;
     }
-    
+
     return make_select(
         $name,      // name
         $selected,  // selected value
@@ -668,15 +684,15 @@ function hour24Select($selected, $name)
 
 /**
  * Generate a 12-hour format hour selection dropdown with AM/PM
- * 
+ *
  * Creates a select element for selecting hours of the day in 12-hour format
  * with AM/PM display. Uses the standardized make_select() function with support
  * for additional JavaScript attributes via $extraAttrs.
- * 
+ *
  * @param int $selected Currently selected hour value (0-23)
  * @param string $name Name attribute for the select element
  * @return string Complete HTML select element with 12-hour format options
- * 
+ *
  * @example Basic usage:
  *   echo hourSelect(14, 'hour');  // 2 PM selected
  */
@@ -688,7 +704,7 @@ function hourSelect($selected, $name)
         $ts = new DateTime("2000-01-01 $i:00");
         $options[$i] = $ts->format("h A");
     }
-    
+
     return make_select(
         $name,          // name
         $selected,      // selected value
@@ -698,15 +714,15 @@ function hourSelect($selected, $name)
 
 /**
  * Generate a GMT/UTC hour selection dropdown (0-23)
- * 
+ *
  * Creates a select element for selecting hours of the day in 24-hour GMT/UTC format.
  * Each option displays the hour followed by "UTC" (e.g., "0 UTC", "14 UTC").
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param int $selected Currently selected hour value (0-23)
  * @param string $name Name attribute for the select element
  * @return string Complete HTML select element with GMT/UTC hour options
- * 
+ *
  * @example Basic usage:
  *   echo gmtHourSelect(14, 'gmt_hour');  // 14 UTC selected
  * @example With custom name:
@@ -719,7 +735,7 @@ function gmtHourSelect($selected, $name)
     for ($i = 0; $i < 24; $i++) {
         $options[$i] = $i . " UTC";
     }
-    
+
     return make_select(
         $name,      // name
         $selected,  // selected value
@@ -730,17 +746,17 @@ function gmtHourSelect($selected, $name)
 
 /**
  * Generate a month selection dropdown with customizable format
- * 
+ *
  * Creates a select element for selecting months using customizable date format.
  * Supports custom name attributes, date formatting, and JavaScript/HTML attributes.
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param int $selected Currently selected month value (1-12)
  * @param string $name Name attribute for the select element (default: "month")
  * @param string $fmt Date format for month display (default: "M" for 3-letter abbreviation)
  * @param string $jsextra Additional JavaScript/HTML attributes (default: "")
  * @return string Complete HTML select element with month options
- * 
+ *
  * @example Basic usage (backwards compatible):
  *   echo monthSelect(6);  // June selected, name="month", format="M"
  * @example Custom name and format:
@@ -756,19 +772,19 @@ function monthSelect($selected, $name = "month", $fmt = "M", $jsextra = '')
         $ts = new DateTime("2000-$i-01");
         $options[$i] = $ts->format($fmt);
     }
-    
+
     // Parse jsextra for additional attributes
     $extraAttrs = array();
     $jscallback = '';
     $cssclass = '';
-    
+
     if (!empty($jsextra)) {
         // Parse onchange callback
         if (preg_match('/onchange\s*=\s*["\']([^"\']*)["\']/', $jsextra, $matches)) {
             $jscallback = $matches[1];
         }
     }
-    
+
     return make_select(
         $name,          // name
         $selected,      // selected value
@@ -784,18 +800,18 @@ function monthSelect($selected, $name = "month", $fmt = "M", $jsextra = '')
 
 /**
  * Generate a year selection dropdown from start year to end year
- * 
+ *
  * Creates a select element for selecting years from a specified start year
  * up to an end year (defaults to current year). Supports custom name attributes
  * and JavaScript/HTML attributes. Uses the standardized make_select() function.
- * 
+ *
  * @param int $start Starting year for the range
  * @param int $selected Currently selected year value
  * @param string $fname Name attribute for the select element (default: "year")
  * @param string $jsextra Additional JavaScript/HTML attributes (default: "")
  * @param int|null $endyear Ending year for the range (default: current year)
  * @return string Complete HTML select element with year options
- * 
+ *
  * @example Basic usage (backwards compatible):
  *   echo yearSelect(2000, 2023);  // Years 2000-current, 2023 selected, name="year"
  * @example Custom name and end year:
@@ -808,25 +824,25 @@ function yearSelect($start, $selected, $fname = 'year', $jsextra = '', $endyear 
     $start = intval($start);
     $now = new DateTime();
     $tyear = ($endyear !== null) ? intval($endyear) : intval($now->format("Y"));
-    
+
     // Build options array for year range
     $options = array();
     for ($i = $start; $i <= $tyear; $i++) {
         $options[$i] = (string)$i;
     }
-    
+
     // Parse jsextra for additional attributes
     $extraAttrs = array();
     $jscallback = '';
     $cssclass = '';
-    
+
     if (!empty($jsextra)) {
         // Parse onchange callback
         if (preg_match('/onchange\s*=\s*["\']([^"\']*)["\']/', $jsextra, $matches)) {
             $jscallback = $matches[1];
         }
     }
-    
+
     return make_select(
         $fname,         // name
         $selected,      // selected value
@@ -842,15 +858,15 @@ function yearSelect($start, $selected, $fname = 'year', $jsextra = '', $endyear 
 
 /**
  * Generate a day selection dropdown (1-31)
- * 
+ *
  * Creates a select element for selecting day of month from 1 to 31.
  * Supports custom name attributes and JavaScript/HTML attributes for enhanced functionality.
  * Uses the standardized make_select() function for consistency.
- * 
+ *
  * @param int $selected Currently selected day value (1-31)
  * @param string $name Name attribute for the select element (default: "day")
  * @return string Complete HTML select element with day options
- * 
+ *
  * @example Basic usage (backwards compatible):
  *   echo daySelect(15);  // Day 15 selected, name="day"
  * @example Custom name:
@@ -863,7 +879,7 @@ function daySelect($selected, $name = 'day')
     for ($k = 1; $k < 32; $k++) {
         $options[$k] = (string)$k;
     }
-        
+
     return make_select(
         $name,          // name
         $selected,      // selected value
@@ -871,4 +887,4 @@ function daySelect($selected, $name = 'day')
     );
 } // End of daySelect
 
- 
+

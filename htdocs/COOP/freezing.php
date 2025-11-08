@@ -7,8 +7,8 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
+$sortcol = get_str404("sortcol", "station");
+$network = get_str404("network", "IACLIMATE");
 
 $t = new MyView();
 $t->title = "Freezing Dates";
@@ -26,7 +26,7 @@ $query = "select station, valid, min_low, min_low_yr from climate
 $stname = iem_pg_prepare($conn, $query);
 $rs = pg_execute($conn, $stname, array(substr($network, 0, 2), 32));
 
- 
+
 $query = "select station, valid, low from climate
      WHERE valid > '2000-08-01' and low <= $2
      and substr(station,0,3) = $1 ORDER by valid";
@@ -94,8 +94,8 @@ $t->content = <<<EOM
 <h3>Freezing Dates</h3>
 
 <p>Using the NWS COOP data archive, significant dates relating to fall are
-extracted and presented on this page.  The specific dates are the first 
-occurance of that temperature and may have occured again in subsequent 
+extracted and presented on this page.  The specific dates are the first
+occurance of that temperature and may have occured again in subsequent
 years.
 
 <br>The "Record Lows" columns show the first fall occurance of a low

@@ -5,7 +5,7 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/vendor/mapscript.php";
 
-$extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) :
+$extents = array_key_exists("BBOX", $_GET) ? explode(",", $_GET["BBOX"]) :
     array(-105, 40, -97, 47);
 
 $mapFile = "../../data/gis/base4326.map";

@@ -9,9 +9,9 @@ $year = get_str404("YEAR", $year, 4);
 $sts = "$d%2000:00";
 $ets = "$d%2023:59";
 $uri = "{$EXTERNAL_BASEURL}/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/ww.map&amp;YEAR=$year&amp;STARTTS=$sts&amp;ENDTS=$ets&amp;";
-if (isset($_GET['time'])) {
+if (array_key_exists('time', $_GET)) {
     $year = substr($d, 0, 4);
-    $ts = "$d%20" . $_GET['time'];
+    $ts = "$d%20" . get_str404('time', null);
     $uri = "{$EXTERNAL_BASEURL}/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/wwt.map&amp;YEAR=$year&TS=$ts&amp;";
 }
 echo <<<EOM

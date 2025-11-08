@@ -7,7 +7,7 @@ require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 
 // Get things set via CGI
-$state = isset($_GET["state"]) ? substr(xssafe($_GET["state"]), 0, 2) : "IA";
+$state = substr(get_str404("state", "IA"), 0, 2);
 
 
 $sselect = stateSelect($state, "state");

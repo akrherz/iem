@@ -16,10 +16,10 @@ $t->jsextra = <<<EOM
 <script src="list_ugcs.module.js" type="module"></script>
 EOM;
 
-$wfo = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : 'DMX';
-$just_firewx = isset($_REQUEST["just_firewx"]) ? intval(xssafe($_REQUEST["just_firewx"])) : 0;
-$w = isset($_REQUEST["w"]) ? xssafe($_REQUEST["w"]) : "wfo";
-$state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
+$wfo = get_str404('station', 'DMX');
+$just_firewx = get_int404("just_firewx", 0);
+$w = get_str404("w", "wfo");
+$state = get_str404("state", "IA");
 if (($just_firewx != 1) && ($just_firewx != 0)){
     $just_firewx = 0;
 }
@@ -37,7 +37,7 @@ $arr = array(
     "just_firewx" => $just_firewx,
 );
 $title = "";
-if (($w == "wfo") && isset($_REQUEST["w"])) {
+if (($w == "wfo") && array_key_exists("w", $_REQUEST)) {
     $title = "for WFO: $wfo";
     $arr["wfo"] = $wfo;
 }

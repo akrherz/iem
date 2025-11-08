@@ -17,15 +17,15 @@ if ($year < 1986) {
 }
 $sid = get_int404("sid", 1);
 $eid = get_int404("eid", 999);
-$rhthres = isset($_REQUEST["relh"]) ? floatval(xssafe($_REQUEST["relh"])) : 25;
-$skntthres = isset($_REQUEST["sknt"]) ? floatval(xssafe($_REQUEST["sknt"])) : 25;
-$gustthres = isset($_REQUEST["gust"]) ? floatval(xssafe($_REQUEST["gust"])) : 25;
-$vsbythres = isset($_REQUEST["vsby"]) ? floatval(xssafe($_REQUEST["vsby"])) : 0.25;
-$ltmpfthres = isset($_REQUEST["ltmpf"]) ? floatval(xssafe($_REQUEST["ltmpf"])) : 32;
-$wchtthres = isset($_REQUEST["wcht"]) ? floatval(xssafe($_REQUEST["wcht"])) : -20;
-$hidxthres = isset($_REQUEST["hidx"]) ? floatval(xssafe($_REQUEST["hidx"])) : 105;
-$htmpfthres = isset($_REQUEST["htmpf"]) ? floatval(xssafe($_REQUEST["htmpf"])) : 100;
-$mode = isset($_REQUEST["mode"]) ? substr(xssafe($_REQUEST["mode"]), 0, 4) : 'FW.W';
+$rhthres = get_float404("relh", 25);
+$skntthres = get_float404("sknt", 25);
+$gustthres = get_float404("gust", 25);
+$vsbythres = get_float404("vsby", 0.25);
+$ltmpfthres = get_float404("ltmpf", 32);
+$wchtthres = get_float404("wcht", -20);
+$hidxthres = get_float404("hidx", 105);
+$htmpfthres = get_float404("htmpf", 100);
+$mode = substr(get_str404("mode", 'FW.W'), 0, 4);
 $ar = explode(".", $mode);
 $phenomena = $ar[0];
 $significance = $ar[1];
@@ -242,7 +242,7 @@ $t->content = <<<EOM
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="current">NWS Watch/Warning/Advisory + ASOS Observations</li>
 </ol>
-  
+
   <p>This app allows you to view an office's warnings for a year and
   then looks for ASOS/AWOS observations valid for the warning period. The observations
   presented are coded like:
@@ -250,15 +250,15 @@ $t->content = <<<EOM
   <br />Where ID is the station identifier, DDHHMI is the day-hour-minute of the
   observation in UTC, TMPF is the air temperature in Fahrenheit, DWPF is the
   dew point temperature in Fahrenheit, RELH is the relative humidity, VSBY is
-  the visibility, SKNT is the wind speed in knots and GUST is the wind gust in knots. 
+  the visibility, SKNT is the wind speed in knots and GUST is the wind gust in knots.
   The wind chill is displayed when the temperature is below 32&deg;F. The heat index
   is displayed when the value is above 80&deg;F.
-  
-  <p>A warning event may be listed multiple times, if the UGC zones associated 
+
+  <p>A warning event may be listed multiple times, if the UGC zones associated
   with the warning had different expiration times.
-    
+
   <form method="GET" name="theform">
-  
+
   <p>
   <table class="table table-sm">
   <tr>
@@ -276,9 +276,9 @@ $t->content = <<<EOM
     <td>{$yselect}</td>
     </tr>
     </table>
-  
+
   <table class="table table-sm">
-  <tr>	
+  <tr>
       <th>Relative Humidity Threshold (%):</th>
       <th>Wind Speed Threshold (kts):</th>
       <th>Wind Gust Threshold (kts):</th>

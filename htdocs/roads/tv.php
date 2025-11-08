@@ -2,11 +2,12 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vendor/mapscript.php";
+require_once "../../include/forms.php";
 
 $con = iemdb("postgis");
 
 // kvillewxguy@hotmail.com
-$metroview = isset($_GET["metro"]);
+$metroview = array_key_exists("metro", $_GET);
 
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);

@@ -4,11 +4,12 @@ require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_scatter.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/forms.php";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
-$station = isset($_REQUEST['station']) ? $_REQUEST['station'] : null;
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$station = get_str404('station', null);
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0) {
     $myTime = strtotime($year . "-" . $month . "-" . $day);

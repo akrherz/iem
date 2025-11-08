@@ -9,8 +9,8 @@ $t = new MyView();
 $t->title = "River Forecast Point Monitor";
 $content = "";
 
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "DMX";
-$state = isset($_GET["state"]) ? substr(xssafe($_GET["state"]), 0, 2) : "IA";
+$wfo = substr(get_str404("wfo", "DMX"), 0, 3);
+$state = substr(get_str404("state", "IA"), 0, 2);
 
 $sevcol = array(
     "N" => "#0f0",
@@ -31,11 +31,11 @@ $rivers = array();
 $used = array();
 foreach ($jobs as $key => $val) {
     $url = "{$EXTERNAL_BASEURL}/api/1/nws/current_flood_{$val}.json";
-    if (isset($_REQUEST["state"])) {
+    if (array_key_exists("state", $_REQUEST)) {
         $c2 = " bg-light border rounded p-3";
         $url .= "?state={$state}";
         $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
-    } else if (isset($_REQUEST["all"])) {
+    } else if (array_key_exists("all", $_REQUEST)) {
         $c3 = " bg-light border rounded p-3";
         $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
     } else {
@@ -89,10 +89,10 @@ $content .= $ptitle;
 $nselect = networkSelect("WFO", $wfo, array(), 'wfo');
 $sselect = stateSelect($state);
 $content .= <<<EOM
-<p>This page produces a summary listing for National Weather Service Flood 
+<p>This page produces a summary listing for National Weather Service Flood
 Forecast Points when the point is currently in a flood watch or warning state.
 The IEM
-processes the flood products and attempts to extract the important 
+processes the flood products and attempts to extract the important
 details regarding flood state, severity, forecasted stage and impact. By clicking
 on the graph icon near the location identfier, you are taken to an IEM Autoplot
 which shows forecasted stage and observations.</p>

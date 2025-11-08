@@ -52,7 +52,7 @@ if ($network == '_ALL_') {
     while ($row = pg_fetch_assoc($rs)) {
         $cities[$row["id"]] = $row;
     }
-} else if (isset($_GET["special"]) && $_GET["special"] == 'allasos') {
+} else if (get_str404("special", null) == 'allasos') {
     $rs = pg_query(
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, " .
@@ -64,7 +64,7 @@ if ($network == '_ALL_') {
     while ($row = pg_fetch_assoc($rs)) {
         $cities[$row["id"]] = $row;
     }
-} else if (isset($_GET["special"]) && $_GET["special"] == 'alldcp') {
+} else if (get_str404("special", null) == 'alldcp') {
     $rs = pg_query(
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, " .
@@ -106,7 +106,7 @@ if ($network == '_ALL_') {
 }
 
 $format = get_str404('format', 'html');
-$nohtml = isset($_GET['nohtml']);
+$nohtml = array_key_exists('nohtml', $_GET);
 
 $table = "";
 if (strlen($network) > 0) {
@@ -236,7 +236,7 @@ if (!$nohtml || $format == 'shapefile') {
     $t->title = "Network Station Tables";
     $page = 'full.phtml';
     $sextra = "";
-    if (isset($_REQUEST['station'])) {
+    if (array_key_exists('station', $_REQUEST)) {
         $t->sites_current = "tables";
         require_once "../../include/sites.php";
         $ctx = get_sites_context();

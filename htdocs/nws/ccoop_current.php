@@ -12,8 +12,8 @@ require_once "../../include/mlib.php";
 
 $t = new MyView();
 
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
-$sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']) : 'desc';
+$sortcol = get_str404('sortcol', 'ts');
+$sortdir = get_str404('sortdir', 'desc');
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
 function precip_formatter($val)
@@ -143,12 +143,12 @@ $eight = get_sortdir($baseurl, "pday", $sortcol, $sortdir);
 
 $t->content = <<<EOM
 
-<p>Sorted by: <strong>{$cols[$sortcol]} {$sorts[$sortdir]}</strong>. 
+<p>Sorted by: <strong>{$cols[$sortcol]} {$sorts[$sortdir]}</strong>.
 Times are presented in the local time of the site. Click on the identifier to
 get all daily observations for the site.  Click on the site name to get more
 information on the site. Click on the column heading to sort the column, clicking
 again will reverse the sort.
- 
+
 <form name="st" action="/my/current.phtml" method="GET">
 <table class="table table-striped table-sm table-bordered">
 <thead class="sticky">

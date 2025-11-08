@@ -8,18 +8,18 @@ $connect = iemdb("postgis");
 $year = get_int404("year", 2006);
 if ($year < 2002) die("invalid year specified!");
 
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : "MPX";
+$wfo = substr(get_str404("wfo", "MPX"), 0, 4);
 if (strlen($wfo) > 3) {
     $wfo = substr($wfo, 1, 3);
 }
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
+$phenomena = substr(get_str404("phenomena", "SV"), 0, 2);
+$significance = substr(get_str404("significance", "W"), 0, 1);
 
 $stname = iem_pg_prepare($connect, "SELECT eventid, phenomena, ".
         "significance, ST_AsText(geom) as g ".
         "from sbw ".
-        "WHERE vtec_year = $5 and wfo = $1 and phenomena = $2 and ". 
+        "WHERE vtec_year = $5 and wfo = $1 and phenomena = $2 and ".
         "eventid = $3 and significance = $4 ".
         "and status = 'NEW'");
 $result = pg_execute(
@@ -29,7 +29,7 @@ $result = pg_execute(
 );
 if (pg_num_rows($result) <= 0) {
     $stname = iem_pg_prepare($connect, "SELECT eventid, phenomena, ".
-        "significance, ST_astext(u.geom) as g ". 
+        "significance, ST_astext(u.geom) as g ".
         "from warnings w JOIN ugcs u on (u.gid = w.gid) ".
         "WHERE w.vtec_year = $5 and w.wfo = $1 and phenomena = $2 and ".
         "eventid = $3 and significance = $4 ");

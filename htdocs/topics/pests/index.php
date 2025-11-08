@@ -19,11 +19,11 @@ $station = get_str404("station", "IATAME");
 $pest = get_str404("pest", "seedcorn_maggot");
 $sdate = get_str404("sdate", "$year-01-01");
 $edate = get_str404("edate", $day);
-$edatechecked = isset($_GET["edate"]) ? "" : "checked";
+$edatechecked = !array_key_exists("edate", $_GET) ? "checked" : "";
 
 // Folks may have this page bookmarked and thus get a wonky combination of
 // start date and end date, rectify this
-if ((! isset($_GET["edate"])) && isset($_GET["sdate"])) {
+if (!array_key_exists("edate", $_GET) && array_key_exists("sdate", $_GET)) {
     $sdate = sprintf("%s-%s", $year, substr($sdate, 5, 5));
 }
 

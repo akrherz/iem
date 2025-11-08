@@ -12,7 +12,7 @@ $cities = $nt->table;
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 10) : "OT0002";
+$station = substr(get_str404("station", "OT0002"), 0, 10);
 
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 

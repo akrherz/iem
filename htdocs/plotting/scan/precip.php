@@ -9,7 +9,7 @@ require_once "../../../include/jpgraph/jpgraph_bar.php";
 $connection = iemdb("scan");
 $nt = new NetworkTable("SCAN");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$station = get_str404("station", "S2031");
 $year = get_int404("year", date("Y", time() - 3 * 86400));
 $month = get_int404("month", date("m", time() - 3 * 86400));
 $day = get_int404("day", date("d", time() - 3 * 86400));
@@ -19,8 +19,8 @@ $var = "phour";
 $accum = 1;
 
 $stname = iem_pg_prepare($connection, "SELECT sknt, drct, phour,
-        to_char(valid, 'mmdd/HH24') as tvalid 
-        from alldata WHERE 
+        to_char(valid, 'mmdd/HH24') as tvalid
+        from alldata WHERE
         station = $1 and date(valid) >= $2  and phour >= 0
         ORDER by tvalid ASC LIMIT 96");
 

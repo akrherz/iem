@@ -14,7 +14,7 @@ include("../../../include/jpgraph/jpgraph_led.php");
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
-$station = isset($_GET["station"]) ? $_GET["station"] : "SKCI4";
+$station = array_key_exists("station", $_GET) ? $_GET["station"] : "SKCI4";
 $year = get_int404("year", 2018);
 $month = get_int404("month", 1);
 $day = get_int404("day", 1);
@@ -24,7 +24,7 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 /* Dig in the archive for our data! */
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
-$stname = iem_pg_prepare($dbconn, "SELECT * from $tbl 
+$stname = iem_pg_prepare($dbconn, "SELECT * from $tbl
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {

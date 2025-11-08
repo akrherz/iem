@@ -10,7 +10,7 @@ $nt = new NetworkTable("SCAN");
 
 $connection = iemdb("scan");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$station = get_str404("station", "S2031");
 $year = get_int404("year", date("Y", time() - 3 * 86400));
 $month = get_int404("month", date("m", time() - 3 * 86400));
 $day = get_int404("day", date("d", time() - 3 * 86400));

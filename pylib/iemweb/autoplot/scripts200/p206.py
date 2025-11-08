@@ -162,7 +162,7 @@ def get_df(ctx, buf=2.25):
             conn,
             params=params,
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("No Data Found.")
 

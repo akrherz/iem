@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * I am sort of inspired by the old mapblaster days.  Lets create a map of
  * all sorts of data with tons of CGI vars, yippeee
  */
@@ -39,10 +39,10 @@ function draw_header($map, $img, $width, $height)
 
 /**
  * Get a filename and timestamp for the given inbound timestamp and prod
- * 
+ *
  * @param DateTime $ts
  * @param string $product
- * 
+ *
  * @return array (filename, timestamp)
  */
 function get_goes_fn_and_time($ts, $product)
@@ -142,19 +142,19 @@ $sectors = array(
 
 
 /* Setup layers */
-$layers = isset($_GET["layers"]) ? $_GET["layers"] : array("n0q");
+$layers = array_key_exists("layers", $_GET) ? $_GET["layers"] : array("n0q");
 // Make sure layers is an array...
 if (gettype($layers) == "string") {
     $layers = array($layers);
 }
 
 // Alias for visual plot of VTEC
-if (isset($_GET["visual"])){
+if (array_key_exists("visual", $_GET)){
     $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
 /* Straight CGI Butter */
-$sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
+$sector = get_str404("sector", "iem");
 if (!array_key_exists($sector, $sectors)){
     $opts = implode(", ", array_keys($sectors));
     die("Invalid sector provided, available: {$opts}");
@@ -165,7 +165,7 @@ $lsrbuffer = get_int404("lsrbuffer", 15);
 
 // Now, maybe we set a VTEC string, lets do all sorts of fun
 $vtec_limiter = "";
-if (isset($_GET["vtec"])) {
+if (array_key_exists("vtec", $_GET)) {
     $cvtec = xssafe($_GET["vtec"]);
     // cull errand _
     $pos = strpos($cvtec, "_");
@@ -241,7 +241,7 @@ EOM;
     }
 
     $vtec_limiter = sprintf(
-        "and phenomena = '%s' and eventid = %s and 
+        "and phenomena = '%s' and eventid = %s and
         significance = '%s' and w.wfo = '%s'",
         $phenomena,
         $eventid,
@@ -254,7 +254,7 @@ EOM;
         $layers[] = 'cbw';
     }
 }
-if (isset($_REQUEST['pid'])) {
+if (array_key_exists("pid", $_REQUEST)) {
     $pid = $_REQUEST["pid"];
     $dts = DateTime::createFromFormat(
         "YmdHi",
@@ -282,7 +282,7 @@ if (isset($_REQUEST['pid'])) {
 }
 
 /* Could define a custom box */
-if (isset($_GET["bbox"])) {
+if (array_key_exists("bbox", $_GET)) {
     $sector = "custom";
     $bbox = explode(",", $_GET["bbox"]);
     if (sizeof($bbox) != 4){
@@ -292,7 +292,7 @@ if (isset($_GET["bbox"])) {
 }
 /* Fetch bounds based on wfo as being set by bounds */
 if ($sector == "wfo") {
-    $sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]) : "DMX";
+    $sector_wfo = strtoupper(get_str404("sector_wfo", "DMX"));
     /* Fetch the bounds */
     $stname = iem_pg_prepare($postgis, "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
         . " ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
@@ -319,17 +319,17 @@ if ($sector == "wfo") {
 */
 
 $utcnow = new DateTime('now', new DateTimeZone("UTC"));
-$ts = isset($_GET["ts"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts"], new DateTimeZone("UTC")) : $utcnow;
+$ts = array_key_exists("ts", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts"], new DateTimeZone("UTC")) : $utcnow;
 if (is_bool($ts)) xssafe("<tag>");
-$ts1 = isset($_GET["ts1"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts1"], new DateTimeZone("UTC")) : null;
-$ts2 = isset($_GET["ts2"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts2"], new DateTimeZone("UTC")) : null;
-if (isset($dts) && !isset($_GET["ts"])) {
+$ts1 = array_key_exists("ts1", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts1"], new DateTimeZone("UTC")) : null;
+$ts2 = array_key_exists("ts2", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts2"], new DateTimeZone("UTC")) : null;
+if (isset($dts) && !array_key_exists("ts", $_GET)) {
     $ts = clone $dts;
 }
 if (is_null($ts1)) {
     $ts1 = clone $ts;
 }
-if (isset($dts2) && !isset($_GET["ts2"])) {
+if (isset($dts2) && !array_key_exists("ts2", $_GET)) {
     $ts2 = clone $dts2;
 }
 /* Make sure we have a minute %5 */
@@ -367,7 +367,7 @@ $places = $map->getLayerByName("places2010");
 $places->status = in_array("places", $layers);
 $places->draw($map, $img);
 
-if (in_array("goes", $layers) && isset($_REQUEST["goes_product"])) {
+if (in_array("goes", $layers) && array_key_exists("goes_product", $_REQUEST)) {
     $res = get_goes_fn_and_time(
         $ts,
         strtoupper($_REQUEST["goes_product"])
@@ -469,8 +469,8 @@ foreach ($prefixes as $p1 => $p2) {
 
 
 if (
-    in_array("ridge", $layers) && isset($_REQUEST["ridge_radar"]) &&
-    isset($_REQUEST["ridge_product"])
+    in_array("ridge", $layers) && array_key_exists("ridge_radar", $_REQUEST) &&
+    array_key_exists("ridge_product", $_REQUEST)
 ) {
     $res = get_ridge_fn_and_time(
         $ts,
@@ -496,7 +496,7 @@ $states->status = MS_ON;
 $states->draw($map, $img);
 
 /* All SBWs for a WFO */
-if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])) {
+if (in_array("allsbw", $layers) && array_key_exists("sector_wfo", $_REQUEST)) {
     $sbwh = $map->getLayerByName("allsbw");
     $sbwh->status =  MS_ON;
     $sbwh->connection = get_dbconn_str("postgis");
@@ -613,7 +613,7 @@ if (isset($_REQEST["pid"])) {
 
 
 // Draws the county-based VTEC warning, only if "cbw" in $layers
-if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers)) {
+if (array_key_exists("vtec", $_REQUEST) && in_array("cbw", $layers)) {
     $wc = new LayerObj($map);
     $wc->setConnectionType(MS_POSTGIS, "");
     $wc->connection = get_dbconn_str("postgis");
@@ -729,21 +729,21 @@ if (in_array("ci", $layers)) {
     $tblyr = $ts->format("Y");
     $sql = <<<EOM
 geo from (
-    WITH stormbased as (SELECT geom from sbw_$tblyr where wfo = '$wfo' 
-        and eventid = $eventid and significance = '$significance' 
-        and phenomena = '$phenomena' and status = 'NEW'), 
-    countybased as (SELECT ST_Union(u.geom) as geom from 
-        warnings_$tblyr w JOIN ugcs u on (u.gid = w.gid) 
-        WHERE w.wfo = '$wfo' and eventid = $eventid and 
-        significance = '$significance' and phenomena = '$phenomena') 
-                
+    WITH stormbased as (SELECT geom from sbw_$tblyr where wfo = '$wfo'
+        and eventid = $eventid and significance = '$significance'
+        and phenomena = '$phenomena' and status = 'NEW'),
+    countybased as (SELECT ST_Union(u.geom) as geom from
+        warnings_$tblyr w JOIN ugcs u on (u.gid = w.gid)
+        WHERE w.wfo = '$wfo' and eventid = $eventid and
+        significance = '$significance' and phenomena = '$phenomena')
+
     SELECT ST_SetSRID(ST_intersection(
           ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),
           ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))
        ), 4326) as geo,
     random() as k
     from stormbased s, countybased c
-            
+
 ) as foo USING unique k USING SRID=4326
 EOM;
     $ci->data = $sql;
@@ -808,7 +808,7 @@ $tlayer = $map->getLayerByName("bar640t-title");
 $point = new pointobj();
 $point->setXY(80, 15);
 $tzformat = "d M Y h:i A T";
-$tzinfo = isset($_REQUEST["tz"]) ? xssafe($_REQUEST["tz"]) : "America/Chicago";
+$tzinfo = get_str404("tz", "America/Chicago");
 // Translate to ZoneInfo compat
 if ($tzinfo == 'MDT' || $tzinfo == 'MST') {
     $tzinfo = "America/Denver";
@@ -827,9 +827,9 @@ $lts->settimezone(new DateTimeZone($tzinfo));
 $d = $lts->format($tzformat);
 $tomorrow = clone $ts;
 $tomorrow->add(new DateInterval("P1D"));
-if (isset($_GET["title"])) {
+if (array_key_exists("title", $_GET)) {
     $title = substr($_GET["title"], 0, 100);
-} else if (isset($_GET["vtec"])) {
+} else if (array_key_exists("vtec", $_GET)) {
     $title = "VTEC ID: " . $_GET["vtec"];
 } else if (in_array("nexrad", $layers)) {
     $title = "NEXRAD Base Reflectivity";

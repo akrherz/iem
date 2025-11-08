@@ -94,7 +94,7 @@ def plotter(ctx: dict):
         )["high_avg"]
         df["daily_high_depart"] = df["high"] - df["high_avg"]
         levels = list(range(-20, 21, 4))
-        label = "Temperature [F] Departure"
+        label = "Temperature [°F] Departure"
 
     baseyear = max([df["year"].min(), ctx["syear"]])
     endyear = min([df["year"].max(), ctx["eyear"]])

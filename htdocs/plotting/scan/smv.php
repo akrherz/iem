@@ -9,7 +9,7 @@ $nt = new NetworkTable("SCAN");
 
 $connection = iemdb("scan");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$station = get_str404("station", "S2031");
 $year = get_int404("year", date("Y", time() - 3 * 86400));
 $month = get_int404("month", date("m", time() - 3 * 86400));
 $day = get_int404("day", date("d", time() - 3 * 86400));
@@ -18,10 +18,10 @@ $y2label = "Volumetric Soil Moisture [%]";
 
 $date = "$year-$month-$day";
 
-$stname = iem_pg_prepare($connection, "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
-        to_char(valid, 'mmdd/HH24') as tvalid 
-        from alldata WHERE 
-        station = $1 and date(valid) >= $2  
+$stname = iem_pg_prepare($connection, "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad,
+        to_char(valid, 'mmdd/HH24') as tvalid
+        from alldata WHERE
+        station = $1 and date(valid) >= $2
         ORDER by tvalid ASC LIMIT 96");
 
 $result = pg_execute($connection, $stname, Array($station, $date));
@@ -35,8 +35,8 @@ $ydataSR = array();
 
 $xlabel= array();
 
-for( $i=0; $row = pg_fetch_assoc($result); $i++) 
-{ 
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
+{
   if ($row["c1smv"] > 0)   $ydata1[$i]  = $row["c1smv"];
   if ($row["c2smv"] > 0)   $ydata2[$i]  = $row["c2smv"];
   if ($row["c3smv"] > 0)   $ydata3[$i]  = $row["c3smv"];

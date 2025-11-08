@@ -10,7 +10,7 @@ $nt = new NetworkTable("SCAN");
 
 $connection = iemdb("scan");
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$station = get_str404("station", "S2031");
 $year = get_int404("year", date("Y", time() - 3 * 86400));
 $month = get_int404("month", date("m", time() - 3 * 86400));
 $day = get_int404("day", date("d", time() - 3 * 86400));
@@ -22,11 +22,11 @@ $queryData = "";
 
 $date = "$year-$month-$day";
 
-$stname = iem_pg_prepare($connection, "SELECT c1tmpf, c2tmpf, c3tmpf, 
-        c4tmpf, c5tmpf, srad, tmpf, valid, 
-        to_char(valid, 'mmdd/HH24') as tvalid 
-        from alldata WHERE 
-        station = $1 and date(valid) >= $2  
+$stname = iem_pg_prepare($connection, "SELECT c1tmpf, c2tmpf, c3tmpf,
+        c4tmpf, c5tmpf, srad, tmpf, valid,
+        to_char(valid, 'mmdd/HH24') as tvalid
+        from alldata WHERE
+        station = $1 and date(valid) >= $2
         ORDER by tvalid ASC LIMIT 96");
 
 $result = pg_execute($connection, $stname, Array($station, $date));
@@ -40,7 +40,7 @@ $ydataSR = array();
 
 $times= array();
 
-for( $i=0; $row = pg_fetch_assoc($result); $i++) 
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
 {
   $ydata1[] = ($row["c1tmpf"] > -90) ? $row["c1tmpf"] : "";
   $ydata2[] = ($row["c2tmpf"] > -90) ? $row["c2tmpf"] : "";

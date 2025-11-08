@@ -15,7 +15,7 @@ $t->jsextra = <<<EOM
 <script src="index.module.js?v=5" type="module"></script>
 EOM;
 
-$state = isset($_REQUEST['state']) ? xssafe($_REQUEST['state']) : null;
+$state = get_str404('state', null);
 $year = get_int404("year", date("Y"));
 $opt = get_int404("opt", 0);
 
@@ -128,7 +128,7 @@ $t->content = <<<EOM
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header bg-light">

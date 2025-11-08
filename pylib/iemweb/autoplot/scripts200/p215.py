@@ -20,9 +20,9 @@ from iemweb.autoplot import ARG_STATION
 from iemweb.util import month2months
 
 PDICT = {
-    "high": "High Temperature [F]",
-    "low": "Low Temperature [F]",
-    "avgt": "Average Temperature [F]",
+    "high": "High Temperature [°F]",
+    "low": "Low Temperature [°F]",
+    "avgt": "Average Temperature [°F]",
 }
 MDICT = {
     "all": "No Month/Time Limit",

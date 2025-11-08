@@ -32,6 +32,7 @@
 /cgi-bin/request/other.py?station=AAA
 /cgi-bin/request/raster2netcdf.py?dstr=201710251200&prod=bogus
 /cgi-bin/request/scan.py?stations=A,B,C,D,E,F,G,H,I,J,K,L&sts=2022-02-01&ets=2025-01-01
+/cgi-bin/request/scan.py?year1=2025&month1=1&day1=1&hour1=0&year2=2025&month2=12&day2=31&hour2=23&vars=test&what=view&stations=IA0000
 /cgi-bin/request/smos.py?sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&lat=42.0&lon=-93.0
 /cgi-bin/request/talltowers.py?station=MCAI4&var=nw_ws&z=100&agg=std&sts=2024-01-01T00:00:00Z&ets=2024-01-02T00:00:00Z
 /cgi-bin/request/wmo_bufr_srf.py?station=OT0001&sts=2025-09-01T00:00Z&ets=2025-09-30T23:59Z&format=csv

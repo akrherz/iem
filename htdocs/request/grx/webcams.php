@@ -6,8 +6,8 @@ require_once "../../../include/cameras.inc.php";
 require_once "../../../include/iemprop.php";
 require_once "../../../include/forms.php";
 $camera_refresh = get_iemprop("webcam.interval");
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCRG";
-$overview = isset($_GET["overview"]);
+$network = get_str404("network", "KCRG");
+$overview = array_key_exists("overview", $_GET);
 
 $thres = 999;
 $title = "IEM Webcam Overview";

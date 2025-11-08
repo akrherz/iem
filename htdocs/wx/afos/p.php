@@ -19,9 +19,9 @@ if (!is_null($e) && strlen($_GET["e"]) != 12) {
     // Naughty
     xssafe("<tag>");
 }
-$pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']), 0, 6)) : null;
-$bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : null;
-$dir = isset($_REQUEST['dir']) ? xssafe($_REQUEST['dir']) : null;
+$pil = strtoupper(substr(get_str404('pil', null), 0, 6));
+$bbb = strtoupper(substr(get_str404("bbb", null), 0, 3));
+$dir = get_str404('dir', null);
 
 if (is_null($pil) || trim($pil) == "") {
     http_response_code(422);

@@ -10,7 +10,8 @@ require_once "../../../include/mlib.php";
 $t = new MyView();
 
 try {
-    $day = isset($_GET["day"]) ? new DateTime(xssafe($_GET["day"])) : null;
+    $dayParam = get_str404("day", null);
+    $day = !is_null($dayParam) ? new DateTime($dayParam) : null;
 } catch (Exception $exp){
     xssafe("<tag>");
     die();

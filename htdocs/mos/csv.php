@@ -4,8 +4,8 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "KAMW";
-$ts = isset($_GET["valid"]) ? strtotime(xssafe($_GET["valid"])) : time();
+$station = get_str404("station", "KAMW");
+$ts = array_key_exists("valid", $_GET) ? strtotime(xssafe($_GET["valid"])) : time();
 $year = intval(date("Y", $ts));
 if ($year < 2007) {
     exit();
@@ -15,7 +15,7 @@ $mos = iemdb("mos");
 pg_exec($mos, "SET TIME ZONE 'UTC'");
 
 
-if (isset($_GET["runtime"]) && isset($_GET["model"])) {
+if (array_key_exists("runtime", $_GET) && array_key_exists("model", $_GET)) {
     $ts = strtotime($_GET["runtime"]);
     $year = intval(date("Y", $ts));
     if ($year < 2007) {

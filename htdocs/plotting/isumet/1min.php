@@ -5,12 +5,12 @@ require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
-//  1 minute data plotter 
+//  1 minute data plotter
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
-$station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']): null;
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$station = get_str404("station", null);
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);
@@ -68,10 +68,10 @@ if ($station == null){
         if (sizeof($tokens) != 21){
             continue;
         }
-          $tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], 
+          $tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2],
                   $tokens[3]);
           $v = strtotime($tstring);
-          
+
         if ($v < $myTime || trim($tstring) == ""){
             continue;
         }
@@ -86,12 +86,12 @@ if ($station == null){
         $d = dwpf($tokens[5], $rh);
         $dwpf[] = ($rh > 1 && $rh < 101) ? $d: "";
      } // End of while
-}	
+}
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example1");
 $graph->SetScale("datlin");
-if (isset($_REQUEST["rh"])){
+if (array_key_exists("rh", $_REQUEST)){
     $graph->SetY2Scale("lin",0,100);
     $graph->y2axis->SetTitle("Relative Humidity [%]");
     $graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
@@ -141,7 +141,7 @@ $lineplot3->SetColor("black");
 $lineplot3->SetWeight(3.0);
 
 $graph->Add($lineplot);
-if (isset($_REQUEST["rh"])){
+if (array_key_exists("rh", $_REQUEST)){
     $graph->AddY2($lineplot3);
 } else {
     $graph->Add($lineplot2);

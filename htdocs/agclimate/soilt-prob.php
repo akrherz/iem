@@ -7,12 +7,12 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 
-$station = isset($_GET["station"]) ? xssafe($_GET['station']) : "A130209";
-$tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']) : "50,45,40,35,32,28,23";
+$station = get_str404("station", "A130209");
+$tstr = get_str404("tstr", "50,45,40,35,32,28,23");
 
 $conn = iemdb("isuag");
 $stname1 = iem_pg_prepare($conn, "SELECT extract(year from valid) as yr,
-      max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and 
+      max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
       extract(month from valid) < 7 and c30_f != 'e' GROUP by yr");
 $stname2 = iem_pg_prepare($conn, "SELECT extract(year from valid) as yr,
       min(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
@@ -130,7 +130,7 @@ below the given threshold was observed <strong>after</strong> a given date.</li>
 below the given threshold was observed <strong>before</strong> a given date.</li>
 </ul>
 
-<div class="alert alert-info">This application uses the legacy ISU Ag Climate 
+<div class="alert alert-info">This application uses the legacy ISU Ag Climate
 network for its computations.  Data from the newer ISU Soil Moisture Network
 is not considered.</div>
 

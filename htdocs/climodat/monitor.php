@@ -14,12 +14,12 @@ function ss($v)
 }
 
 $year = date("Y");
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "05/01/{$year}";
+$sdate = get_str404("sdate", "05/01/{$year}");
 $network = get_str404("network", "IACLIMATE", 9);
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : "12/31/{$year}";
+$edate = get_str404("edate", "12/31/{$year}");
 $gddbase = get_int404("gddbase", 50);
-$gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
-$gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
+$gddfloor = ss(get_str404("gddfloor", "50"));
+$gddceil = ss(get_str404("gddceil", "86"));
 
 $hiddendates = <<<EOM
 <input type="hidden" name="sdate" value="{$sdate}">
@@ -27,8 +27,8 @@ $hiddendates = <<<EOM
 EOM;
 $sdate = strtotime($sdate);
 $edate = strtotime($edate);
-$s = isset($_GET["s"]) ? $_GET["s"] : array();
-if (isset($_GET['r'])) {
+$s = array_key_exists("s", $_GET) ? $_GET["s"] : array();
+if (array_key_exists('r', $_GET)) {
     $r = $_GET["r"];
     foreach ($r as $k => $v) {
         if (($key = array_search($v, $s)) !== false) {
@@ -85,7 +85,7 @@ foreach ($stationgrps as $state => $stations) {
       avg(merra_srad) as avg_srad
       from alldata_{$state} WHERE station in {$sstring}
       and year > 1950 GROUP by station, sday)
-      
+
     select o.station,
        sum({$gddstr}) as ogdd50,
        sum(o.precip) as oprecip,
@@ -138,7 +138,7 @@ $nselect = networkSelect($network, "IA0000", array(), "s[]");
 
 $t = new MyView();
 $showmap = " hidden";
-if (isset($_GET['map'])) {
+if (array_key_exists('map', $_GET)) {
     $t->iemss = True;
     $showmap = "";
 }
@@ -164,20 +164,20 @@ $t->content = <<<EOM
  <li class="active">IEM Climodat Station Monitor</li>
 </ol>
 
-<p>The purpose of this page is to provide a one-stop view of summarized 
-IEM Climodat data for a period of your choice.  Once you have configured 
+<p>The purpose of this page is to provide a one-stop view of summarized
+IEM Climodat data for a period of your choice.  Once you have configured
 your favorite sites, <strong>please bookmark the page</strong>. There are
 options presented on this page on how to compute Growing Degree Days.  Here
 is a description of the three options.</p>
 
 <ul>
  <li><i>base</i>: This is the base temperature (F) to substract the daily
- average [(high + low) / 2] temperature from.  The resulting value is 
+ average [(high + low) / 2] temperature from.  The resulting value is
  always non-negative.</li>
  <li><i>floor</i>: If the high or low temperature is below this value, the
  temperature is set to this value before the averaging is done. Delete the
  entry to remove this calculation.</li>
- <li><i>ceiling</i>: If the high temperature is above this value, the 
+ <li><i>ceiling</i>: If the high temperature is above this value, the
  high temperature is set to this value prior to averaging.  Delete the
  entry to remove this calculation.</li>
 </ul>

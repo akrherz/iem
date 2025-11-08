@@ -11,28 +11,28 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 
 /** We need these vars to make this work */
-$subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
-$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
-$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
-$pcpn = isset($_GET["pcpn"]) ? $_GET["pcpn"] : "";
+$subc = array_key_exists("subc", $_GET) ? $_GET["subc"] : "";
+$dwpf = array_key_exists("dwpf", $_GET) ? $_GET["dwpf"] : "";
+$tmpf = array_key_exists("tmpf", $_GET) ? $_GET["tmpf"] : "";
+$pcpn = array_key_exists("pcpn", $_GET) ? $_GET["pcpn"] : "";
 $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
 $days = get_int404("days", 2);
-$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
+$station = get_str404("station", "");
+$network = get_str404("network", "IA_RWIS");
 
 /** Lets assemble a time period if this plot is historical */
 $sts = new DateTime("$syear-$smonth-$sday");
 $ets = new DateTime("$syear-$smonth-$sday");
 $ets->modify("+$days days");
 
-if (isset($_GET["limit"])) $val = "between 25 and 35";
+if (array_key_exists("limit", $_GET)) $val = "between 25 and 35";
 
 $rwisdb = iemdb('rwis');
 $stname = iem_pg_prepare($rwisdb, <<<EOM
     SELECT a.* FROM alldata a JOIN stations t on (a.iemid = t.iemid)
-    WHERE id = $1 and valid >= $2 and valid < $3 
+    WHERE id = $1 and valid >= $2 and valid < $3
     ORDER by valid ASC
 EOM);
 $minInterval = 20;
@@ -197,7 +197,7 @@ $tx1->SetPos(0.01, 0.01, 'left', 'top');
 $tx1->SetFont(FF_FONT1, FS_BOLD, 16);
 
 $tx2 = new Text("Time series showing temperatures
-   from the pavement sensors and 
+   from the pavement sensors and
    the sub-surface sensor ");
 $tx2->SetPos(0.01, 0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);

@@ -9,9 +9,9 @@ $t = new MyView();
 
 $dbconn = iemdb("iem");
 
-$wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
-$by = isset($_REQUEST['by']) ? xssafe($_REQUEST['by']) : 'station';
-$tby = isset($_REQUEST['tby']) ? xssafe($_REQUEST['tby']) : 'month';
+$wfo = get_str404('wfo', 'DMX');
+$by = get_str404('by', 'station');
+$tby = get_str404('tby', 'month');
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 
@@ -23,24 +23,24 @@ if ($tby == "month") {
     if ($by == "station") {
         $stname = iem_pg_prepare($dbconn, "select id, network, name,
         count(*) as total,
-        sum(case when pday >= 0 then 1 else 0 end) as pobs, 
-        sum(case when snow >= 0 then 1 else 0 end) as sobs, 
-        sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
-        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
-        from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
-        WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
+        sum(case when pday >= 0 then 1 else 0 end) as pobs,
+        sum(case when snow >= 0 then 1 else 0 end) as sobs,
+        sum(case when snowd >= 0 then 1 else 0 end) as sdobs,
+        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs
+        from summary_$year s JOIN stations t on (t.iemid = s.iemid)
+        WHERE day >= $1 and day < ($1::date + '1 month'::interval)
         and day < 'TOMORROW'::date
         and t.wfo = $2 and t.network ~* 'COOP' GROUP by id, network, name
         ORDER by id ASC");
     } else {
         $stname = iem_pg_prepare($dbconn, "select day,
      count(*) as total,
-     sum(case when pday >= 0 then 1 else 0 end) as pobs, 
-     sum(case when snow >= 0 then 1 else 0 end) as sobs, 
-     sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
-     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
-     from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
-     WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
+     sum(case when pday >= 0 then 1 else 0 end) as pobs,
+     sum(case when snow >= 0 then 1 else 0 end) as sobs,
+     sum(case when snowd >= 0 then 1 else 0 end) as sdobs,
+     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs
+     from summary_$year s JOIN stations t on (t.iemid = s.iemid)
+     WHERE day >= $1 and day < ($1::date + '1 month'::interval)
      and day < 'TOMORROW'::date
      and t.wfo = $2 and t.network ~* 'COOP' GROUP by day ORDER by day ASC");
     }
@@ -50,22 +50,22 @@ if ($tby == "month") {
     if ($by == "station") {
         $stname = iem_pg_prepare($dbconn, "select id, network, name,
         count(*) as total,
-        sum(case when pday >= 0 then 1 else 0 end) as pobs, 
-        sum(case when snow >= 0 then 1 else 0 end) as sobs, 
-        sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
-        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
-        from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+        sum(case when pday >= 0 then 1 else 0 end) as pobs,
+        sum(case when snow >= 0 then 1 else 0 end) as sobs,
+        sum(case when snowd >= 0 then 1 else 0 end) as sdobs,
+        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs
+        from summary_$year s JOIN stations t on (t.iemid = s.iemid)
         WHERE day < 'TOMORROW'::date
         and t.wfo = $1 and t.network ~* 'COOP' GROUP by id, network, name
         ORDER by id ASC");
     } else {
         $stname = iem_pg_prepare($dbconn, "select day,
      count(*) as total,
-     sum(case when pday >= 0 then 1 else 0 end) as pobs, 
-     sum(case when snow >= 0 then 1 else 0 end) as sobs, 
-     sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
-     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
-     from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+     sum(case when pday >= 0 then 1 else 0 end) as pobs,
+     sum(case when snow >= 0 then 1 else 0 end) as sobs,
+     sum(case when snowd >= 0 then 1 else 0 end) as sdobs,
+     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs
+     from summary_$year s JOIN stations t on (t.iemid = s.iemid)
      WHERE day < 'TOMORROW'::date
      and t.wfo = $1 and t.network ~* 'COOP' GROUP by day ORDER by day ASC");
     }
@@ -125,7 +125,7 @@ $t->content = <<<EOM
  <li class="active">NWS COOP Observation Counts by Month by WFO</li>
 </ol>
 
-<p>This application prints out a summary of COOP reports received by the IEM 
+<p>This application prints out a summary of COOP reports received by the IEM
 on a per month and per WFO basis.  Errors do occur and perhaps the IEM's ingestor
 is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</a> of any errors you may suspect!
 

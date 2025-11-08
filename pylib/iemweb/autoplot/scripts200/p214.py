@@ -18,9 +18,9 @@ from pyiem.plot import figure_axes
 from iemweb.util import month2months
 
 VDICT = {
-    "dwpf": "Air Dew Point Temp [F]",
-    "tmpf": "Air Temperature [F]",
-    "feel": "Feels Like Temp [F]",
+    "dwpf": "Air Dew Point Temp [°F]",
+    "tmpf": "Air Temperature [°F]",
+    "feel": "Feels Like Temp [°F]",
     "p01i": "Hourly Precipitation [inch]",
     "alti": "Pressure Altimeter [in Hg]",
     "mslp": "Pressure Mean Sea Level [mb]",

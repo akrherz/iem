@@ -61,7 +61,7 @@ def plotter(ctx: dict):
             params={"ugc": ctx["ugc"]},
             parse_dates=["begin_ts", "end_ts"],
             geom_col="geom",
-        )
+        )  # type: ignore
     if ugcdf.empty:
         raise NoDataFound("No UGC data found.")
 

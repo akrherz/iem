@@ -21,7 +21,7 @@ if (TWITTER_KEY == null || TWITTER_SECRET == null) {
 $pgconn = iemdb('mesosite');
 $user_id = isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : '';
 $screen_name = isset($_SESSION["screen_name"]) ? $_SESSION["screen_name"] : '';
-$channel = isset($_REQUEST["channel"]) ? strtoupper(xssafe($_REQUEST["channel"])) : '';
+$channel = strtoupper(get_str404("channel", ''));
 $channel = trim($channel);
 
 $st_saveauth = iem_pg_prepare($pgconn, "INSERT into " .
@@ -54,7 +54,7 @@ function reloadbot()
 
 $msg = array();
 //------------------------------------------------------------
-if (isset($_REQUEST["removeme"]) && $_REQUEST["removeme"] == "1") {
+if (array_key_exists("removeme", $_REQUEST) && $_REQUEST["removeme"] == "1") {
     // remove subs first due to foreign key constraints
     pg_execute($pgconn, $st_deletesubs, array($user_id));
     pg_execute($pgconn, $st_deleteauth, array($user_id));
@@ -63,7 +63,7 @@ if (isset($_REQUEST["removeme"]) && $_REQUEST["removeme"] == "1") {
     unset($_SESSION["user_id"]);
     unset($_SESSION["screen_name"]);
 }
-if (isset($_REQUEST['add']) && $channel != '' && $screen_name != '') {
+if (array_key_exists('add', $_REQUEST) && $channel != '' && $screen_name != '') {
     pg_execute($pgconn, $st_addsub, array(
         $_SESSION["user_id"],
         strtolower($_SESSION["screen_name"]), $channel
@@ -75,7 +75,7 @@ if (isset($_REQUEST['add']) && $channel != '' && $screen_name != '') {
         $_SESSION["screen_name"]
     );
 }
-if (isset($_REQUEST['del']) && $channel != '' && $screen_name != '') {
+if (array_key_exists('del', $_REQUEST) && $channel != '' && $screen_name != '') {
     pg_execute($pgconn, $st_delsub, array(
         strtolower($_SESSION["user_id"]),
         $channel
@@ -87,7 +87,7 @@ if (isset($_REQUEST['del']) && $channel != '' && $screen_name != '') {
         $_SESSION["screen_name"]
     );
 }
-if (isset($_REQUEST['cb']) && isset($_SESSION['token']) && isset($_SESSION['token_secret'])) {
+if (array_key_exists('cb', $_REQUEST) && isset($_SESSION['token']) && isset($_SESSION['token_secret'])) {
     $connection = new TwitterOAuth(
         TWITTER_KEY,
         TWITTER_SECRET,
@@ -204,7 +204,7 @@ city, so you have been warned!</div>
  <thead><tr><th>Page</th><th>Channel</th><th></th></tr></thead>
 {$sselect2}
  </table>
-</div> 		
+</div>
 
 <div class="card card-body">
 <h4>Delete IEMBot from my account</h4>

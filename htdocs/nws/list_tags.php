@@ -9,10 +9,10 @@ require_once "../../include/forms.php";
 $t = new MyView();
 
 $year = get_int404("year", date("Y"));
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
-$state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
-$opt = isset($_REQUEST["opt"]) ? xssafe($_REQUEST["opt"]) : "bywfo";
-$damagetag = isset($_REQUEST["damagetag"]) ? xssafe($_REQUEST["damagetag"]) : "considerable";
+$wfo = get_str404("wfo", "DMX");
+$state = get_str404("state", "IA");
+$opt = get_str404("opt", "bywfo");
+$damagetag = get_str404("damagetag", "considerable");
 
 $damagetags = array(
     "considerable" => "Considerable",
@@ -208,7 +208,7 @@ $counts = [
         ]
     ],
     "MA" => [
-        "events" => [],  
+        "events" => [],
         "tags" => [
             "windtag" => [],
             "hailtag" => [],
@@ -234,7 +234,7 @@ foreach ($json['results'] as $key => $val) {
     $countkey = sprintf("%s_%s", $val["wfo"], $eventid);
     // Track unique events per phenomena type
     $counts[$ph]["events"][$countkey] = 1;
-    
+
     // Track tag usage per event (prevents double counting when same event has multiple records)
     foreach ($counts[$ph]["tags"] as $tagName => $tagCounts) {
         if (isset($val[$tagName]) && $val[$tagName] !== null && $val[$tagName] !== '') {
@@ -243,7 +243,7 @@ foreach ($json['results'] as $key => $val) {
             if (!isset($counts[$ph]["tags"][$tagName][$tagValue])) {
                 $counts[$ph]["tags"][$tagName][$tagValue] = [];
             }
-            
+
             // Only count once per event (prevents double counting)
             $counts[$ph]["tags"][$tagName][$tagValue][$countkey] = 1;
         }
@@ -265,14 +265,14 @@ foreach ($json['results'] as $key => $val) {
 function generateStatsSummary($counts) {
     $phenomena_names = [
         "SV" => "Severe Thunderstorm",
-        "TO" => "Tornado", 
+        "TO" => "Tornado",
         "MA" => "Marine",
         "FF" => "Flash Flood"
     ];
-    
+
     $tag_labels = [
         "windtag" => "Wind Tag",
-        "hailtag" => "Hail Tag", 
+        "hailtag" => "Hail Tag",
         "tornadotag" => "Tornado Tag",
         "damagetag" => "Damage Tag",
         "waterspouttag" => "Waterspout Tag",
@@ -282,25 +282,25 @@ function generateStatsSummary($counts) {
         "floodtag_dam" => "Dam Tag",
         "floodtag_leeve" => "Levee Tag"
     ];
-    
+
     $summary = [];
-    
+
     foreach ($counts as $phenomena => $data) {
         $totalEvents = count($data["events"]);
         $phenName = $phenomena_names[$phenomena] ?? $phenomena;
-        
+
         if ($totalEvents > 0) {
             $summary[$phenomena] = [
                 "name" => $phenName,
                 "total_events" => $totalEvents,
                 "tags" => []
             ];
-            
+
             foreach ($data["tags"] as $tagName => $tagValues) {
                 if (!empty($tagValues)) {
                     $tagLabel = $tag_labels[$tagName] ?? $tagName;
                     $tagStats = [];
-                    
+
                     // Calculate percentage for each individual tag value
                     foreach ($tagValues as $tagValue => $events) {
                         $eventCount = count($events);
@@ -310,7 +310,7 @@ function generateStatsSummary($counts) {
                             "percentage" => $percentage
                         ];
                     }
-                    
+
                     $summary[$phenomena]["tags"][$tagName] = [
                         "label" => $tagLabel,
                         "values" => $tagStats
@@ -319,7 +319,7 @@ function generateStatsSummary($counts) {
             }
         }
     }
-    
+
     return $summary;
 }
 
@@ -345,22 +345,22 @@ $t->content = <<<EOM
              <li class="breadcrumb-item active" aria-current="page">List Warning Tags Issued</li>
          </ol>
      </nav>
-     
+
      <div class="row">
          <div class="col-12">
              <div class="alert alert-info d-flex align-items-start" role="alert">
                  <i class="bi bi-info-circle-fill me-2 flex-shrink-0" style="font-size: 1.2rem;"></i>
                  <div>
                      <strong>About This Application:</strong> This tool lists Flash Flood, Marine, Severe Thunderstorm,
-                     and Tornado Warnings issued by the National Weather Service for a given year, including metadata tags 
+                     and Tornado Warnings issued by the National Weather Service for a given year, including metadata tags
                      from initial warnings or followup statements.
-                     <br><strong>Important:</strong> Not all offices include these tags in their warnings! 
+                     <br><strong>Important:</strong> Not all offices include these tags in their warnings!
                      Data goes back to 2002, though tags weren't used until recent years.
                  </div>
              </div>
          </div>
      </div>
-     
+
      <form method="GET" name="one" class="mb-4">
          <div class="card form-compact">
              <div class="card-header bg-light">
@@ -431,11 +431,11 @@ $t->content = <<<EOM
          </div>
      </form>
      </form>
-     
+
      <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
          <i class="bi bi-clock-fill me-2 flex-shrink-0"></i>
          <div>
-             <strong>Data Generation:</strong> Based on data generated at <code>{$json["generated_at"]}</code>. 
+             <strong>Data Generation:</strong> Based on data generated at <code>{$json["generated_at"]}</code>.
              Tables are cached for approximately one hour - check back later for updated values.
          </div>
      </div>
@@ -470,7 +470,7 @@ foreach ($statsummary as $phenomena => $stats) {
                                          <strong>Total Events:</strong> <span class="badge bg-primary">{$stats['total_events']}</span>
                                      </div>
 EOM;
-    
+
     foreach ($stats['tags'] as $tagName => $tagData) {
         $t->content .= <<<EOM
                                      <div class="mb-3">
@@ -485,7 +485,7 @@ EOM;
                                              </thead>
                                              <tbody>
 EOM;
-        
+
         // Show individual tag values with their counts and percentages in table rows
         foreach ($tagData['values'] as $value => $valueData) {
             $t->content .= <<<EOM
@@ -496,14 +496,14 @@ EOM;
                                                  </tr>
 EOM;
         }
-        
+
         $t->content .= <<<EOM
                                              </tbody>
                                          </table>
                                      </div>
 EOM;
     }
-    
+
     $t->content .= <<<EOM
                                  </div>
                              </div>
@@ -539,7 +539,7 @@ $t->content .= <<<EOM
                  </div>
              </div>
          </div>
-         
+
          <div class="col-lg-6">
              <div class="card h-100">
                  <div class="card-header bg-warning text-dark d-flex align-items-center">
@@ -559,7 +559,7 @@ $t->content .= <<<EOM
                  </div>
              </div>
          </div>
-         
+
          <div class="col-lg-6">
              <div class="card h-100">
                  <div class="card-header bg-info text-white d-flex align-items-center">
@@ -579,7 +579,7 @@ $t->content .= <<<EOM
                  </div>
              </div>
          </div>
-         
+
          <div class="col-lg-6">
              <div class="card h-100">
                  <div class="card-header bg-primary text-white d-flex align-items-center">

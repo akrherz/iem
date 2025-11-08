@@ -5,7 +5,7 @@ $t = new MyView();
   $t->title = "Birthday Weather";
 require_once "../../../include/forms.php";
 
-$startYear = isset($_GET['startYear']) ? intval($_GET['startYear']): 1951;
+$startYear = get_int404('startYear', 1951);
 
 $cselect = networkSelect("IACLIMATE", "IA0200", Array(), "city");
 $mselect = monthSelect("1", "month");

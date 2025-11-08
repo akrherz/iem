@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * Generate a placefile of SBWs valid at a given time for a given WFO
  */
 require_once "../../../config/settings.inc.php";
@@ -15,7 +15,7 @@ $day = get_int404("day", 8);
 $hour = get_int404("hour", 10);
 $minute = get_int404("minute", 0);
 $ts = gmmktime($hour, $minute, 0, $month, $day, $year);
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
+$wfo = substr(get_str404("wfo", "MPX"), 0, 3);
 
 $stname = iem_pg_prepare($connect, "SELECT *, ST_AsText(geom) as g, ".
            "round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize ".

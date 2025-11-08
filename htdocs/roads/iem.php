@@ -2,21 +2,22 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vendor/mapscript.php";
+require_once "../../include/forms.php";
 
 $con = iemdb("postgis");
 
-$eightbit = isset($_GET["8bit"]);
-$metroview = isset($_GET["metro"]);
-$thumbnail = isset($_GET["thumbnail"]);
+$eightbit = array_key_exists("8bit", $_GET);
+$metroview = array_key_exists("metro", $_GET);
+$thumbnail = array_key_exists("thumbnail", $_GET);
 
-if (!isset($_GET["valid"])) {
+if (!array_key_exists("valid", $_GET)) {
     $sql = "SELECT max(valid) as valid from roads_current";
     $rs = pg_query($con, $sql);
 
     $row = pg_fetch_assoc($rs, 0);
     $ts = new DateTime(substr($row["valid"], 0, 16), new DateTimeZone("America/Chicago"));
 } else {
-    $ts = new DateTime($_GET["valid"], new DateTimeZone("America/Chicago"));
+    $ts = new DateTime(get_str404("valid", null), new DateTimeZone("America/Chicago"));
 }
 
 $map = new MapObj("roads.map");
@@ -44,7 +45,7 @@ $map->__set("height", $height);
 
 $img = $map->prepareImage();
 
-if (isset($_GET["nexrad"])) {
+if (array_key_exists("nexrad", $_GET)) {
     $gmtts = clone $ts;
     $gmtts->setTimezone(new DateTimeZone("UTC"));
     $radarfn = sprintf("/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0q_%s.png", $gmtts->format("Y/m/d"), $gmtts->format("YmdHi"));
@@ -75,13 +76,13 @@ $dbvalid = $ts->format('Y-m-d H:i');
 $dbvalid2 = clone $ts;
 $dbvalid2->sub(new DateInterval("P90D"));
 $dbvalid2 = $dbvalid2->format('Y-m-d H:i');
-if (isset($_GET['valid'])) {
+if (array_key_exists('valid', $_GET)) {
     $sql = <<< EOM
     geom from (
         with data as (
             select b.segid, c.cond_code,
             row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC)
-            from roads_base b, roads_log c WHERE b.segid = c.segid 
+            from roads_base b, roads_log c WHERE b.segid = c.segid
             and c.valid < '$dbvalid' and c.valid > '$dbvalid2'),
         agg as (
             select * from data where row_number = 1)
@@ -97,12 +98,12 @@ $roads->draw($map, $img);
 
 $roads_int = $map->getLayerByName("roads-inter");
 $roads_int->__set("status", MS_ON);
-if (isset($_GET['valid'])) {
+if (array_key_exists('valid', $_GET)) {
     $roads_int->__set("data", str_replace("b.type > 1", "b.type = 1", $sql));
 }
 $roads_int->draw($map, $img);
 
-if (isset($_GET["trucks"])) {
+if (array_key_exists("trucks", $_GET)) {
     // 10 minute window for trucks
     $w1 = clone $ts;
     $w1->sub(new DateInterval("PT5M"));

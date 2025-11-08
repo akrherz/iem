@@ -12,7 +12,7 @@ require_once "../../include/forms.php";
 $mesosite = iemdb("mesosite");
 $t = new MyView();
 
-$myid = isset($_GET["id"]) ? xssafe($_GET["id"]) : null;
+$myid = get_str404("id", null);
 // Sanitize $myid
 if (!is_null($myid)) {
     if (preg_match('/^[a-z_]+$/', $myid) != 1) {

@@ -246,9 +246,9 @@ function scan_formatter($i, $row, $windunits = "mph")
     );
 }
 // Handle both legacy (year/month/day) and modern (date) URL parameters
-if (isset($_GET["date"]) && !empty($_GET["date"])) {
+$date_param = get_str404("date", null);
+if (!empty($date_param)) {
     // Modern date parameter takes precedence
-    $date_param = xssafe($_GET["date"]);
     $date_parts = explode("-", $date_param);
     $year = intval($date_parts[0]);
     $month = intval($date_parts[1]);
@@ -261,10 +261,10 @@ if (isset($_GET["date"]) && !empty($_GET["date"])) {
     $date_param = sprintf("%04d-%02d-%02d", $year, $month, $day);
 }
 
-$metar = (isset($_GET["metar"]) && xssafe($_GET["metar"]) == "1") ? "1" : "0";
-$madis = (isset($_GET["madis"]) && xssafe($_GET["madis"]) == "1") ? "1" : "0";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
-$windunits = isset($_GET["windunits"]) ? xssafe($_GET["windunits"]) : "mph";
+$metar = (get_str404("metar", "0") == "1") ? "1" : "0";
+$madis = (get_str404("madis", "0") == "1") ? "1" : "0";
+$sortdir = get_str404("sortdir", "asc");
+$windunits = get_str404("windunits", "mph");
 $date = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;

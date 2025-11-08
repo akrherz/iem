@@ -3,16 +3,16 @@ $OL = "10.6.1";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "KCCI";
+$network = get_str404("network", "KCCI");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2019;
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
-$station = isset($_GET['station']) ? xssafe($_GET['station']) : "";
+$year = get_int404("year", 2019);
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$station = get_str404('station', "");
 
 $t = new MyView();
 $t->iemselect2 = TRUE;
-if (! isset($_GET["station"])) {
+if (!array_key_exists("station", $_GET)) {
     $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
@@ -50,7 +50,7 @@ if (strlen($station) > 0) {
  <div class="col-md-4 col-sm-4">
 <a href="?network=KCCI" style="text-decoration: none;">
    <img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a>
-   
+
  </div>
  <div class="col-md-4 col-sm-4">
 <a href="?network=KELO" style="text-decoration: none;">
@@ -61,7 +61,7 @@ if (strlen($station) > 0) {
     <img src="/schoolnet/images/kimt_logo.png" border="0"><br /><b>StormNet</b></a>
 
     </div></div>
- 
+
 <style type="text/css">
         #map {
             width: 640px;
@@ -77,14 +77,14 @@ EOM;
 $t->content = <<<EOM
 <h3>1 minute data interval time series</h3>
 
-<p>This application generates graphs of 1 minute interval data 
+<p>This application generates graphs of 1 minute interval data
 for a school based network of your choice. Note that the archive
-begins on 12 February 2002, but does not go back that far for 
+begins on 12 February 2002, but does not go back that far for
 every site.</p>
 
 
 <form method="GET" action="1station_1min.php" name="olselect">
-<input type="hidden" name="network" value="{$network}"> 
+<input type="hidden" name="network" value="{$network}">
 <a href="1station_1min.php?network={$network}">Select Visually</a><br>
 Make plot selections: {$nselect}
 {$ys} {$ms} {$ds}

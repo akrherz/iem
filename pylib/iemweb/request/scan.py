@@ -151,6 +151,9 @@ def application(environ, start_response):
         headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)
     sio = StringIO()
+    for varname in varnames:
+        if varname not in df.columns:
+            raise IncompleteWebRequest(f"Unknown variable: `{varname}`")
     df.to_csv(
         sio, index=False, sep=DELIMITERS[environ["delim"]], columns=varnames
     )

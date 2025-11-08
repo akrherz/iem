@@ -25,8 +25,9 @@ $old2new = array(
 );
 
 // Legacy
-if (isset($_GET["src"]) && array_key_exists(xssafe($_GET["src"]), $old2new)) {
-    $prod = $old2new[$_GET["src"]];
+$src = get_str404("src", null);
+if (!is_null($src) && array_key_exists($src, $old2new)) {
+    $prod = $old2new[$src];
 }
 
 $data = array(
