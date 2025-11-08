@@ -1,5 +1,6 @@
 <?php
 require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";

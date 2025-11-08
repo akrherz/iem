@@ -1,6 +1,6 @@
 <?php
-require_once "../../config/settings.inc.php";
-require_once "../../include/forms.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
 // 27 Feb 2025 still being used...
 $pil = strtoupper(get_str404("pil", 'AFDDMX'));
 $cnt = get_int404("cnt", 1);
