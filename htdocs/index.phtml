@@ -13,8 +13,8 @@ require_once '../include/cameras.inc.php';
 
 $t = new MyView();
 $t->headextra = <<<EOM
-<link rel="alternate" type="application/rss+xml" 
-  title="IEM News + Notes Feed" 
+<link rel="alternate" type="application/rss+xml"
+  title="IEM News + Notes Feed"
   href="/rss.php" />
 <link rel="stylesheet" href="index.css" />
 EOM;
@@ -27,7 +27,7 @@ if (date("md") == "0911" || isset($_GET["911"])){
 <p class="lead">The fateful day of September 11th, 2001 is a distant memory for some, a
 constant nightmare for others and an unexperienced event for most college age
 students and younger.  May we all not forget the ultimate sacrifice many made
-that day and the years that followed.</p> 
+that day and the years that followed.</p>
 </div>
 <div class="col-md-6">
 <img src="/images/911.jpg" class="img-fluid">
@@ -78,9 +78,9 @@ $t->content = <<<EOM
       <div class="row">
 
         <div class="col-md-9">
-       
- <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
- cooperating members with observing networks. The data are stored and made 
+
+ <p>The Iowa Environmental Mesonet (IEM) collects environmental data from
+ cooperating members with observing networks. The data are stored and made
  available on this website.</p>
 
 
@@ -122,7 +122,7 @@ $t->content = <<<EOM
 <a href="/one/" class="list-group-item list-group-item-action">IEM One <small class="text-muted">(RADAR + Warnings)</small></a>
 <a href="/rainfall/" class="list-group-item list-group-item-action">IEM GIS Rainfall</a>
 <a href="/my/current.phtml" class="list-group-item list-group-item-action">Sortable Currents</a>
-<a href="/onsite/features/tags/winter2425.html" class="list-group-item list-group-item-action">Winter Storms of 2024-2025</a>
+<a href="/onsite/features/tags/winter2526.html" class="list-group-item list-group-item-action">Winter Storms of 2025-2026</a>
 </div>
     </div>
 </div>
@@ -134,7 +134,7 @@ $t->content = <<<EOM
 {$news}
 
 <p><i class="bi bi-envelope"></i>
-<a href="https://groups.google.com/g/iem-dailyb">Sign up</a> for the 
+<a href="https://groups.google.com/g/iem-dailyb">Sign up</a> for the
 <a href="/data/iemdb.html">Daily Bulletin</a></p>
 
   </div>
