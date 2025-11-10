@@ -1,4 +1,4 @@
-import { requireElement } from '/js/iemjs/domUtils.js';
+import { requireElement, requireInputElement } from '/js/iemjs/domUtils.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const theButton = requireElement("thebutton");
@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const theTitle = requireElement("thetitle");
     const theImage = requireElement("theimage");
     const theGeojson = requireElement("thegeojson");
-    const theEastCheckbox = requireElement("eastcheckbox");
+    const theEastCheckbox = requireInputElement("eastcheckbox");
 
     theButton.addEventListener("click", () => {
         const text = theText.value;
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             theGeojson.textContent = JSON.stringify(data.geojson);
         })
         .catch(() => {
-            alert("Image Generation Failed, sorry!");
+            theGeojson.textContent = "Image/GeoJSON Generation Failed, sorry!";
         });
     });
 });
