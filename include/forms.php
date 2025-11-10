@@ -87,7 +87,7 @@ function selectNetwork($selected, $extra = array())
 {
     $selected = strtoupper($selected);
     $dbconn = iemdb('mesosite');
-    $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
+    $rs = pg_query($dbconn, "SELECT * from networks ORDER by name ASC");
 
     // Build options array starting with extra options
     $options = array();

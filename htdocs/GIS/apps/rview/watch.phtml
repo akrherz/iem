@@ -15,12 +15,12 @@ $t->title = "SPC $year Convective Watch $num";
 
 require_once "../../../../include/rview_lib.php";
 $db = iemdb("postgis");
-pg_exec($db, "SET TIME ZONE 'UTC'");
+pg_query($db, "SET TIME ZONE 'UTC'");
 
-$stname = iem_pg_prepare($db, "SELECT *, ST_xmin(geom) as x0, 
+$stname = iem_pg_prepare($db, "SELECT *, ST_xmin(geom) as x0,
       ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
-      ST_askml(geom) as kml, 
-      ST_asGeoJSON(geom) as geojson from watches 
+      ST_askml(geom) as kml,
+      ST_asGeoJSON(geom) as geojson from watches
       where extract(year from issued) = $1 and num = $2");
 
 $ERROR = "";
@@ -124,11 +124,11 @@ $t->content = <<<EOM
   </ol>
 </nav>
 
-<p>This application presents a browsable archive 
-of <a href="https://www.spc.noaa.gov">SPC</a> issued tornado and 
+<p>This application presents a browsable archive
+of <a href="https://www.spc.noaa.gov">SPC</a> issued tornado and
 severe thunderstorm watches. Each sequential
 watch is assigned a numeric ID, which uniquely identifies a watch for each year.
-Up until 2006, the polygon was the valid area of the watch.  Since then, the 
+Up until 2006, the polygon was the valid area of the watch.  Since then, the
 valid area is issued by county and marine zone.
 </p>
 
@@ -156,7 +156,7 @@ valid area is issued by county and marine zone.
 <table class="table table-striped">
 <tr><th>Type:</th><td>{$row["type"]}</td></tr>
 <tr><th>Watch #:</th><td>{$yselect}
-<input name="num" type="text" size="5" value="{$row["num"]}"> 
+<input name="num" type="text" size="5" value="{$row["num"]}">
 <input type="submit" value="GO!" class="btn btn-primary"></td></tr>
 
 {$textlinks}

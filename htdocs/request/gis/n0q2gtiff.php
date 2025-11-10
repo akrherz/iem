@@ -14,7 +14,17 @@ if (is_null($dstr)) {
     http_response_code(422);
     die("Invalid date format");
 }
+// Validate dstr format (12 digits: YYYYMMDDHHMM)
+if (!preg_match('/^\d{12}$/', $dstr)) {
+    http_response_code(422);
+    die("Invalid date format");
+}
 $sector = substr(get_str404("sector", "us"), 0, 2);
+// Validate sector contains only letters
+if (!preg_match('/^[a-zA-Z]+$/', $sector)) {
+    http_response_code(422);
+    die("Invalid sector format");
+}
 $year = intval(substr($dstr, 0, 4));
 $month = intval(substr($dstr, 4, 2));
 $day = intval(substr($dstr, 6, 2));
@@ -41,14 +51,20 @@ if ($ts > ($now - 360.0)) {
     $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/{$sector}comp/n0q_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts));
 }
 
-if (!is_file($inFile)) die("No GIS composite found for this time!");
+if (!is_file($inFile)) die("No GIS composite $inFile found for this time!");
 
 
-$cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
-exec(escapeshellcmd($cmd));  // skipcq
+$cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs %s -s_srs %s -of GTIFF %s %s.tif",
+    escapeshellarg("EPSG:4326"),
+    escapeshellarg("EPSG:4326"),
+    escapeshellarg($inFile),
+    escapeshellarg($outFile));
+exec($cmd);
 
-$cmd = "zip $zipFile {$outFile}.tif";
-exec(escapeshellcmd($cmd));  // skipcq
+$cmd = sprintf("zip %s %s.tif",
+    escapeshellarg($zipFile),
+    escapeshellarg($outFile));
+exec($cmd);
 
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename={$zipFile}");

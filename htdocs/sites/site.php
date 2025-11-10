@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
-$OL = "10.6.1";
+$OL = "10.7.0";
 $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;

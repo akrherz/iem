@@ -36,17 +36,17 @@ $content = <<< EOM
 EOM;
 
 if ($id > 0) {
-    $stname = iem_pg_prepare($dbconn, "UPDATE news SET views = views + 1 
+    $stname = iem_pg_prepare($dbconn, "UPDATE news SET views = views + 1
       WHERE id = $1");
     pg_execute($dbconn, $stname, array($id));
-    $stname = iem_pg_prepare($dbconn, "SELECT *, 
-      to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
+    $stname = iem_pg_prepare($dbconn, "SELECT *,
+      to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE id = $1");
     $result = pg_execute($dbconn, $stname, array($id));
 } else if ($q != "") {
-    $stname = iem_pg_prepare($dbconn, "SELECT *, 
-      to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
-      from news WHERE (title ~* $1 or body ~* $1) 
+    $stname = iem_pg_prepare($dbconn, "SELECT *,
+      to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
+      from news WHERE (title ~* $1 or body ~* $1)
       ORDER by entered DESC");
     $result = pg_execute($dbconn, $stname, array($q));
 } else if (!is_null($tag)) {
@@ -56,9 +56,9 @@ if ($id > 0) {
       ORDER by entered DESC");
     $result = pg_execute($dbconn, $stname, array($tag));
 } else {
-    $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
+    $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
            from news ORDER by entered DESC LIMIT 1";
-    $result = pg_exec($dbconn, $q);
+    $result = pg_query($dbconn, $q);
     $row = pg_fetch_assoc($result);
     $id = intval($row["id"]);
 }
@@ -97,7 +97,7 @@ while ($row = pg_fetch_assoc($result)) {
     $content .= "<span class=\"badge bg-light text-dark\" aria-label=\"{$row["views"]} page views\">{$row["views"]} Views</span>";
     $content .= "</header>";
     $content .= "<div class=\"card-body\">";
-    
+
     // Metadata section
     $content .= '<div class="row g-2 mb-3">';
     $link = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
@@ -108,7 +108,7 @@ while ($row = pg_fetch_assoc($result)) {
         $content .= "<div class=\"col-12 col-md-auto\"><span class=\"badge bg-secondary\">Tags: " . print_tags($row["tags"]) . "</span></div>";
     }
     $content .= '</div>';
-    
+
     if (strlen($row["url"]) > 0) {
         $content .= "<div class=\"alert alert-info mb-3\"><strong>Link:</strong> <a href=\"{$row["url"]}\" target=\"_blank\" rel=\"noopener\">{$row["url"]}</a></div>\n";
     }

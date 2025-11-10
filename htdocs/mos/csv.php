@@ -12,8 +12,7 @@ if ($year < 2007) {
 }
 
 $mos = iemdb("mos");
-pg_exec($mos, "SET TIME ZONE 'UTC'");
-
+pg_query($mos, "SET TIME ZONE 'UTC'");
 
 if (array_key_exists("runtime", $_GET) && array_key_exists("model", $_GET)) {
     $ts = strtotime($_GET["runtime"]);
@@ -21,7 +20,7 @@ if (array_key_exists("runtime", $_GET) && array_key_exists("model", $_GET)) {
     if ($year < 2007) {
         die("Bad runtime '" . $_GET["runtime"] . "'");
     }
-    $stname2 = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06, 
+    $stname2 = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06,
                  t12_1 ||'/'|| t12_2 as t12  from t{$year} WHERE station = $1
                  and runtime = $2 and model = $3 ORDER by ftime ASC");
     $rs = pg_execute($mos, $stname2, array(
@@ -29,7 +28,7 @@ if (array_key_exists("runtime", $_GET) && array_key_exists("model", $_GET)) {
         $_GET["model"]
     ));
 } else {
-    $stname = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06, 
+    $stname = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06,
     t12_1 ||'/'|| t12_2 as t12 from t{$year} WHERE station = $1
     and ftime >= $2 and ftime <= ($2 + '10 days'::interval) ORDER by ftime ASC");
     $rs = pg_execute($mos, $stname, array($station, date("Y-m-d H:i", $ts)));

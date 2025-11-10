@@ -1,4 +1,4 @@
-<?php 
+<?php
 global $metadata;
 global $station;
 global $network;
@@ -6,7 +6,7 @@ require_once dirname(__FILE__)."/../forms.php";
 ?>
 <div class="hidden-print">
 <form method="GET" name="automatic">
-<?php 
+<?php
 if (isset($savevars)){
     foreach($savevars as $k => $v){
         echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
@@ -34,7 +34,7 @@ if (isset($_REQUEST["day"])){
 
 <div class="d-flex align-items-center gap-2 mb-3">
     <label for="station-select" class="form-label mb-0">Select Station:</label>
-    <?php echo networkSelectAuto($network, $station); ?> 
+    <?php echo networkSelectAuto($network, $station); ?>
     <input type="submit" class="btn btn-primary" value="Change Station" />
     <span class="text-muted">or</span>
     <a href="locate.php?network=<?php echo $network; ?>" class="btn btn-outline-secondary btn-sm">Select from map</a>
@@ -56,19 +56,19 @@ $o = Array(
         "icon" => "wrench",
         "networks" => Array("IA_ASOS", "IA_RWIS", "ISUAG", "ISUSM")),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
-          "icon" => "chart-area"),
+          "icon" => "graph-up"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
           "metaok" => TRUE, "icon" => "table"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?",
-          "metaok" => TRUE, "icon" => "users"),
+          "metaok" => TRUE, "icon" => "people"),
   "monthsum" => Array("name" => "Monthly Summaries",
-          "uri" => "monthlysum.php?", "icon" => "table"),
+          "uri" => "monthlysum.php?", "icon" => "calendar-month"),
   "obhistory" => Array("name" => "Observation History",
-          "uri" => "obhistory.php?", "icon" => "time"),
+          "uri" => "obhistory.php?", "icon" => "clock-history"),
   "windrose" => Array("name" => "Wind Roses",
-          "uri" => "windrose.phtml?", "icon" => "asterisk"),
+          "uri" => "windrose.phtml?", "icon" => "diagram-3"),
   "custom_windrose" => Array("name" => "Custom Wind Roses",
-          "uri" => "dyn_windrose.phtml?", "icon" => "asterisk"),
+          "uri" => "dyn_windrose.phtml?", "icon" => "diagram-3"),
   "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?",
           "icon" => "calendar", "metaok" => TRUE),
 );
@@ -95,7 +95,7 @@ foreach($o as $key => $val)
     // Do not display links to pages that only work for sites that produce
     // data that we consume!
     if ($network == 'RAOB' && $key == 'custom_windrose'){
-        
+
     }
     else if ($metadata["metasite"] == 't' && ! array_key_exists("metaok", $val)){
         continue;
@@ -110,24 +110,24 @@ foreach($o as $key => $val)
 if (preg_match('/ASOS/', $network) > 0){
     if ($metadata["country"] == "US") {
         $uri = sprintf("/sites/scp.php?station=%s&amp;network=%s", $station, $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-cloud me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Cloud</span>Satellite Cloud Product</a> ", 
+    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-cloud me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Cloud</span>Satellite Cloud Product</a> ",
         $uri);
     }
     $uri = sprintf("/request/download.phtml?network=%s", $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Download</span>Download</a> ", 
+    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Download</span>Download</a> ",
             $uri);
     // TAF
     if (array_key_exists("HASTAF", $metadata["attributes"])){
         echo sprintf(
             '<a href="/sites/taf.php?station=%s&amp;network=%s" '.
-            'class="btn btn-outline-primary"><i class="bi bi-cloud me-1" aria-hidden="true"></i><span class="visually-hidden">Cloud</span>Terminal Aerodome Forecast</a> ', 
-            $station, $network);            
+            'class="btn btn-outline-primary"><i class="bi bi-cloud me-1" aria-hidden="true"></i><span class="visually-hidden">Cloud</span>Terminal Aerodome Forecast</a> ',
+            $station, $network);
     }
 }elseif (preg_match('/DCP/', $network) > 0){
     $uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Download</span>Download</a> ", 
+    echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Download</span>Download</a> ",
             $uri);
-    
+
 }
 ?>
 </div>

@@ -9,7 +9,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/mos_lib.php";
 $mosdb = iemdb("mos");
-pg_exec($mosdb, "SET TIME ZONE 'UTC'");
+pg_query($mosdb, "SET TIME ZONE 'UTC'");
 
 $year = get_int404("year", date("Y", time() + 86400));
 $month = get_int404("month", date("m", time() + 86400));
@@ -109,10 +109,10 @@ $content = <<<EOM
  <li class="active">Single Variable Data Table</li>
 </ol>
 
-<p>This page produces a simple table for the combination of a MOS forecast 
+<p>This page produces a simple table for the combination of a MOS forecast
 point, MOS variable, and range of dates.  The purpose is to examine how a
 forecast has changed with time.  The first entry box requires that you know
-the four character identifier of the MOS site being forecasted for.  You 
+the four character identifier of the MOS site being forecasted for.  You
 should use the "K" for United States sites.</p>
 
 <p><form name="updator">

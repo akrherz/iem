@@ -35,7 +35,7 @@ while ($row = pg_fetch_assoc($rs)) {
 $finalA = array();
 $finalA = aSortBySecondIndex($data, $sortcol);
 
-$rs = pg_exec(
+$rs = pg_query(
     iemdb("mesosite"),
     "SELECT id, name from networks"
 );
@@ -44,7 +44,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $networks[$row["id"]] = $row["name"];
 }
 
-$rs = pg_exec(
+$rs = pg_query(
     $dbconn,
     "select distinct network from current_qc q JOIN stations t " .
         "ON (q.iemid = t.iemid) ORDER by network ASC"
@@ -98,9 +98,9 @@ foreach ($finalA as $key => $val) {
 
 $t->content = <<<EOM
 <h1 class="h4 mb-3">MADIS QC Values</h1>
-<p>Here are the MADIS quality control values for selected networks in the IEM. 
-<span class="text-danger fw-semibold">Red numbers</span> indicate the observed value is above the expected range. 
-<span class="text-primary fw-semibold">Blue numbers</span> indicate the observed value is below the expected range. 
+<p>Here are the MADIS quality control values for selected networks in the IEM.
+<span class="text-danger fw-semibold">Red numbers</span> indicate the observed value is above the expected range.
+<span class="text-primary fw-semibold">Blue numbers</span> indicate the observed value is below the expected range.
 The <strong>QC</strong> value is an average of all MADIS QC routines. The <strong>Spatial</strong> column is the result of the <em>Spatial Consistency Check</em>.</p>
 
 <form method="GET" name="switchNetwork" class="row gy-2 align-items-end" role="search" aria-label="Select network to view">

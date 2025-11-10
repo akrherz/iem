@@ -7,7 +7,7 @@ $t = new MyView();
 $t->title = "Quality Control, Active Trouble Tickets";
 
 $conn = iemdb("portfolio");
-$rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base " .
+$rs = pg_query($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base " .
     "WHERE status != 'CLOSED' ORDER by id ASC");
 
 $ars = array("isusm" => "", "iaawos" => "", "iarwis" => "");
@@ -44,10 +44,10 @@ $t->content = <<<EOM
  <li class="active">Active Trouble Tickets</li>
 </ol>
 
-<p>The IEM developed a system called "IEM Tracker" to track meta-data 
-of sites in our component networks.  This page presents a listing of 
+<p>The IEM developed a system called "IEM Tracker" to track meta-data
+of sites in our component networks.  This page presents a listing of
 'Trouble Tickets' that are currently active.  Currently, only the ticket
-header is presented, but in the future more info will be made publicly 
+header is presented, but in the future more info will be made publicly
 available.  If you have any questions or comments about a ticket listed,
 please feel free to <a href="/info/contacts.php">Contact Us</a>.
 

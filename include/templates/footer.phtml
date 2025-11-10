@@ -1,8 +1,8 @@
-<?php 
+<?php
 $jsextra = is_null($this->jsextra) ? '' : $this->jsextra;
 if ($this->iemss){
     $jsextra .= <<<EOF
-<script src="/vendor/openlayers/10.6.1/ol.js"></script>
+<script src="/vendor/openlayers/10.7.0/ol.js"></script>
 <script src="/js/iemss.js?v=3"></script>
 <script type="module" src="/js/form2url.module.js"></script>
 EOF;
@@ -23,7 +23,6 @@ EOM;
 }
 
 ?>
-<!-- footer -->
 <footer>
     <div class="container" id="iem-footer" aria-label="Site footer">
         <div class="row">
@@ -53,12 +52,12 @@ EOM;
                 <h2 id="footer-social-heading" class="visually-hidden">Social media</h2>
                 <ul class=" labeled">
                 <li><a href="https://www.facebook.com/IEM-157789644737/"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Facebook</a></li>
-                <li><a href="https://twitter.com/akrherz"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Twitter</a></li>
+                <li><a href="https://x.com/akrherz"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Twitter</a></li>
                 <li><a href="https://github.com/akrherz/iem"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Github</a></li>
                 <li><a href="https://youtube.com/akrherz"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> YouTube</a></li>
                 <li><a href="/rss.php"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> RSS</a></li>
                 </ul>
-            </section>	
+            </section>
 
             <!-- footer-legal -->
             <section class="footer-legal col-sm-12 col-md-3" aria-labelledby="footer-legal-heading">
@@ -77,7 +76,6 @@ EOM;
         </div>
     </div>
 </footer>
-<!-- /footer -->
     <script src="/vendor/bootstrap/5.3.6/js/bootstrap.bundle.min.js"></script>
     <script src="/js/iastate-iem.js"></script>
 

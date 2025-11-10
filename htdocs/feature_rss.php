@@ -25,7 +25,7 @@ echo <<<EOM
 <lastBuildDate>{$d}</lastBuildDate>
 EOM;
 $conn = iemdb("mesosite");
-$rs = pg_exec(
+$rs = pg_query(
     $conn,
     "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature " .
         "WHERE valid < now() ORDER by valid DESC LIMIT 20"
@@ -49,7 +49,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 EOM;
     } else {
         $cbody = <<<EOM
-<img src="{$mediaurl}" 
+<img src="{$mediaurl}"
  alt="Feature" style="float: left; padding: 5px;" />
 EOM;
     }

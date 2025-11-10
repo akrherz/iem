@@ -7,7 +7,7 @@ require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 
 $connect = iemdb("postgis");
-pg_exec($connect, "SET TIME ZONE 'UTC'");
+pg_query($connect, "SET TIME ZONE 'UTC'");
 
 $year = get_int404("year", 2006);
 if ($year == 0) die("ERROR: invalid \$year set");

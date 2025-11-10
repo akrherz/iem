@@ -17,7 +17,7 @@ $btable = <<<EOM
 <tbody>
 EOM;
 $pgconn = iemdb("mesosite");
-$rs = pg_exec(
+$rs = pg_query(
     $pgconn,
     "select o.screen_name, o.at_handle, string_agg(channel, ', ' order by channel) " .
         "as channels from iembot_twitter_oauth o JOIN iembot_twitter_subs s on " .
@@ -64,7 +64,7 @@ $t->content = <<<EOM
 
 <p><i>iembot</i> is a XMPP chat bot that relays National Weather Service issued
 text products to XMPP chat rooms hosted on the conference.weather.im multi-user
-chat service. <i>iembot</i> was written to aid the dissemination and use of NWS issued 
+chat service. <i>iembot</i> was written to aid the dissemination and use of NWS issued
 warnings by their chat partners.</p>
 
 <ul>
@@ -97,8 +97,8 @@ warnings by their chat partners.</p>
 
 <p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information
 regarding the product and sends it via a XMPP instant message to the bot
-logged in on the chat server.  The bot then 
-routes the incoming message to a WFO chatroom from which the product was 
+logged in on the chat server.  The bot then
+routes the incoming message to a WFO chatroom from which the product was
 issued.  The entire process takes much less than a second.</p>
 
 <h3>Why was <i>iembot</i> written?</h3>

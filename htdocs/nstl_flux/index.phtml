@@ -20,7 +20,7 @@ $ds2 = daySelect(date("d"), "eday");
 $rows = "";
 $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_meta ORDER by sts ASC";
-$rs = pg_exec($pg_conn, $sql);
+$rs = pg_query($pg_conn, $sql);
 
 while ($row = pg_fetch_assoc($rs)) {
     $rows .= sprintf(
@@ -41,19 +41,19 @@ $t->content = <<<EOM
 
 <h3>USDA-ARS-National Laboratory for Agriculture and the Environment Flux Sites</h3>
 
-<p>The IEM is pleased to host the data from a set of observing platforms operated by the USDA-ARS-National Laboratory for Agriculture and the Environment (NLAE).  These sites directly measure and derive numerous air and soil flux values. 
+<p>The IEM is pleased to host the data from a set of observing platforms operated by the USDA-ARS-National Laboratory for Agriculture and the Environment (NLAE).  These sites directly measure and derive numerous air and soil flux values.
 
-<div class="alert alert-info">These raw data have not been subjected to the 
-<a href="http://www.ars.usda.gov/main/site_main.htm?modecode=36-25-15-00" 
+<div class="alert alert-info">These raw data have not been subjected to the
+<a href="http://www.ars.usda.gov/main/site_main.htm?modecode=36-25-15-00"
 class="alert-link">National Laboratory for Agriculture and the Environment's</a>
-quality control or quality assurance procedures. The correction factor's are 
+quality control or quality assurance procedures. The correction factor's are
 calculated within a <a href="http://www.campbellsci.com/"
-class="alert-link">Campbell Scientific, Inc</a> (Logan, UT) provided flux program 
-for the CR5000 dataloggers. The WPL corrections are based on the equations 
-found in Webb, E.K., G.I. Pearman, and R. Leuning, 1980. Correction of flux 
+class="alert-link">Campbell Scientific, Inc</a> (Logan, UT) provided flux program
+for the CR5000 dataloggers. The WPL corrections are based on the equations
+found in Webb, E.K., G.I. Pearman, and R. Leuning, 1980. Correction of flux
 measurements for density effects due to heat and water vapor transfer.</div>
 
-<p>They are released for limited public use as preliminary data to be 
+<p>They are released for limited public use as preliminary data to be
 used only with appropriate caution.
 
 <p>

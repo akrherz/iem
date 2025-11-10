@@ -6,8 +6,8 @@ require_once "../../../include/forms.php";
 $mesosite = iemdb("mesosite");
 $access = iemdb("iem");
 $asos = iemdb("asos");
-pg_exec($access, "SET TIME ZONE 'UTC'");
-pg_exec($asos, "SET TIME ZONE 'UTC'");
+pg_query($access, "SET TIME ZONE 'UTC'");
+pg_query($asos, "SET TIME ZONE 'UTC'");
 
 $stations = array("AMW");
 
@@ -19,7 +19,7 @@ if (array_key_exists("lat", $_GET) && array_key_exists("lon", $_GET)) {
       ST_DistanceSphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
       WHERE network ~* 'ASOS' ORDER by dist ASC
       LIMIT 5", $lon, $lat);
-    $rs = pg_exec($mesosite, $sql);
+    $rs = pg_query($mesosite, $sql);
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $stations[$i] = $row["id"];
     }
@@ -42,7 +42,7 @@ foreach ($stations as $k => $id) {
         }
         $rs = pg_execute($asos, $stname, array($id));
     } else {
-        $rs = pg_exec($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf,
+        $rs = pg_query($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf,
       max(sknt) as sknt, max(drct) as drct,
       max(phour) as phour, max(alti) as alti, max(gust) as gust,
       max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from current_log c, stations s

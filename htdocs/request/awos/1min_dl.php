@@ -100,7 +100,7 @@ $conn = iemdb("awos");
 $tzn = "local";
 if ($tz == "UTC") {
     $tzn = "UTC";
-    $result = pg_exec($conn, "SET TIME ZONE 'UTC'");
+    $result = pg_query($conn, "SET TIME ZONE 'UTC'");
 }
 
 $stname = iem_pg_prepare($conn, $sqlStr);

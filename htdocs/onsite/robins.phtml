@@ -7,7 +7,7 @@ $t->title = "IEM Robin Tracker";
 
 $connection = iemdb("postgis");
 $q = "SELECT * from robins ORDER by id";
-$rs = pg_exec($connection, $q);
+$rs = pg_query($connection, $q);
 
 $table = "";
 while ($row = pg_fetch_assoc($rs)) {
@@ -20,7 +20,7 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 $t->content = <<<EOM
-The Red Robin is a welcome sign of spring in Iowa!  Here is a graphical 
+The Red Robin is a welcome sign of spring in Iowa!  Here is a graphical
 view and listing of reports received at the IEM of Robin sightings.  If you
 have a report to add, please send it to Daryl (<a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a>).
 

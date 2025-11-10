@@ -18,7 +18,7 @@ $cached_rss = cacheable("/rss.php", 600)(function(){
 <lastBuildDate>{$bd}</lastBuildDate>
 EOM;
     $conn = iemdb("mesosite");
-    $rs = pg_exec($conn, "SELECT id, title, body from news ORDER by entered DESC LIMIT 20");
+    $rs = pg_query($conn, "SELECT id, title, body from news ORDER by entered DESC LIMIT 20");
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         // Properly escape the title for XML; previous logic only replaced '&'.
         $title = htmlspecialchars($row["title"], ENT_XML1 | ENT_COMPAT, 'UTF-8');
