@@ -110,8 +110,8 @@ def plotter(ctx: dict):
             f"{sdate:%b %-d, %Y} - {edate:%b %-d, %Y}"
         ),
         subtitle=(
-            f"based on weekly US Drought Monitor Analysis, {griddelta:.2f}"
-            r"$^\circ$ grid analysis"
+            f"based on weekly US Drought Monitor Analysis, {griddelta:.2f}°"
+            " grid analysis"
         ),
         continentalcolor="white",
         titlefontsize=14,
@@ -160,7 +160,7 @@ def plotter(ctx: dict):
                 "north": north,
             },
             geom_col="the_geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("No Data Found, sorry!")
     # loop over the cached stats

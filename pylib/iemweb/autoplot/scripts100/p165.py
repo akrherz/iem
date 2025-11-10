@@ -220,8 +220,7 @@ def plotter(ctx: dict):
         )
         title = (
             f"{ctx['p']:.0f}{th(str(ctx['p']))} Percentile Date of "
-            f"{PDICT[ctx['w']]} {PDICT2[varname]} {threshold}"
-            r"$^\circ$F"
+            f"{PDICT[ctx['w']]} {PDICT2[varname]} {threshold}°F"
         )
         extra = (
             ", period of record: "
@@ -238,8 +237,7 @@ def plotter(ctx: dict):
         df2["percentile"] = (hits / df2["doy"] * 100).fillna(0)
         title = (
             f"Percentile on {ctx['sday']:%-d %b} of {PDICT2[varname]} "
-            f"{threshold}"
-            r"$^\circ$F"
+            f"{threshold}°F"
         )
         extra = (
             ", period of record: "
@@ -249,11 +247,7 @@ def plotter(ctx: dict):
         df2 = df[df[YRGP[varname]] == year].copy()
         # Require sites have enough data
         df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
-        title = (
-            f"{year} {PDICT[ctx['w']]} {PDICT2[varname]} "
-            f"{threshold}"
-            r"$^\circ$F"
-        )
+        title = f"{year} {PDICT[ctx['w']]} {PDICT2[varname]} {threshold}°F"
         df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
         extra = ""
     if df2.empty:

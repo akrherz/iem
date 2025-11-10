@@ -31,7 +31,7 @@ PDICT3 = {
     "snow": "Snowfall",
 }
 LABELS = {
-    "temps": r"Temperature $^\circ\mathrm{F}$",
+    "temps": "Temperature [°F]",
     "precip": "Precipitation [inch/day]",
     "snow": "Snowfall [inch/day]",
 }

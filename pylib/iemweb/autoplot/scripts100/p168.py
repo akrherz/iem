@@ -94,7 +94,7 @@ def plotter(ctx: dict):
     ax.set_xlim(min(x) - 5, 400)
     ax.set_ylim(y[-1] - 1, y[0] + 1)
     ax.grid(True)
-    ax.set_ylabel(r"High Temperature $^\circ$F")
+    ax.set_ylabel("High Temperature °F")
     ax.set_xlabel("** denotes ties")
 
     return fig, df

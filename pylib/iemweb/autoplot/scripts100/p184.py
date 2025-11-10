@@ -148,7 +148,7 @@ def plotter(ctx: dict):
     ax.legend(loc=1)
     ax.set_xlim(0, df["max"].max() * 1.2)
     ax.set_ylim(maxval2 - 31, maxval2 + 2)
-    ax.set_ylabel(r"High Temperature $^\circ$F")
+    ax.set_ylabel("High Temperature °F")
     if year == date.today().year:
         ax.set_xlabel(f"Days, {year} data till {today}")
     else:
