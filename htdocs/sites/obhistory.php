@@ -17,10 +17,10 @@ function wind_formatter($row, $units = "mph")
     if (is_null($row["drct"]) && is_null($row["sknt"])) {
         return "M";
     }
-    
+
     // Convert knots to appropriate units
     $multiplier = ($units == "mph") ? 1.15 : 1.0; // knots to mph conversion factor
-    
+
     if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
         return sprintf("VRB %.0f", $row["sknt"] * $multiplier);
     }
@@ -36,9 +36,9 @@ function wind_formatter($row, $units = "mph")
     }
     $peak_text = "";
     if (!is_null($row["peak_wind_gust"]) &&
-        !is_null($row["peak_wind_drct"]) && 
+        !is_null($row["peak_wind_drct"]) &&
         !is_null($row["peak_wind_time"])) {
-        $peakdt = new DateTime($row["peak_wind_time"], 
+        $peakdt = new DateTime($row["peak_wind_time"],
             new DateTimeZone("UTC"));
         global $metadata;
         $peaktime = $peakdt->setTimezone(new DateTimeZone($metadata["tzname"]))
@@ -300,7 +300,7 @@ $savevars = array(
     "month" => date("m", $date),
     "day" => date("d", $date)
 );
-$t->jsextra = '<script type="module" src="obhistory.module.js?v=2"></script>';
+$t->jsextra = '<script type="module" src="obhistory.module.js?v=4"></script>';
 $t->headextra = '<link rel="stylesheet" href="obhistory.css" type="text/css">';
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
@@ -331,19 +331,19 @@ $content = <<<EOM
     <div class="row">
         <div class="col-12">
             <h3>{$dstr} Observation History, [{$station}] {$metadata["name"]}, timezone: {$tzname}</h3>
-            
+
             <form id="theform" name="theform" method="GET" class="mb-3">
                 <div class="row g-2 align-items-end">
                     <div class="col-auto">
                         <label for="date_picker" class="form-label mb-1">Select Date:</label>
                         <div class="input-group">
-                            <button type="button" id="prevbutton" class="btn btn-outline-secondary" 
+                            <button type="button" id="prevbutton" class="btn btn-outline-secondary"
                                 data-date="{$yesterday_param}" title="Previous Day">
                                 <i class="bi bi-arrow-left" aria-hidden="true"></i>
                             </button>
-                            <input type="date" id="date_picker" name="date" class="form-control" 
+                            <input type="date" id="date_picker" name="date" class="form-control"
                                 value="{$date_param}" min="{$startyear}-01-01" max="{$today_param}">
-                            <button type="button" id="nextbutton" class="btn btn-outline-secondary" 
+                            <button type="button" id="nextbutton" class="btn btn-outline-secondary"
                                 data-date="{$tomorrow_param}" title="Next Day" {$next_disabled}>
                                 <i class="bi bi-arrow-right" aria-hidden="true"></i>
                             </button>
@@ -361,14 +361,14 @@ $content = <<<EOM
                         <input type="submit" value="Update" class="btn btn-primary" />
                     </div>
                 </div>
-                
+
                 <!-- Hidden parameters -->
                 <input type="hidden" value="{$station}" name="station" />
                 <input type="hidden" value="{$network}" name="network" />
                 <input id="hmetar" type="hidden" value="{$metar}" name="metar" />
                 <input id="hmadis" type="hidden" value="{$madis}" name="madis" />
             </form>
-            
+
             {$mbutton}
         </div>
     </div>
@@ -426,8 +426,8 @@ EOM;
     <th rowspan="2">3 hr</th>
     <th rowspan="2">6 hr</th>
     </tr>
-    
-    <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>    
+
+    <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>
 EOM;
 } else if (preg_match("/DCP|COOP/", $network)) {
     $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";

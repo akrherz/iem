@@ -16,7 +16,7 @@ $pvar4 = isset($_GET["pvar4"]) ? xssafe($_GET["pvar4"]) : "rn_total_avg";
 
 $other = iemdb("other");
 $sql = "SELECT * from flux_vars ORDER by details ASC";
-$rows = pg_exec($other, $sql);
+$rows = pg_query($other, $sql);
 $var_names = array();
 $var_details = array();
 while ($row = pg_fetch_assoc($rows)) {

@@ -4,28 +4,73 @@ let network = null;
 let metar_show = false;
 let madis_show = false;
 
-function updateURI() {
-    // Build URI with modern date parameter and current settings
-    const datePicker = requireElement("date_picker");
+function buildUrl(dateStr) {
+    // Centralized URL building logic
     const sortDirElement = document.querySelector('select[name="sortdir"]');
     const windUnitsElement = document.querySelector('select[name="windunits"]');
     const sortDir = sortDirElement ? sortDirElement.value : "asc";
     const windUnits = windUnitsElement ? windUnitsElement.value : "mph";
-    const currentDate = datePicker.value;
-    let uri = `${window.location.origin}${window.location.pathname}?`+
-        `station=${station}&network=${network}&date=${currentDate}&sortdir=${sortDir}&windunits=${windUnits}`;
+
+    // Use URLSearchParams to properly encode parameters
+    const params = new URLSearchParams({
+        station,
+        network,
+        date: dateStr,
+        sortdir: sortDir,
+        windunits: windUnits
+    });
+
     if (metar_show) {
-        uri += "&metar=1";
+        params.set("metar", "1");
     }
     if (madis_show) {
-        uri += "&madis=1";
+        params.set("madis", "1");
     }
-    window.history.pushState({}, "", uri);
+
+    return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
-function handleDatePickerChange() {
-    // Simply submit the form when date changes - PHP will handle the rest
-    document.getElementById("theform").submit();
+function updateURI() {
+    // Update browser URL without reload
+    const datePicker = requireElement("date_picker");
+    const url = buildUrl(datePicker.value);
+    window.history.pushState({}, "", url);
+}
+
+function handleDatePickerChange(event) {
+    // Only submit when user finishes interaction (blur or calendar selection)
+    // The change event fires on every keystroke when typing, which is annoying
+    const datePicker = event.target;
+
+    // If change happened due to calendar picker (not manual typing),
+    // the input will be blurred shortly after
+    if (datePicker.value && datePicker.validity.valid) {
+        // Check if we're still focused (typing) or not (picker/blur)
+        if (document.activeElement !== datePicker) {
+            // User clicked calendar or tabbed away - submit
+            document.getElementById("theform").submit();
+        }
+        // If still focused, wait for blur event to submit
+    }
+}
+
+function handleDatePickerBlur(event) {
+    // Submit when user leaves the field with a valid date
+    const datePicker = event.target;
+    if (datePicker.value && datePicker.validity.valid) {
+        document.getElementById("theform").submit();
+    }
+}
+
+function handleDatePickerKeydown(event) {
+    // Submit on Enter key only
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const datePicker = event.target;
+        if (datePicker.value && datePicker.validity.valid) {
+            document.getElementById("theform").submit();
+        }
+    }
 }
 
 function handlePrevButtonClick() {
@@ -45,22 +90,10 @@ function handleNextButtonClick() {
 }
 
 function navigateToDate(dateStr) {
-    // Build URL with current state preserved
-    const sortDirElement = document.querySelector('select[name="sortdir"]');
-    const windUnitsElement = document.querySelector('select[name="windunits"]');
-    const sortDir = sortDirElement ? sortDirElement.value : "asc";
-    const windUnits = windUnitsElement ? windUnitsElement.value : "mph";
-    let url = `${window.location.origin}${window.location.pathname}?`+
-        `station=${station}&network=${network}&date=${dateStr}&sortdir=${sortDir}&windunits=${windUnits}`;
-    if (metar_show) {
-        url += "&metar=1";
-    }
-    if (madis_show) {
-        url += "&madis=1";
-    }
-    // Navigate to the new URL
-    window.location.href = url;
+    // Navigate to the new URL using centralized URL builder
+    window.location.href = buildUrl(dateStr);
 }
+
 function showMETAR() {
     document.querySelectorAll(".metar").forEach(element => {
         element.style.display = "table-row";
@@ -70,7 +103,13 @@ function showMETAR() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide METARs";
+    const toggle = document.getElementById("metar_toggle");
+    toggle.textContent = "";
+    const icon = document.createElement("i");
+    icon.className = "bi bi-dash-lg";
+    icon.setAttribute("aria-hidden", "true");
+    toggle.appendChild(icon);
+    toggle.appendChild(document.createTextNode(" Hide METARs"));
 }
 
 function toggleMETAR() {
@@ -82,7 +121,13 @@ function toggleMETAR() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-    document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show METARs";
+        const toggle = document.getElementById("metar_toggle");
+        toggle.textContent = "";
+        const icon = document.createElement("i");
+        icon.className = "bi bi-plus-lg";
+        icon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(icon);
+        toggle.appendChild(document.createTextNode(" Show METARs"));
         document.getElementById("hmetar").value = "0";
     } else {
         // show
@@ -102,7 +147,13 @@ function showMADIS() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide High Frequency MADIS";
+    const toggle = document.getElementById("madis_toggle");
+    toggle.textContent = "";
+    const icon = document.createElement("i");
+    icon.className = "bi bi-dash-lg";
+    icon.setAttribute("aria-hidden", "true");
+    toggle.appendChild(icon);
+    toggle.appendChild(document.createTextNode(" Hide High Frequency MADIS"));
 }
 
 function toggleMADIS() {
@@ -114,7 +165,13 @@ function toggleMADIS() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-    document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show High Frequency MADIS";
+        const toggle = document.getElementById("madis_toggle");
+        toggle.textContent = "";
+        const icon = document.createElement("i");
+        icon.className = "bi bi-plus-lg";
+        icon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(icon);
+        toggle.appendChild(document.createTextNode(" Show High Frequency MADIS"));
         document.getElementById("hmadis").value = "0";
     } else {
         // Show
@@ -129,12 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get form values
     const hiddenStation = document.querySelector('input[name="station"]');
     const hiddenNetwork = document.querySelector('input[name="network"]');
-    
+
     station = hiddenStation.value;
     network = hiddenNetwork.value;
     metar_show = document.getElementById("hmetar").value === "1";
     madis_show = document.getElementById("hmadis").value === "1";
-    
+
     // Set up event listeners
     const metar_toggle = document.getElementById("metar_toggle");
     if (metar_toggle) {
@@ -144,10 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (madis_toggle) {
         madis_toggle.addEventListener('click', toggleMADIS);
     }
-    requireElement("date_picker").addEventListener('change', handleDatePickerChange);
+    const datePicker = requireElement("date_picker");
+    datePicker.addEventListener('change', handleDatePickerChange);
+    datePicker.addEventListener('blur', handleDatePickerBlur);
+    datePicker.addEventListener('keydown', handleDatePickerKeydown);
     requireElement("prevbutton").addEventListener('click', handlePrevButtonClick);
     requireElement("nextbutton").addEventListener('click', handleNextButtonClick);
-    
+
     // Initial state for METAR/MADIS display
     if (metar_show) {
         showMETAR();

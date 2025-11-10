@@ -31,7 +31,7 @@ if (! is_null($ts)) {
         "SELECT * from camera_log WHERE valid = '%s'",
         $ts->format("Y-m-d H:i")
     );
-    $rs = pg_exec($conn, $sql);
+    $rs = pg_query($conn, $sql);
     if (pg_num_rows($rs) == 0) {
         $mins = intval($ts->format("i")) % 5;
         if ($mins > 0){
@@ -41,7 +41,7 @@ if (! is_null($ts)) {
             "SELECT * from camera_log WHERE valid = '%s'",
             $ts->format("Y-m-d H:i")
         );
-        $rs = pg_exec($conn, $sql);
+        $rs = pg_query($conn, $sql);
     }
 
     /* Now we compute the RADAR timestamp, yippee */
@@ -51,7 +51,7 @@ if (! is_null($ts)) {
 } else {
     $ts = new DateTime();
     $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";
-    $rs = pg_exec($conn, $sql);
+    $rs = pg_query($conn, $sql);
     $radts = new DateTime();
     $mins = intval($radts->format("i")) % 5;
     $radts = $radts->sub(new DateInterval("PT{$mins}M"));

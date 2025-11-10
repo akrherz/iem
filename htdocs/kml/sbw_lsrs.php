@@ -14,15 +14,14 @@ $eventid = get_int404("eventid", 103);
 $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 
-/* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT l.*, ST_askml(l.geom) as kml
-           from sbw_$year w, lsrs l
-           WHERE w.wfo = '$wfo' and w.phenomena = '$phenomena' and 
-           w.eventid = $eventid and w.significance = '$significance'
+$stname = iem_pg_prepare($connect, "SELECT l.*, ST_askml(l.geom) as kml
+           from sbw w, lsrs l
+           WHERE w.vtec_year = $1 and w.wfo = $2 and w.phenomena = $3 and
+           w.eventid = $4 and w.significance = $5
            and w.geom && l.geom and l.valid BETWEEN w.issue and w.expire
-           and w.status = 'NEW'";
+           and w.status = 'NEW'");
 
-$result = pg_exec($connect, $query2);
+$result = pg_execute($connect, $stname, array($year, $wfo, $phenomena, $eventid, $significance));
 $row = pg_fetch_assoc($result);
 
 header('Content-disposition: attachment; filename=sbw_lsrs.kml');
@@ -52,8 +51,8 @@ for ($i=0;$row=pg_fetch_assoc($result);$i++)
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Location:</i></font> ". $row["city"] ." ". $row["county"] ." ". $row["state"] ."
-  <br /><font color=\"red\"><i>Time:</i></font> ". gmdate('d M Y H:i', $ts) ." GMT 
-  <br /><font color=\"red\"><i>Source:</i></font> ". $row["source"] ." 
+  <br /><font color=\"red\"><i>Time:</i></font> ". gmdate('d M Y H:i', $ts) ." GMT
+  <br /><font color=\"red\"><i>Source:</i></font> ". $row["source"] ."
   <br /><font color=\"red\"><i>Remark:</i></font> ". $row["remark"] ."
    </p>
         ]]>

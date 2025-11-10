@@ -20,7 +20,7 @@ $vars = array();
 $pgconn = iemdb("other");
 
 $sql = "SELECT * from flux_vars ORDER by details ASC";
-$rows = pg_exec($pgconn, $sql);
+$rows = pg_query($pgconn, $sql);
 while ($row = pg_fetch_assoc($rows)) {
     $vars[$row["name"]] = array("units" => $row["units"], "details" => $row["details"]);
 }

@@ -371,7 +371,7 @@ the loop.</p>
 </div>
 <div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <strong>Warning geography:</strong>
-<br />Short term warnings (SVR,TOR,SMW) have a storm based and county 
+<br />Short term warnings (SVR,TOR,SMW) have a storm based and county
 geography associated with them.  You can pick which or both to display:
 <br />{$wgselect}
 
@@ -383,16 +383,16 @@ geography associated with them.  You can pick which or both to display:
 
 <p><strong>Loop Options</strong>
 <br />{$loselect}
-<br />Loop Frames: 
+<br />Loop Frames:
 <input type="text" value="{$frames}" name="frames" size="3">
-<br />Loop Frame Interval: 
+<br />Loop Frame Interval:
 {$ivselect}
 
 <p><strong>Text Warning Listing</strong>
 <br />Filter by WFO:
 {$wfselect}
 
-<br />Product Filter: 
+<br />Product Filter:
 {$pradio}
 
 <br />Sort Column:
@@ -476,16 +476,16 @@ $cuextra = "";
 if ($cu == 1) {
     $cuextra = " and w.phenomena IN ('SV','TO','MA') ";
 }
-$query = "SELECT w.phenomena, u.name as cname, w.expire as expire, 
-  w.updated as updated, w.status as status, w.fcster as fcster, 
-  w.eventid as eventid, w.significance as significance, 
-  w.issue as issue, u.state as sname, ST_xmax(u.geom) as lon0, 
+$query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
+  w.updated as updated, w.status as status, w.fcster as fcster,
+  w.eventid as eventid, w.significance as significance,
+  w.issue as issue, u.state as sname, ST_xmax(u.geom) as lon0,
   ST_ymax(u.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
    and w.ugc = u.ugc $cuextra ORDER by {$sortcol} {$sortdir}";
-pg_exec($connection, "set time zone 'UTC'");
-$result = pg_exec($connection, $query);
+pg_query($connection, "set time zone 'UTC'");
+$result = pg_query($connection, $query);
 
 $afos = array(
     "SV" => "Svr Tstorm",
@@ -556,7 +556,7 @@ foreach ($wA as $key => $val) {
     $expire = $tokens[5];
     $status = $tokens[6];
 
-    $warningscat = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",  
+    $warningscat = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",
         $year, $wfo, $phenomena, $significance, $eventid);
 
     $k += 1;

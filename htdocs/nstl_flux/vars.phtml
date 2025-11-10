@@ -9,7 +9,7 @@ $t->title = "NLAE Flux Sites Variables";
 
 $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_vars ORDER by name ASC";
-$rs = pg_exec($pg_conn, $sql);
+$rs = pg_query($pg_conn, $sql);
 $rows = "";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
@@ -24,7 +24,7 @@ $t->content = <<<EOM
 <h3>Variables Collected from NLAE Flux Sites</h3>
 
 <p>This page lists out variables collected on the 4 sites in this network.
-Each variable is not collected at every site. 
+Each variable is not collected at every site.
 
 <table class="table table-striped table-sm table-bordered">
 <thead><tr><th colspan="3" align="left">Site Information:</th></tr></thead>

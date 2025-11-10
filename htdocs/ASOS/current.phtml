@@ -8,10 +8,10 @@ require_once "../../include/network.php";
 require_once "../../include/database.inc.php";
 
 $network = get_str404("network", 'IA_ASOS', 10);
-$metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
-$sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']) : "ts";
-$sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']) : "desc";
-$format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']) : 'html';
+$metar = get_str404("metar", "no");
+$sortcol = get_str404("sortcol", "ts");
+$sorder = get_str404("sorder", "desc");
+$format = get_str404("format", "html");
 
 $t = new MyView();
 $t->title = "{$network} Current Conditions";
@@ -32,11 +32,11 @@ if (pg_num_rows($rs) < 1) {
 }
 
 $vals = array(
-    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "tmpf" => "Air Temperature [°F]", "dwpf" => "Dew Point Temp [°F]",
     "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
     "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
     "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
-    "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
+    "feel" => "Feels Like [°F]", "vsby" => "Visibility [miles]",
     "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
     "min_tmpf" => "Today's Low Temperature", "name" => "Station Name",
     "max_tmpf" => "Today's High Temperature", "id" => "Station Identifier",
@@ -142,9 +142,9 @@ Select Network: {$nselect}</td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
 <br />Times shown are for timezone: <strong>{$tzname}.</strong> The local day summary
-is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>  
+is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>
 &nbsp; &nbsp; Click on
-a column to sort it. Click on site ID for more information. You can download data from 
+a column to sort it. Click on site ID for more information. You can download data from
 this network <a href='/request/download.phtml?network={$network}'>here</a>
 and you can view <a href="/sites/hist.phtml?station={$station}&network={$network}&mode=daily&year=$year&month=$month&day=$day">daily summaries</a>
 on this network.
