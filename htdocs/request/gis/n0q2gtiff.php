@@ -59,12 +59,12 @@ $cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs %s -s_srs %s -of G
     escapeshellarg("EPSG:4326"),
     escapeshellarg($inFile),
     escapeshellarg($outFile));
-exec($cmd);
+`$cmd`;
 
 $cmd = sprintf("zip %s %s.tif",
     escapeshellarg($zipFile),
     escapeshellarg($outFile));
-exec($cmd);
+`$cmd`;
 
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename={$zipFile}");

@@ -10,15 +10,24 @@ function buildUrl(dateStr) {
     const windUnitsElement = document.querySelector('select[name="windunits"]');
     const sortDir = sortDirElement ? sortDirElement.value : "asc";
     const windUnits = windUnitsElement ? windUnitsElement.value : "mph";
-    let url = `${window.location.origin}${window.location.pathname}?`+
-        `station=${station}&network=${network}&date=${dateStr}&sortdir=${sortDir}&windunits=${windUnits}`;
+
+    // Use URLSearchParams to properly encode parameters
+    const params = new URLSearchParams({
+        station,
+        network,
+        date: dateStr,
+        sortdir: sortDir,
+        windunits: windUnits
+    });
+
     if (metar_show) {
-        url += "&metar=1";
+        params.set("metar", "1");
     }
     if (madis_show) {
-        url += "&madis=1";
+        params.set("madis", "1");
     }
-    return url;
+
+    return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
 function updateURI() {
@@ -94,7 +103,13 @@ function showMETAR() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide METARs";
+    const toggle = document.getElementById("metar_toggle");
+    toggle.textContent = "";
+    const icon = document.createElement("i");
+    icon.className = "bi bi-dash-lg";
+    icon.setAttribute("aria-hidden", "true");
+    toggle.appendChild(icon);
+    toggle.appendChild(document.createTextNode(" Hide METARs"));
 }
 
 function toggleMETAR() {
@@ -106,7 +121,13 @@ function toggleMETAR() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-        document.getElementById("metar_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show METARs";
+        const toggle = document.getElementById("metar_toggle");
+        toggle.textContent = "";
+        const icon = document.createElement("i");
+        icon.className = "bi bi-plus-lg";
+        icon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(icon);
+        toggle.appendChild(document.createTextNode(" Show METARs"));
         document.getElementById("hmetar").value = "0";
     } else {
         // show
@@ -126,7 +147,13 @@ function showMADIS() {
             element.style.display = "table-row";
         });
     }
-    document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-dash-lg\" aria-hidden=\"true\"></i> Hide High Frequency MADIS";
+    const toggle = document.getElementById("madis_toggle");
+    toggle.textContent = "";
+    const icon = document.createElement("i");
+    icon.className = "bi bi-dash-lg";
+    icon.setAttribute("aria-hidden", "true");
+    toggle.appendChild(icon);
+    toggle.appendChild(document.createTextNode(" Hide High Frequency MADIS"));
 }
 
 function toggleMADIS() {
@@ -138,7 +165,13 @@ function toggleMADIS() {
         document.querySelectorAll(".hfmetar").forEach(element => {
             element.style.display = "none";
         });
-        document.getElementById("madis_toggle").innerHTML = "<i class=\"bi bi-plus-lg\" aria-hidden=\"true\"></i> Show High Frequency MADIS";
+        const toggle = document.getElementById("madis_toggle");
+        toggle.textContent = "";
+        const icon = document.createElement("i");
+        icon.className = "bi bi-plus-lg";
+        icon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(icon);
+        toggle.appendChild(document.createTextNode(" Show High Frequency MADIS"));
         document.getElementById("hmadis").value = "0";
     } else {
         // Show
