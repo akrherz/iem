@@ -14,7 +14,7 @@ if (is_null($dstr)) {
     http_response_code(422);
     die("Invalid date format");
 }
-$sector = substr(get_str404("sector", "us"), 1, 2);
+$sector = substr(get_str404("sector", "us"), 0, 2);
 $year = intval(substr($dstr, 0, 4));
 $month = intval(substr($dstr, 4, 2));
 $day = intval(substr($dstr, 6, 2));
