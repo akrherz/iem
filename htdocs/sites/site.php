@@ -14,17 +14,15 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $alertmsg = "";
-$lat_param = get_float404("lat", null);
-$lon_param = get_float404("lon", null);
 if (
-    !is_null($lat_param) &&
-    $lat_param != 0 &&
-    $lat_param != 1 &&
-    $lat_param != -1 &&
-    !is_null($lon_param) &&
-    $lon_param != 0 &&
-    $lon_param != 1 &&
-    $lon_param != -1
+    isset($_GET["lat"]) &&
+    $_GET["lat"] != "move marker" &&
+    floatval($_GET["lat"]) != 0 &&
+    floatval($_GET["lat"]) != 1 &&
+    floatval($_GET["lat"]) != -1 &&
+    floatval($_GET["lon"]) != 0 &&
+    floatval($_GET["lon"]) != 1 &&
+    floatval($_GET["lon"]) != -1
 ) {
     $client_ip = getClientIp();
     // Log the request so to effectively do some DOS protection.
@@ -47,8 +45,8 @@ if (
         )
     );
 
-    $newlat = $lat_param;
-    $newlon = $lon_param;
+    $newlat = floatval($_GET["lat"]);
+    $newlon = floatval($_GET["lon"]);
     $email = get_str404("email", 'n/a');
     $name = get_str404("name", "n/a");
     $delta = (
@@ -75,9 +73,9 @@ EOM;
     header("Location: site.php?station={$station}&network={$network}&moved=1&suggested_lat={$newlat}&suggested_lon={$newlon}");
     exit();
 }
-if (array_key_exists("moved", $_GET)) {
-    $moved_lat = sprintf("%.5f", get_float404("suggested_lat", 0));
-    $moved_lon = sprintf("%.5f", get_float404("suggested_lon", 0));
+if (isset($_GET["moved"])) {
+    $moved_lat = isset($_GET["suggested_lat"]) ? sprintf("%.5f", floatval($_GET["suggested_lat"])) : null;
+    $moved_lon = isset($_GET["suggested_lon"]) ? sprintf("%.5f", floatval($_GET["suggested_lon"])) : null;
 
     $coord_info = "";
     if ($moved_lat && $moved_lon) {
@@ -94,8 +92,8 @@ $lat = sprintf("%.5f", $metadata["lat"]);
 $lon = sprintf("%.5f", $metadata["lon"]);
 
 // Check for suggested coordinates
-$suggested_lat = sprintf("%.5f", get_float404("suggested_lat", 0));
-$suggested_lon = sprintf("%.5f", get_float404("suggested_lon", 0));
+$suggested_lat = isset($_GET["suggested_lat"]) ? sprintf("%.5f", floatval($_GET["suggested_lat"])) : null;
+$suggested_lon = isset($_GET["suggested_lon"]) ? sprintf("%.5f", floatval($_GET["suggested_lon"])) : null;
 
 $suggested_coordinates_info = "";
 if ($suggested_lat && $suggested_lon) {
