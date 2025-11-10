@@ -5,6 +5,8 @@ Simple tool to help debug NWS LAT...LON polygons.
 Changelog
 ---------
 
+- 2025-11-10: Added option to specify that the given longitudes are east. This
+  is a painful NWS quirk for products from Guam.
 - 2025-01-03: Updated to use pydantic for input validation
 
 Example Requests
@@ -15,6 +17,12 @@ The urlencoding here is a bit ugly, but alas.
 https://mesonet.agron.iastate.edu/nws/debug_latlon/generate_plot.py?\
 text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
 &title=Test
+
+Another example, but with east longitude enabled
+
+https://mesonet.agron.iastate.edu/nws/debug_latlon/generate_plot.py?\
+text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
+&title=Test&east=1
 
 """
 
@@ -32,16 +40,21 @@ from pyiem.plot.use_agg import figure
 from pyiem.reference import ISO8601, TWITTER_RESOLUTION_INCH
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+from shapely.geometry import Polygon
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    east: bool = Field(
+        default=False,
+        description="Interpret given longitudes as East Longitudes (Guam)",
+    )
     text: str = Field(..., description="The text to parse", min_length=1)
     title: str = Field(None, description="Optional title for the plot")
 
 
-def plot_poly(fig, poly, environ):
+def plot_poly(fig, poly, environ: dict):
     """Add to axes."""
     ax = fig.add_axes((0.15, 0.15, 0.7, 0.7))
     title = environ["title"] if environ["title"] else "No Title Provided"
@@ -78,19 +91,22 @@ def plot_poly(fig, poly, environ):
         )
     ax.set_xlim(min(X) - 0.02, max(X) + 0.02)
     ax.set_ylim(min(Y) - 0.02, max(Y) + 0.02)
-    ax.set_ylabel(r"Latitude [$^\circ$N]", fontsize=18)
-    ax.set_xlabel(r"Longitude [$^\circ$E]", fontsize=18)
+    ax.set_ylabel("Latitude [°N]", fontsize=18)
+    ax.set_xlabel("Longitude [°E]", fontsize=18)
     ax.grid(True)
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
 
 
-def process(environ):
+def process(environ: dict):
     """Make something pretty."""
     text = environ.get("text")
     text = text.replace("LAT...LON", "").replace("\n", " ")
     # Add extra whitespace to account for upstream issues
     poly = str2polygon(text + " \n")
+    if environ["east"]:
+        newpoints = [[0 - pt[0], pt[1]] for pt in poly.exterior.coords]
+        poly = Polygon(newpoints)
     fig = figure(figsize=TWITTER_RESOLUTION_INCH)
 
     res = {}
