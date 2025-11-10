@@ -28,11 +28,11 @@ PDICT = {
 }
 
 
-def parse_range(rng):
+def parse_range(rng: str):
     """Convert this into bins"""
     if rng.find(" ") == -1:
         raise NoDataFound("Invalid Range Provided")
-    return [float(f) for f in rng.split()]
+    return [float(f) for f in rng.replace("to", "").split()]
 
 
 def get_description():

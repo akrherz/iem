@@ -1,4 +1,4 @@
-import { requireElement } from '/js/iemjs/domUtils.js';
+import { requireElement, requireInputElement } from '/js/iemjs/domUtils.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const theButton = requireElement("thebutton");
@@ -6,16 +6,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const theTitle = requireElement("thetitle");
     const theImage = requireElement("theimage");
     const theGeojson = requireElement("thegeojson");
+    const theEastCheckbox = requireInputElement("eastcheckbox");
 
     theButton.addEventListener("click", () => {
         const text = theText.value;
         const title = theTitle.value;
+        const east = theEastCheckbox.checked;
         fetch("generate_plot.py", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: new URLSearchParams({ text, title })
+            body: new URLSearchParams({ text, title, east })
         })
         .then(response => {
             if (!response.ok) throw new Error("Network response was not ok");
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             theGeojson.textContent = JSON.stringify(data.geojson);
         })
         .catch(() => {
-            alert("Image Generation Failed, sorry!");
+            theGeojson.textContent = "Image/GeoJSON Generation Failed, sorry!";
         });
     });
 });

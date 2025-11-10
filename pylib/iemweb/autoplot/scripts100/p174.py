@@ -164,8 +164,7 @@ two as (
             fontsize=8,
         )
         ax[i].set_ylabel(
-            f"{vname.capitalize()} {varname.capitalize()} Difference "
-            r"$^\circ$F"
+            f"{vname.capitalize()} {varname.capitalize()} Difference °F"
         )
         rng = df[col].max() - df[col].min()
         ax[i].set_ylim(df[col].min() - 0.2 * rng, df[col].max() + 0.2 * rng)

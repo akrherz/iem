@@ -86,6 +86,10 @@ PDICT8 = {
     "yes": "Overlay cities",
     "no": "Do not overlay cities",
 }
+PDICT9 = {
+    "yes": "Plot any reported zeros",
+    "no": "Do not plot any reported zeros",
+}
 
 
 def get_description():
@@ -166,6 +170,13 @@ def get_description():
             default="yes",
             name="z",
         ),
+        {
+            "type": "select",
+            "name": "pz",
+            "default": "yes",
+            "label": "Should any observed zeros be plotted on the map?",
+            "options": PDICT9,
+        },
         dict(
             type="select",
             options=PDICT5,
@@ -543,13 +554,16 @@ def plotter(ctx: dict):
         mp.drawcities(isolated=True, textoutlinewidth=0)
     if not df.empty and ctx["p"] in ["both", "plot"]:
         df2 = df[df["plotme"]]
-        mp.plot_values(
-            df2["lon"].values,
-            df2["lat"].values,
-            df2["label"].values,
-            fmt="%s",
-            labelbuffer=2,
-        )
+        if ctx["pz"] == "no":
+            df2 = df2[df2["val"] > 0]
+        if not df2.empty:
+            mp.plot_values(
+                df2["lon"].values,
+                df2["lat"].values,
+                df2["label"].values,
+                fmt="%s",
+                labelbuffer=2,
+            )
     if ctx["z"] == "plot":
         df2 = df[df["state"] == "Z"]
         if not df2.empty:
