@@ -1,0 +1,163 @@
+<?php
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 167);
+require_once "../../../include/myview.php";
+
+$t = new MyView();
+$t->title = "MTArchive + College of DuPage Satellite Archive Browser";
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="/archive/codsat/index.css"/>
+EOM;
+$t->jsextra = <<<EOM
+<script src="/archive/codsat/index.module.js" type="module"></script>
+EOM;
+$t->content = <<<EOM
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/archive/">Data Archive</a></li>
+    <li class="breadcrumb-item active" aria-current="page">COD Satellite Browser</li>
+</ol>
+</nav>
+
+<h3>MTArchive + College of DuPage Satellite Archive Browser</h3>
+
+<p>This application allows you to browse and animate GOES satellite imagery from the
+<a href="https://mtarchive.geol.iastate.edu/" target="_blank">Iowa State MTArchive</a>
+powered by the <a href="https://weather.cod.edu/satrad/" target="_blank">College of DuPage NEXLAB</a> imagery.</p>
+
+<div class="alert alert-info">
+    <strong><i class="bi bi-info-circle"></i> Warning, Not Ready Yet:</strong>
+    The backend archive for this page is not fully online yet, so this page
+    does not work for all dates in the archive yet.  The hope that it is ready
+    by 1 January 2026.
+</div>
+
+<div class="row">
+    <div class="col-lg-4 col-xl-3">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Image Selection</h5>
+            </div>
+            <div class="card-body">
+                <form id="selectionForm">
+                    <div class="mb-3">
+                        <label for="dateSelect" class="form-label">Date (UTC):</label>
+                        <input type="date" class="form-control" id="dateSelect" min="2018-01-04" required>
+                        <small class="form-text text-muted">Select date to browse available imagery</small>
+                    </div>
+
+                    <div class="mb-3" id="satelliteRow" style="display: none;">
+                        <label for="satelliteSelect" class="form-label">Satellite:</label>
+                        <select class="form-select" id="satelliteSelect" disabled>
+                            <option value="">Loading...</option>
+                        </select>
+                        <small class="form-text text-muted">Available GOES satellites for selected date</small>
+                    </div>
+
+                    <div class="mb-3" id="sectorTypeRow" style="display: none;">
+                        <label for="sectorTypeSelect" class="form-label">Sector Type:</label>
+                        <select class="form-select" id="sectorTypeSelect" disabled>
+                            <option value="">Loading...</option>
+                        </select>
+                        <small class="form-text text-muted">Continental, global, mesoscale, regional, or subregional</small>
+                    </div>
+
+                    <div class="mb-3" id="sectorRow" style="display: none;">
+                        <label for="sectorSelect" class="form-label">Sector:</label>
+                        <select class="form-select" id="sectorSelect" disabled>
+                            <option value="">Loading...</option>
+                        </select>
+                        <small class="form-text text-muted">Available sectors for selected type</small>
+                    </div>
+
+                    <div class="mb-3" id="plotTypeRow" style="display: none;">
+                        <label for="plotTypeSelect" class="form-label">Plot Type:</label>
+                        <select class="form-select" id="plotTypeSelect" disabled>
+                            <option value="">Loading...</option>
+                        </select>
+                        <small class="form-text text-muted">Available imagery types</small>
+                    </div>
+
+                    <div class="mb-3" id="loadingRow" style="display: none;">
+                        <div>
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span class="ms-2">Loading available images...</span>
+                        </div>
+                    </div>
+
+                    <div id="imagesLoadedRow" style="display: none;">
+                        <div class="alert alert-success mb-0 d-flex justify-content-between align-items-center">
+                            <span><strong id="imageCount">0</strong> images loaded and ready to animate</span>
+                            <button type="button" class="btn btn-sm btn-outline-success" id="shareBtn" title="Copy shareable link">
+                                <i class="bi bi-share"></i> Share
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8 col-xl-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Animation Viewer</h5>
+            </div>
+            <div class="card-body" id="imageContainer">
+                <div class="text-center text-muted" id="noImageMessage">
+                    <i class="bi bi-image" style="font-size: 4rem;"></i>
+                    <p class="mt-3 fs-5">Select options to view imagery</p>
+                </div>
+                <div id="imageWrapper" style="display: none;">
+                    <img id="satelliteImage" class="img-fluid" alt="Satellite imagery">
+                    <div class="mt-3 mb-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">
+                                Frame <span id="currentFrame">0</span> of <span id="totalFrames">0</span>
+                                <br>
+                                Time: <span id="currentTime">--</span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="timeline-container">
+                        <svg id="timeline" width="100%" height="50"></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-light" id="animationCard" style="display: none;">
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <button class="btn btn-primary" id="playBtn">
+                        <i class="bi bi-play-fill"></i> Play
+                    </button>
+                    <button class="btn btn-secondary" id="stopBtn" disabled>
+                        <i class="bi bi-stop-fill"></i> Stop
+                    </button>
+                </div>
+
+                <div class="row mb-2">
+                    <label for="speedSlider" class="col-sm-2 col-form-label col-form-label-sm">Speed:</label>
+                    <div class="col-sm-10">
+                        <input type="range" class="form-range" id="speedSlider" min="100" max="2000" step="100" value="500">
+                        <small class="form-text text-muted">Delay between frames: <span id="speedValue">500</span>ms</small>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-10 offset-sm-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="loopCheck" checked>
+                            <label class="form-check-label" for="loopCheck">
+                                Loop animation
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+EOM;
+$t->render("full.phtml");
