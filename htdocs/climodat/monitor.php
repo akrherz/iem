@@ -10,7 +10,7 @@ require_once "../../include/forms.php";
 function ss($v)
 {
     if ($v == '') return '';
-    return intval(xssafe($v));
+    return intval($v);
 }
 
 $year = date("Y");
@@ -137,7 +137,7 @@ EOM;
 $nselect = networkSelect($network, "IA0000", array(), "s[]");
 
 $t = new MyView();
-$showmap = " hidden";
+$showmap = "d-none";
 if (array_key_exists('map', $_GET)) {
     $t->iemss = True;
     $showmap = "";
@@ -159,10 +159,12 @@ $snice = date("d M Y", $sdate);
 $today = ($edate > time()) ? time() : $edate;
 $enice = date("d M Y", $today);
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/climodat/">Climodat Reports</a></li>
- <li class="active">IEM Climodat Station Monitor</li>
+ <li class="breadcrumb-item"><a href="/climodat/">Climodat Reports</a></li>
+ <li class="breadcrumb-item active" aria-current="page">IEM Climodat Station Monitor</li>
 </ol>
+</nav>
 
 <p>The purpose of this page is to provide a one-stop view of summarized
 IEM Climodat data for a period of your choice.  Once you have configured
@@ -193,8 +195,10 @@ for a bias assessment of these values.</p>
 <form name="switch">
 {$hiddendates}
 {$hiddenstations}
+<div class="mb-3">
 {$sselect}
-<input type="submit" value="Select State">
+<button type="submit" class="btn btn-primary">Select State</button>
+</div>
 </form>
 
 <hr />
@@ -202,19 +206,19 @@ for a bias assessment of these values.</p>
 <div class="col-md-6">
 <h4>Available Stations within Selected State</h4>
 
-<form name="add">
+<form name="add" class="mb-3">
 <input type="hidden" name="network" value="{$network}">
 {$hiddendates}
 {$hiddenstations}
     {$nselect}
-    <input type="submit" value="Add Station">
+    <button type="submit" class="btn btn-primary">Add Station</button>
 </form>
 <form name="addfrommap">
 <input type="hidden" name="network" value="{$network}">
 <input type="hidden" name="map" value="1">
 {$hiddendates}
 {$hiddenstations}
-<br /><input type="submit" value="Select Stations From Map">
+<button type="submit" class="btn btn-secondary">Select Stations From Map</button>
 </form>
 </div>
 <div class="col-md-6 {$showmap}" id="mappanel">
@@ -224,8 +228,7 @@ for a bias assessment of these values.</p>
 {$hiddendates}
 {$hiddenstations}
 <div id="iemss" data-network="{$network}" data-supports-all="0"></div>
-
-<br /><input id="addmapstations" type="submit" value="Add Station(s)">
+<button id="addmapstations" type="submit" class="btn btn-primary mt-3">Add Station(s)</button>
 </form>
 </div>
 </div>
@@ -236,20 +239,24 @@ for a bias assessment of these values.</p>
 <form name="dates">
 <input type="hidden" name="network" value="{$network}">
 {$hiddenstations}
+<div class="table-responsive">
 <table class="table table-sm">
+<tbody>
 <tr><th>Growing Degree Days</th>
- <td>base: <input type="text" name="gddbase" size="4" value="{$gddbase}">
- floor: <input type="text" name="gddfloor" size="4" value="{$gddfloor}">
- ceiling: <input type="text" name="gddceil" size="4" value="{$gddceil}">
+ <td>base: <input type="text" name="gddbase" size="4" value="{$gddbase}" class="form-control form-control-sm d-inline-block" style="width: auto;">
+ floor: <input type="text" name="gddfloor" size="4" value="{$gddfloor}" class="form-control form-control-sm d-inline-block" style="width: auto;">
+ ceiling: <input type="text" name="gddceil" size="4" value="{$gddceil}" class="form-control form-control-sm d-inline-block" style="width: auto;">
  </td></tr>
 
-<tr><th>Period</th><td>start: <input type="date" id="sdate" name="sdate" value="{$sdateiso}">
-    end: <input type="date" id="edate" name="edate" value="{$edateiso}"> (inclusive)</td></tr>
+<tr><th>Period</th><td>start: <input type="date" id="sdate" name="sdate" value="{$sdateiso}" class="form-control form-control-sm d-inline-block" style="width: auto;">
+    end: <input type="date" id="edate" name="edate" value="{$edateiso}" class="form-control form-control-sm d-inline-block" style="width: auto;"> (inclusive)</td></tr>
 
 <tr><td colspan="2">
-<input type="submit" value="Apply Table Options">
+<button type="submit" class="btn btn-primary">Apply Table Options</button>
 </td></tr>
+</tbody>
 </table>
+</div>
 </form>
 
 <hr />
@@ -262,8 +269,9 @@ record since 1951.</p>
 <input type="hidden" name="network" value="{$network}">
 {$hiddenstations}
 {$hiddendates}
+<div class="table-responsive">
 <table class="table table-bordered table-striped table-sm">
-<thead><tr>
+<thead class="table-light"><tr>
     <th rowspan="2">ID</th>
     <th rowspan="2">Name</th>
     <th colspan="3">Precipitation [inch]</th>
@@ -282,8 +290,9 @@ record since 1951.</p>
 </thead>
 <tbody>{$table}</tbody>
 </table>
+</div>
 
-<br /><input type="submit" value="Remove Selected Stations From List">
+<button type="submit" class="btn btn-danger">Remove Selected Stations From List</button>
 </form>
 EOM;
 

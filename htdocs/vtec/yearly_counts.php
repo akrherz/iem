@@ -15,8 +15,8 @@ $vtec_significance = $reference["vtec_significance"];
 $clobber = array_key_exists("clobber", $_REQUEST);
 $wfo = strtoupper(substr(get_str404("wfo", "_ALL"), 0, 4));
 $wfo3 = unrectify_wfo($wfo);
-$phenomena = strtoupper(substr(get_str404("phenomena", null), 0, 2));
-$significance = strtoupper(substr(get_str404("significance", null), 0, 1));
+$phenomena = get_str404("phenomena", null, 2);
+$significance = get_str404("significance", null, 1);
 $wfoLimiter = "";
 $wfoMsg = "Data for all WFOs shown";
 if ($wfo != "_ALL") {
@@ -24,8 +24,8 @@ if ($wfo != "_ALL") {
     $wfoMsg = "Data for only $wfo shown";
 }
 
-$p1 = make_select("phenomena", $phenomena, $vtec_phenomena, $showvalue = TRUE);
-$s1 = make_select("significance", $significance, $vtec_significance, $showvalue = TRUE);
+$p1 = make_select("phenomena", $phenomena, $vtec_phenomena, $showvalue = TRUE, $cssclass = "form-select");
+$s1 = make_select("significance", $significance, $vtec_significance, $showvalue = TRUE, $cssclass = "form-select");
 
 $t = new MyView();
 $t->title = "VTEC Yearly Event Counts";
@@ -189,10 +189,12 @@ EOM;
 }
 
 $content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-<li><a href="/nws/">NWS Resources</a></li>
-<li class="active">VTEC Warning Counts by Year/WFO</li>
+<li class="breadcrumb-item"><a href="/nws/">NWS Resources</a></li>
+<li class="breadcrumb-item active" aria-current="page">VTEC Warning Counts by Year/WFO</li>
 </ol>
+</nav>
 
 <p>This page presents the number of VTEC events issued by either all of the
 NWS or a selected WFO.  These numbers are based on the IEM maintained archive
@@ -208,9 +210,13 @@ your favorite spreadsheet program for further analysis...</div>
 
 $cachedwarning
 
-<p><h4>Option 1: All VTEC Events by Year</h4>
-<form method="GET" name="wfo">
-Limit Numbers by WFO:
+<h4>Option 1: All VTEC Events by Year</h4>
+<form method="GET" name="wfo" class="mb-4">
+<div class="row g-3 align-items-center">
+<div class="col-auto">
+<label for="wfoSelect" class="col-form-label">Limit Numbers by WFO:</label>
+</div>
+<div class="col-auto">
 EOM;
 $allWFO = array("_ALL" => array(
     "id" => "_ALL",
@@ -219,13 +225,26 @@ $allWFO = array("_ALL" => array(
     "archive_begin" => new DateTime("1980-01-01")));
 $content .= networkSelect("WFO", $wfo, $extra = $allWFO, $selectName = "wfo");
 $content .= <<<EOM
-    <input type="submit" value="Generate Table">
+</div>
+<div class="col-auto">
+<button type="submit" class="btn btn-primary">Generate Table</button>
+</div>
+</div>
 </form>
 
-<p><h4>Option 2: Count of One VTEC Phenomena and Significance by WFO</h4>
-<form method="GET" name="wfo2">
-{$p1} {$s1}
-<input type="submit" value="Generate Table">
+<h4>Option 2: Count of One VTEC Phenomena and Significance by WFO</h4>
+<form method="GET" name="wfo2" class="mb-4">
+<div class="row g-3 align-items-center">
+<div class="col-auto">
+{$p1}
+</div>
+<div class="col-auto">
+{$s1}
+</div>
+<div class="col-auto">
+<button type="submit" class="btn btn-primary">Generate Table</button>
+</div>
+</div>
 </form>
 
 <h4>$wfoMsg</h4>

@@ -13,10 +13,11 @@ from zoneinfo import ZoneInfo
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.util import logger
+from sqlalchemy.engine import Connection
 
 LOG = logger()
 NT = NetworkTable("IA_ASOS")
@@ -60,7 +61,7 @@ def xref(row, varname, model):
     return row[rowkey]
 
 
-def run(mcursor, model, station, lon, lat, ts):
+def run(conn: Connection, model, station, lon, lat, ts):
     """
     Ingest the model data for a given Model, stationid and timestamp
     """
@@ -100,15 +101,15 @@ def run(mcursor, model, station, lon, lat, ts):
 
     table = f"model_gridpoint_{ts.year}"
     sql = (
-        f"DELETE from {table} WHERE station = %s "
-        "and model = %s and runtime = %s"
+        "DELETE from {table} WHERE station = :station "
+        "and model = :model and runtime = :runtime"
     )
-    args = (station, model, ts)
-    mcursor.execute(sql, args)
-    if mcursor.rowcount > 0:
+    args = {"station": station, "model": model, "runtime": ts}
+    res = conn.execute(sql_helper(sql, table=table), args)
+    if res.rowcount > 0:
         LOG.warning(
             "Deleted %s rows for ts: %s station: %s model: %s",
-            mcursor.rowcount,
+            res.rowcount,
             ts,
             station,
             model,
@@ -125,28 +126,29 @@ def run(mcursor, model, station, lon, lat, ts):
         pwater = xref(row, "pwater", model)
         fts = datetime.strptime(row["time"], ISO8601)
         fts = fts.replace(tzinfo=ZoneInfo("UTC"))
-        sql = f"""INSERT into {table} (station, model, runtime,
+        sql = """INSERT into {table} (station, model, runtime,
               ftime, sbcape, sbcin, pwater)
-              VALUES (%s, %s , %s, %s, %s, %s, %s)"""
-        args = (
-            station,
-            model,
-            ts,
-            fts,
-            sbcape,
-            sbcin,
-            pwater,
-        )
-        mcursor.execute(sql, args)
+              VALUES (:station, :model, :runtime, :ftime, :sbcape, :sbcin,
+              :pwater)"""
+        args = {
+            "station": station,
+            "model": model,
+            "runtime": ts,
+            "ftime": fts,
+            "sbcape": sbcape,
+            "sbcin": sbcin,
+            "pwater": pwater,
+        }
+        conn.execute(sql_helper(sql, table=table), args)
         count += 1
     return count
 
 
-def run_model(mcursor, model, runtime):
+def run_model(conn: Connection, model, runtime):
     """Actually do a model and timestamp"""
     for sid in NT.sts:
         cnt = run(
-            mcursor,
+            conn,
             model,
             f"K{sid}",
             NT.sts[sid]["lon"],
@@ -157,21 +159,24 @@ def run_model(mcursor, model, runtime):
             LOG.warning("No data K%s %s %s", sid, runtime, model)
 
 
-def check_and_run(mcursor, model, runtime):
+def check_and_run(conn: Connection, model, runtime):
     """Check the database for missing data"""
     table = f"model_gridpoint_{runtime.year}"
-    mcursor.execute(
-        f"SELECT * from {table} WHERE runtime = %s and model = %s",
-        (runtime, model),
+    res = conn.execute(
+        sql_helper(
+            "SELECT * from {table} WHERE runtime = :rt and model = :model",
+            table=table,
+        ),
+        {"rt": runtime, "model": model},
     )
-    if mcursor.rowcount < 10:
+    if res.rowcount < 10:
         LOG.warning(
             "Rerunning %s [runtime=%s] due to rowcount %s",
             model,
             runtime,
-            mcursor.rowcount,
+            res.rowcount,
         )
-        run_model(mcursor, model, runtime)
+        run_model(conn, model, runtime)
 
 
 @click.command()
@@ -179,23 +184,21 @@ def check_and_run(mcursor, model, runtime):
 def main(valid: datetime):
     """Do Something"""
     valid = valid.replace(tzinfo=timezone.utc)
-    pgconn = get_dbconn("mos")
-    mcursor = pgconn.cursor()
+    with get_sqlalchemy_conn("mos") as conn:
+        if valid.hour % 6 == 0:
+            ts = valid - timedelta(hours=6)
+            for model in ["GFS", "NAM"]:
+                run_model(conn, model, ts)
+                conn.commit()
+                check_and_run(conn, model, ts - timedelta(days=7))
+                conn.commit()
 
-    if valid.hour % 6 == 0:
-        ts = valid - timedelta(hours=6)
-        for model in ["GFS", "NAM"]:
-            run_model(mcursor, model, ts)
-            check_and_run(mcursor, model, ts - timedelta(days=7))
-
-    ts = valid - timedelta(hours=2)
-    run_model(mcursor, "RAP", ts)
-    check_and_run(mcursor, "RAP", ts - timedelta(days=7))
-    mcursor.close()
-    pgconn.commit()
-    pgconn.close()
+        ts = valid - timedelta(hours=2)
+        run_model(conn, "RAP", ts)
+        conn.commit()
+        check_and_run(conn, "RAP", ts - timedelta(days=7))
+        conn.commit()
 
 
 if __name__ == "__main__":
-    # Go Go gadget
     main()

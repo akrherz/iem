@@ -39,45 +39,63 @@ foreach ($ars as $key => $val) {
 }
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/QC/">Quality Control</a></li>
- <li class="active">Active Trouble Tickets</li>
+ <li class="breadcrumb-item"><a href="/QC/">Quality Control</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Active Trouble Tickets</li>
 </ol>
+</nav>
 
 <p>The IEM developed a system called "IEM Tracker" to track meta-data
 of sites in our component networks.  This page presents a listing of
 'Trouble Tickets' that are currently active.  Currently, only the ticket
 header is presented, but in the future more info will be made publicly
 available.  If you have any questions or comments about a ticket listed,
-please feel free to <a href="/info/contacts.php">Contact Us</a>.
+please feel free to <a href="/info/contacts.php">Contact Us</a>.</p>
 
-<h3>Iowa State Soil Moisture Network</h3>
+<h3 class="mt-4">Iowa State Soil Moisture Network</h3>
+<div class="table-responsive">
 <table class="table table-striped table-bordered">
-<thead>
+<thead class="table-light">
 <tr>
  <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
+ <th>Ticket Topic:</th>
+</tr>
 </thead>
+<tbody>
 {$ars["isusm"]}
-</table><br><br>
+</tbody>
+</table>
+</div>
 
-<h3>Iowa AWOS network</h3>
-<table class="table table-striped">
-<thead>
+<h3 class="mt-4">Iowa AWOS network</h3>
+<div class="table-responsive">
+<table class="table table-striped table-bordered">
+<thead class="table-light">
 <tr>
  <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
+ <th>Ticket Topic:</th>
+</tr>
 </thead>
+<tbody>
 {$ars["iaawos"]}
-</table><br><br>
+</tbody>
+</table>
+</div>
 
-<h3>Iowa RWIS network</h3>
-<table class="table table-striped">
-<thead><tr>
+<h3 class="mt-4">Iowa RWIS network</h3>
+<div class="table-responsive">
+<table class="table table-striped table-bordered">
+<thead class="table-light">
+<tr>
  <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
+ <th>Ticket Topic:</th>
+</tr>
 </thead>
+<tbody>
 {$ars["iarwis"]}
-</table><br><br>
+</tbody>
+</table>
+</div>
 EOM;
 $t->render('single.phtml');

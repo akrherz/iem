@@ -86,12 +86,14 @@ class NumpyEncoder(json.JSONEncoder):
 class Schema(CGIModel):
     """See how we are called."""
 
-    _domain: str = PrivateAttr(None)
-    _gid: int = PrivateAttr(None)
-    _i: int = PrivateAttr(None)
-    _j: int = PrivateAttr(None)
+    _domain: str = PrivateAttr(default=None)
+    _gid: int = PrivateAttr(default=None)
+    _i: int = PrivateAttr(default=None)
+    _j: int = PrivateAttr(default=None)
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: str = Field(
+        default=None, description="JSONP callback function name"
+    )
     forecast: bool = Field(
         default=False,
         description=(
@@ -118,6 +120,26 @@ class Schema(CGIModel):
         ge=-180,
         le=180,
     )
+
+    @property
+    def i(self):
+        """Return the i index."""
+        return self._i
+
+    @property
+    def j(self):
+        """Return the j index."""
+        return self._j
+
+    @property
+    def domain(self):
+        """Return the model name."""
+        return self._domain
+
+    @property
+    def gid(self):
+        """Return the gid."""
+        return self._gid
 
     @model_validator(mode="after")
     def ensure_domain(self):
@@ -149,7 +171,7 @@ def get_iemre(
     where gid = :gid and valid >= :sdate and valid <= :edate ORDER by valid asc
         """),
         conn,
-        params={"gid": model._gid, "sdate": ts1, "edate": ts2},
+        params={"gid": model.gid, "sdate": ts1, "edate": ts2},
         index_col="valid",
     )
 
@@ -184,22 +206,22 @@ def get_iemre(
 def add_forecast(res: dict, model: Schema):
     """Include forecast info into res."""
     for fxmodel in ["gfs", "ndfd"]:
-        if fxmodel == "ndfd" and model._domain != "":
+        if fxmodel == "ndfd" and model.domain != "":
             continue
         res[f"{fxmodel}_forecast"] = []
-        extra = "" if model._domain == "" else f"_{model._domain}"
+        extra = "" if model.domain == "" else f"_{model.domain}"
         ncfn = f"/mesonet/data/iemre{extra}/{fxmodel}_current.nc"
         if not Path(ncfn).exists():
             continue
         with ncopen(ncfn) as nc:
             taxis = compute_taxis(nc.variables["time"])
             highs = convert_value(
-                nc.variables["high_tmpk"][:, model._j, model._i],
+                nc.variables["high_tmpk"][:, model.j, model.i],
                 "degK",
                 "degF",
             )
             lows = convert_value(
-                nc.variables["low_tmpk"][:, model._j, model._i],
+                nc.variables["low_tmpk"][:, model.j, model.i],
                 "degK",
                 "degF",
             )
@@ -213,8 +235,8 @@ def get_mckey(environ: dict):
     """Figure out the memcache key."""
     model: Schema = environ["_cgimodel_schema"]
     return (
-        f"iemre/multiday/{model._domain}/{environ['sdate']:%Y%m%d}"
-        f"/{environ['edate']:%Y%m%d}/{model._i}/{model._j}"
+        f"iemre/multiday/{model.domain}/{environ['sdate']:%Y%m%d}"
+        f"/{environ['edate']:%Y%m%d}/{model.i}/{model.j}"
         f"/{environ['forecast']}"
     )
 
@@ -239,14 +261,14 @@ def application(environ, start_response):
 
     res = {
         "generated_at": utc().strftime(ISO8601),
-        "iemre_domain": model._domain,
-        "iemre_i": model._i,
-        "iemre_j": model._j,
+        "iemre_domain": model.domain,
+        "iemre_i": model.i,
+        "iemre_j": model.j,
         "data": [],
         "timing_seconds": 0,
     }
 
-    extra = "" if model._domain == "" else f"_{model._domain}"
+    extra = "" if model.domain == "" else f"_{model.domain}"
     with get_sqlalchemy_conn(f"iemre{extra}") as conn:
         iemredf = get_iemre(conn, ts1, ts2, model)
 
@@ -294,21 +316,21 @@ def application(environ, start_response):
     iemredf["solar_mj"] = iemredf["rsds"].to_numpy() / 1e6 * 86400.0
 
     # Get our climatology vars
-    ncfn = Path(get_dailyc_ncname(domain=model._domain))
+    ncfn = Path(get_dailyc_ncname(domain=model.domain))
     if ncfn.exists():
         with ncopen(ncfn) as cnc:
             chigh = convert_value(
-                cnc.variables["high_tmpk"][:, model._j, model._i],
+                cnc.variables["high_tmpk"][:, model.j, model.i],
                 "degK",
                 "degF",
             )
             clow = convert_value(
-                cnc.variables["low_tmpk"][:, model._j, model._i],
+                cnc.variables["low_tmpk"][:, model.j, model.i],
                 "degK",
                 "degF",
             )
             cprecip = convert_value(
-                cnc.variables["p01d"][:, model._j, model._i], "mm", "in"
+                cnc.variables["p01d"][:, model.j, model.i], "mm", "in"
             )
             for dt in iemredf.index:
                 doy = dt.timetuple().tm_yday - 1
@@ -316,7 +338,7 @@ def application(environ, start_response):
                 iemredf.at[dt, "climate_daily_low_f"] = clow[doy]
                 iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
 
-    if is_single_year and ts1.year > 1980 and model._domain == "":
+    if is_single_year and ts1.year > 1980 and model.domain == "":
         i2, j2 = get_nav("prism", "").find_ij(environ["lon"], environ["lat"])
         if i2 is not None and j2 is not None:
             res["prism_grid_i"] = i2
@@ -328,7 +350,7 @@ def application(environ, start_response):
                         nc.variables["ppt"][tslice, j2, i2], "mm", "in"
                     )
 
-    if is_single_year and ts1.year > 2000 and model._domain == "":
+    if is_single_year and ts1.year > 2000 and model.domain == "":
         i2, j2 = get_nav("mrms_iemre", "").find_ij(
             environ["lon"], environ["lat"]
         )
