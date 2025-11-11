@@ -1,0 +1,122 @@
+/* MTArchive + COD Satellite Browser Styles */
+
+#imageContainer {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#imageWrapper {
+    width: 100%;
+}
+
+#satelliteImage {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#noImageMessage {
+    padding: 3rem 1rem;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+#animationCard {
+    margin-top: 1rem;
+}
+
+/* Animation controls styling */
+.btn-group button {
+    min-width: 80px;
+}
+
+/* Timeline styling */
+.timeline-container {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+#timeline {
+    display: block;
+    min-width: 100%;
+}
+
+.timeline-line {
+    stroke: #dee2e6;
+    stroke-width: 2;
+}
+
+.timeline-dot {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeline-dot:hover {
+    r: 6;
+    stroke-width: 3;
+}
+
+.timeline-dot.active {
+    stroke-width: 3;
+}
+
+.timeline-label {
+    font-size: 10px;
+    fill: #6c757d;
+    pointer-events: none;
+}
+
+/* Loading spinner alignment */
+#loadingRow .spinner-border {
+    vertical-align: middle;
+}
+
+/* Form select disabled state */
+select:disabled {
+    cursor: not-allowed;
+}
+
+/* Progress bar styling */
+.progress {
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.1s ease;
+    background-color: #0d6efd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    #imageContainer {
+        min-height: 300px;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Alert styling for image count */
+.alert-success {
+    border-left: 4px solid #198754;
+}
+
+/* Icon sizing in buttons */
+.btn i {
+    margin-right: 0.25rem;
+}
