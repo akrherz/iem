@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 101);
 require_once "../../include/myview.php";
@@ -41,41 +41,37 @@ $rwis = networkOffline("IA_RWIS");
 $awos = networkOffline("IA_ASOS");
 $isusm = networkOffline("ISUSM");
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/QC/">Quality Control</a></li>
- <li class="active">Sites Offline</li>
+ <li class="breadcrumb-item"><a href="/QC/">Quality Control</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Sites Offline</li>
 </ol>
+</nav>
 
-<P>Unfortunately, automated observing sites occasionally go offline due
-to a wide range of factors.  Here is a listing of sites currently offline.
-</p>
+<p>Unfortunately, automated observing sites occasionally go offline due
+to a wide range of factors.  Here is a listing of sites currently offline.</p>
 
-<table class="table table-striped">
-<thead>
+<div class="table-responsive">
+<table class="table table-striped table-bordered">
+<thead class="table-light">
 <tr>
- <th align="left">Site ID:</th>
- <th align="left">Name</th>
- <th align="left">Flagged Offline At</th></tr>
+ <th>Site ID:</th>
+ <th>Name</th>
+ <th>Flagged Offline At</th>
+</tr>
 </thead>
-<tr><td colspan="3" style="background: #CCCCCC;"><b>ISU Soil Moisture Network</b>
-  (3 hour tolerance)</td></tr>
+<tbody>
+<tr><td colspan="3" class="table-secondary fw-bold">ISU Soil Moisture Network (3 hour tolerance)</td></tr>
 {$isusm}
 
-<tr>
- <td colspan=3 style="background: #CCCCCC;"><b>Iowa RWIS Network</b>
-  (1 hour tolerance)</td>
-</tr>
+<tr><td colspan="3" class="table-secondary fw-bold">Iowa RWIS Network (1 hour tolerance)</td></tr>
 {$rwis}
 
-<tr>
- <td colspan=3 style="background: #CCCCCC;"><b>Iowa AWOS Network</b>
-  (90 minute tolerance)</td>
-</tr>
+<tr><td colspan="3" class="table-secondary fw-bold">Iowa AWOS Network (90 minute tolerance)</td></tr>
 {$awos}
 
+</tbody>
 </table>
-
-<p>
 </div>
 EOM;
 $t->render('single.phtml');

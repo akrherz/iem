@@ -4,27 +4,32 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "AWOS Archive | Sky Coverages";
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-    <li><a href="/AWOS/">AWOS</a></li>
-    <li class="active">AWOS Sky Coverage Codes</li>
+    <li class="breadcrumb-item"><a href="/AWOS/">AWOS</a></li>
+    <li class="breadcrumb-item active" aria-current="page">AWOS Sky Coverage Codes</li>
 </ol>
+</nav>
 
 <h3>AWOS Sky Coverages</h3>
 
-<div class="text">
 <p>The Iowa DOT provides the IEM with an <a href="/request/awos/1min.php">archive of 1 minute observations</a>
 from their AWOS network.  This archive contains numerically coded values for
 sky coverage.  Unfortunately, there does not appear to be a definitive cross
-reference to match these values up to something humans can understand (ex. overcast).  
-Here is our (Harry Hillaker and Daryl Herzmann) educated guess at a cross reference 
-to what the sky coverage codes mean that are found in the archive.<p>
+reference to match these values up to something humans can understand (ex. overcast).
+Here is our (Harry Hillaker and Daryl Herzmann) educated guess at a cross reference
+to what the sky coverage codes mean that are found in the archive.</p>
 
-<table class="table table-bordered">
-<thead>
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+<thead class="table-light">
 <tr>
   <th>Code</th>
   <th>Translated Code:</th>
-  <th>Meaning</th></tr></thead>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
 
 <tr><th>0</th><th>NOREPORT</th>
   <td>No report, since lower cloud layers are obstructing.</td></tr>
@@ -65,8 +70,8 @@ to what the sky coverage codes mean that are found in the archive.<p>
 <tr><th>*</th><th>UNKNOWNCODE</th>
   <td>All other values that may appear in the database.</td></tr>
 
+</tbody>
 </table>
-
 </div>
 EOM;
 $t->render('single.phtml');
