@@ -297,6 +297,7 @@
 172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png
 172/network:IACLIMATE::station:IATAME::var:gdd::base:50::ceil:86::year1:2019::sdate:0501::m:3::_r:t::dpi:100.png
 173/network:IA_ASOS::zstation:AMW::units:mph::p1:0501-0510::p2:0511-0520::_r:t::dpi:100.png
+173/network:IA_ASOS::zstation:AMW::units:mph::p1:0501-0510::p2:051124-052024::_r:t::dpi:100.png
 174/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::var:temp::sdate:2024-01-01::edate:2024-05-08::_r:43::dpi:100.png
 175/year:2023::thres:1.0::state:IA::_r:t::dpi:100.png
 175/year:2022::thres:1.0::state:IA::_r:t::dpi:100.png
@@ -347,6 +348,7 @@
 185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
 185/sector:IA::date:2024-05-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
 185/sector:IA::date:2024-06-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.geotiff
+189/network:IACLIMATE::station:IATAME::plot_type:annual_sum_precip::first_year:1951::last_year:2024::linregress:yes::_r:t::dpi:100.png
 191/sdate:2024-01-01::edate:2024-09-12::w:fema::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:TO::significancev1:W::_r:t::dpi:100.png
 191/sdate:2024-01-01::edate:2024-06-23::daytz:12z::w:ugc::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:t::dpi:100.png
 191/sdate:2023-01-01::edate:2024-06-23::daytz:central::w:state::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:43::dpi:100.png

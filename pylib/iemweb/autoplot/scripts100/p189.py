@@ -99,7 +99,7 @@ META = {
     },
     "summer_avg_low": {
         "title": "Summer [JJA] Average Low Temperature",
-        "ylabel": "Temperature [F]",
+        "ylabel": "Temperature [°F]",
         "xlabel": "Year",
         "func": "avg(low)",
         "month_bounds": "and month in (6,7,8)",
@@ -190,7 +190,7 @@ def yearly_plot(ctx):
             df = pd.read_sql(
                 sql_helper(
                     """
-    SELECT extract(year from (day {off})) as yr, {func} as data "
+    SELECT extract(year from (day {off})) as yr, {func} as data
     from alldata WHERE station = :station {bnds}
     GROUP by yr ORDER by yr ASC""",
                     off=off,

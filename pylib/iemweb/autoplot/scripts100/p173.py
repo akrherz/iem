@@ -15,7 +15,7 @@ from datetime import date, datetime
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value
 
@@ -179,6 +179,8 @@ def add_context(ctx):
             if p is None:
                 continue
             tokens = p.split("-")
+            if len(tokens) != 2 or len(tokens[0]) != 4 or len(tokens[1]) != 4:
+                raise IncompleteWebRequest("Invalid date period format.")
             sts = datetime.strptime(f"2000{tokens[0].strip()}", "%Y%m%d")
             ets = datetime.strptime(f"2000{tokens[1].strip()}", "%Y%m%d")
             ldf = (
@@ -194,7 +196,7 @@ def add_context(ctx):
             ctx["subtitle"] = "Period Average Wind Speed by Hour"
         df = pd.concat(dfs)
 
-    df["avg_%s" % (units,)] = convert_value(
+    df[f"avg_{units}"] = convert_value(
         df["avg_sknt"].values, "knot", UNITCONV[units]
     )
     ctx["df"] = df
