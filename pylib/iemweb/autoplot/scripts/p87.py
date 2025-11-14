@@ -192,16 +192,7 @@ def plotter(ctx: dict):
         lax.set_xlim(-0.5, 51.5)
         lax.set_xticks(np.arange(0, 55, 7))
         lax.set_xticklabels(
-            (
-                "Jan 1",
-                "Feb 19",
-                "Apr 8",
-                "May 27",
-                "Jul 15",
-                "Sep 2",
-                "Oct 21",
-                "Dec 9",
-            )
+            "Jan 1,Feb 19,Apr 8,May 27,Jul 15,Sep 2,Oct 21,Dec 9".split(",")
         )
     else:
         ax.set_xticks(

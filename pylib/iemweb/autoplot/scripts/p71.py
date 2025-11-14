@@ -14,7 +14,7 @@ from datetime import date, datetime
 import matplotlib.patheffects as PathEffects
 import pandas as pd
 from matplotlib.axes import Axes
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure
 from pyiem.util import convert_value, drct2text
 
@@ -96,17 +96,17 @@ def plotter(ctx: dict):
     sts = date(year, month, 1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
                 SELECT extract(year from day) as year,
                 to_char(day, 'mmdd') as sday,
                 day, avg_sknt as sknt, vector_avg_drct as drct,
                 coalesce(max_gust, 0) as gust
-                from summary s WHERE iemid = %s and
-                extract(month from day) = %s and avg_sknt is not null
+                from summary s WHERE iemid = :iemid and
+                extract(month from day) = :month and avg_sknt is not null
                 ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(ctx["_nt"].sts[station]["iemid"], month),
+            params={"iemid": ctx["_nt"].sts[station]["iemid"], "month": month},
             parse_dates=["day"],
         )
     title = f"{ctx['_sname']}\n{sts:%b %Y} Daily Wind Speed and Direction"

@@ -59,9 +59,9 @@ PDICT = {
     "vpd": "Vapor Pressure Deficit",
 }
 UNITS = {
-    "tmpf": "F",
-    "dwpf": "F",
-    "feel": "F",
+    "tmpf": "°F",
+    "dwpf": "°F",
+    "feel": "°F",
     "relh": "%",
     "vpd": "hPa",
 }
@@ -252,7 +252,7 @@ def get_data(ctx, startyear):
     return df
 
 
-def make_plot(df, ctx):
+def make_plot(df: pd.DataFrame, ctx: dict):
     """Do the plotting"""
 
     means = (

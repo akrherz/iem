@@ -40,18 +40,18 @@ MDICT = {
     "dec": "December",
 }
 PDICT3 = {
-    "tmpc": "Air Temperature (C)",
-    "dwpc": "Dew Point (C)",
+    "tmpc": "Air Temperature (°C)",
+    "dwpc": "Dew Point (°C)",
     "el_agl_m": "Equalibrium Level (m AGL)",
     "el_pressure_hpa": "Equalibrium Pressure (hPa)",
-    "el_tmpc": "Equalibrium Level Temperature (C)",
+    "el_tmpc": "Equalibrium Level Temperature (°C)",
     "height": "Height (m)",
     "lcl_agl_m": "Lifted Condensation Level (m AGL)",
     "lcl_pressure_hpa": "Lifted Condensation Level (hPa)",
-    "lcl_tmpc": "Lifted Condensation Level Temperature (C)",
+    "lcl_tmpc": "Lifted Condensation Level Temperature (°C)",
     "lfc_agl_m": "Lifted of Free Convection (m AGL)",
     "lfc_pressure_hpa": "Lifted of Free Convection (hPa)",
-    "lfc_tmpc": "Lifted of Free Convection Temperature (C)",
+    "lfc_tmpc": "Lifted of Free Convection Temperature (°C)",
     "mlcape_jkg": "Mixed Layer (100hPa) CAPE (J/kg)",
     "mlcin_jkg": "Mixed Layer (100hPa) CIN (J/kg)",
     "mucape_jkg": "Most Unstable CAPE (J/kg)",
@@ -69,7 +69,7 @@ PDICT3 = {
     "sbcape_jkg": "Surface Based CAPE (J/kg)",
     "sbcin_jkg": "Surface Based CIN (J/kg)",
     "sweat_index": "Sweat Index",
-    "total_totals": "Total Totals (C)",
+    "total_totals": "Total Totals (°C)",
     "smps": "Wind Speed (mps)",
 }
 PDICT4 = {"min": "Minimum", "avg": "Average", "max": "Maximum"}
@@ -135,7 +135,7 @@ def get_description():
     return desc
 
 
-def compute(dfin, varname):
+def compute(dfin: pd.DataFrame, varname: str):
     """Compute our needed yearly aggregates."""
     if dfin.empty:
         raise NoDataFound("No Data Found")
