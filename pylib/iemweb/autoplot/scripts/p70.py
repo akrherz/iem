@@ -248,14 +248,14 @@ def plotter(ctx: dict):
             left=[gdf["doy"].values[0]] * len(gdf.index),
             zorder=3,
             align="center",
-            color=cmap(norm([gdf["cumsum"].values[::-1]]))[0],
+            color=cmap(norm([gdf["cumsum"].to_numpy()[::-1]]))[0],
         )
     gdf = df[["vtec_year", "doy"]].groupby("vtec_year").agg(["min", "max"])
     if len(gdf.index) < 3:
         raise NoDataFound("Not enough data to compute an average")
     # Exclude first and last year in the average
-    avg_start = np.average(gdf["doy", "min"].values[1:-1])
-    avg_end = np.average(gdf["doy", "max"].values[1:-1])
+    avg_start = np.average(gdf["doy", "min"].to_numpy()[1:-1])
+    avg_end = np.average(gdf["doy", "max"].to_numpy()[1:-1])
     ax.axvline(avg_start, ls=":", lw=2, color="k")
     ax.axvline(avg_end, ls=":", lw=2, color="k")
     x0 = date(2000, 1 if split == "jan1" else 7, 1)

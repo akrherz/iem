@@ -106,7 +106,7 @@ $t->content = <<<EOM
 <p>The National Weather Service has a limited number of observers that report
 snowfall totals at 6 hour intervals. This page lists any of those observations
 found by the IEM whilst parsing the feed of SHEF encoded data.
-<a href="/api/1/docs#/nws/service_nws_snowfall_6hour__fmt__get">API Service</a>
+<a href="/api/1/docs#/nws/service_nws__varname__6hour__fmt__get">API Service</a>
 with this data.</p>
 
 <p>This page presents one "day" of data at a time. The day is defined as starting

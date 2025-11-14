@@ -289,7 +289,7 @@ def plotter(ctx: dict):
             df[varname].values,
             fmt=f"%.{PRECISION.get(varname, 1)}f",
             labelbuffer=5,
-            zorder=Z_OVERLAY2 + 3,  # FIXME in pyIEM someday
+            zorder=Z_OVERLAY2 + 3,
         )
 
     return mp.fig, df

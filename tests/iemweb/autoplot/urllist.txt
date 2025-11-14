@@ -434,6 +434,7 @@
 220/which:2C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 220/which:2C::cat:hail::t:cwa::network:WFO::wfo:GSP::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 224/which:pop::valid:2024-05-21%202100::opt:active::_r:t::dpi:100.png
+226/network:CWSU::cwsu:ZFW::num:101::issue:2024-08-11%200000::_r:t::dpi:100::_cb:1.png
 227/pid:202410012036-KDTX-FZUS73-MWSDTX::segnum:0::_r:t::dpi:100.png
 228/mode:normal::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100::_cb:1.png
 228/mode:iadrought::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100.png

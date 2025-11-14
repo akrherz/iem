@@ -29,8 +29,8 @@ PDICT2 = {
     "month": "Month of the Selected Profile",
 }
 PDICT3 = {
-    "tmpc": "Air Temperature (C)",
-    "dwpc": "Dew Point (C)",
+    "tmpc": "Air Temperature (°C)",
+    "dwpc": "Dew Point (°C)",
     "hght": "Height (m)",
     "smps": "Wind Speed (mps)",
 }
@@ -206,8 +206,8 @@ def plotter(ctx: dict):
             (fmt + " (" + fmt + " " + fmt + ")")
             % (
                 df.iloc[i][varname],
-                df.iloc[i][varname + "_min"],
-                df.iloc[i][varname + "_max"],
+                df.iloc[i][f"{varname}_min"],
+                df.iloc[i][f"{varname}_max"],
             )
         )
     ax.set_yticks(range(len(df.index)))

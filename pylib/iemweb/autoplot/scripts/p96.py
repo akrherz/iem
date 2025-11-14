@@ -110,7 +110,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     ax.set_ylabel("Bias of Days per Year with Precip", color="b")
     ax.set_xlim(0, 24)
     ax.set_xticks((0, 4, 8, 12, 16, 20, 24))
-    ax.set_xticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM", "Mid"))
+    ax.set_xticklabels("Mid,4 AM,8 AM,Noon,4 PM,8 PM,Mid".split(","))
     ax.grid(True)
     ax.set_xlabel(
         "Hour Used for 24 Hour Summary, "

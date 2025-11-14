@@ -137,7 +137,7 @@ def get_highcharts(ctx: dict) -> dict:
     return j
 
 
-def add_ctx(ctx):
+def add_ctx(ctx: dict):
     """Get data common to both methods"""
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
