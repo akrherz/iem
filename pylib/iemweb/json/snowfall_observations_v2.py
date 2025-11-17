@@ -28,6 +28,7 @@ from zoneinfo import ZoneInfo
 import httpx
 import pandas as pd
 from pydantic import Field
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
@@ -47,6 +48,8 @@ class Schema(CGIModel):
 def dowork(wfo: str) -> list:
     """Actually do stuff"""
     nt = NetworkTable("WFO")
+    if wfo not in nt.sts:
+        raise IncompleteWebRequest("Unknown WFO")
     tzinfo = ZoneInfo(nt.sts[wfo]["tzname"])
     rows = []
     time_columns = []  # Track column order
