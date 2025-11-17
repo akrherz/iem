@@ -125,7 +125,7 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
     </div>
     <div class="card-body">
         <form method="GET" name="changeme">
-            <div class="row g-3 align-items-end">
+            <div class="row g-3 mb-3">
                 <div class="col-md-2">
                     <label for="year" class="form-label"><strong>Year:</strong></label>
                     {$yselect}
@@ -138,30 +138,30 @@ subsequent 0, and 6 UTC values shown are with valid dates of the next day.</p>
                     <label for="day" class="form-label"><strong>Day:</strong></label>
                     {$dselect}
                 </div>
-                <div class="col-md-6">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="w" value="all" {$allselected} id="all">
-                                <label class="form-check-label" for="all">Show all data</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
-                                <label class="form-check-label" for="wfo">Select by WFO:</label>
-                            </div>
-                            {$wselect}
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="w" value="state" {$stateselected} id="state">
-                                <label class="form-check-label" for="state">Select by State:</label>
-                            </div>
-                            {$sselect}
-                        </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="w" value="all" {$allselected} id="all">
+                        <label class="form-check-label" for="all">Show all data</label>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="w" value="wfo" {$wfoselected} id="wfo">
+                        <label class="form-check-label" for="wfo">Select by WFO:</label>
+                    </div>
+                    {$wselect}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="w" value="state" {$stateselected} id="state">
+                        <label class="form-check-label" for="state">Select by State:</label>
+                    </div>
+                    {$sselect}
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-search"></i> View Table
