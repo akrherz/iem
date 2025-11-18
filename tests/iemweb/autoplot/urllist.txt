@@ -359,6 +359,8 @@
 193/csector:iailin::date:2024-07-01::z:0::f:168::opt:both::scale:7::cmap:gist_ncar::_r:t::dpi:100.png
 193/csector:conus::date:2000-07-01::z:0::f:120::opt:both::scale:auto::cmap:gist_ncar::_r:t::dpi:100.png
 194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
+195/network:WFO::wfo:DMX::p:_A::limit:ANY::_r:t::dpi:100.png
+195/network:WFO::wfo:DMX::p:MA::limit:ANY::_r:t::dpi:100.png
 196/network:IA_ASOS::station:AMW::opt:no::var:chill::_r:43::dpi:100.png
 197/csector:IA::var:corn_planting::w:avg::weeks:1::date:2021-05-09::cmap:BrBG::_r:43::dpi:100.png
 197/csector:IA::var:corn_planting::w:avg::weeks:2::date:2021-05-08::cmap:BrBG::_r:43::dpi:100.png
