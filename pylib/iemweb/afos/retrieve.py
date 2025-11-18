@@ -13,6 +13,11 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2025-11-18: Added `matches` parameter to allow a simple search within
+  candidate text products for a given string.  For some products with
+  ambiguous six character `pil` values and identical issuance `center` values,
+  this allows further refinement of the search.  This is generally only useful
+  for the "faked" PILs used within MOS products.
 - 2025-01-22: Added `aviation_afd` flag for the specific case of retrieving
   the "Aviation" section of an Area Forecast Discussion.
 - 2025-01-08: Added some caching due to incessant requests for the same data.
@@ -80,6 +85,12 @@ Return the aviation section of the latest AFD from NWS Des Moines
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&\
 aviation_afd=1
+
+Return the LAV MOS for KATL by specifying that KATL should appear within the
+product text, so to not return the mos for PATL.
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=LAVATL&\
+matches=KATL
 
 """
 
@@ -151,6 +162,15 @@ class MyModel(CGIModel):
         ),
         ge=1,
         le=9999,
+    )
+    matches: str = Field(
+        default=None,
+        description=(
+            "Attempt a simple substring search within candidate products for "
+            "the given exact string.  This is limited functionality for now."
+        ),
+        max_length=4,
+        min_length=4,
     )
     pil: ListOrCSVType = Field(
         ...,
@@ -317,10 +337,12 @@ def application(environ, start_response):
         "edate": environ["edate"],
         "ttaaii": environ["ttaaii"],
         "limit": environ["limit"],
+        "matches": environ["matches"],
     }
     centerlimit = "" if environ["center"] == "" else " and source = :center "
     ttlimit = "" if environ["ttaaii"] == "" else " and wmo = :ttaaii "
     plimit = " pil = ANY(:pils) "
+    mlimit = " and strpos(data, :matches) > 0 " if environ["matches"] else ""
     if len(pils) == 1:
         plimit = " pil = :pil "
         params["pil"] = pils[0].strip()
@@ -333,11 +355,12 @@ def application(environ, start_response):
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
         "from products WHERE {plimit} "
         "and entered >= :sdate and entered <= :edate {centerlimit} "
-        "{ttlimit} ORDER by entered {order} LIMIT :limit",
+        "{ttlimit} {mlimit} ORDER by entered {order} LIMIT :limit",
         plimit=plimit,
         centerlimit=centerlimit,
         ttlimit=ttlimit,
         order=order,
+        mlimit=mlimit,
     )
     # Query optimization when sdate is very old and perhaps we could reach
     # the limit by looking at the last 31 days of data
