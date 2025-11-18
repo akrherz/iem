@@ -88,6 +88,14 @@ def get_description():
             label="Limit plot start year (if data exists) to:",
         ),
         {
+            "type": "year",
+            "default": today.year,
+            "min": 1900,
+            "name": "eyear",
+            "label": "Inclusive year to limit plot to (if data exists):",
+            "optional": True,
+        },
+        {
             "type": "sday",
             "name": "sday",
             "default": f"{sts:%m%d}",
@@ -197,7 +205,7 @@ def plotter(ctx: dict):
             count_days
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
-        and {dtlimiter} and day >= :start
+        and {dtlimiter} and day >= :start and day <= :end
         GROUP by yr ORDER by yr ASC
         """,
                 doff=doff,
@@ -212,6 +220,7 @@ def plotter(ctx: dict):
                 "sday": f"{ctx['sday']:%m%d}",
                 "eday": f"{ctx['eday']:%m%d}",
                 "start": date(ctx["syear"], 1, 1),
+                "end": date(ctx.get("eyear", date.today().year), 12, 31),
                 "threshold": threshold,
             },
             index_col="yr",

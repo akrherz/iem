@@ -234,5 +234,5 @@ def plotter(ctx: dict):
         )
         g.ax_joint.legend(loc="best")
     g.ax_joint.grid()
-    g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
-    return g.fig, df
+    g.figure.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
+    return g.figure, df
