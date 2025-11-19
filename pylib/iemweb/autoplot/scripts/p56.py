@@ -25,6 +25,7 @@ from pyiem.nws import vtec
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+from iemweb.mlib import unrectify_wfo
 
 OPT = {
     "state": "Summarize by State",
@@ -102,7 +103,7 @@ def get_description():
     return desc
 
 
-def compute_plot_climo(ax, df):
+def compute_plot_climo(ax, df: pd.DataFrame):
     """Figure out the climatology."""
     # Our data frame is by week of the year
     # Our test for bimodal is if the top 5 weeks have a intermediate
@@ -172,7 +173,7 @@ def plotter(ctx: dict):
     params = {
         "ph": phenomena,
         "sig": significance,
-        "wfo": station,
+        "wfo": unrectify_wfo(station),
     }
     limiter = " wfo = :wfo "
     if station not in ctx["_nt"].sts:
