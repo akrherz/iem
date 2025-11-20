@@ -1,6 +1,7 @@
 """
-This plot presents a 2-D histogram of overcast
-conditions reported by the automated sensor.  Please note that the yaxis
+This plot presents a 2-D histogram of reported cloud ceilings as inferred by
+the METAR cloud amount reports of at least BKN (broken) or OVC (overcast)
+from the automated sensor.  Please note that the yaxis
 uses an irregular spacing.
 """
 
@@ -38,10 +39,17 @@ def plotter(ctx: dict):
         df = pd.read_sql(
             sql_helper("""
             select extract(doy from valid) as doy,
-            greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
-            WHERE station = :station and
-            (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
+            CASE
+                WHEN skyc1 in ('BKN', 'OVC') THEN skyl1
+                WHEN skyc2 in ('BKN', 'OVC') THEN skyl2
+                WHEN skyc3 in ('BKN', 'OVC') THEN skyl3
+                WHEN skyc4 in ('BKN', 'OVC') THEN skyl4
+            END as sky
+            from alldata
+            WHERE station = :station
             and valid > '1973-01-01' and report_type = 3
+            and (skyc1 in ('BKN', 'OVC') or skyc2 in ('BKN', 'OVC')
+                 or skyc3 in ('BKN', 'OVC') or skyc4 in ('BKN', 'OVC'))
         """),
             conn,
             params={"station": station},
@@ -76,12 +84,11 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     syear = max([1973, ab.year])
 
-    title = (
-        f"({syear}-{date.today().year}) {ctx['_sname']}:: "
-        "Ceilings Frequency\n"
-        "Level at which Overcast Conditions Reported"
+    (fig, ax) = figure_axes(
+        title=f"({syear}-{date.today().year}) {ctx['_sname']} Ceiling",
+        subtitle="Frequency of first cloud level with BKN or OVC reported",
+        apctx=ctx,
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
@@ -101,7 +108,7 @@ def plotter(ctx: dict):
     idx = [0, 4, 9, 19, 29, 39, 49, 54, 59, 64, 69, 74, 79]
     ax.set_yticks(idx)
     ax.set_yticklabels(z[idx])
-    ax.set_ylabel("Overcast Level [ft AGL], irregular scale")
+    ax.set_ylabel("Overcast/Broken Level [ft AGL], irregular scale")
     ax.set_xlabel("Week of the Year")
     ax.set_xticks(np.arange(1, 55, 7))
     ax.set_xticklabels(

@@ -758,7 +758,7 @@ mopts = [
     {"id": 222, "label": "One Minute Precip During Severe Weather"},
     {
         "id": 162,
-        "label": "Overcast Sky Condition 2D Histogram (Level by Week)",
+        "label": "Cloud Ceilings 2D Histogram (Level by Week)",
     },
     {
         "id": 213,
