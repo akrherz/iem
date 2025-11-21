@@ -52,11 +52,11 @@ module.exports = [
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 },
                 {
-                    "name": "jQuery", 
+                    "name": "jQuery",
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 }
             ],
-            
+
             // Modernization hints
             "no-restricted-syntax": [
                 "warn",
@@ -98,7 +98,7 @@ module.exports = [
                     "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
             ],
-            
+
             // Code quality
             "eqeqeq": "error",
             "no-console": "warn",
@@ -106,23 +106,23 @@ module.exports = [
             "one-var": ["error", "never"], // Require one variable declaration per line
             "init-declarations": ["error", "always"], // Require variables to be initialized when declared
             "object-shorthand": "warn", // Use shorthand property syntax for object literals (e.g., {foo} instead of {foo: foo})
-            
-            
+
+
             // Variable shadowing detection
-            "no-shadow": ["error", { 
+            "no-shadow": ["error", {
                 "builtinGlobals": false,
                 "hoist": "functions",
                 "allow": ["err", "error", "resolve", "reject", "cb", "callback", "done"]
             }],
-            
+
             // Duplicate assignment detection
             "no-self-assign": "error",
             "no-sequences": "error",
             "no-unreachable": "error",
-            
+
             // Block-scoped declarations
             "no-inner-declarations": ["error", "both"], // Function or var declarations in nested blocks is not preferred
-            
+
             // Additional code quality rules to catch common issues
             "no-implicit-coercion": "warn",
             "no-return-assign": "error",
@@ -133,25 +133,25 @@ module.exports = [
             "prefer-const": "warn", // Use const declarations for variables that are never reassigned
             "default-case": "warn", // No default cases in switch statements
             "complexity": ["warn", { "max": 10 }], // Function with cyclomatic complexity higher than threshold
-            "no-unused-vars": ["warn", { 
-                "vars": "all", 
-                "args": "after-used", 
+            "no-unused-vars": ["warn", {
+                "vars": "all",
+                "args": "after-used",
                 "ignoreRestSiblings": false,
                 "argsIgnorePattern": "^_",
                 "varsIgnorePattern": "^_",
                 "caughtErrors": "all"
             }], // Found unused objects
-            
+
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
             "consistent-this": ["error", "self"],
             "class-methods-use-this": "warn", // Warn when class methods don't use `this` and could be static
-            
+
             // Disable some rules that might be too strict for legacy code
             "no-redeclare": "off"
         }
     },
-    
+
     // Configuration for ES modules (.module.js and IEM utilities)
     {
         files: ["**/*.module.js", "src/iemjs/**/*.js"],
@@ -165,7 +165,7 @@ module.exports = [
         rules: {
             // Base ES5+ compliance rules
             "no-var": "error",
-            
+
             // jQuery prohibition rules
             "no-restricted-globals": [
                 "error",
@@ -174,18 +174,19 @@ module.exports = [
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 },
                 {
-                    "name": "jQuery", 
+                    "name": "jQuery",
                     "message": "jQuery should not be used. Use vanilla JavaScript instead."
                 }
             ],
-            
+
             // Modern JavaScript preferences (more strict for modules)
             "prefer-arrow-callback": "error",
             "prefer-template": "error",
             "prefer-const": "error", // Use const declarations for variables that are never reassigned
             "object-shorthand": "error",
-            
-            
+            "no-return-await": "error", // Prevent unnecessary return await (performance issue)
+
+
             // Deprecated method warnings for modules too
             "no-restricted-syntax": [
                 "warn",
@@ -222,54 +223,55 @@ module.exports = [
                     "message": "Template Literal Found - use single quotes instead of template literals when no interpolation is needed."
                 }
             ],
-            
+
             // Code quality
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
             "one-var": ["error", "never"], // Require one variable declaration per line
             "init-declarations": ["error", "always"], // Require variables to be initialized when declared
-            
-            // Variable shadowing detection  
-            "no-shadow": ["error", { 
+
+            // Variable shadowing detection
+            "no-shadow": ["error", {
                 "builtinGlobals": false,
                 "hoist": "functions",
                 "allow": ["err", "error", "resolve", "reject", "cb", "callback", "done"]
             }],
-            
+
             // Duplicate assignment detection
             "no-self-assign": "error",
             "no-sequences": "error",
             "no-unreachable": "error",
-            
+
             // Block-scoped declarations
             "no-inner-declarations": ["error", "both"], // Function or var declarations in nested blocks is not preferred
-            
+
             // Additional code quality rules (stricter for modules)
             "no-implicit-coercion": "error",
             "no-return-assign": "error",
             "array-callback-return": "error",
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+            "require-await": "error", // Async functions must contain await expressions
             "default-case": "error", // No default cases in switch statements
             "complexity": ["error", { "max": 8 }], // Function with cyclomatic complexity higher than threshold
             "no-unused-vars": ["error", {
-                "vars": "all", 
-                "args": "after-used", 
+                "vars": "all",
+                "args": "after-used",
                 "ignoreRestSiblings": false,
                 "argsIgnorePattern": "^_",
                 "varsIgnorePattern": "^_",
                 "caughtErrors": "all"
             }], // Found unused objects
-            
+
             // Avoid usage of `this` in JavaScript code (IEM rule)
             "no-invalid-this": "error",
             "consistent-this": ["error", "self"],
-            
+
             // Disable some rules that might be too strict
             "no-redeclare": "off"
         }
     },
-    
+
     // Configuration for test files - allow console usage for test output
     {
         files: ["**/tests/**/*.js", "**/*.test.js", "**/*.spec.js"],

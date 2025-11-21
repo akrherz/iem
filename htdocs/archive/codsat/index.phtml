@@ -9,7 +9,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/archive/codsat/index.css"/>
 EOM;
 $t->jsextra = <<<EOM
-<script src="/archive/codsat/index.module.js" type="module"></script>
+<script src="/archive/codsat/index.module.js?v=2" type="module"></script>
 EOM;
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
@@ -141,6 +141,14 @@ powered by the <a href="https://weather.cod.edu/satrad/" target="_blank">College
                     <div class="col-sm-10">
                         <input type="range" class="form-range" id="speedSlider" min="100" max="2000" step="100" value="500">
                         <small class="form-text text-muted">Delay between frames: <span id="speedValue">500</span>ms</small>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label for="skipSlider" class="col-sm-2 col-form-label col-form-label-sm">Skip:</label>
+                    <div class="col-sm-10">
+                        <input type="range" class="form-range" id="skipSlider" min="1" max="20" step="1" value="1">
+                        <small class="form-text text-muted">Play every <span id="skipValue">1</span> frame(s)</small>
                     </div>
                 </div>
 

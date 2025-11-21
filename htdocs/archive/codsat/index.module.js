@@ -20,6 +20,7 @@ const state = {
     isPlaying: false,
     animationInterval: null,
     speed: 500,
+    skipFrames: 1,
     loop: true
 };
 
@@ -35,6 +36,8 @@ const elements = {
     stopBtn: null,
     speedSlider: null,
     speedValue: null,
+    skipSlider: null,
+    skipValue: null,
     loopCheck: null,
     currentFrame: null,
     totalFrames: null,
@@ -64,6 +67,8 @@ function init() {
     elements.stopBtn = document.getElementById("stopBtn");
     elements.speedSlider = document.getElementById("speedSlider");
     elements.speedValue = document.getElementById("speedValue");
+    elements.skipSlider = document.getElementById("skipSlider");
+    elements.skipValue = document.getElementById("skipValue");
     elements.loopCheck = document.getElementById("loopCheck");
     elements.currentFrame = document.getElementById("currentFrame");
     elements.totalFrames = document.getElementById("totalFrames");
@@ -102,6 +107,7 @@ async function loadStateFromURL() {
         sector: params.get('sector'),
         plotType: params.get('plotType'),
         speed: params.get('speed'),
+        skipFrames: params.get('skip'),
         loop: params.get('loop'),
         timestamp: params.get('timestamp')
     };
@@ -111,6 +117,12 @@ async function loadStateFromURL() {
         state.speed = parseInt(urlState.speed);
         elements.speedSlider.value = urlState.speed;
         elements.speedValue.textContent = urlState.speed;
+    }
+
+    if (urlState.skipFrames) {
+        state.skipFrames = parseInt(urlState.skipFrames);
+        elements.skipSlider.value = urlState.skipFrames;
+        elements.skipValue.textContent = urlState.skipFrames;
     }
 
     if (urlState.loop !== null) {
@@ -234,9 +246,6 @@ async function loadImagesForSelection() {
         elements.totalFrames.textContent = images.length;
         elements.animationCard.style.display = "block";
 
-        // Render the timeline
-        renderTimeline();
-
         // Check if we have a timestamp from URL to load specific frame
         let initialIndex = 0;
         if (state.currentTimestamp) {
@@ -246,7 +255,21 @@ async function loadImagesForSelection() {
             }
         }
 
-        loadImage(initialIndex);
+        // Set current index before rendering timeline
+        state.currentIndex = initialIndex;
+
+        // Show wrapper first so timeline can measure correctly
+        elements.imageWrapper.style.display = "block";
+        elements.noImageMessage.style.display = "none";
+
+        // Use requestAnimationFrame to ensure layout is updated before measuring
+        requestAnimationFrame(() => {
+            // Render the timeline with correct index and width
+            renderTimeline();
+
+            // Load the image
+            loadImage(initialIndex);
+        });
     }
 }
 
@@ -276,6 +299,7 @@ function updateURL() {
 
     // Add non-default settings
     if (state.speed !== 500) params.set('speed', state.speed);
+    if (state.skipFrames !== 1) params.set('skip', state.skipFrames);
     if (!state.loop) params.set('loop', 'false');
 
     const queryString = params.toString();
@@ -306,12 +330,21 @@ function attachEventListeners() {
         }
     });
 
+    elements.skipSlider.addEventListener("input", (e) => {
+        state.skipFrames = parseInt(e.target.value);
+        elements.skipValue.textContent = state.skipFrames;
+        updateURL();
+    });
+
     elements.loopCheck.addEventListener("change", (e) => {
         state.loop = e.target.checked;
         updateURL();
     });
 
     elements.shareBtn.addEventListener("click", copyShareLink);
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", handleKeyboardInput);
 
     // Re-render timeline on window resize
     let resizeTimeout = null;
@@ -460,8 +493,21 @@ async function handlePlotTypeChange() {
             elements.totalFrames.textContent = images.length;
             elements.animationCard.style.display = "block";
 
-            // Load first image
-            loadImage(0);
+            // Set current index
+            state.currentIndex = 0;
+
+            // Show wrapper first so timeline can measure correctly
+            elements.imageWrapper.style.display = "block";
+            elements.noImageMessage.style.display = "none";
+
+            // Use requestAnimationFrame to ensure layout is updated before measuring
+            requestAnimationFrame(() => {
+                // Render timeline with correct width
+                renderTimeline();
+
+                // Load first image
+                loadImage(0);
+            });
         } else {
             showError(null, "No images found for this selection");
         }
@@ -485,31 +531,31 @@ async function fetchAvailableSatellites(date) {
 /**
  * Fetch available sector types for a satellite
  */
-async function fetchAvailableSectorTypes(date, satellite) {
+function fetchAvailableSectorTypes(date, satellite) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
  * Fetch available sectors for a sector type
  */
-async function fetchAvailableSectors(date, satellite, sectorType) {
+function fetchAvailableSectors(date, satellite, sectorType) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
  * Fetch available plot types for a sector
  */
-async function fetchAvailablePlotTypes(date, satellite, sectorType, sector) {
+function fetchAvailablePlotTypes(date, satellite, sectorType, sector) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
@@ -656,9 +702,22 @@ function loadImage(index) {
     // Update timeline visualization
     updateTimelinePosition();
 
-    // Show image wrapper, hide no image message
-    elements.imageWrapper.style.display = "block";
-    elements.noImageMessage.style.display = "none";
+    // Preload next few images for smoother playback
+    preloadImages(index);
+}
+
+/**
+ * Preload next few images for smoother animation
+ */
+function preloadImages(startIndex) {
+    const preloadCount = 5;
+    for (let i = 1; i <= preloadCount; i++) {
+        const nextIndex = startIndex + (i * state.skipFrames);
+        if (nextIndex < state.images.length && state.images[nextIndex]) {
+            const img = new Image();
+            img.src = state.images[nextIndex].url;
+        }
+    }
 }
 
 /**
@@ -689,20 +748,41 @@ function renderTimeline() {
     // Calculate positions for dots
     const dotSpacing = chartWidth / (state.images.length - 1 || 1);
 
-    // Draw dots for each frame
+    // For large datasets, we need to sample dots to avoid overcrowding
+    // Show max ~100 dots, but always include first, last, and current
+    const maxDots = 100;
+    const shouldSample = state.images.length > maxDots;
+    const sampleRate = shouldSample ? Math.ceil(state.images.length / maxDots) : 1;
+
+    // Track which indices have dots rendered (for updateTimelinePosition)
+    const renderedIndices = new Set();    // Draw dots for each frame
+    // eslint-disable-next-line complexity
     state.images.forEach((image, index) => {
-        const x = margin.left + (index * dotSpacing);
+        // Always show first, last, and current frame
+        const isFirst = index === 0;
+        const isLast = index === state.images.length - 1;
+        const isCurrent = index === state.currentIndex;
+        const isSampled = index % sampleRate === 0;
+
+        if (!isFirst && !isLast && !isCurrent && !isSampled) {
+            return; // Skip this dot
+        }
+
+        renderedIndices.add(index);        const x = margin.left + (index * dotSpacing);
         const y = height / 2;
 
-        // Create dot
+        // Check if this is the current/active frame
+        const isActive = index === state.currentIndex;
+
+        // Create dot with larger size for active frame
         const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         dot.setAttribute('cx', x);
         dot.setAttribute('cy', y);
-        dot.setAttribute('r', 4);
-        dot.setAttribute('fill', '#0d6efd');
+        dot.setAttribute('r', isActive ? 6 : 3);
+        dot.setAttribute('fill', isActive ? '#dc3545' : '#0d6efd');
         dot.setAttribute('stroke', '#fff');
-        dot.setAttribute('stroke-width', 2);
-        dot.setAttribute('class', 'timeline-dot');
+        dot.setAttribute('stroke-width', isActive ? 2 : 1);
+        dot.setAttribute('class', isActive ? 'timeline-dot active' : 'timeline-dot');
         dot.setAttribute('data-index', index);
         dot.setAttribute('data-timestamp', image.timestamp);
 
@@ -747,18 +827,116 @@ function renderTimeline() {
 function updateTimelinePosition() {
     if (!elements.timeline) return;
 
+    // Get all existing dots
     const dots = elements.timeline.querySelectorAll('.timeline-dot');
-    dots.forEach((dot, index) => {
-        if (index === state.currentIndex) {
+
+    // Check if current index has a dot
+    let currentDotExists = false;    // Update existing dots
+    dots.forEach((dot) => {
+        const dotIndex = parseInt(dot.getAttribute('data-index'));
+        const isCurrent = dotIndex === state.currentIndex;
+
+        if (isCurrent) {
+            currentDotExists = true;
             dot.setAttribute('fill', '#dc3545');
-            dot.setAttribute('r', 5);
+            dot.setAttribute('r', 6);
+            dot.setAttribute('stroke-width', 2);
             dot.classList.add('active');
         } else {
             dot.setAttribute('fill', '#0d6efd');
-            dot.setAttribute('r', 4);
+            dot.setAttribute('r', 3);
+            dot.setAttribute('stroke-width', 1);
             dot.classList.remove('active');
         }
     });
+
+    // If current frame doesn't have a dot, add one
+    if (!currentDotExists && state.images.length > 0) {
+        const svg = elements.timeline;
+        const width = svg.clientWidth || 800;
+        const height = 50;
+        const margin = { left: 30, right: 30, top: 10, bottom: 20 };
+        const chartWidth = width - margin.left - margin.right;
+        const dotSpacing = chartWidth / (state.images.length - 1 || 1);
+
+        const x = margin.left + (state.currentIndex * dotSpacing);
+        const y = height / 2;
+
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', x);
+        dot.setAttribute('cy', y);
+        dot.setAttribute('r', 6);
+        dot.setAttribute('fill', '#dc3545');
+        dot.setAttribute('stroke', '#fff');
+        dot.setAttribute('stroke-width', 2);
+        dot.setAttribute('class', 'timeline-dot active current-indicator');
+        dot.setAttribute('data-index', state.currentIndex);
+        dot.setAttribute('data-timestamp', state.images[state.currentIndex].timestamp);
+
+        // Add click handler
+        dot.addEventListener('click', () => {
+            if (state.isPlaying) {
+                stopAnimation();
+            }
+            loadImage(state.currentIndex);
+        });
+
+        // Add hover title
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = state.images[state.currentIndex].timestamp;
+        dot.appendChild(title);
+
+        svg.appendChild(dot);
+    }
+}/**
+ * Handle keyboard shortcuts
+ */
+// eslint-disable-next-line complexity
+function handleKeyboardInput(e) {
+    // Ignore if focus is on an input or select
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+    if (state.images.length === 0) return;
+
+    switch (e.key) {
+        case 'ArrowLeft': {
+            stopAnimation();
+            let prevIndex = state.currentIndex - state.skipFrames;
+            if (prevIndex < 0) {
+                prevIndex = state.loop ? state.images.length - 1 : 0;
+            }
+            loadImage(prevIndex);
+            break;
+        }
+        case 'ArrowRight': {
+            stopAnimation();
+            let nextIndex = state.currentIndex + state.skipFrames;
+            if (nextIndex >= state.images.length) {
+                nextIndex = state.loop ? 0 : state.images.length - 1;
+            }
+            loadImage(nextIndex);
+            break;
+        }
+        case ' ': // Spacebar
+            e.preventDefault(); // Prevent scrolling
+            if (state.isPlaying) {
+                stopAnimation();
+            } else {
+                playAnimation();
+            }
+            break;
+        case 'Home':
+            stopAnimation();
+            loadImage(0);
+            break;
+        case 'End':
+            stopAnimation();
+            loadImage(state.images.length - 1);
+            break;
+        default:
+            // No action for other keys
+            break;
+    }
 }
 
 /**
@@ -772,7 +950,7 @@ function playAnimation() {
     elements.stopBtn.disabled = false;
 
     state.animationInterval = setInterval(() => {
-        let nextIndex = state.currentIndex + 1;
+        let nextIndex = state.currentIndex + state.skipFrames;
 
         if (nextIndex >= state.images.length) {
             if (state.loop) {
