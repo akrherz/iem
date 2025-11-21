@@ -149,7 +149,7 @@ if (gettype($layers) == "string") {
 }
 
 // Alias for visual plot of VTEC
-if (array_key_exists("visual", $_GET)){
+if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)){
     $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
