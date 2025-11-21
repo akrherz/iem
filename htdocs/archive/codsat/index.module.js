@@ -531,31 +531,31 @@ async function fetchAvailableSatellites(date) {
 /**
  * Fetch available sector types for a satellite
  */
-async function fetchAvailableSectorTypes(date, satellite) {
+function fetchAvailableSectorTypes(date, satellite) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
  * Fetch available sectors for a sector type
  */
-async function fetchAvailableSectors(date, satellite, sectorType) {
+function fetchAvailableSectors(date, satellite, sectorType) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
  * Fetch available plot types for a sector
  */
-async function fetchAvailablePlotTypes(date, satellite, sectorType, sector) {
+function fetchAvailablePlotTypes(date, satellite, sectorType, sector) {
     const [year, month, day] = date.split('-');
     const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/`;
 
-    return await fetchDirectoryListing(url);
+    return fetchDirectoryListing(url);
 }
 
 /**
