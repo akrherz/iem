@@ -410,11 +410,11 @@ def plotter(ctx: dict):
             raster = np.where(raster < 1, np.nan, raster)
             rng = range(int(np.nanmin(raster)), int(np.nanmax(raster)) + 2)
     elif ctx["w"] == "count":
-        maxval = ctx["max"] if ctx["max"] > -1 else (np.nanmax(raster) + 1)
+        maxval = ctx["max"] if ctx["max"] > 0 else (np.nanmax(raster) + 1)
         raster = np.where(raster < 1, np.nan, raster)
         rng = np.unique(np.linspace(1, maxval, 10, dtype=int))
     else:
-        maxval = ctx["max"] if ctx["max"] > -1 else (np.nanmax(raster) + 1)
+        maxval = ctx["max"] if ctx["max"] > 0 else (np.nanmax(raster) + 1)
         rng = pretty_bins(0, maxval)
         rng[0] = 0.01
 

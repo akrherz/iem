@@ -531,7 +531,11 @@ def plotter(ctx: dict):
             f"grid size: {ctx['sz']:.0f}km, Rbf: {ctx['f']}"
         ),
     )
-    if df2["val"].max() > 0 and ctx["p"] in ["both", "contour"]:
+    if (
+        len(vals) > 1
+        and df2["val"].max() > 0
+        and ctx["p"] in ["both", "contour"]
+    ):
         mp.contourf(
             lons,
             lats,

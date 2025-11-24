@@ -1,3 +1,4 @@
 /GIS/apps/rview/warnings.phtml?autopilot=0&osite=AKQ&tzoff=0&lat0=36.98&lon0=-77&layers=nexrad&layers=warnings&layers=watches&layers=blank&layers=cwas&layers=uscounties&site=AKQ&tz=EST&year=2012&month=2&day=29&hour=13&minute=25&warngeo=both&zoom=250&imgsize=800x600&loop=0&frames=10&interval=5&filter=1&cu=1&sortcol=expire&sortdir=0&lsrlook=+/-&lsrwindow=15&extents=-78.333889816361,35.98,-75.666110183639,37.98
 /request/awos/1min_dl.php?station%5B%5D=AXA&tz=UTC&year1=2025&month1=1&day1=1&hour1=0&minute1=0&year2=2025&month2=1&day2=1&hour2=0&minute2=0&vars%5B%5D=tmpf&vars%5B%5D=dwpf&sample=1min&what=download&delim=comma&gis=no
 /request/coop/dl.php?network=IACLIMATE&station[]=IA8742&year1=2025&month1=03&day1=06&year2=2025&month2=03&day2=07&vars[]=high&vars[]=low&vars[]=precip&what=view&delim=comma&gis=no
+/wx/afos/p.php?e=
