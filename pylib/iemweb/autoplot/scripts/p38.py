@@ -108,7 +108,7 @@ def plotter(ctx: dict):
         )
     df["best"] = df["era5land_srad"].fillna(df["hrrr_srad"])
     # hack for leap day here
-    if df["best"].loc["0229"] is None:
+    if "0229" in df["best"].index and df["best"].loc["0229"] is None:
         df = df.drop("0229")
 
     title = (

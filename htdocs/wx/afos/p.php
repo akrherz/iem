@@ -13,11 +13,20 @@ $t->jsextra = <<<EOM
 <script type="module" src="/wx/afos/p.module.js"></script>
 EOM;
 
-$e = get_int404("e", null);
-// Ensure e is 12 characters long
-if (!is_null($e) && strlen($_GET["e"]) != 12) {
-    // Naughty
-    xssafe("<tag>");
+$e = null;
+// Ensure e is 12 characters long and only contains digits
+if (array_key_exists("e", $_GET)) {
+    $e = get_str404("e");
+    if ((strlen($e) != 12) || !ctype_digit($e)) {
+        // Naughty
+        xssafe("<tag>");
+    }
+    // convert to a DateTime instance
+    $e = DateTimeImmutable::createFromFormat("YmdHi", $e, new DateTimeZone("UTC"));
+    if ($e === false) {
+        // Naughty
+        xssafe("<tag>");
+    }
 }
 $pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']), 0, 6)) : null;
 $bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : null;
@@ -42,21 +51,12 @@ $st_bbb = iem_pg_prepare(
 
 function locate_product($conn, $e, $pil, $dir)
 {
-    // Attempt to locate this product and redirect to stable URI if so
-    $ts = gmmktime(
-        intval(substr($e, 8, 2)),
-        intval(substr($e, 10, 2)),
-        0,
-        intval(substr($e, 4, 2)),
-        intval(substr($e, 6, 2)),
-        intval(substr($e, 0, 4))
-    );
     $sortdir = ($dir == 'next') ? "ASC" : "DESC";
     $sign = ($dir == 'next') ? ">" : "<";
     $table = sprintf(
         "products_%s_%s",
-        date('Y', $ts),
-        (intval(date("m", $ts)) > 6) ? "0712" : "0106"
+        $e->format("Y"),
+        (intval($e->format("m")) > 6) ? "0712" : "0106"
     );
     // first attempt shortcut
     $stname = iem_pg_prepare($conn, "SELECT " .
@@ -65,7 +65,7 @@ function locate_product($conn, $e, $pil, $dir)
         "ORDER by entered $sortdir LIMIT 1");
     $rs = pg_execute($conn, $stname, array(
         $pil,
-        date("Y-m-d H:i", $ts)
+        $e->format("c"),
     ));
     if (pg_num_rows($rs) == 0) {
         // widen the net
@@ -75,7 +75,7 @@ function locate_product($conn, $e, $pil, $dir)
             "ORDER by entered $sortdir LIMIT 1");
         $rs = pg_execute($conn, $stname, array(
             $pil,
-            date("Y-m-d H:i", $ts)
+            $e->format("c"),
         ));
     }
     if (pg_num_rows($rs) == 0) return $rs;
@@ -112,26 +112,17 @@ function last_product($conn, $pil)
 }
 function exact_product($conn, $e, $pil, $bbb)
 {
-    // Option 3: Explicit request
-    $ts = gmmktime(
-        intval(substr($e, 8, 2)),
-        intval(substr($e, 10, 2)),
-        0,
-        intval(substr($e, 4, 2)),
-        intval(substr($e, 6, 2)),
-        intval(substr($e, 0, 4))
-    );
     if (is_null($bbb)) {
         global $st_nobbb;
         $rs = pg_execute($conn, $st_nobbb, array(
             $pil,
-            gmdate("Y-m-d H:i+00", $ts),
+            $e->format("c"),
         ));
     } else {
         global $st_bbb;
         $rs = pg_execute($conn, $st_bbb, array(
             $pil,
-            gmdate("Y-m-d H:i+00", $ts),
+            $e->format("c"),
             $bbb,
         ));
     }
@@ -167,7 +158,8 @@ if (is_null($rs) || pg_num_rows($rs) < 1) {
         // to be helpful here and look around for nearby products.
         $offsets = array(-1, 1, -2, 2, -3, 3, -4, 4, -5, 5);
         foreach ($offsets as $_idx => $offset) {
-            $rs = exact_product($conn, $e + $offset, $pil, $bbb);
+            $ts = $e->modify(sprintf("%+d minutes", $offset));
+            $rs = exact_product($conn, $ts, $pil, $bbb);
             if (!is_null($rs) && pg_num_rows($rs) > 0) {
                 $row = pg_fetch_assoc($rs, 0);
                 $uri = sprintf(
@@ -426,7 +418,7 @@ EOM;
                 $dom = dom_import_simplexml($xml)->ownerDocument;
                 $dom->formatOutput = true;
                 $content .= htmlentities($dom->saveXML());
-            } catch (Exception $e) {
+            } catch (Exception $exc) {
                 $content .= htmlentities($rawxml);
             }
         }

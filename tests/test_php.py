@@ -1,6 +1,7 @@
 """Smoke test PHP calls through the webserver."""
 
 import os
+from pathlib import Path
 
 import httpx
 import pytest
@@ -26,9 +27,10 @@ PUNTING = [
 ]
 
 
-def get_urls():
+def get_urls(extra):
     """yield up things we can run."""
-    with open(f"{os.path.dirname(__file__)}/urls.txt") as fh:
+    fn = Path(__file__).parent / f"urls{extra}.txt"
+    with open(fn) as fh:
         for line in fh:
             if line.startswith("#") or line.strip() == "":
                 continue
@@ -62,7 +64,7 @@ def test_php(app):
         assert soup.find("title") is not None
 
 
-@pytest.mark.parametrize("url", get_urls())
+@pytest.mark.parametrize("url", get_urls(""))
 def test_php_urls(url):
     """Test the app."""
     resp = httpx.get(f"http://iem.local{url}", timeout=30)
@@ -71,3 +73,10 @@ def test_php_urls(url):
     # 302 redirect
     # 503 Service Temporarily Unavailable
     assert resp.status_code in [503, 422, 301, 302, 200]
+
+
+@pytest.mark.parametrize("url", get_urls("405"))
+def test_php_urls405(url):
+    """Test the app."""
+    resp = httpx.get(f"http://iem.local{url}", timeout=30)
+    assert resp.status_code == 405
