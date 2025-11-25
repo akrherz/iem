@@ -242,6 +242,7 @@
 140/network:IA_ASOS::station:DSM::syear:1928::sday:1101::eday:0217::varname:max_wind_gust::w:aoa::thres:15::year:2025::_r:t::dpi:100.png
 141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
+142/network:IACLIMATE::station:IATAME::p1:31::p2:91::p3:365::sdate:1990-12-05::edate:1991-11-24::pvar:precip::how:diff::_r:43::dpi:100.png
 143/opt:state::state:IA::network:WFO::station:DMX::cmap:Greens::_r:43::dpi:100.png
 144/network:ISUSM::station:AEEI4::threshold:50::hours1:48::hours2:24::_r:t::dpi:100.png
 145/network:ISUSM::station:BOOI4::var:tsoil::year:2024::_r:t::dpi:100.png

@@ -16,15 +16,14 @@ from datetime import date, datetime, timedelta
 import httpx
 import matplotlib.dates as mdates
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import LOG
 
-from iemweb import error_log
-
-UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
+UNITS = {"precip": "inch", "avgt": "°F", "high": "°F", "low": "°F"}
 PDICT = {
     "precip": "Precipitation",
     "avgt": "Daily Average Temperature",
@@ -101,7 +100,7 @@ def get_description():
     return desc
 
 
-def underlay_usdm(axis, sts, ets, lon, lat):
+def underlay_usdm(axis: Axes, sts, ets, lon, lat):
     """Underlay the USDM as pretty bars, somehow"""
     if ets < date(2000, 1, 1):
         axis.text(
@@ -262,14 +261,14 @@ def plotter(ctx: dict):
         df.index.values,
         df["p2_" + pvar + "_" + how],
         lw=2,
-        label="%s Day" % (p2,),
+        label=f"{p2} Day",
         zorder=5,
     )
     (l3,) = ax.plot(
         df.index.values,
         df["p3_" + pvar + "_" + how],
         lw=2,
-        label="%s Day" % (p3,),
+        label=f"{p3} Day",
         zorder=5,
     )
     fig.text(
@@ -291,27 +290,27 @@ def plotter(ctx: dict):
         )
     )
     ax.grid(True)
-    ax.legend(handles=[l1, l2, l3], ncol=3, fontsize=12, loc="best")
+    leg = ax.legend(
+        handles=[l1, l2, l3], ncol=3, fontsize=12, loc="lower left"
+    )
+    ax.add_artist(leg)
     ax.text(
         1,
         -0.14,
-        f"{sts:-%d %b %Y} to {ets:-%d %b %Y}",
+        f"{sts:%-d %b %Y} to {ets:%-d %b %Y}",
         va="bottom",
         ha="right",
         fontsize=12,
         transform=ax.transAxes,
     )
     if station[2:] != "0000":
-        try:
-            underlay_usdm(
-                ax,
-                sts,
-                ets,
-                ctx["_nt"].sts[station]["lon"],
-                ctx["_nt"].sts[station]["lat"],
-            )
-        except Exception as exp:
-            error_log(ctx, str(exp))
+        underlay_usdm(
+            ax,
+            sts,
+            ets,
+            ctx["_nt"].sts[station]["lon"],
+            ctx["_nt"].sts[station]["lat"],
+        )
     offset = timedelta(days=2)
     ax.set_xlim(df.index.min() - offset, df.index.max() + offset)
 
