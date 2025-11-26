@@ -449,6 +449,9 @@
 232/mode:WC::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 232/mode:FW::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 232/mode:BZ::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
+232/mode:BZ::network:IA_ASOS::station:MCW::valid:2022-12-21%201200::hours:72::_r:t::dpi:100.png
+233/sdate:2024-01-01::edate:2024-11-25::network:WFO::wfo:_ALL::heatmap:no::_r:43::dpi:100.png
+233/sdate:2024-01-01::edate:2025-11-25::network:WFO::wfo:_ALL::heatmap:no::_r:43::dpi:100.png
 234/sdate:2024-05-01::edate:2024-06-30::filter:NONE::w:cwa::network:WFO::wfo:_ALL::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
 234/sdate:2023-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMQ::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
 234/sdate:2023-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMX::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
