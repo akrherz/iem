@@ -22,6 +22,7 @@ PDICT = {
     "FW": "Fire Weather Warning",
     "HT": "Heat Advisory / Extreme Heat Warning",
     "WC": "Wind Chill Advisory/Warning",
+    "WI": "Wind Advisory / High Wind Warning",
 }
 DOMAIN = {
     "BZ": [
@@ -30,6 +31,7 @@ DOMAIN = {
     "FW": ["FW.W"],
     "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W", "EC.Y", "EC.W"],
     "HT": ["EH.W", "HT.Y", "XH.W"],
+    "WI": ["WI.Y", "HW.W"],
 }
 
 
@@ -143,9 +145,7 @@ def get_firewx_zone(lon: float, lat: float):
             {"lon": lon, "lat": lat},
         )
         row = res.first()
-        if row:
-            return row[0]
-    return "IAZ001"
+    return "IAZ001" if not row else row[0]
 
 
 def plotter(ctx: dict):
@@ -233,7 +233,7 @@ def plotter(ctx: dict):
     elif ctx["mode"] in ["WC", "HT"]:
         obs = obs[pd.notna(obs["feel"])]
         plot(ax, obs, "feel")
-    elif ctx["mode"] == "FW":
+    elif ctx["mode"] in ["FW", "WI"]:
         sknt = obs[pd.notna(obs["sknt"])]
         ax.bar(
             sknt["utc_valid"],
@@ -250,16 +250,17 @@ def plotter(ctx: dict):
             color="b",
         )
         ax.set_ylabel("Sustained Winds + Gusts (Green) [MPH]", color="b")
-        ax2 = ax.twinx()
-        relh = obs[pd.notna(obs["relh"])]
-        ax2.scatter(
-            relh["utc_valid"],
-            relh["relh"],
-            marker="o",
-            s=40,
-            color="r",
-        )
-        ax2.set_ylabel("Relative Humidity [%]", color="r")
+        if ctx["mode"] == "FW":
+            ax2 = ax.twinx()
+            relh = obs[pd.notna(obs["relh"])]
+            ax2.scatter(
+                relh["utc_valid"],
+                relh["relh"],
+                marker="o",
+                s=40,
+                color="r",
+            )
+            ax2.set_ylabel("Relative Humidity [%]", color="r")
     for i, row in wwa.iterrows():
         color = NWS_COLORS[row["key"]]
         ax.axvspan(
