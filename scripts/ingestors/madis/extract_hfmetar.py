@@ -52,10 +52,10 @@ def vsbyfmt(val):
     return int(val)
 
 
-def process_sky(data, skycs, skyls):
+def process_sky(data: dict, skycs: list[str], skyls: list):
     """Process the sky cover"""
     mtr = ""
-    for i, (skyc, skyl) in enumerate(zip(skycs, skyls, strict=False), start=1):
+    for i, (skyc, skyl) in enumerate(zip(skycs, skyls, strict=True), start=1):
         if skyc == "":
             continue
         data[f"skyc{i}"] = skyc
@@ -233,7 +233,7 @@ def process(ncfn):
             mtr += f"{autoremarks[i]} {opremarks[i]} "
         mtr += "MADISHF"
         # Account for some common cruft
-        mtr = mtr.replace("!", "! ")
+        mtr = mtr.replace("!", "! ").replace("\x00", "")
         # Eat our own dogfood
         try:
             metar = Metar.Metar(mtr)
