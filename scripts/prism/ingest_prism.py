@@ -41,12 +41,13 @@ def process(valid: datetime):
             resp.raise_for_status()
             with open(f"{valid:%Y%m%d}.zip", "wb") as fh:  # skipcq
                 fh.write(resp.content)
-            subprocess.call(
+            subprocess.run(
                 [
                     "unzip",
                     "-q",
                     f"{valid:%Y%m%d}.zip",
-                ]
+                ],
+                check=True,
             )
             os.remove(f"{valid:%Y%m%d}.zip")
         except Exception as exp:
