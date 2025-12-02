@@ -38,6 +38,7 @@
 19/network:IACLIMATE::station:IA0203::binsize:4::x:-60%20130::y:-60%20130::month:all::year:2008::cmap:Blues::_r:t::dpi:100.png
 19/network:IACLIMATE::station:IATAME::binsize:4::x:-60%20130::y:-60%20130::month:winter::year:2008::cmap:Blues::_r:t::dpi:100.png
 21/csector:midwest::date1:2025-08-29::date2:2025-01-29::varname:high::cmap:RdBu_r::_r:t::dpi:100.png
+23/network:IACLIMATE::station:IA0193::syear:2018::years:8::var:avg_temp::_r:t::dpi:100.png
 24/which:cd::csector:midwest::var:precip::w:rank::p:day::year:2025::month:6::sdate:2099-06-01::edate:2099-06-30::cmap:BrBG_r::_r:t::dpi:100.png
 24/which:cd::csector:midwest::var:low::w:dep::p:month::year:2000::month:winter::sdate:2025-06-30::edate:2025-07-28::cmap:BrBG_r::_r:t::dpi:100::_cb:1.png
 24/which:cd::csector:IA::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
