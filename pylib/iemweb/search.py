@@ -39,7 +39,6 @@ https://mesonet.agron.iastate.edu/search.py?q=100%20Main%20St%20Ames%20Iowa
 import re
 
 import pandas as pd
-from commonregex import CommonRegex
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
@@ -51,6 +50,14 @@ AFOS_RE = re.compile(r"^[A-Z0-9]{4,6}$", re.IGNORECASE)
 STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.IGNORECASE)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.IGNORECASE)
 PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.IGNORECASE)
+
+# From CommonRegex
+STREET_ADDRESS = re.compile(
+    r"\d{1,4} [\w\s]{1,20}(?:street|st|avenue|ave|road|rd|highway|hwy|"
+    r"square|sq|trail|trl|drive|dr|court|ct|parkway|pkwy|circle|cir|boulevard|"
+    r"blvd)\W?(?=\s|$)",
+    re.IGNORECASE,
+)
 
 
 class MyModel(CGIModel):
@@ -153,8 +160,8 @@ def find_handler(q, referer: str | None):
     if AFOS_RE.match(q):
         return afos_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
-    c = CommonRegex(q)
-    if c.street_addresses and referer:
+    c = STREET_ADDRESS.search(q)
+    if c and referer:
         return geocoder, q
     return None, None
 
