@@ -30,7 +30,7 @@ jobs:
       WITH_TEST_DATA: ${{ matrix.WITH_TEST_DATA }}
       TEST_WEB: ${{ matrix.TEST_WEB }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     # Lots of daryl's codes use aliases defined in /etc/hosts
     - name: Add /etc/hosts entries

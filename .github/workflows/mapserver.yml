@@ -15,7 +15,7 @@ jobs:
         shell: bash -l -e {0}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Add /etc/hosts entries
       run: |
