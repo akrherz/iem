@@ -16,9 +16,9 @@ from pyiem.plot import figure_axes
 from iemweb.autoplot import ARG_STATION
 
 PDICT = {
-    "avg_high": "Average High Temperature [F]",
-    "avg_temp": "Average Temperature [F]",
-    "avg_low": "Average Low Temperature [F]",
+    "avg_high": "Average High Temperature [°F]",
+    "avg_temp": "Average Temperature [°F]",
+    "avg_low": "Average Low Temperature [°F]",
     "precip": "Total Precipitation [inch]",
 }
 
@@ -62,9 +62,8 @@ def plotter(ctx: dict):
 
     sts = datetime(syear, 1, 1)
     ets = datetime(syear + years, 1, 1)
-    archiveend = date.today() + timedelta(days=1)
-    if archiveend.day < 20:
-        archiveend = archiveend.replace(day=1)
+    aend = date.today() + timedelta(days=1)
+    aend = aend.replace(day=1 if aend.day < 20 else aend.day)
 
     with get_sqlalchemy_conn("coop") as conn:
         ndf = pd.read_sql(
@@ -103,7 +102,7 @@ def plotter(ctx: dict):
             conn,
             params={
                 "station": station,
-                "archiveend": archiveend,
+                "archiveend": aend,
                 "syear": sts.year,
                 "eyear": ets.year,
             },

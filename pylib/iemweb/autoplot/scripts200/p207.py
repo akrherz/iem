@@ -262,7 +262,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         with get_sqlalchemy_conn("iem") as conn:
             coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
-                    """SELECT state, wfo, id as nwsli,
+                    """SELECT state, wfo, id as nwsli, count(*) as count,
                 sum({col}) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
                 from summary s JOIN stations t on (s.iemid = t.iemid)
@@ -295,7 +295,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
-                    """SELECT state, wfo, id as nwsli,
+                    """SELECT state, wfo, id as nwsli, count(*) as count,
                 sum({col}) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
                 from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)

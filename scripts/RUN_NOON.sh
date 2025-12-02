@@ -16,24 +16,24 @@ python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
 python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=china
 
 cd ../prism
-python ingest_prism.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+# 1 Dec 2025, we used to have data for yesterday by now, but not anymore
+python ingest_prism.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 
 cd ../iemre
 # adjusts stage IV hourly file to PRISM reality
-python prism_adjust_stage4.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+python prism_adjust_stage4.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 # Prepare for daily analysis update for t-10 days
 python prism_adjust_stage4.py --date=$(date --date '9 days ago' +'%Y-%m-%d')
 # Copies updated stage IV hourly into IEMRE hourly
-python precip_ingest.py --valid12z=$(date --date '1 days ago' +'%Y-%m-%dT12:00:00')
+python precip_ingest.py --valid12z=$(date --date '2 days ago' +'%Y-%m-%dT12:00:00')
 
 cd ../climodat
 python daily_estimator.py --date=$(date +'%Y-%m-%d')
-python daily_estimator.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
+python daily_estimator.py --date=$(date --date '2 days ago'  +'%Y-%m-%d')
 # Perhaps some more QC happened, that we now need to pick up
 python daily_estimator.py --date=$(date --date '7 days ago'  +'%Y-%m-%d')
 python compute4regions.py --date=$(date +'%Y-%m-%d')
-python compute4regions.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
-python hrrr_solarrad.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
+python hrrr_solarrad.py --date=$(date --date '2 days ago'  +'%Y-%m-%d')
 # Sync any coop data that may have updated over the past 24 hours
 python sync_coop_updates.py
 
