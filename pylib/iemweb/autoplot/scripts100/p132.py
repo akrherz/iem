@@ -5,6 +5,8 @@ shown in the 'Which Metric to Summarize' option:
 <ul>
     <li><i>Total Precipitation</i>: Total precipitation over the specified
     number of days.</li>
+    <li><i>Total Snowfall</i>: Total snowfall over the specified
+    number of days.</li>
     <li><i>Max Least High</i>: The highest minimum high temperature over
     the specified duration of days.</li>
 <li><i>Min Greatest Low</i>: The coldest maximum low temperature over
@@ -47,11 +49,13 @@ MDICT = {
 
 METRICS = {
     "total_precip": "Total Precipitation",
+    "total_snowfall": "Total Snowfall",
     "max_least_high": "Max Least High",
     "min_greatest_low": "Min Greatest Low",
 }
 TRANSLATION = {
     "total_precip": "Precipitation",
+    "total_snowfall": "Snowfall",
     "max_least_high": "Max High Temperature",
     "min_greatest_low": "Min Low Temperature",
 }
@@ -105,6 +109,8 @@ def plotter(ctx: dict):
             current row) as count,
             sum(precip) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
             current row) as total_precip,
+            sum(snow) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
+            current row) as total_snowfall,
             min(high) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
             current row) as max_least_high,
             max(low) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
@@ -133,6 +139,8 @@ def plotter(ctx: dict):
         raise NoDataFound("Error, no results returned!")
     ylabels = []
     fmt = "%.2f" if varname in ["total_precip"] else "%.0f"
+    if varname == "total_snowfall":
+        fmt = "%.1f"
     for _, row in df.iterrows():
         # no strftime support for old days, so we hack at it
         lbl = fmt % (row[varname],)
@@ -190,10 +198,11 @@ def plotter(ctx: dict):
     ax.set_yticklabels(["#%s" % (x,) for x in range(1, 11)][::-1])
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
-    ax.set_xlabel(
-        "Precipitation [inch]"
-        if varname in ["total_precip"]
-        else "Temperature °F"
-    )
+    xlabel = "Precipitation [inch]"
+    if varname in ["max_least_high", "min_greatest_low"]:
+        xlabel = "Temperature [°F]"
+    elif varname == "total_snowfall":
+        xlabel = "Snowfall [inch]"
+    ax.set_xlabel(xlabel)
 
     return fig, df
