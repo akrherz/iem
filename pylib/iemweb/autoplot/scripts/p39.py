@@ -11,9 +11,10 @@ import calendar
 from datetime import date, timedelta
 
 import numpy as np
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -71,25 +72,32 @@ def compute_compare_month(ctx, cursor):
         return year, month
     station = ctx["station"]
     effective_date = ctx["date"]
-    cursor.execute(
-        f"""
+    res = cursor.execute(
+        sql_helper(
+            """
         select year, avg((high+low)/2) from alldata
-        where station = %s and month = %s and year != %s
+        where station = :station and month = :month and year != :year
         and high is not null and low is not null
         GROUP by year
-        ORDER by avg {"desc" if compare == "high" else "asc"} LIMIT 1
+        ORDER by avg {mydir} LIMIT 1
         """,
-        (station, effective_date.month, effective_date.year),
+            mydir="desc" if compare == "high" else "asc",
+        ),
+        {
+            "station": station,
+            "month": effective_date.month,
+            "year": effective_date.year,
+        },
     )
-    return cursor.fetchone()["year"], effective_date.month
+    return res.fetchone()[0], effective_date.month
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     effective_date = ctx["date"]
-    year, month = compute_compare_month(ctx, cursor)
+    year, month = compute_compare_month(ctx, conn)
 
     oldmonth = date(year, month, 1)
     sts = date(effective_date.year, effective_date.month, 1)
@@ -97,34 +105,42 @@ def plotter(ctx: dict):
     days = int((ets - sts).days)
 
     # beat month
-    cursor.execute(
-        "SELECT extract(day from day), (high+low)/2. as t from "
-        "alldata WHERE station = %s and year = %s and month = %s "
-        "ORDER by day ASC",
-        (station, year, month),
+    res = conn.execute(
+        sql_helper(
+            "SELECT extract(day from day), (high+low)/2. as t from "
+            "alldata WHERE station = :station and year = :year and "
+            "month = :month ORDER by day ASC"
+        ),
+        {"station": station, "year": year, "month": month},
     )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
-    prevmonth = [float(row["t"]) for row in cursor]
+    prevmonth = [float(row["t"]) for row in res.mappings()]
 
     # build history
-    cursor.execute(
-        "SELECT year, day, (high+low)/2. as t from alldata "
-        "WHERE station = %s and month = %s and extract(day from day) <= %s "
-        "and day < %s ORDER by day ASC",
-        (station, effective_date.month, days, ets),
+    res = conn.execute(
+        sql_helper(
+            "SELECT year, day, (high+low)/2. as t from alldata "
+            "WHERE station = :station and month = :month and "
+            "extract(day from day) <= :days "
+            "and day < :ets ORDER by day ASC"
+        ),
+        {
+            "station": station,
+            "month": effective_date.month,
+            "days": days,
+            "ets": ets,
+        },
     )
 
-    for i, row in enumerate(cursor):
+    for i, row in enumerate(res.mappings()):
         if i == 0:
             baseyear = row["year"]
             data = (
                 np.ma.ones((effective_date.year - row["year"] + 1, days)) * -99
             )
         data[row["year"] - baseyear, row["day"].day - 1] = row["t"]
-    pgconn.close()
     # Do we have data for the effective_date ?
     pos = (
         effective_date.day

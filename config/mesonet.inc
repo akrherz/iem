@@ -75,6 +75,14 @@ RewriteRule ^/search /search.py [QSA]
     Require all granted
   </Directory>
 
+  # Point to system-installed mapserv binary (from conda env)
+  ScriptAlias /cgi-bin/mapserv/mapserv.fcgi /opt/miniconda3/envs/prod/bin/mapserv
+  ScriptAlias /cgi-bin/mapserv/mapserv /opt/miniconda3/envs/prod/bin/mapserv
+  <Location "/cgi-bin/mapserv">
+    SetHandler fcgid-script
+    Options +ExecCGI
+  </Location>
+
   Alias /cgi-bin/ "/opt/iem/cgi-bin/"
   <Directory "/opt/iem/cgi-bin">
     AllowOverride All
@@ -85,12 +93,6 @@ RewriteRule ^/search /search.py [QSA]
     WSGIProcessGroup iemwsgi_ap
     AddHandler wsgi-script .py
     AddHandler cgi-script .cgi
-    Options +ExecCGI
-  </Directory>
-
-  # Since the above does not cover mapserv binaries
-  <Directory "/opt/iem/cgi-bin/mapserv">
-    SetHandler fcgid-script
     Options +ExecCGI
   </Directory>
 
