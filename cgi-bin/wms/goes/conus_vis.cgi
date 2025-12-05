@@ -6,4 +6,4 @@
 MS_MAPFILE=/opt/iem/data/wms/goes/conus_vis.map
 export MS_MAPFILE
 
-/opt/iem/cgi-bin/mapserv/mapserv
+/opt/miniconda3/envs/prod/bin/mapserv

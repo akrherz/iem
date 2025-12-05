@@ -6,4 +6,4 @@
 MS_MAPFILE=/opt/iem/data/wms/model/hrrr_refd.map
 export MS_MAPFILE
 
-/opt/iem/cgi-bin/mapserv/mapserv
+/opt/miniconda3/envs/prod/bin/mapserv
