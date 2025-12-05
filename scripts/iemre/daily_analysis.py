@@ -9,12 +9,14 @@ This is tricky as some variables we can compute sooner than others.
 """
 
 import subprocess
+import warnings
 from datetime import date, datetime, timedelta, timezone
 from typing import cast
 
 import click
 import numpy as np
 import pandas as pd
+import xarray as xr
 from metpy.calc import relative_humidity_from_dewpoint
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import units
@@ -28,10 +30,19 @@ from pyiem.iemre import (
     hourly_offset,
     set_grids,
 )
-from pyiem.util import convert_value, logger, ncopen
+from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
 
 LOG = logger()
+# How much data is enough, this is a hack to figure out if we have too much
+# missing data over land, ie the ASOS interpolator got used instead of model
+# ERA5Land is the limiting constraint here
+QUORUM_THRESHOLDS = {
+    "": 90,
+    "china": 79,
+    "europe": 77,
+    "sa": 51,
+}
 
 
 def generic_gridder(df, idx, domain: str):
@@ -120,7 +131,7 @@ def compute_daily_pairs(
     return pairs
 
 
-def copy_iemre_hourly(ts: date, ds, domain: str):
+def copy_iemre_hourly(ts: date, ds: xr.Dataset, domain: str):
     """Lots of work to do here..."""
     pairs = compute_daily_pairs(ts, domain, is_12z=False)
     pairs12z = compute_daily_pairs(ts, domain, is_12z=True)
@@ -137,13 +148,16 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
                 tmpk = nc.variables["tmpk"]
                 dwpk = nc.variables["dwpk"]
                 for offset in range(tidx1, tidx2 + 1):
-                    rh = (
-                        relative_humidity_from_dewpoint(
-                            units("degK") * tmpk[offset],
-                            units("degK") * dwpk[offset],
-                        ).m
-                        * 100.0
-                    )
+                    with warnings.catch_warnings(
+                        category=RuntimeWarning, action="ignore"
+                    ):
+                        rh = (
+                            relative_humidity_from_dewpoint(
+                                units("degK") * tmpk[offset],
+                                units("degK") * dwpk[offset],
+                            ).m
+                            * 100.0
+                        )
                     if res is None:
                         res = rh
                     else:
@@ -161,18 +175,23 @@ def copy_iemre_hourly(ts: date, ds, domain: str):
             uwnd = nc.variables["uwnd"]
             vwnd = nc.variables["vwnd"]
             for offset in range(tidx1, tidx2 + 1):
-                # Skip this offset if values are all masked
-                if uwnd[offset].mask.all() or vwnd[offset].mask.all():
-                    LOG.info("Skipping masked wind data at %s", offset)
-                    continue
-                # Assuming zeros, I think was a bad life choice
                 val = np.hypot(uwnd[offset], vwnd[offset])
+                quorum_pct = 100.0 - np.ma.count_masked(val) / val.size * 100.0
+                if quorum_pct < QUORUM_THRESHOLDS[domain]:
+                    dt = utc(pair[0].year) + timedelta(hours=offset)
+                    LOG.info(
+                        "Skipping wind at offset %s[%s] %.2f<%.2f required",
+                        offset,
+                        f"{dt:%Y-%m-%d %H}",
+                        quorum_pct,
+                        QUORUM_THRESHOLDS[domain],
+                    )
+                    continue
                 if runningsum is None:
                     runningsum = val
                 else:
                     runningsum += val
-                if np.nanmax(val) > 0:
-                    hours += 1
+                hours += 1
     if hours > 0:
         ds["wind_speed"].values = runningsum / hours
     # -----------------------------------------------------------------
@@ -431,12 +450,16 @@ def workflow(ts: date, domain: str):
         use_climodat_12z(ts, ds)
 
     for vname in list(ds.keys()):
-        # Some grids are too tight to the CONUS boundary, so we smear things
-        # out some.
+        # Some grids are too tight to the land boundary, so we smear as a hack
         vals = ds[vname].to_masked_array()
         vals = grid_smear(vals, shift=4)
         ds[vname].values = vals
-        msg = f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f}"
+        # Compute the precentage of points within vals that are missing/NaN
+        pct_missing = 100.0 * vals.mask.sum() / vals.size
+        msg = (
+            f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f} "
+            f"{pct_missing:6.2f}% missing"
+        )
         LOG.info(msg)
     set_grids(ts, ds, domain=domain)
     subprocess.call(
