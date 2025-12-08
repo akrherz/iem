@@ -1,5 +1,7 @@
 # Only path setups here, adding data handled in setupdata.sh
 sudo ln -s `pwd` /opt/iem
+# Kind of hacky, but that is what daryl does
+# needed by all kinds of things
 sudo ln -s $HOME/micromamba /opt/miniconda3
 mkdir _mesonet
 sudo ln -s `pwd`/_mesonet /mesonet

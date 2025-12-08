@@ -54,7 +54,7 @@ if ($ts > ($now - 360.0)) {
 if (!is_file($inFile)) die("No GIS composite $inFile found for this time!");
 
 
-$cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs %s -s_srs %s -of GTIFF %s %s.tif",
+$cmd = sprintf("gdalwarp -t_srs %s -s_srs %s -of GTIFF %s %s.tif",
     escapeshellarg("EPSG:4326"),
     escapeshellarg("EPSG:4326"),
     escapeshellarg($inFile),
