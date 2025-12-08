@@ -50,7 +50,7 @@ if ($ts > ($now - 360.0)) {
 if (!is_file($inFile)) die("No GIS composite found for this time!");
 
 
-$cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
+$cmd = sprintf("gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
 `$cmd`;
 
 $cmd = "zip $zipFile {$outFile}.tif";

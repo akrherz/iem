@@ -76,8 +76,8 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   # Point to system-installed mapserv binary (from conda env)
-  ScriptAlias /cgi-bin/mapserv/mapserv.fcgi /opt/miniconda3/envs/prod/bin/mapserv
-  ScriptAlias /cgi-bin/mapserv/mapserv /opt/miniconda3/envs/prod/bin/mapserv
+  ScriptAlias /cgi-bin/mapserv/mapserv.fcgi ${IEMWEBFARM_MAPSERV}
+  ScriptAlias /cgi-bin/mapserv/mapserv ${IEMWEBFARM_MAPSERV}
   <Location "/cgi-bin/mapserv">
     SetHandler fcgid-script
     Options +ExecCGI
