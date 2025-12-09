@@ -339,7 +339,7 @@ def application(environ, start_response):
                 iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
 
     if is_single_year and ts1.year > 1980 and model.domain == "":
-        i2, j2 = get_nav("prism", "").find_ij(environ["lon"], environ["lat"])
+        i2, j2 = get_nav("prism").find_ij(environ["lon"], environ["lat"])
         if i2 is not None and j2 is not None:
             res["prism_grid_i"] = i2
             res["prism_grid_j"] = j2
@@ -351,9 +351,7 @@ def application(environ, start_response):
                     )
 
     if is_single_year and ts1.year > 2000 and model.domain == "":
-        i2, j2 = get_nav("mrms_iemre", "").find_ij(
-            environ["lon"], environ["lat"]
-        )
+        i2, j2 = get_nav("mrms_iemre").find_ij(environ["lon"], environ["lat"])
         res["mrms_iemre_grid_i"] = i2
         res["mrms_iemre_grid_j"] = j2
         ncfn = Path(get_daily_mrms_ncname(ts1.year))

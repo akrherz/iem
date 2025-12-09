@@ -91,7 +91,7 @@ def dowork(environ: dict):
     else:
         raise IncompleteWebRequest("Need valid or sdate/edate")
 
-    i, j = get_nav("prism", "").find_ij(environ["lon"], environ["lat"])
+    i, j = get_nav("prism").find_ij(environ["lon"], environ["lat"])
     if i is None or j is None:
         raise IncompleteWebRequest("Coordinates outside of domain")
 

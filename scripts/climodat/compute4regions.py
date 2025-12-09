@@ -79,7 +79,7 @@ def do_day(cursor, valid: date):
         snow = mm2inch(nc.variables["snow_12z"][idx])
         snowd = mm2inch(nc.variables["snowd_12z"][idx])
     if valid.year < 1981 or (date.today() - valid).days < 4:
-        tp_nav = get_nav("iemre", "")
+        tp_nav = get_nav("iemre")
         ncfn = get_daily_ncname(valid.year)
         with ncopen(ncfn) as nc:
             high = convert_value(
@@ -90,7 +90,7 @@ def do_day(cursor, valid: date):
             )
             precip = mm2inch(nc.variables["p01d_12z"][idx])
     else:
-        tp_nav = get_nav("PRISM", "")
+        tp_nav = get_nav("PRISM")
         ncfn = f"/mesonet/data/prism/{valid:%Y}_daily.nc"
         with ncopen(ncfn) as nc:
             high = convert_value(nc.variables["tmax"][idx], "degC", "degF")
@@ -109,7 +109,7 @@ def do_day(cursor, valid: date):
             index_col="id",
             geom_col="geom",
         )  # type: ignore
-    czs = CachingZonalStats(get_nav("iemre", "").affine_image)
+    czs = CachingZonalStats(get_nav("iemre").affine_image)
     stsnow = czs.gen_stats(np.flipud(snow), gdf["geom"])
     stsnowd = czs.gen_stats(np.flipud(snowd), gdf["geom"])
     czs = CachingZonalStats(tp_nav.affine_image)

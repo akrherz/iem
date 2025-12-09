@@ -82,11 +82,11 @@ def copy_to_iemre(valid):
 
     # Reproject to IEMRE
     aff = (
-        get_nav("STAGE4", "").affine
+        get_nav("STAGE4").affine
         if valid >= ARCHIVE_FLIP
         else get_nav("STAGE4_PRE2002", "").affine
     )
-    res = reproject2iemre(val, aff, get_nav("STAGE4", "").crs, domain="conus")
+    res = reproject2iemre(val, aff, get_nav("STAGE4").crs, domain="conus")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data

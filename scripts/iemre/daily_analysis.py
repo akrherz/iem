@@ -253,7 +253,7 @@ def copy_iemre_hourly(ts: date, ds: xr.Dataset, domain: str):
 def use_climodat_12z(ts, ds):
     """Look at what we have in climodat."""
     mybuf = 2
-    gridnav = get_nav("iemre", "")
+    gridnav = get_nav("iemre")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -371,7 +371,7 @@ def use_asos_daily(ts, ds, domain):
 def use_climodat_daily(ts: date, ds):
     """Do our gridding"""
     mybuf = 2.0
-    gridnav = get_nav("iemre", "")
+    gridnav = get_nav("iemre")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
