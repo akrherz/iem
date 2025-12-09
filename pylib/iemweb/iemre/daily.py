@@ -101,7 +101,7 @@ def application(environ, start_response):
     if not os.path.isfile(fn):
         return [json.dumps(res).encode("ascii")]
 
-    if dt.year > 1980 and domain == "":
+    if dt.year > 1980 and domain == "conus":
         ncfn = f"/mesonet/data/prism/{dt.year}_daily.nc"
         if not os.path.isfile(ncfn):
             prism_precip = None
@@ -112,7 +112,7 @@ def application(environ, start_response):
     else:
         prism_precip = None
 
-    if dt.year > 2000 and domain == "":
+    if dt.year > 2000 and domain == "conus":
         ncfn = get_daily_mrms_ncname(dt.year)
         if not os.path.isfile(ncfn):
             mrms_precip = None
