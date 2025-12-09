@@ -211,7 +211,7 @@ def copy_iemre_hourly(ts: date, ds: xr.Dataset, domain: str):
         "high_tmpk low_tmpk p01d high_soil4t avg_dwpk rsds "
         "low_soil4t high_tmpk_12z low_tmpk_12z p01d_12z"
     ).split():
-        if vname == "rsds" and domain == "":
+        if vname == "rsds" and domain == "conus":
             # Done via other means
             continue
         res = None
@@ -442,10 +442,10 @@ def workflow(ts: date, domain: str):
         if ts.year > 1940:
             LOG.info("Using ASOS for daily summary variables")
             use_asos_daily(ts, ds, domain)
-        if domain == "":
+        if domain == "conus":
             use_climodat_daily(ts, ds)
 
-    if domain == "":
+    if domain == "conus":
         # snow_12z snowd_12z
         use_climodat_12z(ts, ds)
 

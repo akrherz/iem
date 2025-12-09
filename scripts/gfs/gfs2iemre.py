@@ -26,7 +26,7 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
     """
     Create a new NetCDF file for a year of our specification!
     """
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
     gridnav = get_nav("iemre", domain)
     fn = f"/mesonet/data/iemre{dd}/gfs_current{dd}_new.nc"
     with ncopen(fn, "w") as nc:
@@ -264,7 +264,7 @@ def main(valid):
         ncfn = create(valid, domain, dom)
         with ncopen(ncfn, "a") as nc:
             merge_grib(nc, valid, domain, dom)
-        dd = "" if domain == "" else f"_{domain}"
+        dd = "" if domain == "conus" else f"_{domain}"
         # Archive this as we need it for various projects
         cmd = [
             "pqinsert",

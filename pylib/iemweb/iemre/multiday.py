@@ -206,10 +206,10 @@ def get_iemre(
 def add_forecast(res: dict, model: Schema):
     """Include forecast info into res."""
     for fxmodel in ["gfs", "ndfd"]:
-        if fxmodel == "ndfd" and model.domain != "":
+        if fxmodel == "ndfd" and model.domain != "conus":
             continue
         res[f"{fxmodel}_forecast"] = []
-        extra = "" if model.domain == "" else f"_{model.domain}"
+        extra = "" if model.domain == "conus" else f"_{model.domain}"
         ncfn = f"/mesonet/data/iemre{extra}/{fxmodel}_current.nc"
         if not Path(ncfn).exists():
             continue
@@ -268,7 +268,7 @@ def application(environ, start_response):
         "timing_seconds": 0,
     }
 
-    extra = "" if model.domain == "" else f"_{model.domain}"
+    extra = "" if model.domain == "conus" else f"_{model.domain}"
     with get_sqlalchemy_conn(f"iemre{extra}") as conn:
         iemredf = get_iemre(conn, ts1, ts2, model)
 
@@ -338,7 +338,7 @@ def application(environ, start_response):
                 iemredf.at[dt, "climate_daily_low_f"] = clow[doy]
                 iemredf.at[dt, "climate_daily_precip_in"] = cprecip[doy]
 
-    if is_single_year and ts1.year > 1980 and model.domain == "":
+    if is_single_year and ts1.year > 1980 and model.domain == "conus":
         i2, j2 = get_nav("prism").find_ij(environ["lon"], environ["lat"])
         if i2 is not None and j2 is not None:
             res["prism_grid_i"] = i2
@@ -350,7 +350,7 @@ def application(environ, start_response):
                         nc.variables["ppt"][tslice, j2, i2], "mm", "in"
                     )
 
-    if is_single_year and ts1.year > 2000 and model.domain == "":
+    if is_single_year and ts1.year > 2000 and model.domain == "conus":
         i2, j2 = get_nav("mrms_iemre").find_ij(environ["lon"], environ["lat"])
         res["mrms_iemre_grid_i"] = i2
         res["mrms_iemre_grid_j"] = j2

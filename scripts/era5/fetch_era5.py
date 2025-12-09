@@ -77,7 +77,7 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
     )
 
     tidx = hourly_offset(valid)
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
 
     for islice_in, islice_out in zip(islices, islices_out, strict=False):
         for ekey, key in VERBATIM.items():
@@ -227,7 +227,7 @@ def run(valid: datetime, justdomain: str | None, checkcache: bool):
     """Run for the given valid time."""
     fetch(valid, checkcache)
     for domain in DOMAINS if justdomain is None else [justdomain]:
-        dd = "" if domain in ["", "conus"] else f"_{domain}"
+        dd = "" if domain == "conus" else f"_{domain}"
         ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
         LOG.info("Running for %s[domain=%s]", valid, domain)
         with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:

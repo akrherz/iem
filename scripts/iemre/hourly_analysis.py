@@ -44,7 +44,7 @@ def use_era5land(ts, kind, domain):
     tasks = {
         "wind": ["uwnd", "vwnd"],
     }
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
     ncfn = f"/mesonet/data/era5{dd}/{ts:%Y}_era5land_hourly.nc"
     if not os.path.isfile(ncfn):
         LOG.warning("Failed to find %s", ncfn)
@@ -244,7 +244,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # Soil Temperature, try ERA5Land
     res = use_era5land(ts, "soilt", domain)
-    if res is None and domain == "":
+    if res is None and domain == "conus":
         # Use HRRR
         res = use_hrrr_soilt(ts)
     if res is not None:
@@ -252,7 +252,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # try first to use RTMA
     res = None
-    if domain == "":
+    if domain == "conus":
         res = use_rtma(ts, "wind")
     if res is None:
         # try ERA5Land
@@ -272,7 +272,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # try first to use RTMA
     res = None
-    if domain == "":
+    if domain == "conus":
         res = use_rtma(ts, "tmp")
     tmp_used_rtma = res is not None
     if res is None:

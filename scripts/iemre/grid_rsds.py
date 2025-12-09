@@ -33,7 +33,7 @@ SWITCH_DATE = utc(2014, 10, 10, 20)
 
 def try_era5land(ts: datetime, domain: str) -> np.ndarray | None:
     """Attempt to use ERA5Land data."""
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
     # inbound `ts` represents noon local time, we want values from 1 AM
     # till midnight
     one_am = ts.replace(hour=1).astimezone(ZoneInfo("UTC"))
@@ -82,7 +82,7 @@ def do_gfs(ts: datetime, domain: str) -> np.ndarray | None:
     # time period to use to get a "daily" value.
     # For europe, use 6z through 0z(tomorrow)
     # For china, use 0z through 18z
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
 
     # Rectify now back to hour modulo 6
     utcnow = ts.astimezone(ZoneInfo("UTC"))
@@ -255,7 +255,7 @@ def main(dt: datetime | None, year, month):
             if srad is not None and postprocess(srad, sts, domain):
                 continue
             LOG.info("try_era5land failed to find data")
-            if domain == "":
+            if domain == "conus":
                 srad = do_hrrr(sts)
                 if srad is not None and postprocess(srad, sts, domain):
                     continue
