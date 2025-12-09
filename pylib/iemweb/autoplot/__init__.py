@@ -23,7 +23,7 @@ import importlib
 ARG_IEMRE_DOMAIN = {
     "type": "select",
     "name": "domain",
-    "default": "",
+    "default": "conus",
     "label": "Select IEMRE Analysis Domain (China/Europe/SA not complete):",
     "options": {
         "conus": "Contiguous USA",
