@@ -38,14 +38,14 @@ LOG = logger()
 # missing data over land, ie the ASOS interpolator got used instead of model
 # ERA5Land is the limiting constraint here
 QUORUM_THRESHOLDS = {
-    "": 90,
+    "conus": 90,
     "china": 79,
     "europe": 77,
     "sa": 51,
 }
 
 
-def generic_gridder(df, idx, domain: str):
+def generic_gridder(df, idx, domain: str = "conus"):
     """
     Generic gridding algorithm for easy variables
     """
@@ -289,17 +289,17 @@ def use_climodat_12z(ts, ds):
             LOG.warning("Failed quorum")
         return
     if ts.year < 1951:
-        res = generic_gridder(df, "highdata_all", "")
+        res = generic_gridder(df, "highdata_all")
         ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-        res = generic_gridder(df, "lowdata_all", "")
+        res = generic_gridder(df, "lowdata_all")
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-    res = generic_gridder(df, "snowdata", "")
+    res = generic_gridder(df, "snowdata")
     if res is not None and ts < date(2008, 10, 1):  # NOHRSC covers
         ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
-    res = generic_gridder(df, "snowddata", "")
+    res = generic_gridder(df, "snowddata")
     if res is not None:
         ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
 
@@ -413,13 +413,13 @@ def use_climodat_daily(ts: date, ds):
             LOG.warning("Failed quorum")
         return
     suffix = "_all" if ts.year < 1951 else ""
-    res = generic_gridder(df, f"highdata{suffix}", "")
+    res = generic_gridder(df, f"highdata{suffix}")
     if res is not None:
         ds["high_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"lowdata{suffix}", "")
+    res = generic_gridder(df, f"lowdata{suffix}")
     if res is not None:
         ds["low_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"precipdata{suffix}", "")
+    res = generic_gridder(df, f"precipdata{suffix}")
     if res is not None:
         ds["p01d"].values = convert_value(res, "inch", "mm")
 

@@ -32,7 +32,7 @@ warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 MEMORY = {"ts": datetime.now()}
 SAMPLES = {
-    "": {"name": "Ames", "lat": 42.022, "lon": -93.617},
+    "conus": {"name": "Ames", "lat": 42.022, "lon": -93.617},
     "china": {"name": "Bejing", "lat": 39.904, "lon": 116.407},
     "europe": {"name": "Berlin", "lat": 52.520, "lon": 13.405},
     "sa": {"name": "Sao Paulo", "lat": -23.550, "lon": -46.633},
