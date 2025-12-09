@@ -21,7 +21,7 @@ def init_year(ts: datetime, ci: bool):
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite file %s.", fn)
         sys.exit()
-    prism_nav = get_nav("PRISM", "")
+    prism_nav = get_nav("PRISM")
     nc = ncopen(fn, "w")
     nc.title = f"PRISM Daily Data for {ts:%Y}"
     nc.platform = "Grided Observations"

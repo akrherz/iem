@@ -60,10 +60,10 @@ def workflow(valid: datetime):
     with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r") as nc:
         # rasterio freaks out if we have masked arrays
         ppt = nc.variables["ppt"][tidx].filled(0)
-    (pi, pj) = get_nav("prism", "").find_ij(DEBUGLON, DEBUGLAT)
+    (pi, pj) = get_nav("prism").find_ij(DEBUGLON, DEBUGLAT)
 
     s4total = compute_s4total(valid)
-    (si, sj) = get_nav("stage4", "").find_ij(DEBUGLON, DEBUGLAT)
+    (si, sj) = get_nav("stage4").find_ij(DEBUGLON, DEBUGLAT)
     # make sure the s4total does not have zeros
     s4total = np.where(s4total < 0.001, 0.001, s4total)
 
@@ -72,10 +72,10 @@ def workflow(valid: datetime):
     reproject(
         ppt,
         prism_on_s4grid,
-        src_transform=get_nav("prism", "").affine,
+        src_transform=get_nav("prism").affine,
         src_crs="EPSG:4326",
-        dst_transform=get_nav("stage4", "").affine,
-        dst_crs=get_nav("stage4", "").crs,
+        dst_transform=get_nav("stage4").affine,
+        dst_crs=get_nav("stage4").crs,
         dst_nodata=0,
     )
 

@@ -106,7 +106,7 @@ def application(environ, start_response):
         if not os.path.isfile(ncfn):
             prism_precip = None
         else:
-            i2, j2 = get_nav("prism", "").find_ij(lon, lat)
+            i2, j2 = get_nav("prism").find_ij(lon, lat)
             with ncopen(ncfn) as nc:
                 prism_precip = nc.variables["ppt"][offset, j2, i2] / 25.4
     else:
@@ -117,7 +117,7 @@ def application(environ, start_response):
         if not os.path.isfile(ncfn):
             mrms_precip = None
         else:
-            i2, j2 = get_nav("mrms_iemre", "").find_ij(lon, lat)
+            i2, j2 = get_nav("mrms_iemre").find_ij(lon, lat)
             with ncopen(ncfn) as nc:
                 mrms_precip = nc.variables["p01d"][offset, j2, i2] / 25.4
     else:

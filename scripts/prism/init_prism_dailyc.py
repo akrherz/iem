@@ -23,7 +23,7 @@ def init_year(ts):
     if os.path.exists(fn):
         LOG.info("%s exists, skipping", fn)
         return
-    prism_nav = get_nav("PRISM", "")
+    prism_nav = get_nav("PRISM")
     nc = ncopen(fn, "w")
     nc.title = f"PRISM Climatology {ts.year}"
     nc.platform = "Grided Climatology"

@@ -84,7 +84,7 @@ def init_year(ts: datetime, domain: str, ci: bool) -> None:
     hasdata.units = "1"
     hasdata.long_name = "Analysis Available for Grid Cell"
     hasdata.coordinates = "lon lat"
-    hasdata[:] = 0 if domain == "" else 1
+    hasdata[:] = 0 if domain == "conus" else 1
 
     # can storage -128->127 actual values are 0 to 100
     skyc = nc.createVariable(

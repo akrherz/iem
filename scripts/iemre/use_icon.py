@@ -182,7 +182,7 @@ def main(valid: datetime) -> None:
     fhour = (valid - model_valid).total_seconds() // 3600
     # 3. Copy to IEMRE netcdf files
     for domain in DOMAINS:
-        if domain == "":
+        if domain == "conus":
             continue
         copy_grib_to_netcdf(valid, domain, fhour)
 

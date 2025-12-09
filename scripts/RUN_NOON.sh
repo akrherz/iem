@@ -11,7 +11,7 @@ python stage4_12z_adjust.py --date=$(date +'%Y-%m-%d')
 python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
 python ingest_nohrsc.py --date=$(date +'%Y-%m-%d')
 # Need 12z analyses done for climodat
-python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
 # Already tomorrow and need ready for DEP china to run
 python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=china
 
@@ -41,11 +41,11 @@ cd ../iemre
 # Since we have now adjusted the 12z precip 1 day ago, we should rerun
 # iemre for two days ago
 python ingest_nohrsc.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
-python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=conus
 # NOTE: Careful to align this date with DEP reprocessing at 8 PM
 python ingest_nohrsc.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 # Updated soil temperature data from ERA5
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=conus
 python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=sa
 python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=china
 python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=europe

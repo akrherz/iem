@@ -39,12 +39,12 @@ SAMPLES = {
 }
 
 
-def use_era5land(ts, kind, domain):
+def use_era5land(ts, kind, domain: str):
     """Use the ERA5Land dataset."""
     tasks = {
         "wind": ["uwnd", "vwnd"],
     }
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
     ncfn = f"/mesonet/data/era5{dd}/{ts:%Y}_era5land_hourly.nc"
     if not os.path.isfile(ncfn):
         LOG.warning("Failed to find %s", ncfn)
@@ -156,8 +156,8 @@ def grid_wind(df, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", domain=domain)
-    vgrid = generic_gridder(df, "v", domain=domain)
+    ugrid = generic_gridder(df, "u", domain)
+    vgrid = generic_gridder(df, "v", domain)
     return ugrid, vgrid
 
 
@@ -165,10 +165,10 @@ def grid_skyc(df, domain):
     """Take the max sky coverage value."""
     cols = ["max_skyc1", "max_skyc2", "max_skyc3", "max_skyc4"]
     df["skyc"] = df[cols].max(axis="columns")
-    return generic_gridder(df, "skyc", domain=domain)
+    return generic_gridder(df, "skyc", domain)
 
 
-def generic_gridder(df, idx, domain=""):
+def generic_gridder(df, idx, domain):
     """Generic gridding algorithm for easy variables"""
     gridnav = get_nav("iemre", domain)
     df2 = df[pd.notnull(df[idx])]
@@ -244,7 +244,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # Soil Temperature, try ERA5Land
     res = use_era5land(ts, "soilt", domain)
-    if res is None and domain == "":
+    if res is None and domain == "conus":
         # Use HRRR
         res = use_hrrr_soilt(ts)
     if res is not None:
@@ -252,7 +252,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # try first to use RTMA
     res = None
-    if domain == "":
+    if domain == "conus":
         res = use_rtma(ts, "wind")
     if res is None:
         # try ERA5Land
@@ -272,7 +272,7 @@ def grid_hour(ts: datetime, domain: str):
 
     # try first to use RTMA
     res = None
-    if domain == "":
+    if domain == "conus":
         res = use_rtma(ts, "tmp")
     tmp_used_rtma = res is not None
     if res is None:
@@ -286,7 +286,7 @@ def grid_hour(ts: datetime, domain: str):
             LOG.warning("%s has no entries, FAIL", ts)
             return
         did_gridding = True
-        tmpf = generic_gridder(df, "max_tmpf", domain=domain)
+        tmpf = generic_gridder(df, "max_tmpf", domain)
 
     # only use RTMA if tmp worked
     res = None
@@ -311,7 +311,7 @@ def grid_hour(ts: datetime, domain: str):
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        dwpf = generic_gridder(df, "max_dwpf", domain=domain)
+        dwpf = generic_gridder(df, "max_dwpf", domain)
 
     # Only keep cases when tmpf >= dwpf and they are both not masked
     # Note some truncation issues here, so our comparison is not perfect
@@ -362,7 +362,7 @@ def write_grid(valid, vname, grid, domain: str):
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
 @click.option(
     "--domain",
-    default="",
+    default="conus",
     type=click.Choice(DOMAINS.keys()),
     help="Domain to process",
 )

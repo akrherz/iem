@@ -16,7 +16,7 @@ def init_year(ts: datetime, domain: str):
     Create a new NetCDF file for a year of our specification!
     """
     gridnav = get_nav("era5land", domain)
-    dd = "" if domain == "" else f"_{domain}"
+    dd = "" if domain == "conus" else f"_{domain}"
     ncfn = f"/mesonet/data/era5{dd}/{ts.year}_era5land_hourly.nc"
     if os.path.isfile(ncfn):
         LOG.info("Cowardly refusing to overwrite: %s", ncfn)
@@ -189,7 +189,7 @@ def init_year(ts: datetime, domain: str):
 
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
-@click.option("--domain", default="", help="IEMRE Domain")
+@click.option("--domain", default="conus", help="IEMRE Domain")
 def main(year, domain):
     """Go Main Go"""
     init_year(datetime(year, 1, 1), domain)

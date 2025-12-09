@@ -56,7 +56,7 @@ def init_df(state, dt: date):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, dt)
-        i, j = get_nav("iemre", "").find_ij(entry["lon"], entry["lat"])
+        i, j = get_nav("iemre").find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
                 "day": dt,
