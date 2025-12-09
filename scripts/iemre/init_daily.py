@@ -244,7 +244,7 @@ def init_year(ts, domain, ci: bool):
 
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
-@click.option("--domain", default="", help="IEMRE Domain to run for")
+@click.option("--domain", default="conus", help="IEMRE Domain to run for")
 @click.option("--ci", is_flag=True, help="Run in CI mode")
 def main(year: int, domain: str, ci: bool):
     """Go Main Go"""

@@ -26,10 +26,13 @@ ARG_IEMRE_DOMAIN = {
     "default": "",
     "label": "Select IEMRE Analysis Domain (China/Europe/SA not complete):",
     "options": {
-        "": "Contiguous USA",
+        "conus": "Contiguous USA",
         "china": "China",
         "europe": "Europe",
         "sa": "South America",
+    },
+    "alias": {
+        "": "conus",
     },
 }
 ARG_STATION = {

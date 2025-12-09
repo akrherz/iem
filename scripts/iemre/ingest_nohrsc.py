@@ -47,7 +47,7 @@ def main(valid):
             "db_to_netcdf.py",
             f"--date={valid:%Y-%m-%d}",
             "--varname=snow_12z",
-            "--domain=",
+            "--domain=conus",
         ]
     )
 

@@ -1,6 +1,6 @@
 #
-# We are run at :10 after the hour, some of these processes are intensive 
-# 
+# We are run at :10 after the hour, some of these processes are intensive
+#
 YYYY=$(date -u +'%Y')
 MM=$(date -u +'%m')
 DD=$(date -u +'%d')
@@ -62,7 +62,7 @@ fi
 # we run at 11 PM for today as well
 if [ $LHH -eq "23" ]
 then
-    python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
+    python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
     python grid_rsds.py	--date=$(date +'%Y-%m-%d')
 fi
 
@@ -129,7 +129,7 @@ cd ../current
 python q3_xhour.py --hours=6
 python q3_xhour.py --hours=3
 python q3_xhour.py --hours=1
-python mrms_today_total.py --date=$(date +'%Y-%m-%d') 
+python mrms_today_total.py --date=$(date +'%Y-%m-%d')
 
 cd ../ua
 if [ $HH -eq 1 ]

@@ -86,7 +86,7 @@ def copy_to_iemre(valid):
         if valid >= ARCHIVE_FLIP
         else get_nav("STAGE4_PRE2002", "").affine
     )
-    res = reproject2iemre(val, aff, get_nav("STAGE4", "").crs, domain="")
+    res = reproject2iemre(val, aff, get_nav("STAGE4", "").crs, domain="conus")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data
@@ -96,7 +96,7 @@ def copy_to_iemre(valid):
 
     # Open up our RE file
     with ncopen(
-        get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+        get_hourly_ncname(valid.year, domain="conus"), "a", timeout=300
     ) as nc:
         nc.variables["p01m"][tidx] = res
     LOG.info(
@@ -141,7 +141,7 @@ def workflow(valid: datetime, domain: str, force_copy: bool):
 @click.command()
 @click.option("--valid", "ts", type=click.DateTime(), help="Specific UTC")
 @click.option("--valid12z", "ets", type=click.DateTime(), help="12z UTC")
-@click.option("--domain", default="", help="IEMRE Domain")
+@click.option("--domain", default="conus", help="IEMRE Domain")
 def main(ts: datetime | None, ets: datetime | None, domain: str):
     """Go Main"""
     if ts is not None:

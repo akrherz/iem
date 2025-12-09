@@ -28,7 +28,7 @@ LOG = logger()
     type=click.DateTime(),
     help="Valid timestamp",
 )
-@click.option("--domain", default="", help="Domain to process")
+@click.option("--domain", default="conus", help="Domain to process")
 @click.option("--varname", default=None, help="Variable to process")
 def main(dt: datetime, domain: str, varname: str | None) -> None:
     """Go Main Go."""

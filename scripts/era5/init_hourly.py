@@ -189,7 +189,7 @@ def init_year(ts: datetime, domain: str):
 
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
-@click.option("--domain", default="", help="IEMRE Domain")
+@click.option("--domain", default="conus", help="IEMRE Domain")
 def main(year, domain):
     """Go Main Go"""
     init_year(datetime(year, 1, 1), domain)

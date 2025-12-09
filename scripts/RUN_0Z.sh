@@ -21,7 +21,7 @@ python ingest_climdiv.py &
 
 cd ../iemre
 # need to run daily analysis for climodat estimator to then work
-python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
 python daily_analysis.py --date=$(date --date='1 day ago' +'%Y-%m-%d') --domain=europe
 
 cd ../climodat

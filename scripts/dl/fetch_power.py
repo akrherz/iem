@@ -22,7 +22,7 @@ LOG = logger()
 @click.command()
 @click.option("--year", type=int, help="Year to Process")
 @click.option("--date", "dt", type=click.DateTime(), help="Date to fetch")
-@click.option("--domain", default="", type=str, help="IEMRE Domain")
+@click.option("--domain", default="conus", type=str, help="IEMRE Domain")
 @click.option("--force", is_flag=True, help="Force a re-download of data")
 def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     """Go Main Go."""

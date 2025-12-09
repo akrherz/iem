@@ -65,7 +65,7 @@ def build_stations(dt) -> pd.DataFrame:
 
 def compute(df, sids, dt: date, do_regions=False):
     """Do the magic."""
-    ncfn = get_daily_ncname(dt.year, domain="")
+    ncfn = get_daily_ncname(dt.year, domain="conus")
     tidx = daily_offset(dt)
     with ncopen(ncfn) as nc:
         lons = nc.variables["lon"][:]

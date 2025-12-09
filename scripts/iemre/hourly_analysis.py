@@ -362,7 +362,7 @@ def write_grid(valid, vname, grid, domain: str):
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
 @click.option(
     "--domain",
-    default="",
+    default="conus",
     type=click.Choice(DOMAINS.keys()),
     help="Domain to process",
 )

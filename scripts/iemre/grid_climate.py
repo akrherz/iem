@@ -103,7 +103,9 @@ def workflow(ts):
     """Do Work"""
 
     # Load up our netcdf file!
-    with ncopen(iemre.get_dailyc_ncname(domain=""), "a", timeout=300) as nc:
+    with ncopen(
+        iemre.get_dailyc_ncname(domain="conus"), "a", timeout=300
+    ) as nc:
         grid_day(nc, ts)
         grid_solar(nc, ts)
 

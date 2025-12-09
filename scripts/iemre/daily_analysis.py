@@ -476,7 +476,7 @@ def workflow(ts: date, domain: str):
 @click.option(
     "--date", "valid", type=click.DateTime(), help="Date", required=True
 )
-@click.option("--domain", default="", help="Domain to process", type=str)
+@click.option("--domain", default="conus", help="Domain to process", type=str)
 def main(valid: datetime, domain: str):
     """Go Main Go"""
     dt = valid.date()
