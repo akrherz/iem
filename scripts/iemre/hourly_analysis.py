@@ -39,7 +39,7 @@ SAMPLES = {
 }
 
 
-def use_era5land(ts, kind, domain):
+def use_era5land(ts, kind, domain: str):
     """Use the ERA5Land dataset."""
     tasks = {
         "wind": ["uwnd", "vwnd"],
@@ -156,8 +156,8 @@ def grid_wind(df, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", domain=domain)
-    vgrid = generic_gridder(df, "v", domain=domain)
+    ugrid = generic_gridder(df, "u", domain)
+    vgrid = generic_gridder(df, "v", domain)
     return ugrid, vgrid
 
 
@@ -165,10 +165,10 @@ def grid_skyc(df, domain):
     """Take the max sky coverage value."""
     cols = ["max_skyc1", "max_skyc2", "max_skyc3", "max_skyc4"]
     df["skyc"] = df[cols].max(axis="columns")
-    return generic_gridder(df, "skyc", domain=domain)
+    return generic_gridder(df, "skyc", domain)
 
 
-def generic_gridder(df, idx, domain=""):
+def generic_gridder(df, idx, domain):
     """Generic gridding algorithm for easy variables"""
     gridnav = get_nav("iemre", domain)
     df2 = df[pd.notnull(df[idx])]
@@ -286,7 +286,7 @@ def grid_hour(ts: datetime, domain: str):
             LOG.warning("%s has no entries, FAIL", ts)
             return
         did_gridding = True
-        tmpf = generic_gridder(df, "max_tmpf", domain=domain)
+        tmpf = generic_gridder(df, "max_tmpf", domain)
 
     # only use RTMA if tmp worked
     res = None
@@ -311,7 +311,7 @@ def grid_hour(ts: datetime, domain: str):
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        dwpf = generic_gridder(df, "max_dwpf", domain=domain)
+        dwpf = generic_gridder(df, "max_dwpf", domain)
 
     # Only keep cases when tmpf >= dwpf and they are both not masked
     # Note some truncation issues here, so our comparison is not perfect
