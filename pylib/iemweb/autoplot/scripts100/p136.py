@@ -24,6 +24,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
+    lyear = datetime.now().year
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -35,7 +36,8 @@ def get_description():
         dict(
             type="year",
             name="season",
-            default=datetime.now().year,
+            default=lyear if datetime.now().month < 6 else (lyear + 1),
+            max=lyear + 1,
             label="Select Season to Highlight",
         ),
         dict(

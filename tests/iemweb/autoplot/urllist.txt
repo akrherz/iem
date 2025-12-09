@@ -240,6 +240,8 @@
 134/network:OHCLIMATE::station:OHTCMH::var:warmest_hifeel::days:4::cmap:hot_r::_r:43::dpi:100.png
 134/network:IA_ASOS::station:DSM::var:coldest_lofeel::days:7::cmap:jet::_r:t::dpi:100::_cb:1.png
 134/network:IACLIMATE::station:IATAME::var:wettest::days:7::cmap:jet::_r:t::dpi:100.png
+136/network:IA_ASOS::zstation:ALO::season:2026::wind:0::todate:yes::_r:43::dpi:100.png
+136/network:IA_ASOS::zstation:DSM::season:2000::wind:0::todate:yes::_r:43::dpi:100.png
 139/network:IA_ASOS::zstation:AMW::v:smallest::month:winter::_r:t::dpi:100.png
 139/network:IA_ASOS::zstation:AMW::v:largest::month:all::_r:t::dpi:100::_cb:1.png
 140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
