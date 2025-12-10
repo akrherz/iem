@@ -31,7 +31,7 @@ def compute_regions(data, varname, df):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(nav.ERA5LAND.affine_image)
+    czs = CachingZonalStats(nav.ERA5LAND_CONUS.affine_image)
     data = czs.gen_stats(np.flipud(data), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
         df.at[sid, varname] = data[i]
@@ -105,7 +105,7 @@ def compute(df, sids, dt, do_regions=False):
     soilt = soilt.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        i, j = nav.ERA5LAND.find_ij(row["lon"], row["lat"])
+        i, j = nav.ERA5LAND_CONUS.find_ij(row["lon"], row["lat"])
         if i is None:
             continue
         df.at[sid, "era5land_srad"] = rsds[j, i]

@@ -241,5 +241,6 @@ def plotter(ctx: dict):
     if limit != "udf":
         xlabel = f"{xx} thru approximately {date.today():%-d %b}."
     ax.set_xlabel(f"{xlabel} Timezone: {tzname}")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
