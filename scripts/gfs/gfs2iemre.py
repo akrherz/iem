@@ -136,7 +136,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
     # europe   2024-08-05 -> 2024-08-06  0 UTC
     # china    2024-08-05 -> 2024-08-05 18 UTC
     write_hour = {
-        "": 6,
+        "conus": 6,
         "sa": 6,
         "europe": 0,
         "china": 18,
@@ -240,9 +240,9 @@ def merge_grib(nc, now, domain: str, dom: dict):
                     approxlocal.date(),
                     days,
                     domain,
-                    np.nanmean(srad),
+                    -1 if srad is None else np.nanmean(srad),  # appease linter
                     np.ma.mean(sout),
-                    np.nanmean(pgrid),
+                    -1 if pgrid is None else np.nanmean(pgrid),
                     np.ma.mean(pout),
                 )
             tmingrid = None
