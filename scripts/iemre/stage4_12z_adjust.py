@@ -88,7 +88,7 @@ def merge(ts: datetime):
         with ncopen(ncfn, mode="a", timeout=60) as nc:
             nc.variables["p01m_status"][idx0 : (idx1 + 1)] = 2
             for idx in range(idx0, idx1 + 1):
-                data = nc.variables["p01m"][idx, :, :]
+                data = np.array(nc.variables["p01m"][idx])
                 adjust = np.where(data > 0, data, 0.00001) * multiplier
                 adjust = np.where(adjust > 250.0, 0, adjust)
                 LOG.info(
