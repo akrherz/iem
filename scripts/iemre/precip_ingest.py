@@ -126,7 +126,7 @@ def era5workflow(valid: datetime, domain: str):
 
 def workflow(valid: datetime, domain: str, force_copy: bool):
     """Our stage IV workflow."""
-    if valid.year < 1997 or domain != "":
+    if valid.year < 1997 or domain != "conus":
         era5workflow(valid, domain)
         return
     # Figure out what the current status is
