@@ -151,7 +151,7 @@ def plotter(ctx: dict):
         "nocaption": True,
         "apctx": ctx,
     }
-    if domain != "":
+    if domain != "conus":
         ctx["csector"] = "custom"
         mpargs["west"] = gridnav.left_edge
         mpargs["east"] = gridnav.right_edge

@@ -122,7 +122,7 @@ def plotter(ctx: dict):
         "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
         "subtitle": "Sourced from various NOAA/ERA5-Land/DWD ICON datasets",
     }
-    if domain != "":
+    if domain != "conus":
         ctx["csector"] = "custom"
         mpargs["east"] = gridnav.right_edge
         mpargs["west"] = gridnav.left_edge
