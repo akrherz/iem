@@ -270,7 +270,7 @@ EOM;
         <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
         {$tagtext}
 
-        <div class="card float-end ms-3 mb-3" style="max-width: 400px;">
+        <div class="card float-end ms-3 mb-3" style="max-width: 540px;">
             <div class="card-img-top">
                 {$imgiface}
             </div>
@@ -290,7 +290,7 @@ EOF;
         $vtext = "";
     } else {
         $vtext = <<<EOM
-        <br clear="all" \>
+        <div class="clearfix"></div>
         <div class="mt-3">
         <div class="row g-2">
         <div class="col-12 col-sm-3 d-flex align-items-center"><strong><span id="feature_msg">Rate Feature</span></strong></div>
@@ -380,8 +380,10 @@ $get_recent_news = cacheable("recentnews", 120)(function(){
     $news = "";
     while ($row = pg_fetch_assoc($rs)){
         $ts = new DateTime(substr($row["entered"],0,16));
-        if ($ts > $today) $sts = $ts->format("g:i A");
-        $sts = $ts->format("j M g:i A");
+        // Show time only for today's posts, otherwise show date and time
+        $sts = ($ts->format("Y-m-d") === $today->format("Y-m-d"))
+            ? $ts->format("g:i A")
+            : $ts->format("j M g:i A");
         $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
             "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
     }
