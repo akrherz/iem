@@ -360,6 +360,8 @@
 191/sdate:2024-01-01::edate:2024-06-23::daytz:12z::w:ugc::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:t::dpi:100.png
 191/sdate:2023-01-01::edate:2024-06-23::daytz:central::w:state::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::_r:43::dpi:100.png
 192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
+192/t:state::network:WFO::wfo:DMX::state:IA::v:wetbulb::valid:2019-12-24%201500::cmap:PuRd.png
+192/t:conus::network:WFO::wfo:DMX::state:IA::v:wetbulb_awips::valid:2019-12-24%201500::cmap:PuRd.png
 193/csector:conus::date:2024-07-01::z:0::f:120::opt:both::scale:auto::cmap:gist_ncar::_r:t::dpi:100.png
 193/csector:iailin::date:2024-07-01::z:0::f:120::opt:both::scale:10::cmap:gist_ncar::_r:t::dpi:100.png
 193/csector:iailin::date:2024-07-01::z:0::f:120::opt:both::scale:3.5::cmap:gist_ncar::_r:t::dpi:100.png

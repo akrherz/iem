@@ -1,17 +1,23 @@
 """Generates analysis maps of ASOS station data."""
 
-from datetime import timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta, timezone
 
 import numpy as np
 import pandas as pd
+from matplotlib.colors import ListedColormap, to_hex
+from metpy.calc import altimeter_to_station_pressure, wet_bulb_temperature
+from metpy.units import units
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import utc
 
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State",
+    "conus": "Plot for Contiguous US",
+}
 PDICT2 = {
     "vsby": "Visibility",
     "feel": "Feels Like Temperature",
@@ -19,14 +25,18 @@ PDICT2 = {
     "dwpf": "Dew Point Temperature",
     "sknt": "Wind Speed",
     "relh": "Relative Humidity",
+    "wetbulb": "Wet Bulb Temperature (You pick colors)",
+    "wetbulb_awips": "Wet Bulb Temperature (AWIPS Color Scale)",
 }
 UNITS = {
     "vsby": "miles",
-    "feel": "F",
-    "tmpf": "F",
-    "dwpf": "F",
+    "feel": "°F",
+    "tmpf": "°F",
+    "dwpf": "°F",
     "sknt": "kts",
     "relh": "%",
+    "wetbulb": "°F",
+    "wetbulb_awips": "°F",
 }
 
 
@@ -92,20 +102,20 @@ def get_description():
 def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
     if ctx.get("valid"):
-        valid = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
+        valid = ctx["valid"].replace(tzinfo=timezone.utc)
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
                 sql_helper("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
-                state, wfo from stations
+                state, wfo, elevation from stations
                 where network ~* 'ASOS' and
                 ST_contains(
                     ST_MakeEnvelope(:west, :south, :east, :north, 4326),
                     geom)
             )
             SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
-            feel,
+            feel, elevation, alti,
             abs(extract(epoch from (:valid - valid))) as tdiff from
             alldata a JOIN mystation m on (a.station = m.id)
             WHERE a.valid between :sts and :ets ORDER by tdiff ASC
@@ -128,7 +138,8 @@ def get_df(ctx, bnds, buf=2.25):
             df = pd.read_sql(
                 sql_helper("""
                 SELECT state, wfo, tmpf, dwpf, sknt, relh, feel,
-        id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
+        id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat,
+        elevation, alti
         FROM
         current c JOIN stations s ON (s.iemid = c.iemid)
         WHERE s.network ~* 'ASOS' and s.country = 'US' and
@@ -145,7 +156,23 @@ def get_df(ctx, bnds, buf=2.25):
                     "north": bnds[3] + buf,
                 },
             )
-    return df, valid
+    if df.empty:
+        raise NoDataFound("Database query found no results.")
+    if ctx["v"].startswith("wetbulb"):
+        # somewhat expensive, so we only do when necessary
+        df[ctx["v"]] = (
+            wet_bulb_temperature(
+                altimeter_to_station_pressure(
+                    df["alti"].values * units.inHg,
+                    df["elevation"].values * units.meter,
+                ),
+                df["tmpf"].values * units.degF,
+                df["dwpf"].values * units.degF,
+            )
+            .to(units.degF)
+            .magnitude
+        )
+    return df.dropna(subset=[ctx["v"]]), valid
 
 
 def plotter(ctx: dict):
@@ -155,19 +182,20 @@ def plotter(ctx: dict):
     if ctx["t"] == "state":
         bnds = reference.state_bounds[ctx["state"]]
         title = reference.state_names[ctx["state"]]
+    elif ctx["t"] == "conus":
+        bnds = reference.SECTORS["conus"]
+        title = "Contiguous United States"
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
         title = f"NWS CWA {ctx['_sname']}"
     df, valid = get_df(ctx, bnds)
-    if df.empty:
-        raise NoDataFound("No data was found for your query")
     mp = MapPlot(
         apctx=ctx,
-        sector=("state" if ctx["t"] == "state" else "cwa"),
+        sector=ctx["t"],
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
-        title=f"{PDICT2[ctx['v']]} for {title}",
+        title=f"{PDICT2[ctx['v']].split('(')[0]} for {title}",
         subtitle=f"Map valid: {valid:%d %b %Y %H:%M} UTC",
         nocaption=True,
         titlefontsize=16,
@@ -175,8 +203,6 @@ def plotter(ctx: dict):
     ramp = None
     if varname == "vsby":
         ramp = np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9])
-    if df.empty:
-        raise NoDataFound("No Data Found")
     # Data QC, cough
     if ctx.get("above"):
         df = df[df[varname] < ctx["above"]]
@@ -189,14 +215,56 @@ def plotter(ctx: dict):
         ramp = np.linspace(
             df[varname].min() - 5, df[varname].max() + 5, 10, dtype="i"
         )
-    mp.contourf(
-        df["lon"].values,
-        df["lat"].values,
-        df[varname].values,
-        ramp,
-        units=UNITS[varname],
-        cmap=get_cmap(ctx["cmap"]),
-    )
+    cmap = get_cmap(ctx["cmap"])
+    if varname == "wetbulb_awips":
+        # approximately what AWIPS is using
+        cmap_obj = get_cmap("jet")
+        ramp = np.linspace(20, 50, 30 * 5 + 1)
+        pinks = ["#ff99f5", "#ff7fff", "#f66bff"]
+        pink_start = 33.2
+        pink_end = 35.2
+        n_pinks = len(pinks)
+        # Convert the colormap to a list of hex colors
+        color_list = [
+            to_hex(cmap_obj(i / (len(ramp) - 1))) for i in range(len(ramp))
+        ]
+        # Find indices in ramp that cover the pink range
+        idx_start = np.searchsorted(ramp, pink_start, side="left")
+        idx_end = np.searchsorted(ramp, pink_end, side="right")
+        n_indices = idx_end - idx_start
+        if n_indices > 0:
+            # Spread each pink over about a third of the pink range
+            seg_len = n_indices // n_pinks
+            for i in range(n_pinks):
+                seg_start = idx_start + i * seg_len
+                # Last segment takes the remainder
+                seg_end = (
+                    idx_start + (i + 1) * seg_len
+                    if i < n_pinks - 1
+                    else idx_end
+                )
+                for idx in range(seg_start, seg_end):
+                    color_list[idx] = pinks[i]
+        cmap = ListedColormap(color_list)
+        mp.contourf(
+            df["lon"].values,
+            df["lat"].values,
+            df[varname].values,
+            ramp,
+            units=UNITS[varname],
+            cmap=cmap,
+            clevstride=10,
+            iline=False,
+        )
+    else:
+        mp.contourf(
+            df["lon"].values,
+            df["lat"].values,
+            df[varname].values,
+            ramp,
+            units=UNITS[varname],
+            cmap=cmap,
+        )
     if ctx["t"] == "state":
         df2 = df[df["state"] == ctx["state"]]
     else:
@@ -209,7 +277,8 @@ def plotter(ctx: dict):
         "%.1f",
         labelbuffer=10,
     )
-    mp.drawcounties()
+    if ctx["t"] != "conus":
+        mp.drawcounties()
     if ctx["t"] == "cwa":
         mp.draw_cwas()
 
