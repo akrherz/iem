@@ -291,7 +291,7 @@ EOF;
     } else {
         $vtext = <<<EOM
         <div class="clearfix"></div>
-        <div class="mt-3">
+        <div class="mt-3" style="clear: both;">
         <div class="row g-2">
         <div class="col-12 col-sm-3 d-flex align-items-center"><strong><span id="feature_msg">Rate Feature</span></strong></div>
         <div class="col-12 col-sm-3">
