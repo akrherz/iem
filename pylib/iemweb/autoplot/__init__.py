@@ -20,6 +20,8 @@ Not listed due to having no PNG output
 
 import importlib
 
+from pyiem.exceptions import BadWebRequest
+
 ARG_IEMRE_DOMAIN = {
     "type": "select",
     "name": "domain",
@@ -91,7 +93,10 @@ def import_script(p: int):
         s = "100"
     # We used to reload the module here each time, but in local dev we are
     # cycling the mod_wsgi process every request and in prod, \_o_/
-    return importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    try:
+        return importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    except ModuleNotFoundError as exp:
+        raise BadWebRequest("Invalid autoplot id") from exp
 
 
 # Association of plots

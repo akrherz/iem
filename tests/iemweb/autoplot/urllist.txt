@@ -237,6 +237,7 @@
 131/network:IA_ASOS::zstation:DSM::month:winter::var:OVC::hour:0::_r:43::dpi:100.png
 132/network:IACLIMATE::station:IATDSM::var:total_snowfall::days:1::month:nov::_r:43::dpi:100::_cb:1.png
 132/network:IACLIMATE::station:IATDSM::var:max_least_high::days:2::month:nov::_r:43::dpi:100::_cb:1.png
+133/network:IACLIMATE::station:IATDSM::date:2015-12-15::year:2000.png
 134/network:OHCLIMATE::station:OHTCMH::var:warmest_hifeel::days:4::cmap:hot_r::_r:43::dpi:100.png
 134/network:IA_ASOS::station:DSM::var:coldest_lofeel::days:7::cmap:jet::_r:t::dpi:100::_cb:1.png
 134/network:IACLIMATE::station:IATAME::var:wettest::days:7::cmap:jet::_r:t::dpi:100.png
