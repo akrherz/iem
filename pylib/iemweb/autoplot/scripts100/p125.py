@@ -265,7 +265,9 @@ def plotter(ctx: dict):
         df = df[df["total_snow"] > (df["total_snow"].mean() * thres)]
     if df.empty:
         raise NoDataFound("No data was found after filters applied.")
-    levels = pretty_bins(df[varname].min(), df[varname].max(), 10)
+    levels = pretty_bins(
+        df[varname].quantile(0.05), df[varname].quantile(0.95), 10
+    )
     if opt in ["both", "contour"]:
         mp.contourf(
             df["lon"].values,
@@ -274,7 +276,7 @@ def plotter(ctx: dict):
             levels,
             units=UNITS.get(varname, "F"),
             cmap=get_cmap(ctx["cmap"]),
-            extend="neither",
+            extend="both",
             clip_on=False,
         )
         # Manual clipping sector

@@ -1,8 +1,8 @@
 """
 This plot displays the total reported snowfall for
 a period prior to a given date and then after the date for the winter
-season.  When you select a date to split the winter season, the year
-shown in the date can be ignored.
+season. The year convention is from July 1st through June 30th with the year
+value representing the starting year of the season.
 """
 
 from datetime import date
@@ -27,6 +27,13 @@ def get_description():
             min="2015/01/01",
             label="Split Season by Date: (ignore the year)",
         ),
+        {
+            "type": "year",
+            "name": "year",
+            "default": date.today().year,
+            "label": "Highlight given year on the chart:",
+            "min": 1850,
+        },
     ]
     return desc
 
@@ -149,5 +156,21 @@ def plotter(ctx: dict):
         lw=2,
         label=f"After Avg: {df['after'].mean():.1f}",
     )
+    if ctx["year"] in df.index:
+        ax.axvline(
+            df.at[ctx["year"], "before"],
+            color="g",
+            lw=2,
+            label=(
+                f"{ctx['year']}-{ctx['year'] + 1} "
+                f"Before: {df.at[ctx['year'], 'before']:.1f}, "
+                f"After: {df.at[ctx['year'], 'after']:.1f}"
+            ),
+        )
+        ax.axhline(
+            df.at[ctx["year"], "after"],
+            color="g",
+            lw=2,
+        )
     ax.legend(ncol=2, fontsize=12)
     return fig, df
