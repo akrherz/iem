@@ -8,6 +8,7 @@ additional information comes along for the ride.
 Changelog
 ---------
 
+- 2025-12-17: Add the morning / 12 UTC snowfall variables to the output.
 - 2025-01-01: Implementation updated to use pydantic validation.
 - 2024-09-11: Initial documentation update
 
@@ -218,6 +219,12 @@ def application(environ, start_response):
                 ),
                 "avg_windspeed_mps": myrounder(
                     nc.variables["wind_speed"][offset, j, i], 2
+                ),
+                "snow_12z_in": myrounder(
+                    nc.variables["snow_12z"][offset, j, i] / 25.4, 1
+                ),
+                "snowd_12z_in": myrounder(
+                    nc.variables["snowd_12z"][offset, j, i] / 25.4, 1
                 ),
             }
         )
