@@ -16,6 +16,9 @@ services found at
 Changelog
 ---------
 
+- 2025-12-17: Improved the error message when provided time information is
+  not sufficient.  Additionally, the hour values now default to 0 and minute
+  values to 0 as well.
 - 2025-07-12: Added ``fcster`` parameter to filter results by forecaster name
   (case-insensitive matching).  This field is also added to the output.
 - 2025-05-09: Fixed issue with ``ETN`` DBF column allways being (null).
@@ -86,7 +89,7 @@ from stat import S_IFREG
 
 import fiona
 import pandas as pd
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
@@ -102,199 +105,246 @@ class Schema(CGIModel):
     """See how we are called."""
 
     accept: str = Field(
-        "shapefile",
+        default="shapefile",
         pattern="^(shapefile|excel|csv)$",
         description="The format to return, either shapefile or excel.",
     )
     at: AwareDatetime = Field(
-        None,
+        default=None,
         description=(
             "The timestamp to use when ``timeopt=2``, which the service "
             "provides events valid at the specified time."
         ),
     )
     addsvs: str = Field(
-        "no",
+        default="no",
         pattern="^(yes|no)$",
         description="Include polygons that were included within any followup "
         "statements after issuance.",
     )
     ets: AwareDatetime = Field(
-        None,
+        default=None,
         description="The end timestamp in UTC. The format is ISO8601, e.g. "
         "2010-06-01T00:00Z.",
         ge=utc(1986, 1, 1),
     )
     limit0: str = Field(
-        "no",
+        default="no",
         pattern="^(yes|no)$",
         description="If yes, only include Tornado, Severe Thunderstorm, "
         "Flash Flood, and Marine Warnings.",
     )
     limit1: str = Field(
-        "no",
+        default="no",
         pattern="^(yes|no)$",
         description="If yes, only include Storm Based Warnings.",
     )
     limit2: str = Field(
-        "no",
+        default="no",
         pattern="^(yes|no)$",
         description="If yes, only include Emergency Warnings.",
     )
     limitpds: bool = Field(
-        False,
+        default=False,
         description=(
             "If yes, only include products that have a PDS "
             "(Particularly Dangerous Situation) tag or phrasing."
         ),
     )
     limitps: str = Field(
-        "no",
+        default="no",
         pattern="^(yes|no)$",
         description="If yes, only include the specified phenomena and "
         "significance.",
     )
     location_group: str = Field(
-        "wfo",
+        default="wfo",
         pattern="^(wfo|states)$",
         description="The location group to use, either wfo or states.",
     )
     phenomena: ListOrCSVType = Field(
-        ["TO"],
+        default=["TO"],
         description="The two character VTEC phenomena(s) to include. If you "
         "provide more than one value, the length must correspond and align "
         "with the ``significance`` parameter.",
     )
     simple: str = Field(
-        "yes",
+        default="yes",
         pattern="^(yes|no)$",
         description="If yes, use a simplified geometry for the UGC "
         "counties/zones.",
     )
     significance: ListOrCSVType = Field(
-        ["W"],
+        default=["W"],
         description="The one character VTEC significance to include, if you "
         "provide more than one value, the length must correspond "
         "and align with the ``phenomena`` parameter.",
     )
     states: ListOrCSVType = Field(
-        None, description="List of states to include data for."
+        default=None, description="List of states to include data for."
     )
     sts: AwareDatetime = Field(
-        None,
+        default=None,
         description="The start timestamp in UTC. The format is ISO8601, e.g. "
         "2010-06-01T00:00Z.",
         ge=utc(1986, 1, 1),
     )
     timeopt: int = Field(
-        1,
+        default=1,
         description="The time option to use, either 1 or 2, default is 1, "
         "which uses the start and end timestamps to determine "
         "which events to include. Option 2 uses the ``at`` timestamp "
         "to determine which events to include.",
+        ge=1,
+        le=2,
     )
     wfo: ListOrCSVType = Field(
-        None, description="List of WFOs to include data for."
+        default=None, description="List of WFOs to include data for."
     )
     wfos: ListOrCSVType = Field(
-        None, description="Legacy parameter, update to use ``wfo``."
+        default=None, description="Legacy parameter, update to use ``wfo``."
     )
     year1: int = Field(
-        None,
+        default=None,
         description="The start timestamp components in UTC, if you specify a "
         "sts parameter, these are ignored.",
+        ge=1986,
     )
     year2: int = Field(
-        None,
+        default=None,
         description="The end timestamp components in UTC, if you specify a "
         "ets parameter, these are ignored.",
+        ge=1986,
     )
     year3: int = Field(
-        None,
+        default=None,
         description=(
             "The ``at`` timestamp components in UTC.  When timeopt is 2, "
             "this is used to find all events that were valid at this "
             "time."
         ),
+        ge=1986,
     )
     month1: int = Field(
-        None,
+        default=None,
         description="The start timestamp components in UTC, if you specify a "
         "sts parameter, these are ignored.",
+        ge=1,
+        le=12,
     )
     month2: int = Field(
-        None,
+        default=None,
         description="The end timestamp components in UTC, if you specify a "
         "ets parameter, these are ignored.",
+        ge=1,
+        le=12,
     )
     month3: int = Field(
-        None,
+        default=None,
         description=(
             "The ``at`` timestamp components in UTC.  When timeopt is 2, "
             "this is used to find all events that were valid at this "
             "time."
         ),
+        ge=1,
+        le=12,
     )
     day1: int = Field(
-        None,
+        default=None,
         description="The start timestamp components in UTC, if you specify a "
         "sts parameter, these are ignored.",
+        ge=1,
+        le=31,
     )
     day2: int = Field(
-        None,
+        default=None,
         description="The end timestamp components in UTC, if you specify a "
         "ets parameter, these are ignored.",
+        ge=1,
+        le=31,
     )
     day3: int = Field(
-        None,
+        default=None,
         description=(
             "The ``at`` timestamp components in UTC.  When timeopt is 2, "
             "this is used to find all events that were valid at this "
             "time."
         ),
+        ge=1,
+        le=31,
     )
     hour1: int = Field(
-        None,
+        default=0,
         description="The start timestamp components in UTC, if you specify a "
         "sts parameter, these are ignored.",
+        ge=0,
+        le=23,
     )
     hour2: int = Field(
-        None,
+        default=0,
         description="The end timestamp components in UTC, if you specify a "
         "ets parameter, these are ignored.",
+        ge=0,
+        le=23,
     )
     hour3: int = Field(
-        None,
+        default=0,
         description=(
             "The ``at`` timestamp components in UTC.  When timeopt is 2, "
             "this is used to find all events that were valid at this "
             "time."
         ),
+        ge=0,
+        le=23,
     )
     minute1: int = Field(
-        None,
+        default=0,
         description="The start timestamp components in UTC, if you specify a "
         "sts parameter, these are ignored.",
+        ge=0,
+        le=59,
     )
     minute2: int = Field(
-        None,
+        default=0,
         description="The end timestamp components in UTC, if you specify a "
         "ets parameter, these are ignored.",
+        ge=0,
+        le=59,
     )
     minute3: int = Field(
-        None,
+        default=0,
         description=(
             "The ``at`` timestamp components in UTC.  When timeopt is 2, "
             "this is used to find all events that were valid at this "
             "time."
         ),
+        ge=0,
+        le=59,
     )
     fcster: str = Field(
-        None,
+        default=None,
         description="Optional forecaster filter to limit results to events "
         "where the forecaster field matches this value (case-insensitive).",
         max_length=100,
     )
+
+    @model_validator(mode="after")
+    def validate_timeopt(self):
+        """Ensure that timeopt and times jive."""
+        if self.timeopt == 1:
+            if self.sts is None and (
+                self.year1 is None or self.month1 is None or self.day1 is None
+            ):
+                raise ValueError("Either sts or {year,month,day}1 needs set")
+            if self.ets is None and (
+                self.year2 is None or self.month2 is None or self.day2 is None
+            ):
+                raise ValueError("Either ets or {year,month,day}2 needs set")
+        elif self.timeopt == 2:
+            if self.at is None and (
+                self.year3 is None or self.month3 is None or self.day3 is None
+            ):
+                raise ValueError("Either at or {year,month,day}3 needs set")
 
 
 def dfmt(txt):
@@ -352,9 +402,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
         wfo_limiter = parse_wfo_location_group(environ, params)
         wfo_limiter2 = wfo_limiter
 
-    if environ["timeopt"] != 2:
-        if sts is None or ets is None:
-            raise IncompleteWebRequest("Missing start or end time parameters")
+    if environ["timeopt"] == 1:
         # Keep size low
         if wfo_limiter == "" and (ets - sts) > timedelta(days=366):
             raise IncompleteWebRequest("Please shorten request to <1 year.")
