@@ -2,6 +2,7 @@
 // Summary of monthly data from IEMAccess
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
+define("THROTTLE_APP", "sites/obhistory");
 require_once "../../include/sites.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
@@ -226,7 +227,7 @@ $t->content = <<<EOM
 <p>The following tables present IEM computed monthly data summaries based on
 daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network={$network}">download interface</a>
 exists for the daily summary information.  The climatology is provided by the
-nearest NCEI climate station (<a href="/sites/site.php?station={$metadata["ncei91"]}&amp;network=NCEI91">{$metadata["ncei91"]}</a>) within the current 1991-2020 
+nearest NCEI climate station (<a href="/sites/site.php?station={$metadata["ncei91"]}&amp;network=NCEI91">{$metadata["ncei91"]}</a>) within the current 1991-2020
 dataset.</p>
 
 <p><i class="bi bi-table"></i> To load shown data into Microsoft Excel,

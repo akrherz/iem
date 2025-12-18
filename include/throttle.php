@@ -7,7 +7,7 @@ require_once __DIR__ . '/memcache.php';
 if (defined("THROTTLE_APP")) {
     $key = sprintf("throttle/%s", THROTTLE_APP);
 } else {
-    $key = getClientIp();
+    $key = sprintf("throttle/%s", getClientIp());
 }
 
 // Need to do a custom memcache with BinaryProtocol
