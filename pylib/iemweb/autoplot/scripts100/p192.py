@@ -219,7 +219,7 @@ def plotter(ctx: dict):
     if varname == "wetbulb_awips":
         # approximately what AWIPS is using
         cmap_obj = get_cmap("jet")
-        ramp = np.linspace(20, 50, 30 * 5 + 1)
+        ramp = np.linspace(22, 56, 34 * 4 + 1)
         pinks = ["#ff99f5", "#ff7fff", "#f66bff"]
         pink_start = 33.2
         pink_end = 35.2
