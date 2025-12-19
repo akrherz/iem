@@ -23,7 +23,7 @@ import httpx
 import numpy as np
 from PIL import Image, PngImagePlugin
 from pyiem.mrms import make_colorramp
-from pyiem.util import archive_fetch, exponential_backoff, logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 BASEURL = "http://s-iihr77.iihr.uiowa.edu/Products/IFC7ADV"
@@ -37,13 +37,13 @@ def get_file(tmpdir, now, routes):
             break
         fn = now.strftime(f"H99999999_I000{i}_G_%d%b%Y_%H%M00").upper()
         uri = f"{BASEURL}/{fn}.out"
-        resp = exponential_backoff(httpx.get, uri, timeout=5)
-        if resp is None:
-            continue
-        if resp.status_code == 404:
-            continue
-        if resp.status_code != 200:
-            LOG.info("uri %s failed with status %s", uri, resp.status_code)
+        try:
+            resp = httpx.get(uri, timeout=10)
+            resp.raise_for_status()
+        except Exception as exp:
+            # Cut back on emails
+            loglvl = LOG.warning if utc().minute < 6 else LOG.info
+            loglvl("uri %s failed with exception %s", uri, exp)
             continue
         data = resp.text
 
