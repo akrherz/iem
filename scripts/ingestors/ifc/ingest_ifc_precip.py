@@ -11,8 +11,8 @@
 # cellsize [dec deg]: 0.004167
 # no data value: -99.0
 
-http://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
-http://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
+https://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
+https://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
 
 import subprocess
@@ -26,7 +26,7 @@ from pyiem.mrms import make_colorramp
 from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
-BASEURL = "http://s-iihr77.iihr.uiowa.edu/Products/IFC7ADV"
+BASEURL = "https://s-iihr77.iihr.uiowa.edu/Products/IFC7ADV"
 
 
 def get_file(tmpdir, now, routes):
