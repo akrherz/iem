@@ -173,7 +173,8 @@ def build_subui(mapp, fdict):
 {logmsg}
 
 <p><a href="/projects/iembot/mastodon/?testmsg"
- class="btn btn-default">Post Test Message</a>
+ class="btn btn-default"
+ aria-label="Post test message to Mastodon">Post Test Message</a>
 
 <form method="GET" name="sub">
 <input type="text" name="add" size="10">
