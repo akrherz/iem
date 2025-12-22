@@ -220,7 +220,7 @@ def add_ctx(ctx):
             index_col=None,
         )
     if df.empty:
-        raise NoDataFound("No data found for query.")
+        raise NoDataFound("No data found for initial query.")
     textra = ""
     if ctx["todate"] == "yes":
         sday = today.strftime("%m%d")
@@ -256,15 +256,14 @@ def add_ctx(ctx):
     colors = ["g", "k", "r", "orange"]
     for color, lbl in zip(colors, lbls, strict=False):
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
-        if s[lbl].isnull().all():
-            continue
-        s = s.dropna().astype("timedelta64[s]")
-        ctx["lines"][lbl] = {
-            "x": s.index.values[::-1],
-            "y": s[lbl].values[::-1].astype(int) / 24.0 / 3600.0,
-            "label": lbl,
-            "c": color,
-        }
+        if not s[lbl].isnull().all():
+            s = s.dropna().astype("timedelta64[s]")
+            ctx["lines"][lbl] = {
+                "x": s.index.values[::-1],
+                "y": s[lbl].values[::-1].astype(int) / 24.0 / 3600.0,
+                "label": lbl,
+                "c": color,
+            }
     if not ctx["lines"]:
         raise NoDataFound("No data found for query.")
 
