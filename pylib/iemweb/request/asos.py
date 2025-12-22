@@ -12,12 +12,14 @@ returned if the server is under heavy load.
 
 Changelog:
 
-- **2024-04-01** Fix recently introduced bug with time sort order.
-- **2024-03-29** This service had an intermediate bug whereby if the `tz` value
+- 2025-12-22: Clarify that the ``network`` parameter can only be a string and
+  not a list of values.
+- 2024-04-01: Fix recently introduced bug with time sort order.
+- 2024-03-29: This service had an intermediate bug whereby if the `tz` value
   was not provided, it would default to `America/Chicago` instead of `UTC`.
-- **2024-03-29** Migrated to pydantic based request validation.  Will be
+- 2024-03-29: Migrated to pydantic based request validation.  Will be
   monitoring for any issues.
-- **2024-03-14** Initial documentation release.
+- 2024-03-14: Initial documentation release.
 
 Example Usage
 -------------
@@ -154,9 +156,10 @@ class MyModel(CGIModel):
             "output."
         ),
     )
-    network: ListOrCSVType = Field(
+    network: str = Field(
         None,
         description="The network to query, defaults to all networks.",
+        pattern="^[A-Z0-9_]{2,32}$",
     )
     report_type: ListOrCSVType = Field(
         [],

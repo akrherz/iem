@@ -172,7 +172,7 @@ def plotter(ctx: dict):
         )
 
     ax.barh(hours, freq, fc="blue", align="center")
-    ax.set_yticks(range(24))
+    ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels)
     ax.grid(True)
     if ctx["scale"] == "100":

@@ -16,6 +16,7 @@
 /cgi-bin/request/coop.py?network=%22IA%22CLIMATE&stations=%22IA%220000&year1=1988&month1=1&day1=1&year2=2024&month2=12&day2=31&vars%5B%5D=high&vars%5B%5D=highc&vars%5B%5D=low&vars%5B%5D=lowc&vars%5B%5D=precip&vars%5B%5D=precipmm&model=apsim&what=view&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coopobs.py?network=IA_COOP&stations=_ALL&sts=2000-01-01&ets=2020-01-01
 /cgi-bin/request/coopobs.py?network=IA_COOP&sts=2000-01-01&ets=2020-01-01
+/cgi-bin/request/coopobs.py?network=IA_COOP&ets=2024-10-22&what=download&delim=comma&stations=%2Fproc%2Fself%2Fenviron%00.&sts=2024-10-22
 /cgi-bin/request/feel.py?year1=2024&month1=7&day1=1
 /cgi-bin/request/gis/awc_gairmets.py
 /cgi-bin/request/gis/cwas.py
@@ -59,6 +60,7 @@
 /iemre/hourly.py?lat=0&lon=0&date=2024-01-01
 /iemre/multiday.py?sdate=2025-01-01&edate=2025-01-02&lon=-140&lat=10
 /json/nwstext_center_date.py?center=KDMX
+/json/nwstext.py?product_id=202522160452-KDMX-FXUS63-AFDDMX
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01
 /json/prism.py?lat=-140&lon=35
 /json/prism.py?lat=38.64293560387211&lon=-90.3077262041419&sdate=2025-07-22&edate=2024-08-10

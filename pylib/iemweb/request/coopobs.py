@@ -38,14 +38,17 @@ network=IA_COOP&stations=AESI4&sts=2024-10-22&ets=2024-10-22&what=download\
 
 """
 
+import re
 from datetime import date
 from io import StringIO
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+STATION_RE = re.compile(r"^[A-Z0-9_]{3,8}$")
 
 
 class Schema(CGIModel):
@@ -60,7 +63,9 @@ class Schema(CGIModel):
         pattern="^(comma|tab|space)$",
     )
     network: str = Field(
-        ..., description="The network to use for station lookups."
+        ...,
+        description="The network to use for station lookups.",
+        pattern="^[A-Z0-9_]+$",
     )
     stations: ListOrCSVType = Field(
         ...,
@@ -101,6 +106,15 @@ class Schema(CGIModel):
         None,
         description="The ending day for the data request.",
     )
+
+    @field_validator("stations")
+    @classmethod
+    def station_validator(cls, value):
+        """Ensure the station is valid."""
+        for station in value:
+            if not STATION_RE.fullmatch(station):
+                raise ValueError(f"Invalid station identifier: {station}")
+        return value
 
 
 def get_cgi_stations(environ):
