@@ -559,11 +559,11 @@ function fetchAvailablePlotTypes(date, satellite, sectorType, sector) {
 }
 
 /**
- * Fetch available images from 000index.txt
+ * Fetch available images by parsing Apache directory listing
  */
 async function fetchAvailableImages(date, satellite, sectorType, sector, plotType) {
     const [year, month, day] = date.split('-');
-    const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/${plotType}/000index.txt`;
+    const url = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/${plotType}/`;
 
     try {
         const response = await fetch(url);
@@ -571,14 +571,18 @@ async function fetchAvailableImages(date, satellite, sectorType, sector, plotTyp
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const text = await response.text();
-        const lines = text.split('\n').filter(line => line.trim() && line.endsWith('.jpg'));
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = Array.from(doc.querySelectorAll('a'));
+        const jpgFiles = links
+            .map(link => link.getAttribute('href'))
+            .filter(href => href && href.match(/\.jpg$/i));
 
-        // Build full URLs and extract timestamps
-        return lines.map(filename => {
-            const fullUrl = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/${plotType}/${filename.trim()}`;
+        return jpgFiles.map(filename => {
+            const fullUrl = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/${plotType}/${filename}`;
             const timestamp = extractTimestamp(filename);
-            return { url: fullUrl, filename: filename.trim(), timestamp };
+            return { url: fullUrl, filename, timestamp };
         });
     } catch {
         return [];
