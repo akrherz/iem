@@ -577,7 +577,7 @@ async function fetchAvailableImages(date, satellite, sectorType, sector, plotTyp
         const links = Array.from(doc.querySelectorAll('a'));
         const jpgFiles = links
             .map(link => link.getAttribute('href'))
-            .filter(href => href && href.match(/\.jpg$/i));
+            .filter(href => href?.match(/\.jpg$/i));
 
         return jpgFiles.map(filename => {
             const fullUrl = `${BASE_URL}/${year}/${month}/${day}/cod/sat/${satellite}/${sectorType}/${sector}/${plotType}/${filename}`;
