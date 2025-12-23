@@ -151,7 +151,7 @@ $t->content = <<<EOM
     <div class="row isusm-data-template ddisplay"
     style="display:none; min-height: 0px; height: 100%; width: 100%;">
        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}" aria-label="Open site mainpage in new tab"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:{$YEAR}::_r:86.png"><i class="bi bi-thermometer-half" aria-hidden="true"></i> 4in Soil Temps</button>

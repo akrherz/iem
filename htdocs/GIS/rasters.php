@@ -123,7 +123,8 @@ The URL format is like so:</p>
         <input id="ts" type="text" name="dstr" value="201710250000" class="form-control">
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Generate</button>
+        <button type="submit" class="btn btn-primary"
+         aria-label="Generate raster">Generate</button>
     </div>
 </form>
 

@@ -12,12 +12,12 @@ returned if the server is under heavy load.
 
 Changelog:
 
-- **2024-04-01** Fix recently introduced bug with time sort order.
-- **2024-03-29** This service had an intermediate bug whereby if the `tz` value
+- 2024-04-01: Fix recently introduced bug with time sort order.
+- 2024-03-29: This service had an intermediate bug whereby if the `tz` value
   was not provided, it would default to `America/Chicago` instead of `UTC`.
-- **2024-03-29** Migrated to pydantic based request validation.  Will be
+- 2024-03-29: Migrated to pydantic based request validation.  Will be
   monitoring for any issues.
-- **2024-03-14** Initial documentation release.
+- 2024-03-14: Initial documentation release.
 
 Example Usage
 -------------
@@ -27,6 +27,13 @@ Mason City, Iowa.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py\
 ?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
+
+Return all observations for the UTC date on 20 May 2020 for ASOS stations in
+Iowa and Illinois.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py\
+?data=all&network=IA_ASOS,IL_ASOS&sts=2020-05-20T00:00:00Z&\
+ets=2020-05-21T00:00:00Z
 
 """
 
@@ -43,6 +50,7 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb import error_log
 
+NETWORK_RE = re.compile(r"^[A-Z0-9_]{3,32}$")
 STATION_RE = re.compile(r"^[A-Z0-9_]{3,4}$")
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -91,7 +99,7 @@ class MyModel(CGIModel):
     """Request Model."""
 
     data: ListOrCSVType = Field(
-        None,
+        default=None,
         description=(
             "The data columns to return, defaults to all.  The available "
             "options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
@@ -102,45 +110,45 @@ class MyModel(CGIModel):
         ),
     )
     direct: bool = Field(
-        False,
+        default=False,
         description=(
             "If set to 'yes', the data will be directly downloaded as a file."
         ),
     )
     elev: bool = Field(
-        False,
+        default=False,
         description=(
             "If set to 'yes', the elevation (m) of the station will be "
             "included in the output."
         ),
     )
     ets: AwareDatetime = Field(
-        None,
+        default=None,
         description=("The end time of the data request."),
     )
     format: str = Field(
-        "onlycomma",
+        default="onlycomma",
         description=(
             "The format of the data, defaults to onlycomma.  The available "
             "options are: onlycomma, tdf."
         ),
     )
     hours: int = Field(
-        None,
+        default=None,
         description=(
             "The number of hours of data to return prior to the current "
             "timestamp.  Can not be more than 24 if no stations are specified."
         ),
     )
     latlon: bool = Field(
-        False,
+        default=False,
         description=(
             "If set to 'yes', the latitude and longitude of the station will "
             "be included in the output."
         ),
     )
     missing: str = Field(
-        "M",
+        default="M",
         description=(
             "How to represent missing values, defaults to M.  Other options "
             "are 'null' and 'empty'."
@@ -148,25 +156,25 @@ class MyModel(CGIModel):
         pattern="^(M|null|empty)$",
     )
     nometa: bool = Field(
-        False,
+        default=False,
         description=(
             "If set to 'yes', the column headers will not be included in the "
             "output."
         ),
     )
     network: ListOrCSVType = Field(
-        None,
+        default=None,
         description="The network to query, defaults to all networks.",
     )
     report_type: ListOrCSVType = Field(
-        [],
+        default=[],
         description=(
             "The report type to query, defaults to all.  The available "
             "options are: 1 (HFMETAR), 3 (Routine), 4 (Specials)."
         ),
     )
     station: ListOrCSVType = Field(
-        None,
+        default=None,
         description=(
             "The station identifier to query, defaults to all stations and "
             "if you do not specify any stations, you can only request 24 "
@@ -174,11 +182,11 @@ class MyModel(CGIModel):
         ),
     )
     sts: AwareDatetime = Field(
-        None,
+        default=None,
         description=("The start time of the data request."),
     )
     trace: str = Field(
-        "0.0001",
+        default="0.0001",
         description=(
             "How to represent trace values, defaults to 0.0001.  Other "
             "options are 'null' and 'empty'."
@@ -186,7 +194,7 @@ class MyModel(CGIModel):
         pattern="^(0.0001|null|empty|T)$",
     )
     tz: str = Field(
-        "UTC",
+        default="UTC",
         description=(
             "The timezone to use for the request timestamps (when not "
             "providing already tz-aware ``sts`` and ``ets`` values) and the "
@@ -196,70 +204,70 @@ class MyModel(CGIModel):
         ),
     )
     year1: int = Field(
-        None,
+        default=None,
         description=(
             "The year of the start time, defaults to the time zone provided "
             "by `tzname`. If `sts` is not provided."
         ),
     )
     month1: int = Field(
-        None,
+        default=None,
         description=(
             "The month of the start time, defaults to the time zone provided "
             "by `tzname`. If `sts` is not provided."
         ),
     )
     day1: int = Field(
-        None,
+        default=None,
         description=(
             "The day of the start time, defaults to the time zone provided by "
             "`tzname`. If `sts` is not provided."
         ),
     )
     hour1: int = Field(
-        0,
+        default=0,
         description=(
             "The hour of the start time, defaults to the time zone provided "
             "by `tzname`. If `sts` is not provided."
         ),
     )
     minute1: int = Field(
-        0,
+        default=0,
         description=(
             "The minute of the start time, defaults to the time zone provided "
             "by `tzname`. If `sts` is not provided."
         ),
     )
     year2: int = Field(
-        None,
+        default=None,
         description=(
             "The year of the end time, defaults to the time zone provided by "
             "`tzname`. If `ets` is not provided."
         ),
     )
     month2: int = Field(
-        None,
+        default=None,
         description=(
             "The month of the end time, defaults to the time zone provided by "
             "`tzname`. If `ets` is not provided."
         ),
     )
     day2: int = Field(
-        None,
+        default=None,
         description=(
             "The day of the end time, defaults to the time zone provided by "
             "`tzname`. If `ets` is not provided."
         ),
     )
     hour2: int = Field(
-        0,
+        default=0,
         description=(
             "The hour of the end time, defaults to the time zone provided by "
             "`tzname`. If `ets` is not provided."
         ),
     )
     minute2: int = Field(
-        0,
+        default=0,
         description=(
             "The minute of the end time, defaults to the time zone provided "
             "by `tzname`. If `ets` is not provided."
@@ -285,6 +293,15 @@ class MyModel(CGIModel):
         for station in value:
             if not STATION_RE.fullmatch(station):
                 raise ValueError(f"Invalid station identifier: {station}")
+        return value
+
+    @field_validator("network")
+    @classmethod
+    def network_validator(cls, value):
+        """Ensure the network is valid."""
+        for network in value:
+            if not NETWORK_RE.fullmatch(network):
+                raise ValueError(f"Invalid network identifier: {network}")
         return value
 
     @field_validator("report_type", mode="after")

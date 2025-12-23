@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.exceptions import BadWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -66,7 +67,10 @@ def application(environ, start_response):
 
     pid = environ["product_id"]
     tokens = pid.split("-")
-    utc = datetime.strptime(tokens[0], "%Y%m%d%H%M")
+    try:
+        utc = datetime.strptime(tokens[0], "%Y%m%d%H%M")
+    except ValueError as exp:
+        raise BadWebRequest("Invalid timestamp") from exp
     utc = utc.replace(tzinfo=timezone.utc)
     root = {"products": []}
 

@@ -85,7 +85,8 @@ given UTC date with links to download what is available.</p>
 
 <form name="ds" class="d-inline-flex gap-2 align-items-center">
 %(ys)s %(ms)s %(ds)s
-<button type="submit" class="btn btn-primary btn-sm">Select Date</button>
+<button type="submit" class="btn btn-primary btn-sm"
+ aria-label="Select date">Select Date</button>
 </form>
 """
 SOURCES = {

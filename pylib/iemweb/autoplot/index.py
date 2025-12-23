@@ -144,7 +144,8 @@ def map_select_widget(network, name):
     """Generate the HTML for a wiz bang popup."""
     return f"""
 &nbsp; <button type="button" id="button_{network}_{name}" data-state="0"
-onClick="mapFactory('{network}', '{name}');">Show Map</button>
+onClick="mapFactory('{network}', '{name}');"
+aria-label="Show map for {network} {name}">Show Map</button>
 <div style="display: none; width: 100%; height: 640px;"
  id="map_{network}_{name}_wrap">
 <br />Click dot to select in form above. <strong>Key</strong>
@@ -756,13 +757,15 @@ def generate_form(apid, fdict, headers, cookies):
                         {formhtml}
                     </div>
                     <div class="mt-4 d-flex gap-2 flex-wrap">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary"
+                        aria-label="Generate plot">
                                      <i class="bi bi-graph-up me-1"
                                          aria-hidden="true"></i>
                             Generate Plot
                         </button>
                         <button type="submit" name="_cb" value="1"
-                                class="btn btn-outline-warning">
+                                class="btn btn-outline-warning"
+                                aria-label="Force update and bypass cache">
                                      <i class="bi bi-arrow-repeat me-1"
                                          aria-hidden="true"></i>
                             Force Update (bypass cache)
@@ -786,18 +789,21 @@ def generate_form(apid, fdict, headers, cookies):
     </div>
     <div class="card-body">
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{res["imguri"]}.txt" class="btn btn-primary">
+            <a href="{res["imguri"]}.txt" class="btn btn-primary"
+            aria-label="Download direct text link">
                 <i class="bi bi-file-text me-1" aria-hidden="true"></i>
                 Direct Text Link
             </a>
         """
     if meta.get("data"):
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.csv" class="btn btn-primary">
+            <a href="{res["imguri"]}.csv" class="btn btn-primary"
+            aria-label="Download CSV data">
                 <i class="bi bi-download me-1" aria-hidden="true"></i>
                 CSV Data
             </a>
-            <a href="{res["imguri"]}.xlsx" class="btn btn-success">
+            <a href="{res["imguri"]}.xlsx" class="btn btn-success"
+            aria-label="Download Excel file">
                      <i class="bi bi-file-earmark-spreadsheet me-1"
                          aria-hidden="true"></i>
                      Excel Download
@@ -805,14 +811,16 @@ def generate_form(apid, fdict, headers, cookies):
         """
     if meta["maptable"]:
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.geojson" class="btn btn-info">
+            <a href="{res["imguri"]}.geojson" class="btn btn-info"
+            aria-label="Download GeoJSON file">
                 <i class="bi bi-map me-1" aria-hidden="true"></i>
                 GeoJSON
             </a>
         """
     if meta.get("raster"):
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.geotiff" class="btn btn-warning">
+            <a href="{res["imguri"]}.geotiff" class="btn btn-warning"
+            aria-label="Download GeoTIFF file">
                 <i class="bi bi-globe me-1" aria-hidden="true"></i>
                 GeoTIFF
             </a>
@@ -988,14 +996,16 @@ def generate(fdict, headers, cookies):
                 Feel free to use these generated graphics in whatever way
                 you wish.</p>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="/plotting/auto/"
-                       class="btn btn-outline-secondary btn-sm">
+                          <a href="/plotting/auto/"
+                              class="btn btn-outline-secondary btn-sm"
+                              aria-label="Reset app">
                                 <i class="bi bi-arrow-repeat me-1"
                                     aria-hidden="true"></i>
                         Reset App
                     </a>
-                    <a href="/explorer/"
-                       class="btn btn-outline-primary btn-sm">
+                          <a href="/explorer/"
+                              class="btn btn-outline-primary btn-sm"
+                              aria-label="Open IEM Explorer (Simplified)">
                         <i class="bi bi-map me-1" aria-hidden="true"></i>
                         IEM Explorer (Simplified)
                     </a>
@@ -1025,7 +1035,8 @@ def generate(fdict, headers, cookies):
                         </div>
                         <div class="col-12 col-lg-4">
                             <button type="submit"
-                                    class="btn btn-primary w-100">
+                                    class="btn btn-primary w-100"
+                                    aria-label="Select plot type">
                                           <i class="bi bi-arrow-right me-1"
                                               aria-hidden="true"></i>
                                 Select Plot Type
