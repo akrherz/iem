@@ -804,7 +804,7 @@ nopts = [
         "id": 232,
         "label": (
             "ASOS/METAR Time Series during NWS Alert Headline "
-            "(Blizzard / Fire / Wind / Heat / Wind Chill)"
+            "(Blizzard / Fire / Fog / Wind / Heat / Wind Chill)"
         ),
     },
     {

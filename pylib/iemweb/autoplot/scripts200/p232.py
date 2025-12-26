@@ -19,6 +19,7 @@ from pyiem.plot import figure
 
 PDICT = {
     "BZ": "Blizzard Warning",
+    "FG": "Dense Fog Advisory",
     "FW": "Fire Weather Warning",
     "HT": "Heat Advisory / Extreme Heat Warning",
     "WC": "Wind Chill Advisory/Warning",
@@ -28,6 +29,7 @@ DOMAIN = {
     "BZ": [
         "BZ.W",
     ],
+    "FG": ["FG.Y"],
     "FW": ["FW.W"],
     "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W", "EC.Y", "EC.W"],
     "HT": ["EH.W", "HT.Y", "XH.W"],
@@ -71,16 +73,15 @@ def get_description():
     return desc
 
 
-def plot(ax: Axes, obs, col):
+def plot_column(ax: Axes, obs, col, ylabel):
     """Plot simple."""
     ax.scatter(obs.utc_valid, obs[col], marker="o", s=40, color="b", zorder=3)
-    ax.set_ylabel("Feels Like Temperature [°F]", color="b")
+    ax.set_ylabel(ylabel, color="b")
 
 
 def plot_bz(ax: Axes, obs):
     """Do the magic with plotting for BZ."""
-    ax.scatter(obs.utc_valid, obs.vsby, marker="o", s=40, color="b", zorder=2)
-    ax.set_ylabel("Visibility [mile]", color="b")
+    plot_column(ax, obs, "vsby", "Visibility [miles]")
     ax2 = ax.twinx()
     ax2.scatter(
         obs.utc_valid, obs.max_wind, marker="o", s=40, color="r", zorder=2
@@ -232,7 +233,18 @@ def plotter(ctx: dict):
         )
     elif ctx["mode"] in ["WC", "HT"]:
         obs = obs[pd.notna(obs["feel"])]
-        plot(ax, obs, "feel")
+        plot_column(ax, obs, "feel", "Feels Like Temperature [°F]")
+    elif ctx["mode"] == "FG":
+        obs = obs[pd.notna(obs["vsby"])]
+        plot_column(ax, obs, "vsby", "Visibility [miles]")
+        ax.axhline(0.25, linestyle="-.", color="b")
+        ax.annotate(
+            "0.25",
+            xy=(1.01, 0.25),
+            xycoords=("axes fraction", "data"),
+            ha="left",
+            color="b",
+        )
     elif ctx["mode"] in ["FW", "WI"]:
         sknt = obs[pd.notna(obs["sknt"])]
         ax.bar(
