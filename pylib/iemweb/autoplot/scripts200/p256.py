@@ -163,7 +163,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
             params=params,
         )
     # If we have any snow_src values, we should go fishing for that data
-    if stations["snow_src"].notnull().any():
+    if stations["snow_src"].notnull().any() and ctx["date"].year >= 2002:
         # 12z to 12z snow
         ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
         sts = ets - pd.Timedelta("24 hours")
