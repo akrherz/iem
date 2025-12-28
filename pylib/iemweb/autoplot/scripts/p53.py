@@ -70,16 +70,16 @@ def get_description():
             label="Select variable to plot:",
         ),
         dict(
-            type="int",
+            type="float",
             name="t1",
             default=0,
             label=f"Threshold #1 (lowest) {tu}",
         ),
-        dict(type="int", name="t2", default=32, label=f"Threshold #2 {tu}"),
-        dict(type="int", name="t3", default=50, label=f"Threshold #3 {tu}"),
-        dict(type="int", name="t4", default=70, label=f"Threshold #4 {tu}"),
+        dict(type="float", name="t2", default=32, label=f"Threshold #2 {tu}"),
+        dict(type="float", name="t3", default=50, label=f"Threshold #3 {tu}"),
+        dict(type="float", name="t4", default=70, label=f"Threshold #4 {tu}"),
         dict(
-            type="int",
+            type="float",
             name="t5",
             default=90,
             label=f"Threshold #5 (highest) {tu}",
@@ -102,21 +102,21 @@ def plotter(ctx: dict):
     arr.sort()
     if arr != [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"], ctx["t5"]]:
         raise NoDataFound("Thresholds must be in ascending order")
-    params = {
-        "station": ctx["zstation"],
-        "t1": ctx["t1"],
-        "t2": ctx["t2"],
-        "t3": ctx["t3"],
-        "t4": ctx["t4"],
-        "t5": ctx["t5"],
-    }
-    t1 = ctx["t1"]
-    t2 = ctx["t2"]
-    t3 = ctx["t3"]
-    t4 = ctx["t4"]
-    t5 = ctx["t5"]
     v = ctx["var"]
     cst = CAST.get(v, "float")
+    t1 = float(ctx["t1"]) if cst == "float" else int(ctx["t1"])
+    t2 = float(ctx["t2"]) if cst == "float" else int(ctx["t2"])
+    t3 = float(ctx["t3"]) if cst == "float" else int(ctx["t3"])
+    t4 = float(ctx["t4"]) if cst == "float" else int(ctx["t4"])
+    t5 = float(ctx["t5"]) if cst == "float" else int(ctx["t5"])
+    params = {
+        "station": ctx["zstation"],
+        "t1": t1,
+        "t2": t2,
+        "t3": t3,
+        "t4": t4,
+        "t5": t5,
+    }
     mlim = f"and {v} is not null" if ctx["missing"] == "no" else ""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(

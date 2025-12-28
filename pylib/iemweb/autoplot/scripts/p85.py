@@ -1,7 +1,7 @@
 """
 Based on IEM archives of METAR reports, this
-application produces the hourly frequency of a temperature at or
-above or below a temperature thresold.  This application tries to only
+application produces the hourly frequency of a given variable at or
+above or below a threshold.  This application tries to only
 consider the top of the hour reports.
 """
 
@@ -68,7 +68,7 @@ def get_description():
             "options": PDICT3,
         },
         dict(
-            type="int",
+            type="float",
             name="t",
             default=80,
             label="Threshold (units of variable):",
@@ -129,7 +129,7 @@ def plotter(ctx: dict):
             params={
                 "station": station,
                 "month": month,
-                "thres": thres,
+                "thres": thres if varname not in CASTS else int(thres),
                 "tzname": tzname,
             },
             index_col="hour",
