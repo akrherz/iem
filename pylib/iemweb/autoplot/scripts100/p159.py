@@ -48,9 +48,9 @@ MDICT = {
 }
 
 METRICS = {
-    "tmpf": "Air Temp (F)",
-    "dwpf": "Dew Point Temp (F)",
-    "feel": "Feels Like Temp (F)",
+    "tmpf": "Air Temp (°F)",
+    "dwpf": "Dew Point Temp (°F)",
+    "feel": "Feels Like Temp (°F)",
     "mslp": "Mean Sea Level Pressure (mb)",
     "alti": "Pressure Altimeter (inHg)",
     "relh": "Relative Humidity (%)",
@@ -59,9 +59,9 @@ METRICS = {
     "vsby": "Visibility (miles)",
 }
 UNITS = {
-    "tmpf": "F",
-    "dwpf": "F",
-    "feel": "F",
+    "tmpf": "°F",
+    "dwpf": "°F",
+    "feel": "°F",
     "relh": "%",
     "sped": "mph",
     "gust": "mph",
@@ -99,10 +99,10 @@ def get_description():
             options=DIRS,
         ),
         dict(
-            type="int",
+            type="float",
             name="thres",
             default=65,
-            label="Threshold (F, %, mph, inHg, mb):",
+            label="Threshold (°F, %, mph, inHg, mb):",
         ),
         dict(
             type="select",
@@ -200,7 +200,7 @@ def set_df(ctx):
                 """WITH hourly as (
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
-            case when {dbvarname}::int {opp} :t then 1 else 0 end as hit
+            case when {dbvarname} {opp} :t then 1 else 0 end as hit
             from alldata where station = :station and report_type = 3 and
             valid > :start)
 
