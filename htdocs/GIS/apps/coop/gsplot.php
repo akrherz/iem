@@ -98,7 +98,7 @@ $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
 $stname = iem_pg_prepare($dbconn,
     "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
-        select ST_Extent(the_geom) as g from states 
+        select ST_Extent(the_geom) as g from states
         where state_abbr = $1
         ) as foo");
 $rs = pg_execute($dbconn, $stname, Array($state));
@@ -137,7 +137,7 @@ $dy = ($map->extent->maxy - $map->extent->miny) / 25;
 $dx = ($map->extent->maxx - $map->extent->minx) / 25;
 
 $stname = iem_pg_prepare($coopdb, <<<EOM
-    SELECT station, 
+    SELECT station,
     sum(precip) as s_prec,
     sum(gddxx(32, 86, high, low)) as s_gdd32,
     sum(gddxx(41, 86, high, low)) as s_gdd41,
@@ -152,7 +152,7 @@ $stname = iem_pg_prepare($coopdb, <<<EOM
     max(high) as s_maxtemp from alldata_{$state}
     WHERE day >= $1 and day <= $2
     and substr(station, 3, 4) != '0000' and substr(station, 3, 1) != 'C'
-    GROUP by station 
+    GROUP by station
     ORDER by station ASC
 EOM
 );
@@ -186,7 +186,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
     // Value UL
     $pt = new PointObj();
-    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0, "");
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     $pt->draw(
         $map,
         $snet,
