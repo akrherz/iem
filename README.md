@@ -15,5 +15,5 @@ repositories found here and how the fit together.
 
 ## Requirements
 
-    - Python 3.10+ (CI tests with 3.13)
+    - Python 3.10+ (CI tests with 3.14)
     - PHP 8
