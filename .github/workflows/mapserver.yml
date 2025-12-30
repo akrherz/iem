@@ -29,9 +29,8 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-            - defaults
         create-args: >-
-          python=3.13
+          python=3.14
         environment-name: prod
         cache-environment: true
 

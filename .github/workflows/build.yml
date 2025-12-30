@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.13"]
+        PYTHON_VERSION: ["3.14"]
         WITH_TEST_DATA: ["test_data", "no_test_data"]
         TEST_WEB: ["YES", "NO"]
         exclude:
           # This combination is not all that useful
-          - PYTHON_VERSION: "3.13"
+          - PYTHON_VERSION: "3.14"
             TEST_WEB: "NO"
             WITH_TEST_DATA: "no_test_data"
     env:
@@ -59,7 +59,6 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-            - defaults
         create-args: >-
           python=${{ env.PYTHON_VERSION }}
         environment-name: prod
@@ -113,7 +112,7 @@ jobs:
       if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
-        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py  
+        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py
 
     - name: Run mod_wsgi smoke test
       if: ${{ matrix.TEST_WEB == 'YES' }}

@@ -27,7 +27,7 @@ def main():
     utcnow = utc().replace(minute=0)
     with httpx.Client() as client, tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
-        resp = client.get(REAL_EARTH)
+        resp = client.get(REAL_EARTH, timeout=60)
         resp.raise_for_status()
         with open("temp.geojson", "w") as fp:
             fp.write(resp.text)
