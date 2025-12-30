@@ -552,7 +552,7 @@ if (in_array("bufferedlsr", $layers)) {
     $blc0 = new ClassObj($blsr);
     $blc0->name = "Buffered LSRs ({$lsrbuffer} km)";
     $blc0s0 = new StyleObj($blc0);
-    $blc0s0->symbolname = 'circle';
+    //$blc0s0->set("symbolname", "circle");
     $blc0s0->color->setRGB(0, 0, 0);
     $blc0s0->outlinecolor->setRGB(50, 50, 50);
     $blsr->draw($map, $img);
@@ -604,10 +604,9 @@ if (isset($_REQEST["pid"])) {
 
     $wcc0 = new ClassObj($wc);
     $wcc0->name = "Product";
-    $wcc0s0 = new StyleObj($wcc0);
+    $wcc0s0 = new StyleObj($wcc0, 'circle');
     $wcc0s0->color->setRGB(255, 0, 0);
     $wcc0s0->size = 3;
-    $wcc0s0->symbolname = 'circle';
     $wc->draw($map, $img);
 }
 
@@ -633,7 +632,7 @@ if (array_key_exists("vtec", $_REQUEST) && in_array("cbw", $layers)) {
     $wcc0s0 = new StyleObj($wcc0);
     $wcc0s0->color->setRGB(255, 0, 0);
     $wcc0s0->width = 3;
-    $wcc0s0->symbol = 'circle';
+    //$wcc0s0->symbol = 'circle';
     $wc->draw($map, $img);
 }
 
