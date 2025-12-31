@@ -22,10 +22,12 @@ $render_vars = [
     "high" => "High Temperature",
     "high_depart" => "High Temperature Departure",
     "high_record" => "Record High Temperature",
+    "high_record_years" => "Record High Temperature Years",
     "high_normal" => "Normal High Temperature",
     "low" => "Low Temperature",
     "low_depart" => "Low Temperature Departure",
     "low_record" => "Record Low Temperature",
+    "low_record_years" => "Record Low Temperature Years",
     "low_normal" => "Normal Low Temperature",
     "precip" => "Precipitation",
     "precip_month" => "Precipitation this month",
@@ -37,6 +39,7 @@ $render_vars = [
     "precip_dec1" => "Precipitation since December 1",
     "precip_dec1_normal" => "Precipitation since December 1 Normal",
     "precip_record" => "Precipitation Record",
+    "precip_record_years" => "Precipitation Record Years",
     "precip_month_normal" => "Precipitation this month normal",
     "snow" => "Snowfall",
     "snowdepth" => "Snow Depth [inch]",
@@ -46,6 +49,7 @@ $render_vars = [
     "snow_jul1_depart" => "Snowfall since July 1 Departure",
     "snow_dec1" => "Snowfall since December 1",
     "snow_record" => "Snowfall Record",
+    "snow_record_years" => "Snowfall Record Years",
     "resultant_wind_speed" => "Resultant Wind Speed [mph]",
     "resultant_wind_direction" => "Resultant Wind Direction",
     "highest_wind_speed" => "Highest Wind Speed [mph]",
@@ -63,7 +67,7 @@ $render_select = make_select("renderattr", $valid_var, $render_vars, "", "form-s
 
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '10.5.0';
+$OL = '10.7.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
@@ -72,7 +76,7 @@ EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='climap.js?v=8'></script>
+<script src='climap.js?v=9'></script>
 EOM;
 
 $t->content = <<<EOM

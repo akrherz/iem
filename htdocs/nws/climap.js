@@ -74,11 +74,14 @@ function updateDate() {
  */
 const vectorStyleFunction = feature => {
     let style = null;
-    const value = feature.get(renderattr);
+    let value = feature.get(renderattr);
     let color = '#FFFFFF';
     const outlinecolor = '#000000';
     if (value !== 'M') {
-        if (renderattr.indexOf('depart') > -1) {
+        if (renderattr.indexOf("years") > -1) {
+            value = value.join(",");
+        }
+        else if (renderattr.indexOf('depart') > -1) {
             if (renderattr.indexOf('high') > -1 || renderattr.indexOf('low') > -1) {
                 if (value > 0) {
                     color = '#FF0000';
@@ -162,14 +165,14 @@ function showPopover(feature, coordinate) {
             <div class="row g-1">
                 <div class="col-6"><small><strong>High:</strong> ${feature.get('high')}</small></div>
                 <div class="col-6"><small>Norm: ${feature.get('high_normal')}</small></div>
-                <div class="col-6"><small>Rec: ${feature.get('high_record')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get('high_record')} (${feature.get('high_record_years').join(',')})</small></div>
                 <div class="col-6"><small><strong>Low:</strong> ${feature.get('low')}</small></div>
                 <div class="col-6"><small>Norm: ${feature.get('low_normal')}</small></div>
-                <div class="col-6"><small>Rec: ${feature.get('low_record')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get('low_record')} (${feature.get('low_record_years').join(',')})</small></div>
                 <div class="col-6"><small><strong>Precip:</strong> ${feature.get('precip')}</small></div>
-                <div class="col-6"><small>Rec: ${feature.get('precip_record')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get('precip_record')} (${feature.get('precip_record_years').join(',')})</small></div>
                 <div class="col-6"><small><strong>Snow:</strong> ${feature.get('snow')}</small></div>
-                <div class="col-6"><small>Rec: ${feature.get('snow_record')}</small></div>
+                <div class="col-6"><small>Rec: ${feature.get('snow_record')} (${feature.get('snow_record_years').join(',')})</small></div>
             </div>
         </div>
     `;
