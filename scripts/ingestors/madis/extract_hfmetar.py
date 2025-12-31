@@ -121,7 +121,28 @@ def process(ncfn):
     stations = chartostring(data["stationId"][:])
     presentwxs = chartostring(data["presWx"][:])
     skycs = chartostring(data["skyCvr"][:])
-    autoremarks = chartostring(data["autoRemark"][:])
+    try:
+        autoremarks = chartostring(data["autoRemark"][:])
+    except UnicodeDecodeError:
+        LOG.warning("Encountered bad unicode in autoRemark, %s", ncfn)
+        autoremarks = []
+        for i, station in enumerate(stations):
+            try:
+                autoremarks.append(chartostring(data["autoRemark"][i]))
+            except UnicodeDecodeError:
+
+                def safe_decode(val):
+                    if np.ma.is_masked(val):
+                        return ""
+                    return val.decode("ascii", errors="replace")
+
+                LOG.warning(
+                    "Bad %s entry of %s %s",
+                    i,
+                    station,
+                    "".join(safe_decode(x) for x in data["autoRemark"][i]),
+                )
+                autoremarks.append("")
     opremarks = chartostring(data["operatorRemark"][:])
 
     def decision(i, fieldname, tolerance):
