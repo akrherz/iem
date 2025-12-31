@@ -39,92 +39,108 @@ from pyiem.windrose_utils import windrose
 
 
 class Schema(CGIModel):
-    bins: str = Field(None, description="Wind Speed Bins separated by comma")
+    bins: str = Field(
+        default=None, description="Wind Speed Bins separated by comma"
+    )
     conv: str = Field(
-        "from",
+        default="from",
         description=(
             "Wind Convention, either from (meteorology) or to (engineering)"
         ),
     )
     dpi: int = Field(
-        100, description="Image Dots per inch (DPI)", ge=10, le=1000
+        default=100, description="Image Dots per inch (DPI)", ge=10, le=1000
     )
     ets: AwareDatetime = Field(
-        None,
+        default=None,
         description=(
             "End time with timezone included, otherwise "
             "{year,month,day,hour,minute}2 values used"
         ),
     )
     fmt: str = Field(
-        "png",
+        default="png",
         description="Output image format, one of png, pdf, svg",
     )
     hourlimit: bool = Field(
-        False,
+        default=False,
         description="Limit the data to the hour provided",
     )
     hourrangelimit: bool = Field(
-        False,
+        default=False,
         description="Limit the data to the hour range provided",
     )
     justdata: bool = Field(
-        False,
+        default=False,
         description="Return data table instead of plot",
     )
     level: int = Field(
-        None,
+        default=None,
         description="In the case of RAOB data, the hPa level to use",
         ge=0,
         le=1050,
     )
     limit_by_doy: bool = Field(
-        False,
+        default=False,
         description="Limit the data to the day of year range provided",
     )
     monthlimit: bool = Field(
-        False,
+        default=False,
         description="Limit the data to the start month provided",
     )
     network: str = Field(
-        None,
+        default=None,
         description="Network Identifier, best to provide otherwise guessed",
     )
     nsector: int = Field(
-        36,
+        default=36,
         description="Number of sectors to use for windrose plot",
         ge=4,
         le=180,
     )
     staticrange: int = Field(
-        None,
+        default=None,
         description="Static range for windrose plot",
         ge=1,
         le=100,
     )
     station: str = Field(..., description="Station Identifier")
     sts: AwareDatetime = Field(
-        None,
+        default=None,
         description=(
             "Start time with timezone included, otherwise "
             "{year,month,day,hour,minute}1 values used"
         ),
     )
     units: str = Field(
-        "mph",
+        default="mph",
         description="Units to use for speed, one of mph, kts, mps, kph",
         pattern="^(mph|kts|mps|kph)$",
     )
-    year1: int = Field(1900, description="Start Year, if sts not provided")
-    month1: int = Field(1, description="Start Month, if sts not provided")
-    day1: int = Field(1, description="Start Day, if sts not provided")
-    hour1: int = Field(0, description="Start Hour, if sts not provided")
-    minute1: int = Field(0, description="Start Minute, if sts not provided")
-    year2: int = Field(2050, description="End Year, if ets not provided")
-    month2: int = Field(1, description="End Month, if ets not provided")
-    day2: int = Field(1, description="End Day, if ets not provided")
-    hour2: int = Field(0, description="End Hour, if ets not provided")
-    minute2: int = Field(0, description="End Minute, if ets not provided")
+    year1: int = Field(
+        default=1900, description="Start Year, if sts not provided"
+    )
+    month1: int = Field(
+        default=1, description="Start Month, if sts not provided"
+    )
+    day1: int = Field(default=1, description="Start Day, if sts not provided")
+    hour1: int = Field(
+        default=0, description="Start Hour, if sts not provided"
+    )
+    minute1: int = Field(
+        default=0, description="Start Minute, if sts not provided"
+    )
+    year2: int = Field(
+        default=2050, description="End Year, if ets not provided"
+    )
+    month2: int = Field(
+        default=1, description="End Month, if ets not provided"
+    )
+    day2: int = Field(default=1, description="End Day, if ets not provided")
+    hour2: int = Field(default=0, description="End Hour, if ets not provided")
+    minute2: int = Field(
+        default=0, description="End Minute, if ets not provided"
+    )
 
     @model_validator(mode="after")
     def validator_raob_request(self):
@@ -236,7 +252,7 @@ def application(environ, start_response):
             float(v) for v in environ["bins"].split(",") if v.strip() != ""
         ]
         # Ensure that the bins are in ascending order and unique
-        bins = sorted(set(bins))
+        bins = sorted(set(bins))[:6]
     res = windrose(
         station,
         database=dbname,

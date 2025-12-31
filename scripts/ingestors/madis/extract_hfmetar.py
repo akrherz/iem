@@ -137,8 +137,10 @@ def process(ncfn):
                     return val.decode("ascii", errors="replace")
 
                 LOG.warning(
-                    "Bad %s entry of %s %s",
+                    "Bad recNum:%s @%s entry for %s %s",
                     i,
+                    datetime(1970, 1, 1)
+                    + timedelta(seconds=data["observationTime"][i]),
                     station,
                     "".join(safe_decode(x) for x in data["autoRemark"][i]),
                 )
