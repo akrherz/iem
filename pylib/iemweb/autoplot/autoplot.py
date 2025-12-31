@@ -26,7 +26,6 @@ from pyiem.reference import ISO8601
 from pyiem.util import get_autoplot_context, utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
-from six import string_types
 
 from iemweb import error_log
 from iemweb.autoplot import import_script
@@ -66,7 +65,7 @@ def parser(cgistr: str) -> dict:
         if token2[1] == " ":  # Undo hack above
             token2[1] = ""
         if token2[0] in data:
-            if isinstance(data[token2[0]], string_types):
+            if isinstance(data[token2[0]], str):
                 data[token2[0]] = [data[token2[0]]]
             data[token2[0]].append(token2[1])
         else:

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
@@ -16,6 +16,14 @@ $t->content = <<<EOM
 data around within the computing infrastructure.  Anybody is eligable to request
 a LDM feed, so to get products pushed to you without any fuss!  This page details
 the setup of the LDM feed.</p>
+
+<h3>Looking for low latency ASOS data? Read this first!</h3>
+
+<p>The IEM LDM feed offers no magic in this space and you are not going to get
+live ASOS data via this feed.  You likely want to read this news item about
+<a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1469">Wagering
+on ASOS temperatures</a> before contacting daryl about your "research" needs
+for this data via LDM.</p>
 
 <div class="row">
     <div class="col-lg-8">
@@ -49,12 +57,12 @@ the setup of the LDM feed.</p>
                 <p>You don't have to complete this step, but you can keep up-to-date with
                 IEM news and events with the IEM Daily Bulletin. You can sign up for it
                 <a href="https://groups.google.com/g/iem-dailyb" target="_blank">here</a>.
-                If this service generates enough interest, I will set up a dedicated 
+                If this service generates enough interest, I will set up a dedicated
                 email list for it.</p>
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header">
