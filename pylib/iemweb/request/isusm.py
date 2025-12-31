@@ -54,6 +54,7 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+pd.set_option("future.no_silent_downcasting", True)
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 LEGACY_STS = re.compile("sts=[A-Z]")
 MISSING = {"", "M", "-99"}

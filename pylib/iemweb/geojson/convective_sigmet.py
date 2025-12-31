@@ -45,17 +45,17 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function")
+    callback: str = Field(default=None, description="JSONP callback function")
     at: AwareDatetime = Field(
-        None,
+        default=None,
         description="SIGMETs valid at given time, in ISO8601 format",
     )
     ets: AwareDatetime = Field(
-        None,
+        default=None,
         description="SIGMETs valid before time, in ISO8601 format",
     )
     sts: AwareDatetime = Field(
-        None,
+        default=None,
         description="SIGMETs valid after time, in ISO8601 format",
     )
 

@@ -21,9 +21,9 @@ SERVICE = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
 
 
 class MyModel(CGIModel):
-    address: str = Field(None, description="Street address to geocode")
-    city: str = Field(None, description="City name to geocode")
-    street: str = Field(None, description="Street name to geocode")
+    address: str = Field(default=None, description="Street address to geocode")
+    city: str = Field(default=None, description="City name to geocode")
+    street: str = Field(default=None, description="Street name to geocode")
 
     @model_validator(mode="after")
     def validate_request(self):

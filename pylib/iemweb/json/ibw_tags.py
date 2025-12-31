@@ -46,14 +46,16 @@ IEM = "https://mesonet.agron.iastate.edu"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback Name")
-    damagetag: str = Field(None, description="Damage Tag", max_length=20)
+    callback: str = Field(default=None, description="JSONP Callback Name")
+    damagetag: str = Field(
+        default=None, description="Damage Tag", max_length=20
+    )
     state: str = Field(
-        None,
+        default=None,
         description="State identifier is used first if wfo provided too",
         max_length=2,
     )
-    wfo: str = Field(None, description="WFO Identifier", max_length=4)
+    wfo: str = Field(default=None, description="WFO Identifier", max_length=4)
     year: int = Field(..., description="Year to query", ge=2000, le=utc().year)
 
     @model_validator(mode="after")

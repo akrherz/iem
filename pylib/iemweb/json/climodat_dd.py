@@ -34,7 +34,7 @@ from metpy.units import units
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
 from pyiem.webutil import CGIModel, iemapp
@@ -52,11 +52,11 @@ class Schema(CGIModel):
         description="The end date for the period of interest.",
     )
     gddbase: int = Field(
-        50,
+        default=50,
         description="The base temperature for GDD computation.",
     )
     gddceil: int = Field(
-        86,
+        default=86,
         description="The ceiling temperature for GDD computation.",
     )
     sdate: date = Field(
@@ -124,7 +124,7 @@ def run(station, sdate, edate, gddbase, gddceil) -> dict:
         "gddceil": gddceil,
         "accum": accum,
     }
-    idx, jdx = IEMRE.find_ij(lon, lat)  # type: ignore
+    idx, jdx = get_nav("IEMRE", "conus").find_ij(lon, lat)
     if idx is not None:
         for model in ["gfs", "ndfd"]:
             ncfn = f"/mesonet/data/iemre/{model}_current.nc"
@@ -135,10 +135,11 @@ def run(station, sdate, edate, gddbase, gddceil) -> dict:
                 lows = c2f(nc.variables["low_tmpk"][:, jdx, idx] - 273.15)
                 taxis = compute_taxis(nc.variables["time"])
                 gdds, total = compute(taxis, highs, lows, gddbase, gddceil)
-                data[model] = gdds
-                data[f"{model}_accum"] = total
-                data[f"{model}_sdate"] = f"{gdds[0]['date']}"
-                data[f"{model}_edate"] = f"{gdds[-1]['date']}"
+                if gdds:
+                    data[model] = gdds
+                    data[f"{model}_accum"] = total
+                    data[f"{model}_sdate"] = f"{gdds[0]['date']}"
+                    data[f"{model}_edate"] = f"{gdds[-1]['date']}"
 
     return data
 

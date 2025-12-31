@@ -345,6 +345,7 @@ class Schema(CGIModel):
                 self.year3 is None or self.month3 is None or self.day3 is None
             ):
                 raise ValueError("Either at or {year,month,day}3 needs set")
+        return self
 
 
 def dfmt(txt):

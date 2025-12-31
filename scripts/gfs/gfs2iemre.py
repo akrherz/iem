@@ -167,33 +167,34 @@ def merge_grib(nc, now, domain: str, dom: dict):
                     0 - dx / 2.0,
                     0.0,
                     -dx,
-                    grb["latitudeOfFirstGridPointInDegrees"] + dx / 2.0,
+                    min(
+                        grb["latitudeOfFirstGridPointInDegrees"] + dx / 2.0,
+                        89.99,
+                    ),
                 )
             name = grb.shortName.lower()
+            # GFS grid is slightly too big
+            values = grb.values[:-1, :-1]
             if name == "tmax":
                 if tmaxgrid is None:
-                    tmaxgrid = grb.values
+                    tmaxgrid = values
                 else:
-                    tmaxgrid = np.where(
-                        grb.values > tmaxgrid, grb.values, tmaxgrid
-                    )
+                    tmaxgrid = np.where(values > tmaxgrid, values, tmaxgrid)
             elif name in ["dswrf", "sdswrf"]:
                 if srad is None:
                     # Average 6 hour flux in W/m^2 to MJ/day
-                    srad = grb.values * 6.0 * 3600.0 / 1_000_000.0
+                    srad = values * 6.0 * 3600.0 / 1_000_000.0
                 else:
-                    srad = srad + (grb.values * 6.0 * 3600.0 / 1_000_000.0)
+                    srad = srad + (values * 6.0 * 3600.0 / 1_000_000.0)
             elif name == "tmin":
                 if tmingrid is None:
-                    tmingrid = grb.values
+                    tmingrid = values
                 else:
-                    tmingrid = np.where(
-                        grb.values < tmingrid, grb.values, tmingrid
-                    )
+                    tmingrid = np.where(values < tmingrid, values, tmingrid)
             elif name == "prate":
                 hits += 1
                 # kg/m^2/s over six hours
-                ptotal = grb.values * 6.0 * 3600.0
+                ptotal = values * 6.0 * 3600.0
                 if plast is None:
                     plast = 0
                 if pgrid is None:
@@ -203,9 +204,9 @@ def merge_grib(nc, now, domain: str, dom: dict):
             # Hacky
             elif name == "st" and str(grb).find("0.0-0.1 m") > -1:
                 if tsoilgrid is None:
-                    tsoilgrid = grb.values
+                    tsoilgrid = values
                 else:
-                    tsoilgrid += grb.values
+                    tsoilgrid += values
 
         grbs.close()
 
@@ -254,7 +255,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
-def main(valid):
+def main(valid: datetime):
     """Do the work."""
     valid = valid.replace(tzinfo=timezone.utc)
     # Run every hour, filter those we don't run
