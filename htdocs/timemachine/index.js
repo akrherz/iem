@@ -1,11 +1,11 @@
-/* global moment, noUiSlider */
+/* global moment */
 let dt = moment(); // Current application time
 let irealtime = true; // Is our application in realtime mode or not
 let isUpdating = false; // Prevent recursive calls
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -22,10 +22,12 @@ function escapeHTML(val) {
 function updateURL() {
     // Update the URL with the current product and timestamp
     const url = new URL(window.location.href);
-    const pid = getSelectedOption().value;
+    const opt = getSelectedOption();
+    if (!opt) return;
+    const pid = opt.value;
     const stamp = dt.utc().format('YYYYMMDDHHmm');
     url.searchParams.set('product', pid);
-    url.searchParams.set('timestamp', irealtime ? "0": stamp);
+    url.searchParams.set('timestamp', irealtime ? "0" : stamp);
     window.history.replaceState({}, '', url);
 }
 function readURL() {
@@ -83,27 +85,17 @@ function addproducts(data) {
     });
 }
 
-function updateSliderLabels() {
-    // Update the labels for the sliders
-    const yearLabelText = document.querySelector('label[for="year_slider"] .year-label-text');
-    const dayLabelText = document.querySelector('label[for="day_slider"] .day-label-text');
-    const hourLabelText = document.querySelector('label[for="hour_slider"] .hour-label-text');
-    const minuteLabelText = document.querySelector('label[for="minute_slider"] .minute-label-text');
-    if (yearLabelText) {
-        yearLabelText.textContent = `${dt.year()}`;
-    }
-    if (dayLabelText) {
-        dayLabelText.textContent = `Day: ${moment([dt.year()]).dayOfYear(dt.dayOfYear()).format('MMM D')}`;
-    }
-    if (hourLabelText) {
-        const hour = dt.local().hour();
-        const period = hour >= 12 ? 'PM' : 'AM';
-        const hour12 = hour % 12 || 12; // Convert to 12-hour format
-        hourLabelText.textContent = `${hour12} ${period}`;
-    }
-    if (minuteLabelText) {
-        minuteLabelText.textContent = `${dt.local().minute()}`;
-    }
+function updateTimeDisplay() {
+    // Update the time display elements
+    document.getElementById('year-value').textContent = dt.year();
+    document.getElementById('month-value').textContent = dt.format('MMM');
+    document.getElementById('day-value').textContent = dt.format('D');
+
+    const hour = dt.local().hour();
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    document.getElementById('hour-value').textContent = `${hour12} ${period}`;
+    document.getElementById('minute-value').textContent = dt.format('mm');
 }
 
 // Helper functions for update() complexity reduction
@@ -113,12 +105,12 @@ function calculateTimeConstraints(opt) {
     const interval = parseInt(opt.getAttribute('data-interval'), 10);
     const avail_lag = parseInt(opt.getAttribute('data-avail_lag'), 10);
     const time_offset = parseInt(opt.getAttribute('data-time_offset'), 10);
-    
+
     if (avail_lag > 0) {
         ets.add(0 - avail_lag, 'minutes');
     }
     ets.subtract(time_offset, 'minutes');
-    
+
     return { ets, sts, interval };
 }
 
@@ -130,127 +122,57 @@ function adjustTimeForConstraints(sts, ets, interval) {
     if (dt > ets) {
         dt = ets;
     }
-    
+
     // Check 2: If our modulus is OK, we can quit early
     if ((dt.utc().hours() * 60 + dt.minutes()) % interval !== 0) {
         // Check 3: Place dt on a time that works for the given interval
         if (interval > 1440) {
-            dt.utc().startOf('month');
+            dt = dt.utc().startOf('month');
         } else if (interval >= 60) {
             // minute has to be zero
-            dt.utc().startOf('hour');
+            dt = dt.utc().startOf('hour');
             if (interval !== 60) {
-                dt.utc().startOf('day');
+                dt = dt.utc().startOf('day');
             }
         } else {
-            dt.utc().startOf('hour');
+            dt = dt.utc().startOf('hour');
         }
     }
 }
 
 function updateTimeSliders(sts, interval) {
-    const now = moment();
-    updateYearSlider(sts, now);
-    updateDaySliderValue();
-    updateHourSlider(interval);
-    updateMinuteSlider(interval);
+    // No sliders to update anymore - just update visibility
+    updateControlVisibility(interval);
 }
 
-function updateYearSlider(sts, now) {
-    const yearSlider = document.getElementById('year_slider');
-    if (yearSlider?.noUiSlider) {
-        yearSlider.noUiSlider.updateOptions({
-            range: {
-                min: sts.year(),
-                max: now.year()
-            },
-            start: dt.local().year()
-        });
+function updateControlVisibility(interval) {
+    // Show/hide controls based on interval
+    // Year and Month are always visible for navigation
+    // Day/Hour/Minute visibility depends on product interval
+    const minuteControl = document.getElementById('minute-control');
+    const hourControl = document.getElementById('hour-control');
+    const dayControl = document.getElementById('day-control');
+
+    if (minuteControl) {
+        minuteControl.style.display = interval >= 60 ? 'none' : 'block';
     }
-}
-
-function updateDaySliderValue() {
-    const daySlider = document.getElementById('day_slider');
-    if (daySlider?.noUiSlider) {
-        daySlider.noUiSlider.set(dt.local().dayOfYear());
+    if (hourControl) {
+        hourControl.style.display = interval >= 1440 ? 'none' : 'block';
     }
-}
-
-function updateHourSlider(interval) {
-    const hourSlider = document.getElementById('hour_slider');
-    if (hourSlider?.noUiSlider) {
-        if (interval >= 1440) { // Disable if interval is a day or more
-            hourSlider.setAttribute('disabled', true);
-            hourSlider.classList.add('noUi-disabled');
-        } else {
-            hourSlider.removeAttribute('disabled');
-            hourSlider.classList.remove('noUi-disabled');
-            hourSlider.noUiSlider.set(dt.local().hour());
-        }
-    }
-}
-
-function updateMinuteSlider(interval) {
-    const minuteSlider = document.getElementById('minute_slider');
-    if (minuteSlider?.noUiSlider) {
-        if (interval < 60) {
-            minuteSlider.removeAttribute('disabled');
-            minuteSlider.classList.remove('noUi-disabled');
-            minuteSlider.noUiSlider.updateOptions({
-                range: {
-                    min: 0,
-                    max: 59
-                },
-                step: interval, // Dynamically set the step interval
-                start: dt.local().minute()
-            });
-        } else {
-            minuteSlider.setAttribute('disabled', true);
-            minuteSlider.classList.add('noUi-disabled');
-        }
-    }
-}
-
-function updateSliderVisibility(interval) {
-    updateMinuteSliderVisibility(interval);
-    updateHourSliderVisibility(interval);
-}
-
-function updateMinuteSliderVisibility(interval) {
-    const minuteSliderElement = document.getElementById('minute_slider');
-    if (minuteSliderElement?.parentElement) {
-        if (interval >= 60) {
-            // Hide the entire minute column container
-            minuteSliderElement.parentElement.style.display = 'none';
-        } else {
-            // Show the entire minute column container
-            minuteSliderElement.parentElement.style.display = 'block';
-        }
-    }
-}
-
-function updateHourSliderVisibility(interval) {
-    const hourSliderElement = document.getElementById('hour_slider');
-    if (hourSliderElement?.parentElement) {
-        if (interval >= 1440) {
-            // Hide the entire hour column container
-            hourSliderElement.parentElement.style.display = 'none';
-        } else {
-            // Show the entire hour column container
-            hourSliderElement.parentElement.style.display = 'block';
-        }
+    if (dayControl) {
+        dayControl.style.display = interval > 1440 ? 'none' : 'block';
     }
 }
 
 function updateImageDisplay(opt) {
     const imagedisplay = document.getElementById('imagedisplay');
     const loadingIndicator = document.getElementById('loading-indicator');
-    
+
     if (loadingIndicator) {
         loadingIndicator.textContent = 'Loading...'; // Set loading text
         loadingIndicator.style.display = 'block'; // Show loading indicator
     }
-    
+
     const templateText = escapeHTML(opt.getAttribute('data-template'));
     const url = templateText.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
@@ -258,7 +180,7 @@ function updateImageDisplay(opt) {
         .replace(/%d/g, dt.utc().format('DD'))
         .replace(/%H/g, dt.utc().format('HH'))
         .replace(/%i/g, dt.utc().format('mm'));
-        
+
     imagedisplay.onload = () => {
         if (loadingIndicator) {
             loadingIndicator.style.display = 'none'; // Hide loading indicator
@@ -276,16 +198,15 @@ function update() {
     if (isUpdating) return; // Safeguard to prevent recursion
     isUpdating = true;
 
-    updateSliderLabels();
+    updateTimeDisplay();
 
     // Make sure that our current dt matches what can be provided by the
     // currently selected option.
     const opt = getSelectedOption();
     const { ets, sts, interval } = calculateTimeConstraints(opt);
-    
+
     adjustTimeForConstraints(sts, ets, interval);
     updateTimeSliders(sts, interval);
-    updateSliderVisibility(interval);
     updateImageDisplay(opt);
 
     updateURL();
@@ -295,7 +216,7 @@ function update() {
 
 function updateUITimestamp() {
     const opt = getSelectedOption();
-    if (opt.getAttribute('data-interval') >= 1440) {
+    if (parseInt(opt.getAttribute('data-interval'), 10) >= 1440) {
         document.getElementById('utctime').textContent = dt.utc().format('MMM Do YYYY');
         document.getElementById('localtime').textContent = dt.local().format('MMM Do YYYY');
     } else {
@@ -312,142 +233,9 @@ function getSelectedOption() {
     return null;
 }
 
-// Replace jQuery UI sliders with noUiSlider
+// Replace jQuery UI sliders with simple button controls
 function buildUI() {
-    // Year slider
-    const yearSlider = document.getElementById('year_slider');
-    const yearLabelText = document.querySelector('label[for="year_slider"] .year-label-text');
-    noUiSlider.create(yearSlider, {
-        start: dt.year(),
-        range: {
-            min: 2000, // Example start year
-            max: moment().year()
-        },
-        step: 1,
-        tooltips: true,
-        format: {
-            to: value => Math.round(value),
-            from: value => Math.round(value)
-        }
-    });
-    yearSlider.noUiSlider.on('change', (values) => {
-        dt.year(parseInt(values[0], 10));
-        if (yearLabelText) {
-            yearLabelText.textContent = `${values[0]}`;
-        }
-        irealtime = false;
-        update();
-    });
-
-    // Day slider
-    const daySlider = document.getElementById('day_slider');
-    const dayLabelText = document.querySelector('label[for="day_slider"] .day-label-text');
-    const updateDaySlider = () => {
-        const year = dt.year();
-        const daysInYear = moment([year]).isLeapYear() ? 366 : 365;
-        const monthStartDays = Array.from({ length: 12 }, (_, i) =>
-            moment([year, i, 1]).dayOfYear()
-        );
-
-        if (daySlider.noUiSlider) {
-            daySlider.noUiSlider.destroy();
-        }
-
-        noUiSlider.create(daySlider, {
-            start: dt.dayOfYear(),
-            range: {
-                min: 1,
-                max: daysInYear
-            },
-            step: 1,
-            tooltips: {
-                to: value => moment([year]).dayOfYear(Math.round(value)).format('MMM D'),
-                from: value => Math.round(value)
-            },
-            format: {
-                to: value => Math.round(value),
-                from: value => Math.round(value)
-            }
-        });
-
-        daySlider.noUiSlider.on('change', (values) => {
-            dt.dayOfYear(parseInt(values[0], 10));
-            if (dayLabelText) {
-                dayLabelText.textContent = `Day: ${moment([dt.year()]).dayOfYear(values[0]).format('MMM D')}`;
-            }
-            irealtime = false;
-            update();
-        });
-
-        const density = window.innerWidth < 768 ? 2 : 4;
-
-        daySlider.noUiSlider.pips({
-            mode: 'values',
-            values: monthStartDays,
-            density,
-            format: {
-                to: value => moment([year]).dayOfYear(value).format('MMM D'),
-                from: value => value
-            }
-        });
-    };
-
-    updateDaySlider();
-
-    // Hour slider
-    const hourSlider = document.getElementById('hour_slider');
-    const hourLabelText = document.querySelector('label[for="hour_slider"] .hour-label-text');
-    noUiSlider.create(hourSlider, {
-        start: dt.hour(),
-        range: {
-            min: 0,
-            max: 23
-        },
-        step: 1,
-        tooltips: true,
-        format: {
-            to: value => Math.round(value),
-            from: value => Math.round(value)
-        }
-    });
-    hourSlider.noUiSlider.on('change', (values) => {
-        dt.hour(parseInt(values[0], 10));
-        const hour = dt.local().hour();
-        const period = hour >= 12 ? 'PM' : 'AM';
-        const hour12 = hour % 12 || 12; // Convert to 12-hour format
-        if (hourLabelText) {
-            hourLabelText.textContent = `${hour12} ${period}`;
-        }
-        irealtime = false;
-        update();
-    });
-
-    // Minute slider
-    const minuteSlider = document.getElementById('minute_slider');
-    const minuteLabelText = document.querySelector('label[for="minute_slider"] .minute-label-text');
-    noUiSlider.create(minuteSlider, {
-        start: dt.minute(),
-        range: {
-            min: 0,
-            max: 59
-        },
-        step: 1,
-        tooltips: true,
-        format: {
-            to: value => Math.round(value),
-            from: value => Math.round(value)
-        }
-    });
-    minuteSlider.noUiSlider.on('change', (values) => {
-        dt.minute(parseInt(values[0], 10));
-        if (minuteLabelText) {
-            minuteLabelText.textContent = `${values[0]}`;
-        }
-        irealtime = false;
-        update();
-    });
-
-    // Listen for click
+    // Listen for button clicks
     document.querySelectorAll('.btn').forEach(button => {
         button.addEventListener('click', (event) => {
             event.preventDefault();
@@ -457,7 +245,7 @@ function buildUI() {
                 return;
             }
             const interval = parseInt(opt.getAttribute('data-interval'), 10);
-            // retrive the data-unit value from the DOM obj
+            // retrieve the data-unit value from the DOM obj
             const unit = button.getAttribute('data-unit');
             let offset = parseInt(button.getAttribute('data-offset'), 10);
             // If the abs(offset) is greater than the interval, we need to adjust
@@ -480,7 +268,6 @@ function buildUI() {
         // unblur
         document.querySelector('select[name=products]').blur();
     });
-
 }
 function refresh() {
     if (irealtime) {
@@ -514,7 +301,10 @@ function translateHashLink() {
 document.addEventListener('DOMContentLoaded', () => {
     translateHashLink();
     fetch("/json/products.json")
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load products');
+            return response.json();
+        })
         .then(data => {
             addproducts(data);
             buildUI();

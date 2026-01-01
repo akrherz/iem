@@ -1,53 +1,27 @@
-.ui-slider-tip {
-    width: 50px !important;
+/* Time control styling */
+.time-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
 }
 
-/* Add styles for noUiSlider */
-.noUi-tooltip {
-    display: none; /* Hide tooltip by default */
-    background: #333;
-    color: #fff;
-    border-radius: 3px;
-    font-size: 12px;
-    padding: 5px;
-}
-
-.noUi-active .noUi-tooltip {
-    display: block; /* Show tooltip when slider is active */
-    position: absolute;
-    top: -30px; /* Position above the slider handle */
-    background: #333;
-    color: #fff;
-    border-radius: 3px;
-    font-size: 12px;
-    padding: 5px;
+.time-label {
+    font-weight: 600;
+    font-size: 16px;
     white-space: nowrap;
-    z-index: 10;
+    flex-grow: 1;
+    text-align: center;
 }
 
-.noUi-horizontal {
-    height: 10px;
-    background: #ddd;
-    border-radius: 5px;
-}
-
-.noUi-handle {
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-/* Style for disabled sliders */
-.noUi-disabled {
-    pointer-events: none; /* Disable interaction */
-    opacity: 0.5; /* Greyed-out appearance */
-}
-
-#day_slider {
-    margin-top: 20px; /* Add spacing above the slider to avoid overlap */
-    margin-bottom: 40px; /* Increase spacing below the slider to avoid overlap */
+.time-value {
+    font-weight: 700;
+    color: #007bff;
+    font-size: 18px;
 }
 
 .btn {
