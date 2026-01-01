@@ -161,11 +161,12 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("postgis") as conn:
         # NB quasi hack here as we have some redundant ETNs for a given year
         # so the groupby helps some.
+        # Don't use vtec_year as it is not right for events happening 31 Dec
         daily = pd.read_sql(
             sql_helper(
                 """
                 SELECT
-                vtec_year,
+                extract(year from issue at time zone :tzname)::int as year,
                 extract(month from issue at time zone :tzname)::int as mo,
                 min(date(issue at time zone :tzname)) as min_date,
                 wfo,
@@ -173,8 +174,8 @@ def plotter(ctx: dict):
                 from warnings where phenomena = ANY(:ph)
                 and significance = :sig
                 {wfo_limiter}
-                GROUP by vtec_year, mo, wfo, phenomena, significance, eventid
-                ORDER by vtec_year asc, mo asc
+                GROUP by year, mo, wfo, phenomena, significance, eventid
+                ORDER by year asc, mo asc
         """,
                 wfo_limiter=wfo_limiter,
             ),
@@ -191,15 +192,15 @@ def plotter(ctx: dict):
             )
         raise NoDataFound("Sorry, no data found!")
     df = (
-        daily[["vtec_year", "mo", "eventid"]]
-        .groupby(["vtec_year", "mo"])
+        daily[["year", "mo", "eventid"]]
+        .groupby(["year", "mo"])
         .count()
         .reset_index()
         .rename(columns={"eventid": "count"})
     )
 
-    df2 = df.pivot(index="vtec_year", columns="mo", values="count").reindex(
-        index=range(df["vtec_year"].min(), df["vtec_year"].max() + 1),
+    df2 = df.pivot(index="year", columns="mo", values="count").reindex(
+        index=range(df["year"].min(), df["year"].max() + 1),
         columns=range(1, 13),
     )
 
@@ -224,13 +225,11 @@ def plotter(ctx: dict):
     ypos -= 0.04
     fig.text(0.82, ypos, params["tzname"])
     gdf = (
-        daily.groupby("min_date")
-        .count()
-        .sort_values("vtec_year", ascending=False)
+        daily.groupby("min_date").count().sort_values("year", ascending=False)
     )
     for dt, row in gdf.head(10).iterrows():
         ypos -= 0.04
-        fig.text(0.82, ypos, f"{dt} {row['vtec_year']:3.0f}")
+        fig.text(0.82, ypos, f"{dt} {row['year']:3.0f}")
     ax.set_position([0.1, 0.1, 0.75, 0.8])
     sns.heatmap(
         df2,
@@ -247,9 +246,7 @@ def plotter(ctx: dict):
     for year, count in sumdf.items():
         ax.text(12, year, f"{count:.0f}")
     # Add some horizontal lines
-    for i, year in enumerate(
-        range(df["vtec_year"].min(), df["vtec_year"].max() + 1)
-    ):
+    for i, year in enumerate(range(df["year"].min(), df["year"].max() + 1)):
         ax.text(
             12 + 0.7, i + 0.5, f"{sumdf[year]:4.0f}", ha="right", va="center"
         )
