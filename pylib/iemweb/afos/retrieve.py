@@ -143,7 +143,7 @@ class MyModel(CGIModel):
         ),
     )
     fmt: str = Field(
-        "text",
+        default="text",
         description=(
             "The format of the returned data, either text, html, or zip. The "
             "meaning of ``text`` is to return something that resembles what "
@@ -155,7 +155,7 @@ class MyModel(CGIModel):
         pattern="^(text|html|zip)$",
     )
     limit: int = Field(
-        1,
+        default=1,
         description=(
             "The number of products to return, default is 1. This number "
             "is limited to 9999."
@@ -181,7 +181,7 @@ class MyModel(CGIModel):
         ),
     )
     sdate: None | datetime = Field(
-        None,
+        default=None,
         description=(
             "The starting timestamp in UTC to limit the database search. This "
             "value is inclusive."
@@ -195,7 +195,7 @@ class MyModel(CGIModel):
         pattern="^(asc|desc)$",
     )
     ttaaii: str = Field(
-        "",
+        default="",
         description=(
             "The 6 character WMO Header to limit the search to.  This is "
             "typically only used when a PIL is ambiguous"

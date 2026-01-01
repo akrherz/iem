@@ -9,6 +9,7 @@
 /config/settings.inc.php
 node_modules
 **/.coverage
+coverage.xml
 # Stuff built by iemvtec
 htdocs/vtec/assets*
 htdocs/vtec/_index_content.html
