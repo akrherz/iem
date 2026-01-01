@@ -43,7 +43,7 @@ def barchart_with_top10(
     """
     ax = kwargs.get("ax")
     if ax is None:
-        ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
+        ax = fig.add_axes((0.1, 0.1, 0.7, 0.8))
     ax.bar(
         data.index,
         data[column],

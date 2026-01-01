@@ -252,14 +252,13 @@ def plotter(ctx: dict):
     avgv = df[colname].mean()
     bars = ax.bar(df.index.values, df[colname], align="center")
     for i, _bar in enumerate(bars):
-        val = df.iloc[i][colname]
-        if val < avgv:
-            _bar.set_color("blue")
-        else:
-            _bar.set_color("red")
+        _bar.set_color("blue" if df.iloc[i][colname] < avgv else "red")
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     rng = df[colname].max() - df[colname].min()
-    ax.set_ylim(df[colname].min() - rng * 0.1, df[colname].max() + rng * 0.1)
+    if rng > 0:
+        ax.set_ylim(
+            df[colname].min() - rng * 0.1, df[colname].max() + rng * 0.1
+        )
     ax.axhline(avgv, color="k")
     ax.text(df.index.values[-1] + 2, avgv, f"Avg:\n{avgv:.1f}")
     ax.set_xlabel("Year")

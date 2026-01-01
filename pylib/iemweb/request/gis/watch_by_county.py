@@ -2,6 +2,19 @@
 
 Return to `API Services </api/#cgi>`_
 
+Changelog
+---------
+
+- 2026-01-01: A bug was fixed with the resulting download zip file name.
+
+Example Requests
+----------------
+
+Return the watch by county shapefile for watch 275 at 17 UTC on 21 May 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watch_by_county.py?\
+etn=275&year=2024&month=5&day=21&hour=17&minute=0
+
 """
 
 import tempfile
@@ -21,12 +34,12 @@ PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    etn: int = Field(None, description="Event ID")
-    year: int = Field(None, description="Year of valid timestamp")
-    month: int = Field(None, description="Month of valid timestamp")
-    day: int = Field(None, description="Day of valid timestamp")
-    hour: int = Field(None, description="Hour of valid timestamp")
-    minute: int = Field(None, description="Minute of valid timestamp")
+    etn: int = Field(default=None, description="Event ID")
+    year: int = Field(default=None, description="Year of valid timestamp")
+    month: int = Field(default=None, description="Month of valid timestamp")
+    day: int = Field(default=None, description="Day of valid timestamp")
+    hour: int = Field(default=None, description="Hour of valid timestamp")
+    minute: int = Field(default=None, description="Minute of valid timestamp")
 
 
 def get_ts_fn(environ):
@@ -56,7 +69,6 @@ def application(environ, start_response):
         raise IncompleteWebRequest("bad input provided") from exp
     if environ["etn"] is not None:
         etnLimiter = f"and eventid = {int(environ.get('etn'))}"
-        fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(environ.get('etn'))}"
     else:
         etnLimiter = ""
 
@@ -125,8 +137,8 @@ def application(environ, start_response):
             out_layer.CreateFeature(featDef)
             feat.Destroy()
 
-        source.Destroy()
-        out_ds.Destroy()
+        source.Close()
+        out_ds.Close()
 
         zio = BytesIO()
         with zipfile.ZipFile(

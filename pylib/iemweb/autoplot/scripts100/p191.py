@@ -16,11 +16,16 @@ doing so the time zone used to compute the calendar dates is US Central.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import (
+    get_sqlalchemy_conn,
+    sql_helper,
+    with_sqlalchemy_conn,
+)
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -131,15 +136,17 @@ def get_description():
     return desc
 
 
-def get_ugc_name(ugc):
+@with_sqlalchemy_conn("postgis")
+def get_ugc_name(ugc, conn: Connection | None = None) -> list[str, str]:
     """Return the WFO and county name."""
-    cursor = get_dbconn("postgis").cursor()
-    cursor.execute(
-        "SELECT name, wfo from ugcs where ugc = %s "
-        "ORDER by end_ts nulls first",
-        (ugc,),
+    res = conn.execute(
+        sql_helper(
+            "SELECT name, wfo from ugcs where ugc = :ugc "
+            "ORDER by end_ts nulls first"
+        ),
+        {"ugc": ugc},
     )
-    return cursor.fetchone()
+    return ("", "") if res.rowcount == 0 else list(res.fetchone())
 
 
 def plotter(ctx: dict):
