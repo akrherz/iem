@@ -161,7 +161,7 @@ def plotter(ctx: dict):
     station = ctx["station"]
     sts = ctx["sdate"]
     if station not in ctx["_nt"].sts:
-        raise NoDataFound("Invalid station provided.")
+        raise NoDataFound("Invalid WFO provided.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     sts = datetime(sts.year, sts.month, sts.day, tzinfo=tz)
     days = ctx["days"]

@@ -1,6 +1,6 @@
 """Attempt to manage the disaster that is IEM symlinking"""
 
-import os
+from pathlib import Path
 
 from pyiem.util import logger
 
@@ -51,56 +51,56 @@ PAIRS = [
 ]
 
 
-def workflow(link, target):
+def workflow(link: Path, target: Path):
     """Do things"""
-    if not os.path.isdir(target):
+    if not target.exists():
         LOG.info("ERROR: link target: %s is not found", target)
         return
-    if not os.path.islink(link) and os.path.isdir(link):
+    if not link.is_symlink() and link.is_dir():
         LOG.info("ERROR: symlink: %s is already a directory!", link)
         return
-    if os.path.islink(link):
-        oldtarget = os.path.realpath(link)
+    if link.is_symlink():
+        oldtarget = link.resolve()
         if oldtarget == target:
             return
-        os.unlink(link)
+        link.unlink()
     LOG.info("%s -> %s", link, target)
-    os.symlink(target, link)
+    link.symlink_to(target)
 
 
 def main():
     """Go Main"""
     # Ensure some base folders exist
     for mysubdir in ["share", "ARCHIVE", "data"]:
-        path = f"/mesonet/{mysubdir}"
-        if not os.path.isdir(path):
-            os.makedirs(path)
+        path = Path("/mesonet") / Path(mysubdir)
+        if not path.is_dir():
+            path.mkdir(parents=True)
     # Quasi dynamic generation of /mesonet/ARCHIVE/data/YYYY links
-    if not os.path.isdir("/mesonet/ARCHIVE/data"):
-        os.makedirs("/mesonet/ARCHIVE/data")
+    if not Path("/mesonet/ARCHIVE/data").is_dir():
+        Path("/mesonet/ARCHIVE/data").mkdir(parents=True)
     for year in range(1893, 2015):
-        link = f"/mesonet/ARCHIVE/data/{year}"
-        target = f"/mnt/archive32/ARCHIVE/data/{year}"
+        link = Path("/mesonet/ARCHIVE/data") / str(year)
+        target = Path(f"/mnt/archive32/ARCHIVE/data/{year}")
         workflow(link, target)
     for year in range(2015, 2019):
-        link = f"/mesonet/ARCHIVE/data/{year}"
-        target = f"/mnt/archive5/ARCHIVE/data/{year}"
+        link = Path("/mesonet/ARCHIVE/data") / str(year)
+        target = Path(f"/mnt/archive5/ARCHIVE/data/{year}")
         workflow(link, target)
     for year in range(2019, 2024):
-        link = f"/mesonet/ARCHIVE/data/{year}"
-        target = f"/mnt/archive32/ARCHIVE/data/{year}"
+        link = Path("/mesonet/ARCHIVE/data") / str(year)
+        target = Path(f"/mnt/archive32/ARCHIVE/data/{year}")
         workflow(link, target)
     for year in range(2024, 2025):
-        link = f"/mesonet/ARCHIVE/data/{year}"
-        target = f"/mnt/archive5/ARCHIVE/data/{year}"
+        link = Path("/mesonet/ARCHIVE/data") / str(year)
+        target = Path(f"/mnt/archive5/ARCHIVE/data/{year}")
         workflow(link, target)
     for year in range(2025, 2027):
-        link = f"/mesonet/ARCHIVE/data/{year}"
-        target = f"/mnt/archive33/ARCHIVE/data/{year}"
+        link = Path("/mesonet/ARCHIVE/data") / str(year)
+        target = Path(f"/mnt/archive33/ARCHIVE/data/{year}")
         workflow(link, target)
 
     for link, target in PAIRS:
-        workflow(link, target)
+        workflow(Path(link), Path(target))
 
 
 if __name__ == "__main__":

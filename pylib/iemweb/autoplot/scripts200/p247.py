@@ -211,9 +211,8 @@ def make_legend(mp, df, statdf, year):
         txt.set_alpha(alphas[i])
 
 
-def plotdf(mp, df):
+def plotdf(mp, df: gpd.GeoDataFrame):
     """Do plotting."""
-    df["color"] = df["ps"].apply(lambda x: NWS_COLORS.get(x, "k"))
     for panel in mp.panels:
         for sig in ["S", "Y", "A", "W"]:
             df2 = (
@@ -308,6 +307,7 @@ def plotter(ctx: dict):
                 "key"
             )
         make_legend(mp, ugcdf, statsdf, valid.year - 1)
+        ugcdf["color"] = ugcdf["ps"].apply(lambda x: NWS_COLORS.get(x, "k"))
         if not sbwdf.empty:
             # remove rows from ugcdf where key is in sbwdf
             ugcdf = ugcdf[~ugcdf["key"].isin(sbwdf["key"])]

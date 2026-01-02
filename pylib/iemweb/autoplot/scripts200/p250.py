@@ -23,14 +23,14 @@ from pyiem.plot import figure
 from pyiem.util import utc
 
 PDICT = {
-    "tmpf": "Air Temperature (F)",
-    "dwpf": "Dew Point (F)",
+    "tmpf": "Air Temperature (°F)",
+    "dwpf": "Dew Point (°F)",
     "sknt": "Wind Speed (knots)",
     "drct": "Wind Direction (degrees)",
     "alti": "Pressure Altimeter (inches)",
     "vsby": "Visibility (miles)",
     "gust": "Wind Gust (knots)",
-    "feel": "Feels Like Temp (F)",
+    "feel": "Feels Like Temp (°F)",
     "mslp": "Mean Sea Level Pressure (mb)",
 }
 
@@ -119,7 +119,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No data found with initial query.")
     df["utc_valid"] = df["utc_valid"].dt.tz_localize(timezone.utc)
-    tz = ZoneInfo(ctx["_nt1"].sts[station1]["tzname"])
+    tz = ZoneInfo(ctx["_nt1"].sts[station1]["tzname"] or "America/Chicago")
     df["local_valid"] = df["utc_valid"].dt.tz_convert(tz)
     df = df.pivot_table(
         index="local_valid", columns="station", values=varname, aggfunc="mean"
