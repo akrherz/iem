@@ -148,7 +148,7 @@ def dowork(
             & (outlooks["cycle"] == row["cycle"])
         ].empty:
             rows.append(row)
-    if rows:
+    if rows and not outlooks.empty:
         outlooks: pd.DataFrame = pd.concat(
             [outlooks, pd.DataFrame(rows)], ignore_index=True
         )

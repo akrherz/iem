@@ -158,7 +158,7 @@ def plotter(ctx: dict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
+    tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"] or "America/Chicago")
     title = (
         f"{ctx['_sname']} ({ab.year}-{date.today().year})\n"
         f"Top 10 {PDICT[ctx['v']]} Local Calendar Day "

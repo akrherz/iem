@@ -137,7 +137,7 @@ def plotter(ctx: dict):
         )
     if ctx["network"].find("COOP") > -1:
         raise NoDataFound("This plot type does not work for COOP.")
-    tzname = ctx["_nt"].sts[station]["tzname"]
+    tzname = ctx["_nt"].sts[station]["tzname"] or "America/Chicago"
 
     df = get_data(ctx["network"], station, tzname, sdate).reset_index()
     if df.empty:
