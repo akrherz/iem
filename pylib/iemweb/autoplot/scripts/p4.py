@@ -17,7 +17,7 @@ import pandas as pd
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.grid import nav
+from pyiem.grid.nav import get_nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
@@ -80,7 +80,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Data not available for year")
     with ncopen(ncfn) as nc:
         precip = nc.variables["p01d"]
-        czs = CachingZonalStats(nav.IEMRE.affine_image)
+        czs = CachingZonalStats(get_nav("IEMRE", "CONUS").affine_image)
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )
@@ -114,6 +114,8 @@ def plotter(ctx: dict):
             coverage.append(tots / float(datapts) * 100.0)
 
             now += timedelta(days=1)
+    if not days:
+        raise NoDataFound("No data found for requested year/range")
     df = pd.DataFrame(
         {"day": pd.Series(days), "coverage": pd.Series(coverage)}
     )
