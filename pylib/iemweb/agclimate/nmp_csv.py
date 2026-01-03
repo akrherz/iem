@@ -3,7 +3,6 @@
 https://mesonet.agron.iastate.edu/agclimate/isusm.csv
 """
 
-from datetime import datetime
 from io import StringIO
 
 import numpy as np
@@ -12,7 +11,7 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import convert_value
+from pyiem.util import convert_value, utc
 from pyiem.webutil import iemapp
 
 INVERSION = [
@@ -112,7 +111,8 @@ def do_soil_moisture(row):
 def use_table(sio):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
-    table = f"sm_minute_{datetime.now().year}"
+    # NOTE: Careful to use the actual table with actual current data
+    table = f"sm_minute_{utc():%Y}"
     with get_sqlalchemy_conn("isuag") as conn:
         obsdf = pd.read_sql(
             sql_helper(
