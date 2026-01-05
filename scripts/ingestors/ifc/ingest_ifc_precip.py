@@ -39,6 +39,10 @@ def get_file(tmpdir, now, routes):
         uri = f"{BASEURL}/{fn}.out"
         try:
             resp = httpx.get(uri, timeout=10)
+            # A common case that I don't need verbosity about
+            if i == 7 and resp.status_code == 404:
+                LOG.info("Got 404 for %s", uri)
+                continue
             resp.raise_for_status()
         except Exception as exp:
             # Cut back on emails
