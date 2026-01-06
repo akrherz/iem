@@ -5,12 +5,14 @@ you should consider the representativity of that value when compared with
 other years with a full year's worth of data.
 """
 
-import matplotlib.patheffects as PathEffects
+from datetime import date
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 
+from iemweb.autoplot.barchart import barchart_with_top10
 from iemweb.util import month2months
 
 PDICT = {
@@ -97,6 +99,12 @@ def get_description():
             label="Express days as percentage or number of",
             options=PDICT4,
         ),
+        {
+            "type": "year",
+            "default": date.today().year,
+            "name": "year",
+            "label": "Year to highlight on chart",
+        },
     ]
     return desc
 
@@ -176,17 +184,16 @@ def plotter(ctx: dict):
     df["low_freq"] = df[f"low_{which}"] / df["days"].astype("f") * 100.0
     df["avg_freq"] = df[f"avg_{which}"] / df["days"].astype("f") * 100.0
 
-    title = "\n".join(
-        [
-            f"{ctx['_sname']} "
-            f"{df.index.values.min()}-{df.index.values.max()} "
-            f"{PDICT4[ctx['opt']]} of Days",
-            f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} "
-            f"Average (month={month.upper()})",
-            "Using Period of Record Simple Climatology",
-        ]
+    title = (
+        f"{ctx['_sname']} "
+        f"{df.index.values.min()}-{df.index.values.max()} "
+        f"{PDICT4[ctx['opt']]} of Days "
+        f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} Average"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    subtitle = (
+        f"(month={month.upper()}) Using Period of Record Simple Climatology"
+    )
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     suffix = f"_{which}" if ctx["opt"] == "number" else "_freq"
     avgv = df[varname + suffix].mean()
 
@@ -194,27 +201,29 @@ def plotter(ctx: dict):
     colorbelow = "b"
     if ctx["which"] == "below":
         colorabove, colorbelow = colorbelow, colorabove
+    df["color"] = colorabove
+    df.loc[df[varname + suffix] < avgv, "color"] = colorbelow
+    if ctx["year"] in df.index:
+        df.loc[ctx["year"], "color"] = "yellow"
     data = df[varname + suffix].values
-    bars = ax.bar(
-        df.index.values, data, fc=colorabove, ec=colorabove, align="center"
+    ax = barchart_with_top10(
+        fig,
+        df,
+        f"{varname}{suffix}",
+        color=df["color"],
+        table_col_title="Days" if ctx["opt"] == "number" else "Freq (%)",
     )
-    for i, mybar in enumerate(bars):
-        if data[i] < avgv:
-            mybar.set_facecolor(colorbelow)
-            mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color="k", zorder=2)
-    txt = ax.text(
-        bars[-1].get_x(),
-        avgv,
-        f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}",
-        color="yellow",
-        fontsize=14,
-        va="center",
-    )
-    txt.set_path_effects([PathEffects.withStroke(linewidth=5, foreground="k")])
+    vv = f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}"
     ax.set_ylim(bottom=0)
-    ax.set_xlabel("Year")
-    ax.set_xlim(bars[0].get_x() - 1, bars[-1].get_x() + 1)
+    extra = ""
+    if ctx["year"] in df.index:
+        extra = (
+            f" (highlighted year {ctx['year']} with value: "
+            f"{data[df.index.get_loc(ctx['year'])]:.1f}"
+            f"{'' if ctx['opt'] == 'number' else '%'})"
+        )
+    ax.set_xlabel(f"Year{extra}, {vv}")
     ax.set_ylabel(
         "Frequency [%]" if ctx["opt"] == "percent" else "Number of Days"
     )
