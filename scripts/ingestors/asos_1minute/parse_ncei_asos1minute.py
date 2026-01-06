@@ -21,7 +21,7 @@ import click
 import httpx
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
-from pyiem.util import exponential_backoff, logger, set_property, utc
+from pyiem.util import logger, set_property, utc
 from tqdm import tqdm
 
 LOG = logger()
@@ -202,16 +202,25 @@ def dl_archive(df, dt):
             fn = f"asos-1min-pg{page}-{station4}-{dt:%Y%m}.dat"
             if not os.path.isfile(f"{datadir}/{fn}"):
                 uri = f"{baseuri}{page}/access/{dt:%Y/%m}/{fn}"
-                req = exponential_backoff(httpx.get, uri, timeout=60)
-                if req is None:
-                    LOG.info("total failure %s", uri)
-                    continue
-                if req.status_code != 200:
-                    LOG.info("failed %s %s", uri, req.status_code)
-                    continue
-                with open(f"{datadir}/{fn}", "wb") as fh:
-                    fh.write(req.content)
-            df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
+                for _ in range(3):
+                    try:
+                        resp = httpx.get(uri, timeout=60)
+                        if resp.status_code == 404:
+                            LOG.info("dl_archive %s missing", uri)
+                            resp = None
+                            break
+                        resp.raise_for_status()
+                        break
+                    except Exception as exp:
+                        LOG.warning("dl_archive %s failed: %s", uri, exp)
+                        resp = None
+                        continue
+                if resp is not None:
+                    with open(f"{datadir}/{fn}", "wb") as fh:
+                        fh.write(resp.content)
+                    df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
+            else:
+                df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
 
 
 def liner(fn):
@@ -377,7 +386,7 @@ def dl_realtime(df, dt, mdt, page):
             if resp.status_code != 200:
                 loglvl = LOG.info if dt.month != mdt.month else LOG.warning
                 loglvl("Got HTTP %s for %s", resp.status_code, uri)
-                return
+                sys.exit(2)
             with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
                 for chunk in resp.iter_bytes():
                     if chunk:
