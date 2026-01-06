@@ -4,11 +4,11 @@
 function rsplit(val, sep, maxsplit) {
     const split = val.split(sep);
     return maxsplit ? [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit)) : split;
-};
+}
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -19,32 +19,43 @@ function escapeHTML(val) {
               .replace(/'/g, '&#039;');
 }
 
-flowplayer((api) => {
-    api.on("error", (_e, api2, err) => {
-        if (err.code === 4) { // Video file not found
-            // reset state
-            api2.error = api2.loading = false;
-        }
-    });
-
-});
+let player = null;
 
 function myloader() {
     const ts = new Date();
     const mycam = escapeHTML(document.theform.mycam.value);
     const mylapse = escapeHTML(document.theform.mylapse.value);
     window.location.href = `#${mycam}_${mylapse}`;
-    const url = `/onsite/lapses/auto/${mycam}_${mylapse}.flv?${ts.getTime()}`;
-    const url2 = `/onsite/lapses/auto/${mycam}_${mylapse}.mp4?${ts.getTime()}`;
-    flowplayer(0).load({
-        sources: [
-            { type: "video/flv", src: url },
-            { type: "video/mp4", src: url2 }
-        ]
-    });
+    const url = `https://mesonet.agron.iastate.edu/onsite/lapses/auto/${mycam}_${mylapse}.mp4?${ts.getTime()}`;
+
+    if (player) {
+        // Load new video into existing player
+        player.load({
+            sources: [
+                { type: "video/mp4", src: url }
+            ]
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the flowplayer
+    const container = document.querySelector('.flowplayer');
+    player = flowplayer(container, {
+        clip: {
+            sources: [
+                { type: "video/mp4", src: "https://mesonet.agron.iastate.edu/onsite/lapses/auto/isu_curtis_center_sunrise.mp4" }
+            ]
+        }
+    });
+
+    player.on("error", (_e, api, err) => {
+        if (err.code === 4) { // Video file not found
+            // reset state
+            api.error = api.loading = false;
+        }
+    });
+
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {
         const tokens2 = rsplit(tokens[1], '_', 1);
