@@ -98,6 +98,8 @@
 61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
 61/var:precip::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
 69/network:IACLIMATE::station:IA0000::var:high::which:above::unit:degrees::mag:0::month:winter::opt:percent::_r:t::dpi:100.png
+69/network:IACLIMATE::station:IATAME::var:high::which:above::unit:degrees::mag:-15::month:all::opt:percent::year:2026::_r:t::dpi:100.png
+69/network:IACLIMATE::station:IATAME::var:high::which:abs_below::unit:sigma::mag:-1::month:all::opt:percent::year:2026::_r:t::dpi:100.png
 70/opt:wfo::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jul1::f:none::cmap:jet::_r:t::dpi:100.png
 70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:accum::cmap:jet::_r:t::dpi:100.png

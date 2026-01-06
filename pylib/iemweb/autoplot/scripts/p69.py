@@ -3,6 +3,12 @@ The frequency of days per year that the temperature
 was above/below average.  Data is shown for the current year as well, so
 you should consider the representativity of that value when compared with
 other years with a full year's worth of data.
+
+<p>This app gets a bit tricky to understand the interplay between direction
+and magnitude.  For example, if you pick -5 degrees as the magnitude and then
+an above departure, you get the data domain of departures ranging from -5 to
+positive infinity.  If you pick the absolute value departure, then you can
+do the combination of departures of both sides of average.</p>
 """
 
 from datetime import date
@@ -22,9 +28,14 @@ PDICT = {
 }
 PDICT2 = {
     "degrees": "Degrees Fahrenheit",
-    "sigma": "Sigma (1 Standard Deviation)",
+    "sigma": "Sigma (1 StdDev)",
 }
-PDICT3 = {"above": "Above", "below": "Below"}
+PDICT3 = {
+    "above": "At or Above",
+    "below": "Below",
+    "abs_above": "Absolute Value At or Above",
+    "abs_below": "Absolute Value Below",
+}
 PDICT4 = {"percent": "Percentage", "number": "Number"}
 MDICT = {
     "all": "No Month/Season Limit",
@@ -70,7 +81,7 @@ def get_description():
             options=PDICT3,
             name="which",
             default="above",
-            label="Compute above or below average:",
+            label="How to compare against average along with magnitude below:",
         ),
         dict(
             type="select",
@@ -83,7 +94,7 @@ def get_description():
             type="float",
             name="mag",
             default=0,
-            label="Absolute magnitude of departure expressed with previous:",
+            label="Magnitude of departure expressed with previous:",
         ),
         dict(
             type="select",
@@ -114,26 +125,42 @@ def plotter(ctx: dict):
     station = ctx["station"]
     varname = ctx["var"]
     month = ctx["month"]
-    ctx["mag"] = abs(ctx["mag"])
 
     yr = "year as yr"
     months = month2months(month)
     if month == "winter":
-        yr = "extract(year from o.day - '60 days'::interval) as yr"
+        yr = "case when month = 12 then year + 1 else year end as yr"
 
-    metric = ""
-    smul = 0
-    offset = 0
-    if ctx["mag"] > 0:
-        if ctx["unit"] == "sigma":
-            metric = rf"{ctx['mag']}$\sigma$"
-            smul = ctx["mag"]
-        elif ctx["unit"] == "degrees":
-            metric = f"{ctx['mag']}°F"
-            offset = ctx["mag"]
     op = "+" if ctx["which"] == "above" else "-"
-    comp = ">" if ctx["which"] == "above" else "<"
-    which = "above" if ctx["which"] == "above" else "below"
+    comp = ">=" if ctx["which"] in ("above", "abs_above") else "<"
+
+    # The degrees case
+    high_sql = f"high {comp} (avg_high {op} :mag)"
+    low_sql = f"low {comp} (avg_low {op} :mag)"
+    avg_sql = f"(high+low)/2. {comp} (avg_temp {op} :mag)"
+    tt = f"{comp} {ctx['mag']}°F of Average"
+    # The sigma case
+    if ctx["unit"] == "sigma":
+        high_sql = f"high {comp} (avg_high {op} (stddev_high * :mag))"
+        low_sql = f"low {comp} (avg_low {op} (stddev_low * :mag))"
+        avg_sql = f"(high+low)/2. {comp} (avg_temp {op} (stddev_temp * :mag))"
+        tt = f"{comp} {ctx['mag']} Sigma of Average"
+    if ctx["which"].startswith("abs"):
+        # Ensure magnitude makes sense in this case
+        ctx["mag"] = abs(ctx["mag"])
+        if ctx["unit"] == "sigma":
+            high_sql = f"abs(high - avg_high) {comp} (stddev_high * :mag)"
+            low_sql = f"abs(low - avg_low) {comp} (stddev_low * :mag)"
+            avg_sql = (
+                f"abs((high+low)/2. - avg_temp) {comp} (stddev_temp * :mag)"
+            )
+            tt = f"{comp} +/- {ctx['mag']} Sigma of Average"
+        else:  # degrees
+            high_sql = f"abs(high - avg_high) {comp} :mag"
+            low_sql = f"abs(low - avg_low) {comp} :mag"
+            avg_sql = f"abs((high+low)/2. - avg_temp) {comp} :mag"
+            tt = f"{comp} +/- {ctx['mag']}°F of Average"
+
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -150,51 +177,47 @@ def plotter(ctx: dict):
             station = :station GROUP by sday)
 
         SELECT {yr},
-        sum(case when o.high {comp}
-        (a.avg_high {op} a.stddev_high * {smul} {op} {offset})
-            then 1 else 0 end) as high_{which},
-        sum(case when o.low {comp}
-        (a.avg_low {op} a.stddev_low * {smul} {op} {offset}) then 1 else 0 end
-        ) as low_{which},
-        sum(case when (o.high+o.low)/2. {comp}
-        (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset})
-            then 1 else 0 end) as avg_{which},
+        sum(case when {high_sql} then 1 else 0 end) as high_{which},
+        sum(case when {low_sql} then 1 else 0 end) as low_{which},
+        sum(case when {avg_sql} then 1 else 0 end) as avg_{which},
         count(*) as days from alldata o, avgs a WHERE o.station = :station
         and o.sday = a.sday and month = ANY(:months)
         GROUP by yr ORDER by yr ASC
         """,
                 yr=yr,
-                comp=comp,
-                op=op,
-                smul=str(smul),  # lame
-                offset=str(offset),  # lame
-                which=which,
+                which=ctx["which"],
+                high_sql=high_sql,
+                low_sql=low_sql,
+                avg_sql=avg_sql,
             ),
             conn,
             params={
                 "station": station,
                 "months": months,
+                "mag": ctx["mag"],
             },
             index_col="yr",
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    df["high_freq"] = df[f"high_{which}"] / df["days"].astype("f") * 100.0
-    df["low_freq"] = df[f"low_{which}"] / df["days"].astype("f") * 100.0
-    df["avg_freq"] = df[f"avg_{which}"] / df["days"].astype("f") * 100.0
+    df["high_freq"] = (
+        df[f"high_{ctx['which']}"] / df["days"].astype("f") * 100.0
+    )
+    df["low_freq"] = df[f"low_{ctx['which']}"] / df["days"].astype("f") * 100.0
+    df["avg_freq"] = df[f"avg_{ctx['which']}"] / df["days"].astype("f") * 100.0
 
     title = (
         f"{ctx['_sname']} "
-        f"{df.index.values.min()}-{df.index.values.max()} "
+        f"({df.index.values.min()}-{df.index.values.max()}) "
         f"{PDICT4[ctx['opt']]} of Days "
-        f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} Average"
+        f"with {PDICT[varname]} {tt}"
     )
     subtitle = (
         f"(month={month.upper()}) Using Period of Record Simple Climatology"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    suffix = f"_{which}" if ctx["opt"] == "number" else "_freq"
+    suffix = f"_{ctx['which']}" if ctx["opt"] == "number" else "_freq"
     avgv = df[varname + suffix].mean()
 
     colorabove = "r"
