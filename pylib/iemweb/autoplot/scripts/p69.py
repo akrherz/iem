@@ -14,6 +14,8 @@ do the combination of departures of both sides of average.</p>
 from datetime import date
 
 import pandas as pd
+from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
@@ -120,6 +122,55 @@ def get_description():
     return desc
 
 
+def make_cartoon(fig: Figure, ctx: dict):
+    """Draw a cartoon to show what data range is being plotted."""
+    ax = fig.add_axes((0.1, 0.8, 0.7, 0.04), frameon=False, yticks=[])
+    ax.set_title("Green areas show values used in frequency", fontsize=10)
+    ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
+    unit = "°F" if ctx["unit"] == "degrees" else " Sigma"
+    ax.set_xticklabels(
+        [
+            "- Inf",
+            f"Avg -{abs(ctx['mag'])}{unit}",
+            "Average",
+            f"Avg +{abs(ctx['mag'])}{unit}",
+            "+ Inf",
+        ]
+    )
+    box_colors = ["#fff", "#fff", "#fff", "#fff"]
+    # Yuck, but here we go...
+    if ctx["which"] == "above":
+        box_colors[3] = "#aaffaa"
+        if ctx["mag"] < 0:
+            box_colors[2] = "#aaffaa"
+            box_colors[1] = "#aaffaa"
+    elif ctx["which"] == "below":
+        box_colors[0] = "#aaffaa"
+        if ctx["mag"] > 0:
+            box_colors[1] = "#aaffaa"
+            box_colors[2] = "#aaffaa"
+    elif ctx["which"] == "abs_above":
+        box_colors[0] = "#aaffaa"
+        box_colors[3] = "#aaffaa"
+    elif ctx["which"] == "abs_below":
+        box_colors[1] = "#aaffaa"
+        box_colors[2] = "#aaffaa"
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    for i in range(4):
+        ax.add_patch(
+            Rectangle(
+                (0.25 * i, 0.0),
+                0.25,
+                1,
+                facecolor=box_colors[i],
+                edgecolor="k",
+                lw=2,
+                zorder=1,
+            )
+        )
+
+
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
@@ -131,19 +182,18 @@ def plotter(ctx: dict):
     if month == "winter":
         yr = "case when month = 12 then year + 1 else year end as yr"
 
-    op = "+" if ctx["which"] == "above" else "-"
     comp = ">=" if ctx["which"] in ("above", "abs_above") else "<"
 
     # The degrees case
-    high_sql = f"high {comp} (avg_high {op} :mag)"
-    low_sql = f"low {comp} (avg_low {op} :mag)"
-    avg_sql = f"(high+low)/2. {comp} (avg_temp {op} :mag)"
+    high_sql = f"high {comp} (avg_high + :mag)"
+    low_sql = f"low {comp} (avg_low + :mag)"
+    avg_sql = f"(high+low)/2. {comp} (avg_temp + :mag)"
     tt = f"{comp} {ctx['mag']}°F of Average"
     # The sigma case
     if ctx["unit"] == "sigma":
-        high_sql = f"high {comp} (avg_high {op} (stddev_high * :mag))"
-        low_sql = f"low {comp} (avg_low {op} (stddev_low * :mag))"
-        avg_sql = f"(high+low)/2. {comp} (avg_temp {op} (stddev_temp * :mag))"
+        high_sql = f"high {comp} (avg_high + (stddev_high * :mag))"
+        low_sql = f"low {comp} (avg_low + (stddev_low * :mag))"
+        avg_sql = f"(high+low)/2. {comp} (avg_temp + (stddev_temp * :mag))"
         tt = f"{comp} {ctx['mag']} Sigma of Average"
     if ctx["which"].startswith("abs"):
         # Ensure magnitude makes sense in this case
@@ -236,6 +286,9 @@ def plotter(ctx: dict):
         color=df["color"],
         table_col_title="Days" if ctx["opt"] == "number" else "Freq (%)",
     )
+    pos = ax.get_position()
+    ax.set_position((pos.x0, pos.y0, pos.width, pos.height - 0.15))
+    make_cartoon(fig, ctx)
     ax.axhline(avgv, lw=2, color="k", zorder=2)
     vv = f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}"
     ax.set_ylim(bottom=0)
