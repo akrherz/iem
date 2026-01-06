@@ -26,11 +26,11 @@ This page allows you to view the most recent iteration of these lapses. Please
 note the timestamp on the lapses, some of them may be old.</p>
 
 
-<div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
+<div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px;">
 <div class="flowplayer">
 <video>
-<source type="video/mp4" src="/onsite/lapses/auto/isu_curtis_center_sunrise.mp4">
-<source type="video/flv" src="/onsite/lapses/auto/isu_curtis_center_sunrise.flv">
+<source type="video/mp4" src="https://mesonet.agron.iastate.edu/onsite/lapses/auto/isu_curtis_center_sunrise.mp4">
+<source type="video/flv" src="https://mesonet.agron.iastate.edu/onsite/lapses/auto/isu_curtis_center_sunrise.flv">
 </video>
 </div>
 <form name="theform">
@@ -38,10 +38,10 @@ note the timestamp on the lapses, some of them may be old.</p>
 {$camselect}
 <strong>Select Lapse:</strong>
 <select id="mylapse" name="mylapse" onchange="myloader()">
- <option value="sunrise">Sunrise 
- <option value="morning">Morning (8 AM - 11 AM) 
+ <option value="sunrise">Sunrise
+ <option value="morning">Morning (8 AM - 11 AM)
  <option value="afternoon">Afternoon (1 PM - 4 PM)
- <option value="eve">Sunset 
+ <option value="eve">Sunset
  <option value="day">Full day
 </select>
 </div>
@@ -49,7 +49,7 @@ note the timestamp on the lapses, some of them may be old.</p>
 EOM;
 $t->jsextra = <<<EOM
 <script type="text/javascript" src="/vendor/flowplayer/7.2.6/flowplayer.min.js"></script>
-<script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="app.js?v=2"></script>
 EOM;
 
 $t->render('single.phtml');

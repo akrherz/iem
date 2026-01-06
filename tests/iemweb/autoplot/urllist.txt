@@ -125,6 +125,7 @@
 82/network:IACLIMATE::station:IATAME::var:max_tmpf::sdate:2023-05-11::edate:2023-08-14::_r:t::dpi:100.png
 82/network:IA_ASOS::station:DSM::var:max_tmpf::sdate:2024-03-01::edate:2026-01-05::layout:column::colorize:yes::cmap:jet.png
 82/network:IA_ASOS::station:AMW::var:high_departure::sdate:2024-02-01::edate:2025-01-05::layout:column::colorize:yes::cmap:YlGnBu::interval:-15,16,5::_r:t::dpi:100.png
+82/network:IA_ASOS::station:AMW::var:pday::sdate:2023-12-31::edate:2024-06-01::layout:column::colorize:yes::cmap:jet::interval:0,101,0.001::_r:t::dpi:100.png
 84/sector:conus::network:WFO::src:iemre::opt:dep::usdm:no::ptype:g::sdate:2023-01-01::edate:2023-01-02::clip:no::cmap:YlGnBu::_r:43::dpi:100.png
 84/sector:northeast::network:WFO::src:stage4::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-01::cmap:YlGnBu::_r:t::dpi:100.png
 84/sector:sengland::network:WFO::cwa:ALY::src:mrms::opt:dep::usdm:no::ptype:g::sdate:2024-11-10::edate:2024-10-10::cmap:YlGnBu::_r:t::dpi:100.png

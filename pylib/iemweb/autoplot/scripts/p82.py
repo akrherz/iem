@@ -312,8 +312,12 @@ def plotter(ctx: dict):
     data = {}
     cmap = get_cmap(ctx["cmap"])
     if ctx.get("interval", "") != "":
+        minv, maxv, interval = map(float, ctx["interval"].split(","))
+        # Prevent naughty requests
+        if maxv <= minv or (maxv - minv) / interval > 500:
+            raise NoDataFound("Invalid min,max,interval specified.")
         norm = BoundaryNorm(
-            np.arange(*map(float, ctx["interval"].split(","))),
+            np.arange(minv, maxv, interval),
             cmap.N,
         )
     else:

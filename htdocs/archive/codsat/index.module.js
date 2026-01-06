@@ -55,7 +55,7 @@ const elements = {
 /**
  * Initialize the application
  */
-function init() {
+async function init() {
     // Cache DOM elements
     elements.dateSelect = document.getElementById("dateSelect");
     elements.satelliteSelect = document.getElementById("satelliteSelect");
@@ -82,20 +82,32 @@ function init() {
     elements.imagesLoadedRow = document.getElementById("imagesLoadedRow");
     elements.shareBtn = document.getElementById("shareBtn");
 
-    // Set default date to today
-    const today = new Date().toISOString().split('T')[0];
-    elements.dateSelect.value = today;
-    elements.dateSelect.max = today;
+    // Set default date to yesterday (satellite data has delay)
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split('T')[0];
+
+    elements.dateSelect.value = yesterdayStr;
+    elements.dateSelect.max = todayStr;
 
     // Attach event listeners
     attachEventListeners();
 
-    // Load state from URL parameters if present
-    loadStateFromURL();
+    // Load state from URL parameters if present, otherwise trigger initial load
+    const hasURLParams = await loadStateFromURL();
+
+    // If no URL parameters, trigger initial date change to load data
+    if (!hasURLParams) {
+        state.date = yesterdayStr;
+        await handleDateChange();
+    }
 }
 
 /**
  * Load state from URL parameters
+ * @returns {Promise<boolean>} True if URL parameters were loaded
  */
 async function loadStateFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -136,7 +148,7 @@ async function loadStateFromURL() {
     }
 
     // If no date parameter, we're done
-    if (!urlState.date) return;
+    if (!urlState.date) return false;
 
     // Set date and trigger cascade
     elements.dateSelect.value = urlState.date;
@@ -147,6 +159,8 @@ async function loadStateFromURL() {
     } catch {
         // Silently fail - user can manually select options
     }
+
+    return true;
 }
 
 /**
