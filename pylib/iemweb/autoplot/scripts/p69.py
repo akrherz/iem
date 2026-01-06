@@ -129,7 +129,7 @@ def plotter(ctx: dict):
     yr = "year as yr"
     months = month2months(month)
     if month == "winter":
-        yr = "case(when month = 12 then year + 1 else year end) as yr"
+        yr = "case when month = 12 then year + 1 else year end as yr"
 
     op = "+" if ctx["which"] == "above" else "-"
     comp = ">=" if ctx["which"] in ("above", "abs_above") else "<"
