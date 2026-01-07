@@ -1,0 +1,56 @@
+/* Climap Application Styles */
+
+.map {
+    height: 70vh;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    position: relative;
+}
+
+.popover {
+    width: 320px;
+    max-width: 90vw;
+}
+
+.popover-body {
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Font size controls styling */
+.btn-group .btn.disabled {
+    pointer-events: none;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .map {
+        height: 50vh;
+    }
+    
+    .popover {
+        width: 280px;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+}

@@ -134,6 +134,7 @@ not be implied as an endorsement. Of course, you can just search google for
       <a href="/json/cf6.py?help">JSON</a></li>
       <li>CLI Data: <a href="/geojson/cli.py?help">GeoJSON</a> or
       <a href="/json/cli.py?help">JSON</a></li>
+      <li><a href="/geojson/coopobs.py?help">Daily COOP Obs GeoJSON</a></li>
       <li><a href="/geojson/lsr.py?help">Local Storm Reports</a></li>
       <li><a href="/geojson/nexrad_attr.py?help">NEXRAD Storm Attributes</a></li>
       <li><a href="/json/ibw_tags.py?help">Impact Based Warning Tags</a></li>
