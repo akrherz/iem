@@ -75,6 +75,9 @@ $o = Array(
 
 foreach($o as $key => $val)
 {
+    if (($key == "meteo") && preg_match('/COOP/', $network) > 0){
+        continue;
+    }
     if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
         continue;
     }
