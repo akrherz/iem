@@ -181,21 +181,21 @@ def process(ncfn):
         #  06019G23KT
         val = decision(i, "windDir", 15)
         if val is not None:
-            iem.data["drct"] = int(val)
+            iem.data["drct"] = round(val, 0)
             mtr += f"{iem.data['drct']:03.0f}"
         else:
             mtr += "///"
 
         val = decision(i, "windSpeed", 10)
         if val is not None:
-            iem.data["sknt"] = int(val)
+            iem.data["sknt"] = round(val, 0)
             mtr += f"{iem.data['sknt']:02.0f}"
         else:
             mtr += "//"
 
         val = decision(i, "windGust", 10)
         if val is not None and val > 0:
-            iem.data["gust"] = int(val)
+            iem.data["gust"] = round(val, 0)
             mtr += f"G{iem.data['gust']:02.0f}"
         mtr += "KT "
 
