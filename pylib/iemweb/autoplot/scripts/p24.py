@@ -317,7 +317,7 @@ def plotter(ctx: dict):
     cmap = get_cmap(ctx["cmap"])
     pvar = f"{ctx['var']}_{ctx['w']}"
     fmt = "%.2f"
-    if ctx["var"] == "sdd86":
+    if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
         fmt = "%.1f"
     if ctx["var"] == "aridity":
         bins = np.arange(-4, 4.1, 1)
