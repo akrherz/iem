@@ -59,7 +59,7 @@ def get_description():
     return desc
 
 
-def common(ctx):
+def common(ctx: dict):
     """Do things common to both plots."""
     station = ctx["station"]
     year = ctx["year"]
@@ -154,7 +154,7 @@ def common(ctx):
     ctx["df"] = df
 
 
-def do_precip_plot(ctx) -> bool:
+def do_precip_plot(ctx: dict) -> bool:
     """Make the precipitation plot."""
     hasdata = False
     ax = ctx["fig"].gca()
@@ -207,7 +207,7 @@ def do_precip_plot(ctx) -> bool:
     return hasdata
 
 
-def do_temperature_plot(ctx) -> bool:
+def do_temperature_plot(ctx: dict) -> bool:
     """Make the temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]
@@ -293,7 +293,7 @@ def do_temperature_plot(ctx) -> bool:
     return hasdata
 
 
-def do_dwpf_plot(ctx) -> bool:
+def do_dwpf_plot(ctx: dict) -> bool:
     """Make the dew point temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]

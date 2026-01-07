@@ -11,8 +11,9 @@ provides actual streaks and yearly maximum values.
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -49,32 +50,34 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection | None = None):
     """Go"""
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor()
     station = ctx["station"]
     varname = ctx["var"]
 
     rows = []
     for dy in range(1, 32):
-        ccursor.execute(
-            f"""
+        res = conn.execute(
+            sql_helper(
+                """
             with data as (
             select day,
             avg({varname}) OVER
-                (ORDER by day ASC rows between %s preceding and current row),
+                (ORDER by day ASC rows between :d1 preceding and current row),
             min({varname}) OVER
-                (ORDER by day ASC rows between %s preceding and current row),
+                (ORDER by day ASC rows between :d1 preceding and current row),
             max({varname}) OVER
-                (ORDER by day ASC rows between %s preceding and current row)
-            from alldata_{station[:2]} where station = %s)
+                (ORDER by day ASC rows between :d1 preceding and current row)
+            from alldata where station = :station)
         SELECT max(avg), min(avg), max(min), min(min), max(max), min(max)
         from data
         """,
-            (dy - 1, dy - 1, dy - 1, station),
+                varname=varname,
+            ),
+            {"d1": dy - 1, "station": station},
         )
-        row = ccursor.fetchone()
+        row = res.fetchone()
         rows.append(
             dict(
                 days=dy,

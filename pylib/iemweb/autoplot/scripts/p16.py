@@ -21,10 +21,10 @@ from iemweb.util import month2months
 
 PDICT = {
     "ts": "Thunderstorm (TS) Reported",
-    "tmpf_above": "Temperature At or Above Threshold (F)",
-    "tmpf_below": "Temperature Below Threshold (F)",
-    "dwpf_above": "Dew Point At or Above Threshold (F)",
-    "dwpf_below": "Dew Point Below Threshold (F)",
+    "tmpf_above": "Temperature At or Above Threshold (°F)",
+    "tmpf_below": "Temperature Below Threshold (°F)",
+    "dwpf_above": "Dew Point At or Above Threshold (°F)",
+    "dwpf_below": "Dew Point Below Threshold (°F)",
     "relh_above": "Relative Humidity At or Above Threshold (%)",
     "relh_below": "Relative Humidity Below Threshold (%)",
 }
@@ -100,7 +100,7 @@ def get_description():
         dict(
             type="int",
             name="threshold",
-            default="80",
+            default=80,
             label="Threshold (when appropriate):",
         ),
         dict(
