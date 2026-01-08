@@ -207,6 +207,8 @@ them.</p>
   <div class="card-header"><h2 class="h6 mb-0" id="card-coop">Cooperative Observer Program - COOP</h2></div>
   <div class="card-body">
 <ul>
+ <li><a href="/COOP/map/">Interactive map of COOP observations</a><br />
+  See daily observations plotted on an interactive map.</li>
  <li><a href="/nws/coop-cnts.php">Monthly COOP Frequency Reports</a><br />
   Quantity of observations received by variable for the COOP network.</li>
  <li><a href="/COOP/current.phtml">Sortable Current COOP Reports</a><br />

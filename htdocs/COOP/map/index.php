@@ -55,7 +55,7 @@ $t->content = <<<EOM
 
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+        <li class="breadcrumb-item"><a href="/COOP/">NWS COOP Mainpage</a></li>
         <li class="breadcrumb-item active" aria-current="page">Map of NWS Daily COOP Reports</li>
 </ol>
 </nav>

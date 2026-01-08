@@ -104,9 +104,9 @@ $dict = array(
 
     array(
         "img" => "thumb_map.png",
-        "url" => "/GIS/apps/coop/plot.phtml",
+        "url" => "/GIS/map/",
         "title" => "Map Daily Observations",
-        "desc" => "Generate maps of daily observations."
+        "desc" => "Interactive map of daily observations."
     ),
 
 );
@@ -180,7 +180,7 @@ $t->content = <<<EOM
 <h2 class="h4">Data + Summaries</h2>
 
 <ul>
- <li>A <a href="/data/gis/shape/4326/iem/coopobs.zip">GIS shapefile</a> is 
+ <li>A <a href="/data/gis/shape/4326/iem/coopobs.zip">GIS shapefile</a> is
  generated daily with the most recent set of COOP observation in it.</li>
  <li>A <a href="/data/csv/coop.csv">Comma Delimited File</a> of today's
  COOP observations.</li>
@@ -199,7 +199,7 @@ $t->content = <<<EOM
     <br>Pick your site, pick a time period, and download the data.</li>
   <li><a href="/COOP/cat.phtml">2004-<?php echo date("Y"); ?> Observations</a>
     <br />View all obs from 2004 to <?php echo date("Y"); ?> for one site or pick a date and view all sites!</li>
-  <li><a href="/climodat">ClimoDat Interface</a> 
+  <li><a href="/climodat">ClimoDat Interface</a>
     <br>Handy application to access summary COOP data.</li>
   <li><a href="/COOP/hpd.php">Fisher Porter Rain Gauge Download</a>
     <br />IEM processed data made available by NCEI for Iowa stations only.</li>
@@ -209,7 +209,7 @@ $t->content = <<<EOM
   <li><a href="dl/normals.phtml">Daily Climate Normals</a>
     <br>Download daily normal high and low temperatures and average rainfall.</li>
 </ul>
-  
+
 </aside>
 <div class="col-md-7" aria-labelledby="data-apps-heading">
     <h2 id="data-apps-heading" class="h4 mb-3">Data Applications</h2>
