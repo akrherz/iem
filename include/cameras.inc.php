@@ -9,7 +9,7 @@ $cached_cameras = cacheable("php/cameras.inc.php", 43200)(function(){
     $cameras = array();
     while ($row = pg_fetch_assoc($rs)) {
         $cameras[$row["id"]] = array(
-            "sts" => strtotime($row["sts"]),
+            "sts" => is_null($row["sts"]) ? time(): strtotime($row["sts"]),
             "ets" => ($row["ets"] === NULL) ? time() + 86400 :
                 strtotime($row["ets"]),
             "name" => $row["name"],

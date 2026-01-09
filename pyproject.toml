@@ -8,6 +8,7 @@ target-version = "py310"
 [tool.ruff.lint]
 select = [
     "A",  # builtins
+    # "ANN",  # annotations
     "ARG",  # unused args
     "ASYNC",  # async
     "B",  # bugbear

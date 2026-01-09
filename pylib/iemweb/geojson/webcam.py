@@ -138,9 +138,9 @@ def get_mckey(environ):
     schema=Schema,
     memcachekey=get_mckey,
     memcacheexpire=15,
-    content_tye="application/vnd.geo+json",
+    content_type="application/vnd.geo+json",
 )
-def application(environ, start_response):
+def application(environ: dict, start_response):
     """Do Main"""
     headers = [("Content-type", "application/vnd.geo+json")]
 

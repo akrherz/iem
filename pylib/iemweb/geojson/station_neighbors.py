@@ -49,18 +49,13 @@ class Schema(CGIModel):
         ..., description="IEM Station Identifier", max_length=30
     )
     distance: float = Field(
-        25.0,
+        default=25.0,
         description="Distance in kilometers to search for neighbors",
         gt=0,
         le=1000,
     )
     only_online: bool = Field(
-        False, description="Only include online stations"
-    )
-    fmt: str = Field(
-        default="geojson",
-        description="Output format (fixed to geojson).",
-        pattern=r"^geojson$",
+        default=False, description="Only include online stations"
     )
 
 
@@ -164,7 +159,7 @@ def get_mckey(environ) -> str:
     help=__doc__,
     schema=Schema,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response):
     """Main Workflow"""
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("mesosite") as conn:

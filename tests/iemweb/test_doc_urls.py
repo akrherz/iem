@@ -20,7 +20,7 @@ def get_mods_and_urls():
         mod = importlib.import_module(modname)
         doc = mod.__doc__
         # Typically apache mod_rewrite is not available
-        if doc.find("NODOCTEST") > 0:
+        if doc is None or doc.find("NODOCTEST") > 0:
             continue
         for line in doc.split("\n"):
             if not line.strip().startswith(

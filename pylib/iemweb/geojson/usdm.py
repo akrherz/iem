@@ -43,8 +43,14 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    date: dateobj = Field(None, description="Date to query for, YYYY-MM-DD")
+    callback: str = Field(
+        default=None, description="JSONP callback function name"
+    )
+    date: dateobj = Field(
+        default=None,
+        ge=dateobj(2000, 1, 1),
+        description="Date to query for, YYYY-MM-DD",
+    )
 
 
 def rectify_date(dt: dateobj):
@@ -65,7 +71,7 @@ def rectify_date(dt: dateobj):
     return dt - timedelta(days=offset)
 
 
-def run(ts):
+def run(ts: dateobj):
     """Actually do the hard work of getting the USDM in geojson"""
     utcnow = utc()
     with get_sqlalchemy_conn("postgis") as conn:

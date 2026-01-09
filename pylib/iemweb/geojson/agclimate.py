@@ -133,8 +133,6 @@ def get_inversion_data(conn, ts):
     )
     for row in res.mappings():
         sid = row["station"]
-        if sid not in nt.sts:
-            continue
         lon = nt.sts[sid]["lon"]
         lat = nt.sts[sid]["lat"]
         data["features"].append(

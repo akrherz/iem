@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 import click
 import numpy as np
 from metpy.units import units
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_daily_ncname
 from pyiem.meteorology import gdd
 from pyiem.util import convert_value, logger, ncopen
@@ -128,10 +128,13 @@ def copy_iemre(nc, ncdate0: date, ncdate1: date, islice, jslice):
             nc.variables["srad"][nt, :, :] = srad
 
 
-def tile_extraction(nc, valid, west, south, fullmode):
+def tile_extraction(nc, valid, west: float, south: float, fullmode):
     """Do our tile extraction"""
     # update model metadata
-    i, j = IEMRE.find_ij(west, south)
+    i, j = get_nav("IEMRE", "conus").find_ij(west, south)
+    if i is None or j is None:
+        LOG.warning("Failed to find i,j for %s %s", west, south)
+        return
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     if fullmode:
@@ -175,10 +178,10 @@ def workflow(valid, ncfn, west, south, fullmode):
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
 @click.option("--full", is_flag=True, help="Full replacement mode")
-def main(dt: datetime, full):
+def main(dt: datetime | None, full: bool):
     """Go Main Go"""
     if dt is not None:
-        dt = dt.date()
+        dt: date = dt.date()
     # Create tiles to cover 12 states
     progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
     for west in progress:

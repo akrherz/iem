@@ -28,7 +28,7 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb import error_log
 
-SIMULTANEOUS_REQUESTS = 30
+SIMULTANEOUS_REQUESTS: int = 30
 
 
 class Schema(CGIModel):

@@ -49,7 +49,7 @@ def workflow(tmpdir, valid, period, start_response):
     with archive_fetch(ppath) as fn:
         if fn is None:
             raise NoDataFound(f"File not found: {ppath}")
-        img = imread(fn, pilmode="P")
+        img = imread(fn, mode="P")
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones(size, np.uint16) * 65535
