@@ -8,7 +8,6 @@ https://www.ncei.noaa.gov/pub/download/hidden/onemin/
 NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
 
-import codecs
 import os
 import re
 import subprocess
@@ -225,7 +224,7 @@ def dl_archive(df, dt):
 
 def liner(fn):
     """Hacky."""
-    return codecs.open(fn, "r", "utf-8", "ignore")
+    return open(fn, encoding="utf-8", errors="ignore")
 
 
 def runner(pgconn, metadata, station):

@@ -15,9 +15,9 @@ Changelog
 Example Requests
 ----------------
 
-Get reports for 7 AM on 1 July 2024
+Return COOP reports valid 22 Oct 2024
 
-https://mesonet.agron.iastate.edu/geojson/coopobs.py?valid=2024-07-01
+https://mesonet.agron.iastate.edu/geojson/coopobs.py?valid=2024-10-22
 
 """
 

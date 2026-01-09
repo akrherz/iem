@@ -243,12 +243,12 @@ def get_mckey(environ: dict):
 
 @iemapp(
     help=__doc__,
-    content_tye="application/json",
+    content_type="application/json",
     schema=Schema,
     memcachekey=get_mckey,
     memcacheexpire=3600,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response):
     """Go Main Go"""
     begin_ts = utc()
     model: Schema = environ["_cgimodel_schema"]

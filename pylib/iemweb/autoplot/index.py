@@ -251,7 +251,7 @@ def vtec_ps_handler(fdict, arg):
     return s
 
 
-def cmap_handler(fdict, value, arg, res):
+def cmap_handler(fdict: dict, value: str, arg: dict, res: dict) -> str:
     """Our fancy pants cmap handler."""
     reverse_on = fdict.get(f"{arg['name']}_r", "off") == "on"
     if value.endswith("_r"):
@@ -267,7 +267,8 @@ def cmap_handler(fdict, value, arg, res):
     checked = ' checked="checked"' if reverse_on else ""
     s += (
         f'&nbsp; <input type="checkbox" name="{arg["name"]}_r" '
-        f'value="on"{checked}> Reverse Colormap?'
+        f'id="{arg["name"]}_r" value="on"{checked}> '
+        f'<label for="{arg["name"]}_r">Reverse Colormap?</label>'
     )
     res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
     return s
