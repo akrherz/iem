@@ -284,6 +284,7 @@ def plotter(ctx: dict):
     sdate = ctx.get("sdate")
 
     fig = None
+    df = pd.DataFrame()
     if ctx["network"].find("COOP") == -1:
         tzname = ctx["_nt"].sts[station]["tzname"] or "America/Chicago"
         df = get_data(ctx["network"], station, tzname, sdate).reset_index()
