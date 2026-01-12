@@ -13,6 +13,7 @@ import pandas as pd
 from matplotlib import ticker
 from matplotlib.artist import setp
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -138,7 +139,7 @@ def ceilingfunc(row: dict) -> float:
     return larr[pos] / 1000.0
 
 
-def plot_df(ctx: dict, df: pd.DataFrame, tzname: str):
+def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
     """Do some plotting."""
     df["time_delta"] = (
         df["utc_valid"] - df.shift(1)["utc_valid"]
@@ -274,6 +275,7 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str):
     ax.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax2.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax.grid(True)
+    return fig
 
 
 def plotter(ctx: dict):
