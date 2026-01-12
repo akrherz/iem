@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import ticker
 from matplotlib.artist import setp
+from matplotlib.axes import Axes
 from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -24,7 +25,7 @@ PDICT = {
 }
 
 
-def date_ticker(ax, mytz):
+def date_ticker(ax: Axes, mytz):
     """Timestamp formatter"""
     (xmin, xmax) = ax.get_xlim()
     if xmin < 1:
@@ -125,38 +126,24 @@ def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
     raise NoDataFound("No data was found for this site.")
 
 
-def plotter(ctx: dict):
-    """Go"""
-    station = ctx["station"]
-    sdate = ctx.get("sdate")
-    plot_type = ctx["p"]
+def ceilingfunc(row: dict) -> float:
+    """Our logic to compute a ceiling"""
+    c = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
+    if "OVC" not in c:
+        return np.nan
+    pos = c.index("OVC")
+    larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
+    if pd.isnull(larr[pos]):
+        return None
+    return larr[pos] / 1000.0
 
-    if not ctx["_nt"].sts:
-        raise NoDataFound(
-            f"Network Identifier {ctx['network']} is unknown to IEM"
-        )
-    if ctx["network"].find("COOP") > -1:
-        raise NoDataFound("This plot type does not work for COOP.")
-    tzname = ctx["_nt"].sts[station]["tzname"] or "America/Chicago"
 
-    df = get_data(ctx["network"], station, tzname, sdate).reset_index()
-    if df.empty:
-        raise NoDataFound("No data was found!")
+def plot_df(ctx: dict, df: pd.DataFrame, tzname: str):
+    """Do some plotting."""
     df["time_delta"] = (
         df["utc_valid"] - df.shift(1)["utc_valid"]
     ).dt.total_seconds()
     df = df.set_index("utc_valid")
-
-    def ceilingfunc(row: dict) -> float:
-        """Our logic to compute a ceiling"""
-        c = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
-        if "OVC" not in c:
-            return np.nan
-        pos = c.index("OVC")
-        larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
-        if pd.isnull(larr[pos]):
-            return None
-        return larr[pos] / 1000.0
 
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 
@@ -251,7 +238,7 @@ def plotter(ctx: dict):
 
     # _________ PLOT 3 ____
     ax = fig.add_axes((xalign, 0.1, xwidth, 0.25))
-    if plot_type == "default":
+    if ctx["p"] == "default":
         ax2 = ax.twinx()
         ax2.scatter(
             df.index.values,
@@ -273,7 +260,7 @@ def plotter(ctx: dict):
         )
         ax.set_ylabel("Visibility [miles]")
         ax.set_ylim(0, 14)
-    elif plot_type == "two":
+    elif ctx["p"] == "two":
         df2 = df[(df["alti"] > 20.0) & (df["alti"] < 40.0)]
         ax.grid(True)
         vals = (df2["alti"].values * units("inch_Hg")).to(units("hPa")).m
@@ -287,5 +274,30 @@ def plotter(ctx: dict):
     ax.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax2.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax.grid(True)
+
+
+def plotter(ctx: dict):
+    """This autoplot gets hit a lot, so we attempt to always generate."""
+    station = ctx["station"]
+    sdate = ctx.get("sdate")
+
+    fig = None
+    if ctx["network"].find("COOP") == -1:
+        tzname = ctx["_nt"].sts[station]["tzname"] or "America/Chicago"
+        df = get_data(ctx["network"], station, tzname, sdate).reset_index()
+        if not df.empty:
+            fig = plot_df(ctx, df, tzname)
+    if fig is None:
+        fig = figure(
+            title=f"{ctx['_sname']} Recent Time Series",
+            apctx=ctx,
+        )
+        fig.text(
+            0.5,
+            0.5,
+            "No recent data available for this station.",
+            ha="center",
+            va="center",
+        )
 
     return fig, df

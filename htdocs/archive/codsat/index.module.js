@@ -49,7 +49,9 @@ const elements = {
     imageCount: null,
     loadingRow: null,
     imagesLoadedRow: null,
-    shareBtn: null
+    shareBtn: null,
+    statusIndicator: null,
+    statusMessage: null
 };
 
 /**
@@ -81,6 +83,8 @@ async function init() {
     elements.loadingRow = document.getElementById("loadingRow");
     elements.imagesLoadedRow = document.getElementById("imagesLoadedRow");
     elements.shareBtn = document.getElementById("shareBtn");
+    elements.statusIndicator = document.getElementById("statusIndicator");
+    elements.statusMessage = document.getElementById("statusMessage");
 
     // Set default date to yesterday (satellite data has delay)
     const today = new Date();
@@ -379,6 +383,30 @@ async function handleDateChange() {
     const date = elements.dateSelect.value;
     if (!date) return;
 
+    // Validate date format is complete (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return;
+    }
+
+    // Validate date is a valid date
+    const selectedDate = new Date(date);
+    if (Number.isNaN(selectedDate.getTime())) {
+        return;
+    }
+
+    // Validate date is not before minimum date (2017-04-15)
+    const minDate = new Date('2017-04-15');
+    if (selectedDate < minDate) {
+        return;
+    }
+
+    // Validate date is not in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate > today) {
+        return;
+    }
+
     state.date = date;
     state.satellite = null;
     state.sectorType = null;
@@ -627,13 +655,16 @@ function extractTimestamp(filename) {
  * Fetch directory listing by parsing HTML
  */
 async function fetchDirectoryListing(url) {
+    showStatus(`Fetching directory listing ${url}`, 'info');
     try {
         const response = await fetch(url);
         if (!response.ok) {
+            showStatus(`URL failed (${response.status}) ${url}`, 'danger');
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const html = await response.text();
+        showStatus(`Successfully fetched directory listing ${url}`, 'success');
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const links = doc.querySelectorAll('a');
@@ -648,9 +679,26 @@ async function fetchDirectoryListing(url) {
         });
 
         return dirs.sort();
-    } catch {
+    } catch (error) {
+        // Only show status if it wasn't already shown (avoid duplicate messages)
+        if (!error.message.includes('HTTP error')) {
+            showStatus(`Unable to load directory listing from ${url}`, 'danger');
+        }
         return [];
     }
+}
+
+/**
+ * Show status message
+ * @param {string} message - Status message to display
+ * @param {string} type - Bootstrap alert type: info, success, danger, warning
+ */
+function showStatus(message, type = 'info') {
+    if (!elements.statusIndicator || !elements.statusMessage) return;
+
+    elements.statusMessage.textContent = message;
+    elements.statusIndicator.className = `alert alert-${type} mb-3`;
+    elements.statusIndicator.style.display = 'block';
 }
 
 /**
@@ -680,24 +728,52 @@ function populateSelect(selectElement, options, placeholder) {
     });
 }
 
+// Label mappings for satellite products
+const PRODUCT_LABELS = {
+    // Product names
+    'natcolor': 'Natural Color',
+    'natcolorfire': 'Natural Color + Fire',
+    'truecolor': 'True Color',
+    'airmass': 'Air Mass',
+    'dcphase': 'Day Cloud Phase',
+    'ntmicro': 'Night Microphysics',
+    'sandwich': 'Sandwich',
+    'simplewv': 'Simple Water Vapor',
+    'abi01': 'Visible Blue (abi01)',
+    'abi02': 'Visible Red (abi02)',
+    'abi03': 'Veggie NIR (abi03)',
+    'abi04': 'Cirrus NIR (abi04)',
+    'abi05': 'Snow/Ice NIR (abi05)',
+    'abi06': 'Particle Size (abi06)',
+    'abi07': 'Shortwave IR (abi07)',
+    'abi08': 'Upper-level WV (abi08)',
+    'abi09': 'Mid-level WV (abi09)',
+    'abi10': 'Lower-level WV (abi10)',
+    'abi11': 'Cloud Top Phase (abi11)',
+    'abi12': 'Ozone (abi12)',
+    'abi13': 'Clean LWIR (abi13)',
+    'abi14': 'Long-wave IR (abi14)',
+    'abi15': 'Dirty LWIR (abi15)',
+    'abi16': 'CO2 LWIR (abi16)'
+};
+
 /**
  * Format option text for display
  */
 function formatOptionText(text) {
-    // Capitalize and format common patterns
-    const formatted = text
-        .replace(/^abi(\d+)$/, 'ABI Band $1')
-        .replace(/^goes(\d+)$/, 'GOES-$1')
-        .replace(/natcolor/, 'Natural Color')
-        .replace(/natcolorfire/, 'Natural Color + Fire')
-        .replace(/truecolor/, 'True Color')
-        .replace(/airmass/, 'Air Mass')
-        .replace(/dcphase/, 'Day Cloud Phase')
-        .replace(/ntmicro/, 'Night Microphysics')
-        .replace(/sandwich/, 'Sandwich')
-        .replace(/simplewv/, 'Simple Water Vapor');
+    // Check for GOES satellite pattern: goes16, goes17, etc.
+    const goesMatch = text.match(/^goes(\d+)$/);
+    if (goesMatch) {
+        return `GOES-${goesMatch[1]}`;
+    }
 
-    return formatted;
+    // Look up in product labels dictionary
+    if (PRODUCT_LABELS[text]) {
+        return PRODUCT_LABELS[text];
+    }
+
+    // Return original text if no match
+    return text;
 }
 
 /**
