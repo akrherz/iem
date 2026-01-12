@@ -9,7 +9,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/archive/codsat/index.css"/>
 EOM;
 $t->jsextra = <<<EOM
-<script src="/archive/codsat/index.module.js?v=4" type="module"></script>
+<script src="/archive/codsat/index.module.js?v=5" type="module"></script>
 EOM;
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
@@ -31,6 +31,12 @@ powered by the <a href="https://weather.cod.edu/satrad/" target="_blank">College
     continue to use the excellent CoD website for real-time viewing!
 </div>
 
+<div id="statusIndicator" class="alert alert-info mb-3" style="display: none;">
+    <small>
+        <strong>Status:</strong> <span id="statusMessage"></span>
+    </small>
+</div>
+
 <div class="row">
     <div class="col-lg-4 col-xl-3">
         <div class="card mb-3">
@@ -40,8 +46,8 @@ powered by the <a href="https://weather.cod.edu/satrad/" target="_blank">College
             <div class="card-body">
                 <form id="selectionForm">
                     <div class="mb-3">
-                        <label for="dateSelect" class="form-label">Date (UTC):</label>
-                        <input type="date" class="form-control" id="dateSelect" min="2018-01-04" required>
+                        <label for="dateSelect" class="form-label">Date (UTC) [since 15 Apr 2017]:</label>
+                        <input type="date" class="form-control" id="dateSelect" min="2017-04-15" required>
                         <small class="form-text text-muted">Select date to browse available imagery</small>
                     </div>
 
