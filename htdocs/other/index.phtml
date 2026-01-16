@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 25);
 require_once "../../include/myview.php";
@@ -12,12 +12,12 @@ $y1select = yearSelect(2012, 2012, "year1");
 $m1select = monthSelect(1, "month1");
 $d1select = daySelect(1, "day1");
 $y2select = yearSelect(2012, date("Y"), "year2");
-$y242select = yearSelect(2024, 2024, "year1");
+$y24select = yearSelect(2024, 2024, "year1");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect(date("d"), "day2");
 $y12select = yearSelect(2003, 2003, "year1");
 $y22select = yearSelect(2003, date("Y"), "year2");
-$y24select = yearSelect(2024, date("Y"), "year2");
+$y242select = yearSelect(2024, date("Y"), "year2");
 $y13select = yearSelect(2013, 2013, "year1");
 $y23select = yearSelect(2013, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
@@ -69,7 +69,7 @@ are freely available to others.
 <input type="hidden" name="opt" value="bubbler" />
 <table class="table table-bordered">
 <tr>
- <th>Start Date:</th> 
+ <th>Start Date:</th>
   <td>{$y1select}</td>
   <td>{$m1select}</td>
   <td>{$d1select}</td></tr>
@@ -105,7 +105,7 @@ are freely available to others.
    <option value="9100135">SSP #8</option>
   </select>
   </td>
-  <th>Start Date:</th> 
+  <th>Start Date:</th>
   <td>{$y1select}</td>
   <td>{$m1select}</td>
   <td>{$d1select}</td></tr>
@@ -137,7 +137,7 @@ are freely available to others.
         <form name="purple" action="/cgi-bin/request/purpleair.py">
         <table class="table table-bordered">
         <tr>
-         <th>Start Date:</th> 
+         <th>Start Date:</th>
           <td>{$y24select}</td>
           <td>{$m1select}</td>
           <td>{$d1select}</td></tr>
@@ -167,7 +167,7 @@ are freely available to others.
         <form name="feel" action="/cgi-bin/request/feel.py">
         <table class="table table-bordered">
         <tr>
-         <th>Start Date:</th> 
+         <th>Start Date:</th>
           <td>{$y13select}</td>
           <td>{$m1select}</td>
           <td>{$d1select}</td></tr>
@@ -192,7 +192,7 @@ are freely available to others.
         <form name="dl" action="/cgi-bin/request/other.py">
         <table class="table table-sm table-bordered">
         <tr><th rowspan="2">Select Location: {$nselect}</th>
-         <th>Start Date:</th> 
+         <th>Start Date:</th>
           <td>{$y12select}</td>
           <td>{$m1select}</td>
           <td>{$d1select}</td></tr>
