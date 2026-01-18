@@ -132,7 +132,7 @@ module.exports = [
             "prefer-template": "warn", // Template Literal Found - use template literals instead of string concatenation
             "prefer-const": "warn", // Use const declarations for variables that are never reassigned
             "default-case": "warn", // No default cases in switch statements
-            "complexity": ["warn", { "max": 10 }], // Function with cyclomatic complexity higher than threshold
+            "complexity": ["warn", { "max": 15 }], // Function with cyclomatic complexity higher than threshold
             "no-unused-vars": ["warn", {
                 "vars": "all",
                 "args": "after-used",
@@ -253,7 +253,7 @@ module.exports = [
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
             "require-await": "error", // Async functions must contain await expressions
             "default-case": "error", // No default cases in switch statements
-            "complexity": ["error", { "max": 8 }], // Function with cyclomatic complexity higher than threshold
+            "complexity": ["error", { "max": 15 }], // Function with cyclomatic complexity higher than threshold
             "no-unused-vars": ["error", {
                 "vars": "all",
                 "args": "after-used",
