@@ -27,6 +27,8 @@ const state = {
 // DOM elements
 const elements = {
     dateSelect: null,
+    datePrevBtn: null,
+    dateNextBtn: null,
     satelliteSelect: null,
     sectorTypeSelect: null,
     sectorSelect: null,
@@ -60,6 +62,8 @@ const elements = {
 async function init() {
     // Cache DOM elements
     elements.dateSelect = document.getElementById("dateSelect");
+    elements.datePrevBtn = document.getElementById("datePrevBtn");
+    elements.dateNextBtn = document.getElementById("dateNextBtn");
     elements.satelliteSelect = document.getElementById("satelliteSelect");
     elements.sectorTypeSelect = document.getElementById("sectorTypeSelect");
     elements.sectorSelect = document.getElementById("sectorSelect");
@@ -95,6 +99,7 @@ async function init() {
 
     elements.dateSelect.value = yesterdayStr;
     elements.dateSelect.max = todayStr;
+    updateDateNavButtons();
 
     // Attach event listeners
     attachEventListeners();
@@ -157,6 +162,7 @@ async function loadStateFromURL() {
     // Set date and trigger cascade
     elements.dateSelect.value = urlState.date;
     state.date = urlState.date;
+    updateDateNavButtons();
 
     try {
         await loadCascadingSelections(urlState);
@@ -329,7 +335,9 @@ function updateURL() {
  * Attach all event listeners
  */
 function attachEventListeners() {
-    elements.dateSelect.addEventListener("change", handleDateChange);
+    elements.dateSelect.addEventListener("change", () => handleDateChange({ preserveSelections: true }));
+    elements.datePrevBtn.addEventListener("click", () => shiftDateByDays(-1));
+    elements.dateNextBtn.addEventListener("click", () => shiftDateByDays(1));
     elements.satelliteSelect.addEventListener("change", handleSatelliteChange);
     elements.sectorTypeSelect.addEventListener("change", handleSectorTypeChange);
     elements.sectorSelect.addEventListener("change", handleSectorChange);
@@ -379,7 +387,8 @@ function attachEventListeners() {
 /**
  * Handle date selection change
  */
-async function handleDateChange() {
+async function handleDateChange(options = {}) {
+    const { preserveSelections = true } = options;
     const date = elements.dateSelect.value;
     if (!date) return;
 
@@ -388,35 +397,37 @@ async function handleDateChange() {
         return;
     }
 
-    // Validate date is a valid date
-    const selectedDate = new Date(date);
-    if (Number.isNaN(selectedDate.getTime())) {
+    if (!isDateWithinBounds(date)) {
         return;
     }
 
-    // Validate date is not before minimum date (2017-04-15)
-    const minDate = new Date('2017-04-15');
-    if (selectedDate < minDate) {
-        return;
-    }
-
-    // Validate date is not in the future
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (selectedDate > today) {
-        return;
-    }
+    const previousSelections = {
+        satellite: state.satellite,
+        sectorType: state.sectorType,
+        sector: state.sector,
+        plotType: state.plotType
+    };
 
     state.date = date;
-    state.satellite = null;
-    state.sectorType = null;
-    state.sector = null;
-    state.plotType = null;
     state.images = [];
+    state.currentIndex = 0;
 
     resetUI();
     showRow("satelliteRow");
     updateURL();
+    updateDateNavButtons();
+
+    if (preserveSelections) {
+        const preserved = await restoreSelectionsForDate(date, previousSelections);
+        if (preserved) {
+            return;
+        }
+    }
+
+    state.satellite = null;
+    state.sectorType = null;
+    state.sector = null;
+    state.plotType = null;
 
     try {
         const satellites = await fetchAvailableSatellites(date);
@@ -425,6 +436,152 @@ async function handleDateChange() {
     } catch {
         showError(elements.satelliteSelect, "Failed to load satellites");
     }
+}
+
+/**
+ * Attempt to restore the previous selections for a new date
+ * @returns {Promise<boolean>} True if restoration was attempted
+ */
+async function restoreSelectionsForDate(date, selections) {
+    const satellites = await fetchAvailableSatellites(date);
+    populateSelect(elements.satelliteSelect, satellites, "Select satellite...");
+    elements.satelliteSelect.disabled = false;
+
+    if (!selections.satellite || !satellites.includes(selections.satellite)) {
+        return false;
+    }
+
+    elements.satelliteSelect.value = selections.satellite;
+    state.satellite = selections.satellite;
+
+    hideFromRow("sectorTypeRow");
+    showRow("sectorTypeRow");
+    const sectorTypes = await fetchAvailableSectorTypes(date, selections.satellite);
+    populateSelect(elements.sectorTypeSelect, sectorTypes, "Select sector type...");
+    elements.sectorTypeSelect.disabled = false;
+
+    if (!selections.sectorType || !sectorTypes.includes(selections.sectorType)) {
+        return true;
+    }
+
+    elements.sectorTypeSelect.value = selections.sectorType;
+    state.sectorType = selections.sectorType;
+
+    hideFromRow("sectorRow");
+    showRow("sectorRow");
+    const sectors = await fetchAvailableSectors(date, selections.satellite, selections.sectorType);
+    populateSelect(elements.sectorSelect, sectors, "Select sector...");
+    elements.sectorSelect.disabled = false;
+
+    if (!selections.sector || !sectors.includes(selections.sector)) {
+        return true;
+    }
+
+    elements.sectorSelect.value = selections.sector;
+    state.sector = selections.sector;
+
+    hideFromRow("plotTypeRow");
+    showRow("plotTypeRow");
+    const plotTypes = await fetchAvailablePlotTypes(
+        date,
+        selections.satellite,
+        selections.sectorType,
+        selections.sector
+    );
+    populateSelect(elements.plotTypeSelect, plotTypes, "Select plot type...");
+    elements.plotTypeSelect.disabled = false;
+
+    if (!selections.plotType || !plotTypes.includes(selections.plotType)) {
+        return true;
+    }
+
+    elements.plotTypeSelect.value = selections.plotType;
+    state.plotType = selections.plotType;
+
+    await loadImagesForSelection();
+    return true;
+}
+
+/**
+ * Update the date navigation buttons based on the current date value
+ */
+function updateDateNavButtons() {
+    const currentDate = elements.dateSelect.value;
+    if (!currentDate || !elements.datePrevBtn || !elements.dateNextBtn) return;
+
+    const minDate = elements.dateSelect.min || "2017-04-15";
+    const maxDate = elements.dateSelect.max;
+
+    const prevDate = addDaysToDateString(currentDate, -1);
+    const nextDate = addDaysToDateString(currentDate, 1);
+
+    elements.datePrevBtn.disabled = !prevDate || (minDate && prevDate < minDate);
+    elements.dateNextBtn.disabled = !nextDate || (maxDate && nextDate > maxDate);
+}
+
+/**
+ * Shift the currently selected date by a number of days
+ */
+function shiftDateByDays(days) {
+    const currentDate = elements.dateSelect.value || state.date;
+    if (!currentDate) return;
+
+    const newDate = addDaysToDateString(currentDate, days);
+    if (!newDate || !isDateWithinBounds(newDate)) return;
+
+    elements.dateSelect.value = newDate;
+    updateDateNavButtons();
+    handleDateChange({ preserveSelections: true });
+}
+
+/**
+ * Parse YYYY-MM-DD string to Date without timezone shifts
+ */
+function parseDateISO(dateStr) {
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+        return null;
+    }
+    return new Date(year, month, day);
+}
+
+/**
+ * Format Date to YYYY-MM-DD
+ */
+function formatDateISO(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Add days to a YYYY-MM-DD date string
+ */
+function addDaysToDateString(dateStr, days) {
+    const date = parseDateISO(dateStr);
+    if (!date) return null;
+    date.setDate(date.getDate() + days);
+    return formatDateISO(date);
+}
+
+/**
+ * Validate date is within input min/max bounds
+ */
+function isDateWithinBounds(dateStr) {
+    const selectedDate = parseDateISO(dateStr);
+    if (!selectedDate) return false;
+
+    const minDate = elements.dateSelect.min ? parseDateISO(elements.dateSelect.min) : null;
+    const maxDate = elements.dateSelect.max ? parseDateISO(elements.dateSelect.max) : null;
+
+    if (minDate && selectedDate < minDate) return false;
+    if (maxDate && selectedDate > maxDate) return false;
+    return true;
 }
 
 /**
@@ -850,7 +1007,6 @@ function renderTimeline() {
 
     // Track which indices have dots rendered (for updateTimelinePosition)
     const renderedIndices = new Set();    // Draw dots for each frame
-    // eslint-disable-next-line complexity
     state.images.forEach((image, index) => {
         // Always show first, last, and current frame
         const isFirst = index === 0;
@@ -982,55 +1138,71 @@ function updateTimelinePosition() {
 
         svg.appendChild(dot);
     }
-}/**
+}
+/**
  * Handle keyboard shortcuts
  */
-// eslint-disable-next-line complexity
 function handleKeyboardInput(e) {
     // Ignore if focus is on an input or select
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
+    if (handleShiftDayNavigation(e)) return;
+
     if (state.images.length === 0) return;
 
-    switch (e.key) {
-        case 'ArrowLeft': {
-            stopAnimation();
-            let prevIndex = state.currentIndex - state.skipFrames;
-            if (prevIndex < 0) {
-                prevIndex = state.loop ? state.images.length - 1 : 0;
-            }
-            loadImage(prevIndex);
-            break;
-        }
-        case 'ArrowRight': {
-            stopAnimation();
-            let nextIndex = state.currentIndex + state.skipFrames;
-            if (nextIndex >= state.images.length) {
-                nextIndex = state.loop ? 0 : state.images.length - 1;
-            }
-            loadImage(nextIndex);
-            break;
-        }
-        case ' ': // Spacebar
-            e.preventDefault(); // Prevent scrolling
-            if (state.isPlaying) {
-                stopAnimation();
-            } else {
-                playAnimation();
-            }
-            break;
-        case 'Home':
-            stopAnimation();
-            loadImage(0);
-            break;
-        case 'End':
-            stopAnimation();
-            loadImage(state.images.length - 1);
-            break;
-        default:
-            // No action for other keys
-            break;
+    const handlers = {
+        ArrowLeft: () => handleFrameStep(-1),
+        ArrowRight: () => handleFrameStep(1),
+        Home: handleFirstFrame,
+        End: handleLastFrame,
+        ' ': () => handlePlayPause(e)
+    };
+
+    const handler = handlers[e.key];
+    if (handler) {
+        handler();
     }
+}
+
+function handleShiftDayNavigation(e) {
+    if (!e.shiftKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) {
+        return false;
+    }
+
+    e.preventDefault();
+    shiftDateByDays(e.key === 'ArrowLeft' ? -1 : 1);
+    return true;
+}
+
+function handleFrameStep(direction) {
+    stopAnimation();
+    let nextIndex = state.currentIndex + (direction * state.skipFrames);
+    if (nextIndex < 0) {
+        nextIndex = state.loop ? state.images.length - 1 : 0;
+    }
+    if (nextIndex >= state.images.length) {
+        nextIndex = state.loop ? 0 : state.images.length - 1;
+    }
+    loadImage(nextIndex);
+}
+
+function handlePlayPause(event) {
+    event.preventDefault(); // Prevent scrolling
+    if (state.isPlaying) {
+        stopAnimation();
+    } else {
+        playAnimation();
+    }
+}
+
+function handleFirstFrame() {
+    stopAnimation();
+    loadImage(0);
+}
+
+function handleLastFrame() {
+    stopAnimation();
+    loadImage(state.images.length - 1);
 }
 
 /**
