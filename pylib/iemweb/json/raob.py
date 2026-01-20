@@ -54,6 +54,7 @@ class Schema(CGIModel):
         description="3(assuming K***) or 4 char Station Identifier",
         min_length=3,
         max_length=4,
+        pattern="^[A-Z0-9_]{3,4}$",
     )
     ts: datetime = Field(
         ...,
@@ -80,9 +81,7 @@ class Schema(CGIModel):
     @classmethod
     def rectify_station(cls, value):
         """Ensure we have a valid station identifier."""
-        if len(value) == 3:
-            return f"K{value}"
-        return value
+        return value if len(value) == 4 else f"K{value}"
 
 
 def safe(val):

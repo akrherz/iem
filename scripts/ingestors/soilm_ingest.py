@@ -527,12 +527,13 @@ def daily_process(nwsli, maxts):
         if valid not in EVENTS["days"]:
             EVENTS["days"].append(valid)
         ob.data["et_inch"] = mm2inch(row["dailyet_qc"])
+        # pyiem observation could turn this value into `None`
         ob.data["srad_mj"] = row["slrkj_tot_qc"] / 1000.0
         # Someday check if this is apples to apples here
         ob.data["vector_avg_drct"] = row["winddir_d1_wvt_qc"]
         if ob.data["max_tmpf"] is None:
             EVENTS["reprocess_temps"] = True
-        if ob.data["srad_mj"] == 0 or np.isnan(ob.data["srad_mj"]):
+        if ob.data["srad_mj"] == 0 or pd.isna(ob.data["srad_mj"]):
             LOG.info(
                 "soilm_ingest.py station: %s ts: %s has 0 solar",
                 nwsli,
