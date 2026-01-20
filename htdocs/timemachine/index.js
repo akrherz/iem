@@ -62,6 +62,9 @@ function setProduct(pid) {
 
 function addproducts(data) {
     const pp = document.querySelector('select[name=products]');
+    // Accessibility: Add ARIA label and role to product select
+    pp.setAttribute('aria-label', 'Product Selection');
+    pp.setAttribute('role', 'listbox');
     let groupname = '';
     let optgroup = null;
 
@@ -87,15 +90,29 @@ function addproducts(data) {
 
 function updateTimeDisplay() {
     // Update the time display elements
-    document.getElementById('year-value').textContent = dt.year();
-    document.getElementById('month-value').textContent = dt.format('MMM');
-    document.getElementById('day-value').textContent = dt.format('D');
+    // Accessibility: Add ARIA live region to time display
+    const yearElem = document.getElementById('year-value');
+    const monthElem = document.getElementById('month-value');
+    const dayElem = document.getElementById('day-value');
+    const hourElem = document.getElementById('hour-value');
+    const minuteElem = document.getElementById('minute-value');
+
+    yearElem.textContent = dt.year();
+    monthElem.textContent = dt.format('MMM');
+    dayElem.textContent = dt.format('D');
 
     const hour = dt.local().hour();
     const period = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
-    document.getElementById('hour-value').textContent = `${hour12} ${period}`;
-    document.getElementById('minute-value').textContent = dt.format('mm');
+    hourElem.textContent = `${hour12} ${period}`;
+    minuteElem.textContent = dt.format('mm');
+
+    // Set ARIA attributes for live update
+    yearElem.setAttribute('aria-live', 'polite');
+    monthElem.setAttribute('aria-live', 'polite');
+    dayElem.setAttribute('aria-live', 'polite');
+    hourElem.setAttribute('aria-live', 'polite');
+    minuteElem.setAttribute('aria-live', 'polite');
 }
 
 // Helper functions for update() complexity reduction
@@ -217,10 +234,10 @@ function update() {
 function updateUITimestamp() {
     const opt = getSelectedOption();
     if (parseInt(opt.getAttribute('data-interval'), 10) >= 1440) {
-        document.getElementById('utctime').textContent = dt.utc().format('MMM Do YYYY');
+        document.getElementById('utctime').textContent = dt.utc().format('YYYY-MM-DD');
         document.getElementById('localtime').textContent = dt.local().format('MMM Do YYYY');
     } else {
-        document.getElementById('utctime').textContent = dt.utc().format('MMM Do YYYY HH:mm');
+        document.getElementById('utctime').textContent = dt.utc().format('YYYY-MM-DD HH:mm');
         document.getElementById('localtime').textContent = dt.local().format('MMM Do YYYY h:mm a');
     }
 }
@@ -237,6 +254,15 @@ function getSelectedOption() {
 function buildUI() {
     // Listen for button clicks
     document.querySelectorAll('.btn').forEach(button => {
+        // Accessibility: Add ARIA label and role to time navigation buttons
+        const btnUnit = button.getAttribute('data-unit');
+        const btnOffset = button.getAttribute('data-offset');
+        let label = 'Time Navigation';
+        if (btnUnit && btnOffset) {
+            label = `Change time by ${btnOffset} ${btnUnit}`;
+        }
+        button.setAttribute('aria-label', label);
+        button.setAttribute('role', 'button');
         button.addEventListener('click', (event) => {
             event.preventDefault();
             // Get the current product interval
@@ -246,16 +272,16 @@ function buildUI() {
             }
             const interval = parseInt(opt.getAttribute('data-interval'), 10);
             // retrieve the data-unit value from the DOM obj
-            const unit = button.getAttribute('data-unit');
-            let offset = parseInt(button.getAttribute('data-offset'), 10);
+            const clickUnit = button.getAttribute('data-unit');
+            let clickOffset = parseInt(button.getAttribute('data-offset'), 10);
             // If the abs(offset) is greater than the interval, we need to adjust
             // the interval to match the offset
-            if (unit === "minute" && (Math.abs(offset) < interval)) {
-                offset = offset < 0 ? -interval : interval;
+            if (clickUnit === "minute" && (Math.abs(clickOffset) < interval)) {
+                clickOffset = clickOffset < 0 ? -interval : interval;
             }
 
-            if (unit && !isNaN(offset)) {
-                dt.add(offset, unit);
+            if (clickUnit && !isNaN(clickOffset)) {
+                dt.add(clickOffset, clickUnit);
                 irealtime = false;
             }
             button.blur();
@@ -324,4 +350,55 @@ document.addEventListener('DOMContentLoaded', () => {
             update(); // Update the UI
         });
     }
+
+    // Keyboard navigation for time control
+    document.addEventListener('keydown', handleKeyboardNavigation);
 });
+
+/**
+ * Keyboard navigation handler for time control
+ * ArrowLeft/ArrowRight: decrement/increment by interval
+ * Shift+ArrowLeft/ArrowRight: decrement/increment by one day
+ */
+function handleKeyboardNavigation(event) {
+    // Ignore if focus is on an input, textarea, or select
+    const tag = document.activeElement.tagName;
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
+
+    const opt = getSelectedOption();
+    if (!opt) return;
+    const interval = parseInt(opt.getAttribute('data-interval'), 10);
+
+    // Shift+Arrow for day navigation
+    if (event.shiftKey && event.key === 'ArrowRight') {
+        dt.add(1, 'day');
+        irealtime = false;
+        update();
+        event.preventDefault();
+        return;
+    }
+    if (event.shiftKey && event.key === 'ArrowLeft') {
+        dt.subtract(1, 'day');
+        irealtime = false;
+        update();
+        event.preventDefault();
+        return;
+    }
+
+    // ArrowRight: increment by interval
+    if (!event.shiftKey && event.key === 'ArrowRight') {
+        dt.add(interval, 'minutes');
+        irealtime = false;
+        update();
+        event.preventDefault();
+        return;
+    }
+    // ArrowLeft: decrement by interval
+    if (!event.shiftKey && event.key === 'ArrowLeft') {
+        dt.subtract(interval, 'minutes');
+        irealtime = false;
+        update();
+        event.preventDefault();
+        return;
+    }
+}
