@@ -27,6 +27,7 @@ cd ../isusm
 python agg_1minute.py
 
 cd ../hads
+python compute_hads_phour.py --date=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H:00:00')
 python compute_hads_pday.py --date=$(date '+%Y-%m-%d')
 
 cd ../ingestors
