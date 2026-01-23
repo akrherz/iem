@@ -42,6 +42,7 @@ mode=daily&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC\
 """
 
 import re
+import warnings
 from datetime import timedelta
 from io import BytesIO, StringIO
 from zoneinfo import ZoneInfo
@@ -53,6 +54,9 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+# Cull a fragmentation warning from pandas due to our hacky things
+warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 pd.set_option("future.no_silent_downcasting", True)
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -66,55 +70,81 @@ class Schema(CGIModel):
     """See how we are called..."""
 
     chillbase: float = Field(
-        32, description="Chill Hours Base Temperature [degF]"
+        default=32, description="Chill Hours Base Temperature [degF]"
     )
     chillceil: float = Field(
-        45, description="Chill Hours Ceiling Temperature [degF]"
+        default=45, description="Chill Hours Ceiling Temperature [degF]"
     )
     delim: str = Field(
         description="Delimiter", default="comma", pattern="comma|tab"
     )
-    ets: AwareDatetime = Field(None, description="End Time")
+    ets: AwareDatetime = Field(default=None, description="End Time")
     format: str = Field(
-        "csv", description="Output Format", pattern="csv|comma|excel|tab"
+        default="csv",
+        description="Output Format",
+        pattern="csv|comma|excel|tab",
     )
     missing: str = Field(
-        "-99", description="Missing Value Indicator", pattern="^-99|M|$"
+        default="-99",
+        description="Missing Value Indicator",
+        pattern="^-99|M|$",
     )
     qcflags: bool = Field(
         default=False,
         description="Include QC Flag Values",
     )
-    sts: AwareDatetime = Field(None, description="Start Time")
+    sts: AwareDatetime = Field(default=None, description="Start Time")
     mode: str = Field(
-        "hourly",
+        default="hourly",
         description="Data Mode",
         pattern="hourly|daily|inversion",
     )
     station: ListOrCSVType = Field(description="Station Identifier(s)")
     timeres: str = Field(
-        "hourly",
+        default="hourly",
         description="Time Resolution for hourly request",
         pattern="hourly|minute",
     )
-    todisk: str = Field("no", description="Download to Disk", pattern="yes|no")
+    todisk: str = Field(
+        default="no", description="Download to Disk", pattern="yes|no"
+    )
     tz: str = Field(
-        "America/Chicago",
+        default="America/Chicago",
         description="Timezone for output",
     )
     vars: ListOrCSVType = Field(
         default=None, description="Variables to include in output"
     )
-    year1: int = Field(None, description="Start year if sts is not provided")
-    month1: int = Field(None, description="Start month if sts is not provided")
-    day1: int = Field(None, description="Start day if sts is not provided")
-    hour1: int = Field(0, description="Start hour if sts is not provided")
-    minute1: int = Field(0, description="Start minute if sts is not provided")
-    year2: int = Field(None, description="End year if ets is not provided")
-    month2: int = Field(None, description="End month if ets is not provided")
-    day2: int = Field(None, description="End day if ets is not provided")
-    hour2: int = Field(0, description="End hour if ets is not provided")
-    minute2: int = Field(0, description="End minute if ets is not provided")
+    year1: int = Field(
+        default=None, description="Start year if sts is not provided"
+    )
+    month1: int = Field(
+        default=None, description="Start month if sts is not provided"
+    )
+    day1: int = Field(
+        default=None, description="Start day if sts is not provided"
+    )
+    hour1: int = Field(
+        default=0, description="Start hour if sts is not provided"
+    )
+    minute1: int = Field(
+        default=0, description="Start minute if sts is not provided"
+    )
+    year2: int = Field(
+        default=None, description="End year if ets is not provided"
+    )
+    month2: int = Field(
+        default=None, description="End month if ets is not provided"
+    )
+    day2: int = Field(
+        default=None, description="End day if ets is not provided"
+    )
+    hour2: int = Field(
+        default=0, description="End hour if ets is not provided"
+    )
+    minute2: int = Field(
+        default=0, description="End minute if ets is not provided"
+    )
 
     @field_validator("tz", mode="after")
     @classmethod
