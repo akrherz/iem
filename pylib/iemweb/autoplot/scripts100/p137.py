@@ -110,7 +110,7 @@ def plotter(ctx: dict):
     df["spring_length"] = df["summer_end_doy"] - 91 - df["winter_end_doy"]
     # fall is a bit tricker
     df["fall_length"] = None
-    df["fall_length"].values[:-1] = (
+    df.iloc[:-1]["fall_length"] = (
         (df["winter_end_doy"].values[1:] + 365)
         - 91
         - df["summer_end_doy"].values[:-1]

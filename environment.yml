@@ -52,7 +52,7 @@ dependencies:
   # excel output
   - openpyxl
   # due to config settings
-  - pandas>=2.2
+  - pandas>=3
   # mod-wsgi
   - paste
   # PIL

@@ -213,7 +213,7 @@ def plotter(ctx: dict):
     df2 = pd.concat(
         [df2, df[["month", varname]].groupby("month").mean().transpose()]
     )
-    df2.index.values[-1] = "MEAN"
+    df2 = df2.rename(index={df2.index[-1]: "MEAN"})
     ax = sns.heatmap(
         df2,
         annot=True,
