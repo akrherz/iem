@@ -12,6 +12,8 @@ def test_asos_request():
         "&station=AWM,DSM,ALO,OTM,BRL,DBQ,CID,IOW,MCW,MIW"
         "&ets=2026-01-01T00:00Z&format=comma"
     )
+    # exhaust the generator for coverage purposes
+    list(resp.response)
     assert resp.status_code == 400
 
 
@@ -21,4 +23,6 @@ def test_asos_alldata_greater_than_24hours():
     resp = client.get(
         "?sts=1900-01-01T00:00Z&ets=2026-01-01T00:00Z&format=comma"
     )
+    # exhaust the generator for coverage purposes
+    list(resp.response)
     assert resp.status_code == 400
