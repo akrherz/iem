@@ -194,7 +194,7 @@ def plotter(ctx: dict):
     ):
         d2 = row["enddate"]
         d1 = d2 - timedelta(days=row["period"] - 1)
-        df.at[idx, "startdate"] = d1
+        df.at[idx, "startdate"] = f"{d1:%Y-%m-%d}"
         fig.text(
             0.7,
             ypos,
