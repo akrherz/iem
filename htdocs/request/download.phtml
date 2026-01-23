@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 8);
 require_once "../../include/myview.php";
@@ -20,13 +20,13 @@ $t->title = "Download ASOS/AWOS/METAR Data";
 
 $netselect = selectNetworkType("ASOS", $network);
 
-$y1select = yearSelect(1900, date("Y"), "year1"); 
-$y2select = yearSelect(1900, date("Y"), "year2"); 
+$y1select = yearSelect(1900, date("Y"), "year1");
+$y2select = yearSelect(1900, date("Y"), "year2");
 
-$m1select = monthSelect(1, "month1"); 
-$m2select = monthSelect(date("m"), "month2"); 
+$m1select = monthSelect(1, "month1");
+$m2select = monthSelect(date("m"), "month2");
 
-$d1select = daySelect(1, "day1"); 
+$d1select = daySelect(1, "day1");
 $d2select = daySelect(date("d"), "day2");
 
 $ar = Array(
@@ -42,45 +42,48 @@ $tzselect = make_select("tz", "Etc/UTC", $ar);
 
 $t->content = <<<EOM
 
-<ol class="breadcrumb">
- <li><a href="/ASOS">ASOS Network</a></li>
- <li class="active">ASOS-AWOS-METAR Data Download</li>
-</ol>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/ASOS">ASOS Network</a></li>
+    <li class="breadcrumb-item active" aria-current="page">ASOS-AWOS-METAR Data Download</li>
+  </ol>
+</nav>
 
 <div class="row">
-<div class="col-md-8">
+<div class="col-lg-8 col-md-7">
 
 <p>The IEM maintains an ever growing archive of automated airport weather
-observations from around the world!  These observations are typically called 
-'ASOS' or sometimes 'AWOS' sensors.  A more generic term may be METAR data, 
-which is a term that describes the format the data is transmitted as. If you 
-don't get data for a request, please feel free to 
+observations from around the world!  These observations are typically called
+'ASOS' or sometimes 'AWOS' sensors.  A more generic term may be METAR data,
+which is a term that describes the format the data is transmitted as. If you
+don't get data for a request, please feel free to
 <a href="/info/contacts.php">contact us</a> for help. The IEM also has a one
-minute interval dataset for <a href="asos/1min.phtml">US ASOS</a> (2000-) 
+minute interval dataset for <a href="asos/1min.phtml">US ASOS</a> (2000-)
 and <a href="awos/1min.php">Iowa AWOS</a> (1995-2011) sites.  This archive
-simply provides the as-is collection of historical observations, very little 
+simply provides the as-is collection of historical observations, very little
 quality control is done.  More details on this dataset are
 <a href="/info/datasets/metar.html">here</a>.</p>
 
 <p><strong>Data Sources:</strong> The data made available on this page is sourced
 from a number of places including: <a href="https://www.unidata.ucar.edu/projects/#idd">Unidata IDD</a>,
-<a href="https://www.ncdc.noaa.gov/isd">NCEI ISD</a>, and 
+<a href="https://www.ncdc.noaa.gov/isd">NCEI ISD</a>, and
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS One Minute ASOS</a>.</p>
 
 </div>
-<div class="col-md-4">
+<div class="col-lg-4 col-md-5">
 
 <p><strong>Tools/Libaries</strong></p>
 
 <p><strong>Python Script Examples</strong>
-<br /><a href="https://github.com/akrherz/iem/blob/main/scripts/asos/iem_scraper_example.py">fetch by network</a> 
-<br /><a href="https://github.com/akrherz/iem/blob/main/scripts/asos/iem_scraper_example2.py">selectively fetch</a> 
+<br /><a href="https://github.com/akrherz/iem/blob/main/scripts/asos/iem_scraper_example.py">fetch by network</a>
+<br /><a href="https://github.com/akrherz/iem/blob/main/scripts/asos/iem_scraper_example2.py">selectively fetch</a>
 </p>
 
 <p><strong>R Script Examples</strong>
 <br />A community user has contributed <a href="https://github.com/realmiketalbot/R-scripts/blob/master/iem_scraper_example.
 r">R language</a> version of the python script.
-There is also a <a href="https://docs.ropensci.org/riem/">riem R package</a> 
+There is also a <a href="https://docs.ropensci.org/riem/">riem R package</a>
  allowing for easy access to this archive.</p>
 
 </div>
@@ -95,38 +98,37 @@ is synced from the real-time ingest every 10 minutes.</p>
 wish to script against this service.
 </p>
 
-<form name="netselect">
-<p><strong>Select Network</strong> {$netselect} 
-<input type="submit" value="Switch to Network">
-</p>
+<form name="netselect" class="mb-3">
+  <label for="network-select" class="form-label"><strong>Select Network</strong></label>
+  {$netselect}
+  <button type="submit" class="btn btn-outline-primary btn-sm ms-2">Switch to Network</button>
 </form>
 
 <form target="_blank" method="GET" action="/cgi-bin/request/asos.py" name="iemss">
-<input type="hidden" name="network" value="{$network}">
-
-<div class="form2url"></div>
-
-<div class="row">
-<div class="col-sm-7">
+  <input type="hidden" name="network" value="{$network}">
+  <div class="form2url"></div>
+  <div class="row">
+    <div class="col-lg-7 col-md-6">
 
 <h4>1) Select Station/Network by clicking on location: </h4>
 
 <p>If you select no stations, you can download up to a
 <strong>24 hour period</strong> of all
-data available from this archive!</p>
+data available from this archive!  If you select stations, the aggregate
+request limit is <strong>1,000 station years</strong> worth of data.</p>
 
 
 <div id="iemss" data-network="{$network}" data-name="station" data-supports-all="0"></div>
 
 </div>
-<div class="col-sm-5">
+<div class="col-lg-5 col-md-6">
 
 <h4>2) Select From Available Data:</h4>
 
 <p><strong>Note:</strong> Precipitation data is unavailable for non-US sites.
 The Heat Index/Wind Chill value retroactively use current NWS equations.</p>
 
-<select name="data" size="10" MULTIPLE>
+<select name="data" size="10" multiple class="form-select">
     <option value="all" SELECTED>All Available</option>
     <option value="tmpf">Air Temperature [F]</option>
     <option value="tmpc">Air Temperature [C]</option>
@@ -169,20 +171,20 @@ The Heat Index/Wind Chill value retroactively use current NWS equations.</p>
 midnight of the selected timezone.  The start date is inclusive and the
 end date is exclusive.</p>
 
-<table class="table table-sm">
+<table class="table table-bordered table-sm align-middle">
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select}</td></tr>
 <tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select}</td></tr>
 </table>
 
 <h4>4) Timezone of Observation Times:</h4>
-<p><i>The following options are available for how the observation time is 
+<p><i>The following options are available for how the observation time is
     presented.</i></p>
 {$tzselect}
 
 <h4>5) Download Options:</h4>
 
-<p><strong>Data Format:</strong> 
-<select name="format">
+<p><strong>Data Format:</strong>
+<select name="format" class="form-select form-select-sm w-auto d-inline-block ms-2">
 <option value="onlycomma">Comma Delimited</option>
 <option value="onlytdf">Tab Delimited</option>
 <option value="comma">Comma Delimited (With DEBUG headers)</option>
@@ -190,26 +192,26 @@ end date is exclusive.</p>
 </select></p>
 
 <p><strong>Include Latitude + Longitude?</strong>
-<select name="latlon">
+<select name="latlon" class="form-select form-select-sm w-auto d-inline-block ms-2">
   <option value="no">No
   <option value="yes">Yes
 </select></p>
 
 <p><strong>Include Elevation (meters)?</strong>
-<select name="elev">
+<select name="elev" class="form-select form-select-sm w-auto d-inline-block ms-2">
   <option value="no">No</option>
   <option value="yes">Yes</option>
 </select></p>
 
 <p><strong>How to represent missing data?</strong>
-<select name="missing">
+<select name="missing" class="form-select form-select-sm w-auto d-inline-block ms-2">
   <option value="M">Use 'M'</option>
   <option value="null">Use 'null'</option>
   <option value="empty">Use blank/empty string</option>
 </select></p>
 
 <p><strong>How to represent Trace reports?</strong>
-<select name="trace">
+<select name="trace" class="form-select form-select-sm w-auto d-inline-block ms-2">
   <option value="T">Use 'T'</option>
   <option value="null">Use 'null'</option>
   <option value="empty">Use blank/empty string</option>
@@ -217,7 +219,7 @@ end date is exclusive.</p>
 </select></p>
 
 <p>
-<select name="direct">
+<select name="direct" class="form-select form-select-sm w-auto d-inline-block ms-2">
   <option value="no">View result data in web browser</option>
   <option value="yes">Save result data to file on computer</option>
 </select></p>
@@ -227,21 +229,27 @@ end date is exclusive.</p>
 <p>See <a href="/onsite/news.phtml?id=1434">news item</a> on recent changes
 made for report types.  When in doubt, pick both routine and specials.</p>
 
-<input type="checkbox" name="report_type" value="1" id="rt1">
-<label for="rt1">MADIS HFMETAR / 5 Minute ASOS</label><br />
-<input type="checkbox" name="report_type" value="3" id="rt3" checked>
-<label for="rt3">Routine / Once Hourly</label><br />
-<input type="checkbox" name="report_type" value="4" id="rt4" checked>
-<label for="rt4">Specials</label><br />
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" name="report_type" value="1" id="rt1">
+  <label class="form-check-label" for="rt1">MADIS HFMETAR / 5 Minute ASOS</label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" name="report_type" value="3" id="rt3" checked>
+  <label class="form-check-label" for="rt3">Routine / Once Hourly</label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" name="report_type" value="4" id="rt4" checked>
+  <label class="form-check-label" for="rt4">Specials</label>
+</div>
 
 <h4>7) Finally, get Data:</h4>
 
-  <input type="submit" value="Get Data">
-  <input type="reset">
+  <button type="submit" class="btn btn-success">Get Data</button>
+  <button type="reset" class="btn btn-secondary ms-2">Reset</button>
 
          </div>
          </div>
-         
+
 </form>
 
 <p><strong>Download Variable Description</strong>
