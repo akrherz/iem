@@ -21,7 +21,7 @@ station's state and lat/lon included:
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/hourlyprecip.py?\
 station=AMW&network=IA_ASOS&sts=2024-01-01T00:00:00Z&ets=2024-02-01T00:00:00Z\
-&st=1&lalo=1
+&st=1&lalo=1&tz=America/Chicago
 
 """
 
@@ -37,35 +37,47 @@ class Schema(CGIModel):
     """See how we are called."""
 
     ets: AwareDatetime = Field(
-        None, description="The end of the requested interval."
+        default=None, description="The end of the requested interval."
     )
-    lalo: bool = Field(False, description="Include the lat/lon in the output.")
+    lalo: bool = Field(
+        default=False, description="Include the lat/lon in the output."
+    )
     network: str = Field(
-        "IA_ASOS",
+        default="IA_ASOS",
         description="The network to request data for.",
         max_length=12,
     )
     st: bool = Field(False, description="Include the state in the output.")
     station: ListOrCSVType = Field(
-        [], description="The station(s) to request data for."
+        default=[], description="The station(s) to request data for."
     )
     sts: AwareDatetime = Field(
-        None, description="The start of the requested interval."
+        default=None, description="The start of the requested interval."
     )
     tz: str = Field(
-        "America/Chicago",
+        default="America/Chicago",
         description=(
             "The timezone to present the data in and for requested interval."
         ),
     )
-    year1: int = Field(None, description="The start year, when sts is unset.")
-    month1: int = Field(
-        None, description="The start month, when sts is unset."
+    year1: int = Field(
+        default=None, description="The start year, when sts is unset."
     )
-    day1: int = Field(None, description="The start day, when sts is unset.")
-    year2: int = Field(None, description="The end year, when ets is unset.")
-    month2: int = Field(None, description="The end month, when ets is unset.")
-    day2: int = Field(None, description="The end day, when ets is unset.")
+    month1: int = Field(
+        default=None, description="The start month, when sts is unset."
+    )
+    day1: int = Field(
+        default=None, description="The start day, when sts is unset."
+    )
+    year2: int = Field(
+        default=None, description="The end year, when ets is unset."
+    )
+    month2: int = Field(
+        default=None, description="The end month, when ets is unset."
+    )
+    day2: int = Field(
+        default=None, description="The end day, when ets is unset."
+    )
 
     @field_validator("tz", mode="after")
     @classmethod
