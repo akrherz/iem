@@ -1,0 +1,157 @@
+<?php
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 155);
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+
+$mesosite = iemdb('mesosite');
+
+$t = new MyView();
+$t->iemss = True;
+$t->title = "Download Hourly Precipitation Data";
+
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_ASOS";
+
+$nselect = "<select name=\"network\">";
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks WHERE (id ~* 'ASOS' and " .
+        "length(id) = 7) or id ~* 'DCP' ORDER by name ASC"
+);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
+}
+$nselect .= "</select>";
+
+$y1 = yearSelect(1941, date("Y"), "year1");
+$m1 = monthSelect("", "month1");
+$d1 = daySelect("", "day1");
+$y2 = yearSelect(1941, date("Y"), "year2");
+$m2 = monthSelect(date("m"), "month2");
+$d2 = daySelect(date("d"), "day2");
+
+$ar = array(
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
+    "America/New_York" => "America/New_York (EST/EDT)",
+    "America/Chicago" => "America/Chicago (CST/CDT)",
+    "America/Denver" => "America/Denver (MST/MDT)",
+    "America/Los_Angeles" => "America/Los_Angeles (PST/PDT)",
+    "America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+);
+
+$tzselect = make_select("tz", "America/Chicago", $ar);
+
+$t->content = <<<EOM
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/archive/">Archive Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">IEM Computed Hourly Precipitation Totals</li>
+    </ol>
+</nav>
+
+<p>
+As a convience, the IEM attempts to provide explicit hourly precipitation observations
+without the need for manual computation / deciphering observations.  For ASOS sites, this
+means the total is either derived from the "top of the hour" METAR reports or from the
+daily summary message values.  For DCP sites, this means either the explicit PPH SHEF
+variable is taken or the math is done to figure out the total from the PCI precipitation
+counter.
+</p>
+
+<p>
+<a href="/cgi-bin/request/hourlyprecip.py?help"
+class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
+exists for those that wish to script against the backend service.
+</p>
+
+
+<div class="alert alert-warning" role="alert">
+    Data prior to 2010 only contains the non-zero values, whereas all hours are
+    accounted for after 2010. This may be fixed in upcoming work on the database.
+    On 23 Jan 2026, processing started to provide this information for DCP sites,
+    but will take a number of days to backfill to 2010.
+</div>
+
+<p>Select network to download from:<br />
+<form name="network" action="hourlyprecip.phtml" class="mb-3">
+    <label for="network-select" class="form-label"><strong>Select Network</strong></label>
+    {$nselect}
+    <button type="submit" class="btn btn-outline-primary btn-sm ms-2">Switch Network</button>
+</form>
+
+<form target="_blank" name="dl" action="/cgi-bin/request/hourlyprecip.py">
+    <div class="form2url"></div>
+    <input type="hidden" value="{$network}" name="network" />
+    <div class="row">
+        <div class="col-lg-8 col-md-7">
+
+<h4>1) Select Station(s):</h4>
+<div id="iemss" data-network="{$network}" data-name="station" data-supports-all="0"></div>
+
+
+    </div>
+    <div class="col-lg-4 col-md-5">
+
+<h4>2) Select period:</h4>
+<table class="table table-bordered table-sm align-middle">
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
+        </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>{$y2}</td><td>{$m2}</td><td>{$d2}</td>
+  </tr>
+</table>
+
+<h4>3) Metadata</h4>
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" name="lalo" value="1" id="lalo">
+    <label class="form-check-label" for="lalo">Include Station Lat/Lon</label>
+</div>
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" name="st" value="1" id="st">
+    <label class="form-check-label" for="st">Include State of Station</label>
+</div>
+
+<h4>4) Timezone of Observation Times:</h4>
+<p><i>The following options are available for how the observation time is
+    presented.</i></p>
+{$tzselect}
+
+<button type="submit" class="btn btn-success">Request Data</button>
+
+<h4>Download Fields</h4>
+
+<dl class="row">
+    <dt class="col-sm-3">station</dt><dd class="col-sm-9">Common identifier for the station.</dd>
+    <dt class="col-sm-3">network</dt><dd class="col-sm-9">Network identifier for the station.</dd>
+    <dt class="col-sm-3">valid</dt><dd class="col-sm-9">Hour on which the precip fell.</dd>
+    <dt class="col-sm-3">precip_in</dt><dd class="col-sm-9">Hourly Precipitation [inch]. A value of 0.0001 denotes a Trace.</dd>
+    <dt class="col-sm-3">lat</dt><dd class="col-sm-9">Station Latitude (deg N), when selected.</dd>
+    <dt class="col-sm-3">lon</dt><dd class="col-sm-9">Station Longitude (deg E), when selected.</dd>
+    <dt class="col-sm-3">st</dt><dd class="col-sm-9">Station State Indentifier, when selected.</dd>
+</dl>
+
+</div></div>
+</form>
+
+EOM;
+$t->render('single.phtml');
