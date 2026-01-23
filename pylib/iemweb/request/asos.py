@@ -12,6 +12,9 @@ returned if the server is under heavy load.
 
 Changelog:
 
+- 2026-01-23: Added a practical limit of 1,000 station years worth of data
+  to be allowed with the request prior to the database query for the actual
+  data. You will get a HTTP 422 in this instance with a message to reduce size.
 - 2024-04-01: Fix recently introduced bug with time sort order.
 - 2024-03-29: This service had an intermediate bug whereby if the `tz` value
   was not provided, it would default to `America/Chicago` instead of `UTC`.
@@ -485,7 +488,6 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     acursor = pgconn.cursor(cursor_name, scrollable=False)
-    # bumped from 2_000 to see if it helps any
     acursor.itersize = 20_000
 
     report_types = [int(x) for x in environ["report_type"]]
@@ -505,6 +507,16 @@ def application(environ, start_response):
             pgconn.close()
             start_response("400 Bad Request", [("Content-type", "text/plain")])
             yield b"When requesting all-stations, must be less than 24 hours."
+            return
+    else:
+        # Limit to 1_000 station years of data
+        if (ets.year - sts.year) * len(stations) > 1_000:
+            pgconn.close()
+            start_response("400 Bad Request", [("Content-type", "text/plain")])
+            yield (
+                b"Requested too much data, reduce stations or time period. "
+                b"Currently limited to 1,000 station_years worth of data."
+            )
             return
     delim = environ["format"]
     headers = []
