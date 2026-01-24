@@ -18,6 +18,7 @@ Run from RUN_20_AFTER.sh for previous hour
 
 """
 
+import re
 from datetime import datetime, timedelta, timezone
 
 import click
@@ -31,6 +32,7 @@ from pyiem.util import logger
 from sqlalchemy.engine import Connection
 
 LOG = logger()
+NWSLI_RE = re.compile(r"^[A-Z]{4}[0-9]{1}$")
 
 
 @with_sqlalchemy_conn("mesosite")
@@ -46,6 +48,21 @@ def build_metadata(conn: Connection | None = None) -> pd.DataFrame:
         conn,
         index_col="iemid",
     )
+
+
+@with_sqlalchemy_conn("hads")
+def insert_unknown_station(
+    station: str, conn: Connection | None = None
+) -> None:
+    """Allow for other processing to happen."""
+    conn.execute(
+        sql_helper(
+            "insert into unknown(nwsli, product, network) "
+            "values (:station, '197001010000-KISU-NOUS99-NOTREA', 'DCP')"
+        ),
+        {"station": station},
+    )
+    conn.commit()
 
 
 @with_sqlalchemy_conn("hads")
@@ -149,6 +166,8 @@ def workflow(valid: datetime, conn: Connection | None = None):
     for station, gdf in obsdf.groupby("station"):
         if station not in metadf["id"].values:
             counts["unknown_station"] += 1
+            if NWSLI_RE.match(str(station)):
+                insert_unknown_station(station)
             continue
         iemid = metadf.index[metadf["id"] == station][0]
         # Scenario 1, 1 entry of PPH, easy
