@@ -39,3 +39,7 @@ python compute_uscrn_pday.py --date=$(date '+%Y-%m-%d')
 # Run later to keep from conflicting with RUN_20MIN.sh to_iemaccess.py
 cd ../ingestors/madis
 python extract_hfmetar.py --hours=0
+
+# Reprocess day old HADS
+cd ../../hads
+python compute_hads_phour.py --valid=$(date -u --date '24 hours ago' +'%Y-%m-%dT%H:00:00')

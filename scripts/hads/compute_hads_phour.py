@@ -14,8 +14,7 @@ where substr(key, 1, 2) in ('PP', 'PC', 'PR') group by key order by count desc;
 
 ---> The database storage is for the hour the precip fell!
 
-Run from RUN_20_AFTER.sh for previous hour
-
+Run from RUN_20_AFTER.sh for previous hour and 24 hours ago
 """
 
 import re

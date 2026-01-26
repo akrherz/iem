@@ -41,6 +41,9 @@ def main():
                 "and online = 'f'",
                 (nwsli,),
             )
+        elif row[2].startswith("1970"):
+            # Ignoring one-off that needs manual update
+            pass
         else:
             print(
                 f"Site {nwsli} [{network}] {row[2]} was unknown, "

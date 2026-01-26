@@ -30,6 +30,7 @@ https://mesonet.agron.iastate.edu/json/vtec_events_bystate.py\
 
 import json
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -47,31 +48,41 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="optional JSONP callback")
-    fmt: str = Field(
-        default="json",
-        description="The format of the response, json, csv, or xlsx",
-        pattern="^(json|csv|xlsx)$",
+    callback: Annotated[str, Field(description="optional JSONP callback")] = (
+        None
     )
-    phenomena: str = Field(
-        default="__",
-        description="2 character phenomena identifier",
-        max_length=2,
-    )
-    significance: str = Field(
-        default="_",
-        description="1 character significance identifier",
-        max_length=1,
-    )
-    state: str = Field(
-        default=..., description="2 character state identifier", max_length=2
-    )
-    year: int = Field(
-        default=...,
-        description="Year to query for",
-        ge=1986,
-        le=utc().year,
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format of the response, json, csv, or xlsx",
+            pattern="^(json|csv|xlsx)$",
+        ),
+    ] = "json"
+    phenomena: Annotated[
+        str,
+        Field(
+            description="2 character phenomena identifier",
+            max_length=2,
+        ),
+    ] = "__"
+    significance: Annotated[
+        str,
+        Field(
+            description="1 character significance identifier",
+            max_length=1,
+        ),
+    ] = "_"
+    state: Annotated[
+        str, Field(description="2 character state identifier", max_length=2)
+    ]
+    year: Annotated[
+        int,
+        Field(
+            description="Year to query for",
+            ge=1986,
+            le=utc().year,
+        ),
+    ]
 
 
 def get_res(state, year, phenomena, significance):

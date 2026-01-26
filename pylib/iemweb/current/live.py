@@ -12,6 +12,7 @@ Changelog
 
 from datetime import datetime
 from io import BytesIO
+from typing import Annotated
 
 import httpx
 from PIL import Image, ImageDraw
@@ -25,9 +26,9 @@ from sqlalchemy.engine import Connection
 class MySchema(CGIModel):
     """See how we are called."""
 
-    id: str = Field(
-        "KCCI-027", description="The ID of the webcam", max_length=10
-    )
+    id: Annotated[
+        str, Field(description="The ID of the webcam", max_length=10)
+    ] = "KCCI-027"
 
 
 @with_sqlalchemy_conn("mesosite")

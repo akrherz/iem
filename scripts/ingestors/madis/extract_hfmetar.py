@@ -67,6 +67,38 @@ def process_sky(data: dict, skycs: list[str], skyls: list):
     return mtr
 
 
+def safe_convert(
+    data: dict, col: str, ncfn: str, stations: list[str]
+) -> list[str]:
+    """Be careful."""
+    res = []
+    try:
+        return chartostring(data[col][:])
+    except UnicodeDecodeError:
+        LOG.warning("Encountered bad unicode in %s, %s", col, ncfn)
+        # Try one at a time
+        for i, station in enumerate(stations):
+            try:
+                res.append(chartostring(data[col][i]))
+            except UnicodeDecodeError:
+
+                def safe_decode(val):
+                    if np.ma.is_masked(val):
+                        return ""
+                    return val.decode("ascii", errors="replace")
+
+                LOG.warning(
+                    "Bad recNum:%s @%s entry for %s %s",
+                    i,
+                    datetime(1970, 1, 1)
+                    + timedelta(seconds=data["observationTime"][i]),
+                    station,
+                    "".join(safe_decode(x) for x in data[col][i]),
+                )
+                res.append("")
+    return res
+
+
 def process(ncfn):
     """Process this file"""
     pgconn, icursor = get_dbconnc("iem")
@@ -121,31 +153,8 @@ def process(ncfn):
     stations = chartostring(data["stationId"][:])
     presentwxs = chartostring(data["presWx"][:])
     skycs = chartostring(data["skyCvr"][:])
-    try:
-        autoremarks = chartostring(data["autoRemark"][:])
-    except UnicodeDecodeError:
-        LOG.warning("Encountered bad unicode in autoRemark, %s", ncfn)
-        autoremarks = []
-        for i, station in enumerate(stations):
-            try:
-                autoremarks.append(chartostring(data["autoRemark"][i]))
-            except UnicodeDecodeError:
-
-                def safe_decode(val):
-                    if np.ma.is_masked(val):
-                        return ""
-                    return val.decode("ascii", errors="replace")
-
-                LOG.warning(
-                    "Bad recNum:%s @%s entry for %s %s",
-                    i,
-                    datetime(1970, 1, 1)
-                    + timedelta(seconds=data["observationTime"][i]),
-                    station,
-                    "".join(safe_decode(x) for x in data["autoRemark"][i]),
-                )
-                autoremarks.append("")
-    opremarks = chartostring(data["operatorRemark"][:])
+    autoremarks = safe_convert(data, "autoRemark", ncfn, stations)
+    opremarks = safe_convert(data, "operatorRemark", ncfn, stations)
 
     def decision(i, fieldname, tolerance):
         """Our decision if we are going to take a HFMETAR value or not"""
