@@ -170,4 +170,4 @@ def application(environ, start_response):
     res = to_json(data, df)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [json.dumps(res).encode("ascii")]
+    return [json.dumps(res).replace(" NaN", " null").encode("ascii")]

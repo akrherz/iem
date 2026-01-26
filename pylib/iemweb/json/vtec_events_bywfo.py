@@ -164,7 +164,7 @@ def as_json(df):
             }
         )
 
-    return json.dumps(res)
+    return json.dumps(res).replace(" NaN", " null")
 
 
 @iemapp(help=__doc__, schema=Schema)

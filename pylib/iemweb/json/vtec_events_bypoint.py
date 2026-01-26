@@ -192,7 +192,7 @@ def to_json(df):
             }
         )
 
-    return json.dumps(res)
+    return json.dumps(res).replace(" NaN", " null")
 
 
 def get_mckey(environ: dict) -> str:

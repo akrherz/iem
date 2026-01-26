@@ -53,3 +53,8 @@ def test_urls(mod, cgi):
     res = c.get(cgi, headers={"Referer": "http://iem.local"})
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]
+
+    # If the response is JSON, ensure the NaN string does not appear
+    ct = res.headers.get("Content-Type", "")
+    if ct.find("json") != -1:
+        assert res.data.find(b"NaN") == -1
