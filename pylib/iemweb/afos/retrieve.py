@@ -143,7 +143,7 @@ class MyModel(CGIModel):
         ),
     ] = False
     edate: Annotated[
-        datetime,
+        datetime | None,
         Field(
             description=(
                 "The ending timestamp in UTC to limit the database search. "
@@ -200,7 +200,7 @@ class MyModel(CGIModel):
         ),
     ]
     sdate: Annotated[
-        datetime,
+        datetime | None,
         Field(
             description=(
                 "The starting timestamp in UTC to limit the database search. "
@@ -240,13 +240,15 @@ class MyModel(CGIModel):
 
     @field_validator("sdate", "edate", mode="before")
     @classmethod
-    def allow_str_or_none(cls, v: str):
+    def allow_str_or_none(cls, v: str | None):
         """pydantic can't seem to handle this."""
+        if v is None or v == "":
+            return None
         # pydantic/pydantic/issues/9308
         if 8 <= len(v) < 10:
             # zero pad
             return "-".join(f"{int(v):02.0f}" for v in v.split("-"))
-        return None if v == "" else v
+        return v
 
 
 def pil_logic(pils):

@@ -22,7 +22,7 @@ def workflow(dt: date):
     icursor = iem_pgconn.cursor()
     # load up the current obs
     with get_sqlalchemy_conn("iem") as conn:
-        df = pd.read_sql(
+        accessdf = pd.read_sql(
             sql_helper(
                 """
         WITH dcp as (
@@ -30,79 +30,82 @@ def workflow(dt: date):
             and tzname is not null
         ), obs as (
             SELECT iemid, pday from {table} WHERE day = :dt)
-        SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
+        SELECT d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
         dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
         """,
                 table=f"summary_{dt:%Y}",
             ),
             conn,
             params={"dt": dt},
-            index_col="id",
+            index_col="iemid",
         )
     bases = {}
     ts = utc(dt.year, dt.month, dt.day, 12)
-    for tzname in df["tzname"].unique():
+    for tzname in accessdf["tzname"].unique():
         base = ts.astimezone(ZoneInfo(tzname))
         bases[tzname] = base.replace(hour=0)
     # retrieve data that is within 12 hours of our bounds
     sts = datetime(dt.year, dt.month, dt.day) - timedelta(hours=12)
     ets = sts + timedelta(hours=48)
-    with get_sqlalchemy_conn("hads") as conn:
+    # This brings other networks along for the ride, so be careful
+    with get_sqlalchemy_conn("iem") as conn:
         obsdf = pd.read_sql(
             sql_helper(
                 """
-        SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
-        from {table} WHERE valid between :sts and :ets and
-        substr(key, 1, 3) = 'PPH' and value >= 0
-        """,
-                table=f"raw{dt:%Y}",
+        SELECT iemid, valid at time zone 'UTC' as utc_valid, phour
+        from hourly WHERE valid between :sts and :ets and phour >= 0
+        order by iemid
+        """
             ),
             conn,
             params={"sts": sts, "ets": ets},
             index_col=None,
         )
     if obsdf.empty:
-        LOG.info("%s found no data", dt)
+        LOG.warning("%s found no phour access data", dt)
         return
     obsdf["utc_valid"] = obsdf["utc_valid"].dt.tz_localize(ZoneInfo("UTC"))
-    precip = np.zeros(24 * 60)
-    grouped = obsdf.groupby("station")
-    for station in obsdf["station"].unique():
-        if station not in df.index:
+    counts = {
+        "skips": 0,
+        "updates": 0,
+        "inserts": 0,
+    }
+    for iemid, gdf in obsdf.groupby("iemid"):
+        if iemid not in accessdf.index:
             continue
-        precip[:] = 0
-        tz = df.loc[station, "tzname"]
-        current_pday = df.loc[station, "pday"]
-        for _, row in grouped.get_group(station).iterrows():
-            ts = row["utc_valid"].to_pydatetime()
-            if ts <= bases[tz]:
-                continue
-            t1 = (ts - bases[tz]).total_seconds() / 60.0
-            t0 = max([0, t1 - 60.0])
-            precip[int(t0) : int(t1)] = row["value"] / 60.0
-        pday = np.sum(precip)
-        if pday > 50 or np.allclose([pday], [current_pday]):
+        tz = accessdf.at[iemid, "tzname"]
+        # obsdf stores data for the actual timestamp hour, so we want 0 to 23
+        sts = bases[tz]
+        ets = sts.replace(hour=23)
+        current_pday = accessdf.at[iemid, "pday"]
+        phour_total = gdf[
+            (gdf["utc_valid"] >= sts) & (gdf["utc_valid"] <= ets)
+        ]["phour"].sum()
+        if phour_total > 50 or np.allclose([phour_total], [current_pday]):
+            counts["skips"] += 1
             continue
-        iemid = int(df.loc[station, "iemid"])
         icursor.execute(
             f"UPDATE summary_{dt:%Y} "
             "SET pday = %s WHERE iemid = %s and day = %s",
-            (pday, iemid, dt),
+            (phour_total, iemid, dt),
         )
+        counts["updates"] += 1
         if icursor.rowcount == 0:
-            LOG.info("Adding record %s[%s] for day %s", station, iemid, dt)
+            LOG.info("Adding record %s for day %s", iemid, dt)
             icursor.execute(
                 f"INSERT into summary_{dt:%Y} (iemid, day) VALUES (%s, %s)",
                 (iemid, dt),
             )
+            counts["inserts"] += 1
             icursor.execute(
                 f"UPDATE summary_{dt:%Y} "
                 "SET pday = %s WHERE iemid = %s and day = %s "
                 "and %s > coalesce(pday, 0)",
-                (pday, iemid, dt, pday),
+                (phour_total, iemid, dt, phour_total),
             )
     icursor.close()
     iem_pgconn.commit()
+    LOG.info("Counts %s", counts)
 
 
 @click.command()
