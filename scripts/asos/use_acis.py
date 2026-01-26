@@ -123,8 +123,7 @@ def do(meta, acis_station, interactive):
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
-    with pd.option_context("future.no_silent_downcasting", True):
-        df["dbhas"] = df["dbhas"].fillna(False).astype(bool)
+    df["dbhas"] = df["dbhas"].fillna(False).astype(bool)
     inserts = 0
     updates = {}
     minday = None

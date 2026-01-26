@@ -18,7 +18,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
 from pyiem.util import logger
 
-pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
 SERVICE = "https://data.rcc-acis.org/StnData"
 METASERVICE = "https://data.rcc-acis.org/StnMeta"

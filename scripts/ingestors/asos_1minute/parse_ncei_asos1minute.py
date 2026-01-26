@@ -24,7 +24,6 @@ from pyiem.util import logger, set_property, utc
 from tqdm import tqdm
 
 LOG = logger()
-pd.set_option("future.no_silent_downcasting", True)
 HIDDENURL = "https://www.ncei.noaa.gov/pub/download/hidden/onemin"
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"

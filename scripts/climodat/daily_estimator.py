@@ -28,7 +28,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import logger, mm2inch
 
-pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
 NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 

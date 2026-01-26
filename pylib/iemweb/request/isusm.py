@@ -58,7 +58,6 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 # Cull a fragmentation warning from pandas due to our hacky things
 warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
-pd.set_option("future.no_silent_downcasting", True)
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 LEGACY_STS = re.compile("sts=[A-Z]")
 MISSING = {"", "M", "-99"}

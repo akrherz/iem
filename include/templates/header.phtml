@@ -11,7 +11,7 @@ if ($this->refresh > 0){
 $headextra = "";
 if ($this->iemss){
   $headextra .= <<<EOF
-<link rel="stylesheet" href="/vendor/openlayers/10.6.1/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/10.7.0/ol.css" type="text/css">
 <link rel="stylesheet" href="/css/iemss.css" type="text/css">
 EOF;
 }
@@ -54,7 +54,7 @@ $headextra .= is_null($this->headextra) ? '': $this->headextra;
     <meta property="og:description" content="<?php echo $this->twitter_description; ?>">
     <meta property="og:image" content="<?php echo $EXTERNAL_BASEURL . $this->twitter_image; ?>">
     <meta property="og:url" content="<?php echo $EXTERNAL_BASEURL .htmlentities($_SERVER["REQUEST_URI"]); ?>">
-    <?php if (!is_null($this->twitter_video)){ 
+    <?php if (!is_null($this->twitter_video)){
         echo <<<EOM
     <meta property="og:type" content="video">
     <meta property="og:video" content="{$EXTERNAL_BASEURL}{$this->twitter_video}">
