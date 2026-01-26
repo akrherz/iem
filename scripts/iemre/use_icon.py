@@ -12,7 +12,9 @@ Called from RUN_40_AFTER.sh
 
 import os
 import subprocess
+import sys
 import tempfile
+import time
 from datetime import datetime, timedelta, timezone
 
 import click
@@ -87,50 +89,57 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
             ".grib2.bz2"
         )
         LOG.info("Downloading %s", url)
-        try:
-            with httpx.Client() as client:
-                response = client.get(url)
-                if response.status_code == 404:
-                    # Try something 6 hours older
-                    mv2 = model_valid - timedelta(hours=6)
-                    fo2 = fhour_off + 6
-                    url = (
-                        f"{baseurl}{mv2:%H}/{meta['gname']}/"
-                        "icon_global_icosahedral_single-level_"
-                        f"{mv2:%Y%m%d%H}_{fo2:03.0f}_{meta['gname'].upper()}"
-                        ".grib2.bz2"
-                    )
+        for attempt in range(3):
+            try:
+                with httpx.Client() as client:
                     response = client.get(url)
-            response.raise_for_status()
-            with open(filename, "wb") as f:
-                f.write(response.content)
-            subprocess.run(["bzip2", "-d", filename], check=True)
-            # Use cdo to convert grid to lat/lon
-            with subprocess.Popen(
-                [
-                    "cdo",
-                    "-f",
-                    "grb2",
-                    (
-                        "remap,/mesonet/data/meta/icon_description.txt,"
-                        "/mesonet/data/meta/icon_weights.nc"
-                    ),
-                    f"{var}.grib2",
-                    f"{var}_latlon.grib2",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            ) as proc:
-                stdout, stderr = proc.communicate()
-            if proc.returncode != 0:
-                LOG.error(
-                    "CDO remap failed for %s: %s %s",
-                    filename,
-                    stderr.decode("utf-8"),
-                    stdout.decode("utf-8"),
-                )
-        except (httpx.RequestError, httpx.HTTPStatusError) as e:
-            LOG.error("Failed to download %s: %s", filename, e)
+                    if response.status_code == 404:
+                        # Try something 6 hours older
+                        mv2 = model_valid - timedelta(hours=6)
+                        fo2 = fhour_off + 6
+                        url = (
+                            f"{baseurl}{mv2:%H}/{meta['gname']}/"
+                            "icon_global_icosahedral_single-level_"
+                            f"{mv2:%Y%m%d%H}_{fo2:03.0f}_"
+                            f"{meta['gname'].upper()}.grib2.bz2"
+                        )
+                        response = client.get(url)
+                response.raise_for_status()
+                break
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                LOG.error("Failed to download %s: %s", filename, e)
+                time.sleep(5)
+            if attempt == 2:
+                LOG.warning("Aborting")
+                sys.exit(3)
+
+        with open(filename, "wb") as f:
+            f.write(response.content)
+        subprocess.run(["bzip2", "-d", filename], check=True)
+        # Use cdo to convert grid to lat/lon
+        with subprocess.Popen(
+            [
+                "cdo",
+                "-f",
+                "grb2",
+                (
+                    "remap,/mesonet/data/meta/icon_description.txt,"
+                    "/mesonet/data/meta/icon_weights.nc"
+                ),
+                f"{var}.grib2",
+                f"{var}_latlon.grib2",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ) as proc:
+            stdout, stderr = proc.communicate()
+        if proc.returncode != 0:
+            LOG.error(
+                "CDO remap failed for %s: %s %s",
+                filename,
+                stderr.decode("utf-8"),
+                stdout.decode("utf-8"),
+            )
 
 
 def copy_grib_to_netcdf(valid: datetime, domain: str, fhour: int) -> None:
