@@ -29,7 +29,6 @@ TEXTARGS = {
     "zorder": 3,
 }
 PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
-pd.set_option("future.no_silent_downcasting", True)
 
 
 def get_description():

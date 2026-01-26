@@ -12,7 +12,6 @@ from pyiem.util import logger
 
 LOG = logger()
 CST = ZoneInfo("Etc/GMT+6")
-pd.set_option("future.no_silent_downcasting", True)
 
 
 def assign_phour():
