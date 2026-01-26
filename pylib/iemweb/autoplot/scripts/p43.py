@@ -264,10 +264,11 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
     elif ctx["p"] == "two":
         df2 = df[(df["alti"] > 20.0) & (df["alti"] < 40.0)]
         ax.grid(True)
-        vals = (df2["alti"].values * units("inch_Hg")).to(units("hPa")).m
-        ax.fill_between(df2.index.values, 0, vals, color="#a16334")
-        ax.set_ylim(bottom=(vals.min() - 1), top=vals.max() + 1)
-        ax.set_ylabel("Pressure [mb]")
+        if not df2.empty:
+            vals = (df2["alti"].values * units("inch_Hg")).to(units("hPa")).m
+            ax.fill_between(df2.index.values, 0, vals, color="#a16334")
+            ax.set_ylim(bottom=(vals.min() - 1), top=vals.max() + 1)
+            ax.set_ylabel("Pressure [mb]")
 
     ax.set_xlim(xmin, xmax)
     date_ticker(ax, ZoneInfo(tzname))

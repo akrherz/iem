@@ -53,7 +53,7 @@ def get_description():
             name="emphasis",
             default="-99",
             label=(
-                "Temperature(&deg;F) or RH(%) Line of Emphasis (-99 disables):"
+                "Temperature(°F) or RH(%) Line of Emphasis (-99 disables):"
             ),
         ),
         dict(

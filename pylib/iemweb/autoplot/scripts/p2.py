@@ -44,13 +44,13 @@ def get_description():
             type="int",
             default=50,
             name="gddbase",
-            label="Growing Degree Day base (F)",
+            label="Growing Degree Day base (°F)",
         ),
         dict(
             type="int",
             default=86,
             name="gddceil",
-            label="Growing Degree Day ceiling (F)",
+            label="Growing Degree Day ceiling (°F)",
         ),
     ]
     return desc
