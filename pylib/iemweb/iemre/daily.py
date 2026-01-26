@@ -45,26 +45,26 @@ class Schema(CGIModel):
     """See how we are called."""
 
     date: dateobj = Field(
-        dateobj(2019, 3, 1),
+        default=dateobj(2019, 3, 1),
         title="Date",
         description="Date of interest",
     )
     lat: float = Field(
-        41.99,
+        default=-41.99,
         title="Latitude",
         description="Latitude of interest",
         ge=-90,
         le=90,
     )
     lon: float = Field(
-        -95.1,
+        default=-95.1,
         title="Longitude",
         description="Longitude of interest",
         ge=-180,
         le=180,
     )
     format: str = Field(
-        "json",
+        default="json",
         title="Format",
         description="Format of the output",
         pattern="json",
@@ -102,27 +102,21 @@ def application(environ, start_response):
     if not os.path.isfile(fn):
         return [json.dumps(res).encode("ascii")]
 
+    prism_precip = None
     if dt.year > 1980 and domain == "conus":
         ncfn = f"/mesonet/data/prism/{dt.year}_daily.nc"
-        if not os.path.isfile(ncfn):
-            prism_precip = None
-        else:
+        if os.path.isfile(ncfn):
             i2, j2 = get_nav("prism").find_ij(lon, lat)
             with ncopen(ncfn) as nc:
                 prism_precip = nc.variables["ppt"][offset, j2, i2] / 25.4
-    else:
-        prism_precip = None
 
+    mrms_precip = None
     if dt.year > 2000 and domain == "conus":
         ncfn = get_daily_mrms_ncname(dt.year)
-        if not os.path.isfile(ncfn):
-            mrms_precip = None
-        else:
+        if os.path.isfile(ncfn):
             i2, j2 = get_nav("mrms_iemre").find_ij(lon, lat)
             with ncopen(ncfn) as nc:
                 mrms_precip = nc.variables["p01d"][offset, j2, i2] / 25.4
-    else:
-        mrms_precip = None
 
     c2000 = dt.replace(year=2000)
     coffset = daily_offset(c2000)

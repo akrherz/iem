@@ -1,5 +1,7 @@
 """Test the current/live.py service."""
 
+from io import BytesIO
+
 from iemweb.current import live
 from PIL import Image
 from pytest_httpx import HTTPXMock
@@ -16,9 +18,12 @@ def test_offline():
 def test_workflow(httpx_mock: HTTPXMock):
     """Test we can fetch an image."""
     image = Image.new("RGB", (320, 240), (73, 109, 137))
+    buf = BytesIO()
+    image.save(buf, format="JPEG")
+    image_bytes = buf.getvalue()
     httpx_mock.add_response(
         status_code=200,
-        content=image,
+        content=image_bytes,
     )
     client = Client(live.application)
     response = client.get("/current/live.py?id=KCRG-032")  # is_vapix

@@ -98,6 +98,7 @@ import re
 import zipfile
 from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
+from typing import Annotated
 
 from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -113,95 +114,119 @@ AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
 class MyModel(CGIModel):
     """See how we are called."""
 
-    aviation_afd: bool = Field(
-        False,
-        description=(
-            "If set to 1, the returned data will be the 'Aviation' section "
-            "of an Area Forecast Discussion. This requires the PIL to be "
-            "an AFD product and a limit of 1 set."
+    aviation_afd: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 1, the returned data will be the 'Aviation' "
+                "section of an Area Forecast Discussion. This requires the "
+                "PIL to be an AFD product and a limit of 1 set."
+            ),
         ),
-    )
-    center: str = Field(
-        "",
-        description=(
-            "The 4 character source iddentifier to limit the search to. "
-            "This is typically only used when a PIL is ambiguous"
+    ] = False
+    center: Annotated[
+        str,
+        Field(
+            description=(
+                "The 4 character source iddentifier to limit the search to. "
+                "This is typically only used when a PIL is ambiguous"
+            ),
+            max_length=4,
         ),
-        max_length=4,
-    )
-    dl: bool = Field(
-        False,
-        description=(
-            "If set to 1, the returned data will be downloaded as a file"
+    ] = ""
+    dl: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 1, the returned data will be downloaded as a file"
+            ),
         ),
-    )
-    edate: None | datetime = Field(
-        None,
-        description=(
-            "The ending timestamp in UTC to limit the database search. This "
-            "value is exclusive."
+    ] = False
+    edate: Annotated[
+        datetime,
+        Field(
+            description=(
+                "The ending timestamp in UTC to limit the database search. "
+                "This value is exclusive."
+            ),
         ),
-    )
-    fmt: str = Field(
-        default="text",
-        description=(
-            "The format of the returned data, either text, html, or zip. The "
-            "meaning of ``text`` is to return something that resembles what "
-            "would have been sent over the NWS NOAAPort system. The ``html`` "
-            "format is a bit more human readable. The ``zip`` format will "
-            "return a zip file containing the text products, one file per "
-            "product."
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description=(
+                "The format of the returned data, either text, html, or zip. "
+                "The meaning of ``text`` is to return something that "
+                "resembles what would have been sent over the NWS NOAAPort "
+                "system. The ``html`` format is a bit more human readable. "
+                "The ``zip`` format will return a zip file containing the "
+                "text products, one file per product."
+            ),
+            pattern="^(text|html|zip)$",
         ),
-        pattern="^(text|html|zip)$",
-    )
-    limit: int = Field(
-        default=1,
-        description=(
-            "The number of products to return, default is 1. This number "
-            "is limited to 9999."
+    ] = "text"
+    limit: Annotated[
+        int,
+        Field(
+            description=(
+                "The number of products to return, default is 1. This number "
+                "is limited to 9999."
+            ),
+            ge=1,
+            le=9999,
         ),
-        ge=1,
-        le=9999,
-    )
-    matches: str = Field(
-        default=None,
-        description=(
-            "Attempt a simple substring search within candidate products for "
-            "the given exact string.  This is limited functionality for now."
+    ] = 1
+    matches: Annotated[
+        str,
+        Field(
+            description=(
+                "Attempt a simple substring search within candidate products "
+                "for the given exact string.  This is limited functionality "
+                "for now."
+            ),
+            max_length=4,
+            min_length=4,
         ),
-        max_length=4,
-        min_length=4,
-    )
-    pil: ListOrCSVType = Field(
-        ...,
-        description=(
-            "The 3 to 6 character AFOS ID / Product ID to query for. This is "
-            "typically the third line of a NWS Text Product.  A special case "
-            f"of ``WAR`` will return {', '.join(WARPIL)} products."
+    ] = None
+    pil: Annotated[
+        ListOrCSVType,
+        Field(
+            description=(
+                "The 3 to 6 character AFOS ID / Product ID to query for. This "
+                "is typically the third line of a NWS Text Product.  A "
+                f"special case of ``WAR`` will return {', '.join(WARPIL)} "
+                "products."
+            ),
         ),
-    )
-    sdate: None | datetime = Field(
-        default=None,
-        description=(
-            "The starting timestamp in UTC to limit the database search. This "
-            "value is inclusive."
+    ]
+    sdate: Annotated[
+        datetime,
+        Field(
+            description=(
+                "The starting timestamp in UTC to limit the database search. "
+                "This value is inclusive."
+            ),
         ),
-    )
-    order: str = Field(
-        default="desc",
-        description=(
-            "The order of the returned products, either 'asc' or 'desc'"
+    ] = None
+    order: Annotated[
+        str,
+        Field(
+            description=(
+                "The order of the returned products, either 'asc' or 'desc'"
+            ),
+            pattern="^(asc|desc)$",
         ),
-        pattern="^(asc|desc)$",
-    )
-    ttaaii: str = Field(
-        default="",
-        description=(
-            "The 6 character WMO Header to limit the search to.  This is "
-            "typically only used when a PIL is ambiguous"
+    ] = "desc"
+    ttaaii: Annotated[
+        str,
+        Field(
+            description=(
+                "The 6 character WMO Header to limit the search to.  This is "
+                "typically only used when a PIL is ambiguous"
+            ),
+            max_length=6,
         ),
-        max_length=6,
-    )
+    ] = ""
 
     @field_validator("pil", mode="after")
     @classmethod
