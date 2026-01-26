@@ -312,10 +312,15 @@ function setupSortAndFilterHandlers() {
 
 function setupIemssMapAndData(iemssElement, networkParam) {
     const onlyOnline = (iemssElement.getAttribute('data-only-online') === '1');
+    let url = `/geojson/network/${networkParam}.geojson?only_online=${onlyOnline ? "1" : "0"}`;
+    const hasAttribute = iemssElement.getAttribute('data-has-attribute');
+    if (hasAttribute) {
+        url += `&has_attribute=${encodeURIComponent(hasAttribute)}`;
+    }
     iemssApp.geojsonSource = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
         projection: ol.proj.get('EPSG:3857'),
-        url: `/geojson/network/${networkParam}.geojson?only_online=${onlyOnline ? "1" : "0"}`
+        url
     });
     iemssApp.map = new ol.Map({
         target: 'map',

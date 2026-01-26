@@ -11,12 +11,19 @@ network.
 Changelog
 ---------
 
+- 2026-01-26: Added `has_attribute` parameter to allow a filtered result to
+  those stations with that attribute set.
 - 2024-11-25: Added `network` overload value of `HAS_HML` for sites with HML
   data.
 - 2024-08-19: Initial documentation update
 
 Example Usage
 -------------
+
+Provide Iowa DCP sites with hourly precipitation available.
+
+https://mesonet.agron.iastate.edu/geojson/network.py?\
+network=IA_DCP&has_attribute=HAS_PHOUR
 
 Provide all sites with 1 minute ASOS data:
 
@@ -33,6 +40,7 @@ https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -50,19 +58,26 @@ XREF = {
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    network: str = Field(
-        "IA_ASOS",
-        description="IEM Network Code",
-        max_length=30,
-        pattern=r"^[A-Z0-9_]+$",
-    )
-    only_online: bool = Field(
-        False, description="Only include online stations"
-    )
+    callback: Annotated[
+        str, Field(description="JSONP callback function name")
+    ] = None
+    has_attribute: Annotated[
+        str, Field(description="Station Attribute to filter on")
+    ] = None
+    network: Annotated[
+        str,
+        Field(
+            description="IEM Network Code",
+            max_length=30,
+            pattern=r"^[A-Z0-9_]+$",
+        ),
+    ] = "IA_ASOS"
+    only_online: Annotated[
+        bool, Field(description="Only include online stations")
+    ] = False
 
 
-def run(conn, network, only_online):
+def run(conn, network, only_online: bool, has_attribute: str | None):
     """Generate a GeoJSON dump of the provided network"""
     params = {
         "network": network,
@@ -82,6 +97,9 @@ def run(conn, network, only_online):
     else:
         subselect = "network = :network "
         subselect += "and online" if only_online else ""
+        if has_attribute:
+            subselect += " and a.attr = :has_attribute"
+            params["has_attribute"] = has_attribute
     cursor = conn.execute(
         sql_helper(
             """
@@ -153,11 +171,12 @@ def run(conn, network, only_online):
     return json.dumps(res)
 
 
-def get_mckey(environ) -> str:
+def get_mckey(environ: dict) -> str:
     """Get the memcache key"""
     return (
         "/geojson/network/"
-        f"{environ['network']}.geojson|{environ['only_online']}/v2"
+        f"{environ['network']}.geojson|{environ['only_online']}|"
+        f"{environ['has_attribute']}/v2"
     )
 
 
@@ -174,8 +193,8 @@ def application(environ, start_response):
 
     network = environ["network"]
     only_online = environ["only_online"]
-
+    has_attribute = environ["has_attribute"]
     with get_sqlalchemy_conn("mesosite") as conn:
-        res = run(conn, network, only_online)
+        res = run(conn, network, only_online, has_attribute)
     start_response("200 OK", headers)
     return res
