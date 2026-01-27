@@ -1,7 +1,8 @@
 """
 This application plots the number of days for a
 given month or period of months that a given variable was above or below
-some threshold.
+some threshold.  If you select the winter season, the year represents the
+year of the December month included in the period.
 """
 
 from datetime import date
@@ -37,13 +38,13 @@ METRICS = {
     "avg_sknt": "Avg Wind Speed (kts)",
     "max_sknt": "Max Wind Speed (kts)",
     "max_gust": "Max Wind Speed Gust (kts)",
-    "max_tmpf": "Max Air Temp (F)",
-    "min_tmpf": "Min Air Temp (F)",
-    "max_dwpf": "Max Dew Point Temp (F)",
-    "min_dwpf": "Min Dew Point Temp (F)",
-    "max_feel": "Max Feels Like Temperature (F)",
-    "avg_feel": "Avg Feels Like Temperature (F)",
-    "min_feel": "Min Feels Like Temperature (F)",
+    "max_tmpf": "Max Air Temp (°F)",
+    "min_tmpf": "Min Air Temp (°F)",
+    "max_dwpf": "Max Dew Point Temp (°F)",
+    "min_dwpf": "Min Dew Point Temp (°F)",
+    "max_feel": "Max Feels Like Temperature (°F)",
+    "avg_feel": "Avg Feels Like Temperature (°F)",
+    "min_feel": "Min Feels Like Temperature (°F)",
     "max_rh": "Max Relative Humidity (%)",
     "avg_rh": "Avg Relative Humidity (%)",
     "min_rh": "Min Relative Humidity (%)",
@@ -78,7 +79,7 @@ def get_description():
             label="Threshold Direction:",
             options=DIRS,
         ),
-        dict(type="int", name="thres", default=65, label="Threshold"),
+        dict(type="float", name="thres", default=65, label="Threshold"),
         dict(
             type="select",
             name="month",
@@ -109,12 +110,19 @@ def add_context(ctx):
     months = month2months(month)
 
     opp = ">=" if mydir == "aoa" else "<"
+    months_to_offset = [99]
+    ctx["xlabel"] = "Year"
+    if month == "winter":
+        ctx["xlabel"] = "Year of December in (Dec-Jan-Feb)"
+        months_to_offset = [1, 2]
     with get_sqlalchemy_conn("iem") as conn:
         ctx["df"] = pd.read_sql(
             sql_helper(
                 """
-            SELECT extract(year from day)::int as year,
-            sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
+            SELECT case when extract(month from day) = ANY(:moff)
+            then extract(year from day) - 1 else extract(year from day) end
+            as year,
+            sum(case when {varname} {opp} :t then 1 else 0 end) as count
             from summary s JOIN stations t on (s.iemid = t.iemid)
             WHERE t.id = :station and t.network = :network
             and extract(month from day) = ANY(:months)
@@ -129,6 +137,7 @@ def add_context(ctx):
                 "t": threshold,
                 "station": station,
                 "network": ctx["network"],
+                "moff": months_to_offset,
                 "months": months,
             },
             index_col="year",
@@ -155,6 +164,7 @@ Highcharts.chart('{containername}', {{
             type: 'column'
         }},
         yAxis: {{title: {{text: 'Days'}}}},
+        xAxis: {{title: {{text: '{ctx["xlabel"]}'}}}},
         title: {{text: '{ctx["title"]}'}},
         subtitle: {{text: '{ctx["subtitle"]}'}},
         series: [{{
@@ -170,7 +180,7 @@ def plotter(ctx: dict):
     add_context(ctx)
     df = ctx["df"]
     if df.empty:
-        raise NoDataFound("Error, no results returned!")
+        raise NoDataFound("Database query found no data!")
 
     title = f"{ctx['title']}\n{ctx['subtitle']}"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -188,6 +198,7 @@ def plotter(ctx: dict):
         )
     ax.grid(True)
     ax.set_ylabel("Days Per Period")
+    ax.set_xlabel(ctx["xlabel"])
     ax.set_xlim(df.index.min() - 0.5, df.index.max() + 0.5)
     avgv = df["count"].mean()
     ax.axhline(avgv)
