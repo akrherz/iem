@@ -76,6 +76,8 @@ PDICT5 = {
 PDICT6 = {
     "rain": "Rainfall",
     "snow": "Snowfall",
+    "ss": "Snowfall & Sleet",
+    "sleet": "Sleet",
     "ice": "Freezing Rain / Ice Storm (LSRs Only)",
 }
 PDICT7 = {
@@ -225,14 +227,20 @@ def get_description():
 
 def load_data(ctx: dict, basets: datetime, endts: datetime):
     """Generate a dataframe with the data we want to analyze."""
-    typs = {"rain": "R", "snow": "S", "ice": "5"}
+    typs = {
+        "rain": ["R"],
+        "snow": ["S"],
+        "ice": ["5"],
+        "sleet": ["s"],
+        "ss": ["S", "s"],
+    }
     with get_sqlalchemy_conn("postgis") as conn:
         df: gpd.GeoDataFrame = gpd.read_postgis(
             sql_helper(
                 """SELECT state, wfo,
             max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
             ST_Transform(geom, 2163) as geo
-            from lsrs WHERE type = :typ and magnitude >= 0 and
+            from lsrs WHERE type = ANY(:typs) and magnitude >= 0 and
             valid >= :basets and valid <= :endts
             GROUP by state, wfo, lon, lat, geo
             ORDER by val DESC
@@ -240,7 +248,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             ),
             conn,
             params={
-                "typ": typs[ctx["v"]],
+                "typs": typs[ctx["v"]],
                 "basets": basets,
                 "endts": endts,
             },
@@ -258,7 +266,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         for dt in pd.date_range(basets.date(), endts.date())
         if basets < datetime(dt.year, dt.month, dt.day, 7) < endts
     ]
-    if ctx["coop"] == "yes" and ctx["v"] != "ice":
+    if ctx["coop"] == "yes" and ctx["v"] not in ["ice", "sleet"]:
         with get_sqlalchemy_conn("iem") as conn:
             coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
@@ -272,7 +280,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
                 """,
-                    col="snow" if ctx["v"] == "snow" else "pday",
+                    col="snow" if ctx["v"] in ["snow", "ss"] else "pday",
                 ),
                 conn,
                 params={
@@ -291,7 +299,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 df = coopdf
             else:
                 df = pd.concat([df, coopdf], ignore_index=True, sort=False)
-    if ctx["cocorahs"] == "yes" and ctx["v"] != "ice":
+    if ctx["cocorahs"] == "yes" and ctx["v"] not in ["ice", "sleet"]:
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
@@ -309,7 +317,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
                 """,
-                    col="snow" if ctx["v"] == "snow" else "precip",
+                    col="snow" if ctx["v"] in ["snow", "ss"] else "precip",
                 ),
                 conn,
                 params={
@@ -516,6 +524,10 @@ def plotter(ctx: dict):
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
     elif ctx["v"] == "rain":
         title = f"NWS Local Storm Report{_t} Rainfall Total Analysis"
+    elif ctx["v"] == "sleet":
+        title = "NWS Local Storm Report Sleet Total Analysis"
+    elif ctx["v"] == "ss":
+        title = f"NWS Local Storm Report{_t} Snowfall + Sleet Total Analysis"
     obcnt = len(df2[df2["state"] != "Z"].index)
     mp = MapPlot(
         apctx=ctx,
