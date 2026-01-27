@@ -20,3 +20,12 @@ for domain in "europe" "sa" "china"; do
         python precip_ingest.py --domain=$domain --valid="${D6}T${hr}:00:00"
     done
 done
+
+# We are generally happy with rsds and soilt, so we need those reprocessed
+for domain in "conus" "europe" "sa" "china"; do
+    for hr in {0..23}; do
+        python hourly_analysis.py --domain=$domain --valid="${D6}T${hr}:00:00"
+    done
+    # D7 daily should be in good shape now for all domains?
+    python daily_analysis.py --domain=$domain --date="${D7}"
+done
