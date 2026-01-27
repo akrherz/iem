@@ -1,9 +1,9 @@
 """Quality control our 4 inch soil temperature data.
 
 Called from soilm_ingest.py
+Called after ERA5Land ingest completes
 """
 
-import json
 from datetime import date, datetime
 
 import click
@@ -57,7 +57,7 @@ def setval(
 def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
     # We'll take any value
     obcol = f"ob_{col}"
-    for station, row in qcdf[qcdf["useme"]].iterrows():
+    for station, row in qcdf.iterrows():
         # If Ob is None, we have no choice
         if row[obcol] is None:
             setval(conn, station, col, row[obcol], dt, row[col], "E")
@@ -90,6 +90,21 @@ def do_checks(qcdf: pd.DataFrame, conn: Connection, dt: date, col: str):
         setval(conn, station, col, row[obcol], dt, row[col], "E")
 
 
+def passes_bulk_check(qcdf: pd.DataFrame):
+    """Can we rely on the model analysis?"""
+    # What should this arb check look like?
+    # How about at least 70% of the obs are within 5C of IEMRE
+    within_count = ((qcdf["ob_t4_c_avg"] - qcdf["t4_c_avg"]).abs() <= 3).sum()
+    ratio = within_count / len(qcdf.index)
+    if ratio < 0.7:
+        LOG.warning(
+            "Bulk QC failed with %.1f%% obs inside of 3C", ratio * 100.0
+        )
+        return False
+    LOG.info("Bulk QC passed with %.1f%% obs within 3C", ratio * 100.0)
+    return True
+
+
 @with_sqlalchemy_conn("isuag")
 def check_date(dt: date, conn: Connection = None):
     """Look this date over and compare with IEMRE."""
@@ -107,14 +122,16 @@ def check_date(dt: date, conn: Connection = None):
     qcrows = []
     for row in res.mappings():
         station = row["station"]
+        if nt.sts[station]["attributes"].get("NO_4INCH") == "1":
+            LOG.info("Skipping %s as NO_4INCH", station)
+            continue
         # Go fetch me the IEMRE value!
         uri = (
             f"https://mesonet.agron.iastate.edu/iemre/daily/{dt:%Y-%m-%d}/"
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = httpx.get(uri, timeout=60)
-        j = json.loads(res.content)
+        j = httpx.get(uri, timeout=60).json()
         iemre = j["data"][0]
         iemre_low = convert_value(iemre["soil4t_low_f"], "degF", "degC")
         iemre_high = convert_value(iemre["soil4t_high_f"], "degF", "degC")
@@ -122,32 +139,28 @@ def check_date(dt: date, conn: Connection = None):
             LOG.warning("%s %s IEMRE is missing", station, dt)
             continue
         iemre_avg = (iemre_high + iemre_low) / 2.0
-        useme = True
-        if nt.sts[station]["attributes"].get("NO_4INCH") == "1":
-            LOG.info("Skipping %s as NO_4INCH", station)
-            useme = False
         qcrows.append(
             {
                 "station": station,
                 "ob_t4_c_avg": row["t4_c_avg"],
-                "ob_t4_c_min": row["t4_c_min"],
-                "ob_t4_c_max": row["t4_c_max"],
                 "ob_t4_c_avg_f": row["t4_c_avg_f"],
-                "ob_t4_c_min_f": row["t4_c_min_f"],
-                "ob_t4_c_max_f": row["t4_c_max_f"],
                 "ob_t4_c_avg_qc": row["t4_c_avg_qc"],
-                "ob_t4_c_min_qc": row["t4_c_min_qc"],
-                "ob_t4_c_max_qc": row["t4_c_max_qc"],
-                "useme": useme,
                 "t4_c_avg": iemre_avg,
+                "ob_t4_c_min": row["t4_c_min"],
+                "ob_t4_c_min_f": row["t4_c_min_f"],
+                "ob_t4_c_min_qc": row["t4_c_min_qc"],
                 "t4_c_min": iemre_low,
+                "ob_t4_c_max": row["t4_c_max"],
+                "ob_t4_c_max_f": row["t4_c_max_f"],
+                "ob_t4_c_max_qc": row["t4_c_max_qc"],
                 "t4_c_max": iemre_high,
             }
         )
     qcdf = pd.DataFrame(qcrows).set_index("station")
-    for col in ["t4_c_avg", "t4_c_min", "t4_c_max"]:
-        do_checks(qcdf, conn, dt, col)
-    conn.commit()
+    if passes_bulk_check(qcdf):
+        for col in ["t4_c_avg", "t4_c_min", "t4_c_max"]:
+            do_checks(qcdf, conn, dt, col)
+        conn.commit()
 
 
 @click.command()

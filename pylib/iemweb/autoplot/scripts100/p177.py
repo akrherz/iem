@@ -19,10 +19,14 @@ from metpy.units import units
 from pyiem import meteorology
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_hourly_ncname
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
     c2f,
     convert_value,
+    ncopen,
+    utc,
 )
 
 CENTRAL = ZoneInfo("America/Chicago")
@@ -40,6 +44,7 @@ PLOTTYPES = {
     "10": "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4)",
     "11": "Inversion Daily Timing (BOOI4, CAMI4, CRFI4)",
     "2": "Just Soil Temps",
+    "4iemre": "Four inch soil temperature QC diagnostic",
     "sm": "Just Soil Moisture",
     "at": "One Minute Timeseries",
 }
@@ -750,6 +755,59 @@ def plot_sm(ctx):
     return fig, df
 
 
+def plot4iemre(ctx: dict, lon: float, lat: float):
+    """Four inch soil temperature diagnostic"""
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            sql_helper(
+                "SELECT valid, t4_c_avg, t4_c_avg_qc from sm_hourly "
+                "WHERE station = :station and "
+                "valid BETWEEN :sts and :ets ORDER by valid ASC"
+            ),
+            conn,
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
+            index_col="valid",
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for This Plot.")
+
+    i, j = get_nav("IEMRE", "conus").find_ij(lon, lat)
+    with ncopen(get_hourly_ncname(ctx["sts"].year), timeout=300) as nc:
+        times = nc.variables["time"][:]
+        time0 = utc(ctx["sts"].year, 1, 1)
+        vtimes = [time0 + timedelta(hours=int(t)) for t in times]
+        t4 = convert_value(nc.variables["soil4t"][:, j, i], "degK", "degF")
+
+    title = f"ISUSM Station: {ctx['_sname']} :: Four inch soil temp diagnostic"
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
+
+    ax.plot(vtimes, t4, label="IEMRE Hourly")
+    ax.plot(
+        df.index.to_pydatetime(),
+        c2f(df["t4_c_avg_qc"].values),
+        label="ISUSM QC",
+    )
+    ax.plot(
+        df.index.to_pydatetime(),
+        c2f(df["t4_c_avg"].values),
+        label="ISUSM Obs",
+    )
+
+    apply_xaxis_formatting(ax, ctx)
+    if ax.get_ylim()[0] < 40:
+        ax.axhline(32, linestyle="--", lw=2, color="tan")
+    ax.set_ylabel("Temperature [°F]")
+    ax.set_xlim(ctx["sts"], ctx["ets"])
+    ax.legend(ncol=3)
+    ax.grid(True)
+
+    return fig, df
+
+
 def plot2(ctx):
     """Just soil temps"""
     with get_sqlalchemy_conn("isuag") as conn:
@@ -1108,6 +1166,10 @@ def plotter(ctx: dict):
         fig, df = plot_meteogram(ctx)
     elif ctx["opt"] == "2":
         fig, df = plot2(ctx)
+    elif ctx["opt"] == "4iemre":
+        lon = ctx["_nt"].sts[ctx["station"]]["lon"]
+        lat = ctx["_nt"].sts[ctx["station"]]["lat"]
+        fig, df = plot4iemre(ctx, lon, lat)
     elif ctx["opt"] == "at":
         fig, df = plot_at(ctx)
     elif ctx["opt"] == "sm":
