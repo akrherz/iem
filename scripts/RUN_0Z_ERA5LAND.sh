@@ -29,3 +29,6 @@ for domain in "conus" "europe" "sa" "china"; do
     # D7 daily should be in good shape now for all domains?
     python daily_analysis.py --domain=$domain --date="${D7}"
 done
+
+cd ../isusm
+python fix_soil4t.py --date="${D7}"
