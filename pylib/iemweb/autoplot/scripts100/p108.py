@@ -203,13 +203,14 @@ def plotter(ctx: dict):
     for year in range(ab.year, datetime.now().year + 1):
         sts = sdate.replace(year=year)
         ets = sts + timedelta(days=xlen - 1)
-        x = df.loc[sts:ets, f"o{glabel}"].cumsum()
+        slc = slice(pd.Timestamp(sts), pd.Timestamp(ets))
+        x = df.loc[slc, f"o{glabel}"].cumsum()
         if x.empty:
             continue
         acc[(year - sdate.year), : len(x.index)] = x.to_numpy()
-        x = df.loc[sts:ets, "oprecip"].cumsum()
+        x = df.loc[slc, "oprecip"].cumsum()
         pacc[(year - sdate.year), : len(x.index)] = x.to_numpy()
-        x = df.loc[sts:ets, "osdd86"].cumsum()
+        x = df.loc[slc, "osdd86"].cumsum()
         sacc[(year - sdate.year), : len(x.index)] = x.to_numpy()
 
         if year not in wantedyears:
@@ -221,14 +222,14 @@ def plotter(ctx: dict):
         if whichplots in ["gdd", "all"]:
             ax1.plot(
                 range(len(x.index)),
-                df.loc[sts:ets, f"o{glabel}"].cumsum().values,
+                df.loc[slc, f"o{glabel}"].cumsum().values,
                 zorder=6,
                 color=color,
                 label=f"{yearlabel}",
                 lw=2,
             )
         # Get cumulated precip
-        p = df.loc[sts:ets, "oprecip"].cumsum()
+        p = df.loc[slc, "oprecip"].cumsum()
         if whichplots in ["all", "precip"]:
             ax3.plot(
                 range(len(p.index)),
@@ -238,7 +239,7 @@ def plotter(ctx: dict):
                 zorder=6,
                 label=f"{yearlabel}",
             )
-        p = df.loc[sts:ets, "osdd86"].cumsum()
+        p = df.loc[slc, "osdd86"].cumsum()
         if whichplots in ["all", "sdd"]:
             ax4.plot(
                 range(len(p.index)),
@@ -253,7 +254,8 @@ def plotter(ctx: dict):
             # Plot climatology, but do a trick to plot a larger time domain
             csts = sts.replace(year=df.index[0].year)
             cets = ets.replace(year=df.index[0].year)
-            x = df.loc[csts:cets, f"c{glabel}"].cumsum()
+            cslc = slice(pd.Timestamp(csts), pd.Timestamp(cets))
+            x = df.loc[cslc, f"c{glabel}"].cumsum()
             if whichplots in ["all", "gdd"]:
                 ax1.plot(
                     range(len(x.index)),
@@ -263,7 +265,7 @@ def plotter(ctx: dict):
                     lw=2,
                     zorder=5,
                 )
-            x = df.loc[csts:cets, "cprecip"].cumsum()
+            x = df.loc[cslc, "cprecip"].cumsum()
             if whichplots in ["all", "precip"]:
                 ax3.plot(
                     range(len(x.index)),
@@ -273,7 +275,7 @@ def plotter(ctx: dict):
                     lw=2,
                     zorder=5,
                 )
-            x = df.loc[csts:cets, "csdd86"].cumsum()
+            x = df.loc[cslc, "csdd86"].cumsum()
             if whichplots in ["all", "sdd"]:
                 ax4.plot(
                     range(len(x.index)),
@@ -284,7 +286,7 @@ def plotter(ctx: dict):
                     zorder=5,
                 )
 
-        x = df.loc[sts:ets, glabel + "_diff"].cumsum()
+        x = df.loc[slc, glabel + "_diff"].cumsum()
         if whichplots in ["all", "gdd"]:
             ax2.plot(
                 range(len(x.index)),

@@ -148,7 +148,7 @@ def application(environ, start_response):
         )
     if environ["fmt"] == "json":
         start_response("200 OK", [("Content-type", "application/json")])
-        return climodf.to_json(orient="records")
+        return climodf.to_json(orient="records", date_format="iso")
     if environ["fmt"] == "excel":
         start_response(
             "200 OK",

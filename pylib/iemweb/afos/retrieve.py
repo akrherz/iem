@@ -13,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-01-29: This service is now protected by a query timeout of 60 seconds.
+  You will get a HTTP status of 503.
 - 2025-11-18: Added `matches` parameter to allow a simple search within
   candidate text products for a given string.  For some products with
   ambiguous six character `pil` values and identical issuance `center` values,
@@ -104,11 +106,14 @@ from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from sqlalchemy.exc import OperationalError
 
+from iemweb import error_log
 from iemweb.util import get_ct
 
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
+STATEMENT_TIMEOUT = "60s"
 
 
 class MyModel(CGIModel):
@@ -349,11 +354,11 @@ def application(environ, start_response):
         headers.append(
             ("Content-disposition", f"attachment; filename=afos.{suffix}")
         )
-    start_response("200 OK", headers)
 
     sio = StringIO()
     if pils[0][:3] == "MTR":
         with get_sqlalchemy_conn("iem") as conn:
+            start_response("200 OK", headers)
             return special_metar_logic(
                 conn, pils, environ["limit"], fmt, sio, order
             )
@@ -397,11 +402,28 @@ def application(environ, start_response):
     ):
         sdates = [utc() - timedelta(days=31), environ["sdate"]]
     with get_sqlalchemy_conn("afos") as conn:
+        # Prevent something from running away with resources
+        # Lovely situation here without parameter support for ``set``
+        conn.execute(
+            sql_helper(
+                "SET statement_timeout = '{timeout}'",
+                timeout=STATEMENT_TIMEOUT,
+            )
+        )
         for sdate in sdates:
             params["sdate"] = sdate
-            cursor = conn.execute(sql, params)
+            try:
+                cursor = conn.execute(sql, params)
+            except OperationalError as exp:
+                error_log(environ, str(exp))
+                start_response(
+                    "503 Service Unavailable", [("Content-type", "text/plain")]
+                )
+                sio.write("ERROR: Query took too long to complete")
+                return sio.getvalue().encode("utf-8")
             if cursor.rowcount == environ["limit"]:
                 break
+        start_response("200 OK", headers)
 
         if fmt == "zip":
             return zip_handler(cursor)

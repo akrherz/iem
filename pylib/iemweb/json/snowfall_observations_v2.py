@@ -103,7 +103,7 @@ def dowork(wfo: str) -> list:
     # Represent all values as a string with at most 1 decimal
     obs = obs.map(lambda x: f"{x:.1f}" if isinstance(x, float) else x)
 
-    return obs.reset_index().to_json(orient="records")
+    return obs.reset_index().to_json(orient="records", date_format="iso")
 
 
 @iemapp(

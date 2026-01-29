@@ -120,7 +120,7 @@ def get_data(sts, ets, stations, fmt):
         )
     df = df.drop(columns=["valid"])
     if fmt == "json":
-        return df.to_json(orient="records")
+        return df.to_json(orient="records", date_format="iso")
     if fmt == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:

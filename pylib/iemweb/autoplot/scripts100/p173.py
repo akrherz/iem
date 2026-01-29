@@ -185,7 +185,7 @@ def add_context(ctx):
             ets = datetime.strptime(f"2000{tokens[1].strip()}", "%Y%m%d")
             ldf = (
                 df[["hour", "avg_sknt"]]
-                .loc[sts.date() : ets.date()]
+                .loc[pd.Timestamp(sts) : pd.Timestamp(ets)]
                 .groupby("hour")
                 .mean()
             )

@@ -218,7 +218,7 @@ def plotter(ctx: dict):
     jday = df[["row", "accum"]].groupby("row").mean()
     if jday.empty or len(jday.index) < 3:
         raise NoDataFound("No data found for variable.")
-    jday.iloc[-1]["accum"] = jday.iloc[-2]["accum"]
+    jday.loc[df.index[-1], "accum"] = jday.iloc[-2]["accum"]
     if climo.empty:
         ax.plot(
             range(1, len(jday.index) + 1),
@@ -233,7 +233,7 @@ def plotter(ctx: dict):
     jmin = df[["row", "accum"]].groupby("row").min()
     jmax = df[["row", "accum"]].groupby("row").max()
     ax.fill_between(
-        range(1, len(jday.index) + 1),
+        range(1, len(jmin.index) + 1),
         jmin["accum"],
         jmax["accum"],
         zorder=2,

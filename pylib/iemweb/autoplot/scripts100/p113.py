@@ -213,9 +213,9 @@ def plotter(ctx: dict):
     if crosses_jan1:
         if ctx["eday"].month == 2 and ctx["eday"].day == 29:
             ctx["eday"] = date(ctx["eday"].year, 2, 28)
-        dfnew = df.loc[ctx["sday"] :].copy()
+        dfnew = df.loc[pd.Timestamp(ctx["sday"]) :].copy()
         dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
-        df = pd.concat([dfnew, df.loc[: ctx["sday"]]])
+        df = pd.concat([dfnew, df.loc[: pd.Timestamp(ctx["sday"])]])
         ctx["sday"] = ctx["sday"].replace(year=1999)
 
     x = df.index.date

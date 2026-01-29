@@ -159,12 +159,22 @@ def add_ctx(ctx, conn: Connection | None = None):
 def get_highcharts(ctx: dict) -> str:
     """Do highcharts"""
     add_ctx(ctx)
-    rng = ctx["df"][["dates", "mins", "maxs"]].to_json(orient="values")
-    p95 = ctx["df"][["dates", "p2p5", "p97p5"]].to_json(orient="values")
-    p50 = ctx["df"][["dates", "p25", "p75"]].to_json(orient="values")
-    mean = ctx["df"][["dates", "avg"]].to_json(orient="values")
+    rng = ctx["df"][["dates", "mins", "maxs"]].to_json(
+        orient="values", date_format="iso"
+    )
+    p95 = ctx["df"][["dates", "p2p5", "p97p5"]].to_json(
+        orient="values", date_format="iso"
+    )
+    p50 = ctx["df"][["dates", "p25", "p75"]].to_json(
+        orient="values", date_format="iso"
+    )
+    mean = ctx["df"][["dates", "avg"]].to_json(
+        orient="values", date_format="iso"
+    )
     try:
-        thisyear = ctx["df"][["dates", "thisyear"]].to_json(orient="values")
+        thisyear = ctx["df"][["dates", "thisyear"]].to_json(
+            orient="values", date_format="iso"
+        )
     except Exception:
         thisyear = "[]"
     containername = ctx["_e"]
