@@ -9,6 +9,7 @@ called from RUN_10MIN.sh
 from datetime import timezone
 
 from pyiem.database import get_dbconnc
+from pyiem.network import Table as NetworkTable
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -17,13 +18,14 @@ LOG = logger()
 def main():
     """Do things"""
     ceiling = utc()
+    nt = NetworkTable("ISUSM", only_online=False)
     pgconn, cursor = get_dbconnc("hads")
     cursor2 = pgconn.cursor()
     cursor.execute(
         "INSERT into raw_inbound_tmp SELECT distinct station, valid, "
         "key, value, depth, unit_convention, qualifier, dv_interval "
-        "from raw_inbound WHERE updated < %s",
-        (ceiling,),
+        "from raw_inbound WHERE updated < %s and not (station = Any(%s))",
+        (ceiling, list(nt.sts.keys())),
     )
     LOG.info("inserted %s rows into tmp", cursor.rowcount)
     cursor.execute("delete from raw_inbound where updated < %s", (ceiling,))

@@ -23,6 +23,7 @@ https://mesonet.agron.iastate.edu/json/snowfall_observations_v2.py?wfo=MFL
 """
 
 from datetime import timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -37,12 +38,16 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback Name")
-    wfo: str = Field(
-        default="DVN",
-        description="The WFO to return data for",
-        pattern="^[A-Z]{3}$",
-    )
+    callback: Annotated[
+        str | None, Field(description="JSONP Callback Name")
+    ] = None
+    wfo: Annotated[
+        str,
+        Field(
+            description="The WFO to return data for",
+            pattern="^[A-Z]{3}$",
+        ),
+    ] = "DVN"
 
 
 def dowork(wfo: str) -> list:
@@ -65,14 +70,19 @@ def dowork(wfo: str) -> list:
                 f"api/1/nws/snowfall_6hour.json?valid={now:%Y-%m-%dT%H}:00"
                 f"&wfo={wfo}"
             )
-            resp = httpx.get(service, timeout=15).json()
+            try:
+                resp = httpx.get(service, timeout=15)
+                resp.raise_for_status()
+                jdata = resp.json()
+            except Exception:
+                continue
             rows.extend(
                 {
                     "Location": entry["name"],
                     "tidx": tidx,
                     "value": entry["value"],
                 }
-                for entry in resp["data"]
+                for entry in jdata["data"]
             )
 
         now -= timedelta(hours=1)
