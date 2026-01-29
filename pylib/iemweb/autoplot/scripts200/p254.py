@@ -104,7 +104,7 @@ def plotter(ctx: dict):
     latency["lon"] = latency["nexrad"].apply(lambda x: _get(x, "lon"))
     latency["lat"] = latency["nexrad"].apply(lambda x: _get(x, "lat"))
     for col in ["latency", "realtime"]:
-        latency.loc[latency[col] < 0][col] = 0
+        latency.loc[latency[col] < 0, col] = 0
     mp = MapPlot(
         sector="nws",
         title=f"IEM Estimated NEXRAD III {PDICT[ctx['mode']]} over NOAAPort",
