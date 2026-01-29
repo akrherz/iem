@@ -357,6 +357,7 @@
 177/network:ISUSM::station:BOOI4::opt:at::sts:2023-07-18%201000::ets:2023-07-25%201000::_r:t::dpi:100.png
 177/network:ISUSM::station:BOOI4::opt:1::sts:2023-07-21%201600::ets:2023-07-22%201600::_r:t::dpi:100.png
 177/network:ISUSM::station:BOOI4::opt:4iemre::sts:2023-01-01%200000::ets:2023-01-02%200000.png
+178/t:state::network:WFO::wfo:DMX::state:IA::hour:1::ilabel:yes::ts:2018-01-29%201504::cmap:gist_rainbow.png
 180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
 180/v:snow::network1:IACLIMATE::station1:IATDSM::c1:custom::network2:IACLIMATE::c2:1951::s:14::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:t::dpi:100.png
 180/v:temps::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::c2:ncei81::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png

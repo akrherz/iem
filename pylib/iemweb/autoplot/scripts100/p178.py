@@ -122,10 +122,9 @@ def plotter(ctx: dict):
             f"on {ts:%-d %b %Y %H} UTC"
         ),
         subtitle=(
-            "Estimated amount of %s Rainfall "
+            f"Estimated amount of {HOURS[ctx['hour']]} Rainfall "
             "needed for non-urban Flash Flooding to commence"
-        )
-        % (HOURS[ctx["hour"]],),
+        ),
         nocaption=True,
     )
     cmap = get_cmap(ctx["cmap"])
@@ -162,23 +161,24 @@ def plotter(ctx: dict):
                 params=(ts - timedelta(hours=24), ts),
                 index_col="ugc",
             )
-        df2 = df[df["ztype"] == "C"]
-        plot.fill_ugcs(
-            df2[column].to_dict(),
-            bins=bins,
-            cmap=cmap,
-            plotmissing=False,
-            ilabel=ilabel,
-        )
-        df2 = df[df["ztype"] == "Z"]
-        plot.fill_ugcs(
-            df2[column].to_dict(),
-            bins=bins,
-            cmap=cmap,
-            plotmissing=False,
-            units="inches",
-            ilabel=ilabel,
-        )
+        if not df.empty:
+            df2 = df[df["ztype"] == "C"]
+            plot.fill_ugcs(
+                df2[column].to_dict(),
+                bins=bins,
+                cmap=cmap,
+                plotmissing=False,
+                ilabel=ilabel,
+            )
+            df2 = df[df["ztype"] == "Z"]
+            plot.fill_ugcs(
+                df2[column].to_dict(),
+                bins=bins,
+                cmap=cmap,
+                plotmissing=False,
+                units="inches",
+                ilabel=ilabel,
+            )
     else:
         # use grib data
         ts -= timedelta(hours=ts.hour % 6)
@@ -191,7 +191,7 @@ def plotter(ctx: dict):
             ) as testfn:
                 if testfn is not None:
                     grbs = pygrib.index(testfn, "stepRange")
-                    grb = grbs.select(stepRange="0-%s" % (hour,))[0]
+                    grb = grbs.select(stepRange=f"0-{hour}")[0]
                     lats, lons = grb.latlons()
                     break
 

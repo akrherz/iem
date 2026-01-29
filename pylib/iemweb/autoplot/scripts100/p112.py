@@ -15,28 +15,27 @@ from iemweb.autoplot import ARG_STATION
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {
+    return {
         "description": __doc__,
         "data": True,
         "report": True,
         "nopng": True,
+        "arguments": [
+            ARG_STATION,
+            dict(
+                type="int",
+                name="base",
+                default="52",
+                label="Growing Degree Day Base (°F)",
+            ),
+            dict(
+                type="int",
+                name="ceil",
+                default="86",
+                label="Growing Degree Day Ceiling (°F)",
+            ),
+        ],
     }
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="base",
-            default="52",
-            label="Growing Degree Day Base (F)",
-        ),
-        dict(
-            type="int",
-            name="ceil",
-            default="86",
-            label="Growing Degree Day Ceiling (F)",
-        ),
-    ]
-    return desc
 
 
 def modMonth(

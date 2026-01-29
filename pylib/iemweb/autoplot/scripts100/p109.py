@@ -154,7 +154,7 @@ def get_description():
     return desc
 
 
-def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
+def get_count_df(ctx, pstr: str, sts: datetime, ets: datetime) -> pd.DataFrame:
     """Oh boy, do complex things."""
     emerg_extra = ""
     if ctx["e"] == "yes":
@@ -162,120 +162,79 @@ def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
     elif ctx["e"] == "pds":
         emerg_extra = " and is_pds "
     params = {}
-    if varname.startswith("count_"):
-        if (ets - sts).days > 366:
-            raise NoDataFound("Can't compute over period > 366 days")
-        params["sday"] = f"{sts:%m%d}"
-        params["eday"] = f"{ets:%m%d}"
-        slimiter = (
-            " (to_char(issue, 'mmdd') >= :sday and "
-            "to_char(issue, 'mmdd') <= :eday ) "
+    if (ets - sts).days > 366:
+        raise NoDataFound("Can't compute over period > 366 days")
+    params["sday"] = f"{sts:%m%d}"
+    params["eday"] = f"{ets:%m%d}"
+    slimiter = (
+        " (to_char(issue, 'mmdd') >= :sday and "
+        "to_char(issue, 'mmdd') <= :eday ) "
+    )
+    yearcol = "vtec_year"
+    if params["eday"] <= params["sday"]:
+        slimiter = slimiter.replace(" and ", " or ")
+        yearcol = (
+            "case when to_char(issue, 'mmdd') <= :eday then "
+            "vtec_year - 1 else vtec_year end"
         )
-        yearcol = "vtec_year"
-        if params["eday"] <= params["sday"]:
-            slimiter = slimiter.replace(" and ", " or ")
-            yearcol = (
-                "case when to_char(issue, 'mmdd') <= :eday then "
-                "vtec_year - 1 else vtec_year end"
-            )
 
-        # compute all the things.
-        params["sdate"] = "2002-01-01"
-        if pstr == " 1=1 ":
-            params["sdate"] = "2005-10-01"
-        with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
-                sql = """
-                with events as (
-                    select distinct wfo, substr(ugc, 1, 2) as state,
-                    {yearcol} as year,
-                    phenomena, eventid from warnings where {pstr} and
-                    {slimiter} and issue > :sdate {emerg_extra})
-                select state as datum, year::int as year, count(*) from events
-                group by datum, year
-                """
-            else:
-                sql = """
-                with events as (
-                    select distinct wfo, {yearcol} as year,
-                    phenomena, eventid from warnings where {pstr} and
-                    {slimiter} and issue > :sdate {emerg_extra})
-                select wfo as datum, year::int as year, count(*) from events
-                group by datum, year
-                """
-            df = pd.read_sql(
-                sql_helper(
-                    sql,
-                    yearcol=yearcol,
-                    slimiter=slimiter,
-                    pstr=pstr,
-                    emerg_extra=emerg_extra,
-                ),
-                conn,
-                params=params,
-                index_col=None,
-            )
-        # enlarge by wfo and year cartesian product
-        ctx["_subtitle"] = (
-            ", Period of Record: "
-            f"{df['year'].min():.0f}-{df['year'].max():.0f}"
-        )
-        idx = pd.MultiIndex.from_product(
-            [df["datum"].unique(), df["year"].unique()],
-            names=["datum", "year"],
-        )
-        df = (
-            df.set_index(["datum", "year"])
-            .reindex(idx)
-            .fillna(0)
-            .reset_index()
-        )
-        df["rank"] = df.groupby("datum")["count"].rank(
-            method="min", ascending=True
-        )
-        thisyear = (
-            df[df["year"] == sts.year].set_index("datum").drop("year", axis=1)
-        )
-        # Ready to construct final df.
-        df = (
-            df[["datum", "count"]].groupby("datum").agg(["mean", "std"]).copy()
-        )
-        df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
-        df[["count", "count_rank"]] = thisyear[["count", "rank"]]
-        df["count_departure"] = df["count"] - df["count_mean"]
-        df["count_standard"] = df["count_departure"] / df["count_std"]
-    else:
-        with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
-                sql = """
-                with total as (
+    # compute all the things.
+    params["sdate"] = "2002-01-01"
+    if pstr == " 1=1 ":
+        params["sdate"] = "2005-10-01"
+    with get_sqlalchemy_conn("postgis") as conn:
+        if ctx["by"] == "state":
+            sql = """
+            with events as (
                 select distinct wfo, substr(ugc, 1, 2) as state,
-                extract(year from issue at time zone 'UTC') as year,
-                phenomena, significance, eventid from warnings
-                where {pstr} and issue >=:sts and issue < :ets {emerg_extra}
-                )
-
-                SELECT state as datum, count(*) from total
-                GROUP by datum
-                """
-            else:
-                sql = """
-                with total as (
-                select distinct wfo,
-                extract(year from issue at time zone 'UTC') as year,
-                phenomena, significance, eventid from warnings
-                where {pstr} and issue >= :sts and issue < :ets {emerg_extra}
-                )
-
-                SELECT wfo as datum, count(*) from total
-                GROUP by datum
-                """
-            df = pd.read_sql(
-                sql_helper(sql, pstr=pstr, emerg_extra=emerg_extra),
-                conn,
-                params={"sts": sts, "ets": ets},
-                index_col="datum",
-            )
+                {yearcol} as year,
+                phenomena, eventid from warnings where {pstr} and
+                {slimiter} and issue > :sdate {emerg_extra})
+            select state as datum, year::int as year, count(*) from events
+            group by datum, year
+            """
+        else:
+            sql = """
+            with events as (
+                select distinct wfo, {yearcol} as year,
+                phenomena, eventid from warnings where {pstr} and
+                {slimiter} and issue > :sdate {emerg_extra})
+            select wfo as datum, year::int as year, count(*) from events
+            group by datum, year
+            """
+        df = pd.read_sql(
+            sql_helper(
+                sql,
+                yearcol=yearcol,
+                slimiter=slimiter,
+                pstr=pstr,
+                emerg_extra=emerg_extra,
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
+    # enlarge by wfo and year cartesian product
+    ctx["_subtitle"] = (
+        f", Period of Record: {df['year'].min():.0f}-{df['year'].max():.0f}"
+    )
+    idx = pd.MultiIndex.from_product(
+        [df["datum"].unique(), df["year"].unique()],
+        names=["datum", "year"],
+    )
+    df = df.set_index(["datum", "year"]).reindex(idx).fillna(0).reset_index()
+    df["rank"] = df.groupby("datum")["count"].rank(
+        method="min", ascending=True
+    )
+    thisyear = (
+        df[df["year"] == sts.year].set_index("datum").drop("year", axis=1)
+    )
+    # Ready to construct final df.
+    df = df[["datum", "count"]].groupby("datum").agg(["mean", "std"]).copy()
+    df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
+    df[["count", "count_rank"]] = thisyear[["count", "rank"]]
+    df["count_departure"] = df["count"] - df["count_mean"]
+    df["count_standard"] = df["count_departure"] / df["count_std"]
     return df
 
 
@@ -396,7 +355,7 @@ def plotter(ctx: dict):
         title += " (Particularly Dangerous Situation) "
     subtitle_extra = ""
     if varname.startswith("count"):
-        df = get_count_df(ctx, varname, pstr, sts, ets)
+        df = get_count_df(ctx, pstr, sts, ets)
 
         bins = get_count_bins(df, varname)
         lformat = "%.0f"
