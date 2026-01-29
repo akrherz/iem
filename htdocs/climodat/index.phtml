@@ -1,4 +1,5 @@
 <?php
+
 $OL = "10.7.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 15);
@@ -7,16 +8,27 @@ force_https();
 require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 require_once "../../include/forms.php";
-// hacky
+
+/**
+ * Ensure the network string matches the station prefix.
+ * If the station is set and its prefix does not match the network,
+ * update the network to match the station's prefix.
+ *
+ * @param string $station Station identifier (e.g., 'IA0001')
+ * @param string $network Network string (e.g., 'IACLIMATE')
+ * @return string Corrected network string
+ */
+function match_network_to_station($station, $network) {
+    if ($station !== "" && substr($station, 0, 2) !== substr($network, 0, 2)) {
+        return sprintf("%sCLIMATE", substr($station, 0, 2));
+    }
+    return $network;
+}
+
 $report = sprintf("%02d", get_int404("report", 1));
 $station = strtoupper(get_str404("station", "", 6));
 $network = strtoupper(get_str404('network', 'IACLIMATE', 9));
-// Make sure that our network matches the station, silly bots
-if ($station != "") {
-    if (substr($station, 0, 2) != substr($network, 0, 2)) {
-        $network = sprintf("%sCLIMATE", substr($station, 0, 2));
-    }
-}
+$network = match_network_to_station($station, $network);
 
 if (isset($_GET["id"])) {
     $station = substr(xssafe($_GET["id"]), 0, 6);

@@ -5,8 +5,8 @@ import tempfile
 
 import click
 
-DB1, DB2, DB3 = range(3)
-IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()
+DB1, DB2, DB3, DB4 = range(4)
+IPS = "172.16.170.1 172.16.172.1 172.16.174.1 172.16.176.1".split()
 LOOKUP = {
     "": IPS[DB1],
     "-afos": IPS[DB1],
@@ -30,7 +30,7 @@ LOOKUP = {
     "-isuag": IPS[DB1],
     "-kcci": IPS[DB1],
     "-mesonet": IPS[DB1],
-    "-mesosite": IPS[DB2],  # needs 10g
+    "-mesosite": IPS[DB2],
     "-mos": IPS[DB1],
     "-nc1018": IPS[DB1],
     "-nldn": IPS[DB2],
@@ -48,7 +48,7 @@ LOOKUP = {
     "-snet": IPS[DB3],
     "-squaw": IPS[DB1],
     "-sustainablecorn": IPS[DB1],
-    "-talltowers": IPS[DB2],
+    "-talltowers": IPS[DB4],
     "-td": IPS[DB1],
     "-uscrn": IPS[DB1],
     "-wepp": IPS[DB1],
