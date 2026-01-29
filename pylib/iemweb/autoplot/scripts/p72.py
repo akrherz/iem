@@ -14,13 +14,14 @@ like Flood Warnings are prime examples of this.
 plots for a single county/zone/parish at a time.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
+from pyiem.util import utc
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -47,6 +48,7 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
+    tomorrow = utc() + timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -74,6 +76,21 @@ def get_description():
             label="Select Time Period:",
             options=MDICT,
         ),
+        {
+            "type": "date",
+            "default": "1986/01/01",
+            "min": "1986/01/01",
+            "name": "sdate",
+            "label": "Potential Start Date (@00 UTC) Limit, if data exists",
+        },
+        {
+            "type": "date",
+            "default": f"{tomorrow:%Y/%m/%d}",
+            "max": f"{tomorrow:%Y/%m/%d}",
+            "min": "1986/01/01",
+            "name": "edate",
+            "label": "Potential End Date (@00 UTC) Limit, if data exists",
+        },
     ]
     return desc
 
@@ -87,12 +104,13 @@ def get_data(conn, params):
         sql_helper(
             """
     WITH data as (
-        SELECT extract(year from issue) as yr, eventid,
+        SELECT vtec_year as yr, eventid,
         min(issue at time zone :tzname) as minissue,
         max(issue at time zone :tzname) as maxissue,
         max(expire at time zone :tzname) as maxexpire from warnings WHERE
         phenomena = :phenomena and significance = :significance
-        and wfo = :wfo {monthlimiter} GROUP by yr, eventid),
+        and wfo = :wfo {monthlimiter} and issue >= :sdate and issue < :edate
+        GROUP by yr, eventid),
     events as (
         select count(*), min(minissue) as min_issue,
         max(maxissue) as max_issue from data),
@@ -157,6 +175,8 @@ def plotter(ctx: dict):
                 "significance": significance,
                 "wfo": wfo,
                 "months": None,
+                "sdate": ctx["sdate"],
+                "edate": ctx["edate"],
             },
         )
         if dfall.empty:
@@ -170,6 +190,8 @@ def plotter(ctx: dict):
                     "significance": significance,
                     "wfo": wfo,
                     "months": months,
+                    "sdate": ctx["sdate"],
+                    "edate": ctx["edate"],
                 },
             )
             dfall[sfcol] = dfseason["frequency"]
@@ -241,7 +263,7 @@ def plotter(ctx: dict):
         ]
     )
     ax.set_xlabel(f"Timezone: {tzname} (Daylight or Standard)")
-    ylabel = f"{dfall['total'].max()} Overall"
+    ylabel = f"{dfall['total'].max():.0f} Overall"
     if ctx["season"] != "all":
         ylabel += f", {dfseason['total'].max()} {MDICT[ctx['season']]}"
     ax.set_ylabel(f"Percentage [%] out of\n{ylabel} Events")
