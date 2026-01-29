@@ -127,7 +127,7 @@ def get_data(sts, ets, station, model, fmt):
     if not df.empty:
         df = df.dropna(axis=1, how="all")
     if fmt == "json":
-        return df.to_json(orient="records")
+        return df.to_json(orient="records", date_format="iso")
     if fmt == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:

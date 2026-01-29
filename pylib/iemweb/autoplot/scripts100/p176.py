@@ -113,9 +113,17 @@ def get_highcharts(ctx: dict) -> str:
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
     cols = ["date", "margin", "val"]
     rename = {"date": "x", "margin": "y"}
-    v = df2[cols].rename(columns=rename).to_json(orient="records")
+    v = (
+        df2[cols]
+        .rename(columns=rename)
+        .to_json(orient="records", date_format="iso")
+    )
     df2 = ctx["df"][ctx["df"]["margin"] < 0]
-    v2 = df2[cols].rename(columns=rename).to_json(orient="records")
+    v2 = (
+        df2[cols]
+        .rename(columns=rename)
+        .to_json(orient="records", date_format="iso")
+    )
     a = "High" if ctx["opt"] == "0" else "Low"
     b = "High" if ctx["opt"] == "1" else "Low"
     series = f"""{{

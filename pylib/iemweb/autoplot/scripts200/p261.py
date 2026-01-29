@@ -39,16 +39,21 @@ LOOKUP = {
 }
 
 
-def fix():
-    """muck with the prodDefinitions to get the key included"""
+def ensure_prodDefinitions_keys_in_labels():
+    """
+    Ensure each prodDefinitions label includes its key for clarity in UI.
+    If the label does not already start with '[', prepend '[key] ' to it.
+    This helps users distinguish similar product names in dropdowns.
+    """
     for key, val in prodDefinitions.items():
-        prodDefinitions[key] = val if val.startswith("[") else f"[{key}] {val}"
+        if not val.startswith("["):
+            prodDefinitions[key] = f"[{key}] {val}"
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    fix()
+    ensure_prodDefinitions_keys_in_labels()
     desc["arguments"] = [
         dict(
             type="select",

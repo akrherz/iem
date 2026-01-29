@@ -117,8 +117,8 @@ def get_description():
     return desc
 
 
-def rounder(row, varname):
-    """Hacky."""
+def rounder(row: dict, varname: str) -> str:
+    """Round based on variable name."""
     if varname in ["max_p01i", "max_alti", "min_alti"]:
         return f"{row[varname]:.2f}"
     return f"{row[varname]:3.0f}"

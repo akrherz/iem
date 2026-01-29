@@ -1,5 +1,9 @@
 [tool.pytest.ini_options]
-filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
+filterwarnings = [
+    "error::pandas.errors.ChainedAssignmentError",
+    "error::pandas.errors.Pandas4Warning",
+    "ignore:numpy.ndarray size changed:RuntimeWarning",
+]
 
 [tool.ruff]
 line-length = 79

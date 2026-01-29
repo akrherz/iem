@@ -184,7 +184,7 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     if na != "blank":
         df = df.fillna(na)
     if fmt == "json":
-        return df.to_json(orient="records")
+        return df.to_json(orient="records", date_format="iso")
     if fmt == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
