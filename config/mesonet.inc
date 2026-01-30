@@ -75,6 +75,8 @@ RewriteRule ^/search /search.py [QSA]
     Require all granted
   </Directory>
 
+  RewriteRule ^/projects/iembot/slack/(.*)$ /projects/iembot/slack/index.py/$1 [QSA,PT,L]
+
   # Point to system-installed mapserv binary (from conda env)
   ScriptAlias /cgi-bin/mapserv/mapserv.fcgi ${IEMWEBFARM_MAPSERV}
   ScriptAlias /cgi-bin/mapserv/mapserv ${IEMWEBFARM_MAPSERV}
@@ -270,6 +272,7 @@ RewriteRule ^/search /search.py [QSA]
     # Allow for python scripts to act has directories NETWORK/SID/TOOL
     RewriteRule ^([^/]{3,20})/([^/]{3,20})/([^/]+)$ $3.py
   </Directory>
+
 
   <Directory "/opt/iem/htdocs/wx/afos">
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
