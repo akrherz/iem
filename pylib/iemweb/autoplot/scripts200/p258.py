@@ -145,9 +145,7 @@ def plotter(ctx: dict):
             0.8,
             0.8,
             color=color,
-            hatch=cig_hatching.get(row0["threshold"], None)
-            if hatched
-            else None,
+            hatch=cig_hatching.get(row0["threshold"]) if hatched else None,
             zorder=3,
         )
         ax.add_patch(rect)
@@ -157,7 +155,7 @@ def plotter(ctx: dict):
                     (x - 0.4, thisy - 0.4),
                     0.8,
                     0.8,
-                    hatch=cig_hatching.get(row0["threshold"], None)
+                    hatch=cig_hatching.get(row0["threshold"])
                     if hatched
                     else None,
                     fill=False,
