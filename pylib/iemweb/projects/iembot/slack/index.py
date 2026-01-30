@@ -2,6 +2,7 @@
 IEM Slack Bot OAuth and Subscription Handlers
 """
 
+import json
 import urllib.parse
 
 import httpx
@@ -103,12 +104,16 @@ def slack_subscribe(
         params = urllib.parse.parse_qs(body)
     except Exception:
         params = {}
+    # Slack slash command: team_id, channel_id, text (subkey)
     team_id = params.get("team_id", [None])[0]
     channel_id = params.get("channel_id", [None])[0]
-    subkey = params.get("subkey", [None])[0]
+    subkey = params.get("text", [None])[0]
     if not (team_id and channel_id and subkey):
-        start_response("400 Bad Request", [("Content-Type", "text/plain")])
-        return [b"Missing team_id, channel_id, or subkey"]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        return [
+            b'{"response_type":"ephemeral","text":"Missing team_id, '
+            b'channel_id, or subkey (usage: /iembot_subscribe [product_key])"}'
+        ]
     try:
         conn.execute(
             sql_helper("""
@@ -119,16 +124,19 @@ def slack_subscribe(
             {"team_id": team_id, "channel_id": channel_id, "subkey": subkey},
         )
         conn.commit()
-        start_response("200 OK", [("Content-Type", "text/html")])
-        return [
-            f"<h1>Subscribed!</h1><p>Channel {channel_id} is now "
-            f"subscribed to {subkey}.</p>".encode()
-        ]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        resp = {
+            "response_type": "ephemeral",
+            "text": f"Channel <#{channel_id}> is now subscribed to {subkey}.",
+        }
+        return [json.dumps(resp).encode()]
     except Exception as e:
-        start_response(
-            "500 Internal Server Error", [("Content-Type", "text/plain")]
-        )
-        return [f"Subscription failed: {e}".encode()]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        resp = {
+            "response_type": "ephemeral",
+            "text": f"Subscription failed: {e}",
+        }
+        return [json.dumps(resp).encode()]
 
 
 @with_sqlalchemy_conn("mesosite")
@@ -143,12 +151,17 @@ def slack_unsubscribe(
         params = urllib.parse.parse_qs(body)
     except Exception:
         params = {}
+    # Slack slash command: team_id, channel_id, text (subkey)
     team_id = params.get("team_id", [None])[0]
     channel_id = params.get("channel_id", [None])[0]
-    subkey = params.get("subkey", [None])[0]
+    subkey = params.get("text", [None])[0]
     if not (team_id and channel_id and subkey):
-        start_response("400 Bad Request", [("Content-Type", "text/plain")])
-        return [b"Missing team_id, channel_id, or subkey"]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        return [
+            b'{"response_type":"ephemeral","text":"Missing team_id, '
+            b"channel_id, or subkey (usage: /iembot_unsubscribe "
+            b'[product_key])"}'
+        ]
     try:
         conn.execute(
             sql_helper("""
@@ -159,16 +172,21 @@ def slack_unsubscribe(
             {"team_id": team_id, "channel_id": channel_id, "subkey": subkey},
         )
         conn.commit()
-        start_response("200 OK", [("Content-Type", "text/html")])
-        return [
-            f"<h1>Unsubscribed!</h1><p>Channel {channel_id} is now "
-            f"unsubscribed from {subkey}.</p>".encode()
-        ]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        resp = {
+            "response_type": "ephemeral",
+            "text": (
+                f"Channel <#{channel_id}> is now unsubscribed from {subkey}."
+            ),
+        }
+        return [json.dumps(resp).encode()]
     except Exception as e:
-        start_response(
-            "500 Internal Server Error", [("Content-Type", "text/plain")]
-        )
-        return [f"Unsubscribe failed: {e}".encode()]
+        start_response("200 OK", [("Content-Type", "application/json")])
+        resp = {
+            "response_type": "ephemeral",
+            "text": f"Unsubscribe failed: {e}",
+        }
+        return [json.dumps(resp).encode()]
 
 
 @iemapp()
