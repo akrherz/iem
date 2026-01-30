@@ -32,6 +32,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, get_monofont
+from iemweb.autoplot.scripts200.p200 import OUTLOOKS
 
 PDICT = {
     "0": "At least touches",
@@ -61,54 +62,6 @@ PDICT4 = {
     "7": "7",
     "8": "8",
 }
-OUTLOOKS = {
-    "ANY SEVERE.0.02": "Any Severe 2% (Day 3+)",
-    "ANY SEVERE.0.05": "Any Severe 5% (Day 3+)",
-    "ANY SEVERE.0.15": "Any Severe 15% (Day 3+)",
-    "ANY SEVERE.0.25": "Any Severe 25% (Day 3+)",
-    "ANY SEVERE.0.30": "Any Severe 30% (Day 3+)",
-    "ANY SEVERE.0.35": "Any Severe 35% (Day 3+)",
-    "ANY SEVERE.0.45": "Any Severe 45% (Day 3+)",
-    "ANY SEVERE.0.60": "Any Severe 60% (Day 3+)",
-    "ANY SEVERE.SIGN": "Any Severe Significant (Day 3+)",
-    "CATEGORICAL.TSTM": "Categorical Thunderstorm Risk",
-    "CATEGORICAL.MRGL": "Categorical Marginal Risk (2015+)",
-    "CATEGORICAL.SLGT": "Categorical Slight Risk",
-    "CATEGORICAL.ENH": "Categorical Enhanced Risk (2015+)",
-    "CATEGORICAL.MDT": "Categorical Moderate Risk",
-    "CATEGORICAL.HIGH": "Categorical High Risk",
-    "FIRE WEATHER CATEGORICAL.CRIT": "Categorical Critical Fire Wx (Days 1-2)",
-    "FIRE WEATHER CATEGORICAL.EXTM": "Categorical Extreme Fire Wx (Days 1-2)",
-    "CRITICAL FIRE WEATHER AREA.0.15": (
-        "Critical Fire Weather Area 15% (Days3-7)"
-    ),
-    "HAIL.0.05": "Hail 5% (Days 1+2)",
-    "HAIL.0.15": "Hail 15% (Days 1+2)",
-    "HAIL.0.25": "Hail 25% (Days 1+2)",
-    "HAIL.0.30": "Hail 30% (Days 1+2)",
-    "HAIL.0.35": "Hail 35% (Days 1+2)",
-    "HAIL.0.45": "Hail 45% (Days 1+2)",
-    "HAIL.0.60": "Hail 60% (Days 1+2)",
-    "HAIL.SIGN": "Hail Significant (Days 1+2)",
-    "TORNADO.0.02": "Tornado 2% (Days 1+2)",
-    "TORNADO.0.05": "Tornado 5% (Days 1+2)",
-    "TORNADO.0.10": "Tornado 10% (Days 1+2)",
-    "TORNADO.0.15": "Tornado 15% (Days 1+2)",
-    "TORNADO.0.25": "Tornado 25% (Days 1+2)",
-    "TORNADO.0.30": "Tornado 30% (Days 1+2)",
-    "TORNADO.0.35": "Tornado 35% (Days 1+2)",
-    "TORNADO.0.45": "Tornado 45% (Days 1+2)",
-    "TORNADO.0.60": "Tornado 60% (Days 1+2)",
-    "TORNADO.SIGN": "Tornado Significant (Days 1+2)",
-    "WIND.0.05": "Wind 5% (Days 1+2)",
-    "WIND.0.15": "Wind 15% (Days 1+2)",
-    "WIND.0.25": "Wind 25% (Days 1+2)",
-    "WIND.0.30": "Wind 30% (Days 1+2)",
-    "WIND.0.35": "Wind 35% (Days 1+2)",
-    "WIND.0.45": "Wind 45% (Days 1+2)",
-    "WIND.0.60": "Wind 60% (Days 1+2)",
-    "WIND.SIGN": "Wind Significant (Days 1+2)",
-}
 
 
 def get_description():
@@ -125,7 +78,7 @@ def get_description():
         {
             "type": "select",
             "options": PDICT3,
-            "default": "c",
+            "default": "C",
             "label": "Select Outlook Type:",
             "name": "outlook_type",
         },
@@ -329,8 +282,8 @@ def plotter(ctx: dict):
     gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
     if len(gdf.index) > 2:
         # Exclude first and last year in the average
-        avg_start = np.average(gdf["doy", "min"].values[1:-1])
-        avg_end = np.average(gdf["doy", "max"].values[1:-1])
+        avg_start = np.average(gdf["doy", "min"].to_numpy()[1:-1])
+        avg_end = np.average(gdf["doy", "max"].to_numpy()[1:-1])
         ax.axvline(avg_start, ls=":", lw=2, color="k")
         ax.axvline(avg_end, ls=":", lw=2, color="k")
         x0 = date(2000, 1, 1)

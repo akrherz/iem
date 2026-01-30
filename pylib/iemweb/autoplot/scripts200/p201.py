@@ -12,7 +12,8 @@ previous day, which is technically not accurate but the logic that most
 people expect to see.</p>
 
 <p>When plotting hail, tornado, or wind probabilities, a "H" will appear on
-days that had "hatched"/"SIGNificant" risk.  Note that this isn't an exact
+days that had "hatched"/"SIGNificant" risk.  A "C1", "C2", or "C3" will appear
+for days with those conditional risks. Note that this isn't an exact
 science as the hatched and probability risk are not checked to see if they
 spatially/temporally overlap each other.</p>
 
@@ -225,17 +226,17 @@ def plotter(ctx: dict):
                 threshold not in ('IDRT', 'SDRT')),
             hatched as (
                 select distinct outlook_date, threshold from data
-                where threshold = 'SIGN'
+                where threshold = ANY(:cigs)
             ),
             agg as (
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN'
-                {threshold_filter})
+                on (d.threshold = t.threshold) WHERE
+                not (d.threshold = ANY(:cigs)) {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
-            case when h.threshold = 'SIGN' then true else false end as sign
+            case when h.threshold = ANY(:cigs) then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
             """,
@@ -249,6 +250,7 @@ def plotter(ctx: dict):
                     "sts": sts,
                     "ets": ets,
                     "just": ctx["just"],
+                    "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
                 },
                 index_col="date",
                 parse_dates=[
@@ -308,17 +310,17 @@ def plotter(ctx: dict):
                 and outlook_date <= :ets {sqllimiter}),
             hatched as (
                 select distinct outlook_date, threshold from data
-                where threshold = 'SIGN'
+                where threshold = ANY(:cigs)
             ),
             agg as (
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN'
-                {threshold_filter})
+                on (d.threshold = t.threshold) WHERE
+                not (d.threshold = ANY(:cigs)) {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
-            case when h.threshold = 'SIGN' then true else false end as sign
+            case when h.threshold = ANY(:cigs) then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
             """,
@@ -337,6 +339,7 @@ def plotter(ctx: dict):
                     "sts": sts,
                     "ets": ets,
                     "just": ctx["just"],
+                    "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
                 },
                 index_col="date",
                 parse_dates="date",
@@ -362,11 +365,12 @@ def plotter(ctx: dict):
             if thres in COLORS:
                 aggtxt.append(f"{thres} {row['days']}")
                 sumtxt.append(f"{thres} {len(df[df['threshold'] == thres])}")
+    cigref = {"SIGN": "H", "CIG1": "C1", "CIG2": "C2", "CIG3": "C3"}
     for dt, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
         data[dt.to_pydatetime().date()] = {
-            "val": row["threshold"] + ("H" if row["sign"] else ""),
+            "val": f"{row['threshold']}{cigref.get(row['threshold'], '')}",
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
     jj = f"Only {ctx['just']}" if ctx["just"] else "Highest"
@@ -379,7 +383,7 @@ def plotter(ctx: dict):
         f"Days since: {', '.join(aggtxt)}. Total Days: {', '.join(sumtxt)}"
     )
     if outlook_type in ["H", "W", "T"]:
-        subtitle += ", H denotes SIGN"
+        subtitle += ", H/C denotes SIGN/CIG"
     if ctx["mode"] == "cal":
         fig = calendar_plot(
             sts,

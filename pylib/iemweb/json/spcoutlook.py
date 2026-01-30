@@ -143,7 +143,8 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
             where o.threshold = t.threshold and
             ST_Contains(geom, ST_Point(:lon, :lat, 4326))
             and day = :day and outlook_type = 'C' and category = :cat
-            and o.threshold not in ('TSTM', 'SIGN') ORDER by issue DESC),
+            and o.threshold not in ('TSTM', 'SIGN', 'CIG1', 'CIG2', 'CIG3')
+            ORDER by issue DESC),
         agg as (
             select i, e, v, threshold, category from data where rank = 1),
         sign as (
@@ -153,7 +154,8 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
             threshold, category from spc_outlooks
             where ST_Contains(geom, ST_Point(:lon, :lat, 4326))
             and day = :day and outlook_type = 'C' and category = :cat
-            and threshold = 'SIGN' ORDER by expire DESC, issue ASC LIMIT 1)
+            and threshold in ('SIGN', 'CIG1', 'CIG2', 'CIG3')
+            ORDER by expire DESC, issue ASC LIMIT 1)
 
         (SELECT i, e, v, threshold, category from agg
         ORDER by e DESC, threshold desc) UNION ALL

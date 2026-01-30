@@ -461,6 +461,7 @@
 220/which:7C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2001-09-10%201943::_r:t::dpi:100.png
 220/which:2C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 220/which:2C::cat:hail::t:cwa::network:WFO::wfo:GSP::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
+220/which:1C::cat:hail::t:state::network:WFO::wfo:DMX::fema:7::csector:conus::valid:2024-08-03%201800::_r:t::dpi:100.png
 224/which:pop::valid:2024-05-21%202100::opt:active::_r:t::dpi:100.png
 226/network:CWSU::cwsu:ZFW::num:101::issue:2024-08-11%200000::_r:t::dpi:100::_cb:1.png
 227/pid:202410012036-KDTX-FZUS73-MWSDTX::segnum:0::_r:t::dpi:100.png
@@ -519,6 +520,7 @@
 257/valid:2024-10-29%200000::shade:no::csector:midwest::cmap:afmhot_r::_r:t::dpi:100.png
 257/valid:2024-08-16%201700::shade:yes::csector:southeast::cmap:afmhot_r::_r:t::dpi:100.png
 258/valid:2024-08-02::outlook_type:C::lat:42.0::lon:-95.0::_r:t::dpi:100::_cb:1.png
+258/valid:2024-08-03::outlook_type:C::lat:45.4::lon:-95.8::_r:43::dpi:100.png
 259/ugc:CAZ509::fire:yes::_r:t::dpi:100::_cb:1.png
 260/opt:wfo::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:midwest::fema:7::c:single::phenomena:FF::significance:W::_r:t::dpi:100::_cb:1.png
 260/opt:csector::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png

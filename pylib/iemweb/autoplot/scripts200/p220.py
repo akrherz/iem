@@ -293,18 +293,21 @@ def plotter(ctx: dict):
     )
     rects = []
     rectlabels = []
+    hatching = {"SIGN": "/", "CIG1": "/", "CIG2": "\\", "CIG3": "x"}
     for _idx, row in df[~pd.isna(df["threshold"])].iterrows():
-        if row["threshold"] == "SIGN":
+        if row["threshold"] in ["SIGN", "CIG1", "CIG2", "CIG3"]:
             mp.panels[0].add_geometries(
                 [row["geom"]],
                 LATLON,
                 facecolor="None",
                 edgecolor="k",
                 linewidth=2,
-                hatch="/",
+                hatch=hatching[row["threshold"]],
                 zorder=Z_POLITICAL - 1,
             )
-            rect = Rectangle((0, 0), 1, 1, fc="None", hatch="/")
+            rect = Rectangle(
+                (0, 0), 1, 1, fc="None", hatch=hatching[row["threshold"]]
+            )
         else:
             fc = COLORS.get(row["threshold"], "red")
             ec = OUTLINE_COLORS.get(row["threshold"], "k")

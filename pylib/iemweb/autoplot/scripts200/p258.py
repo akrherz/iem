@@ -108,8 +108,10 @@ def plotter(ctx: dict):
     ylabels = []
     ylocator = {}
     slots = compute_slots(ctx["outlook_type"], ctx["valid"])
+    cigs = ["SIGN", "CIG1", "CIG2", "CIG3"]
+    cig_hatching = {"SIGN": "/", "CIG1": "/", "CIG2": "\\", "CIG3": "x"}
     for (pissue, cat), df2 in outlooks.groupby(["product_issue", "category"]):
-        row0 = df2[df2["threshold"] != "SIGN"].iloc[0]
+        row0 = df2[~df2["threshold"].isin(cigs)].iloc[0]
         if row0["cycle"] != -1:
             # Consume up slots as necessary
             slotkey = f"{row0['day']}.{ctx['outlook_type']}.{row0['cycle']}"
@@ -126,7 +128,7 @@ def plotter(ctx: dict):
                     slots.pop(slots.index(slot))
             if slots and slotkey == slots[0]:
                 slots.pop(0)
-        hatched = "SIGN" in df2["threshold"].values
+        hatched = any(df2["threshold"].isin(cigs))
         cycle = row0["cycle"] if row0["cycle"] > -1 else ""
         key = f"Day {row0['day']}@{cycle}Z\nIssued:{pissue:%d/%H%M}Z"
         if key not in ylocator:
@@ -143,7 +145,7 @@ def plotter(ctx: dict):
             0.8,
             0.8,
             color=color,
-            hatch="/" if hatched else None,
+            hatch=cig_hatching.get(row0["threshold"]) if hatched else None,
             zorder=3,
         )
         ax.add_patch(rect)
@@ -153,7 +155,9 @@ def plotter(ctx: dict):
                     (x - 0.4, thisy - 0.4),
                     0.8,
                     0.8,
-                    hatch="//" if hatched else None,
+                    hatch=cig_hatching.get(row0["threshold"])
+                    if hatched
+                    else None,
                     fill=False,
                     zorder=4,
                 )
