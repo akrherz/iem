@@ -6,15 +6,18 @@ import json
 import urllib.parse
 
 import httpx
+from paste.request import parse_formvars
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 from sqlalchemy.engine import Connection
 
-# These should be set in your environment or config
 SLACK_CLIENT_ID = get_properties().get("bot.slack.client_id", "changeme")
 SLACK_CLIENT_SECRET = get_properties().get(
     "bot.slack.client_secret", "changeme"
+)
+SLACK_SIGNING_SECRET = get_properties().get(
+    "bot.slack.signing_secret", "changeme"
 )
 SLACK_REDIRECT_URI = get_properties().get(
     "bot.slack.redirect_uri",
@@ -44,10 +47,8 @@ def slack_oauth_callback(
     environ: dict, start_response: callable, conn: Connection | None = None
 ):
     """Handle Slack OAuth callback, exchange code for tokens."""
-    # Parse query string
-    query = environ.get("QUERY_STRING", "")
-    params = urllib.parse.parse_qs(query)
-    code = params.get("code", [None])[0]
+    params = parse_formvars(environ)
+    code = params.get("code")
     if not code:
         start_response("400 Bad Request", [("Content-Type", "text/plain")])
         return [b"Missing code parameter"]
@@ -97,17 +98,10 @@ def slack_subscribe(
     environ: dict, start_response: callable, conn: Connection | None = None
 ):
     """Subscribe a channel to a subkey (product key)."""
-    # Expect POST with form: team_id, channel_id, subkey
-    try:
-        size = int(environ.get("CONTENT_LENGTH", 0))
-        body = environ["wsgi.input"].read(size).decode()
-        params = urllib.parse.parse_qs(body)
-    except Exception:
-        params = {}
-    # Slack slash command: team_id, channel_id, text (subkey)
-    team_id = params.get("team_id", [None])[0]
-    channel_id = params.get("channel_id", [None])[0]
-    subkey = params.get("text", [None])[0]
+    params = parse_formvars(environ)
+    team_id = params.get("team_id")
+    channel_id = params.get("channel_id")
+    subkey = params.get("text")
     if not (team_id and channel_id and subkey):
         start_response("200 OK", [("Content-Type", "application/json")])
         return [
@@ -144,17 +138,10 @@ def slack_unsubscribe(
     environ: dict, start_response: callable, conn: Connection | None = None
 ):
     """Unsubscribe a channel from a subkey (product key)."""
-    # Expect POST with form: team_id, channel_id, subkey
-    try:
-        size = int(environ.get("CONTENT_LENGTH", 0))
-        body = environ["wsgi.input"].read(size).decode()
-        params = urllib.parse.parse_qs(body)
-    except Exception:
-        params = {}
-    # Slack slash command: team_id, channel_id, text (subkey)
-    team_id = params.get("team_id", [None])[0]
-    channel_id = params.get("channel_id", [None])[0]
-    subkey = params.get("text", [None])[0]
+    params = parse_formvars(environ)
+    team_id = params.get("team_id")
+    channel_id = params.get("channel_id")
+    subkey = params.get("text")
     if not (team_id and channel_id and subkey):
         start_response("200 OK", [("Content-Type", "application/json")])
         return [
