@@ -12,6 +12,8 @@ from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.util import error_log
+
 SLACK_CLIENT_ID = get_properties().get("bot.slack.client_id", "changeme")
 SLACK_CLIENT_SECRET = get_properties().get(
     "bot.slack.client_secret", "changeme"
@@ -125,10 +127,11 @@ def slack_subscribe(
         }
         return [json.dumps(resp).encode()]
     except Exception as e:
+        error_log(environ, str(e))
         start_response("200 OK", [("Content-Type", "application/json")])
         resp = {
             "response_type": "ephemeral",
-            "text": f"Subscription failed: {e}",
+            "text": "Subscription failed:",
         }
         return [json.dumps(resp).encode()]
 
@@ -168,10 +171,11 @@ def slack_unsubscribe(
         }
         return [json.dumps(resp).encode()]
     except Exception as e:
+        error_log(environ, str(e))
         start_response("200 OK", [("Content-Type", "application/json")])
         resp = {
             "response_type": "ephemeral",
-            "text": f"Unsubscribe failed: {e}",
+            "text": "Unsubscribe failed",
         }
         return [json.dumps(resp).encode()]
 
