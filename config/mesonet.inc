@@ -75,8 +75,6 @@ RewriteRule ^/search /search.py [QSA]
     Require all granted
   </Directory>
 
-  RewriteRule ^/projects/iembot/slack/(.*)$ /projects/iembot/slack/index.py/$1 [QSA,PT,L]
-
   # Point to system-installed mapserv binary (from conda env)
   ScriptAlias /cgi-bin/mapserv/mapserv.fcgi ${IEMWEBFARM_MAPSERV}
   ScriptAlias /cgi-bin/mapserv/mapserv ${IEMWEBFARM_MAPSERV}

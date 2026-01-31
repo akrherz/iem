@@ -1,0 +1,38 @@
+<?php
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/myview.php";
+$t = new MyView();
+
+$t->content = <<<EOM
+
+<h3>Experimental Slack Support</h3>
+
+<p>Want to live life dangerously?  As with about everything on this website,
+no warranties! This feature allows you to connect your Slack workspace
+to receive IEMBot messages.</p>
+
+<p>
+Step 1: Install the app to your workspace via
+<a href="https://weather.im/iembot-json/install">install link</a>.  After
+approving, you should see a OAuth success message.
+</p>
+
+<p>
+Step 2: Within slack, invite the bot to your channel via the channel command
+<code>/invite @iembot</code>.
+</p>
+
+<p>
+Step 3: Within the channel on Slack, issue the bot specific command
+<code>/iembot_subscribe ChannelID</code> where <code>ChannelID</code> is the
+<a href="/projects/iembot/#channels">channel codes</a>
+used by iembot for various products.  Sadly, the word "channel" has dual
+meanings in this context :(
+</p>
+
+<p>As with everything iembot, this is experimental and may break at any time
+and will be constantly iterated on to improve.  Good luck! akrherz@iastate.edu
+</p>
+
+EOM;
+$t->render('single.phtml');
