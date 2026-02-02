@@ -26,9 +26,9 @@
     "@eslint/js": "^9.39.2",
     "@types/ol": "^7.0.0",
     "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "^61.5.0",
-    "globals": "^17.0.0",
-    "prettier": "^3.7.4",
+    "eslint-plugin-jsdoc": "^62.5.0",
+    "globals": "^17.3.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
   "engines": {
