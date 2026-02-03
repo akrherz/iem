@@ -9,6 +9,8 @@ This allows downloading of the IEM archived SMOS data for the midwest.
 
 """
 
+from typing import Annotated
+
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest, NoDataFound
@@ -18,70 +20,120 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """Our schema for this request"""
 
-    lat: float = Field(
-        ...,
-        description="Latitude of point to request data for.",
-        le=90,
-        ge=-90,
-    )
-    lon: float = Field(
-        ...,
-        description="West longitude of point to request data for.",
-        le=180,
-        ge=-180,
-    )
-    ets: AwareDatetime = Field(
-        None,
-        description=(
-            "End timestamp with timezone included to request data for."
+    lat: Annotated[
+        float,
+        Field(
+            ...,
+            description="Latitude of point to request data for.",
+            le=90,
+            ge=-90,
         ),
-    )
-    sts: AwareDatetime = Field(
-        None,
-        description=(
-            "Start timestamp with timezone included to request data for."
+    ]
+    lon: Annotated[
+        float,
+        Field(
+            ...,
+            description="West longitude of point to request data for.",
+            le=180,
+            ge=-180,
         ),
-    )
-    year1: int = Field(
-        None,
-        description=(
-            "Year to request data for, this is an alternative to sts/ets."
+    ]
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "End timestamp with timezone included to request data for."
+            ),
         ),
-    )
-    year2: int = Field(
-        None,
-        description=(
-            "Year to request data for, this is an alternative to sts/ets."
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "Start timestamp with timezone included to request data for."
+            ),
         ),
-    )
-    month1: int = Field(
-        None,
-        description=(
-            "Month to request data for, this is an alternative to sts/ets."
+    ] = None
+    year1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Year to request data for, this is an alternative to sts/ets."
+            ),
         ),
-    )
-    month2: int = Field(
-        None,
-        description=(
-            "Month to request data for, this is an alternative to sts/ets."
+    ] = None
+    year2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Year to request data for, this is an alternative to sts/ets."
+            ),
         ),
-    )
-    day1: int = Field(
-        None,
-        description=(
-            "Day to request data for, this is an alternative to sts/ets."
+    ] = None
+    month1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Month to request data for, this is an alternative to sts/ets."
+            ),
         ),
-    )
-    day2: int = Field(
-        None,
-        description=(
-            "Day to request data for, this is an alternative to sts/ets."
+    ] = None
+    month2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Month to request data for, this is an alternative to sts/ets."
+            ),
         ),
-    )
-    hour1: int = Field(0, description="Hour to request data for.")
-    hour2: int = Field(0, description="Hour to request data for.")
-    minute1: int = Field(0, description="Minute to request data for.")
-    minute2: int = Field(0, description="Minute to request data for.")
+    ] = None
+    day1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Day to request data for, this is an alternative to sts/ets."
+            ),
+        ),
+    ] = None
+    day2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "Day to request data for, this is an alternative to sts/ets."
+            ),
+        ),
+    ] = None
+    hour1: Annotated[
+        int,
+        Field(
+            description="Hour to request data for.",
+            ge=0,
+            le=23,
+        ),
+    ] = 0
+    hour2: Annotated[
+        int,
+        Field(
+            description="Hour to request data for.",
+            ge=0,
+            le=23,
+        ),
+    ] = 0
+    minute1: Annotated[
+        int,
+        Field(
+            description="Minute to request data for.",
+            ge=0,
+            le=59,
+        ),
+    ] = 0
+    minute2: Annotated[
+        int,
+        Field(
+            description="Minute to request data for.",
+            ge=0,
+            le=59,
+        ),
+    ] = 0
 
 
 @iemapp(schema=Schema, help=__doc__)

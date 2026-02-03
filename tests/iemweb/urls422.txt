@@ -32,6 +32,7 @@
 /cgi-bin/request/hads.py?stations=DNKI4
 /cgi-bin/request/hads.py?stations=DNKI4,DSXI4&sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z
 /cgi-bin/request/hads.py?stations=_ALL&network=QQ_DCP&sts=2024-01-01T00:00:00Z&ets=2024-01-02T00:00:00Z
+/cgi-bin/request/hml.py?stations=DNKI4,DSXI4&sts=2024-12-01T00:00:00Z&ets=2025-01-01T00:00:00Z&tz=Bogus
 /cgi-bin/request/hourlyprecip.py
 /cgi-bin/request/hourlyprecip.py?station=DSM
 /cgi-bin/request/hourlyprecip.py?tz=Etc
