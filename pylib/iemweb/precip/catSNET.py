@@ -155,12 +155,11 @@ def application(environ, start_response):
 
     sqlStr = """
         SELECT extract('hour' from valid) as vhour,
-        id as station, valid, phour from hourly_%s h JOIN stations s on
+        id as station, valid, phour from hourly h JOIN stations s on
         (h.iemid = s.iemid) WHERE
         valid > '%s 00:00' and valid <= '%s 00:00'
         and network in ('KCCI','KIMT','KELO')
     """ % (
-        ts.year,
         td,
         tm,
     )
