@@ -6,6 +6,7 @@
 127.0.0.1 iemdb-dep_china.local
 127.0.0.1 iemdb-dep_europe.local
 127.0.0.1 iemdb-dep_sa.local
+127.0.0.1 iemdb-iembot.local
 127.0.0.1 iemdb-iemre.local
 127.0.0.1 iemdb-iemre_china.local
 127.0.0.1 iemdb-iemre_europe.local
