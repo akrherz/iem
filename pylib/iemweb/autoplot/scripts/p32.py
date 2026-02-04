@@ -292,9 +292,9 @@ def plotter(ctx: dict):
                 pd.date_range(f"{year}/1/1", f"{year}/12/31").strftime("%m%d")
             )
             .assign(
-                day=lambda _: pd.date_range(
-                    f"{year}/1/1", f"{year}/12/31"
-                ).values
+                day=lambda _: (
+                    pd.date_range(f"{year}/1/1", f"{year}/12/31").values
+                )
             )
         )
         if yeardf[yr][varname].isna().all():

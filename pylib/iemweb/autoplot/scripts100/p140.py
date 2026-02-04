@@ -234,7 +234,7 @@ def plotter(ctx: dict):
 
     ylabel = "Temperature °F"
     units = "°F"
-    if varname in ["precip"]:
+    if varname == "precip":
         ylabel = "Precipitation [inch]"
         units = "[inch]"
     elif varname.find("wind") > -1:

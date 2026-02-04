@@ -296,8 +296,8 @@ def plotter(ctx: dict):
     ax.legend(fontsize=10)
     xmonths = ", ".join(str(calendar.month_abbr[x]) for x in months1)
     ymonths = ", ".join(str(calendar.month_abbr[x]) for x in months2)
-    t1 = "" if varname1 not in ["days_high_aoa"] else f" {threshold:.0f}"
-    t2 = "" if varname2 not in ["days_high_aoa"] else f" {threshold:.0f}"
+    t1 = "" if varname1 != "days_high_aoa" else f" {threshold:.0f}"
+    t2 = "" if varname2 != "days_high_aoa" else f" {threshold:.0f}"
     x = xdata.mean()
     y = ydata.mean()
     df["zscore"] = ((xdata - x) ** 2 + (ydata - y) ** 2) ** 0.5

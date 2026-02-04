@@ -113,7 +113,7 @@ def add_ctx(ctx):
     ctx["mydir"] = mydir
     ctx["level"] = level
     ctx["varname"] = varname
-    units = "inch" if varname in ["precip"] else "F"
+    units = "inch" if varname == "precip" else "F"
     ctx["title"] = ("Monthly Frequency of Daily %s %s %s+ %s") % (
         PDICT[varname],
         PDICT2[mydir],

@@ -144,9 +144,9 @@ def th(val):
     v = val[-1]
     if v in ["0", "4", "5", "6", "7", "8", "9"]:
         return "th"
-    if v in ["1"]:
+    if v == "1":
         return "rst"
-    if v in ["3"]:
+    if v == "3":
         return "rd"
     return "nd"
 

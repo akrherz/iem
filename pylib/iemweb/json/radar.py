@@ -184,7 +184,7 @@ def find_scans(root, radar, product, sts, ets):
     """
     now = sts
     times = []
-    if radar in ["USCOMP"]:
+    if radar == "USCOMP":
         # These are every 5 minutes, so 288 per day
         now -= timedelta(minutes=now.minute % 5)
         while now < ets:

@@ -103,7 +103,7 @@ def plotter(ctx: dict):
         f"[{station2}] {ctx['_nt2'].sts[station2]['name']}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    color_above = "b" if varname in ["total_precip"] else "r"
+    color_above = "b" if varname == "total_precip" else "r"
     color_below = "r" if color_above == "b" else "b"
     df["color"] = color_above
     df.loc[df[f"diff_{varname}"] < 0, "color"] = color_below
@@ -114,10 +114,10 @@ def plotter(ctx: dict):
         f"diff_{varname}",
         color=df["color"],
         table_col_title="Diff",
-        labelformat="%.2f" if varname in ["total_precip"] else "%.1f",
+        labelformat="%.2f" if varname == "total_precip" else "%.1f",
     )
 
-    units = "inch" if varname in ["total_precip"] else "F"
+    units = "inch" if varname == "total_precip" else "F"
     lbl = "wetter" if units == "inch" else "warmer"
     wins = len(df[df["diff_" + varname] > 0].index)
     ax.text(

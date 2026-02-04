@@ -307,7 +307,7 @@ def update_iemaccess(obs):
         ob = obs[sid]
         iemob = Observation(sid, "IA_RWIS", ob["valid"])
         for varname in ob:
-            if varname in ["valid"]:
+            if varname == "valid":
                 continue
             # Don't insert NaN values into iemaccess
             thisval = ob.get(varname)

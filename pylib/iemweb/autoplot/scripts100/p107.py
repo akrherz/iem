@@ -366,9 +366,9 @@ def plotter(ctx: dict):
         df[varname].mean(), lw=2, label=f"Avg: {df[varname].mean():.2f}"
     )
     ylabel = "Temperature °F"
-    if varname in ["precip"]:
+    if varname == "precip":
         ylabel = "Precipitation [inch]"
-    elif varname in ["snow"]:
+    elif varname == "snow":
         ylabel = "Snowfall [inch]"
     elif varname.find("srad") > -1:
         vv = PDICT[varname].replace("Daily", "Daily\n")
