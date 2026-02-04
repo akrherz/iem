@@ -9,31 +9,28 @@ $btable = <<<EOM
 <table class="table table-striped table-bordered">
 <thead>
 <tr>
-  <th>Bluesky Handle</th>
-  <th>Twitter User</th>
-  <th>Mastodon User</th>
+  <th>Twitter/X User</th>
   <th>Channels</th>
 </tr></thead>
 <tbody>
 EOM;
-$pgconn = iemdb("mesosite");
+$pgconn = iemdb("iembot");
 $rs = pg_query(
-    $pgconn,
-    "select o.screen_name, o.at_handle, string_agg(channel, ', ' order by channel) " .
-        "as channels from iembot_twitter_oauth o JOIN iembot_twitter_subs s on " .
-        "(o.user_id = s.user_id) WHERE o.iem_owned ".
-        "GROUP by o.screen_name, o.at_handle ORDER by screen_name ASC"
-);
+    $pgconn, <<<EOM
+    select o.screen_name, string_agg(channel_name, ', ' order by channel_name)
+    as channels from
+    iembot_twitter_oauth o, iembot_subscriptions s, iembot_channels c
+    WHERE
+        o.iembot_account_id = s.iembot_account_id and
+        o.iem_owned and s.channel_id = c.id
+    GROUP by o.screen_name ORDER by screen_name ASC
+EOM
+        );
 while ($row = pg_fetch_assoc($rs)) {
     $btable .= sprintf(
         "<tr>".
-        "<td><a href=\"https://bsky.app/profile/%s\">@%s</a></td>".
         "<td><a href=\"https://twitter.com/%s\">@%s</a></td>".
-        "<td><a href=\"https://masto.globaleas.org/@%s\">@%s@masto.globaleas.org</a></td><td>%s</td></tr>",
-        $row["at_handle"],
-        $row["at_handle"],
-        $row["screen_name"],
-        $row["screen_name"],
+        "<td>%s</td></tr>",
         $row["screen_name"],
         $row["screen_name"],
         $row["channels"]

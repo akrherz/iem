@@ -88,7 +88,8 @@ def get_app4user(cookies):
     conn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         """
-        select access_token, server from iembot_mastodon_oauth o,
+        select access_token, server, iembot_account_id
+        from iembot_mastodon_oauth o,
         iembot_mastodon_apps a where o.id = %s and o.appid = a.id
         and access_token is not null
         """,
@@ -118,6 +119,7 @@ def get_app4user(cookies):
     conn.close()
     # For better or likely worse, we tag along this attribute
     mapp.iembot_user_id = user_id
+    mapp.iembot_account_id = row["iembot_account_id"]
     return mapp
 
 
@@ -143,8 +145,8 @@ def build_subui(mapp, fdict):
     if channel is not None and channel != "":
         cursor.execute(
             """
-            insert into iembot_mastodon_subs(user_id, channel)
-            values (%s, %s)
+            insert into iembot_subscriptions(iembot_user_id, channel_id)
+            values (%s, (select get_or_create_iembot_channel_id(%s)))
             """,
             (mapp.iembot_user_id, channel.upper()),
         )
@@ -154,8 +156,9 @@ def build_subui(mapp, fdict):
     if channel is not None and channel != "":
         cursor.execute(
             """
-            delete from iembot_mastodon_subs where user_id = %s
-            and channel = %s
+            delete from iembot_subscriptions where iembot_user_id = %s
+            and channel_id = (
+            select id from iembot_channels where channel_name = %s)
             """,
             (mapp.iembot_user_id, channel.upper()),
         )
@@ -163,8 +166,10 @@ def build_subui(mapp, fdict):
         reload_bot()
     cursor.execute(
         """
-        SELECT channel from iembot_mastodon_subs WHERE user_id = %s
-        ORDER by channel asc
+        SELECT channel_name as channel from
+        iembot_channels c, iembot_subscriptions s
+        where s.iembot_user_id = %s and c.id = s.channel_id
+        ORDER by channel_name asc
         """,
         (mapp.iembot_user_id,),
     )
@@ -229,11 +234,13 @@ def save_code(mapp, server, code, headers):
     if cursor.rowcount == 0:
         cursor.execute(
             """
-            insert into iembot_mastodon_oauth(appid, screen_name)
+            insert into iembot_mastodon_oauth(appid, screen_name,
+                iembot_account_id)
             values
             (
                 (select id from iembot_mastodon_apps where server = %s),
-                %s
+                %s,
+                (select create_iembot_account('mastodon'))
             ) returning id
             """,
             (server, me["username"]),
