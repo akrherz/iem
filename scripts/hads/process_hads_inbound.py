@@ -137,7 +137,6 @@ def main(conn: Connection | None = None):
         )
         if res.rowcount > 0:
             if res.rowcount > 1:
-                deletes += res.rowcount - 1
                 if not quiet:
                     progress.write(f"del {res.rowcount} dup entries {row}")
                 # Delete 'em, except the last one :/
@@ -156,6 +155,7 @@ def main(conn: Connection | None = None):
                         "valid": row.v,
                     },
                 )
+                deletes += res.rowcount
             updates += 1
             if updates % 1_000 == 0:
                 conn.commit()
@@ -183,15 +183,14 @@ def main(conn: Connection | None = None):
                 "dv_interval": dv_interval,
             },
         )
-    LOG.info(
+    lglvl = LOG.warning if 0 in [updates, inserts] else LOG.info
+    lglvl(
         "Updated %s rows, inserted %s row, %s dbdups, %s deletes",
         updates,
         inserts,
         duplicates,
         deletes,
     )
-    if inserts == 0:
-        LOG.warning("found no data to insert...")
     res = conn.execute(
         sql_helper(
             "delete from raw_inbound where updated >= :sts and updated < :ets"
