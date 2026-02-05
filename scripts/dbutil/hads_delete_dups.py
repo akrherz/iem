@@ -1,7 +1,8 @@
 """
 Our HADS database gets loaded up with duplicates, this cleans it up.
 
-called from RUN_MIDNIGHT.sh for yesterday and 35 days ago
+NOTE: This is currently not used as process inbound dedups already, hopefully.
+see akrherz/pyWWA#316
 """
 
 from datetime import datetime, timedelta, timezone
