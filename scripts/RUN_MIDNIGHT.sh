@@ -32,8 +32,6 @@ cd ../iemre
 python grid_rsds.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../dbutil
-python hads_delete_dups.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
-python hads_delete_dups.py --date=$(date -u --date '35 day ago' +'%Y-%m-%d')
 python set_attribute_phour.py
 
 cd ../hads

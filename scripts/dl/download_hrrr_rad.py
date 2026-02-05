@@ -59,13 +59,7 @@ def fetch(valid):
         if neednext:
             offsets[-1].append(int(tokens[1]))
             neednext = False
-        if (
-            tokens[3]
-            in [
-                "DSWRF",
-            ]
-            and tokens[5].find("ave fcst") > -1
-        ):
+        if tokens[3] == "DSWRF" and tokens[5].find("ave fcst") > -1:
             offsets.append([int(tokens[1])])
             neednext = True
 

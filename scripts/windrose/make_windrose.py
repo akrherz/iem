@@ -24,7 +24,7 @@ def main(network, station):
         database = "snet"
     elif network.find("_RWIS") > 0:
         database = "rwis"
-    elif network in ("ISUSM",):
+    elif network == "ISUSM":
         database = "isuag"
     elif network.find("_DCP") > 0:
         database = "hads"

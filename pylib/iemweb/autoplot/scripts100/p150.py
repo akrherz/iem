@@ -190,7 +190,7 @@ def plotter(ctx: dict):
         range(len(df.index)), df[varname + "_percentile"], align="center"
     )
     y2labels = []
-    fmt = "%.1f" if varname not in ["hght"] else "%.0f"
+    fmt = "%.1f" if varname != "hght" else "%.0f"
     for i, mybar in enumerate(bars):
         ptile = mybar.get_width()
         # Prevent 99.999 from showing up as 100.0

@@ -109,7 +109,7 @@ def process_lines_pdfminer(valid, lines) -> int:
     numbers = []
     for line_in in lines:
         line = line_in.strip().lower()
-        if line in [""]:
+        if line == "":
             continue
         if line in ["topsoil moisture", "subsoil moisture"]:
             labels += line + "\n"

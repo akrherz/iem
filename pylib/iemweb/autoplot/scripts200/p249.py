@@ -94,9 +94,7 @@ def unit_convert(nc, varname, idx0):
         )
     else:
         data = nc.variables[varname][idx0]
-    if varname in [
-        "p01m",
-    ]:
+    if varname == "p01m":
         data = masked_array(data, units("mm")).to(units("inch")).m
     elif varname in [
         "tmpk",
@@ -142,13 +140,11 @@ def plotter(ctx: dict):
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
         ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
-        if varname in ["wind_speed"]:
+        if varname == "wind_speed":
             plot_units = "mph"
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
-        elif varname in [
-            "p01m",
-        ]:
+        elif varname == "p01m":
             # Value is in W m**-2, we want MJ
             plot_units = "inch"
             if ptiles[2] < 1:

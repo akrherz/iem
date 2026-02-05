@@ -221,9 +221,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
             "https://mesonet.agron.iastate.edu/onsite/features/"
             f"{row['valid']:%Y/%m/%y%m%d}.{row['mediasuffix']}"
         )
-        if row["mediasuffix"] in [
-            "mp4",
-        ]:
+        if row["mediasuffix"] == "mp4":
             row2["mediamarkup"] = (
                 f'<video controls><source src="{imgurl}" type="video/mp4">'
                 "Your email client does not support videos, please follow "

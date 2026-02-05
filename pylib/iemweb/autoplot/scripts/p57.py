@@ -156,9 +156,9 @@ def plotter(ctx: dict):
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(top=resdf[col].max() * 1.2)
     ylabel = "Temperature °F"
-    if varname in ["total_precip"]:
+    if varname == "total_precip":
         ylabel = "Precipitation [inch]"
-    elif varname in ["rain_days"]:
+    elif varname == "rain_days":
         ylabel = "Measurable Precipitation Days"
     ax.set_ylabel(ylabel)
     ax.grid(True)

@@ -37,9 +37,9 @@ def get_content_type(val):
         ct = "text/plain"
     elif val in ["png", "gif", "jpg"]:
         ct = f"image/{val}"
-    elif val in ["mp4"]:
+    elif val == "mp4":
         ct = f"video/{val}"
-    elif val in ["pdf"]:
+    elif val == "pdf":
         ct = f"application/{val}"
     else:
         ct = "text/plain"

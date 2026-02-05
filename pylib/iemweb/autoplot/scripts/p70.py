@@ -152,9 +152,9 @@ def plotter(ctx: dict):
     # Split the season at jul 1, if requested
     if split == "jul1":
         df["vtec_year"] = df.apply(
-            lambda x: x["vtec_year"] + 1
-            if x["date"].month > 6
-            else x["vtec_year"],
+            lambda x: (
+                x["vtec_year"] + 1 if x["date"].month > 6 else x["vtec_year"]
+            ),
             axis=1,
         )
         df["doy"] = df.apply(

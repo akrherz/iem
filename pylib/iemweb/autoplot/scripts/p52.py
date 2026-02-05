@@ -120,7 +120,7 @@ def make_url(row, state):
     wfo = f"K{row['wfo']}"
     if state in ["AK", "HI", "GU"]:
         wfo = f"P{row['wfo']}"
-    elif state in ["PR"]:
+    elif state == "PR":
         wfo = f"T{row['wfo']}"
     return (
         f"https://mesonet.agron.iastate.edu/vtec/f/{row['year']}-O-NEW-{wfo}-"

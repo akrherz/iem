@@ -57,7 +57,7 @@ class Schema(CGIModel):
 def plot_poly(fig, poly, environ: dict):
     """Add to axes."""
     ax = fig.add_axes((0.15, 0.15, 0.7, 0.7))
-    title = environ["title"] if environ["title"] else "No Title Provided"
+    title = environ["title"] or "No Title Provided"
     title = title[:120]
     title += (
         f"\npolygon.is_valid: {poly.is_valid} "

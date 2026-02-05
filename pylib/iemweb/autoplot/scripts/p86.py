@@ -103,7 +103,7 @@ def unit_convert(nc, varname, idx0):
         # Value is in W m**-2, we want MJ
         multi = (86400.0 / 1000000.0) if varname == "rsds" else 1
         data = data * multi
-    elif varname in ["wind_speed"]:
+    elif varname == "wind_speed":
         data = (
             masked_array(
                 data,
@@ -176,7 +176,7 @@ def plotter(ctx: dict):
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
             cmap.set_under("white")
-        elif varname in ["wind_speed"]:
+        elif varname == "wind_speed":
             plot_units = "mph"
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01

@@ -164,9 +164,9 @@ def get_df(ctx):
         )
         .reset_index()
         .assign(
-            freq=lambda df_: (df_["sum"] / df_["count"] * 100.0)
-            .fillna(0)
-            .round(1)
+            freq=lambda df_: (
+                (df_["sum"] / df_["count"] * 100.0).fillna(0).round(1)
+            )
         )
     )
     units = "°F" if varname != "relh" else "%"

@@ -249,20 +249,20 @@ def get_site(year, month, iemre, nwsli):
             valid = valid - timedelta(minutes=1)
         idx = int(valid.day)
         key = row[1]
-        if key in ["TAIRGZ"]:
+        if key == "TAIRGZ":
             # This is automated station
             continue
         if key in ["TAIRZXZ", "TAIRZX"]:
             data[idx]["coop"]["high"] = row[2]
         elif key in ["TAIRZNZ", "TAIRZN"]:
             data[idx]["coop"]["low"] = row[2]
-        elif key in ["TAIRZZ"]:
+        elif key == "TAIRZZ":
             data[idx]["coop"]["atob"] = row[2]
-        elif key in ["SFDRZZ"]:
+        elif key == "SFDRZZ":
             data[idx]["coop"]["sf"] = row[2]
-        elif key in ["SDIRZZ"]:
+        elif key == "SDIRZZ":
             data[idx]["coop"]["sog"] = row[2]
-        elif key in ["PPDRZZ"]:
+        elif key == "PPDRZZ":
             data[idx]["coop"]["prec"] = row[2]
         elif key[:2] in ["PP", "SF"] and key[2] == "V":
             data[idx]["coop"]["v"] += f"{key}/{row[2]} "

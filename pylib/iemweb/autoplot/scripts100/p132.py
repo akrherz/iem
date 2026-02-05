@@ -99,7 +99,7 @@ def plotter(ctx: dict):
 
     months = month2months(month)
 
-    sorder = "ASC" if varname in ["min_greatest_low"] else "DESC"
+    sorder = "ASC" if varname == "min_greatest_low" else "DESC"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -138,7 +138,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     ylabels = []
-    fmt = "%.2f" if varname in ["total_precip"] else "%.0f"
+    fmt = "%.2f" if varname == "total_precip" else "%.0f"
     if varname == "total_snowfall":
         fmt = "%.1f"
     for _, row in df.iterrows():
