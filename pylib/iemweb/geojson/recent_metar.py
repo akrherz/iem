@@ -150,7 +150,5 @@ def application(environ, start_response):
     """see how we are called"""
     headers = [("Content-type", get_ct(environ))]
     res = get_data(environ["q"])
-    cb = environ.get("callback")
-    payload = f"{cb}({res});" if cb else res
     start_response("200 OK", headers)
-    return payload.encode("utf-8")
+    return res.encode("utf-8")

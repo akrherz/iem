@@ -186,14 +186,8 @@ def application(environ, start_response):
     """see how we are called"""
     dt = environ["dt"]
     fmt = environ["fmt"]
-    callback = environ.get("callback")
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, dt, fmt)
-    # Optionally wrap GeoJSON in JSONP callback
-    if fmt == "geojson" and callback:
-        payload = f"{callback}({data});"
-    else:
-        payload = data
     start_response("200 OK", headers)
-    return payload.encode("utf-8")
+    return data.encode("utf-8")

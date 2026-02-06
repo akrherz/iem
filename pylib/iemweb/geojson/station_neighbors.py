@@ -164,7 +164,5 @@ def application(environ: dict, start_response):
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("mesosite") as conn:
         res = run(conn, environ)
-    cb = environ.get("callback")
-    payload = f"{cb}({res});" if cb else res
     start_response("200 OK", headers)
-    return payload.encode("utf-8")
+    return res.encode("utf-8")

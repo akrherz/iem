@@ -48,6 +48,7 @@ sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
 """
 
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 import geopandas as gpd
 from pydantic import Field, field_validator, model_validator
@@ -63,91 +64,125 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str | None = Field(
-        default=None,
-        description="JSONP callback function",
-        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
-        max_length=64,
-    )
-    inc_ap: bool = Field(
-        default=False,
-        description="Include any associated warnings in the output.",
-    )
-    eventid: int = Field(
-        default=103,
-        description="If provided, use the given eventid to find LSRs for.",
-    )
-    phenomena: str = Field(
-        default=None,
-        description="If provided, use the given VTEC event to find LSRs for.",
-        max_length=2,
-    )
-    significance: str = Field(
-        default="W",
-        description="If provided, use the given VTEC event to find LSRs for.",
-        max_length=1,
-    )
-    states: ListOrCSVType = Field(
-        default=[],
-        description="If provided, use the given states to find LSRs for.",
-    )
-    ets: datetime = Field(
-        default=None,
-        description="End timestamp.",
-    )
-    sts: datetime = Field(
-        default=None,
-        description="Start Timestamp.",
-    )
-    hours: int = Field(
-        default=None,
-        description=(
-            "If provided, number of hours prior to `ets` "
-            "(default now) to provide LSRs for."
+    callback: Annotated[
+        str | None,
+        Field(
+            description="JSONP callback function",
+            pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+            max_length=64,
         ),
-    )
-    wfo: str = Field(
-        default=None,
-        description="If provided, use the given WFO to find LSRs for.",
-        max_length=4,
-    )
-    wfos: ListOrCSVType = Field(
-        default=[],
-        description="If provided, use the given WFOs to find LSRs for.",
-    )
-    year: int = Field(
-        default=2006,
-        description="If provided, use this year for the given VTEC event.",
-    )
-    east: float = Field(
-        default=None,
-        description="Eastern extent of spatial bounds. (degrees East)",
-        ge=-180,
-        le=180,
-    )
-    west: float = Field(
-        default=None,
-        description="Western extent of spatial bounds. (degrees East)",
-        ge=-180,
-        le=180,
-    )
-    north: float = Field(
-        default=None,
-        description="Northern extent of spatial bounds. (degrees North)",
-        ge=-90,
-        le=90,
-    )
-    south: float = Field(
-        default=None,
-        description="Southern extent of spatial bounds. (degrees North)",
-        ge=-90,
-        le=90,
-    )
-    fmt: str = Field(
-        default="geojson",
-        description="Output format (fixed to geojson).",
-        pattern=r"^geojson$",
-    )
+    ] = None
+    inc_ap: Annotated[
+        bool,
+        Field(
+            description="Include any associated warnings in the output.",
+        ),
+    ] = False
+    eventid: Annotated[
+        int,
+        Field(
+            description="If provided, use the given eventid to find LSRs for.",
+        ),
+    ] = 103
+    phenomena: Annotated[
+        str | None,
+        Field(
+            description="If provided, use the given VTEC event to find LSRs.",
+            max_length=2,
+        ),
+    ] = None
+    significance: Annotated[
+        str,
+        Field(
+            description="If provided, use the given VTEC event to find LSRs.",
+            max_length=1,
+        ),
+    ] = "W"
+    states: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="If provided, use the given states to find LSRs for.",
+        ),
+    ] = None
+    ets: Annotated[
+        datetime | None,
+        Field(
+            description="End timestamp.",
+        ),
+    ] = None
+    sts: Annotated[
+        datetime | None,
+        Field(
+            description="Start Timestamp.",
+        ),
+    ] = None
+    hours: Annotated[
+        int | None,
+        Field(
+            description=(
+                "If provided, number of hours prior to `ets` "
+                "(default now) to provide LSRs for."
+            ),
+        ),
+    ] = None
+    wfo: Annotated[
+        str | None,
+        Field(
+            description="If provided, use the given WFO to find LSRs for.",
+            max_length=4,
+        ),
+    ] = None
+    wfos: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="If provided, use the given WFOs to find LSRs for.",
+        ),
+    ] = None
+    year: Annotated[
+        int,
+        Field(
+            description="If provided, use this year for the given VTEC event.",
+        ),
+    ] = 2006
+    east: Annotated[
+        float | None,
+        Field(
+            description="Eastern extent of spatial bounds. (degrees East)",
+            ge=-180,
+            le=180,
+        ),
+    ] = None
+    west: Annotated[
+        float | None,
+        Field(
+            description="Western extent of spatial bounds. (degrees East)",
+            ge=-180,
+            le=180,
+        ),
+    ] = None
+    north: Annotated[
+        float | None,
+        Field(
+            description="Northern extent of spatial bounds. (degrees North)",
+            ge=-90,
+            le=90,
+        ),
+    ] = None
+    south: Annotated[
+        float | None,
+        Field(
+            description="Southern extent of spatial bounds. (degrees North)",
+            ge=-90,
+            le=90,
+        ),
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="Output format (fixed to geojson).",
+            pattern=r"^geojson$",
+        ),
+    ] = "geojson"
 
     @model_validator(mode="after")
     def validate_spatial_bounds(self):
@@ -332,10 +367,15 @@ def get_mckey(environ: dict) -> str | None:
 def application(environ, start_response):
     """Do Something"""
     # Quirk unhandled properly yet
-    environ["wfos"] = list(filter(lambda x: 2 < len(x) < 5, environ["wfos"]))
     if environ["wfos"]:
+        environ["wfos"] = list(
+            filter(lambda x: 2 < len(x) < 5, environ["wfos"])
+        )
         environ["wfos"] = [unrectify_wfo(x) for x in environ["wfos"]]
-    environ["states"] = list(filter(lambda x: len(x) == 2, environ["states"]))
+    if environ["states"]:
+        environ["states"] = list(
+            filter(lambda x: len(x) == 2, environ["states"])
+        )
     if environ["hours"] is not None:
         if environ["ets"] is None:
             environ["ets"] = utc()
@@ -366,8 +406,5 @@ def application(environ, start_response):
         r"\.0$", "", regex=True
     )
     payload = lsrdf.to_json()
-    cb = environ.get("callback")
-    if cb:
-        payload = f"{cb}({payload});"
     start_response("200 OK", headers)
     return payload.encode("utf-8")

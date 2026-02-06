@@ -278,7 +278,6 @@ def get_mckey(environ: dict) -> str:
 def application(environ, start_response):
     """see how we are called"""
     fmt = environ["fmt"]
-    callback = environ.get("callback")
 
     # Derive content-type from shared utility
     headers = [("Content-type", get_ct(environ))]
@@ -293,11 +292,6 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, environ["dt"], fmt)
-    # Optionally wrap GeoJSON in JSONP callback
-    if fmt == "geojson" and callback:
-        payload = f"{callback}({data});"
-    else:
-        payload = data
     start_response("200 OK", headers)
     # Use UTF-8 to support non-ASCII station names, etc.
-    return payload.encode("utf-8")
+    return data.encode("utf-8")

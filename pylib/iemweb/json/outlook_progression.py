@@ -45,6 +45,7 @@ https://mesonet.agron.iastate.edu/json/outlook_progression.py\
 import json
 from datetime import date, timedelta
 from io import BytesIO
+from typing import Annotated
 
 import geopandas as gpd
 import pandas as pd
@@ -60,32 +61,42 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    fmt: str = Field(
-        default="json",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(json|excel|csv)$",
-    )
-    callback: str = Field(None, description="JSONP Callback Name")
-    lat: float = Field(
-        42.0,
-        description="Latitude of point in decimal degrees",
-        ge=20,
-        le=60,
-    )
-    lon: float = Field(
-        -95.0,
-        description="Longitude of point in decimal degrees",
-        ge=-130,
-        le=-60,
-    )
-    outlook_type: str = Field(
-        "C",
-        description="Outlook type (C)onvective, (F)ire, (E)xcessive Rain",
-        pattern="^(C|F|E)$",
-    )
-    valid: date = Field(
-        ..., description="Date of interest in YYYY-MM-DD format"
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format to return data in: json, excel, or csv",
+            pattern="^(json|excel|csv)$",
+        ),
+    ] = "json"
+    callback: Annotated[
+        str | None, Field(description="JSONP Callback Name")
+    ] = None
+    lat: Annotated[
+        float,
+        Field(
+            description="Latitude of point in decimal degrees",
+            ge=20,
+            le=60,
+        ),
+    ] = 42.0
+    lon: Annotated[
+        float,
+        Field(
+            description="Longitude of point in decimal degrees",
+            ge=-130,
+            le=-60,
+        ),
+    ] = -95.0
+    outlook_type: Annotated[
+        str,
+        Field(
+            description="Outlook type (C)onvective, (F)ire, (E)xcessive Rain",
+            pattern="^(C|F|E)$",
+        ),
+    ] = "C"
+    valid: Annotated[
+        date, Field(description="Date of interest in YYYY-MM-DD format")
+    ]
 
 
 def dowork(
@@ -188,11 +199,7 @@ def application(environ, start_response):
         }
         headers = [("Content-type", get_ct(environ))]
         start_response("200 OK", headers)
-        payload = json.dumps(res).replace("NaN", "null")
-        cb = environ.get("callback")
-        if cb:
-            return f"{cb}({payload});"
-        return payload
+        return json.dumps(res).replace("NaN", "null")
     if fmt == "excel":
         headers = [
             ("Content-type", get_ct(environ)),
