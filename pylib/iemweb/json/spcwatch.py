@@ -34,6 +34,7 @@ https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000&fmt=excel
 
 from datetime import datetime, timezone
 from io import BytesIO
+from typing import Annotated
 
 import geopandas as gpd
 from pydantic import Field
@@ -48,25 +49,32 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    fmt: str = Field(
-        default="geojson",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(geojson|excel|csv)$",
-    )
-    ts: str = Field(
-        None, description="The timestamp to query for", pattern="^[0-9]{12}$"
-    )
-    lat: float = Field(
-        default=None,
-        description="The latitude to query for",
-    )
-    lon: float = Field(
-        default=None,
-        description="The longitude to query for",
-    )
-    callback: str = Field(
-        None, description="Callback function for JSONP output"
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format to return data in: geojson, excel, or csv",
+            pattern="^(geojson|excel|csv)$",
+        ),
+    ] = "geojson"
+    ts: Annotated[
+        str | None,
+        Field(description="The timestamp to query for", pattern="^[0-9]{12}$"),
+    ] = None
+    lat: Annotated[
+        float | None,
+        Field(
+            description="The latitude to query for",
+        ),
+    ] = None
+    lon: Annotated[
+        float | None,
+        Field(
+            description="The longitude to query for",
+        ),
+    ] = None
+    callback: Annotated[
+        str | None, Field(description="Callback function for JSONP output")
+    ] = None
 
 
 def process_df(watches: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -137,10 +145,7 @@ def application(environ, start_response):
     if fmt == "geojson":
         headers = [("Content-type", get_ct(environ))]
         start_response("200 OK", headers)
-        cb = environ.get("callback")
         payload = watches.to_json()
-        if cb:
-            return f"{cb}({payload});"
         return payload
     if fmt == "excel":
         headers = [

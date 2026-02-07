@@ -22,6 +22,7 @@ https://mesonet.agron.iastate.edu/json/cf6.py?station=KDSM&year=2024
 """
 
 from datetime import date
+from typing import Annotated
 
 import simplejson as json
 from pydantic import Field
@@ -35,16 +36,20 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    fmt: str = Field(
-        default="json",
-        description="The format of the output, either csv or json",
-        pattern="^(json|csv)$",
-    )
-    station: str = Field(
-        "KDSM", description="The station identifier", max_length=4
-    )
-    year: int = Field(2019, description="The year of interest")
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format of the output, either csv or json",
+            pattern="^(json|csv)$",
+        ),
+    ] = "json"
+    station: Annotated[
+        str, Field(description="The station identifier", max_length=4)
+    ] = "KDSM"
+    year: Annotated[int, Field(description="The year of interest")] = 2019
 
 
 def departure(ob, climo):
@@ -175,8 +180,4 @@ def application(environ, start_response):
         res = get_data(conn, station, year, environ["fmt"])
     headers = [("Content-type", get_ct(environ))]
     start_response("200 OK", headers)
-    # Optional JSONP wrapping for JSON responses
-    cb = environ.get("callback")
-    if environ["fmt"] == "json" and cb:
-        return f"{cb}({res});"
     return res

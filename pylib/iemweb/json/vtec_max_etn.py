@@ -21,6 +21,7 @@ https://mesonet.agron.iastate.edu/json/vtec_max_etn.py?year=2024&format=html
 """
 
 import json
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -35,11 +36,17 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="JSONP Callback")
-    year: int = Field(default=2015, description="Year")
-    format: str = Field(
-        default="json", description="Format", pattern="json|html"
-    )
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
+    year: Annotated[int, Field(description="Year", ge=1986)] = 2015
+    format: Annotated[
+        str,
+        Field(
+            description="Format",
+            pattern="json|html",
+        ),
+    ] = "json"
 
 
 def run(year, fmt):
@@ -132,9 +139,5 @@ def application(environ, start_response):
     headers = [("Content-type", get_ct(environ))]
 
     res = run(year, fmt)
-    # Optional JSONP wrapping for JSON responses
-    cb = environ.get("callback")
-    if fmt == "json" and cb:
-        res = f"{cb}({res});"
     start_response("200 OK", headers)
     return res

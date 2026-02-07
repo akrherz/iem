@@ -19,15 +19,18 @@ Example Requests
 
 Get all daily climate data for Des Moines, IA during 2024
 
-https://mesonet.agron.iastate.edu/json/cli.py?station=KDSM&year=2024
+https://mesonet.agron.iastate.edu/json/cli.py?station=KDSM&year=2024&\
+callback=gotData
 
 """
 
 from datetime import date
+from typing import Annotated
 
 import simplejson as json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
@@ -40,18 +43,21 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    fmt: str = Field(
-        default="json",
-        description="The format of the output, either json or csv",
-    )
-    station: str = Field(
-        default="KDSM",
-        description="The station identifier to query for",
-        max_length=4,
-        pattern="^[A-Z0-9]{4}$",
-    )
-    year: int = Field(default=2019, description="The year to query for")
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
+    fmt: Annotated[
+        str, Field(description="The format of the output, either json or csv")
+    ] = "json"
+    station: Annotated[
+        str,
+        Field(
+            description="The 4 character station identifier to query for",
+            max_length=4,
+            pattern="^[A-Z0-9]{4}$",
+        ),
+    ] = "KDSM"
+    year: Annotated[int, Field(description="The year to query for")] = 2019
 
 
 def departure(ob, climo):
@@ -90,7 +96,7 @@ def get_data(conn, station, year, fmt):
     """Get the data for this timestamp"""
     data = {
         "results": [],
-        "generated_at": utc().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": utc().strftime(ISO8601),
     }
     # Fetch the daily values
     res = conn.execute(
@@ -226,7 +232,7 @@ def get_mckey(environ: dict):
     memcachekey=get_mckey,
     memcacheexpire=300,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     station = environ["station"]
     year = environ["year"]
@@ -236,7 +242,4 @@ def application(environ, start_response):
         data = get_data(conn, station, year, fmt)
     headers = [("Content-type", get_ct(environ))]
     start_response("200 OK", headers)
-    cb = environ.get("callback")
-    if fmt == "json" and cb:
-        return f"{cb}({data});".encode("ascii")
     return data.encode("ascii")

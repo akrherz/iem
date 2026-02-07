@@ -75,7 +75,6 @@ def main(conn: Connection | None = None):
             f"Upd: {updates} Ins: {inserts} Dups: {duplicates} Del: {deletes}"
         )
         table = f"raw{row.v:%Y_%m}"
-        updates += 1
         dv_interval = None if pd.isna(row.dv_interval) else row.dv_interval
         depth = None if pd.isna(row.depth) else int(row.depth)
         value = None if pd.isna(row.value) else row.value
@@ -85,7 +84,14 @@ def main(conn: Connection | None = None):
             sql_helper(
                 """
     select value, ctid,
-    value is not distinct from :value as is_duplicate
+    (
+        (CAST(:value AS double precision) is null and value is null)
+        or (
+            CAST(:value AS double precision) is not null
+            and value is not null
+            and abs(value - CAST(:value AS double precision)) < 1e-3
+        )
+    ) as is_duplicate
     from {table}  where
     station = :station and valid = :valid and key = :key
     and (depth IS NOT DISTINCT FROM :depth)

@@ -1,9 +1,12 @@
 """.. title: SPC Watches Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Documentation for /json/watches.py
 ----------------------------------
+
+This service emits metadata for SPC issued convective watches.  You can request
+one year's worth of data at a time.
 
 Changelog
 ---------
@@ -24,10 +27,12 @@ https://mesonet.agron.iastate.edu/json/watches.py?year=2024&is_pds=1
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection, text
 
@@ -35,12 +40,16 @@ from sqlalchemy import Connection, text
 class Schema(CGIModel):
     """see how we are called."""
 
-    callback: str = Field(default=None, description="JSONP callback function")
-    is_pds: bool = Field(default=False, description="Only PDS Watches")
-    year: int = Field(default=2022, description="Year to limit to")
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function")
+    ] = None
+    is_pds: Annotated[bool, Field(description="Only PDS Watches")] = False
+    year: Annotated[
+        int, Field(description="Year to return watches for.", ge=1997)
+    ] = 2022
 
 
-def run(conn: Connection, year, is_pds):
+def run(conn: Connection, year: int, is_pds: bool) -> str:
     """Generate data."""
 
     if is_pds:
@@ -65,7 +74,10 @@ def run(conn: Connection, year, is_pds):
     """),
         {"year": year},
     )
-    data = {"events": []}
+    data = {
+        "generated_at": utc().strftime(ISO8601),
+        "events": [],
+    }
     for row in res.mappings():
         data["events"].append(
             dict(
@@ -87,13 +99,13 @@ def run(conn: Connection, year, is_pds):
     return json.dumps(data)
 
 
-def mckey(environ):
+def mckey(environ: dict) -> str:
     """Generate a cache key."""
     return f"/json/watch/{environ['is_pds']}/{environ['year']}"
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=mckey, memcacheexpire=600)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
