@@ -49,7 +49,7 @@ def get_description():
             default=ts.strftime("%Y/%m/%d"),
             label="Start Date of Plot:",
             min="1951/01/01",
-        ),  # Comes back to python as yyyy-mm-dd
+        ),
         dict(type="int", name="days", default="365", label="Days to Plot"),
         dict(
             type="select",
@@ -246,7 +246,7 @@ def plotter(ctx: dict):
         .tz_localize(None)
     )
     ax.plot(x.values, ctx["df"]["datum"], color="r", label="Hourly Obs")
-    ax.set_ylabel("%s %s" % (MDICT[ctx["var"]], UNITS[ctx["var"]]))
+    ax.set_ylabel(f"{MDICT[ctx['var']]} {UNITS[ctx['var']]}")
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(ctx["sdate"], ctx["edate"] + oneday)
