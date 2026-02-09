@@ -69,7 +69,8 @@ def get_description():
         dict(
             type="int",
             name="days",
-            default="1",
+            default=1,
+            gt=0,
             label="Number of Days to Look:",
         ),
         dict(
@@ -126,7 +127,7 @@ def plotter(ctx: dict):
     if varname in ["high", "low"]:
         params["threshold"] = int(threshold)
         params["threshold2"] = int(threshold2)
-    days = int(ctx["days"])
+    days = max(1, ctx["days"])
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
