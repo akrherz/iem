@@ -124,7 +124,8 @@ def plotter(ctx: dict):
             sql_helper(
                 """
             SELECT w.ugc, simple_geom, u.name,
-            issue at time zone 'UTC' as issue,
+            (case when issue > expire then product_issue else issue end)
+            at time zone 'UTC' as issue,
             expire at time zone 'UTC' as expire,
             init_expire at time zone 'UTC' as init_expire,
             1 as val,
