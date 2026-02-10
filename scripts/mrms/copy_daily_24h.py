@@ -13,7 +13,7 @@ from pyiem.util import archive_fetch, logger
 LOG = logger()
 
 
-def workflow(dt):
+def workflow(dt: datetime):
     """Copy things around."""
     basefn = dt.strftime("%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00")
     yest = dt - timedelta(days=1)
@@ -21,7 +21,7 @@ def workflow(dt):
         ppath = f"{basefn}.{suffix}"
         with archive_fetch(ppath) as target:
             if target is None:
-                LOG.warning("ERROR: %s not found", target)
+                LOG.warning("ERROR: %s not found", ppath)
                 return
             cmd = [
                 "pqinsert",
