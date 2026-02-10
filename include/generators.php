@@ -218,6 +218,7 @@ function gen_feature($t)
         }
         $tagtext .= "</small>";
     }
+    $chart_block = "";
     $jsextra = "";
     if ($row["mediasuffix"] == 'mp4') {
         $imgiface = <<<EOM
@@ -230,15 +231,17 @@ EOM;
         $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img-fluid\" /></a>";
     }
     if ($row["javascripturl"]) {
-        $imgiface = <<<EOF
-<div class="d-none d-md-block">
-<div id="ap_container" style="width:100%;height:400px;"></div>
+        $chart_block = <<<EOF
+<div class="d-none d-md-block mb-3">
+    <div id="ap_container" class="w-100" style="min-height:400px;"></div>
 </div>
+EOF;
+        $imgiface = <<<EOF
 <div class="d-md-none">
 <a href="$imghref"><img src="$imghref" alt="Feature" class="img-fluid" /></a>
 </div>
 EOF;
-        $HC = "8.2.0";
+        $HC = "12.1.2";
         $jsextra = <<<EOM
 <script src="/vendor/highcharts/{$HC}/highcharts.js"></script>
 <script src="/vendor/highcharts/{$HC}/highcharts-more.js"></script>
@@ -270,17 +273,21 @@ EOM;
         <small class="text-muted">Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
         {$tagtext}
 
-        <div class="card float-end ms-3 mb-3" style="max-width: 540px;">
-            <div class="card-img-top">
-                {$imgiface}
+        <div class="row g-3">
+            <div class="col-12 col-lg-5">
+                <div class="mt-2">{$row["story"]}</div>
             </div>
-            <div class="card-body">
-                <span>{$row["caption"]}</span>
-                {$linktext}
+            <div class="col-12 col-lg-7">
+                <div class="card h-100">
+                    <div class="card-body">
+                        {$chart_block}
+                        <div class="mb-2">{$imgiface}</div>
+                        <span>{$row["caption"]}</span>
+                        {$linktext}
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="mt-2">{$row["story"]}</div>
 
 EOF;
 
