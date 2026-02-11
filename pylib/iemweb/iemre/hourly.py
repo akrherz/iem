@@ -6,6 +6,9 @@ request 24 hours of data at a time.
 Changelog
 ---------
 
+- 2026-02-11: Added `tz` parameter to control the timezone used for the
+  data response.
+- 2026-02-11: The ``generated_at`` metadata was updated to be ISO8601.
 - 2025-01-03: Initial implementation with pydantic validation.
 
 """
@@ -14,12 +17,15 @@ import json
 import os
 from datetime import date as datetype
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
-from pydantic import Field, PrivateAttr, model_validator
+from pydantic import Field, PrivateAttr, field_validator, model_validator
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import get_nav
-from pyiem.iemre import DOMAINS, get_domain, get_hourly_ncname, hourly_offset
+from pyiem.iemre import get_domain, get_hourly_ncname, hourly_offset
+from pyiem.reference import ISO8601
 from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 
@@ -29,23 +35,47 @@ ISO = "%Y-%m-%dT%H:%MZ"
 class Schema(CGIModel):
     """See how we are called."""
 
-    _domain: str = PrivateAttr(None)
-    _i: int = PrivateAttr(None)
-    _j: int = PrivateAttr(None)
+    _domain: Annotated[str, PrivateAttr(None)]
+    _i: Annotated[int, PrivateAttr(None)]
+    _j: Annotated[int, PrivateAttr(None)]
 
-    date: datetype = Field(..., description="Date to query data for")
-    lat: float = Field(
-        ...,
-        le=90,
-        ge=-90,
-        description="Latitude (degrees Norht) of point to query",
-    )
-    lon: float = Field(
-        ...,
-        le=180,
-        ge=-180,
-        description="Longitude (degrees East) of point to query",
-    )
+    date: Annotated[
+        datetype, Field(description="Date (for provided tz) to query data for")
+    ]
+    lat: Annotated[
+        float,
+        Field(
+            le=90,
+            ge=-90,
+            description="Latitude (degrees Norht) of point to query",
+        ),
+    ]
+    lon: Annotated[
+        float,
+        Field(
+            le=180,
+            ge=-180,
+            description="Longitude (degrees East) of point to query",
+        ),
+    ]
+    tz: Annotated[
+        str,
+        Field(
+            description=(
+                "Timezone of the point to query, for example 'America/Chicago'"
+            ),
+        ),
+    ] = "America/Chicago"
+
+    @field_validator("tz", mode="before")
+    @classmethod
+    def validate_tz(cls, value):
+        """Ensure the timezone is valid."""
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as exp:
+            raise ValueError(f"Unknown timezone {value}") from exp
+        return value
 
     @model_validator(mode="after")
     def ensure_domain(self):
@@ -67,11 +97,12 @@ def myrounder(val, precision):
     return round(float(val), precision)
 
 
-def get_timerange(dt: datetype, domain: str) -> tuple[datetime, datetime]:
+def get_timerange(environ: dict) -> tuple[datetime, datetime]:
     """Figure out what period to get data for."""
-    tzinfo = DOMAINS[domain]["tzinfo"]
+    tzname = environ["tz"]
+    dt = environ["date"]
     # Construct a local midnight to 11 PM period
-    ts = datetime(dt.year, dt.month, dt.day, 0, tzinfo=tzinfo)
+    ts = datetime(dt.year, dt.month, dt.day, 0, tzinfo=ZoneInfo(tzname))
     return ts, ts.replace(hour=23)
 
 
@@ -83,7 +114,7 @@ def workflow(
         "data": [],
         "grid_i": i,
         "grid_j": j,
-        "generated_at": utc().strftime(ISO),
+        "generated_at": utc().strftime(ISO8601),
     }
 
     tidx0 = hourly_offset(sts)
@@ -142,7 +173,7 @@ def get_mckey(environ: dict):
     model: Schema = environ["_cgimodel_schema"]
     return (
         f"iemre/hourly/{model._domain}/{environ['date']:%Y%m%d}"  # skipcq
-        f"/{model._i}/{model._j}"  # skipcq
+        f"/{model._i}/{model._j}/{environ['tz']}"  # skipcq
     )
 
 
@@ -152,7 +183,7 @@ def get_mckey(environ: dict):
 def application(environ, start_response):
     """Do Something Fun!"""
     model: Schema = environ["_cgimodel_schema"]
-    sts, ets = get_timerange(environ["date"], model._domain)  # skipcq
+    sts, ets = get_timerange(environ)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
