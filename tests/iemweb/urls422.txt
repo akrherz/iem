@@ -60,6 +60,7 @@
 /GIS/tiff/index.py?service=5kmffg&ts=202509110100
 /iemre/daily.py?lat=89.0&lon=0.0&date=2024-01-01
 /iemre/hourly.py?lat=0&lon=0&date=2024-01-01
+/iemre/hourly.py?lat=42&lon=-95&date=2026-01-01&tz=Bogus
 /iemre/multiday.py?sdate=2025-01-01&edate=2025-01-02&lon=-140&lat=10
 /json/nwstext_center_date.py?center=KDMX
 /json/nwstext.py?product_id=202522160452-KDMX-FXUS63-AFDDMX
