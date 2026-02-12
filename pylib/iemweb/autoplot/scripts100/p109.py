@@ -162,6 +162,7 @@ def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
     elif ctx["e"] == "pds":
         emerg_extra = " and is_pds "
     params = {}
+    # Careful here, we could come in with varname == "count"
     if varname.startswith("count_"):
         if (ets - sts).days > 366:
             raise NoDataFound("Can't compute over period > 366 days")

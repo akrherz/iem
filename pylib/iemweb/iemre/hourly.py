@@ -21,7 +21,7 @@ from typing import Annotated
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
-from pydantic import Field, PrivateAttr, field_validator, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_domain, get_hourly_ncname, hourly_offset
@@ -35,9 +35,17 @@ ISO = "%Y-%m-%dT%H:%MZ"
 class Schema(CGIModel):
     """See how we are called."""
 
-    _domain: Annotated[str, PrivateAttr(None)]
-    _i: Annotated[int, PrivateAttr(None)]
-    _j: Annotated[int, PrivateAttr(None)]
+    @computed_field(repr=False)
+    def domain(self) -> str:
+        return get_domain(self.lon, self.lat)
+
+    @computed_field(repr=False)
+    def grid_i(self) -> int:
+        return get_nav("iemre", self.domain).find_ij(self.lon, self.lat)[0]
+
+    @computed_field(repr=False)
+    def grid_j(self) -> int:
+        return get_nav("iemre", self.domain).find_ij(self.lon, self.lat)[1]
 
     date: Annotated[
         datetype, Field(description="Date (for provided tz) to query data for")
@@ -83,10 +91,6 @@ class Schema(CGIModel):
         domain = get_domain(self.lon, self.lat)
         if domain is None:
             raise ValueError("Point is outside all IEMRE domains")
-        self._domain = domain  # skipcq
-        self._i, self._j = get_nav("iemre", domain).find_ij(
-            self.lon, self.lat
-        )  # skipcq
         return self
 
 
@@ -172,8 +176,8 @@ def get_mckey(environ: dict):
     """Figure out the memcache key."""
     model: Schema = environ["_cgimodel_schema"]
     return (
-        f"iemre/hourly/{model._domain}/{environ['date']:%Y%m%d}"  # skipcq
-        f"/{model._i}/{model._j}/{environ['tz']}"  # skipcq
+        f"iemre/hourly/{model.domain}/{environ['date']:%Y%m%d}"
+        f"/{model.grid_i}/{model.grid_j}/{environ['tz']}"
     )
 
 
@@ -187,5 +191,5 @@ def application(environ, start_response):
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    res = workflow(sts, ets, model._i, model._j, model._domain)  # skipcq
+    res = workflow(sts, ets, model.grid_i, model.grid_j, model.domain)
     return json.dumps(res)
