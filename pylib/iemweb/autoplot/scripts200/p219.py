@@ -15,10 +15,16 @@ import pandas as pd
 from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import (
+    get_dbconn,
+    get_sqlalchemy_conn,
+    sql_helper,
+    with_sqlalchemy_conn,
+)
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import LOG, utc
+from sqlalchemy.engine import Connection
 
 VIS = "visibility"
 TEXTARGS = {
@@ -73,18 +79,20 @@ def get_text(product_id):
     return text
 
 
-def taf_search(pgconn, station, valid):
+@with_sqlalchemy_conn("asos")
+def taf_search(station, valid, conn: Connection | None = None):
     """Go look for a nearest in time TAF."""
-    cursor = pgconn.cursor()
-    cursor.execute(
-        "SELECT valid at time zone 'UTC' from taf "
-        "WHERE station = %s and valid > %s and "
-        "valid < %s ORDER by valid DESC",
-        (station, valid - timedelta(hours=24), valid),
+    res = conn.execute(
+        sql_helper(
+            "SELECT valid at time zone 'UTC' from taf "
+            "WHERE station = :station and valid > :sts and "
+            "valid <= :ets ORDER by valid DESC"
+        ),
+        {"station": station, "sts": valid - timedelta(hours=24), "ets": valid},
     )
-    if cursor.rowcount == 0:
+    if res.rowcount == 0:
         return None
-    return cursor.fetchone()[0].replace(tzinfo=timezone.utc)
+    return res.fetchone()[0].replace(tzinfo=timezone.utc)
 
 
 def compute_flight_condition(row):
@@ -115,7 +123,9 @@ def fetch(station: str, ts: datetime) -> pd.DataFrame:
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper("""
-    SELECT f.*, t.product_id from taf t JOIN taf_forecast f on
+    SELECT f.*, t.product_id,
+    coalesce(t.is_amendment, false) as is_amendment
+    from taf t JOIN taf_forecast f on
     (t.id = f.taf_id) WHERE t.station = :station and t.valid = :valid
     and ftype in (0, 1, 2)
     ORDER by f.valid ASC"""),
@@ -132,7 +142,7 @@ def plotter(ctx: dict):
     df = fetch(ctx["station"], valid)
     if df.empty:
         pgconn = get_dbconn("asos")
-        valid = taf_search(pgconn, ctx["station"], valid)
+        valid = taf_search(ctx["station"], valid)
         pgconn.close()
         if valid is None:
             raise NoDataFound("TAF data was not found!")
@@ -143,8 +153,9 @@ def plotter(ctx: dict):
         df.reset_index().shift(-1)["valid"].values - df.index.values
     )
     product_id = df.iloc[0]["product_id"]
+    amd = "Amended " if df.iloc[0]["is_amendment"] else ""
     title = (
-        f"{ctx['station']} Terminal Aerodome Forecast by NWS "
+        f"{ctx['station']} {amd}Terminal Aerodome Forecast by NWS "
         f"{product_id[14:17]}\n"
         f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )
