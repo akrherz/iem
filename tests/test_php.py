@@ -3,8 +3,8 @@
 import os
 from pathlib import Path
 
-import httpx
 import pytest
+import requests
 from bs4 import BeautifulSoup
 
 # These mapscript apps need /mesonet/data/gis/static content
@@ -51,7 +51,7 @@ def test_php(app):
     """Test the app."""
     if app in PUNTING:
         pytest.skip("Punting")
-    resp = httpx.get(f"http://iem.local{app}", timeout=30)
+    resp = requests.get(f"http://iem.local{app}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
     # 301 The app could be upset about being approached via http
     # 302 redirect
@@ -67,7 +67,7 @@ def test_php(app):
 @pytest.mark.parametrize("url", get_urls(""))
 def test_php_urls(url):
     """Test the app."""
-    resp = httpx.get(f"http://iem.local{url}", timeout=30)
+    resp = requests.get(f"http://iem.local{url}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
     # 301 The app could be upset about being approached via http
     # 302 redirect
@@ -78,5 +78,5 @@ def test_php_urls(url):
 @pytest.mark.parametrize("url", get_urls("405"))
 def test_php_urls405(url):
     """Test the app."""
-    resp = httpx.get(f"http://iem.local{url}", timeout=30)
+    resp = requests.get(f"http://iem.local{url}", timeout=30)
     assert resp.status_code == 405

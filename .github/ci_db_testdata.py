@@ -15,7 +15,7 @@ LOG = logger()
 
 
 @with_sqlalchemy_conn("isuag")
-def create_realtime_isuag(conn: Connection = None) -> None:
+def create_realtime_isuag(conn: Connection | None = None) -> None:
     """Create the realtime table if needed."""
     nt = NetworkTable("ISUSM")
     for sid in nt.sts:
@@ -48,7 +48,7 @@ def create_realtime_isuag(conn: Connection = None) -> None:
 
 
 @with_sqlalchemy_conn("iem")
-def create_iemaccess_isuag(conn: Connection = None) -> None:
+def create_iemaccess_isuag(conn: Connection | None = None) -> None:
     """Create the realtime table if needed."""
     nt = NetworkTable("ISUSM")
     for sid in nt.sts:
@@ -65,7 +65,7 @@ def create_iemaccess_isuag(conn: Connection = None) -> None:
 
 
 @with_sqlalchemy_conn("id3b")
-def ldm_product_log(conn: Connection = None) -> None:
+def ldm_product_log(conn: Connection | None = None) -> None:
     """Update these to the future."""
     conn.execute(
         sql_helper("""
@@ -82,7 +82,7 @@ def ldm_product_log(conn: Connection = None) -> None:
 
 
 @with_sqlalchemy_conn("radar")
-def nexrad_attributes(conn: Connection = None) -> None:
+def nexrad_attributes(conn: Connection | None = None) -> None:
     """Update these to be current."""
     res = conn.execute(
         sql_helper("update nexrad_attributes SET valid = now()")

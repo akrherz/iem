@@ -10,8 +10,8 @@ This service emits shapefiles (with additional csv included),
 or even Excel files.  This service is
 rather blunt force and perhaps you should review the mountain of adhoc JSON/API
 services found at
-`IEM Legacy JSON Services </json/>`_ or at
-`IEM API Services </api/1/docs/>`_ .
+`IEM API Homepage </api/>`_ or at
+`IEM API WebServices </api/1/docs>`_ .
 
 Changelog
 ---------

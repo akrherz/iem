@@ -88,7 +88,7 @@ class Schema(CGIModel):
         description="Include latitude and longitude columns in output",
     )
     vars: ListOrCSVType = Field(
-        default=[],
+        default_factory=list,
         description=(
             "List of variables to include in output, if none are set, "
             "then all variables are returned for the given ``src``"
@@ -113,7 +113,7 @@ class Schema(CGIModel):
         pattern="^(atmos|soil|traffic)$",
     )
     stations: ListOrCSVType = Field(
-        default=[],
+        default_factory=list,
         description=(
             "List of stations to include in output, `_ALL` for all stations"
         ),

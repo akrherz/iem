@@ -38,7 +38,7 @@ class Schema(CGIModel):
     excel: bool = Field(description="Return Excel File", default=False)
     opt: str = Field(description="bubbler or gage", default="gage")
     station: ListOrCSVType = Field(
-        default=[], description="Station ID to query"
+        default_factory=list, description="Station ID to query"
     )
     sts: AwareDatetime = Field(description="Start Time", default=None)
     ets: AwareDatetime = Field(description="End Time", default=None)

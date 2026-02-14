@@ -87,6 +87,10 @@ dependencies:
   - rasterio
   # various places
   - rasterstats
+  # Can't really avoid
+  - requests
+  # Testing
+  - responses
   # important
   - scipy
   # autoplots

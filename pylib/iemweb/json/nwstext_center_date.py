@@ -27,9 +27,9 @@ https://mesonet.agron.iastate.edu/json/nwstext_center_date.py?center=KDMX\
 
 """
 
-# stdlib
 import json
 from datetime import datetime, timedelta
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -46,38 +46,49 @@ OPTPILS = (
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        None, description="Optional JSONP callback function name"
-    )
-    date: str = Field(
-        None,
-        description="Optional date to limit the search to, YYYY-MM-DD",
-        pattern=r"\d{4}-\d{1,2}-\d{1,2}",
-    )
-    center: str = Field(
-        default="KOKX",
-        description="NWS Center Identifier (4 character)",
-        min_length=4,
-        max_length=4,
-    )
-    opt: bool = Field(
-        False,
-        description=(
-            f"Optional flag to limit to certain pil types {', '.join(OPTPILS)}"
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
+    date: Annotated[
+        str | None,
+        Field(
+            description="Optional date to limit the search to, YYYY-MM-DD",
+            pattern=r"\d{4}-\d{1,2}-\d{1,2}",
         ),
-    )
-    sts: AwareDatetime = Field(
-        None,
-        description="Optional start time for the search",
-    )
-    ets: AwareDatetime = Field(
-        None,
-        description="Optional end time for the search",
-    )
+    ] = None
+    center: Annotated[
+        str,
+        Field(
+            description="NWS Center Identifier (4 character)",
+            min_length=4,
+            max_length=4,
+        ),
+    ] = "KOKX"
+    opt: Annotated[
+        bool,
+        Field(
+            description=(
+                "Optional flag to limit to certain pil "
+                f"types {', '.join(OPTPILS)}"
+            ),
+        ),
+    ] = False
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Optional start time for the search",
+        ),
+    ] = None
+    ets: Annotated[
+        AwareDatetime,
+        Field(
+            description="Optional end time for the search",
+        ),
+    ] = None
 
 
 @iemapp(help=__doc__, schema=Schema, default_tz="UTC")
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     center = environ["center"]
     if environ["date"] is not None:

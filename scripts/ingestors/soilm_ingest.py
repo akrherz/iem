@@ -4,7 +4,6 @@
 Run from RUN_5MIN.sh
 """
 
-# stdlib
 import io
 import os
 import subprocess

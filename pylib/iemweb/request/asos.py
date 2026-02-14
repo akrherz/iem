@@ -43,6 +43,7 @@ ets=2020-05-21T00:00:00Z
 import re
 from datetime import datetime, timedelta
 from io import StringIO
+from typing import Annotated
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import AwareDatetime, Field, field_validator
@@ -101,181 +102,233 @@ CONV_COLS = {
 class MyModel(CGIModel):
     """Request Model."""
 
-    data: ListOrCSVType = Field(
-        default=None,
-        description=(
-            "The data columns to return, defaults to all.  The available "
-            "options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
-            "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, "
-            "skyl4, wxcodes, ice_accretion_1hr, ice_accretion_3hr, "
-            "ice_accretion_6hr, peak_wind_gust, peak_wind_drct, "
-            "peak_wind_time, feel, metar, snowdepth"
+    data: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description=(
+                "The data columns to return, defaults to all.  The available "
+                "options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
+                "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, "
+                "skyl4, wxcodes, ice_accretion_1hr, ice_accretion_3hr, "
+                "ice_accretion_6hr, peak_wind_gust, peak_wind_drct, "
+                "peak_wind_time, feel, metar, snowdepth"
+            ),
         ),
-    )
-    direct: bool = Field(
-        default=False,
-        description=(
-            "If set to 'yes', the data will be directly downloaded as a file."
+    ] = None
+    direct: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 'yes', the data will be directly "
+                "downloaded as a file."
+            ),
         ),
-    )
-    elev: bool = Field(
-        default=False,
-        description=(
-            "If set to 'yes', the elevation (m) of the station will be "
-            "included in the output."
+    ] = False
+    elev: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 'yes', the elevation (m) of the station will be "
+                "included in the output."
+            ),
         ),
-    )
-    ets: AwareDatetime = Field(
-        default=None,
-        description=("The end time of the data request."),
-    )
-    format: str = Field(
-        default="onlycomma",
-        description=(
-            "The format of the data, defaults to onlycomma.  The available "
-            "options are: onlycomma, tdf."
+    ] = False
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=("The end time of the data request."),
         ),
-    )
-    hours: int = Field(
-        default=None,
-        description=(
-            "The number of hours of data to return prior to the current "
-            "timestamp.  Can not be more than 24 if no stations are specified."
+    ] = None
+    format: Annotated[
+        str,
+        Field(
+            description=(
+                "The format of the data, defaults to onlycomma. "
+                "The available options are: onlycomma, tdf."
+            ),
         ),
-    )
-    latlon: bool = Field(
-        default=False,
-        description=(
-            "If set to 'yes', the latitude and longitude of the station will "
-            "be included in the output."
+    ] = "onlycomma"
+    hours: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The number of hours of data to return prior to the current "
+                "timestamp.  Can not be more than 24 if no stations are "
+                "specified."
+            ),
         ),
-    )
-    missing: str = Field(
-        default="M",
-        description=(
-            "How to represent missing values, defaults to M.  Other options "
-            "are 'null' and 'empty'."
+    ] = None
+    latlon: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 'yes', the latitude and longitude of the station "
+                "will be included in the output."
+            ),
         ),
-        pattern="^(M|null|empty)$",
-    )
-    nometa: bool = Field(
-        default=False,
-        description=(
-            "If set to 'yes', the column headers will not be included in the "
-            "output."
+    ] = False
+    missing: Annotated[
+        str,
+        Field(
+            description=(
+                "How to represent missing values, defaults to M.  Other "
+                "options are 'null' and 'empty'."
+            ),
+            pattern="^(M|null|empty)$",
         ),
-    )
-    network: ListOrCSVType = Field(
-        default=None,
-        description="The network to query, defaults to all networks.",
-    )
+    ] = "M"
+    nometa: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 'yes', the column headers will not be included "
+                "in the output."
+            ),
+        ),
+    ] = False
+    network: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="The network to query, defaults to all networks.",
+        ),
+    ] = None
     report_type: ListOrCSVType = Field(
-        default=[],
+        default_factory=list,
         description=(
             "The report type to query, defaults to all.  The available "
             "options are: 1 (HFMETAR), 3 (Routine), 4 (Specials)."
         ),
     )
-    station: ListOrCSVType = Field(
-        default=None,
-        description=(
-            "The station identifier to query, defaults to all stations and "
-            "if you do not specify any stations, you can only request 24 "
-            "hours of data."
+    station: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description=(
+                "The station identifier to query, defaults to all stations "
+                "and if you do not specify any stations, you can only "
+                "request 24 hours of data."
+            ),
         ),
-    )
-    sts: AwareDatetime = Field(
-        default=None,
-        description=("The start time of the data request."),
-    )
-    trace: str = Field(
-        default="0.0001",
-        description=(
-            "How to represent trace values, defaults to 0.0001.  Other "
-            "options are 'null' and 'empty'."
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=("The start time of the data request."),
         ),
-        pattern="^(0.0001|null|empty|T)$",
-    )
-    tz: str = Field(
-        default="UTC",
-        description=(
-            "The timezone to use for the request timestamps (when not "
-            "providing already tz-aware ``sts`` and ``ets`` values) and the "
-            "output valid timestamp.  It is highly recommended to set this to "
-            "UTC to ensure it is set.  This string should be "
-            "something that the Python ``zoneinfo`` library can understand."
+    ] = None
+    trace: Annotated[
+        str,
+        Field(
+            description=(
+                "How to represent trace values, defaults to 0.0001.  Other "
+                "options are 'null' and 'empty'."
+            ),
+            pattern="^(0.0001|null|empty|T)$",
         ),
-    )
-    year1: int = Field(
-        default=None,
-        description=(
-            "The year of the start time, defaults to the time zone provided "
-            "by `tzname`. If `sts` is not provided."
+    ] = "0.0001"
+    tz: Annotated[
+        str,
+        Field(
+            description=(
+                "The timezone to use for the request timestamps (when not "
+                "providing already tz-aware ``sts`` and ``ets`` values) and "
+                "the output valid timestamp.  It is highly recommended to set "
+                "this to UTC to ensure it is set.  This string should be "
+                "something that the Python ``zoneinfo`` library can "
+                "understand."
+            ),
         ),
-    )
-    month1: int = Field(
-        default=None,
-        description=(
-            "The month of the start time, defaults to the time zone provided "
-            "by `tzname`. If `sts` is not provided."
+    ] = "UTC"
+    year1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The year of the start time, defaults to the time zone "
+                "provided by `tzname`. If `sts` is not provided."
+            ),
         ),
-    )
-    day1: int = Field(
-        default=None,
-        description=(
-            "The day of the start time, defaults to the time zone provided by "
-            "`tzname`. If `sts` is not provided."
+    ] = None
+    month1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The month of the start time, defaults to the time zone "
+                "provided by `tzname`. If `sts` is not provided."
+            ),
         ),
-    )
-    hour1: int = Field(
-        default=0,
-        description=(
-            "The hour of the start time, defaults to the time zone provided "
-            "by `tzname`. If `sts` is not provided."
+    ] = None
+    day1: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The day of the start time, defaults to the time zone "
+                "provided by `tzname`. If `sts` is not provided."
+            ),
         ),
-    )
-    minute1: int = Field(
-        default=0,
-        description=(
-            "The minute of the start time, defaults to the time zone provided "
-            "by `tzname`. If `sts` is not provided."
+    ] = None
+    hour1: Annotated[
+        int,
+        Field(
+            description=(
+                "The hour of the start time, defaults to the time zone "
+                "provided by `tzname`. If `sts` is not provided."
+            ),
         ),
-    )
-    year2: int = Field(
-        default=None,
-        description=(
-            "The year of the end time, defaults to the time zone provided by "
-            "`tzname`. If `ets` is not provided."
+    ] = 0
+    minute1: Annotated[
+        int,
+        Field(
+            description=(
+                "The minute of the start time, defaults to the time zone "
+                "provided by `tzname`. If `sts` is not provided."
+            ),
         ),
-    )
-    month2: int = Field(
-        default=None,
-        description=(
-            "The month of the end time, defaults to the time zone provided by "
-            "`tzname`. If `ets` is not provided."
+    ] = 0
+    year2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The year of the end time, defaults to the time zone "
+                "provided by `tzname`. If `ets` is not provided."
+            ),
         ),
-    )
-    day2: int = Field(
-        default=None,
-        description=(
-            "The day of the end time, defaults to the time zone provided by "
-            "`tzname`. If `ets` is not provided."
+    ] = None
+    month2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The month of the end time, defaults to the time zone "
+                "provided by `tzname`. If `ets` is not provided."
+            ),
         ),
-    )
-    hour2: int = Field(
-        default=0,
-        description=(
-            "The hour of the end time, defaults to the time zone provided by "
-            "`tzname`. If `ets` is not provided."
+    ] = None
+    day2: Annotated[
+        int | None,
+        Field(
+            description=(
+                "The day of the end time, defaults to the time zone "
+                "provided by `tzname`. If `ets` is not provided."
+            ),
         ),
-    )
-    minute2: int = Field(
-        default=0,
-        description=(
-            "The minute of the end time, defaults to the time zone provided "
-            "by `tzname`. If `ets` is not provided."
+    ] = None
+    hour2: Annotated[
+        int,
+        Field(
+            description=(
+                "The hour of the end time, defaults to the time zone "
+                "provided by `tzname`. If `ets` is not provided."
+            ),
         ),
-    )
+    ] = 0
+    minute2: Annotated[
+        int,
+        Field(
+            default=0,
+            description=(
+                "The minute of the end time, defaults to the time zone "
+                "provided by `tzname`. If `ets` is not provided."
+            ),
+        ),
+    ] = 0
 
     @field_validator("tz")
     @classmethod
