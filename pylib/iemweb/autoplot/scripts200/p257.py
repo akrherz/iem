@@ -10,7 +10,7 @@ import pygrib
 from metpy.calc import relative_humidity_from_dewpoint, wind_speed
 from metpy.units import units
 from pyiem.exceptions import NoDataFound
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import grb2iemre
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.plot import MapPlot, get_cmap
@@ -104,7 +104,7 @@ def get_raster(ctx: dict):
     except Exception as exp:
         LOG.exception(exp)
         raise NoDataFound("No HRRR Data Found.") from exp
-    return cci, IEMRE.affine, IEMRE.crs
+    return cci, get_nav("IEMRE", "conus").affine, get_nav("IEMRE", "conus").crs
 
 
 def plotter(ctx: dict):

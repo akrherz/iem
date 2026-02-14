@@ -47,7 +47,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     artcc: ListOrCSVType = Field(
-        default=[],
+        default_factory=list,
         description="The ARTCC to limit the query to, use _ALL for all",
     )
     ets: AwareDatetime = Field(

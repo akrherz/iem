@@ -49,7 +49,7 @@ class Schema(CGIModel):
     )
     st: bool = Field(False, description="Include the state in the output.")
     station: ListOrCSVType = Field(
-        default=[], description="The station(s) to request data for."
+        default_factory=list, description="The station(s) to request data for."
     )
     sts: AwareDatetime = Field(
         default=None, description="The start of the requested interval."

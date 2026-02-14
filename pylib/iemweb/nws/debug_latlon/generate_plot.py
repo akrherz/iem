@@ -26,7 +26,6 @@ text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
 
 """
 
-# stdlib
 import json
 import os
 import tempfile

@@ -4,7 +4,7 @@ from pyiem.webutil import iemapp
 
 
 @iemapp()
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """dev."""
     # We'd want to enforce that this works, so we are getting called rightly
     try:

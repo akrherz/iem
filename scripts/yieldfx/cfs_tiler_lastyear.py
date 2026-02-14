@@ -7,7 +7,7 @@ from datetime import date, timedelta
 
 import numpy as np
 from metpy.units import units
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.meteorology import gdd
 from pyiem.util import convert_value, ncopen
@@ -158,7 +158,7 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
 def tile_extraction(nc, valid, west, south):
     """Do our tile extraction"""
     # update model metadata
-    i, j = IEMRE.find_ij(west, south)
+    i, j = get_nav("IEMRE", "conus").find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     # Current year IEMRE should be substituted for this year's data

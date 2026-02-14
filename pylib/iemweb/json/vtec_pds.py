@@ -1,6 +1,6 @@
 """.. title:: VTEC PDS Events
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Changelog
 ---------
@@ -10,6 +10,7 @@ Changelog
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -24,7 +25,7 @@ from iemweb.mlib import rectify_wfo
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback")
+    callback: Annotated[str | None, Field(description="JSONP Callback")] = None
 
 
 @with_sqlalchemy_conn("postgis")

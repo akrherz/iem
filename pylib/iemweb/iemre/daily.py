@@ -25,6 +25,7 @@ https://mesonet.agron.iastate.edu/iemre/daily.py\
 import json
 import os
 from datetime import date as dateobj
+from typing import Annotated
 
 import numpy as np
 from pydantic import Field
@@ -44,31 +45,31 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    date: dateobj = Field(
-        default=dateobj(2019, 3, 1),
-        title="Date",
-        description="Date of interest",
-    )
-    lat: float = Field(
-        default=-41.99,
-        title="Latitude",
-        description="Latitude of interest",
-        ge=-90,
-        le=90,
-    )
-    lon: float = Field(
-        default=-95.1,
-        title="Longitude",
-        description="Longitude of interest",
-        ge=-180,
-        le=180,
-    )
-    format: str = Field(
-        default="json",
-        title="Format",
-        description="Format of the output",
-        pattern="json",
-    )
+    date: Annotated[
+        dateobj,
+        Field(
+            title="Date",
+            description="Date of interest",
+        ),
+    ] = dateobj(2019, 3, 1)
+    lat: Annotated[
+        float,
+        Field(
+            title="Latitude",
+            description="Latitude of interest",
+            ge=-90,
+            le=90,
+        ),
+    ] = -41.99
+    lon: Annotated[
+        float,
+        Field(
+            title="Longitude",
+            description="Longitude of interest",
+            ge=-180,
+            le=180,
+        ),
+    ] = -95.1
 
 
 def myrounder(val, precision):
@@ -79,7 +80,7 @@ def myrounder(val, precision):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do Something Fun!"""
     dt: dateobj = environ["date"]
     lat = environ["lat"]

@@ -16,10 +16,19 @@ Changelog
 
 - 2024-06-22: Initital documentation and backend conversion to pydantic.
 
+Example Requests
+----------------
+
+Provide the Iowa areal average data for 2020 in Excel format
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/coop.py?\
+station=IA0000&network=IACLIMATE=&year1=2020&year2=2020&what=excel
+
 """
 
 from datetime import date, datetime, timedelta
 from io import BytesIO, StringIO
+from typing import Annotated
 from zipfile import ZipFile
 
 import pandas as pd
@@ -43,86 +52,114 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    delim: str = Field(
-        "comma",
-        description=(
-            "The delimiter to use in the output file.  "
-            "Options: comma, tab, space"
+    delim: Annotated[
+        str,
+        Field(
+            description=(
+                "The delimiter to use in the output file.  "
+                "Options: comma, tab, space"
+            ),
+            pattern="^(comma|tab|space)$",
         ),
-        pattern="^(comma|tab|space)$",
-    )
-    gis: bool = Field(
-        False,
-        description="Include latitude and longitude columns in the output.",
-    )
-    inclatlon: bool = Field(
-        False,
-        description="Include latitude and longitude columns in the output.",
-    )
-    model: str = Field(
-        None,
-        description=(
-            "The model to use for output.  Options: simple, apsim, "
-            "century, daycent, salus, dndc, swat.  Specifying this will "
-            "override the 'vars' option."
+    ] = "comma"
+    gis: Annotated[
+        bool,
+        Field(
+            description="Include latitude and longitude cols in the output.",
         ),
-    )
-    network: str = Field(
-        "IACLIMATE", description="The network to use for station lookups."
-    )
-    scenario: bool = Field(
-        False,
-        description=(
-            "Should data from a previous year, specified by scenario_year "
-            "be used to fill out the present year."
+    ] = False
+    inclatlon: Annotated[
+        bool,
+        Field(
+            description="Include latitude and longitude cols in the output.",
         ),
-    )
-    scenario_year: int = Field(
-        2020,
-        description=(
-            "The year to use as a scenario year, if scenario is true."
+    ] = False
+    model: Annotated[
+        str | None,
+        Field(
+            description=(
+                "The model to use for output.  Options: simple, apsim, "
+                "century, daycent, salus, dndc, swat.  Specifying this will "
+                "override the 'vars' option."
+            ),
         ),
-    )
+    ] = None
+    network: Annotated[
+        str, Field(description="The network to use for station lookups.")
+    ] = "IACLIMATE"
+    scenario: Annotated[
+        bool,
+        Field(
+            description=(
+                "Should data from a previous year, specified by scenario_year "
+                "be used to fill out the present year."
+            ),
+        ),
+    ] = False
+    scenario_year: Annotated[
+        int,
+        Field(
+            description=(
+                "The year to use as a scenario year, if scenario is true."
+            ),
+        ),
+    ] = 2020
     station: ListOrCSVType = Field(
-        [], description="List of stations to include in the output."
+        default_factory=list,
+        description="List of stations to include in the output.",
     )
     stations: ListOrCSVType = Field(
-        [],
+        default_factory=list,
         description=(
             "List of stations to include in the output. Legacy variable name."
         ),
     )
     vars: ListOrCSVType = Field(
-        [], description="List of variables to include in the output."
+        default_factory=list,
+        description="List of variables to include in the output.",
     )
-    what: str = Field("view", description="The type of output to generate.")
-    with_header: bool = Field(
-        True, description="Include a header row in the output."
-    )
-    year1: int = Field(
-        date.today().year,
-        description="The starting year for the data request.",
-    )
-    month1: int = Field(
-        1,
-        description="The starting month for the data request.",
-    )
-    day1: int = Field(
-        1,
-        description="The starting day for the data request.",
-    )
-    year2: int = Field(
-        date.today().year,
-        description="The ending year for the data request.",
-    )
-    month2: int = Field(
-        date.today().month,
-        description="The ending month for the data request.",
-    )
-    day2: int = Field(
-        date.today().day,
-        description="The ending day for the data request.",
-    )
+    what: Annotated[
+        str, Field(description="The type of output to generate.")
+    ] = "view"
+    with_header: Annotated[
+        bool, Field(description="Include a header row in the output.")
+    ] = True
+    year1: Annotated[
+        int,
+        Field(
+            description="The starting year for the data request.",
+        ),
+    ] = date.today().year
+    month1: Annotated[
+        int,
+        Field(
+            description="The starting month for the data request.",
+        ),
+    ] = 1
+    day1: Annotated[
+        int,
+        Field(
+            description="The starting day for the data request.",
+        ),
+    ] = 1
+    year2: Annotated[
+        int,
+        Field(
+            description="The ending year for the data request.",
+        ),
+    ] = date.today().year
+    month2: Annotated[
+        int,
+        Field(
+            description="The ending month for the data request.",
+        ),
+    ] = date.today().month
+    day2: Annotated[
+        int,
+        Field(
+            description="The ending day for the data request.",
+        ),
+    ] = date.today().day
 
 
 def get_scenario_period(ctx):
@@ -182,7 +219,7 @@ def f2c(val):
     return (val * DEGF).to(DEGC).m
 
 
-def get_tablename(stations):
+def get_tablename(stations: list[str]):
     """Figure out the table that has the data for these stations"""
     states = []
     for sid in stations:
@@ -622,6 +659,8 @@ def do_simple(cursor, ctx):
             df["lat"] = [_gs(x, "lat") for x in df["station"]]
             df["lon"] = [_gs(x, "lon") for x in df["station"]]
         bio = BytesIO()
+        # Cull any cols not in the dataframe
+        cols = [c for c in cols if c in df.columns]
         df.to_excel(bio, columns=cols, index=False, engine="openpyxl")
         return bio.getvalue()
 

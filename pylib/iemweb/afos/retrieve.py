@@ -113,7 +113,7 @@ from iemweb.util import get_ct
 
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
-STATEMENT_TIMEOUT = "60s"
+STATEMENT_TIMEOUT: str = "60s"
 
 
 class MyModel(CGIModel):

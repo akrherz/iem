@@ -1,6 +1,6 @@
 """.. title:: VTEC Max EventID by Year
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Changelog
 ---------

@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 import numpy as np
 from metpy.units import units
-from pyiem.grid.nav import IEMRE
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.meteorology import gdd
 from pyiem.util import convert_value, logger, ncopen, utc
@@ -164,7 +164,7 @@ def tile_extraction(nc, valid, west, south):
     """Do our tile extraction"""
     # update model metadata
     nc.valid = f"CFS model: {valid:%Y-%m-%dT%H:%M:%S}Z"
-    i, j = IEMRE.find_ij(west, south)
+    i, j = get_nav("IEMRE", "conus").find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     for year in range(1980, valid.year + 1):

@@ -312,7 +312,10 @@ def plotter(ctx: dict):
     data = {}
     cmap = get_cmap(ctx["cmap"])
     if ctx.get("interval", "") != "":
-        minv, maxv, interval = map(float, ctx["interval"].split(","))
+        tokens = ctx["interval"].split(",")
+        if len(tokens) != 3:
+            raise NoDataFound("Invalid interval specified.")
+        minv, maxv, interval = map(float, tokens)
         # Prevent naughty requests
         if maxv <= minv or (maxv - minv) / interval > 500:
             raise NoDataFound("Invalid min,max,interval specified.")

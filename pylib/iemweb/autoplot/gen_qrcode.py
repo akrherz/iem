@@ -10,9 +10,9 @@ q=network:WFO::wfo:DMX::var:tmpf::year1:2023::month1:5::day1:1::hour1&p=1
 
 """
 
-# stdlib
 import hashlib
 from io import BytesIO
+from typing import Annotated
 
 import qrcode
 from pydantic import Field
@@ -23,21 +23,25 @@ HTTP200 = "200 OK"
 
 
 class MyModel(CGIModel):
-    p: str = Field(
-        None,
-        title="Plot Type",
-        description="The plot type to use, if any",
-    )
-    q: str = Field(
-        ...,
-        title="Query String",
-        description="The query string to encode in the QR code.",
-        min_length=1,
-        max_length=2048,
-    )
+    p: Annotated[
+        str | None,
+        Field(
+            title="Plot Type",
+            description="The plot type to use, if any",
+        ),
+    ] = None
+    q: Annotated[
+        str,
+        Field(
+            title="Query String",
+            description="The query string to encode in the QR code.",
+            min_length=1,
+            max_length=2048,
+        ),
+    ]
 
 
-def q2uri(qstr, pval):
+def q2uri(qstr: str, pval: str):
     """Convert the query string to a URI."""
     if qstr.startswith("https://mesonet"):
         return qstr

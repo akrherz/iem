@@ -3,8 +3,8 @@ Configure iembot for mastodon, gasp.
 """
 
 import cryptocode
-import httpx
 import mastodon
+import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
@@ -38,7 +38,7 @@ TEST_MESSAGE = "Hello, this is a test message from the IEMBot integration."
 def get_mastodon_app(server):
     """Get or create an app."""
     redirect_uri = f"{APP}/?s={server}"
-    conn, cursor = get_dbconnc("mesosite")
+    conn, cursor = get_dbconnc("iembot")
     cursor.execute(
         """
         SELECT client_id, client_secret from iembot_mastodon_apps WHERE
@@ -75,7 +75,7 @@ def get_mastodon_app(server):
     return mapp, mapp.auth_request_url(redirect_uris=redirect_uri)
 
 
-def get_app4user(cookies):
+def get_app4user(cookies: dict):
     """Do we know who we have here?"""
     mm = cookies.get("mm")
     if mm is None or mm == "":
@@ -85,7 +85,7 @@ def get_app4user(cookies):
         user_id = int(cryptocode.decrypt(mm, PRIVKEY))
     except Exception:
         return None
-    conn, cursor = get_dbconnc("mesosite")
+    conn, cursor = get_dbconnc("iembot")
     cursor.execute(
         """
         select access_token, server, iembot_account_id
@@ -118,7 +118,7 @@ def get_app4user(cookies):
         return None
     conn.close()
     # For better or likely worse, we tag along this attribute
-    mapp.iembot_user_id = user_id
+    mapp.iembot_account_id = user_id
     mapp.iembot_account_id = row["iembot_account_id"]
     return mapp
 
@@ -131,7 +131,7 @@ def build_subui(mapp, fdict):
     <img src="{me["avatar"]}" style="width:20px;">!
     This page configures your IEMBot channel subscriptions.</p>
     """
-    conn, cursor = get_dbconnc("mesosite")
+    conn, cursor = get_dbconnc("iembot")
     log = []
     if fdict.get("testmsg") is not None:
         try:
@@ -145,10 +145,10 @@ def build_subui(mapp, fdict):
     if channel is not None and channel != "":
         cursor.execute(
             """
-            insert into iembot_subscriptions(iembot_user_id, channel_id)
+            insert into iembot_subscriptions(iembot_account_id, channel_id)
             values (%s, (select get_or_create_iembot_channel_id(%s)))
             """,
-            (mapp.iembot_user_id, channel.upper()),
+            (mapp.iembot_account_id, channel.upper()),
         )
         log.append(f"Added channel subscription for |{channel.upper()}")
         reload_bot()
@@ -156,11 +156,11 @@ def build_subui(mapp, fdict):
     if channel is not None and channel != "":
         cursor.execute(
             """
-            delete from iembot_subscriptions where iembot_user_id = %s
+            delete from iembot_subscriptions where iembot_account_id = %s
             and channel_id = (
             select id from iembot_channels where channel_name = %s)
             """,
-            (mapp.iembot_user_id, channel.upper()),
+            (mapp.iembot_account_id, channel.upper()),
         )
         log.append(f"Deleted channel subscription for |{channel.upper()}")
         reload_bot()
@@ -168,10 +168,10 @@ def build_subui(mapp, fdict):
         """
         SELECT channel_name as channel from
         iembot_channels c, iembot_subscriptions s
-        where s.iembot_user_id = %s and c.id = s.channel_id
+        where s.iembot_account_id = %s and c.id = s.channel_id
         ORDER by channel_name asc
         """,
-        (mapp.iembot_user_id,),
+        (mapp.iembot_account_id,),
     )
     logmsg = "" if not log else f"<h3>Log Messages</h3> {'<br/>'.join(log)}"
     res += f"""
@@ -222,7 +222,7 @@ def save_code(mapp, server, code, headers):
         access_token=access_token,
     )
     me = mapp.me()
-    conn, cursor = get_dbconnc("mesosite")
+    conn, cursor = get_dbconnc("iembot")
     # Ensure we have no current entry
     cursor.execute(
         """
@@ -245,19 +245,19 @@ def save_code(mapp, server, code, headers):
             """,
             (server, me["username"]),
         )
-    mapp.iembot_user_id = cursor.fetchone()["id"]
+    mapp.iembot_account_id = cursor.fetchone()["id"]
     cursor.execute(
         """
         update iembot_mastodon_oauth SET access_token = %s,
         updated = now() WHERE id = %s
         """,
-        (access_token, mapp.iembot_user_id),
+        (access_token, mapp.iembot_account_id),
     )
     cursor.close()
     conn.commit()
     conn.close()
     # Set a cookie
-    text = cryptocode.encrypt(str(mapp.iembot_user_id), PRIVKEY)
+    text = cryptocode.encrypt(str(mapp.iembot_account_id), PRIVKEY)
     headers.append(
         (
             "Set-Cookie",
@@ -269,11 +269,11 @@ def save_code(mapp, server, code, headers):
 
 def reload_bot():
     """Tell iembot to refresh."""
-    httpx.get("http://iembot:9003/reload", timeout=5)
+    requests.get("http://iembot:9003/reload", timeout=5)
 
 
 @iemapp()
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """mod-wsgi handler."""
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]
