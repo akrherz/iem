@@ -10,13 +10,14 @@ Changelog
 Example Requests
 ----------------
 
-Return metadata for the IA_ASOS network:
+Return metadata for the SCAN network:
 
-https://mesonet.agron.iastate.edu/json/network.py?network=IA_ASOS
+https://mesonet.agron.iastate.edu/json/network.py?network=SCAN
 
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -26,11 +27,15 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    network: str = Field(
-        default="IA_ASOS",
-        description="Optional network identifier to filter results by",
-    )
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    network: Annotated[
+        str,
+        Field(
+            description="Optional network identifier to filter results by",
+        ),
+    ] = "IA_ASOS"
 
 
 def get_mckey(environ):

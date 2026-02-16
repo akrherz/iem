@@ -11,33 +11,35 @@ window.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
         const tableElem = document.getElementById("thetable");
         if (!tableElem) return;
-        // Manually extract columns and data from HTML table
-        const columns = [];
-        const data = [];
+        // Extract columns from thead
         const thead = tableElem.querySelector('thead');
-        const tbody = tableElem.querySelector('tbody');
-        if (!thead || !tbody) return;
-        // Use the last row of thead for column titles
-        const headerRows = thead.querySelectorAll('tr');
-        const lastHeaderRow = headerRows[headerRows.length - 1];
-        const ths = lastHeaderRow.querySelectorAll('th');
-        ths.forEach((th, i) => {
-            columns.push({
-                title: th.textContent.trim(),
-                field: `col${i}`,
-                headerSort: false,
-                ...(i === 0 ? { formatter: "html" } : {})
-            });
+        const headerCells = thead.querySelectorAll('tr th');
+        const columns = Array.from(headerCells).map((th, i) => {
+            const col = { title: th.textContent.trim(), field: `col${i}` };
+            // Only the first column (icon + date/station) is HTML
+            if (i === 0) {
+                col.headerSort = false;
+                col.formatter = 'html';
+                col.frozen = true;
+            }
+            return col;
         });
         // Extract data rows
+        const tbody = tableElem.querySelector('tbody');
+        if (!tbody) return;
         const trs = tbody.querySelectorAll('tr');
+        const data = [];
         trs.forEach(tr => {
             const tds = tr.querySelectorAll('td');
             const row = {};
-            tds.forEach((td, i) => {
-                // Preserve HTML for first column (date/station link)
-                row[`col${i}`] = (i === 0) ? td.innerHTML.trim() : td.textContent.trim();
-            });
+            for (let i = 0; i < columns.length; i++) {
+                const td = tds[i];
+                if (td) {
+                    row[`col${i}`] = (i === 0) ? td.innerHTML.trim() : td.textContent.trim();
+                } else {
+                    row[`col${i}`] = "";
+                }
+            }
             data.push(row);
         });
         // Create a new div to host Tabulator
@@ -49,10 +51,8 @@ window.addEventListener("DOMContentLoaded", () => {
             data,
             columns,
             layout: "fitDataStretch",
-            responsiveLayout: true,
             movableColumns: true,
             height: "600px",
-            headerSort: false,
             pagination: false,
             downloadConfig: {
                 columnGroups: false,

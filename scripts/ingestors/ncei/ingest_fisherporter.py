@@ -14,7 +14,7 @@ from pyiem.util import logger
 LOG = logger()
 
 
-def ingest(df, sid, cursor):
+def ingest(df: pd.DataFrame, sid: str, cursor):
     """Process a file of data"""
     cursor.execute(
         "SELECT max(date(valid)) from hpd_alldata WHERE station = %s", (sid,)
@@ -29,6 +29,8 @@ def ingest(df, sid, cursor):
         )
         LOG.info("Removed %s rows from database", cursor.rowcount)
     LOG.info("Found %s rows to ingest", len(df.index))
+    if df.empty:
+        return
     taxis = pd.date_range("2000/01/01 00:00", "2000/01/01 23:45", freq="15min")
     for dt, row in df.iterrows():
         # CST

@@ -51,15 +51,9 @@ $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 $table = <<<EOM
 <h3>{$title}</h3>
 <table id="thetable" class="table table-striped table-bordered table-hover">
-<thead class="sticky">
+<thead>
 <tr class="small">
-    <th rowspan="2">{$col1label}</th>
-    <th colspan="6">Temperature &deg;F</th>
-    <th colspan="3">Precipitation</th>
-    <th colspan="5">Wind MPH</th>
-    <th colspan="4">Misc/Sky</th>
-</tr>
-<tr class="small">
+    <th>{$col1label}</th>
     <th>High</th><th>Low</th><th>Avg</th><th>Departure</th><th>HDD</th>
     <th>CDD</th>
     <th>Precip</th><th>Snow</th><th>Snow Depth 12z</th>
@@ -121,8 +115,9 @@ foreach ($arr as $entry) {
     }
     $table .= sprintf(
         "
-        <tr><td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"bi bi-file-richtext\" alt=\"View Text\"></i></a>
-            %s</td>
+        <tr>
+        <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\">
+        <i class=\"bi bi-file-richtext\" alt=\"View Text\"></i></a>%s</td>
             <td>%s</td><td nowrap>%s</td><td>%s</td>
             <td>%s</td><td>%s</td><td>%s</td>
             <td>%s</td><td>%s</td><td>%s</td>
@@ -238,6 +233,6 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="cf6table.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="module" src="cf6table.module.js"></script>
+<script type="module" src="cf6table.module.js?v=2"></script>
 EOM;
 $t->render('full.phtml');

@@ -33,6 +33,7 @@ product_id=202407160452-KDMX-FXUS63-AFDDMX
 
 import json
 from datetime import datetime, timezone
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -43,16 +44,18 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        None, description="Optional JSONP callback function name"
-    )
-    product_id: str = Field(
-        ...,
-        description="Product Identifier to retrieve text for",
-        max_length=36,
-        min_length=28,
-        pattern=r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}$",
-    )
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
+    product_id: Annotated[
+        str,
+        Field(
+            description="Product Identifier to retrieve text for",
+            max_length=36,
+            min_length=28,
+            pattern=r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}$",
+        ),
+    ]
 
 
 @iemapp(
@@ -61,7 +64,7 @@ class Schema(CGIModel):
     memcacheexpire=300,
     schema=Schema,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     headers = [("Content-type", "application/json")]
 
