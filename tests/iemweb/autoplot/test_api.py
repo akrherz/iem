@@ -1,5 +1,7 @@
 """Excerise the imports."""
 
+import json
+
 import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.autoplot import application as autoplot_app
@@ -43,7 +45,7 @@ def test_autoplot_calls_index(apid: str):
 def test_autoplot_calls_via_frontend(apid: str):
     """Just import things."""
     c = Client(meta_app)
-    meta = c.get(f"?p={apid}").json
+    meta = json.loads(c.get(f"?p={apid}").data.decode("utf-8"))
     fmts = ["png"]
     if meta["highcharts"]:
         fmts.append("js")

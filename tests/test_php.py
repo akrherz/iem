@@ -43,14 +43,15 @@ def apps():
         for file in files:
             fullpath = os.path.join(_rt, file)
             if fullpath.endswith((".php", ".phtml")):
-                yield fullpath.replace("htdocs", "")
+                app = fullpath.replace("htdocs", "")
+                if app in PUNTING:
+                    continue
+                yield app
 
 
 @pytest.mark.parametrize("app", apps())
 def test_php(app):
     """Test the app."""
-    if app in PUNTING:
-        pytest.skip("Punting")
     resp = requests.get(
         f"http://iem.local{app}", timeout=30, allow_redirects=False
     )

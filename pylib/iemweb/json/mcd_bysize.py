@@ -16,10 +16,12 @@ Changelog
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 BASEURL = "https://www.spc.noaa.gov/products/md"
@@ -28,24 +30,33 @@ BASEURL = "https://www.spc.noaa.gov/products/md"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="Optional JSON(P) callback.")
-    count: int = Field(
-        default=10,
-        description="Number of results to return.",
-        ge=1,
-        le=1000,
-    )
-    sort: str = Field(
-        default="desc",
-        description="how to sort the results,",
-        pattern="^(asc|desc|ASC|DESC)$",
-    )
+    callback: Annotated[
+        str | None, Field(description="Optional JSON(P) callback.")
+    ] = None
+    count: Annotated[
+        int,
+        Field(
+            description="Number of results to return.",
+            ge=1,
+            le=1000,
+        ),
+    ] = 10
+    sort: Annotated[
+        str,
+        Field(
+            description="how to sort the results,",
+            pattern="^(asc|desc|ASC|DESC)$",
+        ),
+    ] = "desc"
 
 
 def dowork(count, sort):
     """Actually do stuff"""
 
-    data = dict(mcds=[])
+    data = {
+        "mcds": [],
+        "generated_at": utc().format(ISO8601),
+    }
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
             sql_helper(

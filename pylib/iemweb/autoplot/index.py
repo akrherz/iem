@@ -467,16 +467,16 @@ def dat_handler(fdict, res):
     res["pltvars"].append(f"datglobalid:{gid}")
     # Query DAT for the list of events
     ss = '<select name="datglobalid">\n'
+    sts = datetime.strptime(dt, "%Y/%m/%d").replace(tzinfo=ZoneInfo("UTC"))
+    ets = sts + timedelta(hours=36)
+    url = (
+        "https://services.dat.noaa.gov/arcgis/rest/services/"
+        "nws_damageassessmenttoolkit/DamageViewer/FeatureServer/1/query?"
+        "f=json&returnGeometry=false&outFields=*&"
+        "geometryType=esriGeometryPolyline&"
+        f"time={sts:%s}000%2C{ets:%s}000"
+    )
     with httpx.Client() as client:
-        sts = datetime.strptime(dt, "%Y/%m/%d").replace(tzinfo=ZoneInfo("UTC"))
-        ets = sts + timedelta(hours=36)
-        url = (
-            "https://services.dat.noaa.gov/arcgis/rest/services/"
-            "nws_damageassessmenttoolkit/DamageViewer/FeatureServer/1/query?"
-            "f=json&returnGeometry=false&outFields=*&"
-            "geometryType=esriGeometryPolyline&"
-            f"time={sts:%s}000%2C{ets:%s}000"
-        )
         datjson = client.get(url, timeout=30).json()
         for feat in datjson["features"]:
             _globalid = feat["attributes"]["globalid"]
