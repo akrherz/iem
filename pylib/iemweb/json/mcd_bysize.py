@@ -55,7 +55,7 @@ def dowork(count, sort):
 
     data = {
         "mcds": [],
-        "generated_at": utc().format(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
     }
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
