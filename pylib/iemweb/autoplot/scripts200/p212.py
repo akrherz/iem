@@ -108,7 +108,7 @@ def get_description():
     return desc
 
 
-def get_data(ctx):
+def get_data(ctx: dict):
     """Get the data for what was choosen."""
     station = ctx["station"]
     if station not in ctx["_nt"].sts:  # This is needed.
@@ -229,7 +229,7 @@ def get_highcharts(ctx: dict) -> str:
     """Make highcharts output."""
     get_data(ctx)
     df = ctx["df"]
-    df["ticks"] = df["utc_valid"].astype("int64") // 1e6
+    df["ticks"] = df["utc_valid"].astype("int64") // 1e3
     units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
     myyearcol = f"{ctx['var']}_{ctx['year']}"
     title = ctx["title"].replace("\n", "\\n")
@@ -257,7 +257,16 @@ Highcharts.chart("{containername}", {{
             }}
         }},
         xAxis: {{
-            type: 'datetime'
+            type: 'datetime',
+            labels: {{
+                format: '{{value:%b %d}}'
+            }},
+            dateTimeLabelFormats: {{
+                day: '%b %d',
+                week: '%b %d',
+                month: '%b %d',
+                year: '%b %d'
+            }}
         }},
         yAxis: {{
             title: {{
@@ -310,7 +319,7 @@ Highcharts.chart("{containername}", {{
                 zIndex: 0,
                 tooltip: {{
                     pointFormatter: function() {{
-                        var s = '<span style="color:' + this.color +
+                        const s = '<span style="color:' + this.color +
                             '">\u25cf</span> '+
                             this.series.name + ': <b>' + this.low + ' (' +
                             min_years[this.index] +') to ' + this.high + ' ('+
