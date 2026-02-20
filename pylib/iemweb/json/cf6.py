@@ -47,7 +47,13 @@ class Schema(CGIModel):
         ),
     ] = "json"
     station: Annotated[
-        str, Field(description="The station identifier", max_length=4)
+        str,
+        Field(
+            description="The station identifier",
+            pattern="^[A-Z0-9]{4}$",
+            max_length=4,
+            min_length=4,
+        ),
     ] = "KDSM"
     year: Annotated[int, Field(description="The year of interest")] = 2019
 

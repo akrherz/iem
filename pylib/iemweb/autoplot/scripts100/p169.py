@@ -26,7 +26,7 @@ flakey.</p>
 plot, but only considers a calendar day.</p>
 """
 
-from datetime import date, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -109,6 +109,15 @@ def get_description():
             label="How to compute change over given time window:",
             options=PDICT,
         ),
+        {
+            "type": "year",
+            "name": "syear",
+            "default": 1900,
+            "min": 1900,
+            "label": (
+                "Exclude data prior to year (some sites have sus pre 1950)"
+            ),
+        },
     ]
     return desc
 
@@ -144,9 +153,6 @@ def plotter(ctx: dict):
     months = month2months(month)
 
     tzname = ctx["_nt"].sts[station]["tzname"]
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -154,7 +160,7 @@ def plotter(ctx: dict):
                 """
             SELECT valid at time zone 'UTC' as utc_valid, {varname}
             from alldata where station = :station
-            and {varname} is not null
+            and {varname} is not null and valid >= :sts
             ORDER by valid desc
         """,
                 varname=varname,
@@ -162,6 +168,7 @@ def plotter(ctx: dict):
             conn,
             params={
                 "station": station,
+                "sts": datetime(ctx["syear"], 1, 1),
             },
             index_col="utc_valid",
         )
@@ -217,7 +224,8 @@ def plotter(ctx: dict):
     hlabel = "Over Exactly" if ctx["how"] == "exact" else "Within"
     title = (
         f"{ctx['_sname']}:: Top 10 {PDICT2[varname]} {MDICT[mydir]}\n"
-        f"{hlabel} {hours} Hour Period ({ab.year}-{date.today().year}) "
+        f"{hlabel} {hours} Hour Period ({df.index[-1]:%Y-%m-%d}-"
+        f"{df.index[0]:%Y-%m-%d}) "
         f"[{MDICT2[month]}]"
     )
     fig = figure(title=title, apctx=ctx)

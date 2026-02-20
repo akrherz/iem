@@ -233,7 +233,7 @@ def ugc_select(state: str, ugc: str) -> str:
 def ugc_handler(name, value, fdict):
     """Handle selection of UGCs."""
     privfield = f"_{name}_state"
-    state = fdict.get(privfield, "IA")
+    state = fdict.get(privfield, "IA")[:2]
     state_select = make_select(
         privfield, state, state_names, jscallback="onNetworkChange"
     )
