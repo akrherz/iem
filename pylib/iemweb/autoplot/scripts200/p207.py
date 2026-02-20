@@ -10,7 +10,7 @@ presents a number of tunables including:
     it is good to attempt to add zeros in to keep the reports from bleeding
     into areas that did not receive snow.</li>
     <li>You can pick which
-    <a href="{SCIPY}">SciPy.interpolate.Rbf</a>
+    <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Rbf.html">SciPy.interpolate.Rbf</a>
     function to use.  The radius in the function shown equals the grid cell
     size used for the analysis.</li>
     <li>You can optionally include any NWS COOP reports that were processed
@@ -18,7 +18,7 @@ presents a number of tunables including:
 </ul>
 
 <br /><br />If you download the data for this analysis, there is a column
-called <code>{USEME}</code> which denotes if the report was used to
+called <code>used_for_analysis</code> which denotes if the report was used to
 create the grid analysis.  There is a primative quality control routine
 that attempts to omit too low of reports.
 
@@ -39,17 +39,16 @@ from pyiem.reference import EPSG
 from pyiem.util import logger
 from pyproj import Transformer
 from scipy.interpolate import Rbf
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point
 
 LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
 T2163_4326 = Transformer.from_proj(2163, 4326, always_xy=True)
 USEME = "used_for_analysis"
-SCIPY = (
-    "https://docs.scipy.org/doc/scipy/reference/generated/"
-    "scipy.interpolate.Rbf.html"
-)
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State / Regional Sector / CONUS",
+}
 PDICT2 = {
     "multiquadric": "multiquadraic sqrt((r/self.epsilon)**2 + 1)",
     "inverse": "inverse 1.0/sqrt((r/self.epsilon)**2 + 1)",
@@ -172,6 +171,17 @@ def get_description():
             default="yes",
             name="z",
         ),
+        {
+            "type": "int",
+            "default": 3,
+            "name": "zr",
+            "ge": 1,
+            "le": 10,
+            "label": (
+                "If attempting to insert zeros, how many grid cells away"
+                "should they be from an observed point? (integer)",
+            ),
+        },
         {
             "type": "select",
             "name": "pz",
@@ -371,35 +381,51 @@ def compute_grid_bounds(ctx, csector):
     ]
 
 
-def add_zeros(df, ctx):
+def add_zeros(df: pd.DataFrame, ctx: dict):
     """Add values of zero where we believe appropriate."""
     cellsize = ctx["sz"] * 1000.0
+    if ctx["zr"] < 1 or ctx["zr"] > 10:
+        raise NoDataFound(
+            "Invalid number of grid cells for zero insertion, "
+            "must be between 1 and 10"
+        )
     newrows = []
     if ctx["z"] in ["yes", "plot"]:
-        # loop over the grid looking for spots to add a zero
-        for y in np.arange(
-            ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize * 3
-        ):
-            for x in np.arange(
-                ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize * 3
-            ):
-                # search a 2x radius for any obs
-                poly = Polygon(
-                    [
-                        [x - cellsize * 1.5, y - cellsize * 1.5],
-                        [x - cellsize * 1.5, y + cellsize * 1.5],
-                        [x + cellsize * 1.5, y + cellsize * 1.5],
-                        [x + cellsize * 1.5, y - cellsize * 1.5],
-                    ]
+        xvals = np.arange(
+            ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize * ctx["zr"]
+        )
+        yvals = np.arange(
+            ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize * ctx["zr"]
+        )
+        grid_points = [(x, y) for y in yvals for x in xvals]
+        if grid_points:
+            cands = pd.DataFrame(grid_points, columns=["x", "y"])
+            cand_gdf = gpd.GeoDataFrame(
+                cands,
+                geometry=gpd.points_from_xy(cands["x"], cands["y"]),
+                crs=EPSG[2163],
+            )
+
+            has_obs = np.zeros(len(cand_gdf.index), dtype=bool)
+            if not df.empty:
+                point_gdf = gpd.GeoDataFrame(
+                    df[["geo"]].copy(),
+                    geometry="geo",
+                    crs=EPSG[2163],
                 )
-                df2 = df[df["geo"].within(poly)]
-                if not df2.empty:
-                    continue
-                # Add a zero at this "point"
-                (lon, lat) = T2163_4326.transform(x, y)
+                joined = gpd.sjoin_nearest(
+                    cand_gdf,
+                    point_gdf,
+                    how="left",
+                    max_distance=cellsize * 1.5,
+                )
+                has_obs = joined["index_right"].notna().to_numpy()
+
+            for _, row in cand_gdf.loc[~has_obs, ["x", "y"]].iterrows():
+                (lon, lat) = T2163_4326.transform(row["x"], row["y"])
                 newrows.append(
                     {
-                        "geo": Point(x, y),
+                        "geo": Point(row["x"], row["y"]),
                         "lon": lon,
                         "lat": lat,
                         "val": 0,
