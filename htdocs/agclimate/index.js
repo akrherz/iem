@@ -10,7 +10,7 @@ let timeChanged = false;
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -54,17 +54,17 @@ function logic() {
 function updateTitle() {
     const selectedOption = document.querySelector('#varpicker option:checked');
     const maptitleDiv = document.getElementById('maptitle');
-    
+
     if (maptitleDiv && selectedOption) {
         // Find the specific text element within the maptitle structure
         const textDiv = maptitleDiv.querySelector('.small');
         if (textDiv) {
             // Format the datetime for display
-            const options = { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric', 
-                hour: '2-digit', 
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
                 minute: '2-digit',
                 timeZoneName: 'short'
             };
@@ -98,7 +98,7 @@ function updateMap() {
         })
         );
         invgj.setSource(new ol.source.Vector({
-            url: `/geojson/agclimate.py?inversion&${uristamp}`,
+            url: `/geojson/agclimate.py?inversion=1&${uristamp}`,
             format: new ol.format.GeoJSON()
         })
         );
@@ -151,7 +151,7 @@ function setupMap() {
     invgj = new ol.layer.Vector({
         title: 'ISUSM Inversion Data',
         source: new ol.source.Vector({
-            url: "/geojson/agclimate.py?inversion",
+            url: "/geojson/agclimate.py?inversion=1",
             format: new ol.format.GeoJSON()
         }),
         style(feature) {
@@ -198,7 +198,7 @@ function setupMap() {
         // Clear any existing content
         element.innerHTML = '';
         element.style.display = 'none';
-        
+
         const pixel = map.getEventPixel(evt.originalEvent);
         const feature = map.forEachFeatureAtPixel(pixel, (feature2) => {
             return feature2;
@@ -232,7 +232,7 @@ function setupMap() {
 
     dtpicker = document.getElementById('datetimepicker');
     dtpicker.addEventListener('change', logic);
-    
+
     // Set min and max dates for the datetime picker
     const minDate = new Date(2013, 1, 1, 0, 0);
     const maxDate = new Date();
@@ -255,7 +255,7 @@ function setupMap() {
             updateURL();
             return;
         }
-        
+
         // Check for URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('var')) {
@@ -284,7 +284,7 @@ function setDate() {
         const day = String(currentdt.getDate()).padStart(2, '0');
         const hours = String(currentdt.getHours()).padStart(2, '0');
         const minutes = String(currentdt.getMinutes()).padStart(2, '0');
-        
+
         dtpicker.value = `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 }

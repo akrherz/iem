@@ -57,9 +57,10 @@ def test_autoplot_calls_via_frontend(apid: str):
         fmts.append("geojson")
     for fmt in fmts:
         c = Client(autoplot_app)
-        res = c.get(f"?p={apid}&fmt={fmt}&cb=1")
+        res = c.get(f"?p={apid}&fmt={fmt}&q=_cb:1")
         # Crude check that numpy arrays are not being str rendered
         if fmt == "js":
+            print(res.text)
             assert res.text.find("np.") == -1
         # 400 is Rumsfeld's knowns
         assert res.status_code in [200, 400]

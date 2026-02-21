@@ -5,6 +5,12 @@ Return to `API Services </api/#json>`_
 This service provides access to the ISU Ag Climate Network data in a GeoJSON
 format.
 
+Changelog
+---------
+
+- 2026-02-21: A bug was corrected with the `inversion` parameter.  It is now
+  required to be set to something truthy or not set at all.
+
 Example Requests
 ----------------
 
@@ -21,6 +27,7 @@ https://mesonet.agron.iastate.edu/geojson/agclimate.py\
 
 import json
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 from metpy.units import units
 from pydantic import Field
@@ -39,12 +46,16 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    dt: str = Field(
-        None,
-        description="ISO8601 timestamp",
-        pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}",
-    )
-    inversion: str = Field(None, description="Set to 1 to get inversion data")
+    dt: Annotated[
+        str | None,
+        Field(
+            description="ISO8601 timestamp",
+            pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}",
+        ),
+    ] = None
+    inversion: Annotated[
+        bool, Field(description="Set to 1 to get inversion data")
+    ] = False
 
 
 def thi(row):
@@ -339,7 +350,7 @@ def application(environ, start_response):
     else:
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
         ts = datetime.strptime(dt, fmt).replace(tzinfo=timezone.utc)
-    func = get_data if environ["inversion"] is None else get_inversion_data
+    func = get_data if not environ["inversion"] else get_inversion_data
     with get_sqlalchemy_conn("isuag") as conn:
         data = func(conn, ts)
 
