@@ -419,7 +419,12 @@ def add_zeros(df: pd.DataFrame, ctx: dict):
                     how="left",
                     max_distance=cellsize * 1.5,
                 )
-                has_obs = joined["index_right"].notna().to_numpy()
+                has_obs = (
+                    joined.groupby(level=0)["index_right"]
+                    .apply(lambda col: col.notna().any())
+                    .reindex(cand_gdf.index, fill_value=False)
+                    .to_numpy()
+                )
 
             for _, row in cand_gdf.loc[~has_obs, ["x", "y"]].iterrows():
                 (lon, lat) = T2163_4326.transform(row["x"], row["y"])

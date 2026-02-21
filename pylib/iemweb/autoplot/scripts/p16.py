@@ -21,6 +21,9 @@ from iemweb.util import month2months
 
 PDICT = {
     "ts": "Thunderstorm (TS) Reported",
+    "ra": "Rain (RA) Reported",
+    "sn": "Snow (SN) Reported",
+    "p01i": "Measurable Precipitation Reported",
     "tmpf_above": "Temperature At or Above Threshold (°F)",
     "tmpf_below": "Temperature Below Threshold (°F)",
     "dwpf_above": "Dew Point At or Above Threshold (°F)",
@@ -137,7 +140,7 @@ def get_highcharts(ctx: dict) -> str:
     arr = [drct2text(mydir) for mydir in dir_edges]
     containername = ctx["_e"]
     return f"""
-    var arr = {arr};
+    const arr = {arr};
     Highcharts.chart("{containername}", {{
         series: [
         {{
@@ -249,6 +252,15 @@ def add_ctx(ctx):
     if ctx["opt"] == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
         title = f"Air Temp at or above {ctx['threshold']}°F"
+    elif ctx["opt"] == "ra":
+        limiter = "array_to_string(wxcodes, '') ~* 'RA'"
+        title = "Rain (RA) contained in METAR"
+    elif ctx["opt"] == "sn":
+        limiter = "array_to_string(wxcodes, '') ~* 'SN'"
+        title = "Snow (SN) contained in METAR"
+    elif ctx["opt"] == "p01i":
+        limiter = "p01i > 0"
+        title = "Measurable Precipitation Reported"
     elif ctx["opt"] == "tmpf_below":
         limiter = "round(tmpf::numeric,0) < :thres"
         title = f"Air Temp below {ctx['threshold']}°F"
@@ -256,7 +268,7 @@ def add_ctx(ctx):
         limiter = "round(dwpf::numeric,0) < :thres"
         title = f"Dew Point below {ctx['threshold']}°F"
     elif ctx["opt"] == "dwpf_above":
-        limiter = "round(tmpf::numeric,0) >= :thres"
+        limiter = "round(dwpf::numeric,0) >= :thres"
         title = f"Dew Point at or above {ctx['threshold']}°F"
     elif ctx["opt"] == "relh_above":
         limiter = "relh >= :thres"

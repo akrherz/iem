@@ -5,14 +5,14 @@ require_once "../../include/mlib.php";
 force_https();
 
 define("IEM_APPID", 10);
-$OL = "10.6.1";
+$OL = "10.8.0";
 $t = new MyView();
 $t->title = "ISU Soil Moisture Network";
 
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
 <script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
-<script src="index.js?v=3"></script>
+<script src="index.js?v=4"></script>
 EOM;
 
 // Pick a sensible default datetime
@@ -203,7 +203,7 @@ during 2012.
           </div>
         </div>
       </div>
-      
+
       <div class="col-lg-9 col-md-8">
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-light">
@@ -239,7 +239,7 @@ during 2012.
                   </div>
                 </div>
               </div>
-              
+
               <div class="col-md-6">
                 <div class="control-section">
                   <h5 class="mb-3">
@@ -295,7 +295,7 @@ during 2012.
             </span>
           </div>
         </div>
-        
+
         <div id="map" class="mb-4"></div>
         <div id="popup" title="Station Information"></div>
 
@@ -375,7 +375,7 @@ during 2012.
                 </div>
               </div>
             </div>
-            
+
             <div class="mb-4">
               <h6 class="text-primary mb-3">
                 <i class="bi bi-tools me-2"></i>Additional Tools/Apps
@@ -389,7 +389,7 @@ during 2012.
                 </a>
               </div>
             </div>
-            
+
             <div>
               <h6 class="text-primary mb-3">
                 <i class="bi bi-info me-2"></i>Information
@@ -409,7 +409,7 @@ during 2012.
           </div>
         </div>
       </div>
-      
+
       <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-light">
@@ -432,7 +432,7 @@ during 2012.
                   </a>
                 </div>
               </div>
-              
+
               <div class="col-12">
                 <h6 class="text-success mb-3">
                   <i class="bi bi-layers me-2"></i>Soil Plots
@@ -446,7 +446,7 @@ during 2012.
                   </a>
                 </div>
               </div>
-              
+
               <div class="col-12">
                 <h6 class="text-primary mb-3">
                   <i class="bi bi-droplet me-2"></i>Moisture Plots
@@ -463,7 +463,7 @@ during 2012.
                   </a>
                 </div>
               </div>
-              
+
               <div class="col-12">
                 <h6 class="text-warning mb-3">
                   <i class="bi bi-brightness-high me-2"></i>Solar/Wind
