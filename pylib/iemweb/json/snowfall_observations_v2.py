@@ -99,7 +99,7 @@ def dowork(wfo: str) -> list:
     obs = obs.reindex(columns=time_columns)
     obs["Total 48 hr Snow"] = obs.sum(axis=1)
     obs.loc[
-        (0 < obs["Total 48 hr Snow"]) & (obs["Total 48 hr Snow"] < 0.1),
+        (obs["Total 48 hr Snow"] > 0) & (obs["Total 48 hr Snow"] < 0.1),
         "Total 48 hr Snow",
     ] = 0.0001
     # Cleanup trace values
