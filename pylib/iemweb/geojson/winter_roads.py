@@ -12,6 +12,7 @@ https://mesonet.agron.iastate.edu/geojson/winter_roads.geojson
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -24,7 +25,7 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, title="JSONP Callback")
+    callback: Annotated[str | None, Field(description="JSONP Callback")] = None
 
 
 @with_sqlalchemy_conn("postgis")

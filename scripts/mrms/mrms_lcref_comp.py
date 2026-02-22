@@ -14,8 +14,8 @@ from datetime import datetime, timedelta, timezone
 import click
 import numpy as np
 import pygrib
-import pyiem.mrms as mrms
 from PIL import Image
+from pyiem import mrms
 from pyiem.reference import ISO8601
 from pyiem.util import archive_fetch, logger, utc
 
