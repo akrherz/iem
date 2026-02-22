@@ -98,6 +98,10 @@ def dowork(wfo: str) -> list:
     # Reindex columns to preserve chronological order
     obs = obs.reindex(columns=time_columns)
     obs["Total 48 hr Snow"] = obs.sum(axis=1)
+    obs.loc[
+        (0 < obs["Total 48 hr Snow"]) & (obs["Total 48 hr Snow"] < 0.1),
+        "Total 48 hr Snow",
+    ] = 0.0001
     # Cleanup trace values
     obs = obs.replace({0.0001: "T"})
     # Represent all values as a string with at most 1 decimal
