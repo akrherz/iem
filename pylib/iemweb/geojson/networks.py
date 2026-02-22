@@ -14,11 +14,12 @@ Example Usage
 
 Request the GeoJSON representation of the IEM Networks:
 
-https://mesonet.agron.iastate.edu/geojson/network.py
+https://mesonet.agron.iastate.edu/geojson/networks.py
 
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -31,7 +32,9 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function")
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function")
+    ] = None
 
 
 @with_sqlalchemy_conn("mesosite")

@@ -10,7 +10,7 @@ $t->headextra = <<<EOM
 <link href="obhour.css" rel="stylesheet">
 EOM;
 $t->jsextra = <<<EOM
-<script src="obhour.module.js?v=2" type="module"></script>
+<script src="obhour.module.js?v=3" type="module"></script>
 EOM;
 
 $t->title = "Hourly Precip Accumulator";
@@ -25,14 +25,14 @@ $t->content = <<<EOM
                     <li class="breadcrumb-item active" aria-current="page">Hourly Precipitation Accumulator</li>
                 </ol>
             </nav>
-            
+
             <div class="d-flex align-items-center mb-3">
                 <h2 class="mb-0 me-3">
                     <i class="bi bi-cloud-rain-fill text-primary me-2"></i>
                     Hourly Precipitation Accumulator
                 </h2>
             </div>
-            
+
             <div class="alert alert-info d-flex align-items-start mb-4">
                 <i class="bi bi-info-circle-fill me-2 flex-shrink-0" style="font-size: 1.2rem;"></i>
                 <div>
@@ -62,14 +62,14 @@ $t->content = <<<EOM
                             <option value="">Select a Network...</option>
                         </select>
                     </div>
-                    
+
                     <div class="col-lg-2">
                         <label for="date-select" class="form-label fw-medium">
                             <i class="bi bi-calendar3 me-1"></i>Date
                         </label>
                         <input type="date" id="date-select" name="date" class="form-control">
                     </div>
-                    
+
                     <div class="col-lg-2">
                         <label for="time-select" class="form-label fw-medium">
                             <i class="bi bi-clock me-1"></i>Time
@@ -77,7 +77,7 @@ $t->content = <<<EOM
                         <select id="time-select" name="time" class="form-select">
                         </select>
                     </div>
-                    
+
                     <div class="col-lg-2">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="auto-refresh">
@@ -86,7 +86,7 @@ $t->content = <<<EOM
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="col-lg-3">
                         <button type="submit" class="btn btn-primary btn-lg w-100">
                             <i class="bi bi-download me-2"></i>Load Data

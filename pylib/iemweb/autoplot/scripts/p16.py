@@ -24,6 +24,7 @@ PDICT = {
     "ra": "Rain (RA) Reported",
     "sn": "Snow (SN) Reported",
     "p01i": "Measurable Precipitation Reported",
+    "p01i_above": "Precipitation Above Threshold (inch)",
     "tmpf_above": "Temperature At or Above Threshold (°F)",
     "tmpf_below": "Temperature Below Threshold (°F)",
     "dwpf_above": "Dew Point At or Above Threshold (°F)",
@@ -101,7 +102,7 @@ def get_description():
             options=PDICT,
         ),
         dict(
-            type="int",
+            type="float",
             name="threshold",
             default=80,
             label="Threshold (when appropriate):",
@@ -276,6 +277,9 @@ def add_ctx(ctx):
     elif ctx["opt"] == "relh_below":
         limiter = "relh < :thres"
         title = f"Relative Humidity below {ctx['threshold']}%"
+    elif ctx["opt"] == "p01i_above":
+        limiter = "p01i > :thres"
+        title = f"Precipitation Above {ctx['threshold']} inches"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
             sql_helper(

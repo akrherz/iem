@@ -6,6 +6,8 @@ interface.
 """
 
 import json
+from contextlib import suppress
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -19,7 +21,9 @@ from iemweb.autoplot import import_script
 class Schema(CGIModel):
     """See how we are called."""
 
-    p: int = Field(default=0, description="The autoplot index", ge=0, le=1000)
+    p: Annotated[
+        int, Field(description="The autoplot index", ge=0, le=1000)
+    ] = 0
 
 
 def get_timing(pidx: int) -> float:
@@ -50,10 +54,9 @@ def get_metadict(pidx: int) -> dict:
     if pidx == 0:
         data = autoplot_data
     else:
-        try:
+        timing = -1
+        with suppress(Exception):
             timing = get_timing(pidx)
-        except Exception:
-            timing = -1
         mod = import_script(pidx)
         data = mod.get_description()
         data["title"] = find_title(pidx)

@@ -33,6 +33,7 @@ sts=2024-08-10T06:00:00Z&ets=2024-08-10T12:00:00Z
 
 import json
 from datetime import timedelta
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -45,19 +46,27 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="JSONP callback function")
-    at: AwareDatetime = Field(
-        default=None,
-        description="SIGMETs valid at given time, in ISO8601 format",
-    )
-    ets: AwareDatetime = Field(
-        default=None,
-        description="SIGMETs valid before time, in ISO8601 format",
-    )
-    sts: AwareDatetime = Field(
-        default=None,
-        description="SIGMETs valid after time, in ISO8601 format",
-    )
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function")
+    ] = None
+    at: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="SIGMETs valid at given time, in ISO8601 format",
+        ),
+    ] = None
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="SIGMETs valid before time, in ISO8601 format",
+        ),
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="SIGMETs valid after time, in ISO8601 format",
+        ),
+    ] = None
 
     @model_validator(mode="after")
     def validate_time(self):

@@ -22,6 +22,7 @@ https://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py\
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -33,16 +34,18 @@ from sqlalchemy import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, title="JSONP Callback")
-    day: int = Field(default=1, ge=1, le=31)
-    month: int = Field(default=1, ge=1, le=12)
-    syear: int = Field(default=1800, ge=1800, le=2050)
-    eyear: int = Field(default=datetime.now().year + 1, ge=1800, le=2050)
-    network: str = Field(
-        default="IACLIMATE",
-        title="Network Identifier",
-        pattern="^[A-Z][A-Z]CLIMATE$",
-    )
+    callback: Annotated[str | None, Field(title="JSONP Callback")] = None
+    day: Annotated[int, Field(ge=1, le=31)] = 1
+    month: Annotated[int, Field(ge=1, le=12)] = 1
+    syear: Annotated[int, Field(ge=1800, le=2050)] = 1800
+    eyear: Annotated[int, Field(ge=1800, le=2050)] = datetime.now().year + 1
+    network: Annotated[
+        str,
+        Field(
+            title="Network Identifier",
+            pattern="^[A-Z][A-Z]CLIMATE$",
+        ),
+    ] = "IACLIMATE"
 
 
 def run(conn: Connection, network, month, day, syear, eyear):

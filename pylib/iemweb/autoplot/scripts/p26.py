@@ -7,6 +7,7 @@ is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot.
 """
 
 import calendar
+from contextlib import suppress
 from datetime import date, datetime, timedelta
 
 import numpy as np
@@ -171,78 +172,58 @@ def get_highcharts(ctx: dict) -> str:
     mean = ctx["df"][["dates", "avg"]].to_json(
         orient="values", date_format="iso"
     )
-    try:
+    thisyear = "[]"
+    with suppress(Exception):
         thisyear = ctx["df"][["dates", "thisyear"]].to_json(
             orient="values", date_format="iso"
         )
-    except Exception:
-        thisyear = "[]"
     containername = ctx["_e"]
-    return (
-        """
-Highcharts.chart('"""
-        + containername
-        + """', {
-    title: {text: '"""
-        + ctx["title"].replace("\n", " ")
-        + """'},
-    tooltip: {shared: true,
-        xDateFormat: '%B %d'},
-    xAxis: {type: 'datetime',
-        dateTimeLabelFormats: {
+    title = ctx["title"].replace("\n", " ")
+    return f"""
+Highcharts.chart('{containername}', {{
+    title: {{text: '{title}'}},
+    tooltip: {{shared: true,
+        xDateFormat: '%B %d'}},
+    xAxis: {{type: 'datetime',
+        dateTimeLabelFormats: {{
             day: '%b %e',
             week: '%b %e',
-            month: '%b %e'}},
-    yAxis: {title: {text: '"""
-        + ctx["ylabel"]
-        + """'}},
-    series: [{
+            month: '%b %e'}}}},
+    yAxis: {{title: {{text: '{ctx["ylabel"]}'}}}},
+    series: [{{
         name: 'Range',
         type: 'arearange',
         color: 'pink',
-        tooltip: {valueDecimals: 0},
-        data: """
-        + rng
-        + """
-    },{
+        tooltip: {{valueDecimals: 0}},
+        data: {rng}
+    }},{{
         name: '95th',
         type: 'arearange',
         color: 'tan',
-        tooltip: {valueDecimals: 2},
-        data: """
-        + p95
-        + """
-    },{
+        tooltip: {{valueDecimals: 2}},
+        data: {p95}
+    }},{{
         name: '50th',
         type: 'arearange',
         color: 'gold',
-        tooltip: {valueDecimals: 2},
-        data: """
-        + p50
-        + """
-    },{
+        tooltip: {{valueDecimals: 2}},
+        data: {p50}
+    }},{{
         name: 'Average',
         type: 'line',
         color: 'black',
-        tooltip: {valueDecimals: 2},
-        data: """
-        + mean
-        + """
-    },{
-        name: '"""
-        + str(ctx["year"])
-        + """',
+        tooltip: {{valueDecimals: 2}},
+        data: {mean}
+    }},{{
+        name: '{ctx["year"]}',
         type: 'line',
         color: 'blue',
-        tooltip: {valueDecimals: 0},
-        shadow: {'color': 'white'},
-        data: """
-        + thisyear
-        + """
-    }]
-});
+        tooltip: {{valueDecimals: 0}},
+        shadow: {{'color': 'white'}},
+        data: {thisyear}
+    }}]
+}});
     """
-    )
 
 
 def plotter(ctx: dict):
