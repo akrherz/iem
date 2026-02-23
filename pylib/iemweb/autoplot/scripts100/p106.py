@@ -11,15 +11,16 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot import ARG_ZSTATION
 from iemweb.util import month2months
 
 PDICT = {
-    "tmpf_above": "Temperature At or Above Threshold (F)",
-    "tmpf_below": "Temperature Below Threshold (F)",
-    "dwpf_above": "Dew Point At or Above Threshold (F)",
-    "dwpf_below": "Dew Point Below Threshold (F)",
-    "feel_above": "Feels Like Temperature At or Above Threshold (F)",
-    "feel_below": "Feels Like Temperature Below Threshold (F)",
+    "tmpf_above": "Temperature At or Above Threshold (°F)",
+    "tmpf_below": "Temperature Below Threshold (°F)",
+    "dwpf_above": "Dew Point At or Above Threshold (°F)",
+    "dwpf_below": "Dew Point Below Threshold (°F)",
+    "feel_above": "Feels Like Temperature At or Above Threshold (°F)",
+    "feel_below": "Feels Like Temperature Below Threshold (°F)",
     "relh_above": "Relative Humidity At or Above Threshold (%)",
     "relh_below": "Relative Humidity Below Threshold (%)",
     "sknt_above": "Wind Speed At or Above Threshold (kts)",
@@ -32,9 +33,9 @@ PDICT = {
     "p01i_below": "Hourly Precipitation Below Threshold (in)",
 }
 PDICT2 = {
-    "tmpf": "Air Temperature (F)",
-    "dwpf": "Dew Point (F)",
-    "feel": "Feels Like Temperature (F)",
+    "tmpf": "Air Temperature (°F)",
+    "dwpf": "Dew Point (°F)",
+    "feel": "Feels Like Temperature (°F)",
     "relh": "Relative Humidity (%)",
     "sknt": "Wind Speed (kts)",
     "alti": "Pressure Altimeter (in)",
@@ -67,13 +68,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
+        ARG_ZSTATION,
         {
             "type": "select",
             "name": "var",
@@ -106,7 +101,7 @@ def get_description():
             type="float",
             name="threshold",
             default="80",
-            label="Threshold (F,knot,%,mile,inch):",
+            label="Threshold (°F,knot,%,mile,inch):",
         ),
     ]
     return desc
