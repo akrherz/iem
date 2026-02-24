@@ -174,7 +174,7 @@ def get_df(table, product_id):
 def plotter(ctx: dict):
     """Go"""
     product_id = ctx["pid"]
-    if len(product_id) < 32:
+    if len(product_id) < 28:  # arb
         raise NoDataFound("Invalid product identifier")
     # Can we find data?
     df = get_df(f"lsrs_{product_id[:4]}", product_id)
