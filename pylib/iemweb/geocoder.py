@@ -13,7 +13,9 @@ https://mesonet.agron.iastate.edu/cgi-bin/geocoder.py\
 
 """
 
-import httpx
+from typing import Annotated
+
+import requests
 from pydantic import Field, model_validator
 from pyiem.webutil import CGIModel, iemapp
 
@@ -21,9 +23,15 @@ SERVICE = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
 
 
 class MyModel(CGIModel):
-    address: str = Field(default=None, description="Street address to geocode")
-    city: str = Field(default=None, description="City name to geocode")
-    street: str = Field(default=None, description="Street name to geocode")
+    address: Annotated[
+        str | None, Field(description="Street address to geocode")
+    ] = None
+    city: Annotated[str | None, Field(description="City name to geocode")] = (
+        None
+    )
+    street: Annotated[
+        str | None, Field(description="Street name to geocode")
+    ] = None
 
     @model_validator(mode="after")
     def validate_request(self):
@@ -42,7 +50,7 @@ def geocode(address: str) -> tuple[float | None, float | None]:
         "format": "json",
     }
     try:
-        resp = httpx.get(SERVICE, params=params, timeout=10)
+        resp = requests.get(SERVICE, params=params, timeout=10)
         resp.raise_for_status()
         data = resp.json()
         matches = data.get("result", {}).get("addressMatches", [])
