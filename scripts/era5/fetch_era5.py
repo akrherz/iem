@@ -37,7 +37,7 @@ VERBATIM = {
 warnings.simplefilter("ignore", RuntimeWarning)
 
 
-def ingest(ncin: Dataset, nc: Dataset, valid, domain):
+def ingest(ncin: Dataset, nc: Dataset, valid: datetime, domain: str):
     """Consume this grib file."""
     # The grid delta and grid points are hopefully the same, we just need to
     # figure out where they are.
@@ -67,17 +67,18 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
         i0 = islices[0].stop - islices[0].start
         islices_out = [slice(0, i0), slice(i0 + 1, None)]
 
-    LOG.debug(
-        "domain: %s islices[%s]: %s jslice[%s]: %s",
+    tidx = hourly_offset(valid)
+    dd = "" if domain == "conus" else f"_{domain}"
+
+    LOG.info(
+        "domain: %s islices[%s]: %s jslice[%s]: %s tidx: %s",
         domain,
         lon,
         islices,
         lat,
         jslice,
+        tidx,
     )
-
-    tidx = hourly_offset(valid)
-    dd = "" if domain == "conus" else f"_{domain}"
 
     for islice_in, islice_out in zip(islices, islices_out, strict=False):
         for ekey, key in VERBATIM.items():
@@ -119,22 +120,25 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
             tidx0 = hourly_offset(valid - timedelta(hours=24))
             # Special 1 Jan consideration
             if valid.month == 1 and valid.day == 1 and valid.year > 1950:
+                LOG.warning("Running jan1 special tidx0: %s", tidx0)
                 with ncopen(
                     f"/mesonet/data/era5{dd}/"
                     f"{valid.year - 1}_era5land_hourly.nc"
                 ) as nc2:
                     tsolar = (
                         np.sum(
-                            nc2.variables["rsds"][(tidx0 + 1), :, islice_out],
+                            nc2.variables["rsds"][
+                                (tidx0 + 1) :, :, islice_out
+                            ],
                             0,
                         )
                         * 3600.0
                     )
                     tp01m = np.sum(
-                        nc2.variables["p01m"][(tidx0 + 1), :, islice_out], 0
+                        nc2.variables["p01m"][(tidx0 + 1) :, :, islice_out], 0
                     )
                     tevap = np.sum(
-                        nc2.variables["evap"][(tidx0 + 1), :, islice_out], 0
+                        nc2.variables["evap"][(tidx0 + 1) :, :, islice_out], 0
                     )
             else:
                 tsolar = (
@@ -156,7 +160,6 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
         # J m-2 to W/m2
         val = np.flipud(ncin.variables["ssrd"][0, jslice, islice_in])
         newval = (val - tsolar) / 3600.0
-        # Le Sigh, sometimes things are negative, somehow?
         rsds[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
         # m to mm
         val = np.flipud(ncin.variables["e"][0, jslice, islice_in])
@@ -229,7 +232,7 @@ def run(valid: datetime, justdomain: str | None, checkcache: bool):
     for domain in DOMAINS if justdomain is None else [justdomain]:
         dd = "" if domain == "conus" else f"_{domain}"
         ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
-        LOG.info("Running for %s[domain=%s]", valid, domain)
+        LOG.info("Running for %s[domain=%s] %s", valid, domain, ncoutfn)
         with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
             ingest(ncin, nc, valid, domain)
     archive("data_0.nc", valid)
