@@ -1,6 +1,6 @@
 """Copies the appropriate MRMS 24 HR raster for a calendar date.
 
-Run from RUN_MIDNIGHT.sh
+Run from RUN_2AM.sh
 """
 
 import subprocess

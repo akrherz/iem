@@ -1,7 +1,11 @@
 #!/bin/sh
 DD=$(date +%d)
 
-cd isusm
+cd mrms
+# Meh, midnight seemed to be too early for this to run
+python copy_daily_24h.py --date=$(date +'%Y-%m-%d')
+
+cd ../isusm
 bash run_plots.sh
 python backfill_summary.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 python backfill_summary.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
