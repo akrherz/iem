@@ -469,6 +469,8 @@ def get_data(ctx):
     df = pd.concat(dfs)
     # Drop any entries with NaN
     df = df[~pd.isna(df[ctx["var"]])]
+    # Attempt to ensure the column is numeric
+    df[ctx["var"]] = pd.to_numeric(df[ctx["var"]])
     if df.empty:
         raise NoDataFound("All data found to be missing.")
     # Require 90% quorum

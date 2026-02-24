@@ -14,9 +14,10 @@ from zoneinfo import ZoneInfo
 import click
 import httpx
 import wwa
-from pyiem.database import get_dbconnc
+from pyiem.database import get_dbconnc, sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import exponential_backoff, logger, utc
+from sqlalchemy.engine import Connection
 
 LOG = logger()
 REPOS = (
@@ -304,6 +305,55 @@ def send_email(msg):
     smtp.quit()
 
 
+@with_sqlalchemy_conn("iembot")
+def iembot_report(conn: Connection | None = None) -> list[str, str]:
+    """Return on IEMBot stats."""
+    txt = """
+> IEMBot Social Media Posts
+
+IEMBot can be configured to post messages to a number of social media services.
+More details: https://mesonet.agron.iastate.edu/projects/iembot/
+
+Posts yesterday per supported service:
+
+"""
+    html = """
+<h3>IEMBot Social Media Posts</h3>
+
+<p>
+IEMBot can be configured to post messages to a number of social media
+services. More details:
+<a href="https://mesonet.agron.iastate.edu/projects/iembot/">
+IEMBot Homepage</a>.
+</p>
+
+<p>Posts yesterday per supported service:</p>
+<ul>
+"""
+    res = conn.execute(
+        sql_helper("""
+    select service, count(*) from iembot_social_log l JOIN iembot_accounts a
+    on (l.iembot_account_id = a.id) where valid > 'YESTERDAY'
+    and valid < 'TODAY' group by service order by service
+                   """)
+    )
+    labels = {
+        "slack": "Slack",
+        "xmpp": "Weather.IM Jabber Chatrooms",
+        "webhook": "HTTP Webhooks",
+        "atmosphere": "ATMosphere (bluesky only attm)",
+        "mastodon": "Mastodon / Fediverse",
+        "twitter": "Twitter/X",
+    }
+    for row in res.mappings():
+        label = labels.get(row["service"], row["service"])
+        txt += f"  {label}: {row['count']:,}\n"
+        html += f"<li><strong>{label}:</strong> {row['count']:,}</li>\n"
+
+    html += "</ul>"
+    return txt, html
+
+
 @click.command()
 @click.option("--dryrun", is_flag=True, help="Do not send email, just print")
 def main(dryrun: bool):
@@ -346,6 +396,12 @@ def main(dryrun: bool):
         html += h
     except Exception as exp:
         LOG.exception(exp)
+
+    # IEMBot stats
+    t, h = iembot_report()
+    text += t
+    html += h
+
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
     msg.attach(part1)
