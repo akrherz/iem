@@ -62,7 +62,7 @@ class MyModel(CGIModel):
             ge=1,
             le=31,
         ),
-    ] = utc().dat
+    ] = utc().day
     month: Annotated[
         int,
         Field(
