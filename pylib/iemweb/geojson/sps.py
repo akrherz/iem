@@ -29,6 +29,7 @@ https://mesonet.agron.iastate.edu/geojson/sps.py?valid=2024-08-10T20:00:00Z
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -40,14 +41,17 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None, description="JSONP callback function name"
-    )
-    valid: AwareDatetime = Field(
-        default=utc(),
-        ge=utc(1980),
-        description="Optional timestamp to request SPSs for.",
-    )
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    valid: Annotated[
+        AwareDatetime,
+        Field(
+            ge=utc(1980),
+            default_factory=utc,
+            description="Optional timestamp to request SPSs for.",
+        ),
+    ]
 
 
 def run(valid: datetime) -> str:

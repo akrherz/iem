@@ -22,7 +22,7 @@ PDICT = {
     "FG": "Dense Fog Advisory",
     "FW": "Fire Weather Warning",
     "HT": "Heat Advisory / Extreme Heat Warning",
-    "WC": "Wind Chill Advisory/Warning",
+    "WC": "Wind Chill Advisory/Warning / WinterWx",
     "WI": "Wind Advisory / High Wind Warning",
 }
 DOMAIN = {
@@ -31,7 +31,7 @@ DOMAIN = {
     ],
     "FG": ["FG.Y"],
     "FW": ["FW.W"],
-    "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W", "EC.Y", "EC.W"],
+    "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W", "CW.Y", "EC.W"],
     "HT": ["EH.W", "HT.Y", "XH.W"],
     "WI": ["WI.Y", "HW.W"],
 }

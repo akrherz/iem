@@ -23,6 +23,7 @@ import subprocess
 import tempfile
 from calendar import month_abbr
 from datetime import datetime, timedelta
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
@@ -37,37 +38,47 @@ LOG = logging.getLogger(__name__)
 class MyModel(CGIModel):
     """See how we are called."""
 
-    service: str = Field(
-        None,
-        title="Service to use",
-        description="Service to use",
-        pattern="^(5kmffg|rtma)$",
-    )
-    ts: str = Field(
-        None,
-        title="Valid UTC Timestamp",
-        description="Valid UTC Timestamp in YYYYMMDDHHMM format",
-        pattern="^[0-9]{12}$",
-    )
-    day: int = Field(
-        utc().day,
-        title="Day",
-        description="Day of the month",
-        ge=1,
-        le=31,
-    )
-    month: int = Field(
-        utc().month,
-        title="Month",
-        description="Month of the year",
-        ge=1,
-        le=12,
-    )
-    year: int = Field(
-        utc().year,
-        title="Year",
-        description="Year",
-    )
+    service: Annotated[
+        str | None,
+        Field(
+            title="Service to use",
+            description="Service to use",
+            pattern="^(5kmffg|rtma)$",
+        ),
+    ] = None
+    ts: Annotated[
+        str | None,
+        Field(
+            title="Valid UTC Timestamp",
+            description="Valid UTC Timestamp in YYYYMMDDHHMM format",
+            pattern="^[0-9]{12}$",
+        ),
+    ] = None
+    day: Annotated[
+        int,
+        Field(
+            title="Day",
+            description="Day of the month",
+            ge=1,
+            le=31,
+        ),
+    ] = utc().day
+    month: Annotated[
+        int,
+        Field(
+            title="Month",
+            description="Month of the year",
+            ge=1,
+            le=12,
+        ),
+    ] = utc().month
+    year: Annotated[
+        int,
+        Field(
+            title="Year",
+            description="Year",
+        ),
+    ] = utc().year
 
 
 HEADER = """

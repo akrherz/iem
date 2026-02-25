@@ -18,11 +18,7 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 from pyiem.database import get_dbconn
-from pyiem.webutil import CGIModel, iemapp
-
-
-class Schema(CGIModel):
-    """See how we are called."""
+from pyiem.webutil import iemapp
 
 
 def averageTemp(db, hi="high", lo="low"):
@@ -62,8 +58,8 @@ def cdd(db, hi="high", lo="low"):
     return dd
 
 
-@iemapp(help=__doc__, schema=Schema)
-def application(_environ, start_response):
+@iemapp(help=__doc__)
+def application(_environ: dict, start_response: callable):
     """Go Main Go"""
     COOP = get_dbconn("coop")
     ccursor = COOP.cursor()

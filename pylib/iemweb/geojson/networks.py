@@ -7,6 +7,8 @@ This service provides a GeoJSON representation of the IEM Networks.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the `generation_time` root attribute was
+  renamed `generated_at`.
 - 2024-08-20: Initial documentation update
 
 Example Usage
@@ -50,7 +52,7 @@ def run(conn: Connection = None):
     data = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": res.rowcount,
     }
     for row in res.mappings():

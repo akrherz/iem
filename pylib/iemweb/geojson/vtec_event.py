@@ -12,6 +12,8 @@ some additional requested metadata.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the root metadata `generation_time` was
+  renamed `generated_at`.
 - 2024-08-16: Initial documentation update
 
 Example Usage
@@ -41,43 +43,55 @@ https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
 """
 
 from datetime import datetime, timezone
+from typing import Annotated
 
 import simplejson as json
 from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    wfo: str = Field(
-        "MPX",
-        description="3 or 4 character WFO Identifier",
-        min_length=3,
-        max_length=4,
-    )
-    year: int = Field(2015, description="Year of interest")
-    phenomena: str = Field("SV", description="VTEC Phenomena", max_length=2)
-    significance: str = Field(
-        "W", description="VTEC Significance", max_length=1
-    )
-    etn: int = Field(1, description="VTEC Event ID", ge=1, le=9999)
-    sbw: bool = Field(
-        default=False,
-        description=(
-            "Confine result to include the Storm Based Warning polygon"
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    wfo: Annotated[
+        str,
+        Field(
+            description="3 or 4 character WFO Identifier",
+            min_length=3,
+            max_length=4,
         ),
-    )
-    lsrs: bool = Field(
-        default=False,
-        description=(
-            "Provide Local Storm Reports either for the county or "
-            "SBW when sbw=1 is set"
+    ] = "MPX"
+    year: Annotated[int, Field(description="Year of interest")] = 2015
+    phenomena: Annotated[
+        str, Field(description="VTEC Phenomena", max_length=2)
+    ] = "SV"
+    significance: Annotated[
+        str, Field(description="VTEC Significance", max_length=1)
+    ] = "W"
+    etn: Annotated[int, Field(description="VTEC Event ID", ge=1, le=9999)] = 1
+    sbw: Annotated[
+        bool,
+        Field(
+            description=(
+                "Confine result to include the Storm Based Warning polygon"
+            ),
         ),
-    )
+    ] = False
+    lsrs: Annotated[
+        bool,
+        Field(
+            description=(
+                "Provide Local Storm Reports either for the county or "
+                "SBW when sbw=1 is set"
+            ),
+        ),
+    ] = False
 
 
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
@@ -199,7 +213,7 @@ def run(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

@@ -11,6 +11,8 @@ network.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the `generation_time` root attribute was
+  renamed `generated_at`.
 - 2026-01-26: Added `has_attribute` parameter to allow a filtered result to
   those stations with that attribute set.
 - 2024-11-25: Added `network` overload value of `HAS_HML` for sites with HML
@@ -122,7 +124,7 @@ def run(conn, network, only_online: bool, has_attribute: str | None):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
 

@@ -43,6 +43,7 @@ https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=pno
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_dbconnc
@@ -57,21 +58,25 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str | None = Field(
-        default=None,
-        description="JSONP callback function name.",
-        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
-        max_length=64,
-    )
-    q: str = Field(
-        "snowdepth",
-        description=(
-            "The query to perform, one of snowdepth, "
-            "i1, i3, i6, fc, gr, pno, 50, 50A"
+    callback: Annotated[
+        str | None,
+        Field(
+            description="JSONP callback function name.",
+            pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+            max_length=64,
         ),
-        pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A)$",
-    )
-    fmt: str = Field(default="geojson", description="Output format")
+    ] = None
+    q: Annotated[
+        str,
+        Field(
+            description=(
+                "The query to perform, one of snowdepth, "
+                "i1, i3, i6, fc, gr, pno, 50, 50A"
+            ),
+            pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A)$",
+        ),
+    ] = "snowdepth"
+    fmt: Annotated[str, Field(description="Output format")] = "geojson"
 
 
 def trace(val):

@@ -14,6 +14,8 @@ time.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the root `generation_time` attribute was
+  renamed `generated_at`.
 - 2024-07-03: Initial documentation release.
 
 Example Usage
@@ -37,6 +39,7 @@ valid=2024-08-10T05:10:00Z&fmt=csv
 
 import json
 from datetime import datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -52,17 +55,20 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None, description="Optional JSONP callback function name"
-    )
-    fmt: str = Field(
-        default="geojson",
-        description="The format of the output, geojson or csv",
-        pattern="^(geojson|csv)$",
-    )
-    valid: datetime = Field(
-        default=None, description="The timestamp to request data for, in UTC."
-    )
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format of the output, geojson or csv",
+            pattern="^(geojson|csv)$",
+        ),
+    ] = "geojson"
+    valid: Annotated[
+        datetime | None,
+        Field(description="The timestamp to request data for, in UTC."),
+    ] = None
 
 
 @with_sqlalchemy_conn("radar")
@@ -110,7 +116,7 @@ def run(valid, fmt, conn: Connection = None):
         data = {
             "type": "FeatureCollection",
             "features": [],
-            "generation_time": utc().strftime(ISO8601),
+            "generated_at": utc().strftime(ISO8601),
             "count": res.rowcount,
         }
         for i, row in enumerate(res.mappings()):
