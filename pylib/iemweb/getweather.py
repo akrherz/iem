@@ -12,6 +12,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/onsite/birthday/getweather.py\
 
 from datetime import datetime, timedelta
 from io import StringIO
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_dbconn
@@ -22,17 +23,14 @@ from pyiem.webutil import CGIModel, iemapp
 
 nt = NetworkTable("IACLIMATE", only_online=False)
 
-COOP = get_dbconn("coop")
-ccursor = COOP.cursor()
-
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    city: str = Field(..., description="City Code")
-    year: int = Field(..., description="Year")
-    month: int = Field(..., description="Month")
-    day: int = Field(..., description="Day")
+    city: Annotated[str, Field(description="City Code")]
+    year: Annotated[int, Field(description="Year")]
+    month: Annotated[int, Field(description="Month")]
+    day: Annotated[int, Field(description="Day")]
 
 
 def weather_logic(month, high, low, rain, snow):
@@ -77,6 +75,8 @@ def get_values(city, dateStr):
     query_str = """SELECT high, low, precip, snow from alldata_ia
     WHERE station = %s and day = %s """
     args = (city, dateStr)
+    conn = get_dbconn("coop")
+    ccursor = conn.cursor()
     ccursor.execute(query_str, args)
     if ccursor.rowcount == 0:
         raise NoDataFound("No Data Found.")

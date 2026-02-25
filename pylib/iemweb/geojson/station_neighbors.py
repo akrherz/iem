@@ -11,6 +11,8 @@ of the stations that are within a certain distance of the provided station.
 Changelog
 ---------
 
+- 2026-02-14: For IEM consistency, the root attribute `generation_time` was
+  renamed `generated_at`.
 - 2025-03-05: Initial implementation
 
 Example Usage
@@ -24,6 +26,7 @@ station=AMW&network=IA_ASOS&distance=25
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -38,25 +41,31 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str | None = Field(
-        default=None,
-        description="JSONP callback function name",
-        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
-        max_length=64,
-    )
-    network: str = Field(..., description="IEM Network Code", max_length=30)
-    station: str = Field(
-        ..., description="IEM Station Identifier", max_length=30
-    )
-    distance: float = Field(
-        default=25.0,
-        description="Distance in kilometers to search for neighbors",
-        gt=0,
-        le=1000,
-    )
-    only_online: bool = Field(
-        default=False, description="Only include online stations"
-    )
+    callback: Annotated[
+        str | None,
+        Field(
+            description="JSONP callback function name",
+            pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
+            max_length=64,
+        ),
+    ] = None
+    network: Annotated[
+        str, Field(description="IEM Network Code", max_length=30)
+    ]
+    station: Annotated[
+        str, Field(description="IEM Station Identifier", max_length=30)
+    ]
+    distance: Annotated[
+        float,
+        Field(
+            description="Distance in kilometers to search for neighbors",
+            gt=0,
+            le=1000,
+        ),
+    ] = 25.0
+    only_online: Annotated[
+        bool, Field(description="Only include online stations")
+    ] = False
 
 
 def run(conn, environ: dict):
@@ -94,7 +103,7 @@ def run(conn, environ: dict):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
 

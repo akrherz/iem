@@ -12,6 +12,8 @@ The service is designed to be called with a latitude and longitude point.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the `generation_time` root attribute was
+  renamed `generated_at`.
 - 2025-06-29: Initial implementation of WPC Outlook service.
 
 Example Usage
@@ -42,6 +44,7 @@ https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
 import json
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -55,27 +58,38 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    fmt: str = Field(
-        default="json",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(json|excel|csv)$",
-    )
-    callback: str = Field(None, description="JSONP Callback Name")
-    lat: float = Field(
-        42.0, description="Latitude of point in decimal degrees"
-    )
-    lon: float = Field(
-        -95.0, description="Longitude of point in decimal degrees"
-    )
-    last: int = Field(0, description="Limit to last N outlooks, 0 for all")
-    day: int = Field(1, description="Day to query for, 1-8")
-    time: str = Field(
-        None,
-        description=(
-            "Optional specification for a valid timestamp to query outlooks "
-            "for.  This is either a ISO8601 timestamp or 'current' for now."
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format to return data in, json, excel, or csv",
+            pattern="^(json|excel|csv)$",
         ),
-    )
+    ] = "json"
+    callback: Annotated[
+        str | None, Field(description="JSONP Callback Name")
+    ] = None
+    lat: Annotated[
+        float, Field(description="Latitude of point in decimal degrees")
+    ] = 42.0
+    lon: Annotated[
+        float, Field(description="Longitude of point in decimal degrees")
+    ] = -95.0
+    last: Annotated[
+        int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
+    ] = 0
+    day: Annotated[
+        int, Field(description="Day to query for, 1-8", ge=1, le=8)
+    ] = 1
+    time: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional specification for a valid timestamp to query "
+                "outlooks for.  "
+                "This is either a ISO8601 timestamp or 'current' for now."
+            ),
+        ),
+    ] = None
 
 
 def get_order(threshold):
@@ -165,7 +179,7 @@ def dowork(lon, lat, day) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     time = environ.get("time")
     fmt = environ["fmt"]
@@ -183,7 +197,7 @@ def application(environ, start_response):
 
     if fmt == "json" and time is not None:
         res = {
-            "generation_time": utc().strftime(ISO8601),
+            "generated_at": utc().strftime(ISO8601),
             "query_params": {
                 "time": ts.strftime(ISO8601),
                 "lon": lon,

@@ -13,6 +13,8 @@ for new applications.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the `generation_time` root attribute was
+  renamed `generated_at`.
 - 2025-05-29: Implemented a `states` parameter to limit results to a list of
   given two-letter state identifiers.
 - 2024-12-31: Five additional metadata fields are added with lifetime max
@@ -160,7 +162,7 @@ def run(environ: dict):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
     }
 
     wfo_limiter = ""

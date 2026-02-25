@@ -211,6 +211,8 @@ def plotter(ctx: dict):
             inctitle = " [Only Additive]"
         else:
             df2 = df
+        if df2.empty:
+            raise NoDataFound("Failed to find any data after applying check")
         maxval = int(df2["feel"].max() + 1)
         LEVELS[varname] = np.arange(maxval - 31, maxval)
     elif varname in ["windchill", "tmpf_cold", "dwpf_cold"]:

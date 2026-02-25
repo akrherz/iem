@@ -141,7 +141,7 @@ def main(valid: datetime, realtime: bool):
         "end_valid": (valid + timedelta(minutes=15)).strftime(ISO8601),
         "units": "mm",
         "source": "F" if source == "" else source,  # E, L, F
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
     }
     with open("imerg.json", "w", encoding="utf8") as fp:
         json.dump(metadata, fp)

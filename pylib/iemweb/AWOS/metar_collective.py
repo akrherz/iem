@@ -1,7 +1,7 @@
 """.. title:: Iowa METAR Collective of AWOS Sites
 
 This used to be interesting, but not really any longer as the IEM has no
-special METAR feed anymore.
+special METAR feed.
 
 Usage Examples
 --------------

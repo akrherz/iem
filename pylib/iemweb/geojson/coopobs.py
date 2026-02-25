@@ -10,6 +10,8 @@ This service emits a given date's COOP observations.
 Changelog
 ---------
 
+- 2026-02-24: For IEM consistency, the `generation_time` root attribute was
+  renamed `generated_at`.
 - 2026-01-07: Initial Implementation
 
 Example Requests
@@ -23,6 +25,7 @@ https://mesonet.agron.iastate.edu/geojson/coopobs.py?valid=2024-10-22
 
 import json
 from datetime import date, timezone
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -35,16 +38,20 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None,
-        description="Optional JSONP callback function name",
-    )
-    valid: date = Field(
-        default=date.today(),
-        description="Date to generate data for",
-        ge=date(2000, 1, 1),
-        le=date(date.today().year, 12, 31),
-    )
+    callback: Annotated[
+        str | None,
+        Field(
+            description="Optional JSONP callback function name",
+        ),
+    ] = None
+    valid: Annotated[
+        date,
+        Field(
+            description="Date to generate data for",
+            ge=date(2000, 1, 1),
+            le=date(date.today().year, 12, 31),
+        ),
+    ] = date.today()
 
 
 def p(val, precision=2):
@@ -78,7 +85,7 @@ def run(dt: date, conn: Connection | None = None):
     data = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": res.rowcount,
     }
     for row in res.mappings():
