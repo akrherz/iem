@@ -26,6 +26,7 @@ https://mesonet.agron.iastate.edu/json/cli_audit.py\
 
 from datetime import date as dateobj
 from datetime import datetime, timedelta
+from math import isfinite
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -52,7 +53,13 @@ class Event(BaseModel):
 
     varname: Annotated[str, Field(description="The variable name")]
     source: Annotated[str, Field(description="Source of Event")]
-    value: Annotated[float, Field(description="The value of the event")]
+    value: Annotated[
+        float,
+        Field(
+            description="The value of the event",
+            allow_inf_nan=False,
+        ),
+    ]
     utc_valid: Annotated[
         datetime, Field(description="The UTC valid time of the event")
     ]
@@ -77,6 +84,17 @@ class Schema(CGIModel):
         ),
     ] = "KDSM"
     date: Annotated[dateobj, Field(description="The date of interest")]
+
+
+def as_finite_float(value) -> float | None:
+    """Convert value into finite float, return None when unavailable."""
+    if value in (None, "M"):
+        return None
+    try:
+        fvalue = float(value)
+    except (TypeError, ValueError):
+        return None
+    return fvalue if isfinite(fvalue) else None
 
 
 @with_sqlalchemy_conn("asos")
@@ -116,9 +134,9 @@ def add_metar_events(
     running_high = -999
     running_low = 999
     for row in res.mappings():
-        tmpf = row["tmpf"]
-        max_tmpf_6hr = row["max_tmpf_6hr"]
-        min_tmpf_6hr = row["min_tmpf_6hr"]
+        tmpf = as_finite_float(row["tmpf"])
+        max_tmpf_6hr = as_finite_float(row["max_tmpf_6hr"])
+        min_tmpf_6hr = as_finite_float(row["min_tmpf_6hr"])
         utc_valid = row["utc_valid"].replace(tzinfo=ZoneInfo("UTC"))
         local_valid = utc_valid.astimezone(tzinfo)
         offset = local_valid - sts
@@ -251,30 +269,37 @@ def add_dsm_events(
                     continue
                 high = dsmprod.groupdict.get("high")
                 low = dsmprod.groupdict.get("low")
-                if high is not None and high != "M":
+                high_value = as_finite_float(high)
+                low_value = as_finite_float(low)
+                clean_text = (
+                    row["data"]
+                    .encode("ascii", errors="ignore")
+                    .decode("ascii")
+                )
+                if high_value is not None:
                     events.append(
                         Event(
                             varname="high",
                             source="DSM",
-                            value=float(high),
+                            value=high_value,
                             utc_valid=utc_valid,
                             local_valid=local_valid,
-                            description=f"{row['data']}",
+                            description=clean_text,
                             link=(
                                 "https://mesonet.agron.iastate.edu/"
                                 f"p.php?pid={dsm.get_product_id()}"
                             ),
                         )
                     )
-                if low is not None and low != "M":
+                if low_value is not None:
                     events.append(
                         Event(
                             varname="low",
                             source="DSM",
-                            value=float(low),
+                            value=low_value,
                             utc_valid=utc_valid,
                             local_valid=local_valid,
-                            description=f"{row['data']}",
+                            description=clean_text,
                             link=(
                                 "https://mesonet.agron.iastate.edu/"
                                 f"p.php?pid={dsm.get_product_id()}"
@@ -326,12 +351,14 @@ def add_cli_events(
                 high_time = entry["data"].get("temperature_maximum_time")
                 low = entry["data"].get("temperature_minimum")
                 low_time = entry["data"].get("temperature_minimum_time")
-                if high is not None and high != "M":
+                high_value = as_finite_float(high)
+                low_value = as_finite_float(low)
+                if high_value is not None:
                     events.append(
                         Event(
                             varname="high",
                             source="CLI",
-                            value=float(high),
+                            value=high_value,
                             utc_valid=cli.valid,
                             local_valid=cli.valid.astimezone(tzinfo),
                             description=f"{high} at {high_time}",
@@ -341,12 +368,12 @@ def add_cli_events(
                             ),
                         )
                     )
-                if low is not None and low != "M":
+                if low_value is not None:
                     events.append(
                         Event(
                             varname="low",
                             source="CLI",
-                            value=float(low),
+                            value=low_value,
                             utc_valid=cli.valid,
                             local_valid=cli.valid.astimezone(tzinfo),
                             description=f"{low} at {low_time}",
@@ -399,12 +426,14 @@ def add_cf6_events(
                     continue
                 high = entry.get("max")
                 low = entry.get("min")
-                if high is not None and high != "M":
+                high_value = as_finite_float(high)
+                low_value = as_finite_float(low)
+                if high_value is not None:
                     events.append(
                         Event(
                             varname="high",
                             source="CF6",
-                            value=float(high),
+                            value=high_value,
                             utc_valid=cf6.valid,
                             local_valid=cf6.valid.astimezone(tzinfo),
                             description=f"{high}",
@@ -414,12 +443,12 @@ def add_cf6_events(
                             ),
                         )
                     )
-                if low is not None and low != "M":
+                if low_value is not None:
                     events.append(
                         Event(
                             varname="low",
                             source="CF6",
-                            value=float(low),
+                            value=low_value,
                             utc_valid=cf6.valid,
                             local_valid=cf6.valid.astimezone(tzinfo),
                             description=f"{low}",
