@@ -1,0 +1,32 @@
+.cli-audit-table {
+    table-layout: auto;
+    width: 100%;
+}
+
+.cli-audit-table .cli-valid-cell,
+.cli-audit-table th:nth-child(1) {
+    width: 9.5rem;
+    white-space: nowrap;
+}
+
+.cli-audit-table .cli-source-cell,
+.cli-audit-table th:nth-child(2) {
+    width: 7.5rem;
+}
+
+.cli-audit-table .cli-value-cell,
+.cli-audit-table th:nth-child(3) {
+    width: 5.5rem;
+    white-space: nowrap;
+}
+
+.cli-audit-table .cli-source-cell,
+.cli-audit-table .cli-desc-cell {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.cli-audit-table .cli-desc-cell {
+    max-width: 0;
+}
