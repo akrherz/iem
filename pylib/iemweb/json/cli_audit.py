@@ -122,34 +122,40 @@ def add_metar_events(
         utc_valid = row["utc_valid"].replace(tzinfo=ZoneInfo("UTC"))
         local_valid = utc_valid.astimezone(tzinfo)
         offset = local_valid - sts
-        if max_tmpf_6hr is not None and offset > timedelta(hours=3):
-            if max_tmpf_6hr > running_high:
-                events.append(
-                    Event(
-                        source="METAR max 6hr",
-                        varname="high",
-                        value=max_tmpf_6hr,
-                        utc_valid=utc_valid,
-                        local_valid=local_valid,
-                        description=f"{row['metar']}",
-                        link="",
-                    )
+        if (
+            max_tmpf_6hr is not None
+            and offset > timedelta(hours=3)
+            and max_tmpf_6hr > running_high
+        ):
+            events.append(
+                Event(
+                    source="METAR max 6hr",
+                    varname="high",
+                    value=max_tmpf_6hr,
+                    utc_valid=utc_valid,
+                    local_valid=local_valid,
+                    description=f"{row['metar']}",
+                    link="",
                 )
-                running_high = max_tmpf_6hr
-        if min_tmpf_6hr is not None and offset > timedelta(hours=3):
-            if min_tmpf_6hr < running_low:
-                events.append(
-                    Event(
-                        varname="low",
-                        source="METAR min 6hr",
-                        value=min_tmpf_6hr,
-                        utc_valid=utc_valid,
-                        local_valid=local_valid,
-                        description=f"{row['metar']}",
-                        link="",
-                    )
+            )
+            running_high = max_tmpf_6hr
+        if (
+            min_tmpf_6hr is not None
+            and offset > timedelta(hours=3)
+            and min_tmpf_6hr < running_low
+        ):
+            events.append(
+                Event(
+                    varname="low",
+                    source="METAR min 6hr",
+                    value=min_tmpf_6hr,
+                    utc_valid=utc_valid,
+                    local_valid=local_valid,
+                    description=f"{row['metar']}",
+                    link="",
                 )
-                running_low = min_tmpf_6hr
+            )
+            running_low = min_tmpf_6hr
         if tmpf is not None:
             if tmpf > running_high:
                 events.append(

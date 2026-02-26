@@ -12,12 +12,12 @@ const buildLink = (url, label) => {
     if (!url) {
         return null;
     }
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.textContent = label;
-    return a;
+    const atag = document.createElement('a');
+    atag.href = url;
+    atag.target = '_blank';
+    atag.rel = 'noopener noreferrer';
+    atag.textContent = label;
+    return atag;
 };
 
 const formatLocalValid = value => {
