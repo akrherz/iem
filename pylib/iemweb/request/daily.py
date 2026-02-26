@@ -10,6 +10,11 @@ and some more official totals with some sites reporting explicit values.  One
 should also note that typically the airport stations are for a 24 hour period
 over standard time, which means 1 AM to 1 AM daylight time.
 
+Changelog
+---------
+
+- 2026-02-26: Address issue with non-ASCII characters breaking service (GIGO).
+
 Example Usage
 -------------
 
@@ -33,6 +38,7 @@ var=precip_in,climo_precip_in&format=excel
 import copy
 from datetime import datetime
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -54,40 +60,64 @@ DEFAULT_COLS = (
 
 
 class MyCGI(CGIModel):
-    ets: datetime = Field(None, description="End date to query")
-    format: str = Field("csv", description="The format of the output")
-    na: str = Field("None", description="The NA value to use")
-    network: str = Field(..., description="Network Identifier")
-    station: ListOrCSVType = Field(
-        [],
-        description=(
-            "Comma delimited or multi-param station identifiers, "
-            "_ALL for all stations in network (deprecated)"
+    ets: Annotated[datetime | None, Field(description="End date to query")] = (
+        None
+    )
+    format: Annotated[str, Field(description="The format of the output")] = (
+        "csv"
+    )
+    na: Annotated[str, Field(description="The NA value to use")] = "None"
+    network: Annotated[str, Field(description="Network Identifier")]
+    station: Annotated[
+        ListOrCSVType,
+        Field(
+            description=(
+                "Comma delimited or multi-param station identifiers, _ALL "
+                "for all stations in network (deprecated)"
+            ),
+            default_factory=list,
         ),
-    )
-    stations: ListOrCSVType = Field(
-        [],
-        description=(
-            "Comma delimited or multi-param station identifiers, "
-            "_ALL for all stations in network"
+    ]
+    stations: Annotated[
+        ListOrCSVType,
+        Field(
+            description=(
+                "Comma delimited or multi-param station identifiers, _ALL "
+                "for all stations in network"
+            ),
+            default_factory=list,
         ),
-    )
-    sts: datetime = Field(None, description="Start date to query")
-    var: ListOrCSVType = Field(
-        None,
-        description=(
-            "Comma delimited or multi-param variable names to include in "
-            f"output, columns are: {DEFAULT_COLS}"
+    ]
+    sts: Annotated[
+        datetime | None, Field(description="Start date to query")
+    ] = None
+    var: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description=(
+                "Comma delimited or multi-param variable names to include in "
+                f"output, columns are: {DEFAULT_COLS}"
+            ),
         ),
-    )
-    year1: int = Field(None, description="Start year when sts is not provided")
-    month1: int = Field(
-        None, description="Start month when sts is not provided"
-    )
-    day1: int = Field(None, description="Start day when sts is not provided")
-    year2: int = Field(None, description="End year when ets is not provided")
-    month2: int = Field(None, description="End month when ets is not provided")
-    day2: int = Field(None, description="End day when ets is not provided")
+    ] = None
+    year1: Annotated[
+        int | None, Field(description="Start year when sts is not provided")
+    ] = None
+    month1: Annotated[
+        int | None, Field(description="Start month when sts is not provided")
+    ] = None
+    day1: Annotated[
+        int | None, Field(description="Start day when sts is not provided")
+    ] = None
+    year2: Annotated[
+        int | None, Field(description="End year when ets is not provided")
+    ] = None
+    month2: Annotated[
+        int | None, Field(description="End month when ets is not provided")
+    ] = None
+    day2: Annotated[
+        int | None, Field(description="End day when ets is not provided")
+    ] = None
 
 
 def overloaded(environ: dict):
@@ -232,7 +262,8 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return [
             get_data(network, sts, ets, stations, cols, na, fmt).encode(
-                "ascii"
+                "ascii",
+                errors="ignore",
             )
         ]
     headers = [

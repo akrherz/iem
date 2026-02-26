@@ -17,7 +17,6 @@ EOM;
 
 $sselect = networkSelect("NWSCLI", "");
 
-
 $t->content = <<<EOM
 
 <nav aria-label="breadcrumb">
@@ -96,9 +95,7 @@ gambling purposes!
  <li>It is sometimes vague what happens with the METAR report that occurs
  just before midnight local for the start of the period.  This app considers
  the temperature report, but not the 6 hour max/min reported at this time.</li>
- <li>Presently, the backend searches forward in time only 144 hours looking
- for CLI/CF6 products that modified the high/low for the day.</li>
- </ol>
+</ol>
 
 EOM;
 

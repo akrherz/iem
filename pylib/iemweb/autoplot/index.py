@@ -457,7 +457,7 @@ def compute_dat_label(attribs: dict) -> str:
     return f"{wfo} {efscale} {event_id} {sts:%H%M}Z {length:.0f} miles"
 
 
-def dat_handler(fdict, res):
+def dat_handler(fdict: dict, res: dict) -> str:
     """Generate the Damage Assessment Tool form."""
     dt = fdict.get("dat", "2024/05/21")
     gid = fdict.get("datglobalid", "")
@@ -467,7 +467,9 @@ def dat_handler(fdict, res):
     res["pltvars"].append(f"datglobalid:{gid}")
     # Query DAT for the list of events
     ss = '<select name="datglobalid">\n'
-    sts = datetime.strptime(dt, "%Y/%m/%d").replace(tzinfo=ZoneInfo("UTC"))
+    sts = datetime.strptime(
+        "2024/05/21" if dt == "" else dt, "%Y/%m/%d"
+    ).replace(tzinfo=ZoneInfo("UTC"))
     ets = sts + timedelta(hours=36)
     url = (
         "https://services.dat.noaa.gov/arcgis/rest/services/"
