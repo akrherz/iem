@@ -12,6 +12,9 @@ temperature reports from the major ASOS sites.
 Changelog
 ---------
 
+- 2026-02-26: Updates to hopefully have full closure over potential changes
+  found with subsequent CLI and CF6 updates.  Previously, a 144 hour forward
+  time window was assumed.
 - 2026-02-25: Initial implementation
 
 Example Requests
@@ -95,6 +98,28 @@ def as_finite_float(value) -> float | None:
     except (TypeError, ValueError):
         return None
     return fvalue if isfinite(fvalue) else None
+
+
+@with_sqlalchemy_conn("iem")
+def find_last_product(
+    station: str,
+    dt: dateobj,
+    table: str,
+    conn: Connection | None = None,
+) -> str | None:
+    """Figure out the last product ID for the given type."""
+    res = conn.execute(
+        sql_helper(
+            """
+        select product from {table} where valid = :valid and station = :station
+                                  """,
+            table=table,
+        ),
+        {"valid": dt, "station": station},
+    )
+    if res.rowcount == 0:
+        return None
+    return res.fetchone()[0]
 
 
 @with_sqlalchemy_conn("asos")
@@ -322,8 +347,13 @@ def add_cli_events(
     conn: Connection | None = None,
 ):
     """We now process CLI events"""
+    last_cli = find_last_product(station, dt, "cli_data")
+    if last_cli is None:
+        return
     sts = utc(dt.year, dt.month, dt.day)
-    ets = sts + timedelta(hours=144)  # meh?
+    ets = datetime.strptime(last_cli[:12], "%Y%m%d%H%M").replace(
+        tzinfo=ZoneInfo("UTC")
+    ) + timedelta(minutes=1)
     res = conn.execute(
         sql_helper("""
         select entered at time zone 'UTC' as utc_entered, data
@@ -399,8 +429,13 @@ def add_cf6_events(
     conn: Connection | None = None,
 ):
     """We now process CLI events"""
+    last_cf6 = find_last_product(station, dt, "cf6_data")
+    if last_cf6 is None:
+        return
     sts = utc(dt.year, dt.month, dt.day)
-    ets = sts + timedelta(hours=144)  # meh?
+    ets = datetime.strptime(last_cf6[:12], "%Y%m%d%H%M").replace(
+        tzinfo=ZoneInfo("UTC")
+    ) + timedelta(minutes=1)
     res = conn.execute(
         sql_helper("""
         select entered at time zone 'UTC' as utc_entered, data
