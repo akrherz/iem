@@ -10,6 +10,8 @@ Returns NWS Storm Based Warnings for a provided latitude and longitude point.
 Changelog
 ---------
 
+- 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
+  for better IEM app consistency.
 - 2024-10-16: Added ``buffer`` parameter to expand the search area around the
   provided point.  The units are in decimal degrees with a range limited
   between 0 and 1.
@@ -101,7 +103,7 @@ def make_url(row):
     )
 
 
-def get_events(environ):
+def get_events(environ: dict):
     """Get Events"""
     data = {
         "sbws": [],
@@ -110,7 +112,7 @@ def get_events(environ):
         "buffer": environ["buffer"],
         "valid": None,
     }
-    data["generation_time"] = utc().strftime(ISO8601)
+    data["generated_at"] = utc().strftime(ISO8601)
     valid_limiter = ""
     params = {
         "lon": environ["lon"],
@@ -204,7 +206,7 @@ def to_json(data, df):
     schema=Schema,
     parse_times=False,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
 
     fmt = environ["fmt"]

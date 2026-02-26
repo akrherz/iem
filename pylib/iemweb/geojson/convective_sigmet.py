@@ -7,6 +7,8 @@ This service provides a GeoJSON representation of current Convective SIGMETs.
 Changelog
 ---------
 
+- 2026-02-26: Top level metadata `generation_time` was renamed to
+  `generated_at` for better consistency across IEM services.
 - 2025-05-13: Added `sts` and `ets` parameters to filter SIGMETs by time,
   must be less than 32 days in duration. Specifies the period of issuance.
 - 2025-05-13: Added `at` parameter to provide SIGMETs at a specific time.
@@ -114,7 +116,7 @@ def run(environ: dict, conn: Connection = None) -> str:
     data = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": res.rowcount,
     }
     for row in res.mappings():

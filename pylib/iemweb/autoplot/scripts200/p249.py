@@ -5,7 +5,7 @@ variant of this plot.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -36,7 +36,7 @@ PDICT3 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.today() + timedelta(days=2)
+    today = datetime.today()
     desc["arguments"] = [
         ARG_IEMRE_DOMAIN,
         dict(

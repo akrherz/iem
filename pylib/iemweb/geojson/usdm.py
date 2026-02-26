@@ -13,6 +13,8 @@ latest valid USDM is returned.
 Changelog
 ---------
 
+- 2026-02-14: Renamed top level metadata `generation_time` to `generated_at`
+  for better consistency across IEM services.
 - 2024-08-09: Initial documentation release
 
 Example Usage
@@ -95,7 +97,7 @@ def run(ts: dateobj):
         data = {
             "type": "FeatureCollection",
             "features": [],
-            "generation_time": utcnow.strftime(ISO8601),
+            "generated_at": utcnow.strftime(ISO8601),
             "count": res.rowcount,
         }
         for row in res.mappings():

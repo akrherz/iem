@@ -340,7 +340,7 @@ def date_handler(value: str, arg: dict):
     )
 
 
-def datetime_handler(value, arg):
+def datetime_handler(value: str, arg: dict):
     """Handler for datetime instances."""
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))

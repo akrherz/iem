@@ -20,6 +20,8 @@ Implementation Notes
 Changelog
 ---------
 
+- 2026-02-26: Renamed top level `generation_time` metadata to `generated_at`
+  for better IEM app consistency.
 - 2024-11-26: Initial implementation
 
 Example Usage
@@ -188,7 +190,7 @@ def application(environ, start_response):
 
     if fmt == "json":
         res = {
-            "generation_time": utc().strftime(ISO8601),
+            "generated_at": utc().strftime(ISO8601),
             "query_params": {
                 "lon": environ["lon"],
                 "lat": environ["lat"],

@@ -275,8 +275,7 @@ def add_dsm_events(
     )
     for row in res.mappings():
         # Ugly, we need to convert this into a full noaaport product
-        text = f"""
-000
+        text = f"""000
 {row["wmo"]} {row["source"]} {row["utc_entered"]:%d%H%M}
 {row["pil"]}
 {row["data"]}
