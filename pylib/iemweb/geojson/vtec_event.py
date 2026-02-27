@@ -133,7 +133,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
+        "generated_at": datetime.now(timezone.utc).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -176,7 +176,7 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
+        "generated_at": datetime.now(timezone.utc).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

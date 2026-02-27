@@ -216,6 +216,66 @@ if (! is_null($metadata["wigos"])){
         $metadata["wigos"]);
 }
 
+$update_interface = <<<EOM
+<h5>Location Update Request</h5>
+<p><strong>Is the location shown for this station wrong?</strong></p>
+<p>If so, please consider submitting a location submission by moving the marker
+on the map and completing this form below.</p>
+
+{$suggested_coordinates_info}
+
+<form name="updatecoords" method="GET">
+<input type="hidden" value="{$network}" name="network">
+<input type="hidden" value="{$station}" name="station">
+
+<div class="row mb-3">
+<div class="col-md-6">
+<label for="newlat" class="form-label">New Latitude:</label>
+<input id="newlat" type="text" class="form-control" name="lat" placeholder="move marker" required>
+</div>
+<div class="col-md-6">
+<label for="newlon" class="form-label">New Longitude:</label>
+<input id="newlon" type="text" class="form-control" name="lon" placeholder="move marker" required>
+</div>
+</div>
+
+<div class="mb-3">
+<label for="email" class="form-label">Enter Your Email Address <small>[1]</small>:</label>
+<input type="email" id="email" class="form-control" name="email" placeholder="optional" autocomplete="email">
+</div>
+
+<div class="mb-3">
+<label for="name" class="form-label">Better Location Name?:</label>
+<input type="text" id="name" class="form-control" name="name" value="{$metadata["name"]}" maxlength="100" />
+</div>
+
+<div class="alert alert-info">
+<small>
+<strong>[1]</strong> Your email address will not be shared nor will you be added to any
+lists. The IEM developer will simply email you back after consideration of
+this request.
+</small>
+</div>
+
+<div class="alert alert-warning">
+<strong>Note:</strong> If you are looking for a wind rose for a location
+other than this, your only option on this website is to find the nearest station
+with data.
+</div>
+
+<input type="submit" value="I am asking the location be updated." class="btn btn-warning">
+</form>
+</div>
+EOM;
+if (strpos($network, "COCORAHS") > 0) {
+    $update_interface = <<<EOM
+<p>
+Location information and name is controlled by the <a href="https://cocorahs.org">CoCoRaHS</a> organization.
+The IEM hopefully automagically syncs updates from them to the IEM database.
+    </p>
+EOM;
+}
+
 $t->content = <<<EOM
 
 {$alertmsg}
@@ -276,56 +336,7 @@ data-precision="8"
 data-zoom="14"></div>
 
 <div class="mt-3">
-<h5>Location Update Request</h5>
-<p><strong>Is the location shown for this station wrong?</strong></p>
-<p>If so, please consider submitting a location submission by moving the marker
-on the map and completing this form below.</p>
-
-{$suggested_coordinates_info}
-
-<form name="updatecoords" method="GET">
-<input type="hidden" value="{$network}" name="network">
-<input type="hidden" value="{$station}" name="station">
-
-<div class="row mb-3">
-<div class="col-md-6">
-<label for="newlat" class="form-label">New Latitude:</label>
-<input id="newlat" type="text" class="form-control" name="lat" placeholder="move marker" required>
-</div>
-<div class="col-md-6">
-<label for="newlon" class="form-label">New Longitude:</label>
-<input id="newlon" type="text" class="form-control" name="lon" placeholder="move marker" required>
-</div>
-</div>
-
-<div class="mb-3">
-<label for="email" class="form-label">Enter Your Email Address <small>[1]</small>:</label>
-<input type="email" id="email" class="form-control" name="email" placeholder="optional" autocomplete="email">
-</div>
-
-<div class="mb-3">
-<label for="name" class="form-label">Better Location Name?:</label>
-<input type="text" id="name" class="form-control" name="name" value="{$metadata["name"]}" maxlength="100" />
-</div>
-
-<div class="alert alert-info">
-<small>
-<strong>[1]</strong> Your email address will not be shared nor will you be added to any
-lists. The IEM developer will simply email you back after consideration of
-this request.
-</small>
-</div>
-
-<div class="alert alert-warning">
-<strong>Note:</strong> If you are looking for a wind rose for a location
-other than this, your only option on this website is to find the nearest station
-with data.
-</div>
-
-<input type="submit" value="I am asking the location be updated." class="btn btn-warning">
-</form>
-</div>
-
+{$update_interface}
 </div>
 </div>
 

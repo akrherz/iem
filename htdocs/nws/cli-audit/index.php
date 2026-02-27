@@ -90,7 +90,7 @@ gambling purposes!
  <li>"High Frequency" MADIS data is not used due to
  <a href="/onsite/news.phtml?id=1290">reporting in whole degree C</a> and
  not using standard two minute averaging.</li>
- <li>The NWS computes this over a local standard day, so 1 PM till 1 PM
+ <li>The NWS computes this over a local standard day, so 1 AM till 1 AM
  local during daylight saving time. This app attempts to account for that.</li>
  <li>It is sometimes vague what happens with the METAR report that occurs
  just before midnight local for the start of the period.  This app considers

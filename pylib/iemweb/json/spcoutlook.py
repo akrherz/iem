@@ -12,6 +12,8 @@ longitude point.
 Changelog
 ---------
 
+- 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
+  for better consistency across IEM services.
 - 2024-07-09: Add csv and excel output formats
 - 2024-07-17: Fix problems with CSV and Excel output, sigh.
 
@@ -188,7 +190,7 @@ def application(environ, start_response):
 
     if fmt == "json" and time is not None:
         res = {
-            "generation_time": utc().strftime(ISO8601),
+            "generated_at": utc().strftime(ISO8601),
             "query_params": {
                 "time": ts.strftime(ISO8601),
                 "lon": lon,

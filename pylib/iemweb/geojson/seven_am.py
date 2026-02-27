@@ -11,6 +11,8 @@ is currently Iowa centric.
 Changelog
 ---------
 
+- 2026-02-26: Top level metadata `generation_time` was renamed `generated_at`
+  for better consistency across IEM services.
 - 2024-08-14: Documentation Update
 
 Example Requests
@@ -28,10 +30,15 @@ Get the morning reports on that date for ASOS stations
 
 https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=azos
 
+Get the reports on the same date, but for cocorahs this time
+
+https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=cocorahs
+
 """
 
 import json
 from datetime import date, datetime, timedelta, timezone
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -44,19 +51,26 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None,
-        description="Optional JSONP callback function name",
-    )
-    group: str = Field(
-        default="coop",
-        description="The group of stations to generate data for",
-        pattern=r"^(coop|azos|cocorahs)$",
-    )
-    dt: date = Field(
-        default=date.today(),
-        description="Date to generate data for",
-    )
+    callback: Annotated[
+        str | None,
+        Field(
+            description="Optional JSONP callback function name",
+        ),
+    ] = None
+    group: Annotated[
+        str,
+        Field(
+            description="The group of stations to generate data for",
+            pattern=r"^(coop|azos|cocorahs)$",
+        ),
+    ] = "coop"
+    dt: Annotated[
+        date,
+        Field(
+            default_factory=date.today,
+            description="Date to generate data for",
+        ),
+    ]
 
 
 def p(val, precision=2):
@@ -116,7 +130,7 @@ def run_azos(ts: datetime):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     tstamp = ts1.astimezone(timezone.utc).strftime(ISO8601)
@@ -165,7 +179,7 @@ def run(ts, networks):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -216,7 +230,7 @@ def run_cocorahs(ts: datetime):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

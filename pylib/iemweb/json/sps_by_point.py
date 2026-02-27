@@ -8,6 +8,8 @@ polygon threat area.
 Changelog
 ---------
 
+- 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
+  for better consistency across IEM services.
 - 2024-07-06: The `sdate` and `edate` parameters were rectified to be in the
   format of `YYYY-mm-dd` instead of `YYYY/mm/dd`.
 
@@ -83,7 +85,7 @@ def get_events(environ):
         "lat": environ["lat"],
         "valid": environ["valid"],
     }
-    data["generation_time"] = utc().strftime(ISO8601)
+    data["generated_at"] = utc().strftime(ISO8601)
     valid_limiter = ""
     params = {
         "lon": environ["lon"],

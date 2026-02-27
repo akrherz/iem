@@ -14,6 +14,8 @@ text within the resulting JSON response.  This can be disabled by setting the
 Changelog
 ---------
 
+- 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
+  for better IEM service consistency.
 - 2024-11-12: Added boolean attribute ``event_exists`` to the response to
   indicate if the event was found in the database.
 - 2024-07-31: Initial documentation release and pydantic validation
@@ -116,7 +118,7 @@ def run(environ: dict) -> str:
         )
 
     res = {
-        "generation_time": utc().strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "event_exists": not df.empty,
         "year": year,
         "phenomena": phenomena,
