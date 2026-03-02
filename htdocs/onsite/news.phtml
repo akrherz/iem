@@ -62,6 +62,10 @@ if ($id > 0) {
     $row = pg_fetch_assoc($result);
     $id = intval($row["id"]);
 }
+if ($result === false) {
+    xssafe("<invalid>");
+    die();
+}
 
 if (pg_num_rows($result) == 1 && $id > 0) {
     $prev = $id - 1;
