@@ -79,7 +79,7 @@ def plot_column(ax: Axes, obs, col, ylabel):
     ax.set_ylabel(ylabel, color="b")
 
 
-def plot_bz(ax: Axes, obs):
+def plot_bz(ax: Axes, obs: pd.DataFrame):
     """Do the magic with plotting for BZ."""
     plot_column(ax, obs, "vsby", "Visibility [miles]")
     ax2 = ax.twinx()
@@ -118,7 +118,7 @@ def plot_bz(ax: Axes, obs):
         )
         ax.add_patch(rect)
         hit = None
-    if hit:
+    if hit in obs.index:
         secs = (row["utc_valid"] - obs.at[hit, "utc_valid"]).total_seconds()
         color = "#EEEEEE" if secs < (3 * 3600.0) else "lightblue"
         rect = Rectangle(
