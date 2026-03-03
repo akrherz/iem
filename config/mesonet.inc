@@ -2,45 +2,34 @@
 # Apache vhost configuration for IEM
 # I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/src"
 
-  Include /opt/iemwebfarm/config/vhost_common.conf
+Include /opt/iemwebfarm/config/vhost_common.conf
 
-  ServerName mesonet.agron.iastate.edu
-  ServerAlias www.mesonet.agron.iastate.edu
-  ServerAlias mesonet1.agron.iastate.edu
-  ServerAlias mesonet2.agron.iastate.edu
-  ServerAlias mesonet3.agron.iastate.edu
-  ServerAlias iem.local
-  ServerAdmin akrherz@iastate.edu
-  DocumentRoot /opt/iem/htdocs
+ServerName mesonet.agron.iastate.edu
+ServerAlias www.mesonet.agron.iastate.edu
+ServerAlias mesonet1.agron.iastate.edu
+ServerAlias mesonet2.agron.iastate.edu
+ServerAlias mesonet3.agron.iastate.edu
+ServerAlias iem.local
+ServerAdmin akrherz@iastate.edu
+DocumentRoot /opt/iem/htdocs
 
-  # http://enable-cors.org/server_apache.html
-  Header set Access-Control-Allow-Origin "*"
+# http://enable-cors.org/server_apache.html
+Header set Access-Control-Allow-Origin "*"
 
-  # RewriteEngine is not enabled for vhosts by default
-  RewriteEngine On
-  # Useful for debugging
-  # LogLevel alert rewrite:trace3
-  RewriteRule ^/index.php$ / [R]
-  RewriteRule ^/p.phppid=([^\.]+) /p.php?pid=$1 [L]
-  RewriteRule ^/iembot(.*)$ https://weather.im/iembot$1 [R=permanent]
+# RewriteEngine is not enabled for vhosts by default
+RewriteEngine On
+# Useful for debugging
+# LogLevel alert rewrite:trace3
 
 # Search functionality
 RewriteRule ^/search /search.py [QSA]
 
-  Redirect /geojson/spc_outlooks.py https://mesonet.agron.iastate.edu/api/
-  Redirect /data/mwcomp.phtml https://mesonet.agron.iastate.edu/current/mwcomp.phtml
-  Redirect /RWIS/current.php https://mesonet.agron.iastate.edu/RWIS/current.phtml
-  Redirect /schoolnet/current.php https://mesonet.agron.iastate.edu/schoolnet/current.phtml
-  Redirect /RWIS/currentSF.php https://mesonet.agron.iastate.edu/RWIS/currentSF.phtml
-  Redirect /my/current.php https://mesonet.agron.iastate.edu/my/current.phtml
-  Redirect http://www.mesonet.agron.iastate.edu https://mesonet.agron.iastate.edu
-  Redirect permanent /archive/nexrad http://mesonet-longterm.agron.iastate.edu/archive/nexrad
-  Redirect permanent /archive/gempak http://mesonet-longterm.agron.iastate.edu/archive/gempak
-  Redirect permanent /archive/raw http://mesonet-longterm.agron.iastate.edu/archive/raw
-  Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
-  Redirect permanent /cscap https://datateam.agron.iastate.edu/cscap
+Redirect permanent /archive/nexrad http://mesonet-longterm.agron.iastate.edu/archive/nexrad
+Redirect permanent /archive/gempak http://mesonet-longterm.agron.iastate.edu/archive/gempak
+Redirect permanent /archive/raw http://mesonet-longterm.agron.iastate.edu/archive/raw
+Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
 
-  <Directory "/opt/iem/htdocs">
+<Directory "/opt/iem/htdocs">
     # Need FollowSymLinks for mod_rewrite to work!
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -54,38 +43,37 @@ RewriteRule ^/search /search.py [QSA]
     # WSGIErrorOverride On
     AddHandler wsgi-script .py
     Options +ExecCGI
+</Directory>
 
-  </Directory>
-
-  <Directory "/mesonet/ARCHIVE">
+<Directory "/mesonet/ARCHIVE">
     Options Indexes FollowSymLinks
-    AllowOverride All
+    AllowOverride None
     Require all granted
-  </Directory>
+</Directory>
 
-  <Directory "/mesonet/data">
+<Directory "/mesonet/data">
     Options Indexes FollowSymLinks
-    AllowOverride All
+    AllowOverride None
     Require all granted
-  </Directory>
+</Directory>
 
-  <Directory "/mesonet/share">
+<Directory "/mesonet/share">
     Options Indexes FollowSymLinks
-    AllowOverride All
+    AllowOverride None
     Require all granted
-  </Directory>
+</Directory>
 
-  # Point to system-installed mapserv binary (from conda env)
-  ScriptAlias /cgi-bin/mapserv/mapserv.fcgi ${IEMWEBFARM_MAPSERV}
-  ScriptAlias /cgi-bin/mapserv/mapserv ${IEMWEBFARM_MAPSERV}
-  <Location "/cgi-bin/mapserv">
+# Point to system-installed mapserv binary (from conda env)
+ScriptAlias /cgi-bin/mapserv/mapserv.fcgi ${IEMWEBFARM_MAPSERV}
+ScriptAlias /cgi-bin/mapserv/mapserv ${IEMWEBFARM_MAPSERV}
+<Location "/cgi-bin/mapserv">
     SetHandler fcgid-script
     Options +ExecCGI
-  </Location>
+</Location>
 
-  Alias /cgi-bin/ "/opt/iem/cgi-bin/"
-  <Directory "/opt/iem/cgi-bin">
-    AllowOverride All
+Alias /cgi-bin/ "/opt/iem/cgi-bin/"
+<Directory "/opt/iem/cgi-bin">
+    AllowOverride None
     Options FollowSymLinks
     Require all granted
 
@@ -94,118 +82,110 @@ RewriteRule ^/search /search.py [QSA]
     AddHandler wsgi-script .py
     AddHandler cgi-script .cgi
     Options +ExecCGI
-  </Directory>
+</Directory>
 
-  <LocationMatch "camera">
-    ErrorDocument 404 /images/missing-320x240.jpg
-  </LocationMatch>
-
-  <LocationMatch "^/one(/index\.html)?$">
+<LocationMatch "^/one(/index\.html)?$">
     # Prevent caching of index.html
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
-  </LocationMatch>
+</LocationMatch>
 
-  # BUFKIT Warehouse
-  # Include /opt/bufkit_warehouse/config/apache_config.inc
-
-  Alias /usage "/mesonet/share/usage/mesonet.agron.iastate.edu/"
-  <Directory "/mesonet/share/usage/mesonet.agron.iastate.edu/">
+Alias /usage "/mesonet/share/usage/mesonet.agron.iastate.edu/"
+<Directory "/mesonet/share/usage/mesonet.agron.iastate.edu/">
     Options Indexes MultiViews
     AllowOverride None
     Require all granted
-  </Directory>
+</Directory>
 
-  Alias /agclimate/usage "/mesonet/share/usage/agclimate/"
-  <Directory "/mesonet/share/usage/agclimate/">
+Alias /agclimate/usage "/mesonet/share/usage/agclimate/"
+<Directory "/mesonet/share/usage/agclimate/">
     Options Indexes MultiViews
     AllowOverride None
     Require all granted
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/river">
-     RewriteRule wfo.phtml index.php
-  </Directory>
+<Directory "/opt/iem/htdocs/river">
+    RewriteRule wfo.phtml index.php
+</Directory>
 
-  Alias /data "/mesonet/ldmdata"
-  <Directory "/mesonet/ldmdata">
+Alias /data "/mesonet/ldmdata"
+<Directory "/mesonet/ldmdata">
     Options Indexes MultiViews FollowSymLinks
     AllowOverride None
     Require all granted
     Redirect permanent /data/gis/images/unproj /data/gis/images/4326
-      Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
-  </Directory>
+    Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
+</Directory>
 
-  Alias "/onsite/lapses" "/mesonet/share/lapses"
-  Alias "/onsite/windrose" "/mesonet/share/windrose"
-  Alias "/onsite/iemre" "/mesonet/data/iemre"
-  Alias "/onsite/iemre_china" "/mesonet/data/iemre_china"
-  Alias "/onsite/iemre_europe" "/mesonet/data/iemre_europe"
-  Alias "/onsite/iemre_sa" "/mesonet/data/iemre_sa"
-  Alias "/onsite/mrms" "/mesonet/data/mrms"
-  Alias "/onsite/prism" "/mesonet/data/prism"
-  Alias "/onsite/stage4" "/mesonet/data/stage4"
-  Alias "/onsite/era5land" "/mesonet/data/era5"
-  Alias "/present" "/mesonet/share/present"
-  Alias "/cases" "/mesonet/share/cases"
-  Alias "/GIS/data/gis" "/mesonet/data/gis"
-  Alias "/archive/awos" "/mesonet/ARCHIVE/awos"
-  Alias "/archive/raw" "/mesonet/ARCHIVE/raw"
-  Alias "/archive/rer" "/mesonet/ARCHIVE/rer"
-  Alias "/m/img"     "/mesonet/share/iemmaps"
-  Alias "/sites/pics"     "/mesonet/share/pics"
-  Alias "/climodat/reports" "/mesonet/share/climodat/reports"
-  Alias "/climodat/ks" "/mesonet/share/climodat/ks"
+Alias "/onsite/lapses" "/mesonet/share/lapses"
+Alias "/onsite/windrose" "/mesonet/share/windrose"
+Alias "/onsite/iemre" "/mesonet/data/iemre"
+Alias "/onsite/iemre_china" "/mesonet/data/iemre_china"
+Alias "/onsite/iemre_europe" "/mesonet/data/iemre_europe"
+Alias "/onsite/iemre_sa" "/mesonet/data/iemre_sa"
+Alias "/onsite/mrms" "/mesonet/data/mrms"
+Alias "/onsite/prism" "/mesonet/data/prism"
+Alias "/onsite/stage4" "/mesonet/data/stage4"
+Alias "/onsite/era5land" "/mesonet/data/era5"
+Alias "/present" "/mesonet/share/present"
+Alias "/cases" "/mesonet/share/cases"
+Alias "/GIS/data/gis" "/mesonet/data/gis"
+Alias "/archive/awos" "/mesonet/ARCHIVE/awos"
+Alias "/archive/raw" "/mesonet/ARCHIVE/raw"
+Alias "/archive/rer" "/mesonet/ARCHIVE/rer"
+Alias "/m/img"     "/mesonet/share/iemmaps"
+Alias "/sites/pics"     "/mesonet/share/pics"
+Alias "/climodat/reports" "/mesonet/share/climodat/reports"
+Alias "/climodat/ks" "/mesonet/share/climodat/ks"
 
-  Alias "/pickup"    "/mesonet/share/pickup"
-  <Directory "/mesonet/share/pickup">
-    AllowOverride All
+Alias "/pickup" "/mesonet/share/pickup"
+<Directory "/mesonet/share/pickup">
+    AllowOverride None
     Options FollowSymLinks Indexes MultiViews
     Require all granted
-  </Directory>
+</Directory>
 
-  Alias /tmp /var/webtmp
-  <Directory "/var/webtmp">
+Alias /tmp /var/webtmp
+<Directory "/var/webtmp">
     AllowOverride None
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/cgi-bin/wms/nexrad">
+<Directory "/opt/iem/cgi-bin/wms/nexrad">
     RewriteRule n0r.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/nexrad/n0r.map& [QSA,L]
     RewriteRule n0q.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/nexrad/n0q.map& [QSA,L]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/cgi-bin/wms/us">
+<Directory "/opt/iem/cgi-bin/wms/us">
     RewriteRule wwa.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/us/wwa.map& [QSA,L]
-  </Directory>
+</Directory>
 
 
-  <Directory "/opt/iem/htdocs/c">
+<Directory "/opt/iem/htdocs/c">
     WSGIProcessGroup iemwsgi_tc
 
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 14 days"
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/cache">
+<Directory "/opt/iem/htdocs/cache">
     WSGIProcessGroup iemwsgi_tc
 
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 5 minutes"
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/DCP">
-
+<Directory "/opt/iem/htdocs/DCP">
     RewriteRule ahpsxml2wxc/([0-9A-Z]{3,5}).txt$ ahpsxml2wxc.py?nwsli=$1
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/GIS">
+<Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/agclimate">
+<Directory "/opt/iem/htdocs/agclimate">
     # Lots of old links out there to bad URIs
     RewriteRule index\.(html|pl|php)$ /agclimate/ [R]
 
@@ -216,14 +196,14 @@ RewriteRule ^/search /search.py [QSA]
     #
     RewriteRule smplot/([0-9]{1,12})/(.*).png$ isusm.py?t=$1&v=$2
     RewriteRule isusm.csv nmp_csv.py
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/info">
+<Directory "/opt/iem/htdocs/info">
     RewriteRule datasets/([a-z_]+).html$ datasets.php?id=$1 [QSA]
     RewriteRule datasets/?$ datasets.php [QSA]
-  </Directory>
+</Directory>
 
-  <LocationMatch "/api/1">
+<LocationMatch "/api/1">
     # As a reminder, we are going via this route to take advantage of caching
     # port 8080 is nginx, which proxies to fastapi on 8000
     # Always immediately retry a connection
@@ -235,9 +215,9 @@ RewriteRule ^/search /search.py [QSA]
     ErrorDocument 502 /api/proxy_error_handler.py
     ErrorDocument 503 /api/proxy_error_handler.py
     ErrorDocument 504 /api/proxy_error_handler.py
-  </LocationMatch>
+</LocationMatch>
 
-  <Location "/archive/data">
+<Location "/archive/data">
     RequestHeader set "Host" "iem-archive.local"
     ProxyPreserveHost Off
     # Send 404s back here
@@ -245,42 +225,43 @@ RewriteRule ^/search /search.py [QSA]
     # hacky to keep the paths matching in auto-index
     ProxyPass "http://iem-archive.local/archive/data"
     ProxyPassReverse "http://iem-archive.local/archive/data"
-  </Location>
+</Location>
 
 <Proxy "balancer://arcgis">
     BalancerMember "https://iem-arcgis1.agron.iastate.edu:6443/arcgis"
     BalancerMember "https://iem-arcgis2.agron.iastate.edu:6443/arcgis"
 </Proxy>
-  SSLProxyCheckPeerCN off
-  SSLProxyCheckPeerExpire off
-  SSLProxyCheckPeerName off
-  SSLProxyEngine On
-  SSLProxyVerify none
 
- <Location "/arcgis">
-  ProxyPass        "balancer://arcgis"
-  ProxyPassReverse "balancer://arcgis"
- </Location>
+SSLProxyCheckPeerCN off
+SSLProxyCheckPeerExpire off
+SSLProxyCheckPeerName off
+SSLProxyEngine On
+SSLProxyVerify none
 
-  <Directory "/opt/iem/htdocs/content">
+<Location "/arcgis">
+    ProxyPass        "balancer://arcgis"
+    ProxyPassReverse "balancer://arcgis"
+</Location>
+
+<Directory "/opt/iem/htdocs/content">
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/sites">
+<Directory "/opt/iem/htdocs/sites">
     # Allow for python scripts to act has directories NETWORK/SID/TOOL
     RewriteRule ^([^/]{3,20})/([^/]{3,20})/([^/]+)$ $3.py
-  </Directory>
+</Directory>
 
 
-  <Directory "/opt/iem/htdocs/wx/afos">
+<Directory "/opt/iem/htdocs/wx/afos">
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/AWOS">
+<Directory "/opt/iem/htdocs/AWOS">
     RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/geojson">
+<Directory "/opt/iem/htdocs/geojson">
     # QSA causes the query string to be appended
     RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
     # still used
@@ -289,17 +270,17 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule network_obs.php(.*) /api/1/currents.geojson$1 [QSA]
     # General rewrite of anything .php or .geojson to python
     RewriteRule ^([a-z_]+)\.(php|geojson) $1.py [QSA]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/iemre">
+<Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule hourly/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) hourly.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?sdate=$1&edate=$2&lat=$3&lon=$4&format=$5
     RewriteRule cum/([0-9\-]+)/([0-9\-]+)/(shp) cum.py?date0=$1&date1=$2&format=$3&base=50&ceil=86
     RewriteRule cumcounty/([0-9]+)/([0-9\-]+)/([0-9\-]+)/([0-9]+)/([0-9]+)/(json) cum.py?county=$1&date0=$2&date1=$3&format=$6&base=$4&ceil=$5
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/json">
+<Directory "/opt/iem/htdocs/json">
     RewriteRule radar$ radar.py
     # General rewrite of anything .php (eventually, sans index.php) or .json to python
     RewriteRule ^([^i][a-z_]+)\.(php|json) $1.py [QSA]
@@ -307,35 +288,35 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule raob/([0-9]{12})/([A-Z0-9]{3,4})$ raob.py?ts=$1&station=$2 [QSA]
     RewriteRule stage4/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ stage4.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/kml">
+<Directory "/opt/iem/htdocs/kml">
     RewriteRule roadcond.kml roadcond.php
     RewriteRule roadcond_v2.kml roadcond.php?linewidth=6&maxtype=2
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/nws">
+<Directory "/opt/iem/htdocs/nws">
     RewriteRule days_since_([A-Z][A-Z])_([A-Z]).png /plotting/auto/plot/92/phenomena:$1::significance:$2::dpi:100.png
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/onsite/features">
+<Directory "/opt/iem/htdocs/onsite/features">
     RewriteRule tags/([^\.]+)\.html tags/index.php?tag=$1 [L]
     RewriteRule vote/(good|bad|abstain).json$ vote.py?vote=$1
     RewriteRule vote.json$ vote.py
     RewriteRule ^[0-9]{4}/[0-9]{2}/.*$ content.py [PT]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/current">
+<Directory "/opt/iem/htdocs/current">
     RewriteRule live/(.*).jpg live.py?id=$1 [L]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/plotting/auto">
+<Directory "/opt/iem/htdocs/plotting/auto">
     RewriteRule qrcode/([0-9]{1,12})/(.*).png$ gen_qrcode.py?p=$1&q=$2&fmt=png [B]
     RewriteRule plot/([0-9]{1,12})/(.*).(png|csv|txt|xlsx|js|geojson|pdf|svg|geotiff)$ autoplot.py?p=$1&q=$2&fmt=$3 [B]
     RewriteRule meta/([0-9]{1,12}).json meta.py?p=$1 [QSA,B]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/request">
+<Directory "/opt/iem/htdocs/request">
     RewriteRule maxcsv/(.*).txt$ maxcsv.py?q=$1
 
     RewriteRule grx/iadot_trucks.txt grx/iadot_trucks.py
@@ -346,22 +327,21 @@ RewriteRule ^/search /search.py [QSA]
 
     # .php was legacy stuff, lets not break old paths
     RewriteRule grx/l3attr.(php|txt) grx/l3attr.py [QSA]
+</Directory>
 
-  </Directory>
-
-  <Directory "/opt/iem/htdocs/roads">
+<Directory "/opt/iem/htdocs/roads">
     RewriteRule kcau.jpg kcau.php
     RewriteRule ktiv.jpg ktiv.php
     RewriteRule kwwl.jpg kwwl.php?v2
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/vtec">
+<Directory "/opt/iem/htdocs/vtec">
     RewriteRule ^event/.* index.py [L]
     RewriteRule ([^\.]+)\.html index.py?vtec=$1 [L]
     RewriteRule f/(.*)$ f.py [QSA]
-  </Directory>
+</Directory>
 
-  <Directory "/opt/iem/htdocs/metadata/xml">
+<Directory "/opt/iem/htdocs/metadata/xml">
     RewriteRule pl_(.*)_(.*).xml pl.py?network=$1&station=$2 [QSA]
     RewriteRule sd_(.*)_(.*).xml sd.py?network=$1&station=$2 [QSA]
-  </Directory>
+</Directory>
