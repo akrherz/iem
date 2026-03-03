@@ -23,7 +23,7 @@ def do(ts):
             LOG.info("Already have %s", ppath)
             return
     remotefn = ts.strftime("5kmffg_%Y%m%d%H.grb2")
-    url = f"https://ftp.wpc.ncep.noaa.gov/workoff/ffg/{remotefn}"
+    url = f"https://ftp-wpc.ncep.noaa.gov/workoff/ffg/{remotefn}"
     LOG.info("fetching %s", url)
     req = exponential_backoff(httpx.get, url, timeout=20)
     if req is None or req.status_code != 200:

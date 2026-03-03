@@ -29,7 +29,7 @@ EOM
 while ($row = pg_fetch_assoc($rs)) {
     $btable .= sprintf(
         "<tr>".
-        "<td><a href=\"https://twitter.com/%s\">@%s</a></td>".
+        "<td><a href=\"https://x.com/%s\">@%s</a></td>".
         "<td>%s</td></tr>",
         $row["screen_name"],
         $row["screen_name"],
@@ -150,6 +150,8 @@ mean.</p>
 
 <p><strong>Changelog:</strong>
 <ul>
+    <li><strong>3 Mar 2026</strong>:  The IEM website had HTTP redirects for
+    some legacy iembot URI endpoints.  Those were removed.</li>
     <li><strong>18 May 2022:</strong> VTEC products that are purely
     continues, cancels, or expires updates now go into more isolated
     channels than the default phenomena/significance channels. These channels
