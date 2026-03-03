@@ -23,6 +23,8 @@ https://mesonet.agron.iastate.edu/geojson/sbw_county_intersect.py\
 
 """
 
+from typing import Annotated
+
 import geopandas as gpd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -32,14 +34,22 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    wfo: str = Field("MPX", description="3 or 4 character WFO Identifier")
-    year: int = Field(2015, description="Year of interest")
-    phenomena: str = Field("SV", description="VTEC Phenomena", max_length=2)
-    significance: str = Field(
-        "W", description="VTEC Significance", max_length=1
-    )
-    eventid: int = Field(1, description="VTEC Event ID", ge=1, le=9999)
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    wfo: Annotated[
+        str, Field(description="3 or 4 character WFO Identifier")
+    ] = "MPX"
+    year: Annotated[int, Field(description="Year of interest", ge=1986)] = 2015
+    phenomena: Annotated[
+        str, Field(description="VTEC Phenomena", max_length=2)
+    ] = "SV"
+    significance: Annotated[
+        str, Field(description="VTEC Significance", max_length=1)
+    ] = "W"
+    eventid: Annotated[
+        int, Field(description="VTEC Event ID", ge=1, le=9999)
+    ] = 1
 
 
 def run(wfo, year, phenomena, significance, eventid):

@@ -28,6 +28,7 @@ https://mesonet.agron.iastate.edu/json/climodat_dd.py\
 import json
 import os
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 from metpy.units import units
@@ -43,32 +44,44 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None,
-        description="Optional JSONP callback function name.",
-    )
-    edate: date = Field(
-        ...,
-        description="The end date for the period of interest.",
-    )
-    gddbase: int = Field(
-        default=50,
-        description="The base temperature for GDD computation.",
-    )
-    gddceil: int = Field(
-        default=86,
-        description="The ceiling temperature for GDD computation.",
-    )
-    sdate: date = Field(
-        ...,
-        description="The start date for the period of interest.",
-    )
-    station: str = Field(
-        ...,
-        description="The station identifier to query.",
-        max_length=6,
-        min_length=6,
-    )
+    callback: Annotated[
+        str | None,
+        Field(
+            description="Optional JSONP callback function name.",
+        ),
+    ] = None
+    edate: Annotated[
+        date,
+        Field(
+            description="The end date for the period of interest.",
+        ),
+    ]
+    gddbase: Annotated[
+        int,
+        Field(
+            description="The base temperature for GDD computation.",
+        ),
+    ] = 50
+    gddceil: Annotated[
+        int,
+        Field(
+            description="The ceiling temperature for GDD computation.",
+        ),
+    ] = 86
+    sdate: Annotated[
+        date,
+        Field(
+            description="The start date for the period of interest.",
+        ),
+    ]
+    station: Annotated[
+        str,
+        Field(
+            description="The station identifier to query.",
+            max_length=6,
+            min_length=6,
+        ),
+    ]
 
 
 def compute_taxis(ncvar):

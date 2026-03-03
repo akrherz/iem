@@ -87,7 +87,7 @@ def add_context(ctx):
     dt = ctx["dt"]
 
     # Attempt to get station information
-    with get_sqlalchemy_conn("hml") as conn:
+    with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
             sql_helper(
                 "SELECT * from stations where id = :station "
@@ -195,7 +195,7 @@ def get_highcharts(ctx: dict) -> str:
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
-    df["ticks"] = df["valid"].astype(np.int64) // 10**6
+    df["ticks"] = df["valid"].astype(np.int64) // 1e3
     lines = []
     if "id" in df.columns:
         fxs = df["id"].unique()
@@ -216,7 +216,7 @@ def get_highcharts(ctx: dict) -> str:
                 }}
             """
             )
-    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 10**6
+    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 1e3
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
         lines.append(

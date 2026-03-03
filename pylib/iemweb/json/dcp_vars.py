@@ -25,9 +25,11 @@ https://mesonet.agron.iastate.edu/json/dcp_vars.py?station=AESI4
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
@@ -35,12 +37,17 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    station: str = Field(
-        ...,
-        description="Station identifier to look for variables for.",
-        max_length=8,
-    )
+    callback: Annotated[
+        str | None, Field(description="JSONP callback function name")
+    ] = None
+    station: Annotated[
+        str,
+        Field(
+            description="Station identifier to look for variables for.",
+            max_length=8,
+            pattern=r"^[A-Z0-9]+$",
+        ),
+    ]
 
 
 @iemapp(
@@ -53,14 +60,14 @@ class Schema(CGIModel):
 def application(environ, start_response):
     """Answer request."""
     data = {
+        "generated_at": utc().strftime(ISO8601),
         "vars": [],
     }
     table = f"raw{utc():%Y_%m}"
     with get_sqlalchemy_conn("hads") as conn:
         res = conn.execute(
             sql_helper(
-                """
-            select distinct key from {table} where station = :station""",
+                "select distinct key from {table} where station = :station",
                 table=table,
             ),
             {
