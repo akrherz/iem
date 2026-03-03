@@ -11,6 +11,8 @@ site and network combination.
 Changelog
 ---------
 
+- 2026-03-03: Please migrate usage of root attribute `server_gentime` to
+  `generated_at`.
 - 2024-08-01: Documentation update
 
 Example Requests
@@ -23,6 +25,7 @@ https://mesonet.agron.iastate.edu/json/current.py?station=AMW&network=IA_ASOS
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -35,19 +38,27 @@ from sqlalchemy import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    network: str = Field(
-        ...,
-        description="The network identifier, such as IA_ASOS",
-        pattern="^[A-Z0-9_]{1,32}$",
-    )
-    station: str = Field(
-        ...,
-        description="The station identifier, such as AMW",
-        pattern=r"^[A-Z0-9_\-]{1,64}$",
-    )
-    callback: str = Field(
-        None, description="Optional JSONP callback function name"
-    )
+    network: Annotated[
+        str,
+        Field(
+            description="The network identifier, such as IA_ASOS",
+            min_length=4,
+            max_length=32,
+            pattern="^[A-Z0-9_]+$",
+        ),
+    ]
+    station: Annotated[
+        str,
+        Field(
+            description="The station identifier, such as AMW",
+            min_length=3,
+            max_length=64,
+            pattern=r"^[A-Z0-9_\-]+$",
+        ),
+    ]
+    callback: Annotated[
+        str | None, Field(description="Optional JSONP callback function name")
+    ] = None
 
 
 def run(conn: Connection, network, station):
@@ -71,6 +82,7 @@ def run(conn: Connection, network, station):
     row = res.mappings().fetchone()
     data = {}
     data["server_gentime"] = utc().strftime(ISO8601)
+    data["generated_at"] = utc().strftime(ISO8601)
     data["id"] = station
     data["network"] = network
     ob = data.setdefault("last_ob", {})

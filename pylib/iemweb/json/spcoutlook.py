@@ -12,6 +12,8 @@ longitude point.
 Changelog
 ---------
 
+- 2026-03-03: The ill conceived support for time being `now` or `current`
+  was removed.
 - 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
   for better consistency across IEM services.
 - 2024-07-09: Add csv and excel output formats
@@ -43,11 +45,12 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
@@ -58,28 +61,42 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    fmt: str = Field(
-        default="json",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(json|excel|csv)$",
-    )
-    callback: str = Field(None, description="JSONP Callback Name")
-    lat: float = Field(
-        42.0, description="Latitude of point in decimal degrees"
-    )
-    lon: float = Field(
-        -95.0, description="Longitude of point in decimal degrees"
-    )
-    last: int = Field(0, description="Limit to last N outlooks, 0 for all")
-    day: int = Field(1, description="Day to query for, 1-8")
-    time: str = Field(
-        None,
-        description=(
-            "Optional specification for a valid timestamp to query outlooks "
-            "for.  This is either a ISO8601 timestamp or 'current' for now."
+    fmt: Annotated[
+        str,
+        Field(
+            description=(
+                "The format to return data in, either json, excel, or csv"
+            ),
+            pattern="^(json|excel|csv)$",
         ),
+    ] = "json"
+    callback: Annotated[
+        str | None, Field(description="JSONP Callback Name")
+    ] = None
+    lat: Annotated[
+        float, Field(description="Latitude of point in decimal degrees")
+    ] = 42.0
+    lon: Annotated[
+        float, Field(description="Longitude of point in decimal degrees")
+    ] = -95.0
+    last: Annotated[
+        int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
+    ] = 0
+    day: Annotated[
+        int, Field(ge=1, le=8, description="Day to query for, 1-8")
+    ] = 1
+    time: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "Optional specification for a valid timestamp to query "
+                "outlooks for."
+            )
+        ),
+    ] = None
+    cat: Annotated[str, Field(description="Categorical or probabilistic")] = (
+        "categorical"
     )
-    cat: str = Field("categorical", description="Categorical or probabilistic")
 
 
 def get_order(threshold):
@@ -97,16 +114,8 @@ def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
     return outlooks
 
 
-def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
+def dotime(ts: datetime, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
     """Query for Outlook based on some timestamp"""
-    if time in ["", "current", "now"]:
-        ts = utc()
-        if day > 1:
-            ts += timedelta(days=day - 1)
-    else:
-        # ISO formatting
-        ts = datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
-        ts = ts.replace(tzinfo=timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
             sql_helper("""
@@ -171,7 +180,7 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     time = environ.get("time")
     cat = environ["cat"].upper()

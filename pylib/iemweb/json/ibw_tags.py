@@ -11,6 +11,8 @@ This service returns a JSON representation of Impact Based Warning Tags
 Changelog
 ---------
 
+- 2026-03-03: Legacy `gentime` root attribute was removed.  Use the
+  `generated_at` parameter.
 - 2025-08-14: Added support to query by state
 
 Usage Examples
@@ -30,6 +32,7 @@ year=2024&state=IA&damagetag=DESTRUCTIVE
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -46,17 +49,25 @@ IEM = "https://mesonet.agron.iastate.edu"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="JSONP Callback Name")
-    damagetag: str = Field(
-        default=None, description="Damage Tag", max_length=20
-    )
-    state: str = Field(
-        default=None,
-        description="State identifier is used first if wfo provided too",
-        max_length=2,
-    )
-    wfo: str = Field(default=None, description="WFO Identifier", max_length=4)
-    year: int = Field(..., description="Year to query", ge=2000, le=utc().year)
+    callback: Annotated[
+        str | None, Field(description="JSONP Callback Name")
+    ] = None
+    damagetag: Annotated[
+        str | None, Field(description="Damage Tag", max_length=20)
+    ] = None
+    state: Annotated[
+        str | None,
+        Field(
+            description="State identifier is used first if wfo provided too",
+            max_length=2,
+        ),
+    ] = None
+    wfo: Annotated[
+        str | None, Field(description="WFO Identifier", max_length=4)
+    ] = None
+    year: Annotated[
+        int, Field(description="Year to query", ge=2000, le=utc().year)
+    ]
 
     @model_validator(mode="after")
     def validate_wfo_or_damagetag(self):
@@ -105,7 +116,6 @@ def run(
         "wfo": wfo,
         "state": state,
         "generated_at": utc().strftime(ISO8601),
-        "gentime": utc().strftime(ISO8601),
         "results": [],
     }
     with get_sqlalchemy_conn("postgis") as conn:

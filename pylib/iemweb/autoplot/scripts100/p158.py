@@ -84,7 +84,7 @@ def get_highcharts(ctx: dict) -> str:
     """Do highcharts variant"""
     add_context(ctx)
     df = ctx["df"]
-    df["ticks"] = df.index.values.view(np.int64) // 10**6
+    df["ticks"] = df.index.values.view(np.int64) // 1e3
     lines = []
     lines2 = []
     lines3 = []

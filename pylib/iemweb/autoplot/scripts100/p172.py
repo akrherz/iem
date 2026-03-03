@@ -242,6 +242,8 @@ def plotter(ctx: dict):
 
     # find max year
     plotted = []
+    if doy_trunc not in df["row"].values.tolist():
+        doy_trunc = df["row"].max()
     for year, color in zip(
         [
             df["binyear"][df["accum"].idxmax()],

@@ -23,6 +23,7 @@ https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station=IATAME
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -33,12 +34,14 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback")
-    eyear: int = Field(datetime.now().year + 1, description="End Year")
-    station: str = Field(
-        "IA0200", description="Station Identifier", max_length=6
+    callback: Annotated[str | None, Field(description="JSONP Callback")] = None
+    eyear: Annotated[int, Field(description="End Year")] = (
+        datetime.now().year + 1
     )
-    syear: int = Field(1800, description="Start Year")
+    station: Annotated[
+        str, Field(description="Station Identifier", max_length=6)
+    ] = "IA0200"
+    syear: Annotated[int, Field(description="Start Year")] = 1800
 
 
 @with_sqlalchemy_conn("coop")

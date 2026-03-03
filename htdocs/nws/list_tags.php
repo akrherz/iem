@@ -335,7 +335,7 @@ $tselect = make_select("damagetag", $damagetag, $damagetags);
 $yselect = yearSelect(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $sselect = stateSelect($state);
-$gentime = $json["gentime"];
+$gentime = $json["generated_at"];
 
 $t->content = <<<EOM
  <div class="container-fluid">
