@@ -45,16 +45,23 @@ import pandas as pd
 from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import LOG, utc
+from pyiem.util import LOG
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_PH_FIELD,
+    VTEC_SIG_FIELD,
+    VTEC_YEAR_FIELD,
+)
 from iemweb.mlib import unrectify_wfo
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     include_text: bool = Field(
         default=True,
         description=(
@@ -68,15 +75,9 @@ class Schema(CGIModel):
         max_length=4,
         pattern=r"^[A-Z]{3,4}$",
     )
-    year: int = Field(
-        ..., description="Year of the event", ge=1986, le=utc().year + 1
-    )
-    phenomena: str = Field(
-        ..., description="VTEC Phenomena", min_length=2, max_length=2
-    )
-    significance: str = Field(
-        ..., description="VTEC Significance", min_length=1, max_length=1
-    )
+    year: VTEC_YEAR_FIELD
+    phenomena: VTEC_PH_FIELD
+    significance: VTEC_SIG_FIELD
     etn: int = Field(..., description="Event Tracking Number", ge=1, le=9999)
 
     @field_validator("wfo")
@@ -117,17 +118,18 @@ def run(environ: dict) -> str:
             },
         )
 
-    res = {
-        "generated_at": utc().strftime(ISO8601),
-        "event_exists": not df.empty,
-        "year": year,
-        "phenomena": phenomena,
-        "significance": significance,
-        "etn": etn,
-        "wfo": wfo,
-        "report": {},
-        "svs": [],
-    }
+    res = json_response_dict(
+        {
+            "event_exists": not df.empty,
+            "year": year,
+            "phenomena": phenomena,
+            "significance": significance,
+            "etn": etn,
+            "wfo": wfo,
+            "report": {},
+            "svs": [],
+        }
+    )
     if df.empty:
         return json.dumps(res)
 

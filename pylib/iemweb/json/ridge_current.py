@@ -9,6 +9,12 @@ The IEM processes a number of NWS Level III products into a geo-referenced
 PNG format.  This service provides a metadata overview of the most recent
 images for a given product.
 
+Changelog
+---------
+
+- 2026-03-03: Root attribute `generation_time_utc` was renamed `generated_at`
+  so to match a common IEM nomenclature.
+
 Example Usage
 -------------
 
@@ -20,30 +26,34 @@ https://mesonet.agron.iastate.edu/json/ridge_current.py?product=N0B
 
 import glob
 import json
+from typing import Annotated
 
 from pydantic import Field
-from pyiem.reference import ISO8601
-from pyiem.util import LOG, utc
+from pyiem.util import LOG
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    product: str = Field(
-        "N0B", description="Radar product to aggregate", max_length=3
-    )
+    callback: CALLBACK_FIELD = None
+    product: Annotated[
+        str, Field(description="Radar product to aggregate", max_length=3)
+    ] = "N0B"
 
 
 def run(product):
     """Actually run for this product"""
 
-    res = {
-        "generation_time_utc": utc().strftime(ISO8601),
-        "product": product,
-        "meta": [],
-    }
+    res = json_response_dict(
+        {
+            "product": product,
+            "meta": [],
+        }
+    )
 
     for fn in glob.glob(
         f"/mesonet/ldmdata/gis/images/4326/ridge/???/{product}_0.json"

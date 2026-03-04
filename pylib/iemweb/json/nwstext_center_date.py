@@ -37,6 +37,9 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 OPTPILS = (
     "AQA CFW DGT DSW FFA FFS FFW FLS FLW FWW HLS MWS MWW NPW NOW PNS PSH RER "
     "RFW RWR RWS SMW SPS SRF SQW SVR SVS TCV TOR TSU WCN WSW"
@@ -46,9 +49,7 @@ OPTPILS = (
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     date: Annotated[
         str | None,
         Field(
@@ -101,7 +102,7 @@ def application(environ: dict, start_response: callable):
         if (environ["ets"] - environ["sts"]) > timedelta(days=14):
             environ["ets"] = environ["sts"] + timedelta(days=14)
 
-    root = {"products": []}
+    root = json_response_dict({"products": []})
     pil_limiter = ""
     params = {
         "center": center,

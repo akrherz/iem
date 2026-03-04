@@ -11,6 +11,8 @@ This service provides a JSON response that describes the Tile Map Services
 Changelog
 ---------
 
+- 2026-03-04: Renamed `generation_utc_time` to `generated_at` to provide better
+  IEM webservice consistency.
 - 2024-08-12: Initial documentation update.
 
 Example Usage
@@ -26,24 +28,26 @@ import json
 import os
 from datetime import datetime
 
-from pydantic import Field
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
 
 
 def run():
     """Generate json response"""
-    res = {
-        "generation_utc_time": utc().strftime(ISO8601),
-        "services": [],
-    }
+    res = json_response_dict(
+        {
+            "services": [],
+        }
+    )
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json"
     if not os.path.isfile(fn):
         return "ERROR"
@@ -78,14 +82,8 @@ def run():
     memcachekey="/json/tms.json",
     memcacheexpire=15,
 )
-def application(environ, start_response):
+def application(_environ: dict, start_response: callable):
     """Answer request."""
-    if environ["REQUEST_METHOD"] not in ["GET", "POST"]:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        data = "Invalid Request"
-        return [data.encode("ascii")]
-
     res = run()
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

@@ -23,22 +23,19 @@ https://mesonet.agron.iastate.edu/json/products.py
 """
 
 import json
-from typing import Annotated
 
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
 
 
 def add_webcam(conn: Connection, data):
@@ -100,10 +97,7 @@ def add_archive_products(conn: Connection, data):
 )
 def application(_environ: dict, start_response: callable):
     """Answer request."""
-    data = {
-        "generated_at": utc().strftime(ISO8601),
-        "products": [],
-    }
+    data = json_response_dict({"products": []})
     with get_sqlalchemy_conn("mesosite") as conn:
         add_archive_products(conn, data)
         add_webcam(conn, data)

@@ -11,6 +11,7 @@ Changelog
 
 import json
 from datetime import datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -18,23 +19,27 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    cid: str = Field(default="ISUC-006", description="Camera ID")
-    date: str = Field(default=None, description="Date in YYYYMMDD format")
-    end_ts: str = Field(
-        default="202101012359", description="End Timestamp in UTC"
+    cid: Annotated[str, Field(description="Camera ID")] = "ISUC-006"
+    date: Annotated[
+        str | None, Field(description="Date in YYYYMMDD format")
+    ] = None
+    end_ts: Annotated[str, Field(description="End Timestamp in UTC")] = (
+        "202101012359"
     )
-    start_ts: str = Field(
-        default="202101010000", description="Start Timestamp in UTC"
+    start_ts: Annotated[str, Field(description="Start Timestamp in UTC")] = (
+        "202101010000"
     )
 
 
 def dance(cid, start_ts, end_ts):
     """Go get the dictionary of data we need and deserve"""
-    data = {"images": []}
+    data = json_response_dict({"images": []})
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
             sql_helper("""

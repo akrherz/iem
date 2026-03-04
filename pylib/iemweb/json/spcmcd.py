@@ -23,36 +23,35 @@ https://mesonet.agron.iastate.edu/json/spcmcd.py?lat=42.0&lon=-95.0&fmt=excel
 
 import json
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback Name")
-    fmt: str = Field(
-        default="json",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(json|excel|csv)$",
-    )
-    lat: float = Field(
-        42.0,
-        description="Latitude of point in decimal degrees",
-        ge=-90,
-        le=90,
-    )
-    lon: float = Field(
-        -95.0,
-        description="Longitude of point in decimal degrees",
-        ge=-180,
-        le=180,
-    )
+    callback: CALLBACK_FIELD = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format to return, either json, excel, or csv",
+            pattern="^(json|excel|csv)$",
+        ),
+    ] = "json"
+    lat: LATITUDE_FIELD_OPTIONAL = 42.0
+    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
 
 
 def dowork(lon, lat) -> pd.DataFrame:
@@ -95,7 +94,7 @@ def application(environ, start_response):
 
     mcds = dowork(lon, lat)
     if fmt == "json":
-        data = {"generated_at": utc().strftime(ISO8601), "mcds": []}
+        data = json_response_dict({"mcds": []})
         for _, row in mcds.iterrows():
             conf = (
                 None

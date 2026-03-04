@@ -41,13 +41,16 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback")
+    callback: CALLBACK_FIELD = None
     pressure: int = Field(-1, description="Pressure Level of Interest")
     station: str = Field(
         default=None,
@@ -93,7 +96,7 @@ def safe(val):
 
 def run(ts, sid, pressure):
     """Actually do some work!"""
-    res = {"profiles": []}
+    res = json_response_dict({"profiles": []})
 
     stationlimiter = ""
     params = {"valid": ts, "pid": pressure}

@@ -42,8 +42,14 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -51,18 +57,14 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     fmt: str = Field(
         "json",
         pattern="^(json|csv|xlsx)$",
         description="The format of the output, either json, csv, or xlsx",
     )
-    lat: float = Field(
-        default=41.99, description="Latitude of point", ge=-90, le=90
-    )
-    lon: float = Field(
-        default=-92.0, description="Longitude of point", ge=-180, le=180
-    )
+    lat: LATITUDE_FIELD_OPTIONAL = 41.99
+    lon: LONGITUDE_FIELD_OPTIONAL = -92.0
     sdate: date = Field(
         default=date(2002, 1, 1),
         description="Start date of search",
@@ -79,13 +81,14 @@ class Schema(CGIModel):
 
 def get_events(environ):
     """Get Events"""
-    data = {
-        "data": [],
-        "lon": environ["lon"],
-        "lat": environ["lat"],
-        "valid": environ["valid"],
-    }
-    data["generated_at"] = utc().strftime(ISO8601)
+    data = json_response_dict(
+        {
+            "data": [],
+            "lon": environ["lon"],
+            "lat": environ["lat"],
+            "valid": environ["valid"],
+        }
+    )
     valid_limiter = ""
     params = {
         "lon": environ["lon"],

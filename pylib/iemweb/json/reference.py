@@ -26,16 +26,18 @@ https://mesonet.agron.iastate.edu/json/reference.py
 
 import json
 
-from pydantic import Field
 from pyiem import reference
 from pyiem.nws.vtec import VTEC_ACTION, VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
 
 
 @iemapp(
@@ -49,10 +51,12 @@ def application(_environ, start_response):
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return json.dumps(
-        {
-            "prodDefinitions": reference.prodDefinitions,
-            "vtec_action": VTEC_ACTION,  # should have been status, sigh
-            "vtec_phenomena": VTEC_PHENOMENA,
-            "vtec_significance": VTEC_SIGNIFICANCE,
-        }
+        json_response_dict(
+            {
+                "prodDefinitions": reference.prodDefinitions,
+                "vtec_action": VTEC_ACTION,  # should have been status, sigh
+                "vtec_phenomena": VTEC_PHENOMENA,
+                "vtec_significance": VTEC_SIGNIFICANCE,
+            }
+        )
     )

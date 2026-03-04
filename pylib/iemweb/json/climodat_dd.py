@@ -40,16 +40,14 @@ from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None,
-        Field(
-            description="Optional JSONP callback function name.",
-        ),
-    ] = None
+    callback: CALLBACK_FIELD = None
     edate: Annotated[
         date,
         Field(
@@ -129,14 +127,16 @@ def run(station, sdate, edate, gddbase, gddceil) -> dict:
         if res.rowcount == 0:
             raise IncompleteWebRequest("No Data Found.")
         accum, lon, lat = [float(x) for x in res.fetchone()]
-    data = {
-        "station": station,
-        "sdate": f"{sdate:%Y-%m-%d}",
-        "edate": f"{edate:%Y-%m-%d}",
-        "gddbase": gddbase,
-        "gddceil": gddceil,
-        "accum": accum,
-    }
+    data = json_response_dict(
+        {
+            "station": station,
+            "sdate": f"{sdate:%Y-%m-%d}",
+            "edate": f"{edate:%Y-%m-%d}",
+            "gddbase": gddbase,
+            "gddceil": gddceil,
+            "accum": accum,
+        }
+    )
     idx, jdx = get_nav("IEMRE", "conus").find_ij(lon, lat)
     if idx is not None:
         for model in ["gfs", "ndfd"]:

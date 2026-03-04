@@ -35,6 +35,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -43,9 +44,7 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str, Field(description="The format of the output, either json or csv")
     ] = "json"

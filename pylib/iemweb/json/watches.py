@@ -32,17 +32,17 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection, text
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """see how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function")
-    ] = None
+    callback: CALLBACK_FIELD = None
     is_pds: Annotated[bool, Field(description="Only PDS Watches")] = False
     year: Annotated[
         int, Field(description="Year to return watches for.", ge=1997)
@@ -74,10 +74,7 @@ def run(conn: Connection, year: int, is_pds: bool) -> str:
     """),
         {"year": year},
     )
-    data = {
-        "generated_at": utc().strftime(ISO8601),
-        "events": [],
-    }
+    data = json_response_dict({"events": []})
     for row in res.mappings():
         data["events"].append(
             dict(

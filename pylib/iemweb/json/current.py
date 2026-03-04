@@ -34,10 +34,14 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    callback: CALLBACK_FIELD = None
     network: Annotated[
         str,
         Field(
@@ -56,9 +60,6 @@ class Schema(CGIModel):
             pattern=r"^[A-Z0-9_\-]+$",
         ),
     ]
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
 
 
 def run(conn: Connection, network, station):
@@ -80,9 +81,8 @@ def run(conn: Connection, network, station):
     if res.rowcount == 0:
         return "{}"
     row = res.mappings().fetchone()
-    data = {}
+    data = json_response_dict({})
     data["server_gentime"] = utc().strftime(ISO8601)
-    data["generated_at"] = utc().strftime(ISO8601)
     data["id"] = station
     data["network"] = network
     ob = data.setdefault("last_ob", {})

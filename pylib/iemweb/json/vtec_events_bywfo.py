@@ -36,7 +36,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_PH_FIELD_OPTIONAL,
+    VTEC_SIG_FIELD_OPTIONAL,
+    VTEC_YEAR_FIELD,
+)
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -44,7 +51,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="JSONP callback function")
+    callback: CALLBACK_FIELD = None
     fmt: str = Field(
         default="json",
         description="The format of the response, either json or csv or xlsx",
@@ -58,25 +65,12 @@ class Schema(CGIModel):
         default=None,
         description="End of period of interest",
     )
-    phenomena: str = Field(
-        default=None,
-        description="VTEC phenomena of interest",
-        max_length=2,
-    )
-    significance: str = Field(
-        default=None,
-        description="VTEC significance of interest",
-        max_length=1,
-    )
+    phenomena: VTEC_PH_FIELD_OPTIONAL = None
+    significance: VTEC_SIG_FIELD_OPTIONAL = None
     wfo: str = Field(
         default="DMX", description="3 character WFO identifier", max_length=3
     )
-    year: int = Field(
-        default=utc().year,
-        ge=1986,
-        le=utc().year,
-        description="Year of interest",
-    )
+    year: VTEC_YEAR_FIELD = utc().year
 
 
 def make_url(row):
@@ -140,9 +134,9 @@ def get_df(wfo, start, end, phenomena, significance):
     return df
 
 
-def as_json(df):
+def as_json(df: pd.DataFrame) -> str:
     """Materialize this df as JSON."""
-    res = {"events": []}
+    res = json_response_dict({"events": []})
     for _, row in df.iterrows():
         res["events"].append(
             {

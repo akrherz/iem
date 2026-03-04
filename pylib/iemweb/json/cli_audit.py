@@ -39,14 +39,13 @@ from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.products.cf6 import parser as cf6_parser
 from pyiem.nws.products.cli import parser as cli_parser
 from pyiem.nws.products.dsm import parser as dsm_parser
-from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 from sqlalchemy.engine import Connection
 
 from iemweb import error_log
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -529,18 +528,19 @@ def application(environ: dict, start_response: callable):
     high_events.sort(key=lambda x: x.utc_valid)
     low_events.sort(key=lambda x: x.utc_valid)
 
-    response = {
-        "generated_at": utc().strftime(ISO8601),
-        "station": station,
-        "date": f"{dt:%Y-%m-%d}",
-        "tzname": tzname,
-        "high": {
-            "events": [e.model_dump(mode="json") for e in high_events],
-        },
-        "low": {
-            "events": [e.model_dump(mode="json") for e in low_events],
-        },
-    }
+    response = json_response_dict(
+        {
+            "station": station,
+            "date": f"{dt:%Y-%m-%d}",
+            "tzname": tzname,
+            "high": {
+                "events": [e.model_dump(mode="json") for e in high_events],
+            },
+            "low": {
+                "events": [e.model_dump(mode="json") for e in low_events],
+            },
+        }
+    )
 
     headers = [("Content-type", get_ct(environ))]
     start_response("200 OK", headers)

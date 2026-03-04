@@ -65,7 +65,13 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -73,7 +79,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     at: AwareDatetime = Field(
         None,
         description=(
@@ -95,8 +101,8 @@ class Schema(CGIModel):
     )
     sdate: date = Field(date(1986, 1, 1), description="Start Date")
     edate: date = Field(date(2099, 1, 1), description="End Date")
-    lat: float = Field(42.5, description="Latitude", ge=-90, le=90)
-    lon: float = Field(-95.5, description="Longitude", ge=-180, le=180)
+    lat: LATITUDE_FIELD_OPTIONAL = 42.0
+    lon: LONGITUDE_FIELD_OPTIONAL = -93.0
 
 
 def make_url(row):
@@ -171,9 +177,9 @@ def get_df(lon, lat, sdate, edate, buffer: float, at: datetime | None):
     return df
 
 
-def to_json(df):
+def to_json(df: pd.DataFrame) -> str:
     """Materialize as JSON."""
-    res = {"events": []}
+    res = json_response_dict({"events": []})
     for _, row in df.iterrows():
         res["events"].append(
             {

@@ -30,11 +30,14 @@ from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[str | None, Field(description="JSONP Callback")] = None
+    callback: CALLBACK_FIELD = None
     eyear: Annotated[int, Field(description="End Year")] = (
         datetime.now().year + 1
     )
@@ -105,12 +108,14 @@ def run(station, syear, eyear, conn: Connection | None = None) -> dict:
     """),
         {"station": station, "syear": syear, "eyear": eyear},
     )
-    data = {
-        "station": station,
-        "start_year": syear,
-        "end_year": eyear,
-        "climatology": [],
-    }
+    data = json_response_dict(
+        {
+            "station": station,
+            "start_year": syear,
+            "end_year": eyear,
+            "climatology": [],
+        }
+    )
     for row in res.mappings():
         data["climatology"].append(
             dict(

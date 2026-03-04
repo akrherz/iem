@@ -30,34 +30,42 @@ sts=2024-07-10T00:00Z&ets=2024-07-11T00:00Z
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    awipsid: str = Field(
-        "AFDDMX",
-        description="The AWIPS Identifier to search for",
-        max_length=6,
-        min_length=3,
-    )
-    sts: datetime = Field(
-        ..., description="Start of the time period (UTC) to search for"
-    )
-    ets: datetime = Field(
-        ..., description="End of the time period (UTC) to search for"
-    )
+    callback: CALLBACK_FIELD = None
+    awipsid: Annotated[
+        str,
+        Field(
+            description="The AWIPS Identifier to search for",
+            max_length=6,
+            min_length=3,
+        ),
+    ] = "AFDDMX"
+    sts: Annotated[
+        datetime,
+        Field(description="Start of the time period (UTC) to search for"),
+    ]
+    ets: Annotated[
+        datetime,
+        Field(description="End of the time period (UTC) to search for"),
+    ]
 
 
 def run(sts, ets, awipsid):
     """Actually do some work!"""
 
-    data = {"results": []}
+    data = json_response_dict({"results": []})
     pillimit = "pil"
     if len(awipsid) == 3:
         pillimit = "substr(pil, 1, 3) "

@@ -40,7 +40,9 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 IEM = "https://mesonet.agron.iastate.edu"
@@ -49,9 +51,7 @@ IEM = "https://mesonet.agron.iastate.edu"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP Callback Name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     damagetag: Annotated[
         str | None, Field(description="Damage Tag", max_length=20)
     ] = None
@@ -111,13 +111,14 @@ def run(
         cbw_wfolimiter = " substr(w.ugc, 1, 2) = :state and "
         sbw_wfolimiter = ""  # Best we can do, the join cleans up our mess
 
-    res = {
-        "year": year,
-        "wfo": wfo,
-        "state": state,
-        "generated_at": utc().strftime(ISO8601),
-        "results": [],
-    }
+    res = json_response_dict(
+        {
+            "year": year,
+            "wfo": wfo,
+            "state": state,
+            "results": [],
+        }
+    )
     with get_sqlalchemy_conn("postgis") as conn:
         cursor = conn.execute(
             sql_helper(

@@ -28,36 +28,49 @@ https://mesonet.agron.iastate.edu/json/spc_bysize.py\
 import json
 import time
 from datetime import date, timedelta
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.products.spcpts import imgsrc_from_row
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function")
-    category: str = Field("CATEGORICAL", description="SPC outlook category")
-    day: int = Field(..., description="SPC outlook day to query")
-    sort: str = Field(
-        default="desc",
-        description="how to sort the results,",
-        pattern="^(asc|desc|ASC|DESC)$",
+    callback: CALLBACK_FIELD = None
+    category: Annotated[str, Field(description="SPC outlook category")] = (
+        "CATEGORICAL"
     )
-    syear: int = Field(1987, description="Inclusive start year to query")
-    threshold: str = Field(..., description="SPC outlook threshold to query")
+    day: Annotated[
+        int, Field(description="SPC outlook day to query", ge=1, le=8)
+    ]
+    sort: Annotated[
+        str,
+        Field(
+            description="how to sort the results,",
+            pattern="^(asc|desc|ASC|DESC)$",
+        ),
+    ] = "desc"
+    syear: Annotated[
+        int, Field(description="Inclusive start year to query")
+    ] = 1987
+    threshold: Annotated[
+        str, Field(description="SPC outlook threshold to query")
+    ]
 
 
 @with_sqlalchemy_conn("postgis")
 def dowork(environ, conn: Connection = None) -> str:
     """Actually do stuff"""
 
-    data = {"generated_at": f"{utc():%Y-%m-%dT%H:%M:%SZ}", "outlooks": []}
+    data = json_response_dict({"outlooks": []})
     hits = []
     sts = time.perf_counter()
     res = conn.execute(

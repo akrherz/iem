@@ -26,20 +26,17 @@ from typing import Annotated
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_dbconn
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.util import get_ct
+from iemweb.fields import CALLBACK_FIELD, VTEC_YEAR_FIELD
+from iemweb.util import get_ct, json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
-    year: Annotated[int, Field(description="Year", ge=1986)] = 2015
+    callback: CALLBACK_FIELD = None
+    year: VTEC_YEAR_FIELD = 2015
     format: Annotated[
         str,
         Field(
@@ -72,18 +69,19 @@ def run(year, fmt):
     """,
         (year,),
     )
-    res = {
-        "count": cursor.rowcount,
-        "generated_at": utc().strftime(ISO8601),
-        "columns": [
-            {"name": "wfo", "type": "str"},
-            {"name": "phenomena", "type": "str"},
-            {"name": "significance", "type": "str"},
-            {"name": "max_eventid", "type": "int"},
-            {"name": "url", "type": "str"},
-        ],
-        "table": cursor.fetchall(),
-    }
+    res = json_response_dict(
+        {
+            "count": cursor.rowcount,
+            "columns": [
+                {"name": "wfo", "type": "str"},
+                {"name": "phenomena", "type": "str"},
+                {"name": "significance", "type": "str"},
+                {"name": "max_eventid", "type": "int"},
+                {"name": "url", "type": "str"},
+            ],
+            "table": cursor.fetchall(),
+        }
+    )
     cursor.close()
     pgconn.close()
 
