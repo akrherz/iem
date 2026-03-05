@@ -92,7 +92,7 @@ def dowork(environ):
     )
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    i, j = get_nav("STAGE4", "conus").find_ij(environ["lon"], environ["lat"])
+    i, j = get_nav("STAGE4").find_ij(environ["lon"], environ["lat"])
     if i is not None:
         with ncopen(ncfn) as nc:
             res["gridi"] = i
