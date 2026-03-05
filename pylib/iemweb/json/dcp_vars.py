@@ -29,17 +29,17 @@ from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     station: Annotated[
         str,
         Field(
@@ -59,10 +59,11 @@ class Schema(CGIModel):
 )
 def application(environ, start_response):
     """Answer request."""
-    data = {
-        "generated_at": utc().strftime(ISO8601),
-        "vars": [],
-    }
+    data = json_response_dict(
+        {
+            "vars": [],
+        }
+    )
     table = f"raw{utc():%Y_%m}"
     with get_sqlalchemy_conn("hads") as conn:
         res = conn.execute(

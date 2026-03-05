@@ -30,6 +30,7 @@ valid=2024-01-10
 import json
 import os
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -40,27 +41,38 @@ from pyiem.iemre import daily_offset
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function")
-    lat: float = Field(41.9, description="Latitude of point", ge=-90, le=90)
-    lon: float = Field(
-        -92.0, description="Longitude of point", ge=-180, le=180
-    )
-    valid: date = Field(
-        default=None,
-        description="Provide data valid for this date (~12 UTC)",
-    )
-    sdate: date = Field(
-        default=None,
-        description="Inclusive start date for data request",
-    )
-    edate: date = Field(
-        default=None,
-        description="Inclusive end date for data request",
-    )
+    callback: CALLBACK_FIELD = None
+    lat: Annotated[
+        float, Field(description="Latitude of point", ge=-90, le=90)
+    ] = 41.9
+    lon: Annotated[
+        float, Field(description="Longitude of point", ge=-180, le=180)
+    ] = -92.0
+    valid: Annotated[
+        date | None,
+        Field(
+            description="Provide data valid for this date (~12 UTC)",
+        ),
+    ] = None
+    sdate: Annotated[
+        date | None,
+        Field(
+            description="Inclusive start date for data request",
+        ),
+    ] = None
+    edate: Annotated[
+        date | None,
+        Field(
+            description="Inclusive end date for data request",
+        ),
+    ] = None
 
     @model_validator(mode="after")
     def validate_dates(self):
@@ -95,15 +107,17 @@ def dowork(environ: dict):
     if i is None or j is None:
         raise IncompleteWebRequest("Coordinates outside of domain")
 
-    res = {
-        "gridi": int(i),
-        "gridj": int(j),
-        "data": [],
-        "disclaimer": (
-            "PRISM Climate Group, Oregon State University, "
-            "https://prism.oregonstate.edu, created 4 Feb 2004."
-        ),
-    }
+    res = json_response_dict(
+        {
+            "gridi": int(i),
+            "gridj": int(j),
+            "data": [],
+            "disclaimer": (
+                "PRISM Climate Group, Oregon State University, "
+                "https://prism.oregonstate.edu, created 4 Feb 2004."
+            ),
+        }
+    )
 
     sidx = daily_offset(dates[0])
     eidx = daily_offset(dates[-1]) + 1

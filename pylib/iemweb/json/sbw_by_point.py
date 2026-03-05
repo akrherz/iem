@@ -55,10 +55,15 @@ from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -66,7 +71,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     buffer: float = Field(
         0.0,
         description="Buffer in decimal degrees around point",
@@ -74,10 +79,8 @@ class Schema(CGIModel):
         le=1,
     )
     fmt: str = Field("json", description="The format of the response")
-    lat: float = Field(41.99, description="Latitude of point", ge=-90, le=90)
-    lon: float = Field(
-        -92.0, description="Longitude of point", ge=-180, le=180
-    )
+    lat: LATITUDE_FIELD_OPTIONAL = 41.99
+    lon: LONGITUDE_FIELD_OPTIONAL = -92.0
     sdate: date = Field(default=date(2002, 1, 1), description="Start Date")
     edate: date = Field(default=date(2099, 1, 1), description="End Date")
     valid: AwareDatetime = Field(
@@ -105,14 +108,15 @@ def make_url(row):
 
 def get_events(environ: dict):
     """Get Events"""
-    data = {
-        "sbws": [],
-        "lon": environ["lon"],
-        "lat": environ["lat"],
-        "buffer": environ["buffer"],
-        "valid": None,
-    }
-    data["generated_at"] = utc().strftime(ISO8601)
+    data = json_response_dict(
+        {
+            "sbws": [],
+            "lon": environ["lon"],
+            "lat": environ["lat"],
+            "buffer": environ["buffer"],
+            "valid": None,
+        }
+    )
     valid_limiter = ""
     params = {
         "lon": environ["lon"],

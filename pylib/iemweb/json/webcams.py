@@ -36,6 +36,7 @@ https://mesonet.agron.iastate.edu/json/webcams.py?network=MCFC
 
 import json
 from datetime import timedelta, timezone
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field
@@ -43,24 +44,31 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 US_CENTRAL = ZoneInfo("America/Chicago")
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    network: str = Field(
-        default="KCRG",
-        description="Network identifier to look for webcams for.",
-    )
-    ts: AwareDatetime = Field(
-        default=None,
-        description=(
-            "Archived timestamp to look for imagery, "
-            "not providing implies realtime."
+    callback: CALLBACK_FIELD = None
+    network: Annotated[
+        str,
+        Field(
+            description="Network identifier to look for webcams for.",
         ),
-    )
+    ] = "KCRG"
+    ts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "Archived timestamp to look for imagery, "
+                "not providing implies realtime."
+            ),
+        ),
+    ] = None
 
 
 def query_db(conn: Connection, environ):
@@ -101,9 +109,7 @@ def query_db(conn: Connection, environ):
 )
 def application(environ, start_response):
     """Answer request."""
-    data = {
-        "images": [],
-    }
+    data = json_response_dict({"images": []})
     # Add the overview image, le sigh, it wants US Central Time
     extra = (
         ""

@@ -26,14 +26,16 @@ import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     date: dateobj = Field(
         default=dateobj.today(),
         description="Query metadata changes since this date.",
@@ -43,9 +45,7 @@ class Schema(CGIModel):
 def run(dt):
     """Actually run for this product"""
 
-    data = {
-        "generated_at": utc().strftime(ISO8601),
-    }
+    data = json_response_dict()
     with get_sqlalchemy_conn("mesosite") as conn:
         changed = pd.read_sql(
             sql_helper(

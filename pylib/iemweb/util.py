@@ -4,6 +4,8 @@ import fcntl
 import os
 from pathlib import Path
 
+from pyiem.reference import ISO8601
+from pyiem.util import utc
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
 
@@ -33,6 +35,18 @@ MONTH_LOOKUP = {
     "gs": [5, 6, 7, 8, 9],
     "mjj": [5, 6, 7],
 }
+
+
+def json_response_dict(init_dict: dict | None = None) -> dict:
+    """Supplement the response dict with a generated_at timestamp in ISO8601.
+
+    Example usage: json_response_dict({"data": []})
+    """
+    gen_at = utc().strftime(ISO8601)
+    if init_dict is not None:
+        init_dict.setdefault("generated_at", gen_at)
+        return init_dict
+    return {"generated_at": gen_at}
 
 
 def acquire_slot(name: str, max_processes: int):

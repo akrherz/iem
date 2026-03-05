@@ -21,8 +21,10 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 BASEURL = "https://www.spc.noaa.gov/products/md"
 
@@ -30,9 +32,7 @@ BASEURL = "https://www.spc.noaa.gov/products/md"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSON(P) callback.")
-    ] = None
+    callback: CALLBACK_FIELD = None
     count: Annotated[
         int,
         Field(
@@ -53,10 +53,7 @@ class Schema(CGIModel):
 def dowork(count, sort):
     """Actually do stuff"""
 
-    data = {
-        "mcds": [],
-        "generated_at": utc().strftime(ISO8601),
-    }
+    data = json_response_dict({"mcds": []})
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
             sql_helper(

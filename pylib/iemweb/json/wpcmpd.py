@@ -27,32 +27,28 @@ import pandas as pd
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
+
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP Callback Name")
+    callback: CALLBACK_FIELD = None
     fmt: str = Field(
         default="json",
         description="The format to return data in, either json, excel, or csv",
         pattern="^(json|excel|csv)$",
     )
-    lat: float = Field(
-        42.0,
-        description="Latitude of point in decimal degrees",
-        ge=-90,
-        le=90,
-    )
-    lon: float = Field(
-        -95.0,
-        description="Longitude of point in decimal degrees",
-        ge=-180,
-        le=180,
-    )
+    lat: LATITUDE_FIELD_OPTIONAL = 42.0
+    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
 
 
 @with_sqlalchemy_conn("postgis")
@@ -88,7 +84,7 @@ def application(environ, start_response):
 
     mpds = dowork(lon, lat)
     if fmt == "json":
-        data = {"generated_at": utc().strftime(ISO8601), "mpds": []}
+        data = json_response_dict({"mpds": []})
         for _, row in mpds.iterrows():
             conf = (
                 None

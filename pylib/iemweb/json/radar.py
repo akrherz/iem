@@ -41,12 +41,16 @@ start=2024-06-30T15:20:00Z&operation=available
 import glob
 import json
 import os.path
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 NIDS = {
     "N0B": "Base Reflectivity (Super Res)",
@@ -66,46 +70,56 @@ NIDS = {
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None,
-        description="Optional JSONP callback function name",
-        max_length=128,
-    )
-    end: AwareDatetime = Field(
-        default=None,
-        description="End of time period to search for data",
-    )
-    lat: float = Field(
-        default=41.9,
-        description="Latitude of location to search for nearby RADARs",
-        ge=-90,
-        le=90,
-    )
-    lon: float = Field(
-        default=-92.3,
-        description="Longitude of location to search for nearby RADARs",
-        ge=-180,
-        le=180,
-    )
-    operation: str = Field(
-        default="list",
-        description="The operation to perform, either list or available",
-        pattern="^(list|available|products)$",
-    )
-    product: str = Field(
-        default="N0Q",
-        description="The NEXRAD product to search for data",
-        max_length=3,
-    )
-    radar: str = Field(
-        default="DMX",
-        description="The RADAR site to search for data",
-        max_length=10,
-    )
-    start: AwareDatetime = Field(
-        default=None,
-        description="Find RADARs available at the given time, defaults to now",
-    )
+    callback: CALLBACK_FIELD = None
+    end: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="End of time period to search for data",
+        ),
+    ] = None
+    lat: Annotated[
+        float,
+        Field(
+            description="Latitude of location to search for nearby RADARs",
+            ge=-90,
+            le=90,
+        ),
+    ] = 41.9
+    lon: Annotated[
+        float,
+        Field(
+            description="Longitude of location to search for nearby RADARs",
+            ge=-180,
+            le=180,
+        ),
+    ] = -95.0
+    operation: Annotated[
+        str,
+        Field(
+            description="The operation to perform, either list or available",
+            pattern="^(list|available|products)$",
+        ),
+    ] = "list"
+    product: Annotated[
+        str,
+        Field(
+            description="The NEXRAD product to search for data",
+            max_length=3,
+        ),
+    ] = "N0B"
+    radar: Annotated[
+        str,
+        Field(
+            description="The RADAR site to search for data",
+            max_length=10,
+        ),
+    ] = "DMX"
+    start: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Find RADARs available at the given time, default now",
+        ),
+    ] = None
 
 
 def available_radars(environ):
@@ -122,7 +136,7 @@ def available_radars(environ):
         "lon": lon,
         "start": start_gts,
     }
-    root = {"radars": []}
+    root = json_response_dict({"radars": []})
     if lat is None or lon is None:
         sql = """
         select id, name,
@@ -168,7 +182,7 @@ def available_radars(environ):
     return root
 
 
-def find_scans(root, radar, product, sts, ets):
+def find_scans(root: dict, radar, product, sts, ets):
     """Find scan times with data
 
     Note that we currently have a 500 length hard coded limit, so if we are
@@ -215,7 +229,7 @@ def find_scans(root, radar, product, sts, ets):
     root["scans"] = times
 
 
-def is_realtime(sts):
+def is_realtime(sts: datetime) -> bool:
     """
     Check to see if this time is close to realtime...
     """
@@ -239,7 +253,7 @@ def list_files(environ):
     # practical limit here of 10 days
     if (start_gts + timedelta(days=10)) < end_gts:
         end_gts = start_gts + timedelta(days=10)
-    root = {"scans": []}
+    root = json_response_dict({"scans": []})
     find_scans(root, radar, product, start_gts, end_gts)
     if not root["scans"] and is_realtime(start_gts):
         now = start_gts - timedelta(minutes=10)
@@ -256,7 +270,7 @@ def list_products(environ):
     now = environ["start"]
     if now is None:
         now = utc()
-    root = {"products": []}
+    root = json_response_dict({"products": []})
     if radar == "USCOMP":
         for dirname in ["N0Q", "N0R"]:
             testfp = now.strftime(
@@ -301,12 +315,12 @@ def application(environ, start_response):
     operation = environ["operation"]
     data = ""
     if operation == "list":
-        data = json.dumps(list_files(environ))
+        data = list_files(environ)
     elif operation == "available":
-        data = json.dumps(available_radars(environ))
+        data = available_radars(environ)
     elif operation == "products":
-        data = json.dumps(list_products(environ))
+        data = list_products(environ)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return data.encode("ascii")
+    return json.dumps(data).encode("ascii")

@@ -37,9 +37,9 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD, STATE_FIELD, VTEC_YEAR_FIELD
 from iemweb.mlib import rectify_wfo
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -48,9 +48,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[str, Field(description="optional JSONP callback")] = (
-        None
-    )
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(
@@ -72,17 +70,8 @@ class Schema(CGIModel):
             max_length=1,
         ),
     ] = "_"
-    state: Annotated[
-        str, Field(description="2 character state identifier", max_length=2)
-    ]
-    year: Annotated[
-        int,
-        Field(
-            description="Year to query for",
-            ge=1986,
-            le=utc().year,
-        ),
-    ]
+    state: STATE_FIELD
+    year: VTEC_YEAR_FIELD
 
 
 def get_res(state, year, phenomena, significance):

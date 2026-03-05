@@ -51,7 +51,9 @@ from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -59,7 +61,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, description="Optional JSON-P Callback")
+    callback: CALLBACK_FIELD = None
     fmt: str = Field(
         default="json",
         description="Response format, either json, csv, or excel",
@@ -141,7 +143,7 @@ def get_df(ugc, sts: datetime, ets: datetime):
 
 def as_json(df):
     """Materialize this df as JSON."""
-    res = {"events": []}
+    res = json_response_dict({"events": []})
     for _, row in df.iterrows():
         res["events"].append(
             {

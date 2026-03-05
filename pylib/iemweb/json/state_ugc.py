@@ -25,20 +25,18 @@ https://mesonet.agron.iastate.edu/json/state_ugc.py?state=LM
 
 import json
 
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD, STATE_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    state: str = Field(
-        default="IA",
-        description="state indentifier",
-        pattern="^[A-Z]{2}$",
-    )
+    callback: CALLBACK_FIELD = None
+    state: STATE_FIELD = "IA"
 
 
 @iemapp(
@@ -50,9 +48,11 @@ class Schema(CGIModel):
 )
 def application(environ, start_response):
     """Answer request."""
-    data = {
-        "ugcs": [],
-    }
+    data = json_response_dict(
+        {
+            "ugcs": [],
+        }
+    )
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
             sql_helper(

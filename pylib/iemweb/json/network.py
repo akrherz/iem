@@ -23,13 +23,14 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     network: Annotated[
         str,
         Field(
@@ -52,9 +53,7 @@ def get_mckey(environ):
 )
 def application(environ, start_response):
     """Answer request."""
-    data = {
-        "stations": [],
-    }
+    data = json_response_dict({"stations": []})
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
             sql_helper(

@@ -43,12 +43,18 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
 from iemweb.util import get_ct
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(
@@ -60,21 +66,8 @@ class Schema(CGIModel):
         str | None,
         Field(description="The timestamp to query for", pattern="^[0-9]{12}$"),
     ] = None
-    lat: Annotated[
-        float | None,
-        Field(
-            description="The latitude to query for",
-        ),
-    ] = None
-    lon: Annotated[
-        float | None,
-        Field(
-            description="The longitude to query for",
-        ),
-    ] = None
-    callback: Annotated[
-        str | None, Field(description="Callback function for JSONP output")
-    ] = None
+    lat: LATITUDE_FIELD_OPTIONAL = None
+    lon: LONGITUDE_FIELD_OPTIONAL = None
 
 
 def process_df(watches: gpd.GeoDataFrame) -> gpd.GeoDataFrame:

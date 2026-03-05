@@ -40,13 +40,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     product_id: Annotated[
         str,
         Field(
@@ -75,7 +76,7 @@ def application(environ: dict, start_response: callable):
     except ValueError as exp:
         raise BadWebRequest("Invalid timestamp") from exp
     utc = utc.replace(tzinfo=timezone.utc)
-    root = {"products": []}
+    root = json_response_dict({"products": []})
 
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(

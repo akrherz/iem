@@ -33,19 +33,21 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
 from pydantic import Field, field_validator
-from pyiem.grid.nav import STAGE4
+from pyiem.grid.nav import get_nav
 from pyiem.iemre import hourly_offset
-from pyiem.reference import ISO8601
-from pyiem.util import mm2inch, ncopen, utc
+from pyiem.util import mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
-    lat: float = Field(..., description="Latitude of point", ge=-90, le=90)
-    lon: float = Field(..., description="Longitude of point", ge=-180, le=180)
+    callback: CALLBACK_FIELD = None
+    lat: LATITUDE_FIELD
+    lon: LONGITUDE_FIELD
     valid: date = Field(..., description="Valid date of data")
     tz: str = Field("UTC", description="Timezone of valid date")
 
@@ -80,16 +82,17 @@ def dowork(environ):
     eidx = hourly_offset(ets)
 
     ncfn = f"/mesonet/data/stage4/{valid:%Y}_stage4_hourly.nc"
-    res = {
-        "generated_at": utc().strftime(ISO8601),
-        "gridi": -1,
-        "gridj": -1,
-        "for_date_in_timezone": environ["tz"],
-        "data": [],
-    }
+    res = json_response_dict(
+        {
+            "gridi": -1,
+            "gridj": -1,
+            "for_date_in_timezone": environ["tz"],
+            "data": [],
+        }
+    )
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    i, j = STAGE4.find_ij(environ["lon"], environ["lat"])
+    i, j = get_nav("STAGE4").find_ij(environ["lon"], environ["lat"])
     if i is not None:
         with ncopen(ncfn) as nc:
             res["gridi"] = i

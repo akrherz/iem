@@ -54,10 +54,18 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(
@@ -65,15 +73,8 @@ class Schema(CGIModel):
             pattern="^(json|excel|csv)$",
         ),
     ] = "json"
-    callback: Annotated[
-        str | None, Field(description="JSONP Callback Name")
-    ] = None
-    lat: Annotated[
-        float, Field(description="Latitude of point in decimal degrees")
-    ] = 42.0
-    lon: Annotated[
-        float, Field(description="Longitude of point in decimal degrees")
-    ] = -95.0
+    lat: LATITUDE_FIELD_OPTIONAL = 42.0
+    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
     last: Annotated[
         int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
     ] = 0
@@ -196,16 +197,17 @@ def application(environ: dict, start_response: callable):
         outlooks = dowork(lon, lat, day)
 
     if fmt == "json" and time is not None:
-        res = {
-            "generated_at": utc().strftime(ISO8601),
-            "query_params": {
-                "time": ts.strftime(ISO8601),
-                "lon": lon,
-                "lat": lat,
-                "day": day,
-            },
-            "outlook": {},
-        }
+        res = json_response_dict(
+            {
+                "query_params": {
+                    "time": ts.strftime(ISO8601),
+                    "lon": lon,
+                    "lat": lat,
+                    "day": day,
+                },
+                "outlook": {},
+            }
+        )
         if not outlooks.empty:
             row0 = outlooks.iloc[0]
             res["outlook"] = {

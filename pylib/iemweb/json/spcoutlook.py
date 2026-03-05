@@ -54,13 +54,16 @@ from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(
@@ -70,9 +73,6 @@ class Schema(CGIModel):
             pattern="^(json|excel|csv)$",
         ),
     ] = "json"
-    callback: Annotated[
-        str | None, Field(description="JSONP Callback Name")
-    ] = None
     lat: Annotated[
         float, Field(description="Latitude of point in decimal degrees")
     ] = 42.0
@@ -198,17 +198,18 @@ def application(environ: dict, start_response: callable):
         outlooks = dowork(lon, lat, day, cat)
 
     if fmt == "json" and time is not None:
-        res = {
-            "generated_at": utc().strftime(ISO8601),
-            "query_params": {
-                "time": ts.strftime(ISO8601),
-                "lon": lon,
-                "lat": lat,
-                "cat": cat,
-                "day": day,
-            },
-            "outlook": {},
-        }
+        res = json_response_dict(
+            {
+                "query_params": {
+                    "time": ts.strftime(ISO8601),
+                    "lon": lon,
+                    "lat": lat,
+                    "cat": cat,
+                    "day": day,
+                },
+                "outlook": {},
+            }
+        )
         if not outlooks.empty:
             row0 = outlooks.iloc[0]
             res["outlook"] = {

@@ -53,16 +53,20 @@ import geopandas as gpd
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.util import get_ct
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
+from iemweb.util import get_ct, json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(
@@ -70,25 +74,8 @@ class Schema(CGIModel):
             pattern="^(json|excel|csv)$",
         ),
     ] = "json"
-    callback: Annotated[
-        str | None, Field(description="JSONP Callback Name")
-    ] = None
-    lat: Annotated[
-        float,
-        Field(
-            description="Latitude of point in decimal degrees",
-            ge=20,
-            le=60,
-        ),
-    ] = 42.0
-    lon: Annotated[
-        float,
-        Field(
-            description="Longitude of point in decimal degrees",
-            ge=-130,
-            le=-60,
-        ),
-    ] = -95.0
+    lat: LATITUDE_FIELD_OPTIONAL = 42.0
+    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
     outlook_type: Annotated[
         str,
         Field(
@@ -189,16 +176,17 @@ def application(environ, start_response):
     )
 
     if fmt == "json":
-        res = {
-            "generated_at": utc().strftime(ISO8601),
-            "query_params": {
-                "lon": environ["lon"],
-                "lat": environ["lat"],
-                "outlook_type": environ["outlook_type"],
-                "valid": environ["valid"].strftime("%Y-%m-%d"),
-            },
-            "outlooks": outlooks.to_dict(orient="records"),
-        }
+        res = json_response_dict(
+            {
+                "query_params": {
+                    "lon": environ["lon"],
+                    "lat": environ["lat"],
+                    "outlook_type": environ["outlook_type"],
+                    "valid": environ["valid"].strftime("%Y-%m-%d"),
+                },
+                "outlooks": outlooks.to_dict(orient="records"),
+            }
+        )
         headers = [("Content-type", get_ct(environ))]
         start_response("200 OK", headers)
         return json.dumps(res).replace("NaN", "null")

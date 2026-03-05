@@ -10,28 +10,27 @@ Changelog
 """
 
 import json
-from typing import Annotated
 
-from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[str | None, Field(description="JSONP Callback")] = None
+    callback: CALLBACK_FIELD = None
 
 
 @with_sqlalchemy_conn("postgis")
 def run(conn: Connection = None):
     """Generate data."""
-    data = {"generated_at": utc().strftime(ISO8601), "events": []}
+    data = json_response_dict({"events": []})
     res = conn.execute(
         sql_helper("""
     SELECT vtec_year, wfo, eventid,

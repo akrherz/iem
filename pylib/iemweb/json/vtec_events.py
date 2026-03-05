@@ -45,11 +45,17 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_PH_FIELD_OPTIONAL,
+    VTEC_SIG_FIELD_OPTIONAL,
+    VTEC_YEAR_FIELD,
+)
 from iemweb.mlib import rectify_wfo
+from iemweb.util import json_response_dict
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -57,7 +63,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="optional JSONP callback")
+    callback: CALLBACK_FIELD = None
     combo: bool = Field(
         default=False,
         description="Special one-off to get all SV, TO, FF, MA events",
@@ -67,22 +73,12 @@ class Schema(CGIModel):
         description="Output format, json, csv, xlsx",
         pattern="^(json|csv|xlsx)$",
     )
-    phenomena: str = Field(
-        default=None,
-        description="2 character phenomena to limit results to",
-        max_length=2,
-    )
-    significance: str = Field(
-        default=None,
-        description="1 character significance to limit results to",
-        max_length=1,
-    )
+    phenomena: VTEC_PH_FIELD_OPTIONAL = None
+    significance: VTEC_SIG_FIELD_OPTIONAL = None
     wfo: str = Field(
         "MPX", description="3 character WFO identifier", max_length=4
     )
-    year: int = Field(
-        2015, description="Year to query", ge=1986, le=utc().year
-    )
+    year: VTEC_YEAR_FIELD = 2015
 
 
 def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
@@ -148,12 +144,13 @@ def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
         ),
         params,
     )
-    data = {
-        "wfo": wfo,
-        "generated_at": utc().strftime(ISO8601),
-        "year": year,
-        "events": [],
-    }
+    data = json_response_dict(
+        {
+            "wfo": wfo,
+            "year": year,
+            "events": [],
+        }
+    )
     for row in res.mappings():
         uri = (
             f"/vtec/?year={year}&wfo={rectify_wfo(wfo)}&"
