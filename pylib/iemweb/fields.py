@@ -19,6 +19,15 @@ CALLBACK_FIELD = Annotated[
     ),
 ]
 
+# -------------
+_DOM = Field(
+    description="Day of the month",
+    le=31,
+    ge=1,
+)
+DAY_OF_MONTH_FIELD = Annotated[int, _DOM]
+DAY_OF_MONTH_FIELD_OPTIONAL = Annotated[int | None, _DOM]
+
 # --------------
 _LATF = Field(
     description="Latitude (decimal degrees) of point of interest",
@@ -36,6 +45,16 @@ _LONF = Field(
 )
 LONGITUDE_FIELD = Annotated[float, _LONF]
 LONGITUDE_FIELD_OPTIONAL = Annotated[float | None, _LONF]
+
+
+# --------------
+_MF = Field(
+    description="Month of the year",
+    le=12,
+    ge=1,
+)
+MONTH_FIELD = Annotated[int, _MF]
+MONTH_FIELD_OPTIONAL = Annotated[int | None, _MF]
 
 # --------------
 _SF = Field(
@@ -72,3 +91,12 @@ _VYF = Field(
 )
 VTEC_YEAR_FIELD = Annotated[int, _VYF]
 VTEC_YEAR_FIELD_OPTIONAL = Annotated[int | None, _VYF]
+
+# -----------------
+_YF = Field(
+    description=("Year field."),
+    ge=1850,
+    le=date.today().year + 1,  # Forgive a bit
+)
+YEAR_FIELD = Annotated[int, _YF]
+YEAR_FIELD_OPTIONAL = Annotated[int | None, _YF]

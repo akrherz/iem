@@ -12,6 +12,9 @@ timestamps, not the forecast valid times.
 Changelog
 ---------
 
+- 2026-03-05: An edge case was corrected where you request timestamps in
+  a given timezone, which are ambiguous during DST fall back. The field is
+  now set to null instead of erroring.
 - 2026-02-13: Added `is_amendment` to output to denote if the TAF is
   amended or not.
 - 2025-08-12: The parser was improved to delineate forecast types, the
@@ -173,7 +176,9 @@ def run(start_response, environ):
         tzinfo = ZoneInfo(environ["tz"])
         for col in ["valid", "fx_valid", "fx_valid_end"]:
             df[col] = (
-                df[col].dt.tz_localize(tzinfo).dt.strftime("%Y-%m-%d %H:%M")
+                df[col]
+                .dt.tz_localize(tzinfo, ambiguous="NaT", nonexistent="NaT")
+                .dt.strftime("%Y-%m-%d %H:%M")
             )
     if environ["last"]:
         df = df[df["rank"] == 1]

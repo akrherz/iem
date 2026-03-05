@@ -12,23 +12,41 @@ syear=2024&smonth=1&sday=1&eyear=2024&emonth=12&eday=31
 
 """
 
+import re
+from typing import Annotated
+
 import pandas as pd
-from pydantic import Field
+from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD, YEAR_FIELD
+
+STATION_RE = re.compile(r"^[A-Z0-9_]{3,12}$")
 
 
 class Schema(CGIModel):
     """Request arguments."""
 
-    syear: int = Field(..., description="Start Year")
-    smonth: int = Field(..., description="Start Month")
-    sday: int = Field(..., description="Start Day")
-    eyear: int = Field(..., description="End Year")
-    emonth: int = Field(..., description="End Month")
-    eday: int = Field(..., description="End Day")
-    station: ListOrCSVType = Field(..., description="Station Identifier")
+    syear: YEAR_FIELD
+    smonth: MONTH_FIELD
+    sday: DAY_OF_MONTH_FIELD
+    eyear: YEAR_FIELD
+    emonth: MONTH_FIELD
+    eday: DAY_OF_MONTH_FIELD
+    station: Annotated[ListOrCSVType, Field(description="Station Identifier")]
+
+    @field_validator("station", mode="before")
+    def _fix_station(cls, v):
+        """Fix up station."""
+        if isinstance(v, str):
+            v = [v]
+        for item in v:
+            if not STATION_RE.match(item):
+                raise ValueError(f"Invalid station: {item}")
+
+        return v
 
 
 @iemapp(help=__doc__, schema=Schema)
