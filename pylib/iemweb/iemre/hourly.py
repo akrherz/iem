@@ -18,16 +18,18 @@ import os
 from datetime import date as datetype
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 import numpy as np
-from pydantic import Field, computed_field, field_validator, model_validator
+from pydantic import Field, computed_field, model_validator
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_domain, get_hourly_ncname, hourly_offset
 from pyiem.reference import ISO8601
 from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import TZ_FIELD
 
 ISO = "%Y-%m-%dT%H:%MZ"
 
@@ -66,24 +68,7 @@ class Schema(CGIModel):
             description="Longitude (degrees East) of point to query",
         ),
     ]
-    tz: Annotated[
-        str,
-        Field(
-            description=(
-                "Timezone of the point to query, for example 'America/Chicago'"
-            ),
-        ),
-    ] = "America/Chicago"
-
-    @field_validator("tz", mode="before")
-    @classmethod
-    def validate_tz(cls, value):
-        """Ensure the timezone is valid."""
-        try:
-            ZoneInfo(value)
-        except ZoneInfoNotFoundError as exp:
-            raise ValueError(f"Unknown timezone {value}") from exp
-        return value
+    tz: TZ_FIELD = "America/Chicago"
 
     @model_validator(mode="after")
     def ensure_domain(self):

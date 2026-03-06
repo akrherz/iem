@@ -27,10 +27,12 @@ station=AMW&network=IA_ASOS&sts=2024-01-01T00:00:00Z&ets=2024-02-01T00:00:00Z\
 
 from zoneinfo import ZoneInfo
 
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import TZ_FIELD
 
 
 class Schema(CGIModel):
@@ -54,12 +56,7 @@ class Schema(CGIModel):
     sts: AwareDatetime = Field(
         default=None, description="The start of the requested interval."
     )
-    tz: str = Field(
-        default="America/Chicago",
-        description=(
-            "The timezone to present the data in and for requested interval."
-        ),
-    )
+    tz: TZ_FIELD = "America/Chicago"
     year1: int = Field(
         default=None, description="The start year, when sts is unset."
     )
@@ -78,16 +75,6 @@ class Schema(CGIModel):
     day2: int = Field(
         default=None, description="The end day, when ets is unset."
     )
-
-    @field_validator("tz", mode="after")
-    @classmethod
-    def validate_tz(cls, value):
-        """Ensure the timezone is valid."""
-        try:
-            ZoneInfo(value)
-        except Exception as exp:
-            raise ValueError("Invalid timezone") from exp
-        return value
 
 
 def get_data(network, environ, tzinfo):

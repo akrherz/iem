@@ -29,16 +29,21 @@ https://mesonet.agron.iastate.edu/json/stage4.py\
 import json
 import os
 from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 import numpy as np
-from pydantic import Field, field_validator
+from pydantic import Field
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import hourly_offset
 from pyiem.util import mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
+    TZ_FIELD,
+)
 from iemweb.util import json_response_dict
 
 
@@ -49,17 +54,7 @@ class Schema(CGIModel):
     lat: LATITUDE_FIELD
     lon: LONGITUDE_FIELD
     valid: date = Field(..., description="Valid date of data")
-    tz: str = Field("UTC", description="Timezone of valid date")
-
-    @field_validator("tz", mode="before")
-    @classmethod
-    def validate_tz(cls, value):
-        """Ensure the timezone is valid."""
-        try:
-            ZoneInfo(value)
-        except ZoneInfoNotFoundError as exp:
-            raise ValueError(f"Unknown timezone {value}") from exp
-        return value
+    tz: TZ_FIELD = "UTC"
 
 
 def myrounder(val, precision):
