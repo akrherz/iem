@@ -1,9 +1,16 @@
 """Stanardized fields used as parameters in Models."""
 
+import re
 from datetime import date
 from typing import Annotated
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field
+from pydantic import (
+    AfterValidator,
+    BeforeValidator,
+    Field,
+    WithJsonSchema,
+)
 
 # --------------
 # Never required, so no optional variant
@@ -57,12 +64,67 @@ MONTH_FIELD = Annotated[int, _MF]
 MONTH_FIELD_OPTIONAL = Annotated[int | None, _MF]
 
 # --------------
+_STF = Field(
+    description=(
+        "Either provide a single value, multiple parameters each with a "
+        "single value, or a comma-separated list of values.  The context here "
+        "is a list of station identifiers.  All lowercase letters are "
+        "converted to uppercase."
+    ),
+)
+
+
+def _clean_station_strings(val: list[str]) -> list[str]:
+    """Clean up the station strings."""
+    station_re = re.compile(r"^[A-Za-z0-9_]+$")
+    for v in val:
+        if not station_re.match(v.strip()):
+            raise ValueError(f"Invalid station identifier: {v}")
+    return [v.strip().upper() for v in val if v.strip()]
+
+
+STATION_LIST_FIELD = Annotated[
+    list,
+    BeforeValidator(lambda v: v.split(",") if isinstance(v, str) else v),
+    AfterValidator(_clean_station_strings),
+    _STF,
+    WithJsonSchema({"type": "string"}, mode="serialization"),
+]
+
+# --------------
 _SF = Field(
     description="Two letter (uppercase) United States code",
     pattern="^[A-Z]{2}$",
 )
 STATE_FIELD = Annotated[str, _SF]
 STATE_FIELD_OPTIONAL = Annotated[str | None, _SF]
+
+# --------------
+_TZF = Field(description=("A POSIX timezone string like America/Chicago."))
+
+
+def _validate_tz(val: str):
+    """Ensure we can use this."""
+    # Opinionated, but we have historically accepted these two values as UTC
+    if val in ["", "etc/utc"]:
+        return "UTC"
+    try:
+        ZoneInfo(val)
+    except ZoneInfoNotFoundError as exp:
+        raise ValueError(f"Unknown timezone: {val}") from exp
+    return val
+
+
+TZ_FIELD = Annotated[
+    str,
+    BeforeValidator(_validate_tz),
+    _TZF,
+]
+TZ_FIELD_OPTIONAL = Annotated[
+    str | None,
+    BeforeValidator(_validate_tz),
+    _TZF,
+]
 
 # --------------
 _VSF = Field(
