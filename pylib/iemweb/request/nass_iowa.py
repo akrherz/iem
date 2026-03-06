@@ -8,9 +8,11 @@ the IEM database.  The data is available in Excel format.  There are no options
 to this service at this time.
 
 Example Usage
-~~~~~~~~~~~~~
+-------------
 
-   https://mesonet.agron.iastate.edu/cgi-bin/request/nass_iowa.py
+Simple Request.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/nass_iowa.py
 
 """
 

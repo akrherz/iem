@@ -13,33 +13,35 @@ syear=2024&smonth=1&sday=1&eyear=2024&emonth=12&eday=31
 """
 
 import pandas as pd
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD,
+    MONTH_FIELD,
+    STATION_LIST_FIELD,
+    YEAR_FIELD,
+)
 
 
 class Schema(CGIModel):
     """Request arguments."""
 
-    syear: int = Field(..., description="Start Year")
-    smonth: int = Field(..., description="Start Month")
-    sday: int = Field(..., description="Start Day")
-    eyear: int = Field(..., description="End Year")
-    emonth: int = Field(..., description="End Month")
-    eday: int = Field(..., description="End Day")
-    station: ListOrCSVType = Field(..., description="Station Identifier")
+    syear: YEAR_FIELD
+    smonth: MONTH_FIELD
+    sday: DAY_OF_MONTH_FIELD
+    eyear: YEAR_FIELD
+    emonth: MONTH_FIELD
+    eday: DAY_OF_MONTH_FIELD
+    station: STATION_LIST_FIELD
 
 
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Handle mod_wsgi request."""
-    sts = utc(
-        int(environ["syear"]), int(environ["smonth"]), int(environ["sday"])
-    )
-    ets = utc(
-        int(environ["eyear"]), int(environ["emonth"]), int(environ["eday"])
-    )
+    sts = utc(environ["syear"], environ["smonth"], environ["sday"])
+    ets = utc(environ["eyear"], environ["emonth"], environ["eday"])
     stations = environ["station"]
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(

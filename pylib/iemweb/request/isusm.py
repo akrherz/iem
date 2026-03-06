@@ -45,15 +45,16 @@ import re
 import warnings
 from datetime import timedelta
 from io import BytesIO, StringIO
-from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import TZ_FIELD
 
 # Cull a fragmentation warning from pandas due to our hacky things
 warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -107,10 +108,7 @@ class Schema(CGIModel):
     todisk: str = Field(
         default="no", description="Download to Disk", pattern="yes|no"
     )
-    tz: str = Field(
-        default="America/Chicago",
-        description="Timezone for output",
-    )
+    tz: TZ_FIELD = "America/Chicago"
     vars: ListOrCSVType = Field(
         default=None, description="Variables to include in output"
     )
@@ -144,13 +142,6 @@ class Schema(CGIModel):
     minute2: int = Field(
         default=0, description="End minute if ets is not provided"
     )
-
-    @field_validator("tz", mode="after")
-    @classmethod
-    def check_tz(cls, value):
-        """Ensure the timezone is valid."""
-        ZoneInfo(value)
-        return value
 
 
 def fetch_daily(environ: dict, cols: list):

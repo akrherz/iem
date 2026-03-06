@@ -50,10 +50,12 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import TZ_FIELD
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -79,9 +81,7 @@ class MyModel(CGIModel):
             pattern="^(csv|excel)$",
         ),
     ] = "csv"
-    tz: Annotated[
-        str, Field(description="The timezone to use for timestamps")
-    ] = "UTC"
+    tz: TZ_FIELD = "UTC"
     sts: Annotated[
         AwareDatetime | None,
         Field(
@@ -136,16 +136,6 @@ class MyModel(CGIModel):
     minute2: Annotated[
         int, Field(description="The end minute, if not using ets")
     ] = 0
-
-    @field_validator("tz", mode="before")
-    @classmethod
-    def check_tz(cls, value):
-        """Ensure the timezone is valid."""
-        try:
-            ZoneInfo(value)
-        except Exception as exp:
-            raise ValueError("Invalid timezone provided") from exp
-        return value
 
 
 def get_obs(dbconn, environ: dict) -> pd.DataFrame:

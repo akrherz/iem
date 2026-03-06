@@ -20,12 +20,13 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station=AMW\
 """
 
 from io import StringIO
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 SAMPLING = {
     "1min": 1,
@@ -54,14 +55,9 @@ class Schema(CGIModel):
         description="Sampling period for data",
         pattern="^(1min|5min|10min|20min|1hour)$",
     )
-    station: ListOrCSVType = Field(
-        ..., description="Station(s) to request data for"
-    )
+    station: STATION_LIST_FIELD
     sts: AwareDatetime = Field(None, description="Start timestamp for data")
-    tz: str = Field(
-        "UTC",
-        description="Timezone to use for the output and input timestamps",
-    )
+    tz: TZ_FIELD = "UTC"
     vars: ListOrCSVType = Field(
         None, description="Variable(s) to request data for"
     )
@@ -78,16 +74,6 @@ class Schema(CGIModel):
     day2: int = Field(None, description="End day for data")
     hour2: int = Field(0, description="End hour for data")
     minute2: int = Field(0, description="End minute for data")
-
-    @field_validator("tz")
-    @classmethod
-    def valid_tz(cls, value):
-        """Ensure the timezone is valid."""
-        try:
-            ZoneInfo(value)
-        except ZoneInfoNotFoundError as exp:
-            raise ValueError(f"Unknown timezone: {value}") from exp
-        return value
 
 
 def get_station_metadata(stations) -> dict:

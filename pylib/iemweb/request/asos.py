@@ -44,7 +44,7 @@ import re
 from datetime import datetime, timedelta
 from io import StringIO
 from typing import Annotated
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
@@ -53,6 +53,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb import error_log
+from iemweb.fields import TZ_FIELD
 
 NETWORK_RE = re.compile(r"^[A-Z0-9_]{3,32}$")
 STATION_RE = re.compile(r"^[A-Z0-9_]{3,4}$")
@@ -225,19 +226,7 @@ class MyModel(CGIModel):
             pattern="^(0.0001|null|empty|T)$",
         ),
     ] = "0.0001"
-    tz: Annotated[
-        str,
-        Field(
-            description=(
-                "The timezone to use for the request timestamps (when not "
-                "providing already tz-aware ``sts`` and ``ets`` values) and "
-                "the output valid timestamp.  It is highly recommended to set "
-                "this to UTC to ensure it is set.  This string should be "
-                "something that the Python ``zoneinfo`` library can "
-                "understand."
-            ),
-        ),
-    ] = "UTC"
+    tz: TZ_FIELD = "UTC"
     year1: Annotated[
         int | None,
         Field(
@@ -329,18 +318,6 @@ class MyModel(CGIModel):
             ),
         ),
     ] = 0
-
-    @field_validator("tz")
-    @classmethod
-    def valid_tz(cls, value):
-        """Ensure the timezone is valid."""
-        if value in ["", "etc/utc"]:
-            return "UTC"
-        try:
-            ZoneInfo(value)
-        except (ZoneInfoNotFoundError, IsADirectoryError) as exp:
-            raise ValueError(f"Unknown timezone: {value}") from exp
-        return value
 
     @field_validator("station")
     @classmethod
