@@ -30,17 +30,17 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD, VTEC_YEAR_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     wfo: Annotated[
         str, Field(description="3 or 4 character WFO Identifier")
     ] = "MPX"
-    year: Annotated[int, Field(description="Year of interest", ge=1986)] = 2015
+    year: VTEC_YEAR_FIELD = 2015
     phenomena: Annotated[
         str, Field(description="VTEC Phenomena", max_length=2)
     ] = "SV"

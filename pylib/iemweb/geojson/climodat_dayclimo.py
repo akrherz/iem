@@ -30,11 +30,13 @@ from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.fields import CALLBACK_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[str | None, Field(title="JSONP Callback")] = None
+    callback: CALLBACK_FIELD = None
     day: Annotated[int, Field(ge=1, le=31)] = 1
     month: Annotated[int, Field(ge=1, le=12)] = 1
     syear: Annotated[int, Field(ge=1800, le=2050)] = 1800

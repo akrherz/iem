@@ -56,8 +56,8 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import (
     CALLBACK_FIELD,
-    LATITUDE_FIELD_OPTIONAL,
-    LONGITUDE_FIELD_OPTIONAL,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
 )
 from iemweb.util import json_response_dict
 
@@ -73,8 +73,8 @@ class Schema(CGIModel):
             pattern="^(json|excel|csv)$",
         ),
     ] = "json"
-    lat: LATITUDE_FIELD_OPTIONAL = 42.0
-    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
+    lat: LATITUDE_FIELD = 42.0
+    lon: LONGITUDE_FIELD = -95.0
     last: Annotated[
         int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
     ] = 0

@@ -49,15 +49,14 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="Optional JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
         Field(

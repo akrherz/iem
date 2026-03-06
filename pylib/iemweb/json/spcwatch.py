@@ -45,8 +45,8 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import (
     CALLBACK_FIELD,
-    LATITUDE_FIELD_OPTIONAL,
-    LONGITUDE_FIELD_OPTIONAL,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
 )
 from iemweb.util import get_ct
 
@@ -66,8 +66,8 @@ class Schema(CGIModel):
         str | None,
         Field(description="The timestamp to query for", pattern="^[0-9]{12}$"),
     ] = None
-    lat: LATITUDE_FIELD_OPTIONAL = None
-    lon: LONGITUDE_FIELD_OPTIONAL = None
+    lat: LATITUDE_FIELD = None
+    lon: LONGITUDE_FIELD = None
 
 
 def process_df(watches: gpd.GeoDataFrame) -> gpd.GeoDataFrame:

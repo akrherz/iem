@@ -21,22 +21,20 @@ https://mesonet.agron.iastate.edu/geojson/networks.py
 """
 
 import json
-from typing import Annotated
 
-from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.fields import CALLBACK_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None, Field(description="JSONP callback function")
-    ] = None
+    callback: CALLBACK_FIELD = None
 
 
 @with_sqlalchemy_conn("mesosite")

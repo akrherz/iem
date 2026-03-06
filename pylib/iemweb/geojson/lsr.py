@@ -57,6 +57,7 @@ from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.mlib import rectify_wfo, unrectify_wfo
 from iemweb.util import get_ct
 
@@ -64,14 +65,7 @@ from iemweb.util import get_ct
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None,
-        Field(
-            description="JSONP callback function",
-            pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
-            max_length=64,
-        ),
-    ] = None
+    callback: CALLBACK_FIELD = None
     inc_ap: Annotated[
         bool,
         Field(

@@ -59,8 +59,8 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import (
     CALLBACK_FIELD,
-    LATITUDE_FIELD_OPTIONAL,
-    LONGITUDE_FIELD_OPTIONAL,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
 )
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
@@ -79,8 +79,8 @@ class Schema(CGIModel):
         le=1,
     )
     fmt: str = Field("json", description="The format of the response")
-    lat: LATITUDE_FIELD_OPTIONAL = 41.99
-    lon: LONGITUDE_FIELD_OPTIONAL = -92.0
+    lat: LATITUDE_FIELD = 41.99
+    lon: LONGITUDE_FIELD = -92.0
     sdate: date = Field(default=date(2002, 1, 1), description="Start Date")
     edate: date = Field(default=date(2099, 1, 1), description="End Date")
     valid: AwareDatetime = Field(

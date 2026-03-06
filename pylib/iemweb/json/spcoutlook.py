@@ -56,7 +56,7 @@ from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.util import json_response_dict
 
 
@@ -73,12 +73,8 @@ class Schema(CGIModel):
             pattern="^(json|excel|csv)$",
         ),
     ] = "json"
-    lat: Annotated[
-        float, Field(description="Latitude of point in decimal degrees")
-    ] = 42.0
-    lon: Annotated[
-        float, Field(description="Longitude of point in decimal degrees")
-    ] = -95.0
+    lat: LATITUDE_FIELD = 42.0
+    lon: LONGITUDE_FIELD = -95.0
     last: Annotated[
         int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
     ] = 0
@@ -223,7 +219,7 @@ def application(environ: dict, start_response: callable):
         return json.dumps(res)
     if fmt == "json":
         running = {}
-        res = {"outlooks": []}
+        res = json_response_dict({"outlooks": []})
         for _, row in outlooks.iterrows():
             if last > 0:
                 running.setdefault(row["threshold"], 0)

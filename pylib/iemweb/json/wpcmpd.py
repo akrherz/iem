@@ -32,8 +32,8 @@ from sqlalchemy.engine import Connection
 
 from iemweb.fields import (
     CALLBACK_FIELD,
-    LATITUDE_FIELD_OPTIONAL,
-    LONGITUDE_FIELD_OPTIONAL,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
 )
 from iemweb.util import json_response_dict
 
@@ -47,8 +47,8 @@ class Schema(CGIModel):
         description="The format to return data in, either json, excel, or csv",
         pattern="^(json|excel|csv)$",
     )
-    lat: LATITUDE_FIELD_OPTIONAL = 42.0
-    lon: LONGITUDE_FIELD_OPTIONAL = -95.0
+    lat: LATITUDE_FIELD = 42.0
+    lon: LONGITUDE_FIELD = -95.0
 
 
 @with_sqlalchemy_conn("postgis")
