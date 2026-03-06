@@ -39,7 +39,9 @@ from io import BytesIO, StringIO
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD_OPTIONAL
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -65,17 +67,8 @@ class Schema(CGIModel):
         None,
         description="The start time of the data request",
     )
-    station: ListOrCSVType = Field(
-        ...,
-        description="The station identifier(s) to request data for",
-    )
-    tz: str = Field(
-        "UTC",
-        description=(
-            "The timezone to use for timestamps in request and response, it "
-            "should be something recognized by the ZoneInfo library."
-        ),
-    )
+    station: STATION_LIST_FIELD
+    tz: TZ_FIELD_OPTIONAL = "UTC"
     year1: int = Field(
         None,
         description="The year for the start time, if sts is not provided",

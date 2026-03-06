@@ -35,15 +35,15 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, STATION_LIST_FIELD
+
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    stations: ListOrCSVType = Field(
-        ..., description="List of SCAN station identifiers."
-    )
+    stations: STATION_LIST_FIELD
     vars: ListOrCSVType = Field(
         [], description="List of variables to include in the output."
     )
@@ -66,10 +66,7 @@ class Schema(CGIModel):
         None,
         description="Start month when sts is not provided.",
     )
-    day1: int = Field(
-        None,
-        description="Start day when sts is not provided.",
-    )
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour1: int = Field(
         None,
         description="Start hour when sts is not provided.",
@@ -82,10 +79,7 @@ class Schema(CGIModel):
         None,
         description="End month when ets is not provided.",
     )
-    day2: int = Field(
-        None,
-        description="End day when ets is not provided.",
-    )
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: int = Field(
         None,
         description="End hour when ets is not provided.",
@@ -128,6 +122,8 @@ def application(environ, start_response):
     """
     Do something!
     """
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("both sts and ets are required.")
     environ["stations"] = get_cgi_stations(environ)
     if (
         len(environ["stations"]) > 9
