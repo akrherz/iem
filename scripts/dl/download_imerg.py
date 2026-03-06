@@ -12,7 +12,7 @@ Drop L in the above.
 
 2001-today
 
-RUN from RUN_20AFTER.sh for 5 hours ago.
+RUN from RUN_20_AFTER.sh for 5 hours ago.
 """
 
 import json
@@ -41,7 +41,7 @@ def get_geotiff(valid: datetime, source: str) -> np.ndarray | None:
     url = (
         f"https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/{pp}/"
         f"3B-HHR-{source}.MS.MRG.3IMERG.{valid:%Y%m%d}-S{valid:%H%M%S}-"
-        f"E{endts:%H%M%S}.{minutes:04.0f}.V07B.30min.tif"
+        f"E{endts:%H%M%S}.{minutes:04.0f}.V07C.30min.tif"
     )
     auth = httpx.NetRCAuth()
     with httpx.Client(auth=auth, follow_redirects=False) as client:

@@ -46,7 +46,7 @@ class Schema(CGIModel):
         str,
         Field(
             description="The network identifier, such as IA_ASOS",
-            min_length=4,
+            min_length=2,  # OT
             max_length=32,
             pattern="^[A-Z0-9_]+$",
         ),
