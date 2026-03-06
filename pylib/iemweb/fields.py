@@ -100,7 +100,13 @@ STATE_FIELD = Annotated[str, _SF]
 STATE_FIELD_OPTIONAL = Annotated[str | None, _SF]
 
 # --------------
-_TZF = Field(description=("A POSIX timezone string like America/Chicago."))
+_TZF = Field(
+    description=(
+        "A time zone string specified by IANA.  Common examples include "
+        "'America/Chicago', 'UTC', and 'Etc/UTC'.  The code implementation "
+        "passes this provided string to the python ZoneInfo library."
+    )
+)
 
 
 def _validate_tz(val: str):
