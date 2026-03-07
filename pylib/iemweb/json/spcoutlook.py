@@ -6,12 +6,26 @@ Documentation for /json/spcoutlook.py
 -------------------------------------
 
 This service provides access to the Storm Prediction Center's Convective
-Outlook products.  The service is designed to be called with a latitude and
-longitude point.
+Outlook products.  This service is a nasty bit of confusion for the three or
+four different modes that it can be run in.  Those modes being:
+
+- Provide the current day X outlook for a given point (`current=1` param).
+- Provide all day X outlooks for a given point.
+- Provide the day X outlook for a given point and given valid time
+  (`time` param).
+- Provide the most recent X number of outlooks for each threshold level for
+  a given lat/lon point (`last` param).
+
+There are examples below or feel free to yell at daryl for big a mess this is.
 
 Changelog
 ---------
 
+- 2026-03-06: Sadly, the recently changed `time` parameter handling created
+  additional service ambiguity.  There is now an additional boolean
+  parameter called `current`, which when enabled causes the service to
+  ignore the `time` parameter and instead return the current outlook for the
+  given day.
 - 2026-03-03: The ill conceived support for time being `now` or `current`
   was removed.
 - 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
@@ -37,15 +51,27 @@ Provide the day 1 outlook for Pierre, SD valid at 8 UTC on 3 Aug 2024
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00Z
 
-Get only the last day 2 outlook for Washington, DC
+Provide the most recent outlook for each categorical threshold for day 2
+for Washington, DC
 
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=38.907&lon=-77.037&day=2&last=1
 
+Provide the current day 2 outlook for Washington, DC
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=38.907&lon=-77.037&day=2&current=1
+
+Provide the day 2 outlook that was valid at 20 UTC on 6 March 2026.  This is
+returning the day 2 forecast made on 5 March 2026.
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=38.907&lon=-77.037&day=2&time=2026-03-06T20:00:00Z
+
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Annotated
 
@@ -54,6 +80,7 @@ from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
@@ -64,6 +91,16 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
+    current: Annotated[
+        bool,
+        Field(
+            description=(
+                "Return the currently valid outlook for the given day and "
+                "category. The `time` parameter is ignored when this is "
+                "enabled."
+            )
+        ),
+    ] = False
     fmt: Annotated[
         str,
         Field(
@@ -178,7 +215,7 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
 @iemapp(help=__doc__, schema=Schema)
 def application(environ: dict, start_response: callable):
     """Answer request."""
-    time = environ.get("time")
+    time = environ["time"]
     cat = environ["cat"].upper()
     fmt = environ["fmt"]
     lon = environ["lon"]
@@ -186,7 +223,10 @@ def application(environ: dict, start_response: callable):
     last = environ["last"]
     day = environ["day"]
     ts = None
-    if time is not None:
+    if time is not None or environ["current"]:
+        if environ["current"]:
+            # Goose the time by the given day offset
+            time = utc() + timedelta(hours=(day - 1) * 24)
         outlooks, ts = dotime(time, lon, lat, day, cat)
         if not outlooks.empty:
             outlooks = outlooks.iloc[[0]]
