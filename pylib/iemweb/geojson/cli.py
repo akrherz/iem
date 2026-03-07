@@ -46,6 +46,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
+from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -54,12 +55,7 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str | None = Field(
-        default=None,
-        description="JSONP callback function name.",
-        pattern=r"^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$",
-        max_length=64,
-    )
+    callback: CALLBACK_FIELD = None
     dl: bool = Field(default=False, description="Force download of CSV file.")
     dt: date = Field(default=date.today(), description="Date of interest.")
     fmt: str = Field(

@@ -67,8 +67,8 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import (
     CALLBACK_FIELD,
-    LATITUDE_FIELD_OPTIONAL,
-    LONGITUDE_FIELD_OPTIONAL,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
 )
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
@@ -101,8 +101,8 @@ class Schema(CGIModel):
     )
     sdate: date = Field(date(1986, 1, 1), description="Start Date")
     edate: date = Field(date(2099, 1, 1), description="End Date")
-    lat: LATITUDE_FIELD_OPTIONAL = 42.0
-    lon: LONGITUDE_FIELD_OPTIONAL = -93.0
+    lat: LATITUDE_FIELD = 42.0
+    lon: LONGITUDE_FIELD = -93.0
 
 
 def make_url(row):

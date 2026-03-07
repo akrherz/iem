@@ -34,11 +34,13 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, description="JSONP callback function name")
+    callback: CALLBACK_FIELD = None
     network: str = Field(
         default="KCCI",
         description="Network to query webcams for.",
@@ -140,7 +142,7 @@ def get_mckey(environ):
     memcacheexpire=15,
     content_type="application/vnd.geo+json",
 )
-def application(environ: dict, start_response):
+def application(environ: dict, start_response: callable):
     """Do Main"""
     headers = [("Content-type", "application/vnd.geo+json")]
 

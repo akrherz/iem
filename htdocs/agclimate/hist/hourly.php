@@ -37,20 +37,22 @@ foreach ($nt->table as $key => $val) {
 }
 
 $ar = array(
-    "tmpf" => "Air Temperature [F]",
+    "tmpf" => "Air Temperature [°F]",
     "relh" => "Relative Humidity [%]",
     "solar" => "Solar Radiation [J/m2]",
     "precip" => "Precipitation [inch]",
     "speed" => "Average Wind Speed [mph]",
-    "drct" => "Wind Direction [deg]",
+    "drct" => "Wind Direction [°]",
     "et" => "Potential Evapotranspiration [inch]",
-    "soil04t" => "4 inch Soil Temperature [F]",
-    "soil12t" => "12 inch Soil Temperature [F]",
-    "soil24t" => "24 inch Soil Temperature [F]",
-    "soil50t" => "50 inch Soil Temperature [F]",
+    "soil04t" => "4 inch Soil Temperature [°F]",
+    "soil12t" => "12 inch Soil Temperature [°F]",
+    "soil24t" => "24 inch Soil Temperature [°F]",
+    "soil50t" => "50 inch Soil Temperature [°F]",
     "soil12vwc" => "12 inch Soil Moisture [%]",
     "soil24vwc" => "24 inch Soil Moisture [%]",
     "soil50vwc" => "50 inch Soil Moisture [%]",
+    "cci" => "Comprehensive Climate Index (CCI) No-Shade Effect [unitless]",
+    "cci_shade" => "Comprehensive Climate Index (CCI) Shade Effect [unitless]",
     "bp_mb" => "Atmospheric Pressure [mb] (only Ames ISU Hort Farm at 15 minute interval)",
 );
 $vselect = make_checkboxes("vars", "", $ar);

@@ -5,6 +5,9 @@ This service emits data from the ISU Soil Moisture Network.
 Changelog
 ---------
 
+- 2026-03-06: Added comprehensive climate index (CCI) as a download option.
+  Either `cci` which does not include a shade effect or `cci_shade` which
+  does.
 - 2025-01-27: Added support for `qcflags` for the inclusion of the flag
   values.
 - **2024-11-19** Initial update to use pydantic request validation.
@@ -33,6 +36,13 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
 mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC\
 &qcflags=1&vars=sv
 
+Same request, but compute the comprehensive climate index (CCI) with and
+without shade effect and include those in the output as well.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
+mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC\
+&qcflags=1&vars=cci,cci_shade
+
 Same as the last, but for daily data this time and solar radiation in MJ/m2
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
@@ -48,13 +58,15 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from metpy.units import units
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.meteorology import comprehensive_climate_index
 from pyiem.util import convert_value
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import TZ_FIELD
+from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 # Cull a fragmentation warning from pandas due to our hacky things
 warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -99,7 +111,7 @@ class Schema(CGIModel):
         description="Data Mode",
         pattern="hourly|daily|inversion",
     )
-    station: ListOrCSVType = Field(description="Station Identifier(s)")
+    station: STATION_LIST_FIELD
     timeres: str = Field(
         default="hourly",
         description="Time Resolution for hourly request",
@@ -433,6 +445,22 @@ def fetch_hourly(environ: dict, cols: list):
         "soil50_f": "soil50vwc_f",
     }
     df = df.rename(columns=xref, errors="ignore")
+    if "cci" in cols:
+        df["cci"] = comprehensive_climate_index(
+            units.degC * df["tair_c_avg_qc"].to_numpy(),
+            units.percent * df["relh"].to_numpy(),
+            units.mps * df["ws_mph_qc"].to_numpy(),
+            units.watts / units.meter**2 * df["slrkj_tot_qc"].to_numpy(),
+            shade_effect=False,
+        )
+    if "cci_shade" in cols:
+        df["cci_shade"] = comprehensive_climate_index(
+            units.degC * df["tair_c_avg_qc"].to_numpy(),
+            units.percent * df["relh"].to_numpy(),
+            units.mps * df["ws_mph_qc"].to_numpy(),
+            units.watts / units.meter**2 * df["slrkj_tot_qc"].to_numpy(),
+            shade_effect=True,
+        )
     # Mul by 100 for %
     for depth in [12, 24, 50]:
         df[f"soil{depth}vwc"] = df[f"soil{depth}vwc"] * 100.0

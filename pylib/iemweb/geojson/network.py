@@ -50,6 +50,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+
 XREF = {
     "HAS_HML": "HAS_HML",
     "ASOS1MIN": "HAS1MIN",
@@ -60,9 +62,7 @@ XREF = {
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str, Field(description="JSONP callback function name")
-    ] = None
+    callback: CALLBACK_FIELD = None
     has_attribute: Annotated[
         str, Field(description="Station Attribute to filter on")
     ] = None

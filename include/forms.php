@@ -331,8 +331,10 @@ function make_checkboxes($name, $selected, $ar)
     $s = "";
     foreach ($ar as $key => $val) {
         $s .= sprintf(
-            '<br /><input name="%s" type="checkbox" value="%s" id="%s_%s"%s> ' .
-                '<label for="%s_%s">%s</label>' . "\n",
+            '<div class="form-check mb-1">' .
+                '<input class="form-check-input" name="%s" type="checkbox" value="%s" id="%s_%s"%s>' .
+                '<label class="form-check-label ms-1" for="%s_%s">%s</label>' .
+            '</div>' . "\n",
             $name,
             $key,
             $name,

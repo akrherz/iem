@@ -140,7 +140,7 @@ def qc(df):
     return df.sort_index()
 
 
-def load_baseline(location):
+def load_baseline(location: str):
     """return a dataframe of this location's data"""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -175,7 +175,7 @@ def load_baseline(location):
     return df
 
 
-def replace_forecast(df, location):
+def replace_forecast(df: pd.DataFrame, location: str):
     """Replace dataframe data with forecast for this location"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
@@ -232,7 +232,7 @@ def replace_forecast(df, location):
             df.loc[idx, "radn"] = row[1]
 
 
-def replace_cfs(df, location):
+def replace_cfs(df: pd.DataFrame, location: str):
     """Replace the CFS data for this year!"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()

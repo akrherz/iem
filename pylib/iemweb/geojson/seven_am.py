@@ -47,16 +47,13 @@ from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: Annotated[
-        str | None,
-        Field(
-            description="Optional JSONP callback function name",
-        ),
-    ] = None
+    callback: CALLBACK_FIELD = None
     group: Annotated[
         str,
         Field(

@@ -988,7 +988,7 @@ misc = [
     {"id": 217, "label": "SPS Special Weather Statement Maps"},
     {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
 ]
-data = {
+data: dict[str, list[dict]] = {
     "plots": [
         {"label": "Daily", "options": daily_opts},
         {"label": "Monthly", "options": monthly_opts},

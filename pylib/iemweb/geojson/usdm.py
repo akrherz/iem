@@ -41,13 +41,13 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import CALLBACK_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(
-        default=None, description="JSONP callback function name"
-    )
+    callback: CALLBACK_FIELD = None
     date: dateobj = Field(
         default=None,
         ge=dateobj(2000, 1, 1),

@@ -5,7 +5,7 @@ from pyiem.database import get_dbconnc
 
 
 @pytest.fixture
-def dbcursor(database):
+def dbcursor(database: str):
     """Yield a cursor for the given database."""
     dbconn, cursor = get_dbconnc(database)
     yield cursor
