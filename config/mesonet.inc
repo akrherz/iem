@@ -133,6 +133,7 @@ Alias "/cases" "/mesonet/share/cases"
 Alias "/GIS/data/gis" "/mesonet/data/gis"
 Alias "/archive/awos" "/mesonet/ARCHIVE/awos"
 Alias "/archive/raw" "/mesonet/ARCHIVE/raw"
+# 7 Mar 2026 removeme at some point
 Alias "/archive/rer" "/mesonet/ARCHIVE/rer"
 Alias "/m/img"     "/mesonet/share/iemmaps"
 Alias "/sites/pics"     "/mesonet/share/pics"
