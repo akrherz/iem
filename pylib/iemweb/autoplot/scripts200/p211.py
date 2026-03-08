@@ -117,8 +117,8 @@ def do_xaxis(ctx, ax, show_label=True):
 def make_wind_plot(ctx, ptype):
     """Generate a wind plot, please."""
     df = ctx["df"]
-    gust = df["gust_sknt"].values
-    sknt = df["sknt"].values
+    gust = pd.to_numeric(df["gust_sknt"])
+    sknt = pd.to_numeric(df["sknt"])
     unit = "kt"
     if ptype == "wind":
         gust = masked_array(gust, units("knots")).to(units("miles per hour")).m
@@ -284,34 +284,37 @@ def make_meteo_plot(ctx):
     do_xaxis(ctx, ax, False)
 
     # -----------------------------
-    df["gust"] = (
-        masked_array(df["gust_sknt"].values, units("knots"))
-        .to(units("miles per hour"))
-        .m
-    )
-    df["sknt"] = (
-        masked_array(df["sknt"].values, units("knots"))
-        .to(units("miles per hour"))
-        .m
-    )
 
     ax = fig.add_axes((0.1, 0.37, 0.85, axheight))
-    df2 = df[df["gust"].notna()]
-    ax.bar(
-        df2["local_valid"].values,
-        df2["gust"].values,
-        zorder=1,
-        width=1.0 / 1440.0,
-        label="Wind Gust",
-    )
-    df2 = df[df["sknt"].notna()]
-    ax.bar(
-        df2["local_valid"].values,
-        df2["sknt"].values,
-        zorder=2,
-        width=1.0 / 1440.0,
-        label="Wind Speed",
-    )
+    df["gust"] = 0
+    if df["gust_sknt"].notna().any():
+        df["gust"] = (
+            masked_array(df["gust_sknt"].to_numpy(), units("knots"))
+            .to(units("miles per hour"))
+            .m
+        )
+        df2 = df[df["gust"].notna()]
+        ax.bar(
+            df2["local_valid"].values,
+            df2["gust"].values,
+            zorder=1,
+            width=1.0 / 1440.0,
+            label="Wind Gust",
+        )
+    if df["sknt"].notna().any():
+        df["sknt"] = (
+            masked_array(df["sknt"].to_numpy(), units("knots"))
+            .to(units("miles per hour"))
+            .m
+        )
+        df2 = df[df["sknt"].notna()]
+        ax.bar(
+            df2["local_valid"].values,
+            df2["sknt"].values,
+            zorder=2,
+            width=1.0 / 1440.0,
+            label="Wind Speed",
+        )
     ax.legend(loc=(0, 1), ncol=3)
     ax2 = ax.twinx()
     ax2.scatter(

@@ -21,6 +21,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD, YEAR_FIELD
+
 nt = NetworkTable("IACLIMATE", only_online=False)
 
 
@@ -28,9 +30,9 @@ class Schema(CGIModel):
     """See how we are called."""
 
     city: Annotated[str, Field(description="City Code")]
-    year: Annotated[int, Field(description="Year")]
-    month: Annotated[int, Field(description="Month")]
-    day: Annotated[int, Field(description="Day")]
+    year: YEAR_FIELD
+    month: MONTH_FIELD
+    day: DAY_OF_MONTH_FIELD
 
 
 def weather_logic(month, high, low, rain, snow):

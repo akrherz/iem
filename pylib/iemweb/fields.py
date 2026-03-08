@@ -1,4 +1,15 @@
-"""Stanardized fields used as parameters in Models."""
+"""Stanardized fields used as parameters in Models.
+
+So we have a convoluted set of things to support here, depending on if the
+field has a None default or not.  So we have three scenarios supported by
+the two field combinations, i.e. FIELD and FIELD_OPTIONAL.
+
+    1. Parameter is always required -> `name: FIELD`
+    2. Parameter has a default of proper type -> `name: FIELD = "good"`
+    3. Parameter is not required and None by default
+       -> `name: FIELD_OPTIONAL = None`
+
+"""
 
 import re
 from datetime import date
@@ -11,6 +22,16 @@ from pydantic import (
     Field,
     WithJsonSchema,
 )
+
+
+def _clean_strings(val: list[str], re_pattern: str) -> list[str]:
+    """Clean up the list strings."""
+    str_re = re.compile(re_pattern)
+    for v in val:
+        if not str_re.match(v.strip()):
+            raise ValueError(f"Invalid parameter: {v}")
+    return [v.strip().upper() for v in val if v.strip()]
+
 
 # --------------
 # Never required, so no optional variant
@@ -64,6 +85,32 @@ MONTH_FIELD = Annotated[int, _MF]
 MONTH_FIELD_OPTIONAL = Annotated[int | None, _MF]
 
 # --------------
+_S8F = Field(
+    description=(
+        "Either provide a single value, multiple parameters each with a "
+        "single value, or a comma-separated list of values.  The context here "
+        "is a list of state identifiers.  All lowercase letters are "
+        "converted to uppercase."
+    ),
+)
+
+STATE_LIST_FIELD = Annotated[
+    list,
+    BeforeValidator(lambda v: v.split(",") if isinstance(v, str) else v),
+    AfterValidator(lambda v: _clean_strings(v, r"^[A-Z]{2}$")),
+    _S8F,
+    WithJsonSchema({"type": "string"}, mode="serialization"),
+]
+STATE_LIST_FIELD_OPTIONAL = Annotated[
+    list | None,
+    BeforeValidator(lambda v: v.split(",") if isinstance(v, str) else v),
+    AfterValidator(lambda v: _clean_strings(v, r"^[A-Z]{2}$")),
+    _S8F,
+    WithJsonSchema({"type": "string"}, mode="serialization"),
+]
+
+
+# --------------
 _STF = Field(
     description=(
         "Either provide a single value, multiple parameters each with a "
@@ -73,20 +120,10 @@ _STF = Field(
     ),
 )
 
-
-def _clean_station_strings(val: list[str]) -> list[str]:
-    """Clean up the station strings."""
-    station_re = re.compile(r"^[A-Za-z0-9_]+$")
-    for v in val:
-        if not station_re.match(v.strip()):
-            raise ValueError(f"Invalid station identifier: {v}")
-    return [v.strip().upper() for v in val if v.strip()]
-
-
 STATION_LIST_FIELD = Annotated[
     list,
     BeforeValidator(lambda v: v.split(",") if isinstance(v, str) else v),
-    AfterValidator(_clean_station_strings),
+    AfterValidator(lambda v: _clean_strings(v, r"^[A-Za-z0-9_]+$")),
     _STF,
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]

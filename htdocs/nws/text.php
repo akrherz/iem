@@ -71,9 +71,6 @@ on this archive and how it is made available.</li>
  <li><a href="/archive/data/{$d}/text/noaaport/">Simple directory listing</a>
   <br />Certain warning type products can be found in the main IEM data archive
   directory structure in per UTC date directories.</li>
-  <li><a href="/archive/rer/">NWS Record Event Reports</a>
-  <br />Daily reports of record temperatures and precipitation for
-   mostly <strong>Iowa</strong> since November 2001. <code>manually populated</code></li>
 </ul>
 
   </div>

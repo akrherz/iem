@@ -29,6 +29,7 @@ text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
 import json
 import os
 import tempfile
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
@@ -45,12 +46,16 @@ from shapely.geometry import Polygon
 class Schema(CGIModel):
     """See how we are called."""
 
-    east: bool = Field(
-        default=False,
-        description="Interpret given longitudes as East Longitudes (Guam)",
-    )
-    text: str = Field(..., description="The text to parse", min_length=1)
-    title: str = Field(None, description="Optional title for the plot")
+    east: Annotated[
+        bool,
+        Field(
+            description="Interpret given longitudes as East Longitudes (Guam)"
+        ),
+    ] = False
+    text: Annotated[str, Field(description="The text to parse", min_length=1)]
+    title: Annotated[
+        str | None, Field(description="Optional title for the plot")
+    ] = None
 
 
 def plot_poly(fig, poly, environ: dict):

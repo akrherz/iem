@@ -37,6 +37,7 @@ https://mesonet.agron.iastate.edu/search.py?q=100%20Main%20St%20Ames%20Iowa
 """
 
 import re
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -63,7 +64,7 @@ STREET_ADDRESS = re.compile(
 class MyModel(CGIModel):
     """See how we are called."""
 
-    q: str = Field(..., title="Search Query")
+    q: Annotated[str, Field(title="Search Query")]
 
 
 def station_df_handler(df: pd.DataFrame) -> str:
