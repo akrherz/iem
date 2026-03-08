@@ -47,7 +47,7 @@ def test_station_list_field(station_model):
 
 def test_naughty_station_list_field(station_model):
     """That that these fail validation"""
-    with pytest.raises(ValueError, match="Invalid station"):
+    with pytest.raises(ValueError, match="Invalid parameter"):
         station_model(station="DSM, OMA, BAD!STN")
-    with pytest.raises(ValueError, match="Invalid station"):
+    with pytest.raises(ValueError, match="Invalid parameter"):
         station_model(station="BAD!STN")

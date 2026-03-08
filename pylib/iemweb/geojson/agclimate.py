@@ -330,11 +330,20 @@ def get_data(conn, ts):
     return json.dumps(data)
 
 
+def get_mckey(environ: dict) -> str:
+    """Compute the memcache key."""
+    dt = environ["dt"]
+    if dt is None:
+        dt = utc().replace(minute=0, second=0, microsecond=0)
+    inversion = environ["inversion"]
+    return f"geojson/agclimate/{dt:%Y%m%d%H%M}_{inversion}"
+
+
 @iemapp(
     help=__doc__,
     schema=Schema,
     content_type="application/vnd.geo+json",
-    memcachekey=lambda env: f"{env['dt']}_{env['inversion']}",
+    memcachekey=get_mckey,
     memcacheexpire=300,
 )
 def application(environ, start_response):
