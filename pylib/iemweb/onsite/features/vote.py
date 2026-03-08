@@ -3,6 +3,7 @@
 import json
 from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -13,11 +14,13 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    vote: str = Field(
-        default=None,
-        description="The vote to cast",
-        pattern="^(good|bad|abstain)$",
-    )
+    vote: Annotated[
+        str,
+        Field(
+            description="The vote to cast",
+            pattern="^(good|bad|abstain)$",
+        ),
+    ] = None
 
 
 @with_sqlalchemy_conn("mesosite")

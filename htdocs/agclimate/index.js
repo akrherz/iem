@@ -296,6 +296,10 @@ function setupUI() {
             timeChanged = true;
             event.target.classList.remove('focus');
             const delta = parseInt(event.target.dataset.delta);
+            // Defensive: ensure currentdt is a valid Date
+            if (!(currentdt instanceof Date) || isNaN(currentdt.valueOf())) {
+                currentdt = new Date();
+            }
             currentdt = new Date(currentdt.valueOf() + delta);
             setDate();
             updateMap();

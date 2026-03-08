@@ -26,11 +26,11 @@ https://mesonet.agron.iastate.edu/geojson/agclimate.py\
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from typing import Annotated
 
 from metpy.units import units
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.meteorology import (
     comprehensive_climate_index,
@@ -47,11 +47,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     dt: Annotated[
-        str | None,
-        Field(
-            description="ISO8601 timestamp",
-            pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}",
-        ),
+        AwareDatetime | None, Field(description="Validity timestamp")
     ] = None
     inversion: Annotated[
         bool, Field(description="Set to 1 to get inversion data")
@@ -346,13 +342,10 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
     dt = environ["dt"]
     if dt is None:
-        ts = utc().replace(minute=0, second=0, microsecond=0)
-    else:
-        fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
-        ts = datetime.strptime(dt, fmt).replace(tzinfo=timezone.utc)
+        dt = utc().replace(minute=0, second=0, microsecond=0)
     func = get_data if not environ["inversion"] else get_inversion_data
     with get_sqlalchemy_conn("isuag") as conn:
-        data = func(conn, ts)
+        data = func(conn, dt)
 
     start_response("200 OK", headers)
     return data

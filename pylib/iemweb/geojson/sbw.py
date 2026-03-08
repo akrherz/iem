@@ -57,7 +57,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, STATE_LIST_FIELD_OPTIONAL
 from iemweb.mlib import rectify_wfo, unrectify_wfo
 from iemweb.util import get_ct
 
@@ -68,23 +68,13 @@ class Schema(CGIModel):
     callback: CALLBACK_FIELD = None
     ets: AwareDatetime = Field(
         default=None,
-        description=(
-            "Legacy UTC end timestamp parameter in the form of YYYYmmddHHMM"
-        ),
+        description=("UTC end timestamp parameter"),
         ge=utc(1986, 1, 1),
     )
-    states: ListOrCSVType = Field(
-        default=None,
-        description=(
-            "Optional CSV list of two-letter state identifiers to limit the "
-            "results to."
-        ),
-    )
+    states: STATE_LIST_FIELD_OPTIONAL = None
     sts: AwareDatetime = Field(
         default=None,
-        description=(
-            "Legacy UTC start timestamp parameter in the form of YYYYmmddHHMM"
-        ),
+        description=("UTC start timestamp parameter"),
         ge=utc(1986, 1, 1),
     )
     ts: AwareDatetime = Field(
@@ -104,11 +94,6 @@ class Schema(CGIModel):
     wfos: ListOrCSVType = Field(
         default=None,
         description="Optional list of WFOs to limit the results to",
-    )
-    fmt: str = Field(
-        default="geojson",
-        description="Output format (fixed to geojson).",
-        pattern=r"^geojson$",
     )
 
     @field_validator("sts", "ets", mode="before")

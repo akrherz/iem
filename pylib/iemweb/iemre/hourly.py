@@ -29,7 +29,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import TZ_FIELD
+from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD, TZ_FIELD
 
 ISO = "%Y-%m-%dT%H:%MZ"
 
@@ -52,22 +52,8 @@ class Schema(CGIModel):
     date: Annotated[
         datetype, Field(description="Date (for provided tz) to query data for")
     ]
-    lat: Annotated[
-        float,
-        Field(
-            le=90,
-            ge=-90,
-            description="Latitude (degrees Norht) of point to query",
-        ),
-    ]
-    lon: Annotated[
-        float,
-        Field(
-            le=180,
-            ge=-180,
-            description="Longitude (degrees East) of point to query",
-        ),
-    ]
+    lat: LATITUDE_FIELD
+    lon: LONGITUDE_FIELD
     tz: TZ_FIELD = "America/Chicago"
 
     @model_validator(mode="after")

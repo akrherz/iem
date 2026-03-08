@@ -50,6 +50,7 @@ from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.json.climodat_dd import compute_taxis
 
 warnings.simplefilter("ignore", UserWarning)
@@ -108,18 +109,8 @@ class Schema(CGIModel):
         default=date.today() - timedelta(days=1),
         description="Inclusive end date for the data request, YYYY-MM-DD",
     )
-    lat: float = Field(
-        ...,
-        description="Latitude of the point of interest, decimal degrees",
-        ge=-90,
-        le=90,
-    )
-    lon: float = Field(
-        ...,
-        description="Longitude of the point of interest, decimal degrees",
-        ge=-180,
-        le=180,
-    )
+    lat: LATITUDE_FIELD
+    lon: LONGITUDE_FIELD
 
     @property
     def i(self):

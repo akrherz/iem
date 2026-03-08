@@ -41,6 +41,8 @@ from pyiem.iemre import (
 from pyiem.util import convert_value, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -52,24 +54,8 @@ class Schema(CGIModel):
             description="Date of interest",
         ),
     ] = dateobj(2019, 3, 1)
-    lat: Annotated[
-        float,
-        Field(
-            title="Latitude",
-            description="Latitude of interest",
-            ge=-90,
-            le=90,
-        ),
-    ] = -41.99
-    lon: Annotated[
-        float,
-        Field(
-            title="Longitude",
-            description="Longitude of interest",
-            ge=-180,
-            le=180,
-        ),
-    ] = -95.1
+    lat: LATITUDE_FIELD = -41.99
+    lon: LONGITUDE_FIELD = -95.1
 
 
 def myrounder(val, precision):

@@ -8,7 +8,6 @@ from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
 
@@ -42,8 +41,6 @@ def plotter(ctx: dict):
             params={"station": station},
             index_col=None,
         )
-    if df.empty:
-        raise NoDataFound("No Data Found.")
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
