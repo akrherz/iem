@@ -78,12 +78,17 @@ ISSUANCE = {
     "4.C.10": "Day 4 Convective @10z",
     "4.E.20": "Day 4 Excessive Rainfall @20z",
     "4.E.8": "Day 4 Excessive Rainfall @8z",
+    "4.F.21": "Day 4 Fire Weather @21z",
     "5.C.10": "Day 5 Convective @10z",
     "5.E.20": "Day 5 Excessive Rainfall @20z",
     "5.E.8": "Day 5 Excessive Rainfall @8z",
+    "5.F.21": "Day 5 Fire Weather @21z",
     "6.C.10": "Day 6 Convective @10z",
+    "6.F.21": "Day 6 Fire Weather @21z",
     "7.C.10": "Day 7 Convective @10z",
+    "7.F.21": "Day 7 Fire Weather @21z",
     "8.C.10": "Day 8 Convective @10z",
+    "8.F.21": "Day 8 Fire Weather @21z",
 }
 OUTLOOKS = {
     "ANY SEVERE.0.02": "Any Severe 2% (Day 3+)",
