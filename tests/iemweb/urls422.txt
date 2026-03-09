@@ -72,4 +72,5 @@
 /json/raob.py?ts=1930-01-01T12:00:00Z
 /json/stage4.py?valid=2024-08-11&lon=-102.30&lat=45.10&tz=Boguis
 /json/snowfall_observations_v2.py?wfo=QQQ
+/json/spcoutlook.py?lat=38.907&lon=-77.037&day=4&last=1&cat=ANYS
 /rainfall/mrms2img.py?year=2016&month=4&day=13&hour=18&minute=0&period=3
