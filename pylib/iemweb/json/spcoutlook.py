@@ -57,6 +57,11 @@ for Washington, DC
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=38.907&lon=-77.037&day=2&last=1
 
+Return the last outlook of each threshold for day 4 for Washington, DC
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=38.907&lon=-77.037&day=4&last=1&cat=ANY%20SEVERE
+
 Provide the current day 2 outlook for Washington, DC
 
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
@@ -85,6 +90,17 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.util import json_response_dict
+
+VALID_CATS = [
+    "ANY SEVERE",
+    "CATEGORICAL",
+    "CRITICAL FIRE WEATHER AREA",
+    "DRY THUNDERSTORM CRITICAL FIRE WEATHER AREA",
+    "FIRE WEATHER CATEGORICAL",
+    "HAIL",
+    "TORNADO",
+    "WIND",
+]
 
 
 class Schema(CGIModel):
@@ -127,9 +143,15 @@ class Schema(CGIModel):
             )
         ),
     ] = None
-    cat: Annotated[str, Field(description="Categorical or probabilistic")] = (
-        "categorical"
-    )
+    cat: Annotated[
+        str,
+        Field(
+            description=(
+                "A label for the category of the outlook type. Valid values "
+                f"are: {', '.join(VALID_CATS)}"
+            )
+        ),
+    ] = "CATEGORICAL"
 
 
 def get_order(threshold):
@@ -217,6 +239,16 @@ def application(environ: dict, start_response: callable):
     """Answer request."""
     time = environ["time"]
     cat = environ["cat"].upper()
+    if cat not in VALID_CATS:
+        res = json_response_dict(
+            {
+                "error": f"Invalid category specified, valid categories are: "
+                f"{', '.join(VALID_CATS)}"
+            }
+        )
+        headers = [("Content-type", "application/json")]
+        start_response("422 Unprocessable Entity", headers)
+        return json.dumps(res)
     fmt = environ["fmt"]
     lon = environ["lon"]
     lat = environ["lat"]
