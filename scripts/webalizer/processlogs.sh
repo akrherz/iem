@@ -6,13 +6,14 @@
 # weatherim
 #
 # RPM requirements for this workflow
-# yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
+# yum -y install libdb-cxx libmaxminddb gd lftp tmpwatch
 
-export yyyymmdd=$(date --date '1 day ago' +'%Y%m%d')
-export yyyy=$(date --date '1 day ago' +'%Y')
-export mm=$(date --date '1 day ago' +'%m')
-export dd=$(date --date '1 day ago' +'%d')
-export yyyymm=$(date --date '1 day ago' +'%Y%m')
+# Careful as 1 day is ambiguous
+export yyyymmdd=$(date --date '12 hours ago' +'%Y%m%d')
+export yyyy=$(date --date '12 hours ago' +'%Y')
+export mm=$(date --date '12 hours ago' +'%m')
+export dd=$(date --date '12 hours ago' +'%d')
+export yyyymm=$(date --date '12 hours ago' +'%Y%m')
 
 # IMPORTANT: iemapps needs to go first for wildcard matching life choices
 PREFIXES="iemapps iem datateam sustainablecorn weatherim depbackend"
@@ -26,8 +27,7 @@ cd /mnt/webalizer/tmp
 # Step 1, bring all these log files back to roost and delete them remotely
 for MACH in $MACHINES
 do
-    # limit file transfer to 750Mbit/s
-    scp -l 750000 -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
+    scp -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
     ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"  # skipcq
     # rename the files so that they are unique
     for PREF in $PREFIXES
