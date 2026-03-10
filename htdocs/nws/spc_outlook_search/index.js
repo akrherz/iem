@@ -1,12 +1,12 @@
 /* global ol, olSelectLonLat, Tabulator */
 let marker = null;
 let outlooksTable = null;
-let mcdsTable = null; 
+let mcdsTable = null;
 let watchesTable = null;
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -67,11 +67,11 @@ function updateMarkerPosition(lon, lat) {
     // Round lat/lon to 4 decimal places for URL params
     const roundedLon = parseFloat(lon.toFixed(4));
     const roundedLat = parseFloat(lat.toFixed(4));
-    
+
     // Update input fields with rounded values
     document.getElementById("lon").value = roundedLon;
     document.getElementById("lat").value = roundedLat;
-    
+
     updateURLParams({lon: roundedLon, lat: roundedLat});
     workflow();
 }
@@ -121,7 +121,7 @@ function doOutlook(lon, lat) {
     const last = document.getElementById('last').checked ? escapeHTML(document.getElementById('events').value) : '0';
     const day = escapeHTML(document.querySelector("input[name='day']:checked").value);
     const cat = escapeHTML(document.querySelector("input[name='cat']:checked").value);
-    
+
     showLoading();
     const jsonurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}`;
     document.getElementById("outlooks_link").href = jsonurl;
@@ -129,7 +129,7 @@ function doOutlook(lon, lat) {
     document.getElementById("outlooks_excel").href = excelurl;
     const csvurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}&fmt=csv`;
     document.getElementById("outlooks_csv").href = csvurl;
-    
+
     fetch(jsonurl)
         .then(response => response.json())
         .then(data => {
@@ -148,7 +148,7 @@ function doMCD(lon, lat) {
     document.getElementById("mcds_excel").href = excelurl;
     const csvurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}&fmt=csv`;
     document.getElementById("mcds_csv").href = csvurl;
-    
+
     fetch(jsonurl)
         .then(response => response.json())
         .then(data => {
@@ -168,7 +168,7 @@ function doWatch(lon, lat) {
     document.getElementById("watches_excel").href = excelurl;
     const csvurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}&fmt=csv`;
     document.getElementById("watches_csv").href = csvurl;
-    
+
     fetch(jsonurl)
         .then(response => response.json())
         .then(data => {
@@ -250,14 +250,14 @@ function readURLParams(){
     // Read the URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     restoreCoordinatesFromURL(urlParams);
-    const { day, cat, last } = restoreFormSelectionFromURL(urlParams);
-    
-    // Trigger workflow if we have coordinates and any search parameters
+    restoreFormSelectionFromURL(urlParams);
+
+    // Trigger workflow when coordinates are present so all three tables load.
     const lon = parseFloat(urlParams.get('lon'));
     const lat = parseFloat(urlParams.get('lat'));
     const hasValidCoordinates = !isNaN(lon) && !isNaN(lat);
-    
-    if (hasValidCoordinates && (day || cat || last)) {
+
+    if (hasValidCoordinates) {
         workflow();
     }
 }
@@ -284,8 +284,8 @@ function initializeTables() {
         placeholder: "Click 'Update' or select a point on the map to search for mesoscale convective discussions",
         columns: [
             {
-                title: "Discussion Number", 
-                field: "product_num", 
+                title: "Discussion Number",
+                field: "product_num",
                 width: 150,
                 formatter: (cell) => {
                     const data = cell.getRow().getData();
@@ -309,8 +309,8 @@ function initializeTables() {
         placeholder: "Click 'Update' or select a point on the map to search for convective watches",
         columns: [
             {
-                title: "Watch Number", 
-                field: "number", 
+                title: "Watch Number",
+                field: "number",
                 width: 130,
                 formatter: (cell) => {
                     const data = cell.getRow().getData();
@@ -323,8 +323,8 @@ function initializeTables() {
             {title: "Max Hail Size", field: "max_hail_size", width: 120},
             {title: "Max Wind Speed", field: "max_wind_gust_knots", width: 130},
             {
-                title: "Is PDS?", 
-                field: "is_pds", 
+                title: "Is PDS?",
+                field: "is_pds",
                 width: 80,
                 formatter: (cell) => {
                     const value = cell.getValue();

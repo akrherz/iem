@@ -6,13 +6,13 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "10.6.1";
+$OL = "10.8.0";
 
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
-<script type="text/javascript" src="index.js?v=10"></script>
+<script type="text/javascript" src="index.js?v=11"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
@@ -40,7 +40,7 @@ table.</p>
 <div class="row">
     <div class="col-md-4 bg-light p-4 rounded-3 border">
         <h3 class="mb-3">Search by Point</h3>
-        
+
         <div class="mb-4">
             <h5 class="mb-3">Manual Coordinate Entry</h5>
             <div class="row g-2">
@@ -63,8 +63,8 @@ table.</p>
             <div class="form-check mb-2">
                 <input type="checkbox" class="form-check-input" id="last" name="last" value="1">
                 <label class="form-check-label" for="last">
-                    List Most Recent 
-                    <input type="number" class="form-control form-control-sm d-inline-block ms-1" 
+                    List Most Recent
+                    <input type="number" class="form-control form-control-sm d-inline-block ms-1"
                            id="events" name="events" value="1" min="1" max="100" style="width: 60px;">
                     Event(s)
                 </label>
@@ -147,7 +147,7 @@ table.</p>
     </div>
     <div class="col-md-8">
     <h3 id="search-results-header">Results of Point Search</h3>
-    
+
     <!-- Central Loading Indicator -->
     <div id="central-loading" class="text-center py-4 mb-3" style="display: none;">
         <div class="spinner-border text-primary me-2" role="status">
@@ -155,8 +155,8 @@ table.</p>
         </div>
         <span class="text-muted">Searching the database, one moment...</span>
     </div>
-    
-<div id="thetabs">	
+
+<div id="thetabs">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link active" href="#1a" data-bs-toggle="tab">Convective Outlooks</a>
@@ -255,7 +255,7 @@ tool to get more accurate results for the watch-by-county era.</p>
 
 </tbody>
 </table>
-        </div>   
+        </div>
     </div>
 </div><!-- ./thetabs -->
 

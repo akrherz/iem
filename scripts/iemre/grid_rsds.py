@@ -238,7 +238,8 @@ def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
 @click.option("--date", "dt", required=False, type=click.DateTime())
 @click.option("--year", required=False, type=int, help="Run for Year,month")
 @click.option("--month", required=False, type=int, help="Run for Year,month")
-def main(dt: datetime | None, year, month):
+@click.option("--domain", default="", help="Run for specific domain")
+def main(dt: datetime | None, year, month, domain: str):
     """Go Main Go"""
     queue = []
     if year is not None and month is not None:
@@ -249,22 +250,25 @@ def main(dt: datetime | None, year, month):
     else:
         queue.append(dt.replace(hour=12))
     for sts_in in queue:
-        for domain, dom in IEMRE_DOMAINS.items():
+        for thisdomain, dom in IEMRE_DOMAINS.items():
+            if domain not in ("", thisdomain):
+                LOG.info("Skipping %s domain due to CLI args", thisdomain)
+                continue
             sts = sts_in.replace(tzinfo=dom["tzinfo"])
-            srad = try_era5land(sts, domain)
-            if srad is not None and postprocess(srad, sts, domain):
+            srad = try_era5land(sts, thisdomain)
+            if srad is not None and postprocess(srad, sts, thisdomain):
                 continue
             LOG.info("try_era5land failed to find data")
-            if domain == "conus":
+            if thisdomain == "conus":
                 srad = do_hrrr(sts)
-                if srad is not None and postprocess(srad, sts, domain):
+                if srad is not None and postprocess(srad, sts, thisdomain):
                     continue
                 LOG.info("do_hrrr failed to find data")
-            srad = do_gfs(sts, domain)
+            srad = do_gfs(sts, thisdomain)
             if srad is None:
                 LOG.info("do_gfs failed to find data")
                 continue
-            postprocess(srad, sts, domain)
+            postprocess(srad, sts, thisdomain)
 
 
 if __name__ == "__main__":
