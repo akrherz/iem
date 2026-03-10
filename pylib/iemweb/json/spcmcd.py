@@ -5,6 +5,7 @@ Return to `API Services </api/#json>`_
 Changelog
 ---------
 
+- 2026-03-10: Prevent NaN values in the response.
 - 2025-03-12: Added new Most Probable Intensity tags for MCDs
 - 2024-07-09: Add csv and excel output formats
 
@@ -85,6 +86,11 @@ def dowork(lon, lat) -> pd.DataFrame:
     return mcds.drop(columns=["i", "e"])
 
 
+def clean(value):
+    """Prevent NaN."""
+    return None if pd.isna(value) else value
+
+
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
@@ -96,11 +102,6 @@ def application(environ, start_response):
     if fmt == "json":
         data = json_response_dict({"mcds": []})
         for _, row in mcds.iterrows():
-            conf = (
-                None
-                if pd.isna(row["watch_confidence"])
-                else row["watch_confidence"]
-            )
             data["mcds"].append(
                 dict(
                     spcurl=row["spcurl"],
@@ -110,11 +111,11 @@ def application(environ, start_response):
                     product_num=row["product_num"],
                     product_id=row["product_id"],
                     product_href=row["product_href"],
-                    concerning=row["concerning"],
-                    watch_confidence=conf,
-                    most_prob_tornado=row["most_prob_tornado"],
-                    most_prob_hail=row["most_prob_hail"],
-                    most_prob_gust=row["most_prob_gust"],
+                    concerning=clean(row["concerning"]),
+                    watch_confidence=clean(row["watch_confidence"]),
+                    most_prob_tornado=clean(row["most_prob_tornado"]),
+                    most_prob_hail=clean(row["most_prob_hail"]),
+                    most_prob_gust=clean(row["most_prob_gust"]),
                 )
             )
         headers = [("Content-type", "application/json")]
