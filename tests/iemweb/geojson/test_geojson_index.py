@@ -7,14 +7,14 @@ from werkzeug.test import Client
 def test_invalid():
     """Test that invalid request goes to our /api/ page."""
     c = Client(application, response_wrapper=None)
-    resp = c.get("yo_yo_yo")
-    assert resp.status_code == 302
+    resp = c.get("/yo_yo_yo")
+    assert resp.status_code == 301
 
 
 def test_7am():
     """Test a poor live choice."""
     c = Client(application, response_wrapper=None)
-    resp = c.get("7am.geojson")
+    resp = c.get("/7am.geojson")
     assert resp.status_code == 200
 
 
