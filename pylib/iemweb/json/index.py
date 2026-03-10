@@ -1,4 +1,4 @@
-"""Dispatch /geojson requests."""
+"""Dispatch /json requests."""
 
 import re
 from importlib import import_module
@@ -8,21 +8,24 @@ from iemweb import error_log
 
 SPECIAL_ROUTES = [
     (
-        re.compile(r"^/7am"),
-        "seven_am",
-        None,
-    ),
-    (
-        re.compile(r"^/network/(?P<network>[^/]+)\.geojson$"),
-        "network",
+        re.compile(r"^/raob/(?P<ts>[0-9]{12})/(?P<station>[A-Z0-9]{3,4})$"),
+        "raob",
         lambda match, environ: add_query(
-            environ, network=match.group("network")
+            environ, ts=match.group("ts"), station=match.group("station")
         ),
     ),
     (
-        re.compile(r"^/nexrad_attr\.csv$"),
-        "nexrad_attr",
-        lambda _match, environ: add_query(environ, fmt="csv"),
+        re.compile(
+            r"^/stage4/(?P<lon>[-+]?([0-9]*[\.])?[0-9]+)/"
+            r"(?P<lat>[-+]?([0-9]*[\.])?[0-9]+)/(?P<date>[0-9\-]+)$"
+        ),
+        "stage4",
+        lambda match, environ: add_query(
+            environ,
+            lon=match.group("lon"),
+            lat=match.group("lat"),
+            valid=match.group("date"),
+        ),
     ),
 ]
 
@@ -44,7 +47,7 @@ def not_found(
     environ: dict, start_response: callable, what: str
 ) -> list[bytes]:
     """Redirect to the docs..."""
-    error_log(environ, f"geojson failed {what}")
+    error_log(environ, f"json failed {what}")
     start_response("301 Found", [("Location", "/api/")])
     return []
 
@@ -55,7 +58,7 @@ def normalize_path(path: str) -> str | None:
         return None
 
     value = path.lstrip("/")
-    for suffix in (".geojson", ".php", ".py"):
+    for suffix in (".json", ".php", ".py"):
         if value.endswith(suffix):
             value = value[: -len(suffix)]
             break
@@ -77,7 +80,7 @@ def application(environ: dict, start_response: callable):
             if transform is not None:
                 transform(match, environ)
             # Assume daryl did not misconfigure the special route above :/
-            handler = import_module(f"iemweb.geojson.{module_name}")
+            handler = import_module(f"iemweb.json.{module_name}")
             return handler.application(environ, start_response)
 
     if path in REDIRECTS:
@@ -97,7 +100,7 @@ def application(environ: dict, start_response: callable):
         return not_found(environ, start_response, path)
 
     try:
-        handler = import_module(f"iemweb.geojson.{endpoint}")
+        handler = import_module(f"iemweb.json.{endpoint}")
     except ModuleNotFoundError:
         return not_found(environ, start_response, path)
 
