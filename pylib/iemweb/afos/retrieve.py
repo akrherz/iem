@@ -13,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-03-09: The METAR service was updated to not consider the IEM generated
+  METARs based on the MADIS HF feed.
 - 2026-01-29: This service is now protected by a query timeout of 60 seconds.
   You will get a HTTP status of 503.
 - 2025-11-18: Added `matches` parameter to allow a simple search within
@@ -23,10 +25,6 @@ Changelog
 - 2025-01-22: Added `aviation_afd` flag for the specific case of retrieving
   the "Aviation" section of an Area Forecast Discussion.
 - 2025-01-08: Added some caching due to incessant requests for the same data.
-- 2024-08-25: Add ``order`` parameter to allow for order of the returned
-  products.
-- 2024-03-29: Initial documentation release and migrate to a pydantic schema
-  verification.
 
 Examples
 ~~~~~~~~
@@ -286,7 +284,8 @@ def special_metar_logic(conn, pils, limit, fmt, sio: StringIO, order):
     params = {"pil": pils[0][3:].strip(), "limit": limit}
     sql = sql_helper(
         "SELECT raw from current_log c JOIN stations t on "
-        "(t.iemid = c.iemid) WHERE raw != '' and id = :pil "
+        "(t.iemid = c.iemid) WHERE raw != '' and strpos(raw, 'MADISHF') = 0 "
+        "and id = :pil "
         "ORDER by valid {order} LIMIT :limit",
         order=order,
     )
