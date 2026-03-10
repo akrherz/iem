@@ -266,7 +266,7 @@ def main(valid: datetime, domain: str):
     if valid.hour % 6 != 0:
         return
     for thisdomain, dom in IEMRE_DOMAINS.items():
-        if domain != "" and domain != thisdomain:
+        if domain not in ("", thisdomain):
             LOG.info("Skipping %s domain due to CLI args", thisdomain)
             continue
         ncfn = create(valid, thisdomain, dom)

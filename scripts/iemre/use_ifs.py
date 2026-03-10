@@ -187,7 +187,6 @@ def main(valid: datetime) -> None:
     if model_valid is None:
         LOG.warning("No IFS model data available for %s", valid)
         return
-    return
     # 2. Download the necessary files
     grib_download(model_valid, valid)
     fhour = (valid - model_valid).total_seconds() // 3600

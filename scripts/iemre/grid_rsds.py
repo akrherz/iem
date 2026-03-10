@@ -251,7 +251,7 @@ def main(dt: datetime | None, year, month, domain: str):
         queue.append(dt.replace(hour=12))
     for sts_in in queue:
         for thisdomain, dom in IEMRE_DOMAINS.items():
-            if domain != "" and domain != thisdomain:
+            if domain not in ("", thisdomain):
                 LOG.info("Skipping %s domain due to CLI args", thisdomain)
                 continue
             sts = sts_in.replace(tzinfo=dom["tzinfo"])
