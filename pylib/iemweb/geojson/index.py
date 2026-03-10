@@ -68,6 +68,8 @@ def normalize_path(path: str) -> str | None:
 def application(environ: dict, start_response: callable):
     """WSGI application entry point."""
     path = environ.get("PATH_INFO", "")
+    if path == "/index.py":
+        return not_found(environ, start_response, path)
 
     for regex, module_name, transform in SPECIAL_ROUTES:
         match = regex.match(path)
