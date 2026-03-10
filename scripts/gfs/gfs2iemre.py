@@ -173,8 +173,11 @@ def merge_grib(nc, now, domain: str, dom: dict):
                     ),
                 )
             name = grb.shortName.lower()
-            # GFS grid is slightly too big
-            values = grb.values[:-1, :-1]
+            # Chris Farley no-idea, otherwise get no-data stripe at 0° Lon
+            if dom == "europe":
+                values = grb.values
+            else:
+                values = grb.values[:-1, :-1]
             if name == "tmax":
                 if tmaxgrid is None:
                     tmaxgrid = values
@@ -226,14 +229,14 @@ def merge_grib(nc, now, domain: str, dom: dict):
                 nc.variables["p01d"][days] = reproject2iemre(
                     pgrid, affine, EPSG[4326], domain=domain
                 )
-                pout = nc.variables["p01d"][days]
+                pout = np.ma.array(nc.variables["p01d"][days])
                 nc.variables["tsoil"][days] = reproject2iemre(
                     tsoilgrid / 4.0, affine, EPSG[4326], domain=domain
                 )
                 nc.variables["srad"][days] = reproject2iemre(
                     srad, affine, EPSG[4326], domain=domain
                 )
-                sout = nc.variables["srad"][days]
+                sout = np.ma.array(nc.variables["srad"][days])
                 LOG.info(
                     "Writing %s[localdate:%s], day=%s, domain=%s "
                     "srad:%.1f->%.1f pgrid:%.2f->%.2f",
@@ -255,17 +258,21 @@ def merge_grib(nc, now, domain: str, dom: dict):
 
 @click.command()
 @click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
-def main(valid: datetime):
+@click.option("--domain", default="", help="Run just for domain")
+def main(valid: datetime, domain: str):
     """Do the work."""
     valid = valid.replace(tzinfo=timezone.utc)
     # Run every hour, filter those we don't run
     if valid.hour % 6 != 0:
         return
-    for domain, dom in IEMRE_DOMAINS.items():
-        ncfn = create(valid, domain, dom)
+    for thisdomain, dom in IEMRE_DOMAINS.items():
+        if domain != "" and domain != thisdomain:
+            LOG.info("Skipping %s domain due to CLI args", thisdomain)
+            continue
+        ncfn = create(valid, thisdomain, dom)
         with ncopen(ncfn, "a") as nc:
-            merge_grib(nc, valid, domain, dom)
-        dd = "" if domain == "conus" else f"_{domain}"
+            merge_grib(nc, valid, thisdomain, dom)
+        dd = "" if thisdomain == "conus" else f"_{thisdomain}"
         # Archive this as we need it for various projects
         cmd = [
             "pqinsert",

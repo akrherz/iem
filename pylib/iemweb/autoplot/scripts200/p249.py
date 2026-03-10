@@ -136,6 +136,8 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
         cmap = get_cmap(ctx["cmap"])
+        # Set bad values to hallow
+        cmap.set_bad("#FFFFFF00")
         data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
@@ -162,7 +164,8 @@ def plotter(ctx: dict):
             clevs = pretty_bins(ptiles[0], ptiles[1])
         elif varname == "rsds":
             plot_units = "W m**-2"
-            clevs = pretty_bins(0, ptiles[1])
+            # Could be zero at night :/
+            clevs = pretty_bins(0, max(ptiles[1], 100))
         elif varname == "skyc":
             plot_units = "%"
             clevs = np.arange(0, 101, 10)
