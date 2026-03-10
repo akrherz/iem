@@ -263,6 +263,7 @@ SSLProxyVerify none
 </Directory>
 
 WSGIScriptAlias /geojson /opt/iem/htdocs/geojson/index.py
+WSGIScriptAlias /json /opt/iem/htdocs/json/index.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
@@ -270,16 +271,6 @@ WSGIScriptAlias /geojson /opt/iem/htdocs/geojson/index.py
     RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?sdate=$1&edate=$2&lat=$3&lon=$4&format=$5
     RewriteRule cum/([0-9\-]+)/([0-9\-]+)/(shp) cum.py?date0=$1&date1=$2&format=$3&base=50&ceil=86
     RewriteRule cumcounty/([0-9]+)/([0-9\-]+)/([0-9\-]+)/([0-9]+)/([0-9]+)/(json) cum.py?county=$1&date0=$2&date1=$3&format=$6&base=$4&ceil=$5
-</Directory>
-
-<Directory "/opt/iem/htdocs/json">
-    RewriteRule radar$ radar.py
-    # General rewrite of anything .php (eventually, sans index.php) or .json to python
-    RewriteRule ^([^i][a-z_]+)\.(php|json) $1.py [QSA]
-    RewriteRule qpe/([0-9\.\-]+)/([0-9\.\-]+)/(json) qpe.py?lat=$2&lon=$1&format=$3
-    RewriteRule raob/([0-9]{12})/([A-Z0-9]{3,4})$ raob.py?ts=$1&station=$2 [QSA]
-    RewriteRule stage4/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ stage4.py?lon=$1&lat=$2&valid=$3 [QSA]
-    RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
 </Directory>
 
 <Directory "/opt/iem/htdocs/kml">
