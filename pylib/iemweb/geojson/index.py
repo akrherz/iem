@@ -8,7 +8,7 @@ from iemweb import error_log
 
 SPECIAL_ROUTES = [
     (
-        re.compile(r"^7am"),
+        re.compile(r"^/7am"),
         "seven_am",
         None,
     ),
