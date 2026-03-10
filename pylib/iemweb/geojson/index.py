@@ -4,6 +4,8 @@ import re
 from importlib import import_module
 from urllib.parse import parse_qsl, urlencode
 
+from iemweb import error_log
+
 SPECIAL_ROUTES = [
     (
         re.compile(r"^7am"),
@@ -38,8 +40,11 @@ def add_query(environ: dict, **params) -> None:
     environ["QUERY_STRING"] = urlencode(current)
 
 
-def not_found(start_response: callable) -> list[bytes]:
+def not_found(
+    environ: dict, start_response: callable, what: str
+) -> list[bytes]:
     """Redirect to the docs..."""
+    error_log(environ, f"geojson failed {what}")
     start_response("301 Found", [("Location", "/api/")])
     return []
 
@@ -55,7 +60,7 @@ def normalize_path(path: str) -> str | None:
             value = value[: -len(suffix)]
             break
 
-    if not re.fullmatch(r"[a-z_]+", value):
+    if not re.fullmatch(r"[a-z_0-9]+", value):
         return None
     return value
 
@@ -87,11 +92,11 @@ def application(environ: dict, start_response: callable):
 
     endpoint = normalize_path(path)
     if endpoint is None:
-        return not_found(start_response)
+        return not_found(environ, start_response, path)
 
     try:
         handler = import_module(f"iemweb.geojson.{endpoint}")
     except ModuleNotFoundError:
-        return not_found(start_response)
+        return not_found(environ, start_response, path)
 
     return handler.application(environ, start_response)
