@@ -5,11 +5,11 @@ $t = new MyView();
 $t->title = "Severe Weather Products";
 $t->content = <<<EOM
 <div class="row">
-<div class="col-md-3"> 
+<div class="col-md-3">
  <h3>Current Severe Weather</h3>
   <ul>
 <li><a href="/wx/afos/">NWS Text Product Finder</a>
-  <br />A quick and easy way to find NWS text products if you know the 
+  <br />A quick and easy way to find NWS text products if you know the
   product identifiers.</li>
 
 <li><a href="/iembot/">Web iembot monitor</a>
@@ -29,7 +29,7 @@ $t->content = <<<EOM
 <ul>
 
 <li>Past 24 hours of Storm Reports
-<br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
+<br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>,
 <a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
 <a href="/data/gis/shape/4326/us/lsr_24hour.geojson">GeoJSON</a>
 <br />The IEM parses the realtime feed of NWS Local Storm Reports.  Every
@@ -37,7 +37,7 @@ $t->content = <<<EOM
 dumps them to the above files.</li>
 
 <li><a href="/request/gis/lsrs.phtml">Download Archived LSRs</a>
- <br />Generate a shapefile of LSRs for a period of your choice dating back 
+ <br />Generate a shapefile of LSRs for a period of your choice dating back
   to 2003!</li>
 
 </ul>
@@ -79,13 +79,13 @@ year.  A useful diagnostic for a NWS Office wishing to check their local VTEC
 eventd database.</li>
 
 <li><a href="/vtec/emergencies.php">Tornado + Flash Flood Emergencies listing</a>
-<br />Simple table showing IEM indicated Tornado and Flash Flood Emergency 
+<br />Simple table showing IEM indicated Tornado and Flash Flood Emergency
 events.</li>
 
 <li><a href="/vtec/yearly_counts.php">Yearly counts of VTEC Products</a>
   <br />Generates a table of the number of VTEC products issued by year.</li>
   </ul>
- 
+
  <h3>Apps with Archives</h3>
 <ul>
 <li><a href="/cow/">IEM Cow</a>
@@ -101,7 +101,7 @@ events.</li>
 <li><a href="/GIS/apps/rview/watch.phtml">Storm Prediction Center (SPC) Watches since 1997.</a>
  <br />Maps of SPC issued watches and initial RADAR (since 1997) at watch issuance.</li>
 
-<li><a href="/GIS/apps/rview/warnings.phtml">Nationwide Weather Warnings.</a> 
+<li><a href="/GIS/apps/rview/warnings.phtml">Nationwide Weather Warnings.</a>
  <br />Popular web mapping application showing all sorts of information
   relating to severe weather.  Works great for situational awareness
   displays.</li>
@@ -121,7 +121,7 @@ events.</li>
 <div class="col-md-6">
  <h3>Severe Weather Outlooks</h3>
 
-<p>The IEM attempts to main a realtime ingest of the 
+<p>The IEM attempts to main a realtime ingest of the
 <a href="https://www.spc.noaa.gov">Storm Prediction Center</a> convective outlooks. This comparison
 is a simple visual diagnostic between the two.</p>
 
@@ -130,7 +130,7 @@ is a simple visual diagnostic between the two.</p>
 <div class="row">
 <div class="col-md-6">
  <a href="https://www.spc.noaa.gov/products/outlook/day1otlk.html">
-        <img src="https://www.spc.noaa.gov/products/outlook/day1otlk.gif" class="img-fluid" alt="Day 1 Outlook"></a>
+        <img src="https://www.spc.noaa.gov/products/outlook/day1otlk.png" class="img-fluid" alt="Day 1 Outlook"></a>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
@@ -144,7 +144,7 @@ is a simple visual diagnostic between the two.</p>
 <div class="row">
 <div class="col-md-6">
  <a href="https://www.spc.noaa.gov/products/outlook/day2otlk.html">
-        <img src="https://www.spc.noaa.gov/products/outlook/day2otlk.gif" class="img-fluid" alt="Day 1 Outlook"></a>
+        <img src="https://www.spc.noaa.gov/products/outlook/day2otlk.png" class="img-fluid" alt="Day 1 Outlook"></a>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
@@ -158,7 +158,7 @@ is a simple visual diagnostic between the two.</p>
 <div class="row">
 <div class="col-md-6">
  <a href="https://www.spc.noaa.gov/products/outlook/day3otlk.html">
-        <img src="https://www.spc.noaa.gov/products/outlook/day3otlk.gif" class="img-fluid" alt="Day 1 Outlook"></a>
+        <img src="https://www.spc.noaa.gov/products/outlook/day3otlk.png" class="img-fluid" alt="Day 1 Outlook"></a>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
@@ -183,7 +183,7 @@ is a simple visual diagnostic between the two.</p>
 
 <h3>WPC Excessive Rainfall Outlooks</h3>
 
-<p>The IEM attempts to main a realtime ingest of the 
+<p>The IEM attempts to main a realtime ingest of the
 <a href="https://www.wpc.noaa.gov">Weather Prediction Center</a> rainfall outlooks. This comparison
 is a simple visual diagnostic between the two.</p>
 
