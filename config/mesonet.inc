@@ -262,16 +262,7 @@ SSLProxyVerify none
     RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
 </Directory>
 
-<Directory "/opt/iem/htdocs/geojson">
-    # QSA causes the query string to be appended
-    RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
-    # still used
-    RewriteRule nexrad_attr.csv(.*) nexrad_attr.py?$1&fmt=csv [QSA]
-    # Le Sigh
-    RewriteRule network_obs.php(.*) /api/1/currents.geojson$1 [QSA]
-    # General rewrite of anything .php or .geojson to python
-    RewriteRule ^([a-z_]+)\.(php|geojson) $1.py [QSA]
-</Directory>
+WSGIScriptAlias /geojson /opt/iem/htdocs/geojson/index.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4

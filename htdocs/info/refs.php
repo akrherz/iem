@@ -60,7 +60,7 @@ $tags = "";
 arsort($COUNTS);
 foreach ($COUNTS as $key => $value) {
     $tags .= sprintf(
-        "<a href=\"%s\" class=\"btn btn-primary\">%s (%s)</a> &nbsp; ",
+        "<a href=\"%s\" class=\"btn btn-primary mb-1\">%s <span class=\"fw-bold\">(%s)</span></a>",
         $XREF[$key],
         $key,
         $value
@@ -74,41 +74,40 @@ $t->content = <<<EOM
 </ol>
 </nav>
 
-<div class="card mb-4">
+<div class="card mb-4 shadow-sm">
 <div class="card-header">
 <h3 class="mb-0">Scholar Work Referencing IEM</h3>
 </div>
-<div class="card-body">
-<p>Beginning in late 2024, the IEM has attempted to curate a list of scholarly
-products referencing datasets found on this website.  The backfilling of
-this list remains a work in progress!</p>
+<div class="card-body p-3 p-md-4">
+<p>Sadly, the IEM does not have a canonical reference for materials found
+on this website. This list attempts to curate scholarly work that uses
+website citations for the IEM based on a Google Scholar alert, so this
+listing is not meant to be complete.</p>
 
 <p>There are currently <strong>{$total}</strong> references in this list.
 Each entry includes a tag for the IEM resource referenced.  Here is how
 many times each tag is used.</p>
 
-<div class="mb-3">
+<div class="d-flex flex-wrap gap-2 mb-3 bg-light rounded p-3">
 {$tags}
 </div>
 </div>
 </div>
 
-<div class="card">
-<div class="card-body">
-<div class="table-responsive">
+<div class="card shadow-sm">
+<div class="card-body p-3 p-md-4">
 <table class="table table-striped">
-<thead class="table-dark sticky-top">
+<thead class="table-dark sticky">
 <tr>
-  <th>IEM Resource</th>
-  <th>Publication Date/Link</th>
-  <th>Title</th>
+    <th>IEM Resource</th>
+    <th>Publication Date/Link</th>
+    <th>Title</th>
 </tr>
 </thead>
 <tbody>
 {$table}
 </tbody>
 </table>
-</div>
 </div>
 </div>
 
