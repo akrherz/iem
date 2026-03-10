@@ -23,7 +23,9 @@ def get_services(package_name):
 def test_all(application, appname: str):
     """Test all apps."""
     c = Client(application)
-    res = c.get(f"/?{appname}")
+    res = c.get()
+    # appname is useful for the pytest failure message, this appeases linters
+    assert appname.startswith("iemweb")
     # 422 when a required parameter was not provided, which is fine
     # 301 when the app is upset about being approached via http
     assert res.status_code in [200, 301, 422]
