@@ -22,6 +22,7 @@ def test_stage4():
     """Test the stage4 rewrite."""
     c = Client(application, response_wrapper=None)
     resp = c.get("/stage4/-97.5/40.0/2026-03-01")
+    assert "gridi" in resp.json
     assert resp.status_code == 200
 
 

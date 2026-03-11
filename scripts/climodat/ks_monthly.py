@@ -46,13 +46,14 @@ def process(sid, csv, yr):
     osdd = []
     for i in range(1, 13):
         cursor.execute(
-            f"""
+            """
         WITH yearly as (
             SELECT year, avg(high) as ah, avg(low) as al,
             sum(precip) as sp,
             sum(gdd50(high, low)) as sgdd50,
             sum(sdd86(high, low)) as ssdd86
-            from alldata_{sid[:2]} WHERE station = %s and month = %s
+            from alldata WHERE station = %s and month = %s
+            and high is not null and low is not null and precip is not null
             GROUP by year)
 
         SELECT
@@ -136,7 +137,9 @@ def main(yr):
             f"{yr}_MINT,CYR_MINT,{yr}_MAXT,CYR_MAXT,{yr}_PREC,CYR_PREC,"
             f"{yr}_GDD50,CYR_GDD50,{yr}_SDD86,CYR_SDD86\n"
         )
-        for sid in tqdm(nt.sts, disable=not sys.stdout.isatty()):
+        progress = tqdm(nt.sts, disable=not sys.stdout.isatty())
+        for sid in progress:
+            progress.set_description(sid)
             metadata(sid, fh)
             process(sid, fh, yr)
 
