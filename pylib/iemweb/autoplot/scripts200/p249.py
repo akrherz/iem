@@ -118,7 +118,7 @@ def plotter(ctx: dict):
         "axisbg": "white",
         "nocaption": True,
         "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
-        "subtitle": "Sourced from various NOAA/ERA5-Land/DWD ICON datasets",
+        "subtitle": "Sourced from various NOAA/ECMWF IFS/ERA5-Land datasets",
     }
     if domain != "conus":
         ctx["csector"] = "custom"

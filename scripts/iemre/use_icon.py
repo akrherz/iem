@@ -4,9 +4,7 @@ Use the DWD ICON model to estimate IEMRE hourly fields for non CONUS domains.
 https://www.dwd.de/DE/leistungen/opendata/help/modelle/Opendata_cdo_EN.pdf
 https://www.dwd.de/DWD/forschung/nwv/fepub/icon_database_main.pdf
 
-Called from RUN_40_AFTER.sh
- - top of next hour.
- - for something 12 hours ago, so to get closer radiation source
+Orphaned for now, use_ifs.py instead.
 
 """
 
