@@ -1,8 +1,5 @@
 """
-Use the DWD ICON model to estimate IEMRE hourly fields for non CONUS domains.
-
-https://www.dwd.de/DE/leistungen/opendata/help/modelle/Opendata_cdo_EN.pdf
-https://www.dwd.de/DWD/forschung/nwv/fepub/icon_database_main.pdf
+Open-Meteo makes the 1 hour IFS output available on AWS.
 
 Called from RUN_40_AFTER.sh
  - top of next hour.
@@ -11,17 +8,17 @@ Called from RUN_40_AFTER.sh
 """
 
 import os
-import subprocess
-import sys
 import tempfile
-import time
 from datetime import datetime, timedelta, timezone
 
 import click
+import fsspec
 import httpx
 import numpy as np
-import pygrib
 from affine import Affine
+from earthkit.regrid import interpolate
+from metpy.units import units
+from omfiles import OmFileReader
 from pyiem.iemre import (
     DOMAINS,
     get_hourly_ncname,
@@ -32,17 +29,7 @@ from pyiem.util import logger, ncopen
 
 LOG = logger()
 # https://www.ecmwf.int/en/forecasts/datasets/open-data
-META = {
-    "skyc": {"gname": "tcc"},
-    "tmpk": {"gname": "2t"},
-    "dwpk": {"gname": "2d"},
-    "uwnd": {"gname": "10u"},
-    "vwnd": {"gname": "10v"},
-    "p01m": {"gname": "tp"},
-    "p01m_prev": {"gname": "tp", "offset": 1},
-    "soil4t": {"gname": "sot", "levellist": 1},
-    "rsds": {"gname": "ssrd"},
-}
+META = {}
 
 
 def compute_model_valid(valid: datetime) -> datetime | None:
@@ -55,13 +42,12 @@ def compute_model_valid(valid: datetime) -> datetime | None:
         model_valid = valid - timedelta(hours=offset)
         if model_valid.hour % 6 != 0:
             continue
-        fhour = (valid - model_valid).total_seconds() // 3600
         testfn = (
-            "https://ecmwf-forecasts.s3.eu-central-1.amazonaws.com/"
-            f"{model_valid:%Y%m%d/%H}z/ifs/0p25/oper/"
-            f"{model_valid:%Y%m%d%H}0000-{fhour:.0f}h-oper-fc.index"
+            "https://openmeteo.s3.amazonaws.com/data_spatial/"
+            f"ecmwf_ifs/{model_valid:%Y/%m/%d/%H%M}Z/"
+            f"{valid:%Y-%m-%dT%H%M}.om"
         )
-        print(testfn)
+        LOG.info("Checking for %s", testfn)
         try:
             with httpx.Client() as client:
                 response = client.head(testfn)
@@ -74,107 +60,91 @@ def compute_model_valid(valid: datetime) -> datetime | None:
     return None
 
 
-def grib_download(model_valid: datetime, valid: datetime) -> None:
-    """
-    Download the necessary GRIB files for the IFS model.
-    """
-    baseurl = "https://opendata.dwd.de/weather/nwp/icon/grib/"
-    fhour = (valid - model_valid).total_seconds() // 3600
-    for var, meta in META.items():
-        filename = f"{var}.grib2.bz2"
-        fhour_off = fhour - meta.get("offset", 0)
-        url = (
-            f"{baseurl}{model_valid:%H}/{meta['gname']}/"
-            "icon_global_icosahedral_single-level_"
-            f"{model_valid:%Y%m%d%H}_{fhour_off:03.0f}_{meta['gname'].upper()}"
-            ".grib2.bz2"
-        )
-        LOG.info("Downloading %s", url)
-        for attempt in range(3):
-            try:
-                with httpx.Client() as client:
-                    response = client.get(url)
-                    if response.status_code == 404:
-                        # Try something 6 hours older
-                        mv2 = model_valid - timedelta(hours=6)
-                        fo2 = fhour_off + 6
-                        url = (
-                            f"{baseurl}{mv2:%H}/{meta['gname']}/"
-                            "icon_global_icosahedral_single-level_"
-                            f"{mv2:%Y%m%d%H}_{fo2:03.0f}_"
-                            f"{meta['gname'].upper()}.grib2.bz2"
-                        )
-                        response = client.get(url)
-                response.raise_for_status()
-                break
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                LOG.error("Failed to download %s: %s", filename, e)
-                time.sleep(5)
-            if attempt == 2:
-                LOG.warning("Aborting")
-                sys.exit(3)
-
-        with open(filename, "wb") as f:
-            f.write(response.content)
-        subprocess.run(["bzip2", "-d", filename], check=True)
-        # Use cdo to convert grid to lat/lon
-        with subprocess.Popen(
-            [
-                "cdo",
-                "-f",
-                "grb2",
-                (
-                    "remap,/mesonet/data/meta/icon_description.txt,"
-                    "/mesonet/data/meta/icon_weights.nc"
-                ),
-                f"{var}.grib2",
-                f"{var}_latlon.grib2",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        ) as proc:
-            stdout, stderr = proc.communicate()
-        if proc.returncode != 0:
-            LOG.error(
-                "CDO remap failed for %s: %s %s",
-                filename,
-                stderr.decode("utf-8"),
-                stdout.decode("utf-8"),
-            )
-
-
-def copy_grib_to_netcdf(valid: datetime, domain: str, fhour: int) -> None:
+def process(valid: datetime, model_valid: datetime) -> None:
     """Fun times."""
-    idx = hourly_offset(valid)
-    # grib file is stored S to N
-    affine_in = Affine(0.125, 0, -180.0, 0, 0.125, -90.0)
-    with ncopen(get_hourly_ncname(valid.year, domain), "a") as nc:
-        for var in META:
-            if var.endswith("_prev"):  # lame
-                continue
-            grib_file = f"{var}_latlon.grib2"
-            if not os.path.exists(grib_file):
-                LOG.warning("GRIB file %s does not exist, skipping", grib_file)
-                continue
-            with pygrib.open(grib_file) as grbs:
-                values = grbs[1].values
-            if var == "p01m":
-                with pygrib.open(f"{var}_prev_latlon.grib2") as grbs:
-                    values = values - grbs[1].values
-            if var == "rsds":
-                with pygrib.open(f"{var}_prev_latlon.grib2") as grbs:
-                    values = (values * fhour) - (grbs[1].values * (fhour - 1))
-            iemre_data = reproject2iemre(
-                values, affine_in, "EPSG:4326", domain=domain
+    tidx = hourly_offset(valid)
+
+    s3uri = (
+        "s3://openmeteo/data_spatial/ecmwf_ifs/"
+        f"{model_valid:%Y/%m/%d/%H%M}Z/{valid:%Y-%m-%dT%H%M}.om"
+    )
+    backend = fsspec.open(
+        f"blockcache::{s3uri}",
+        mode="rb",
+        s3={"anon": True, "default_block_size": 65536},
+        blockcache={"cache_storage": "cache"},
+    )
+    affine = Affine(
+        0.125,
+        0.0,
+        0.0,
+        0.0,
+        -0.125,
+        90.0,
+    )
+    with OmFileReader(backend) as root:
+        # Print out the inventory
+        for omidx in range(root.num_children):
+            child = root.get_child_by_index(omidx)
+            LOG.info("Child %s: %s", omidx, child.name)
+        ncvars = {
+            "tmpc": root.get_child_by_name("temperature_2m"),
+            "soilc": root.get_child_by_name("soil_temperature_0_to_7cm"),
+            "uwnd": root.get_child_by_name("wind_u_component_10m"),
+            "vwnd": root.get_child_by_name("wind_v_component_10m"),
+            "dwpc": root.get_child_by_name("dew_point_2m"),
+            "cloud_cover": root.get_child_by_name("cloud_cover"),
+            "swdn": root.get_child_by_name("shortwave_radiation"),
+            "precip": root.get_child_by_name("precipitation"),
+        }
+        for ncvar, omvar in ncvars.items():
+            # Believe this goes 0-360 lon and 90 to -90 lat
+            ncvars[ncvar] = interpolate(
+                omvar[:],
+                in_grid={"grid": "O1280"},
+                out_grid={"grid": [0.125, 0.125]},
+                method="linear",
             )
-            LOG.info(
-                "Write %s[%s]@%s mean: %.2f",
-                var,
-                domain,
-                idx,
-                np.mean(iemre_data),
-            )
-            nc.variables[var][idx] = iemre_data
+
+        print("Precip mean", np.nanmean(ncvars["precip"][:]))
+        for domain in DOMAINS:
+            if domain in ("", "conus"):
+                continue
+            with ncopen(get_hourly_ncname(valid.year, domain), "a") as nc:
+                # No unit conversions
+                for ncvar, omvar in [
+                    ("uwnd", ncvars["uwnd"]),
+                    ("vwnd", ncvars["vwnd"]),
+                    ("skyc", ncvars["cloud_cover"]),
+                    ("rsds", ncvars["swdn"]),
+                    ("p01m", ncvars["precip"]),
+                ]:
+                    nc.variables[ncvar][tidx] = reproject2iemre(
+                        omvar[:],
+                        affine,
+                        "EPSG:4326",
+                        domain=domain,
+                    )
+
+                # C to K
+                for ncvar, omvar in [
+                    ("tmpk", ncvars["tmpc"]),
+                    ("dwpk", ncvars["dwpc"]),
+                    ("soil4t", ncvars["soilc"]),
+                ]:
+                    nc.variables[ncvar][tidx] = (
+                        (
+                            units.degC
+                            * reproject2iemre(
+                                omvar[:],
+                                affine,
+                                "EPSG:4326",
+                                domain=domain,
+                            )
+                        )
+                        .to(units.degK)
+                        .m
+                    )
 
 
 @click.command()
@@ -187,14 +157,8 @@ def main(valid: datetime) -> None:
     if model_valid is None:
         LOG.warning("No IFS model data available for %s", valid)
         return
-    # 2. Download the necessary files
-    grib_download(model_valid, valid)
-    fhour = (valid - model_valid).total_seconds() // 3600
-    # 3. Copy to IEMRE netcdf files
-    for domain in DOMAINS:
-        if domain == "conus":
-            continue
-        copy_grib_to_netcdf(valid, domain, fhour)
+    # 3. Process
+    process(valid, model_valid)
 
 
 if __name__ == "__main__":

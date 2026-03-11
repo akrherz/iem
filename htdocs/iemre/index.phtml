@@ -43,7 +43,7 @@ globally at high resolution, so a number of regional domains are curated.</p>
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-6 mb-3">
         <div class="card h-100">
             <div class="card-body">
@@ -70,6 +70,9 @@ globally at high resolution, so a number of regional domains are curated.</p>
 
 <div class="alert alert-warning">
     <ul class="mb-0">
+        <li><strong>11 Mar 2026:</strong> For Non-CONUS domains, the
+        <a href="https://www.ecmwf.int/en/forecasts/datasets/open-data">ECMWF IFS</a>
+        is used to provide near-term analysis prior to ERA5Land arriving.</li>
         <li><strong>26 Jul 2025:</strong> Non-CONUS domains are now available
         for South America, Europe, and Southeast Asia/China.</li>
         <li><strong>4 Jan 2023:</strong> Near realtime solar radiation is sourced from
@@ -83,7 +86,7 @@ globally at high resolution, so a number of regional domains are curated.</p>
 </div>
 
 <h3 class="mt-5 mb-4">Data Flow</h3>
- 
+
 <div class="row g-4">
     <div class="col-lg-4">
         <div class="card h-100">
@@ -99,7 +102,7 @@ globally at high resolution, so a number of regional domains are curated.</p>
                         caches the <a href="{$s4link}">grib data</a> and makes hourly
                         plots available <a href="/timemachine/?product=40">here</a>.
                     </li>
-                    
+
                     <li class="list-group-item px-0">
                         <strong>MRMS Precipitation</strong>
                         <br />Currently, this is only used to populate a daily total in a
@@ -116,7 +119,7 @@ globally at high resolution, so a number of regional domains are curated.</p>
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header bg-success text-white">
@@ -139,7 +142,7 @@ globally at high resolution, so a number of regional domains are curated.</p>
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header bg-info text-white">
@@ -184,7 +187,7 @@ fills the gap until the final source is available.</p>
         <tr>
             <th scope="row">Precipitation</th>
             <td>Stage IV (CONUS)
-            <br />DWD ICON Short Term Forecast (non-CONUS)</td>
+            <br />ECMWF IFS Short Term Forecast (non-CONUS)</td>
             <td>1997+ Stage IV adjusted by PRISM (CONUS)
             <br />1950-1997 ERA5-Land (CONUS)
             <br />ERA5-Land (non-CONUS)</td>

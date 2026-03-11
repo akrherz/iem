@@ -13,8 +13,8 @@ cd ../rtma
 python wind_power.py &
 
 cd ../iemre
-python use_icon.py --valid=$DT
-python use_icon.py --valid=$DT12 &
+python use_ifs.py --valid=$DT
+python use_ifs.py --valid=$DT12 &
 
 cd ../qc
 python check_webcams.py
