@@ -38,6 +38,7 @@ def get_description():
         dict(
             type="date",
             name="sdate",
+            max=f"{date.today():%Y}/12/31",  # careful
             default=sts.strftime("%Y/%m/%d"),
             label="Start Date (inclusive):",
             min="1893/01/01",
@@ -46,7 +47,7 @@ def get_description():
             type="date",
             name="edate",
             default=f"{today:%Y/%m/%d}",
-            max=f"{today:%Y}/12/31",
+            max=f"{date.today():%Y}/12/31",  # careful
             label=(
                 "End Date (inclusive): [Setting to future date will increase "
                 "the x-axis to show more climatology]"
