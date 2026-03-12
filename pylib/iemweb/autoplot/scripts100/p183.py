@@ -83,7 +83,7 @@ def plotter(ctx: dict):
     except Exception as exp:
         LOG.info("droughtmonitor failed: %s", exp)
         raise NoDataFound("API request to droughtmonitor failed...") from exp
-    if "d" not in jdata:
+    if not jdata.get("d", []):
         raise NoDataFound("No data Found.")
     df = pd.DataFrame(jdata["d"])
     for c in ["0", "1", "2", "3", "4"]:

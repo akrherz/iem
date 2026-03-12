@@ -35,7 +35,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, YEAR_FIELD
 from iemweb.util import get_ct
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -56,7 +56,7 @@ class Schema(CGIModel):
             pattern="^[A-Z0-9]{4}$",
         ),
     ] = "KDSM"
-    year: Annotated[int, Field(description="The year to query for")] = 2019
+    year: YEAR_FIELD = 2019
 
 
 def departure(ob, climo):
