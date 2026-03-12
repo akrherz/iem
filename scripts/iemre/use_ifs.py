@@ -14,7 +14,6 @@ from datetime import datetime, timedelta, timezone
 import click
 import fsspec
 import httpx
-import numpy as np
 from affine import Affine
 from earthkit.regrid import interpolate
 from metpy.units import units
@@ -106,7 +105,6 @@ def process(valid: datetime, model_valid: datetime) -> None:
                 method="linear",
             )
 
-        print("Precip mean", np.nanmean(ncvars["precip"][:]))
         for domain in DOMAINS:
             if domain in ("", "conus"):
                 continue

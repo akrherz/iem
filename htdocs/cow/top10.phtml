@@ -43,13 +43,15 @@ if ($wfo == 'ALL') {
 }
 
 pg_query($postgis, "SET TIME ZONE 'UTC'");
-$stname_asc = iem_pg_prepare($postgis, "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
-eventid, date(issue), phenomena, significance, wfo from sbw
-WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
+$stname_asc = iem_pg_prepare(
+    $postgis,
+    "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area,
+    eventid, date(issue), phenomena, significance, wfo, vtec_year from sbw
+WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and
 significance = 'W' and issue > '$tstring' and ST_Area(geom) > 0 ORDER by area ASC LIMIT 10");
-$stname_desc = iem_pg_prepare($postgis, "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
-eventid, date(issue), phenomena, significance, wfo from sbw 
-WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
+$stname_desc = iem_pg_prepare($postgis, "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area,
+eventid, date(issue), phenomena, significance, wfo, vtec_year from sbw
+WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and
 significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 
 $t->title = "NWS SVR/TOR Storm Based Warnings by Size";
@@ -80,9 +82,8 @@ $rs = pg_execute($postgis, $stname_desc, array(unrectify_wfo($wfo)));
 while ($row = pg_fetch_assoc($rs)) {
 
     $url = sprintf(
-        "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%04d",
-        substr($row['date'], 0, 4),
-        'NEW',
+        "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%s",
+        $row["vtec_year"],
         rectify_wfo($row['wfo']),
         $row["phenomena"],
         $row['significance'],
@@ -104,9 +105,8 @@ $btable = "";
 $rs = pg_execute($postgis, $stname_asc, array(unrectify_wfo($wfo)));
 while ($row = pg_fetch_assoc($rs)) {
     $url = sprintf(
-        "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%04d",
-        substr($row['date'], 0, 4),
-        'NEW',
+        "/vtec/?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%s",
+        $row["vtec_year"],
         rectify_wfo($row['wfo']),
         $row["phenomena"],
         $row['significance'],
@@ -136,7 +136,7 @@ $t->content = <<<EOM
 <h3>Top 10 NWS WFO Storm Based Warnings by Size</h3>
 
 <p>This application prints out a listing of the top 10 largest and smallest
-storm based warnings by Weather Forecast Office (WFO). You can click the 
+storm based warnings by Weather Forecast Office (WFO). You can click the
 Event ID to get more information on that warning. This page defaults to show the
 largest and smallest warnings from any WFO.  Storm Based Warnings did not become
 operational until 1 Oct 2007, so warning polygons prior to that date were only

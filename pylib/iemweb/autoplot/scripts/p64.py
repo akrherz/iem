@@ -172,7 +172,7 @@ def plotter(ctx: dict):
     t1 = "Last" if ctx["dir"] == "last" else "First"
     t2 = (
         "Trace+"
-        if ctx["threshold"] == "T"
+        if ctx["threshold"] in ("T", "t")
         else f"{float(ctx['threshold']):.2f}+ Inch"
     )
     title = (

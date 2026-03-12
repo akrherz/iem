@@ -55,7 +55,9 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -90,9 +92,7 @@ class MyModel(CGIModel):
             ),
         ),
     ] = False
-    tz: Annotated[
-        str, Field(description="The timezone to use for timestamps")
-    ] = "UTC"
+    tz: TZ_FIELD = "UTC"
     sts: Annotated[
         AwareDatetime | None,
         Field(description="The start timestamp for the data"),
@@ -101,15 +101,7 @@ class MyModel(CGIModel):
         AwareDatetime | None,
         Field(description="The end timestamp for the data"),
     ] = None
-    station: Annotated[
-        ListOrCSVType,
-        Field(
-            description=(
-                "The station(s) to request data for, "
-                "either multi params or comma separated"
-            ),
-        ),
-    ]
+    station: STATION_LIST_FIELD
     year1: Annotated[
         int | None, Field(description="The start year, if not using sts")
     ] = None

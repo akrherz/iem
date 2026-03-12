@@ -9,7 +9,6 @@ $cached_reference = cacheable('include_reference')(function() {
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $data = curl_exec($ch);
-    curl_close($ch);
     $res = json_decode($data, true);
     if (is_null($res)) {
         http_response_code(503);
