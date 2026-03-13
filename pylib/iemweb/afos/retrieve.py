@@ -13,6 +13,10 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-03-13: After gnashing of teeth about the METARs, a compromise was
+  reached to return only the latest non-MADISHF METAR when requesting just
+  one, but return anything available when requesting more than 1.  Will likely
+  regret this decision as well.
 - 2026-03-09: The METAR service was updated to not consider the IEM generated
   METARs based on the MADIS HF feed.
 - 2026-01-29: This service is now protected by a query timeout of 60 seconds.
@@ -279,15 +283,17 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-def special_metar_logic(conn, pils, limit, fmt, sio: StringIO, order):
+def special_metar_logic(conn, pils, limit: int, fmt, sio: StringIO, order):
     """Special METAR logic."""
     params = {"pil": pils[0][3:].strip(), "limit": limit}
+    extra = "and strpos(raw, 'MADISHF') = 0" if limit == 1 else ""
     sql = sql_helper(
         "SELECT raw from current_log c JOIN stations t on "
-        "(t.iemid = c.iemid) WHERE raw != '' and strpos(raw, 'MADISHF') = 0 "
+        "(t.iemid = c.iemid) WHERE raw != '' {extra} "
         "and id = :pil "
         "ORDER by valid {order} LIMIT :limit",
         order=order,
+        extra=extra,
     )
     res = conn.execute(sql, params)
     for row in res:
