@@ -110,7 +110,7 @@ options listed.</p>
 <ul>
  <li><a href="/request/gis/watchwarn.phtml">GIS Shapefiles</a><br />
   of archived Storm Based Warning polygons.</li>
- <li><a href="/iembot/">IEMBot</a><br />
+ <li><a href="/projects/iembot/">IEMBot</a><br />
   Realtime chatrooms, twitter posting service, RSS feeds and more.</li>
 </ul>
 

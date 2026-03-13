@@ -160,6 +160,12 @@ def process(ncfn):
         """Our decision if we are going to take a HFMETAR value or not"""
         if data[fieldname][i] is np.ma.masked:
             return None
+        # Found troubles with values of 255 not getting QCd
+        if (
+            fieldname in ["windSpeed", "windGust"]
+            and data[fieldname][i] >= 250
+        ):
+            return None
         if data[f"{fieldname}QCR"][i] == 0:
             return data[fieldname][i]
         # Now we have work to do
