@@ -190,7 +190,7 @@ def plotter(ctx: dict):
         apctx=ctx,
         sector=sector,
         state=ctx["state"],
-        fema=ctx["fema"],
+        fema_region=ctx["fema"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
         title=f"{PDICT2[ctx['v']]} for {ctx['title']} on {ctx['day']}",

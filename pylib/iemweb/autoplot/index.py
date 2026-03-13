@@ -318,7 +318,7 @@ def sday_handler(value: str, arg: dict):
     )
 
 
-def date_handler(value: str, arg: dict):
+def date_handler(value: str, arg: dict) -> str:
     """Handler for datetime instances."""
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "1893/1/1")
@@ -340,7 +340,7 @@ def date_handler(value: str, arg: dict):
     )
 
 
-def datetime_handler(value: str, arg: dict):
+def datetime_handler(value: str, arg: dict) -> str:
     """Handler for datetime instances."""
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
