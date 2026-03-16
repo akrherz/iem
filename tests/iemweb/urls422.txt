@@ -39,6 +39,7 @@
 /cgi-bin/request/nlaeflux.py?syear=2000&eyear=2001&smonth=1&emonth=2&sday=1&eday=2&station=trouble*
 /cgi-bin/request/other.py?station=AAA
 /cgi-bin/request/raster2netcdf.py?dstr=201710251200&prod=bogus
+/cgi-bin/request/rwis.py?network=IA_RWIS&stations=_ALL&sts=2020-01-01&ets=2025-01-01
 /cgi-bin/request/scan.py?stations=_ALL
 /cgi-bin/request/scan.py?stations=A,B,C,D,E,F,G,H,I,J,K,L&sts=2022-02-01&ets=2025-01-01
 /cgi-bin/request/scan.py?year1=2025&month1=1&day1=1&hour1=0&year2=2025&month2=12&day2=31&hour2=23&vars=test&what=view&stations=IA0000

@@ -11,6 +11,9 @@ This service emits RWIS data.
 Changelog
 ---------
 
+- 2026-03-16: To prevent this service from being over-run, you can only
+  request less than 10 stations at a time when requesting more than one
+  year worth of data.
 - 2025-02-26: Added variable support for `relh` and `feel`, but these
   variables are not fully available yet over the archive.
 - 2024-09-19: Fix bug with no variables returned when ``vars`` is not set
@@ -71,6 +74,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD_OPTIONAL
+
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -103,21 +108,13 @@ class Schema(CGIModel):
         ),
         pattern="^(dl|txt|html|excel|download)$",
     )
-    tz: str = Field(
-        default="UTC",
-        description="Timezone to use for timestamps",
-    )
+    tz: TZ_FIELD_OPTIONAL = "UTC"
     src: str = Field(
         default="atmos",
         description="Data source to use",
         pattern="^(atmos|soil|traffic)$",
     )
-    stations: ListOrCSVType = Field(
-        default_factory=list,
-        description=(
-            "List of stations to include in output, `_ALL` for all stations"
-        ),
-    )
+    stations: STATION_LIST_FIELD
     network: str = Field(
         default="IA_RWIS",
         description="Network to use",
@@ -192,9 +189,14 @@ def application(environ, start_response):
     if src in ["soil", "traffic"]:
         table = f"alldata_{src}"
     network = environ["network"]
-    nt = NetworkTable(network, only_online=False)
     if "_ALL" in stations:
+        nt = NetworkTable(network, only_online=False)
         stations = list(nt.sts.keys())
+    if len(stations) > 10 and (environ["ets"] - environ["sts"]).days > 366:
+        raise IncompleteWebRequest(
+            "Too many stations requested for more than a year of data, "
+            "please reduce the number of stations or the time range."
+        )
     params = {
         "tzname": tzname,
         "ids": stations,
