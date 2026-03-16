@@ -30,13 +30,11 @@ from typing import Annotated
 import simplejson as json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
 from iemweb.fields import CALLBACK_FIELD, YEAR_FIELD
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -93,10 +91,7 @@ def f2_sanitize(val):
 
 def get_data(conn, station, year, fmt):
     """Get the data for this timestamp"""
-    data = {
-        "results": [],
-        "generated_at": utc().strftime(ISO8601),
-    }
+    data = json_response_dict({"results": []})
     # Fetch the daily values
     res = conn.execute(
         sql_helper("""

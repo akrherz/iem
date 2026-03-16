@@ -16,14 +16,14 @@ services found at
 Changelog
 ---------
 
+- 2026-03-16: Boolean fields were improved to allow for more truthy inputs
+  than just `yes` and `no`.
 - 2025-12-17: Improved the error message when provided time information is
   not sufficient.  Additionally, the hour values now default to 0 and minute
   values to 0 as well.
 - 2025-07-12: Added ``fcster`` parameter to filter results by forecaster name
   (case-insensitive matching).  This field is also added to the output.
 - 2025-05-09: Fixed issue with ``ETN`` DBF column allways being (null).
-- 2024-10-28: The service default for parameter ``simple`` was set back to
-  ``yes``.  It was mistakenly set to ``no`` when this was migrated to pydantic.
 - 2024-10-28: Optimize the zipfile response by streaming the result.
 - 2024-10-22: Fix and better document the ``at`` parameter for when
   ``timeopt=2``.
@@ -44,7 +44,7 @@ and significance parameters are repeated so that each combination is present.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?\
 accept=shapefile&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&\
-location_group=states&states=MS&limitps=yes&phenomena=FF,FA,SV,TO,FF,FA,SV,TO&\
+location_group=states&states=MS&limitps=1&phenomena=FF,FA,SV,TO,FF,FA,SV,TO&\
 significance=W,W,W,W,A,A,A,A
 
 Return all Tornado Warnings for the Des Moines WFO in shapefile format during
@@ -52,24 +52,24 @@ Return all Tornado Warnings for the Des Moines WFO in shapefile format during
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
-&limitps=yes&phenomena=TO&significance=W
+&limitps=1&phenomena=TO&significance=W
 
 Provide all Tornado Warnings valid at 2120 UTC on 21 May 2024
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=shapefile&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+?accept=shapefile&at=2024-05-21T21:20Z&timeopt=2&limitps=1&phenomena=TO\
 &significance=W
 
 Same request, but return an excel file
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=excel&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+?accept=excel&at=2024-05-21T21:20Z&timeopt=2&limitps=1&phenomena=TO\
 &significance=W
 
 Same request, but return csv
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=csv&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+?accept=csv&at=2024-05-21T21:20Z&timeopt=2&limitps=1&phenomena=TO\
 &significance=W
 
 Same request, but using the more verbose parameterization for the timestamp
@@ -77,7 +77,7 @@ and also filtering the result by text products signed by john
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&year3=2024&month3=5&day3=21&hour3=21&minute3=20&timeopt=2\
-&limitps=yes&phenomena=TO&significance=W&fcster=john
+&limitps=1&phenomena=TO&significance=W&fcster=john
 
 """
 
@@ -86,6 +86,7 @@ import zlib
 from datetime import datetime, timedelta
 from io import BytesIO
 from stat import S_IFREG
+from typing import Annotated
 
 import fiona
 import pandas as pd
@@ -98,17 +99,21 @@ from shapely.geometry import mapping
 from shapely.wkb import loads
 from stream_zip import ZIP_32, stream_zip
 
+from iemweb.fields import VTEC_YEAR_FIELD_OPTIONAL
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    accept: str = Field(
-        default="shapefile",
-        pattern="^(shapefile|excel|csv)$",
-        description="The format to return, either shapefile or excel.",
-    )
+    accept: Annotated[
+        str,
+        Field(
+            pattern="^(shapefile|excel|csv)$",
+            description="The format to return, either shapefile or excel.",
+        ),
+    ] = "shapefile"
     at: AwareDatetime = Field(
         default=None,
         description=(
@@ -116,47 +121,56 @@ class Schema(CGIModel):
             "provides events valid at the specified time."
         ),
     )
-    addsvs: str = Field(
-        default="no",
-        pattern="^(yes|no)$",
-        description="Include polygons that were included within any followup "
-        "statements after issuance.",
-    )
+    addsvs: Annotated[
+        bool,
+        Field(
+            description=(
+                "Include polygons that were found within any followup "
+                "statements after issuance."
+            ),
+        ),
+    ] = False
     ets: AwareDatetime = Field(
         default=None,
         description="The end timestamp in UTC. The format is ISO8601, e.g. "
         "2010-06-01T00:00Z.",
         ge=utc(1986, 1, 1),
     )
-    limit0: str = Field(
-        default="no",
-        pattern="^(yes|no)$",
-        description="If yes, only include Tornado, Severe Thunderstorm, "
-        "Flash Flood, and Marine Warnings.",
-    )
-    limit1: str = Field(
-        default="no",
-        pattern="^(yes|no)$",
-        description="If yes, only include Storm Based Warnings.",
-    )
-    limit2: str = Field(
-        default="no",
-        pattern="^(yes|no)$",
-        description="If yes, only include Emergency Warnings.",
-    )
-    limitpds: bool = Field(
-        default=False,
-        description=(
-            "If yes, only include products that have a PDS "
-            "(Particularly Dangerous Situation) tag or phrasing."
+    limit0: Annotated[
+        bool,
+        Field(
+            description="If true, only include Tornado, Severe Thunderstorm, "
+            "Flash Flood, and Marine Warnings.",
         ),
-    )
-    limitps: str = Field(
-        default="no",
-        pattern="^(yes|no)$",
-        description="If yes, only include the specified phenomena and "
-        "significance.",
-    )
+    ] = False
+    limit1: Annotated[
+        bool,
+        Field(
+            description="If true, only include Storm Based Warnings.",
+        ),
+    ] = False
+    limit2: Annotated[
+        bool,
+        Field(
+            description="If true, only include Emergency Warnings.",
+        ),
+    ] = False
+    limitpds: Annotated[
+        bool,
+        Field(
+            description=(
+                "If true, only include products that have a PDS "
+                "(Particularly Dangerous Situation) tag or phrasing."
+            ),
+        ),
+    ] = False
+    limitps: Annotated[
+        bool,
+        Field(
+            description="If true, only include the specified phenomena and "
+            "significance.",
+        ),
+    ] = False
     location_group: str = Field(
         default="wfo",
         pattern="^(wfo|states)$",
@@ -168,12 +182,13 @@ class Schema(CGIModel):
         "provide more than one value, the length must correspond and align "
         "with the ``significance`` parameter.",
     )
-    simple: str = Field(
-        default="yes",
-        pattern="^(yes|no)$",
-        description="If yes, use a simplified geometry for the UGC "
-        "counties/zones.",
-    )
+    simple: Annotated[
+        bool,
+        Field(
+            description="If true, use a simplified geometry for the UGC "
+            "counties/zones.",
+        ),
+    ] = True
     significance: ListOrCSVType = Field(
         default=["W"],
         description="The one character VTEC significance to include, if you "
@@ -204,27 +219,9 @@ class Schema(CGIModel):
     wfos: ListOrCSVType = Field(
         default=None, description="Legacy parameter, update to use ``wfo``."
     )
-    year1: int = Field(
-        default=None,
-        description="The start timestamp components in UTC, if you specify a "
-        "sts parameter, these are ignored.",
-        ge=1986,
-    )
-    year2: int = Field(
-        default=None,
-        description="The end timestamp components in UTC, if you specify a "
-        "ets parameter, these are ignored.",
-        ge=1986,
-    )
-    year3: int = Field(
-        default=None,
-        description=(
-            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
-            "this is used to find all events that were valid at this "
-            "time."
-        ),
-        ge=1986,
-    )
+    year1: VTEC_YEAR_FIELD_OPTIONAL = None
+    year2: VTEC_YEAR_FIELD_OPTIONAL = None
+    year3: VTEC_YEAR_FIELD_OPTIONAL = None
     month1: int = Field(
         default=None,
         description="The start timestamp components in UTC, if you specify a "
@@ -425,11 +422,11 @@ def build(environ: dict) -> tuple[str, str, dict]:
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
-    if environ["limit0"] == "yes":
+    if environ["limit0"]:
         limiter = (
             " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
         )
-    if environ["limitps"] == "yes":
+    if environ["limitps"]:
         phenom = environ["phenomena"]
         sig = environ["significance"]
         parts = []
@@ -439,9 +436,9 @@ def build(environ: dict) -> tuple[str, str, dict]:
             params[f"s{_i}"] = s[:1]
         limiter = f" and ({' or '.join(parts)}) "
 
-    sbwlimiter = " WHERE gtype = 'P' " if environ["limit1"] == "yes" else ""
+    sbwlimiter = " WHERE gtype = 'P' " if environ["limit1"] else ""
 
-    elimiter = " and is_emergency " if environ["limit2"] == "yes" else ""
+    elimiter = " and is_emergency " if environ["limit2"] else ""
     pdslimiter = " and is_pds " if environ["limitpds"] else ""
 
     # Forecaster filter
@@ -459,7 +456,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
         sbw_table = f"sbw_{sts.year}"
 
     geomcol = "geom"
-    if environ["simple"] == "yes":
+    if environ["simple"]:
         geomcol = "simple_geom"
 
     cols = (
@@ -484,7 +481,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
             )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
-    if environ["addsvs"] == "yes":
+    if environ["addsvs"]:
         statuslimit = " status != 'CAN' "
         sbwtimelimit = timelimit.replace(
             "issue",

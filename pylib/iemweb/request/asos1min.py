@@ -141,8 +141,6 @@ def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
 )
 def application(environ, start_response):
     """Handle mod_wsgi request."""
-    if environ["station"] is None:
-        raise IncompleteWebRequest("No station= was specified in request.")
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Insufficient start timestamp variables.")
     # Ensure we have uppercase stations

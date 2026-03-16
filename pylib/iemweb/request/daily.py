@@ -48,6 +48,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb import error_log
+from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DEFAULT_COLS = (
@@ -106,18 +107,14 @@ class MyCGI(CGIModel):
     month1: Annotated[
         int | None, Field(description="Start month when sts is not provided")
     ] = None
-    day1: Annotated[
-        int | None, Field(description="Start day when sts is not provided")
-    ] = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     year2: Annotated[
         int | None, Field(description="End year when ets is not provided")
     ] = None
     month2: Annotated[
         int | None, Field(description="End month when ets is not provided")
     ] = None
-    day2: Annotated[
-        int | None, Field(description="End day when ets is not provided")
-    ] = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
 def overloaded(environ: dict):
