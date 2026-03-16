@@ -38,17 +38,16 @@ network=IA_COOP&stations=AESI4&sts=2024-10-22&ets=2024-10-22&what=download\
 
 """
 
-import re
 from datetime import date
 from io import StringIO
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, iemapp
 
-STATION_RE = re.compile(r"^[A-Z0-9_]{3,8}$")
+from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, STATION_LIST_FIELD
 
 
 class Schema(CGIModel):
@@ -67,12 +66,7 @@ class Schema(CGIModel):
         description="The network to use for station lookups.",
         pattern="^[A-Z0-9_]+$",
     )
-    stations: ListOrCSVType = Field(
-        ...,
-        description=(
-            "List of stations to include in the output. Legacy variable name."
-        ),
-    )
+    stations: STATION_LIST_FIELD
     what: str = Field("view", description="The type of output to generate.")
     sts: date = Field(
         None,
@@ -90,10 +84,7 @@ class Schema(CGIModel):
         None,
         description="The starting month for the data request.",
     )
-    day1: int = Field(
-        None,
-        description="The starting day for the data request.",
-    )
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     year2: int = Field(
         None,
         description="The ending year for the data request.",
@@ -102,19 +93,7 @@ class Schema(CGIModel):
         None,
         description="The ending month for the data request.",
     )
-    day2: int = Field(
-        None,
-        description="The ending day for the data request.",
-    )
-
-    @field_validator("stations")
-    @classmethod
-    def station_validator(cls, value):
-        """Ensure the station is valid."""
-        for station in value:
-            if not STATION_RE.fullmatch(station):
-                raise ValueError(f"Invalid station identifier: {station}")
-        return value
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
 def get_cgi_stations(environ):

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Front-end that allows the download of archived WWA metadata
  */
@@ -30,9 +30,9 @@ function get_file_created_date($filename) {
 
 function get_file_size($filename, $size_in = 'MB') {
     $size_in_bytes = @filesize ( $filename );
-    
+
     // Precision: decimals at the end for each type of size
-    
+
     if ($size_in == 'B') {
         $size = $size_in_bytes;
         $precision = 0;
@@ -46,9 +46,9 @@ function get_file_size($filename, $size_in = 'MB') {
         $size = (($size_in_bytes / 1024) / 1024) / 1024;
         $precision = 2;
     }
-    
+
     $size = round ( $size, $precision );
-    
+
     return $size . ' ' . $size_in;
 }
 
@@ -123,7 +123,7 @@ $content = <<<EOM
       VTEC-enabled watch, warning, and advisory events. You can download this
       information on-demand in a zip-file (containing a shapefile + CSV), KML, or
       Microsoft Excel format.</p>
-      <p class="mb-0">If you are looking for a real-time source of warning shapefiles, 
+      <p class="mb-0">If you are looking for a real-time source of warning shapefiles,
       you can find that <a href="/data/gis/shape/4326/us/current_ww.zip" class="alert-link">here.</a></p>
     </div>
   </div>
@@ -181,7 +181,7 @@ $content = <<<EOM
     </p>
 
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
-<input type="hidden" value="yes" name="simple">
+<input type="hidden" value="1" name="simple">
 <input type="hidden" value="shapefile" name="accept" id="accept">
 EOM;
 
@@ -266,25 +266,25 @@ $content .= <<<EOM
 <div class="mb-3">
   <h6 class="mb-3"><i class="bi bi-funnel"></i> Filter Options</h6>
   <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="limit0" value="yes" id="limit0">
+    <input class="form-check-input" type="checkbox" name="limit0" value="1" id="limit0">
     <label class="form-check-label" for="limit0">
       <i class="bi bi-tornado text-danger"></i> Limit output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
     </label>
   </div>
   <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="limit1" value="yes" id="limit1">
+    <input class="form-check-input" type="checkbox" name="limit1" value="1" id="limit1">
     <label class="form-check-label" for="limit1">
       <i class="bi bi-geo-alt text-warning"></i> Limit output to only Storm Based Warnings
     </label>
   </div>
   <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="limit2" value="yes" id="limit2">
+    <input class="form-check-input" type="checkbox" name="limit2" value="1" id="limit2">
     <label class="form-check-label" for="limit2">
       <i class="bi bi-exclamation-triangle-fill text-danger"></i> Limit output to only Emergencies [<sup>2</sup>]
     </label>
   </div>
   <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="limitpds" value="yes" id="limitpds">
+    <input class="form-check-input" type="checkbox" name="limitpds" value="1" id="limitpds">
     <label class="form-check-label" for="limitpds">
       <i class="bi bi-shield-fill-exclamation text-danger"></i> Limit output to only Particularly Dangerous Situations
     </label>
@@ -299,7 +299,7 @@ $content .= <<<EOM
   </div>
 
   <div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="limitps" value="yes" id="limitps">
+    <input class="form-check-input" type="checkbox" name="limitps" value="1" id="limitps">
     <label class="form-check-label" for="limitps">
       <i class="bi bi-list-check text-primary"></i> Limit output to selected VTEC phenomena and significance below.
     </label>
@@ -312,7 +312,7 @@ $content .= <<<EOM
 </div><!-- ./row -->
 
 <div class="form-check mb-4">
-  <input class="form-check-input" type="checkbox" name="addsvs" value="yes" id="addsvs">
+  <input class="form-check-input" type="checkbox" name="addsvs" value="1" id="addsvs">
   <label class="form-check-label" for="addsvs">
     <i class="bi bi-plus-circle text-success"></i> Include polygons/metadata found with any followup (SVS/MWS/etc) statements. [<sup>1</sup>]
   </label>
@@ -414,7 +414,7 @@ $content .= <<<EOM
       </div>
     </div>
   </div>
-  
+
   <div class="col-md-6">
     <div class="card">
       <div class="card-header bg-light">

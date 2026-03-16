@@ -41,6 +41,8 @@ from pyiem.reference import state_names
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import DAY_OF_MONTH_FIELD
+
 DEGF = units.degF
 DEGC = units.degC
 
@@ -136,12 +138,7 @@ class Schema(CGIModel):
             description="The starting month for the data request.",
         ),
     ] = 1
-    day1: Annotated[
-        int,
-        Field(
-            description="The starting day for the data request.",
-        ),
-    ] = 1
+    day1: DAY_OF_MONTH_FIELD = 1
     year2: Annotated[
         int,
         Field(
@@ -154,12 +151,7 @@ class Schema(CGIModel):
             description="The ending month for the data request.",
         ),
     ] = date.today().month
-    day2: Annotated[
-        int,
-        Field(
-            description="The ending day for the data request.",
-        ),
-    ] = date.today().day
+    day2: DAY_OF_MONTH_FIELD = date.today().day
 
 
 def get_scenario_period(ctx):
