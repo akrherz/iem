@@ -54,8 +54,8 @@ $t->content = <<<EOM
   <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
       The IEM archives RWIS information for the network in Iowa based on a direct
       feed from the DOT. We also archive other states based on an archive provided
-      by the <a href="https://madis.ncep.noaa.gov/" class="alert-link">MADIS project</a>. 
-      Data for Iowa dates back to 1995, whereas archive availability for other states 
+      by the <a href="https://madis.ncep.noaa.gov/" class="alert-link">MADIS project</a>.
+      Data for Iowa dates back to 1995, whereas archive availability for other states
       varies based on their participation within MADIS.
     </div>
   </div>
@@ -103,7 +103,7 @@ $t->content = <<<EOM
       </div>
     </div>
   </div>
-  
+
   <div class="col-lg-5 mb-4">
     <div class="card h-100">
       <div class="card-header">
@@ -113,7 +113,10 @@ $t->content = <<<EOM
 
         <div class="mb-4">
           <h6 class="fw-bold">2. Select Start/End Time</h6>
-          <p class="text-muted small mb-3">Times are in timezone you select in step 5 below.</p>
+          <p class="text-muted small mb-3">
+          Times are in timezone you select in step 5 below. You can only
+          request 10 stations at a time or less when requesting more than
+          one year's worth of data.</p>
           <div class="table-responsive">
             <table class="table table-sm">
               <thead>
@@ -197,7 +200,7 @@ $t->content = <<<EOM
         </div>
 
         <div class="mb-4">
-          <h6 class="fw-bold">7. Include Lat / Lons? 
+          <h6 class="fw-bold">7. Include Lat / Lons?
             <img src="/images/gisready.png" alt="GIS Ready" class="ms-2">
           </h6>
           <select name="gis" class="form-select">
@@ -260,7 +263,7 @@ This status can only be reported at Vaisala ESP and SP sites when precipitation 
 </td></tr>
 <tr><th>Ice Warning</th>
 
-<td>Continuous film of ice and water mixture at or below freezing (32°F / 0°C) with insufficient chemical to keep the mixture from freezing. 
+<td>Continuous film of ice and water mixture at or below freezing (32°F / 0°C) with insufficient chemical to keep the mixture from freezing.
 This status can only be reported at NTCIP sites.
 </td></tr>
 <tr><th>Snow Warning</th>
@@ -269,17 +272,17 @@ This status can only be reported at NTCIP sites.
 </td></tr>
 <tr><th>Wet Below Freezing</th>
 
-<td>Moisture on pavement sensor with a surface temperature below freezing (32°F / 0°C). 
+<td>Moisture on pavement sensor with a surface temperature below freezing (32°F / 0°C).
 This status will only be reported at Vaisala SCAN Detector sites.
 </td></tr>
 <tr><th>Ice Watch</th>
 
-<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C). 
+<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C).
 This status can only be reported at NTCIP sites when precipitation is not occurring.
 </td></tr>
 <tr><th>Snow/IceWatch</th>
 
-<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C). 
+<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C).
 This status can only be reported at Vaisala ESP and SP sites when precipitation is not occurring.
 </td></tr>
 <tr><th>Snow Watch</th>
@@ -288,22 +291,22 @@ This status can only be reported at Vaisala ESP and SP sites when precipitation 
 </td></tr>
 <tr><th>Frost</th>
 
-<td>Moisture on pavement at or below freezing (32°F / 0°C) with a pavement temperature at or below the dew point temperature. 
+<td>Moisture on pavement at or below freezing (32°F / 0°C) with a pavement temperature at or below the dew point temperature.
 This status can only be reported by Vaisala ESP, SP, and NTCIP sites when precipitation is not occurring.
 </td></tr>
 <tr><th>Chemical Wet</th>
 
-<td>Continuous film of water and ice mixture at or below freezing (32°F or 0°C) with enough chemical to keep the mixture from freezing. 
+<td>Continuous film of water and ice mixture at or below freezing (32°F or 0°C) with enough chemical to keep the mixture from freezing.
 This status can only be reported by Vaisala ESP, SP, and NTCIP sites when precipitation occurs.
 </td></tr>
 <tr><th>Wet</th>
 
-<td>Continuous film of moisture on the pavement sensor with a surface temperature above freezing (32°F or 0°C). 
+<td>Continuous film of moisture on the pavement sensor with a surface temperature above freezing (32°F or 0°C).
 This status can be reported by Vaisala ESP, SP, SCAN Detector, and NTCIP sites when precipitation has occurred.
 </td></tr>
 <tr><th>Damp</th>
 
-<td>Thin or spotty film of moisture above freezing (32°F or 0°C). 
+<td>Thin or spotty film of moisture above freezing (32°F or 0°C).
 This status can only be reported by Vaisala ESP, and SP sites when precipitation is not occurring.
 </td></tr>
 <tr><th>Trace Moisture</th>
@@ -317,7 +320,7 @@ This status will only be reported at NTCIP sites when precipitation is not occur
 </td></tr>
 <tr><th>Dry</th>
 
-<td>Absence of moisture on the surface sensor. 
+<td>Absence of moisture on the surface sensor.
 This status can be reported by Vaisala ESP, SP, SCAN Dectector, and NTCIP sites.
 </td></tr>
 <tr><th>Other</th>
@@ -326,12 +329,12 @@ This status can be reported by Vaisala ESP, SP, SCAN Dectector, and NTCIP sites.
 </td></tr>
 <tr><th>No Report</th>
 
-<td>The surface sensor is not operating properly and requires maintenance. 
+<td>The surface sensor is not operating properly and requires maintenance.
 This status will only be reported by Vaisala ESP and SP sites.</td></tr>
 
 <tr><th>Error</th>
 
-<td>The surface sensor is not operating properly and requires maintenance. 
+<td>The surface sensor is not operating properly and requires maintenance.
 This status will only be reported by NTCIP sites.</td></tr>
 
 </tbody>
