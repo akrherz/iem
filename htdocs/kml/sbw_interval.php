@@ -192,7 +192,7 @@ function pull_vtec_events_by_wfo_year(
         $wfolimiter = '';
     }
     $pslimiter = "";
-    if (isset($form["limitps"]) && ($form["limitps"] == "yes")) {
+    if (isset($form["limitps"]) && ($form["limitps"] == "1")) {
         $pslimiter = sprintf(
             " and phenomena = '%s' and significance = '%s' ",
             $form["phenomena"],
@@ -200,10 +200,10 @@ function pull_vtec_events_by_wfo_year(
         );
     }
     $statuslimiter = " status = 'NEW' ";
-    if (isset($form["addsvs"]) && ($form["addsvs"] == "yes")) {
+    if (isset($form["addsvs"]) && ($form["addsvs"] == "1")) {
         $statuslimiter = " status != 'CAN' ";
     }
-    if (isset($form["limit2"]) && ($form["limit2"] == "yes")) {
+    if (isset($form["limit2"]) && ($form["limit2"] == "1")) {
         // This is tough as the sbw table has events come in and out of
         // emergency status
         $stname_int = iem_pg_prepare(
