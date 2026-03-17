@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import warnings
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import click
 import numpy as np
@@ -29,6 +30,9 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
     dd = "" if domain == "conus" else f"_{domain}"
     gridnav = get_nav("iemre", domain)
     fn = f"/mesonet/data/iemre{dd}/gfs_current{dd}_new.nc"
+    if Path(fn).exists():
+        LOG.warning("File %s already exists, clobbering", fn)
+        Path(fn).unlink()
     with ncopen(fn, "w") as nc:
         nc.title = (
             f"GFS on IEMRE Grid for Domain: {domain}. Approximating a date "
