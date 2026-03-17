@@ -7,6 +7,8 @@ This service intends to replicate a JSON file make available by NWS Chicago.
 Changelog
 ---------
 
+- 2026-03-17: Added hack around WxCoder issue with 6z obs not coming
+  at the right time.  Also converted "nan" values to "M" in response.
 - 2025-11-17: Initial Release
 
 Example Requests
@@ -74,6 +76,18 @@ def dowork(wfo: str) -> list:
                 resp = httpx.get(service, timeout=15)
                 resp.raise_for_status()
                 jdata = resp.json()
+                if not jdata["data"] and now.hour == 6:
+                    # Hack around WxCoder issue with 6z obs not coming at the
+                    # right time. Try 5 Z too
+                    m1 = now - timedelta(hours=1)
+                    service = (
+                        "http://mesonet.agron.iastate.edu/"
+                        "api/1/nws/snowfall_6hour.json?"
+                        f"valid={m1:%Y-%m-%dT%H}:00&wfo={wfo}"
+                    )
+                    resp = httpx.get(service, timeout=15)
+                    resp.raise_for_status()
+                    jdata = resp.json()
             except Exception:
                 continue
             rows.extend(
@@ -107,7 +121,11 @@ def dowork(wfo: str) -> list:
     # Represent all values as a string with at most 1 decimal
     obs = obs.map(lambda x: f"{x:.1f}" if isinstance(x, float) else x)
 
-    return obs.reset_index().to_json(orient="records", date_format="iso")
+    return (
+        obs.reset_index()
+        .to_json(orient="records", date_format="iso")
+        .replace('"nan"', '"M"')
+    )
 
 
 @iemapp(
