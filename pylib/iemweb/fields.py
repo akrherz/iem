@@ -57,6 +57,15 @@ DAY_OF_MONTH_FIELD = Annotated[int, _DOM]
 DAY_OF_MONTH_FIELD_OPTIONAL = Annotated[int | None, _DOM]
 
 # --------------
+_HF = Field(
+    description="Hour of the day, 24 hour clock",
+    le=23,
+    ge=0,
+)
+HOUR_FIELD = Annotated[int, _HF]
+HOUR_FIELD_OPTIONAL = Annotated[int | None, _HF]
+
+# --------------
 _LATF = Field(
     description="Latitude (decimal degrees) of point of interest",
     ge=-90,
@@ -74,6 +83,14 @@ _LONF = Field(
 LONGITUDE_FIELD = Annotated[float, _LONF]
 LONGITUDE_FIELD_OPTIONAL = Annotated[float | None, _LONF]
 
+# --------------
+_MNF = Field(
+    description="Minute of the hour",
+    le=59,
+    ge=0,
+)
+MINUTE_FIELD = Annotated[int, _MNF]
+MINUTE_FIELD_OPTIONAL = Annotated[int | None, _MNF]
 
 # --------------
 _MF = Field(
