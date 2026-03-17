@@ -243,7 +243,8 @@ def plotter(ctx: dict):
         obs["change"] = obs["two"]
     weekly = obs[[agg, "change"]].groupby(agg).describe()
     df = weekly["change"]
-
+    if "max" not in df.columns:
+        raise NoDataFound("No Data Found after grouping by agg")
     extreme = max([df["max"].max(), 0 - df["min"].min()]) + 10
     title = (
         f"Backward ({PDICT2[ctx['stat']]}) {days:.0f} Days and Forward "
