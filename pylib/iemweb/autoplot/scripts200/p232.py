@@ -220,7 +220,9 @@ def plotter(ctx: dict):
     ax = fig.add_axes(box1)
     top_ax = fig.add_axes(box2, frame_on=False)
     if ctx["mode"] == "BZ":
-        obs = obs[pd.notna(obs["max_wind"]) & pd.notna(obs["vsby"])]
+        obs = obs[
+            pd.notna(obs["max_wind"]) & pd.notna(obs["vsby"])
+        ].reset_index()
         plot_bz(ax, obs)
         fig.text(
             0.5,
@@ -232,10 +234,10 @@ def plotter(ctx: dict):
             ha="center",
         )
     elif ctx["mode"] in ["WC", "HT"]:
-        obs = obs[pd.notna(obs["feel"])]
+        obs = obs[pd.notna(obs["feel"])].reset_index()
         plot_column(ax, obs, "feel", "Feels Like Temperature [°F]")
     elif ctx["mode"] == "FG":
-        obs = obs[pd.notna(obs["vsby"])]
+        obs = obs[pd.notna(obs["vsby"])].reset_index()
         plot_column(ax, obs, "vsby", "Visibility [miles]")
         ax.axhline(0.25, linestyle="-.", color="b")
         ax.annotate(
@@ -246,7 +248,7 @@ def plotter(ctx: dict):
             color="b",
         )
     elif ctx["mode"] in ["FW", "WI"]:
-        sknt = obs[pd.notna(obs["sknt"])]
+        sknt = obs[pd.notna(obs["sknt"])].reset_index()
         ax.bar(
             sknt["utc_valid"],
             sknt["max_wind"],
