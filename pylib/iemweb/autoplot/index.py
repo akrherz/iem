@@ -157,6 +157,34 @@ aria-label="Show map for {network} {name}">Show Map</button>
 """
 
 
+def filtervar_handler(fdict: dict, arg: dict, res: dict) -> str:
+    """Handle the UI and processing for filtervar type."""
+    form_name = arg["name"]
+    value = fdict.get(form_name, arg["default"])
+    comp_name = f"{form_name}_comp"
+    t_name = f"{form_name}_t"
+    comp_value = fdict.get(comp_name, arg.get("comp_default", "ge"))
+    comp_opts = {
+        "ge": "Greater than or equal to",
+        "gt": "Greater than",
+        "le": "Less than or equal to",
+        "lt": "Less than",
+        "eq": "Equal to",
+        "ne": "Not equal to",
+    }
+    if comp_value not in comp_opts:
+        comp_value = arg.get("comp_default", "ge")
+    t_value = float(fdict.get(t_name, arg.get("t_default", 0)))
+    res["pltvars"].append(f"{comp_name}:{comp_value}")
+    res["pltvars"].append(f"{t_name}:{t_value}")
+
+    element1 = make_select(form_name, value, arg["options"], showvalue=False)
+    element2 = make_select(comp_name, comp_value, comp_opts, showvalue=False)
+    element3 = f'<input type="text" name="{t_name}" value="{t_value}" />'
+
+    return f"{element1} {element2} {element3}"
+
+
 def networkselect_handler(value: str, arg: dict, res: dict) -> str:
     """Select a station from a given network."""
     if not isinstance(arg["network"], list):
@@ -562,6 +590,8 @@ def generate_form(apid, fdict, headers, cookies):
         elif arg["type"] == "networkselect":
             set_cookie_networkselect(cookies, headers, arg, value)
             form = networkselect_handler(value, arg, res)
+        elif arg["type"] == "filtervar":
+            form = filtervar_handler(fdict, arg, res)
         elif arg["type"] == "phenomena":
             form = make_select(arg["name"], value, VTEC_PHENOMENA)
         elif arg["type"] == "significance":
