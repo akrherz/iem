@@ -257,6 +257,13 @@ daily_opts = [
     {"id": 255, "label": "Leaky Bucket Model for Daily Precip + Evaporation"},
     {"id": 229, "label": "Lightning Stroke Density Maps"},
     {
+        "id": 262,
+        "label": (
+            "Top 15 Events for Daily Variables after Offset Days of "
+            "certain event"
+        ),
+    },
+    {
         "id": 207,
         "label": (
             "Local Storm Report + COOP Rainfall/Snowfall/Ice Analysis Maps"
