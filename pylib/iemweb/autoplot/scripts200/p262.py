@@ -149,7 +149,7 @@ def make_table(ax, title, tabledf, var1: str, var2: str):
     table.auto_set_font_size(False)
     table.set_fontsize(10)
     table.scale(1, 1.25)
-    for (row, col), cell in table.get_celld().items():
+    for (row, _col), cell in table.get_celld().items():
         cell.set_edgecolor("0.8")
         if row == 0:
             cell.set_facecolor("#d9eaf4")
@@ -158,8 +158,6 @@ def make_table(ax, title, tabledf, var1: str, var2: str):
             cell.set_facecolor("#f6f6f6")
         else:
             cell.set_facecolor("white")
-        if col in [1, 3]:
-            cell._loc = "right"
     return table
 
 
