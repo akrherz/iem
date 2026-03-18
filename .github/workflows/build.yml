@@ -108,6 +108,12 @@ jobs:
         sudo service apache2 restart
         sudo systemctl status apache2.service -l
 
+    - name: Setup upterm session
+      if: ${{ matrix.TEST_WEB == 'YES' && matrix.WITH_TEST_DATA == 'no_test_data' }}
+      uses: lhotari/action-upterm@v1
+      with:
+        limit-access-to-actor: true
+
     - name: Run IEM Production checks
       if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
@@ -121,12 +127,6 @@ jobs:
     - name: Test PHP webscripts
       if: ${{ matrix.TEST_WEB == 'YES' }}
       run: pytest -n 4 tests/test_php.py
-
-    # - name: Setup upterm session
-    #  if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
-    #  uses: lhotari/action-upterm@v1
-    #  with:
-    #    limit-access-to-actor: true
 
     - name: Run IEMWeb Python Check
       if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
