@@ -119,6 +119,7 @@ def plotter(ctx: dict):
             f"Accumulation over {ctx['threshold']} {units} "
             f"after {ctx['sday']:%b %-d}"
         ),
+        apctx=ctx,
     )
     ax = fig.add_axes((0.06, 0.1, 0.65, 0.78))
     ax.plot(df2.index.values, df2["over_threshold"].values, color="k")
