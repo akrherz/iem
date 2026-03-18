@@ -1,7 +1,11 @@
 """Test specialized things we are attempting to handle."""
 
-from iemweb.geojson.index import application
+from functools import partial
+
+from iemweb.dispatch import dispatch_namespace
 from werkzeug.test import Client
+
+application = partial(dispatch_namespace, "geojson")
 
 
 def test_invalid():
