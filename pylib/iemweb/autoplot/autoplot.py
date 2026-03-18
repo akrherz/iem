@@ -16,6 +16,7 @@ import pandas as pd
 import rasterio
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
+from pyiem.autoplot import get_autoplot_context
 from pyiem.exceptions import (
     BadWebRequest,
     IncompleteWebRequest,
@@ -23,7 +24,7 @@ from pyiem.exceptions import (
     UnknownStationException,
 )
 from pyiem.reference import ISO8601
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 
