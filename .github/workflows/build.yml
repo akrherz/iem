@@ -110,7 +110,7 @@ jobs:
 
     - name: Setup upterm session
       if: ${{ matrix.TEST_WEB == 'YES' && matrix.WITH_TEST_DATA == 'no_test_data' }}
-      uses: lhotari/action-upterm@v1
+      uses: owenthereal/action-upterm@v1
       with:
         limit-access-to-actor: true
 
