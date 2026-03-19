@@ -2,7 +2,6 @@
 
 # mod_wsgi is configured from https://github.com/akrherz/iemwebfarm
 # DirectoryIndex index.py
-# WSGIDaemonProcess iemwsgi_tc processes=1 threads=15 display-name=%{GROUP} listen-backlog=20480
 # WSGIDaemonProcess iemwsgi_ap processes=24 threads=1 display-name=%{GROUP} maximum-requests=100
 
 Include /opt/iemwebfarm/config/vhost_common.conf
@@ -161,22 +160,8 @@ Alias /tmp /var/webtmp
     RewriteRule wwa.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/us/wwa.map& [QSA,L]
 </Directory>
 
-
-<Directory "/opt/iem/htdocs/c">
-    WSGIProcessGroup iemwsgi_tc
-
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 14 days"
-</Directory>
-
-<Directory "/opt/iem/htdocs/cache">
-    WSGIProcessGroup iemwsgi_tc
-
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 5 minutes"
-</Directory>
+ProxyPass /c http://iem.local:9081/c
+ProxyPass /cache http://iem.local:9081/cache
 
 <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400

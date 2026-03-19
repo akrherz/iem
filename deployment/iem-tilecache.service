@@ -1,0 +1,14 @@
+[Unit]
+Description=IEM TileCache mod_wsgi-express sidecar (/c and /cache)
+After=network.target
+Before=httpd.service
+
+[Service]
+Type=simple
+User=apache
+ExecStart=/opt/iem/deployment/start_tc_wsgi.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
