@@ -31,6 +31,8 @@ dependencies:
   - httpx
   # mrms script
   - imageio
+  # Unknown problem with netCDF4 not loading
+  - libnetcdf=4.9
   # soft requirement for pandas
   - lxml
   - mastodon.py
