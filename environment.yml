@@ -31,8 +31,6 @@ dependencies:
   - httpx
   # mrms script
   - imageio
-  # Unknown 4.10 issue
-  - libnetcdf=4.9.3
   # soft requirement for pandas
   - lxml
   - mastodon.py

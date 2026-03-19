@@ -50,28 +50,11 @@ jobs:
       run: |
         docker run -d --name iem_memcached -p 11211:11211 memcached:1.6.9
 
-    # All three matrix jobs will fight over the cache write, but it is a
-    # harmless warning
-    - name: Setup Python
-      uses: mamba-org/setup-micromamba@v2
+    - uses: akrherz/ci_tooling/actions/iemwebfarm@main
       with:
         environment-file: environment.yml
-        condarc: |
-          channels:
-            - conda-forge
-        create-args: >-
-          python=${{ env.PYTHON_VERSION }}
+        python-version: ${{ matrix.PYTHON_VERSION }}
         environment-name: prod
-        cache-environment: true
-
-    # conda-forge does not have everything we need, yet
-    - name: Install Python requirements from pip
-      run: |
-        python -m pip install -r pip_requirements.txt
-
-    - name: Clone ci_tooling
-      run: |
-        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
 
     # Copy repo's default settings into the real position
     - name: Copy PHP Setting Defaults
@@ -86,13 +69,6 @@ jobs:
     - name: Setup IEM Data
       if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
       run: sh .github/setupdata.sh
-
-    # Get apache running, which is needed to build mod_wsgi
-    - name: Configure IEM Webfarm Server
-      if: ${{ matrix.TEST_WEB == 'YES' }}
-      run: |
-        cd .ci_tooling
-        . iemwebfarm.sh
 
     - name: Configure Webfarm Server
       if: ${{ matrix.TEST_WEB == 'YES' }}
