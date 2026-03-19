@@ -1,6 +1,8 @@
-#
 # Apache vhost configuration for IEM
-# I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/src"
+
+# mod_wsgi is configured from https://github.com/akrherz/iemwebfarm
+# DirectoryIndex index.py
+# WSGIDaemonProcess iemwsgi_ap processes=24 threads=1 display-name=%{GROUP} maximum-requests=100
 
 Include /opt/iemwebfarm/config/vhost_common.conf
 
@@ -21,13 +23,10 @@ RewriteEngine On
 # Useful for debugging
 # LogLevel alert rewrite:trace3
 
-# Search functionality
-RewriteRule ^/search /search.py [QSA]
-
-Redirect permanent /archive/nexrad http://mesonet-longterm.agron.iastate.edu/archive/nexrad
-Redirect permanent /archive/gempak http://mesonet-longterm.agron.iastate.edu/archive/gempak
-Redirect permanent /archive/raw http://mesonet-longterm.agron.iastate.edu/archive/raw
-Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
+Redirect permanent /archive/nexrad https://mesonet-longterm.agron.iastate.edu/archive/nexrad
+Redirect permanent /archive/gempak https://mesonet-longterm.agron.iastate.edu/archive/gempak
+Redirect permanent /archive/raw https://mesonet-longterm.agron.iastate.edu/archive/raw
+Redirect permanent /data/nexrd2/raw https://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
 
 <Directory "/opt/iem/htdocs">
     # Need FollowSymLinks for mod_rewrite to work!
@@ -161,22 +160,8 @@ Alias /tmp /var/webtmp
     RewriteRule wwa.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/us/wwa.map& [QSA,L]
 </Directory>
 
-
-<Directory "/opt/iem/htdocs/c">
-    WSGIProcessGroup iemwsgi_tc
-
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 14 days"
-</Directory>
-
-<Directory "/opt/iem/htdocs/cache">
-    WSGIProcessGroup iemwsgi_tc
-
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 5 minutes"
-</Directory>
+ProxyPass /c http://iem.local:9081/c
+ProxyPass /cache http://iem.local:9081/cache
 
 <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
@@ -254,10 +239,6 @@ SSLProxyVerify none
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
 </Directory>
 
-<Directory "/opt/iem/htdocs/AWOS">
-    RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
-</Directory>
-
 <Directory "/opt/iem/pylib/iemweb/">
     Require all granted
     WSGIProcessGroup iemwsgi_ap
@@ -266,6 +247,10 @@ SSLProxyVerify none
 # note the preceding directory config
 WSGIScriptAlias /geojson /opt/iem/pylib/iemweb/dispatch.py
 WSGIScriptAlias /json /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /search /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/ames_precip.py /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/isusm.py /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/nmp_csv.py /opt/iem/pylib/iemweb/dispatch.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4

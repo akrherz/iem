@@ -30,4 +30,5 @@ def test_app(app):
     resp = httpx.get(f"http://iem.local{app}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
     # 301 The app could be upset about being approached via http
-    assert resp.status_code in [422, 301, 200]
+    # 503 some of apps are now proxied, so alas
+    assert resp.status_code in [422, 301, 200, 503]

@@ -1,5 +1,7 @@
 """IEM Website Python Library."""
 
+import sys
+
 __version__ = "0.1.0"
 
 
@@ -16,4 +18,4 @@ def error_log(environ: dict, msg: str) -> None:
     client_addr = environ.get(
         "HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR")
     )
-    print(f"client: `{client_addr}` `{msg}`", file=environ["wsgi.errors"])
+    sys.stderr.write(f"client: `{client_addr}` `{msg}`\n")
