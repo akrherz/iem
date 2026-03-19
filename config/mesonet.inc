@@ -259,6 +259,7 @@ SSLProxyVerify none
 </Directory>
 
 <Directory "/opt/iem/pylib/iemweb/">
+    Require all granted
     WSGIProcessGroup iemwsgi_ap
     AddHandler wsgi-script .py
 </Directory>
