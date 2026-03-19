@@ -20,7 +20,7 @@ def main(valid: datetime | None):
         routes = "ac"
     pqstr = (
         f"plot {routes} {valid:%Y%m%d%H}00 iowa_vsby.png "
-        f"vsby_countour_{valid:%H}.png png"
+        f"vsby_contour_{valid:%H}00.png png"
     )
     url = (
         "https://mesonet.agron.iastate.edu/plotting/auto/plot/192/"
