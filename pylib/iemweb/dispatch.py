@@ -69,6 +69,14 @@ MODULE_PREFIXES = {
     "geojson": "iemweb.geojson",
 }
 
+# Single-endpoint modules served directly without sub-path routing.
+DIRECT_ROUTES = {
+    "search": "iemweb.search",
+    "agclimate/ames_precip.py": "iemweb.agclimate.ames_precip",
+    "agclimate/isusm.py": "iemweb.agclimate.isusm",
+    "agclimate/nmp_csv.py": "iemweb.agclimate.nmp_csv",
+}
+
 
 def add_query(environ: dict, **params) -> None:
     """Add content into environ before passing it along."""
@@ -105,22 +113,23 @@ def normalize_path(path: str, suffixes: tuple[str, ...]) -> str | None:
 
 
 def detect_namespace(environ: dict) -> str | None:
-    """Determine which namespace should handle this request."""
+    """Determine which namespace or direct route should handle this request."""
+    all_routes = {**MODULE_PREFIXES, **DIRECT_ROUTES}
     script_name: str = environ.get("SCRIPT_NAME", "")
-    for namespace in MODULE_PREFIXES:
-        prefix = f"/{namespace}"
+    for key in all_routes:
+        prefix = f"/{key}"
         if script_name == prefix or script_name.endswith(prefix):
-            return namespace
+            return key
 
     path: str = environ.get("PATH_INFO", "")
-    for namespace in MODULE_PREFIXES:
-        prefix = f"/{namespace}"
+    for key in all_routes:
+        prefix = f"/{key}"
         if path == prefix:
             environ["PATH_INFO"] = ""
-            return namespace
+            return key
         if path.startswith(f"{prefix}/"):
             environ["PATH_INFO"] = path[len(prefix) :]
-            return namespace
+            return key
     return None
 
 
@@ -176,4 +185,7 @@ def application(environ: dict, start_response: callable):
             "dispatch",
             environ.get("PATH_INFO", ""),
         )
+    if namespace in DIRECT_ROUTES:
+        handler = import_module(DIRECT_ROUTES[namespace])
+        return handler.application(environ, start_response)
     return dispatch_namespace(namespace, environ, start_response)

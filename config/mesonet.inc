@@ -1,6 +1,9 @@
-#
 # Apache vhost configuration for IEM
-# I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/src"
+
+# mod_wsgi is configured from https://github.com/akrherz/iemwebfarm
+# DirectoryIndex index.py
+# WSGIDaemonProcess iemwsgi_tc processes=1 threads=15 display-name=%{GROUP} listen-backlog=20480
+# WSGIDaemonProcess iemwsgi_ap processes=24 threads=1 display-name=%{GROUP} maximum-requests=100
 
 Include /opt/iemwebfarm/config/vhost_common.conf
 
@@ -21,13 +24,10 @@ RewriteEngine On
 # Useful for debugging
 # LogLevel alert rewrite:trace3
 
-# Search functionality
-RewriteRule ^/search /search.py [QSA]
-
-Redirect permanent /archive/nexrad http://mesonet-longterm.agron.iastate.edu/archive/nexrad
-Redirect permanent /archive/gempak http://mesonet-longterm.agron.iastate.edu/archive/gempak
-Redirect permanent /archive/raw http://mesonet-longterm.agron.iastate.edu/archive/raw
-Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
+Redirect permanent /archive/nexrad https://mesonet-longterm.agron.iastate.edu/archive/nexrad
+Redirect permanent /archive/gempak https://mesonet-longterm.agron.iastate.edu/archive/gempak
+Redirect permanent /archive/raw https://mesonet-longterm.agron.iastate.edu/archive/raw
+Redirect permanent /data/nexrd2/raw https://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
 
 <Directory "/opt/iem/htdocs">
     # Need FollowSymLinks for mod_rewrite to work!
@@ -262,6 +262,10 @@ SSLProxyVerify none
 # note the preceding directory config
 WSGIScriptAlias /geojson /opt/iem/pylib/iemweb/dispatch.py
 WSGIScriptAlias /json /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /search /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/ames_precip.py /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/isusm.py /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /agclimate/nmp_csv.py /opt/iem/pylib/iemweb/dispatch.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
