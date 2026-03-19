@@ -178,10 +178,6 @@ Alias /tmp /var/webtmp
     ExpiresDefault "access plus 5 minutes"
 </Directory>
 
-<Directory "/opt/iem/htdocs/DCP">
-    RewriteRule ahpsxml2wxc/([0-9A-Z]{3,5}).txt$ ahpsxml2wxc.py?nwsli=$1
-</Directory>
-
 <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
 </Directory>
