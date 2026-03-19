@@ -178,10 +178,6 @@ Alias /tmp /var/webtmp
     ExpiresDefault "access plus 5 minutes"
 </Directory>
 
-<Directory "/opt/iem/htdocs/DCP">
-    RewriteRule ahpsxml2wxc/([0-9A-Z]{3,5}).txt$ ahpsxml2wxc.py?nwsli=$1
-</Directory>
-
 <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
 </Directory>
@@ -262,8 +258,14 @@ SSLProxyVerify none
     RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
 </Directory>
 
-WSGIScriptAlias /geojson /opt/iem/htdocs/geojson/index.py
-WSGIScriptAlias /json /opt/iem/htdocs/json/index.py
+<Directory "/opt/iem/pylib/iemweb/">
+    Require all granted
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
+</Directory>
+# note the preceding directory config
+WSGIScriptAlias /geojson /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /json /opt/iem/pylib/iemweb/dispatch.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
