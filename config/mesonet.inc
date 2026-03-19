@@ -254,10 +254,6 @@ SSLProxyVerify none
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
 </Directory>
 
-<Directory "/opt/iem/htdocs/AWOS">
-    RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
-</Directory>
-
 <Directory "/opt/iem/pylib/iemweb/">
     Require all granted
     WSGIProcessGroup iemwsgi_ap
