@@ -258,10 +258,13 @@ SSLProxyVerify none
     RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
 </Directory>
 
-# Intentionally use a shim under htdocs so mod_wsgi keeps the established
-# directory/process context while the real dispatcher code lives in pylib.
-WSGIScriptAlias /geojson /opt/iem/htdocs/dispatch.py
-WSGIScriptAlias /json /opt/iem/htdocs/dispatch.py
+<Directory "/opt/iem/pylib/iemweb/">
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
+</Directory>
+# note the preceding directory config
+WSGIScriptAlias /geojson /opt/iem/pylib/iemweb/dispatch.py
+WSGIScriptAlias /json /opt/iem/pylib/iemweb/dispatch.py
 
 <Directory "/opt/iem/htdocs/iemre">
     RewriteRule daily/([0-9\-]+)/([0-9\.\-]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
