@@ -95,10 +95,10 @@ $t->content = <<<EOM
 
 <p>This page allows you to generate a GIS shapefile of NWS issued Local Storm
 Reports for a time period of your choice.  Please be sure to read the
-archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
+archive status and dbf schema below. The IEM's archive is certainly not complete or official.
 
-<p>If you are looking for a real-time source of lsrs, you can find with the following 
-files generated every 5 minutes:  <a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
+<p>If you are looking for a real-time source of lsrs, you can find with the following
+files generated every 5 minutes:  <a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>,
 <a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
 <a href="/data/gis/shape/4326/us/lsr_24hour.geojson">GeoJSON</a>.</p>
 
@@ -123,38 +123,53 @@ for those wishing to script against this service.</p>
 <div class="form2url"></div>
 <h4>Filter Options</h4>
 <div class="row">
-<div class="col-md-4">
+  <div class="col-md-3">
     <div class="mb-3">
-        <label for="wfo" class="form-label">Limit Weather Forecast Office (WFO)</label>
-        <select name="wfo" id="wfo" class="form-select" multiple size="5">
+      <label for="wfo" class="form-label">Limit Weather Forecast Office (WFO)</label>
+      <select name="wfo" id="wfo" class="form-select" multiple size="5">
         <option value="ALL" selected>All Available</option>
         {$ss}
-        </select>
+      </select>
     </div>
-</div>
-<div class="col-md-4">
+  </div>
+  <div class="col-md-3">
     <div class="mb-3">
-        <label for="state" class="form-label">Limit by State</label>
-        {$stateselect}
+      <label for="state" class="form-label">Limit by State</label>
+      {$stateselect}
     </div>
-</div>
-<div class="col-md-4">
+  </div>
+  <div class="col-md-3">
     <div class="mb-3">
-        <label for="type" class="form-label">Limit by Report Type</label>
-        {$typeselect}
+      <label for="type" class="form-label">Limit by Report Type</label>
+      {$typeselect}
     </div>
-</div>
+  </div>
+  <div class="col-md-3">
+    <div class="mb-3">
+      <label for="magge" class="form-label">Minimum Magnitude</label>
+      <input type="number" step="any" class="form-control" id="magge"
+       name="magge" placeholder="e.g. 0.5">
+      <div class="form-text">Only include reports with magnitude &ge; this
+       value. Leave blank for no filter. This is a blunt tool and generally
+       does not work for things without a magnitude, like tornado LSRs.</div>
+    </div>
+  </div>
 </div><!-- ./row -->
 
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Local Storm Reports with an event time <b>valid</b>
 between these times selected below will be included in the output GIS file...)</i>
 <table class="table table-sm table-bordered table-striped">
-  <thead><tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-  </tr></thead>
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Year</th>
+      <th scope="col">Month</th>
+      <th scope="col">Day</th>
+      <th scope="col">Hour</th>
+      <th scope="col">Minute</th>
+    </tr>
+  </thead>
   <tbody>
   <tr>
     <th>Start:</th>
@@ -198,7 +213,7 @@ MAG      Magnitude value of the LSR
 WFO      Weather Forecast Office originating the LSR
 TYPECODE 1 character identifier of the report type, IEM specific
 TYPETEXT Textual value of LSR type used in report
-CITY     Location used for the LSR 
+CITY     Location used for the LSR
 COUNTY   County/Parish of the LSR city
 STATE    Two character state abbreviation
 SOURCE   Who reported the LSR

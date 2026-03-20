@@ -12,6 +12,8 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2026-03-19: A `magge` parameter was added, representing a filter for reports
+  with a magnitude greater than or equal to the given value.
 - 2024-10-24: Added bounding box parameters of ``north``, ``south``, ``east``,
   and ``west`` to allow for spatial subsetting of the results.
 - 2024-09-23: Added `qualify` as the Estimated, Measured, or Unknown qualifier
@@ -39,6 +41,12 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 ?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&fmt=shp
 
+Provide any Iowa LSRs for 2024 with a magnitude of at least 2 (inch)
+for HAIL reports.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&type=HAIL&magge=2
+
 Return all the LSRs issued by the Des Moines WFO in CSV format.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
@@ -56,6 +64,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 import zipfile
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import fiona
 import geopandas as gpd
@@ -67,6 +76,7 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import LATITUDE_FIELD_OPTIONAL, LONGITUDE_FIELD_OPTIONAL
 from iemweb.mlib import unrectify_wfo
 
 fiona.supported_drivers["KML"] = "rw"
@@ -77,10 +87,26 @@ ISO8660 = "%Y-%m-%dT%H:%M"
 class Schema(CGIModel):
     """See how we are called."""
 
-    ets: AwareDatetime = Field(
-        None,
-        description="The end of the period you are interested in.",
-    )
+    magge: Annotated[
+        float | None,
+        Field(
+            description=(
+                "Filter LSRs by the given magnitude threshold for events "
+                "with a magnitude greater than or equal to the given value. "
+                "This is a blunt force tool that does not work for reports "
+                "without a magnitude and things like Tornado reports that "
+                "don't have one either."
+            ),
+            ge=0,
+            le=1000,
+        ),
+    ] = None
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The end of the period you are interested in.",
+        ),
+    ] = None
     fmt: str = Field(
         None,
         description="The output format you desire.",
@@ -157,30 +183,10 @@ class Schema(CGIModel):
         0,
         description="If ets unset, the end minute value in UTC.",
     )
-    east: float = Field(
-        default=None,
-        description="Eastern extent of spatial bounds. (degrees East)",
-        ge=-180,
-        le=180,
-    )
-    west: float = Field(
-        default=None,
-        description="Western extent of spatial bounds. (degrees East)",
-        ge=-180,
-        le=180,
-    )
-    north: float = Field(
-        default=None,
-        description="Northern extent of spatial bounds. (degrees North)",
-        ge=-90,
-        le=90,
-    )
-    south: float = Field(
-        default=None,
-        description="Southern extent of spatial bounds. (degrees North)",
-        ge=-90,
-        le=90,
-    )
+    east: LONGITUDE_FIELD_OPTIONAL = None
+    west: LONGITUDE_FIELD_OPTIONAL = None
+    north: LATITUDE_FIELD_OPTIONAL = None
+    south: LATITUDE_FIELD_OPTIONAL = None
 
     @model_validator(mode="after")
     def validate_spatial_bounds(self):
@@ -286,13 +292,16 @@ def do_excel_kml(fmt, params, sql_filters):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Go Main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [b"Allow: GET,POST,OPTIONS"]
 
-    params = {"wfos": []}
+    params = {
+        "wfos": [],
+        "magge": environ["magge"],
+    }
     params["sts"], params["ets"] = get_time_domain(environ)
     params["states"] = environ["state"]
     if environ["wfo"]:
@@ -300,6 +309,8 @@ def application(environ, start_response):
     params["types"] = environ["type"]
 
     sql_filters = ""
+    if environ["magge"] is not None:
+        sql_filters += " and magnitude >= :magge "
     if params["states"] and "_ALL" not in params["states"]:
         sql_filters += " and l.state = ANY(:states) "
     if params["wfos"] and "ALL" not in params["wfos"]:
