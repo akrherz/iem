@@ -5,6 +5,8 @@ Return to `API Services </api/#cgi>`_
 Changelog
 ---------
 
+- 2026-03-20: Ill-defined `all` parameter needs to be set to something
+  truthy and not just present.
 - 2024-08-25: Initial documentation and pydantic validation
 
 Example Requests
@@ -13,7 +15,7 @@ Example Requests
 Provide values for a time on 21 May 2024
 
 https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt\
-?all&version=1.5&valid=2024-05-21T20:00:00Z
+?all=1&version=1.5&valid=2024-05-21T20:00:00Z
 
 """
 
@@ -21,6 +23,7 @@ import math
 import re
 from datetime import timedelta
 from io import StringIO
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field
@@ -35,18 +38,24 @@ SQLISO = "YYYY-MM-DDThh24:MI:SSZ"
 class Schema(CGIModel):
     """See how we are called."""
 
-    all: str = Field(
-        default=None,
-        description="Include all warnings, not just Tornado",
-    )
-    valid: AwareDatetime = Field(
-        default=None,
-        description="The valid time to generate the product for.",
-    )
-    version: float = Field(
-        default=1.0,
-        description="The version of the GR product to generate.",
-    )
+    all: Annotated[
+        bool | None,
+        Field(
+            description="Include all warnings, not just Tornado",
+        ),
+    ] = False
+    valid: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The valid time to generate the product for.",
+        ),
+    ] = None
+    version: Annotated[
+        float,
+        Field(
+            description="The version of the GR product to generate.",
+        ),
+    ] = 1.0
 
 
 def extrapolate(lon, lat, distance, drct):
@@ -117,7 +126,7 @@ def gentext(sio, row, grversion):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Our WSGI service."""
     grversion = environ["version"]
     phenoms = ["TO", "SV"] if environ["all"] is not None else ["TO"]
