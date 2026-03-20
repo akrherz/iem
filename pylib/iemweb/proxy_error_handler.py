@@ -11,9 +11,7 @@ def application(environ, start_response):
     """Handle Apache proxy errors."""
     status_code = int(environ.get("REDIRECT_STATUS", 200))
     error_log(environ, f"{status_code} {environ.get('REQUEST_URI')}")
-    ip = environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
-    if ip is not None:
-        ip = ip.split(",")[0].strip()
+    ip = environ.get("REMOTE_ADDR")
     write_telemetry(
         TELEMETRY(
             0,
