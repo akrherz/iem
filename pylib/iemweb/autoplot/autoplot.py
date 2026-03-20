@@ -263,12 +263,7 @@ def workflow(mc, environ: dict, fmt: str):
             TELEMETRY(
                 (utc() - start_time).total_seconds(),
                 500,
-                # In testing, perhaps both could be None
-                environ.get(
-                    "X-Forwarded-For", environ.get("REMOTE_ADDR", "127.0.0.1")
-                )
-                .split(",")[0]
-                .strip(),
+                environ.get("REMOTE_ADDR", "127.0.0.1"),
                 environ.get("SCRIPT_NAME"),
                 environ.get("REQUEST_URI"),
                 environ.get("HTTP_HOST"),
