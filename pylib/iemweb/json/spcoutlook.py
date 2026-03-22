@@ -21,6 +21,8 @@ There are examples below or feel free to yell at daryl for big a mess this is.
 Changelog
 ---------
 
+- 2026-03-22: Add a new field to the JSON response called `conditional`,
+  which will indicate the CIG1-3 or legacy SIGN for current queries.
 - 2026-03-06: Sadly, the recently changed `time` parameter handling created
   additional service ambiguity.  There is now an additional boolean
   parameter called `current`, which when enabled causes the service to
@@ -30,8 +32,6 @@ Changelog
   was removed.
 - 2026-02-26: Renamed top level metadata `generation_time` to `generated_at`
   for better consistency across IEM services.
-- 2024-07-09: Add csv and excel output formats
-- 2024-07-17: Fix problems with CSV and Excel output, sigh.
 
 Example Usage
 -------------
@@ -169,7 +169,9 @@ def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
     return outlooks
 
 
-def dotime(ts: datetime, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
+def dotime(
+    ts: datetime, lon: float, lat: float, day: int, cat: str
+) -> tuple[pd.DataFrame, datetime]:
     """Query for Outlook based on some timestamp"""
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
@@ -192,7 +194,7 @@ def dotime(ts: datetime, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
     return process_df(outlooks), ts
 
 
-def dowork(lon, lat, day, cat) -> pd.DataFrame:
+def dowork(lon: float, lat: float, day: int, cat: str) -> pd.DataFrame:
     """Actually do stuff"""
     with get_sqlalchemy_conn("postgis") as conn:
         # Need to compute SIGN seperately
@@ -255,12 +257,19 @@ def application(environ: dict, start_response: callable):
     last = environ["last"]
     day = environ["day"]
     ts = None
+    conditional = None
     if time is not None or environ["current"]:
         if environ["current"]:
             # Goose the time by the given day offset
             time = utc() + timedelta(hours=(day - 1) * 24)
         outlooks, ts = dotime(time, lon, lat, day, cat)
         if not outlooks.empty:
+            # We need to look for SIGN, CIG1, CIG2, and CIG3
+            for _cig in ["CIG3", "CIG2", "CIG1", "SIGN"]:
+                if _cig in outlooks["threshold"].values:
+                    conditional = _cig
+                    break
+            # This will represent the max threshold, but...
             outlooks = outlooks.iloc[[0]]
     else:
         outlooks = dowork(lon, lat, day, cat)
@@ -282,6 +291,7 @@ def application(environ: dict, start_response: callable):
             row0 = outlooks.iloc[0]
             res["outlook"] = {
                 "threshold": row0["threshold"],
+                "conditional": conditional,
                 "utc_product_issue": pd.Timestamp(row0["v"]).strftime(ISO8601),
                 "utc_issue": pd.Timestamp(row0["i"]).strftime(ISO8601),
                 "utc_expire": pd.Timestamp(row0["e"]).strftime(ISO8601),
