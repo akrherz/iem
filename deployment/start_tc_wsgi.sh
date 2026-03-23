@@ -29,11 +29,11 @@ exec "${CONDA_PREFIX}/bin/mod_wsgi-express" start-server \
         --processes 2 \
         --threads 15 \
         --daemon-backlog 500 \
-        --maximum-requests 10000 \
+        --maximum-requests 10000000 \
         --server-name iem.local \
         --server-status \
         --mount-point / \
         --include-file "$INCLUDE_FILE" \
         --include-file "/opt/iemwebfarm/apache_conf.d/server-status.conf" \
-        --log-level "info" \
+        --log-level "warn" \
         --allow-localhost
