@@ -87,6 +87,9 @@ def get_obsdf(ctx):
         "eq": "==",
         "ne": "!=",
     }
+    threshold = ctx["var1_t"]
+    if ctx["var1"] in ["high", "low"]:
+        threshold = int(threshold)
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -113,7 +116,7 @@ def get_obsdf(ctx):
             parse_dates=["day", "day2"],
             params={
                 "station": ctx["station"],
-                "threshold": ctx["var1_t"],
+                "threshold": threshold,
             },
         )
     if df.empty:

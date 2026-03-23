@@ -37,6 +37,7 @@ https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
 import csv
 import io
 from datetime import date
+from typing import Annotated
 
 import simplejson as json
 from pydantic import Field
@@ -56,13 +57,17 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    dl: bool = Field(default=False, description="Force download of CSV file.")
-    dt: date = Field(default=date.today(), description="Date of interest.")
-    fmt: str = Field(
-        default="geojson",
-        description="The output format requested.",
-        pattern="^(geojson|csv)$",
+    dl: Annotated[bool, Field(description="Force download of CSV file.")] = (
+        False
     )
+    dt: Annotated[date, Field(description="Date of interest.")] = date.today()
+    fmt: Annotated[
+        str,
+        Field(
+            description="The output format requested.",
+            pattern="^(geojson|csv)$",
+        ),
+    ] = "geojson"
 
 
 def departure(ob, climo):
@@ -269,7 +274,7 @@ def get_mckey(environ: dict) -> str:
     schema=Schema,
     content_type=get_ct,
     memcachekey=get_mckey,
-    memcacheexpire=300,
+    memcacheexpire=600,  # Excessive usage
 )
 def application(environ, start_response):
     """see how we are called"""
