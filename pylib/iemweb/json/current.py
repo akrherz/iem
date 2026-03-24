@@ -122,6 +122,7 @@ def run(conn: Connection, network, station):
 @iemapp(
     memcachekey=lambda x: f"/json/current/{x['network']}/{x['station']}",
     memcacheexpire=120,
+    content_type="application/json",
     help=__doc__,
     schema=Schema,
 )

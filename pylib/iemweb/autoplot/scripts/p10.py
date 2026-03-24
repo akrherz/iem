@@ -55,7 +55,7 @@ def get_description():
             type="float",
             name="threshold",
             default="32",
-            label="Enter Threshold (degrees F or Inches):",
+            label="Enter Threshold (°F or Inches):",
         ),
         dict(
             type="year", name="year", default=1893, label="Start Year of Plot"
@@ -216,9 +216,6 @@ def plotter(ctx: dict, conn: Connection | None = None):
     spring = np.array(df["spring"], dtype=int)
     fall = np.array(df["fall"], dtype=int)
 
-    s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
-    f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
-
     title = PDICT.get(direction, "").replace(
         "Temperature", PDICT2.get(varname)
     )
@@ -247,17 +244,19 @@ def plotter(ctx: dict, conn: Connection | None = None):
         transform=ax.transAxes,
         rotation=-90,
     )
-    ax.plot(
-        years,
-        years * s_slp + s_int,
-        lw=3,
-        zorder=2,
-        label=(
-            f"{(s_slp * 100.0):.2f} "
-            r"$\frac{days}{100y}$ R$^2$="
-            f"{(s_r**2):.2f}"
-        ),
-    )
+    if len(years) > 3:
+        s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
+        ax.plot(
+            years,
+            years * s_slp + s_int,
+            lw=3,
+            zorder=2,
+            label=(
+                f"{(s_slp * 100.0):.2f} "
+                r"$\frac{days}{100y}$ R$^2$="
+                f"{(s_r**2):.2f}"
+            ),
+        )
     ax.plot(
         years,
         df["spring"].rolling(window=30).mean(),
@@ -265,17 +264,19 @@ def plotter(ctx: dict, conn: Connection | None = None):
         lw=3,
         label="30yr",
     )
-    ax.plot(
-        years,
-        years * f_slp + f_int,
-        lw=3,
-        zorder=2,
-        label=(
-            f"{(f_slp * 100.0):.2f} "
-            r"$\frac{days}{100y}$ R$^2$="
-            f"{(f_r**2):.2f}"
-        ),
-    )
+    if len(years) > 3:
+        f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
+        ax.plot(
+            years,
+            years * f_slp + f_int,
+            lw=3,
+            zorder=2,
+            label=(
+                f"{(f_slp * 100.0):.2f} "
+                r"$\frac{days}{100y}$ R$^2$="
+                f"{(f_r**2):.2f}"
+            ),
+        )
     ax.plot(
         years,
         df["fall"].rolling(window=30).mean(),
