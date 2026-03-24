@@ -488,7 +488,27 @@ def toobusy(pgconn, environ, name):
     return over
 
 
-@iemapp(help=__doc__, parse_times=False, schema=MyModel)
+def get_mckey(environ: dict) -> str | None:
+    """Figure out our memcache key."""
+    # A current incessant caller pattern
+    if (
+        environ["station"] is not None
+        and len(environ["station"]) == 1
+        and environ["data"] == ["tmpf"]
+        and environ["hours"] is not None
+    ):
+        return f"/asos/tmpf/{environ['station'][0]}/{environ['hours']}"
+    return None
+
+
+@iemapp(
+    help=__doc__,
+    parse_times=False,
+    content_type="text/plain",  # Only used in the caching
+    memcachekey=get_mckey,
+    memcacheexpire=600,
+    schema=MyModel,
+)
 def application(environ, start_response):
     """Go main"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
