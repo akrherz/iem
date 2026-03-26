@@ -97,7 +97,7 @@ def dbsave(ts, data):
         LOG.warning("No longitude info found, aborting")
         return
 
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=True)
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute(

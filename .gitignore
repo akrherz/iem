@@ -12,4 +12,5 @@ node_modules
 coverage.xml
 # Stuff built by iemvtec
 htdocs/vtec/assets*
+htdocs/vtec/legends
 htdocs/vtec/_index_content.html

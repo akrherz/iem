@@ -19,6 +19,7 @@ year=2016&month=4&day=13&hour=18&minute=0&period=1
 
 import tempfile
 import zipfile
+from typing import Annotated
 
 import numpy as np
 from imageio.v2 import imread
@@ -28,6 +29,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.util import archive_fetch, utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD,
+)
+
 # Workaround future
 gdal.UseExceptions()
 
@@ -35,12 +43,14 @@ gdal.UseExceptions()
 class Schema(CGIModel):
     """See how we are called."""
 
-    year: int = Field(description="Year of the data", default=2016)
-    month: int = Field(description="Month of the data", default=4)
-    day: int = Field(description="Day of the data", default=13)
-    hour: int = Field(description="Hour of the data", default=18)
-    minute: int = Field(description="Minute of the data", default=0)
-    period: int = Field(description="Period of the data", default=1)
+    year: Annotated[int, Field(description="Year of the data")] = 2016
+    month: MONTH_FIELD = 4
+    day: DAY_OF_MONTH_FIELD = 13
+    hour: HOUR_FIELD = 18
+    minute: MINUTE_FIELD = 0
+    period: Annotated[
+        int, Field(description="Period of the data", ge=1, le=1000)
+    ] = 1
 
 
 def workflow(tmpdir, valid, period, start_response):
