@@ -38,7 +38,7 @@ def main():
     # We set one minute into the future, so to get expiring warnings
     # out of the shapefile
     ets = utc() + timedelta(minutes=+1)
-    with get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis", rw=False) as conn:
         df = gpd.read_postgis(
             """
             SELECT distinct l.geom,

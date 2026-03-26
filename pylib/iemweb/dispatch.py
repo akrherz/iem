@@ -57,6 +57,7 @@ SPECIAL_ROUTES = {
 
 REDIRECTS = {
     "/network_obs.php": "/api/1/currents.geojson",
+    "/obhistory.py": "/api/",  # Annoying LLMs
 }
 
 SUFFIXES = {

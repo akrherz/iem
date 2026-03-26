@@ -11,10 +11,10 @@ from pyiem.database import get_dbconn
 @click.option("--year", type=int, required=True)
 def main(year):
     """Do Something"""
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("postgis", rw=False)
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
-    pgconn2 = get_dbconn("coop")
+    pgconn2 = get_dbconn("coop", rw=False)
     cursor3 = pgconn2.cursor()
     cursor.execute(
         "SELECT ugc, ST_X(centroid), ST_Y(centroid) "

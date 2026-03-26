@@ -201,6 +201,12 @@ $t->content = <<<EOM
 
 <h3 class="mt-4 mb-3">IEMBOT + Twitter Integration</h3>
 
+<div class="alert alert-warning" role="alert">
+    2026-03-26: IEMBot + X is currently not working due to X not supporting
+    this usage case.
+</div>
+
+
 <p>This page allows for the subscription of a Twitter Account to one or more
 <a href="/projects/iembot/#channels" target="_blank">IEMBot channels</a>.
 The automated processing of National Weather Service text products converts each product into a tweet-sized message and is associated

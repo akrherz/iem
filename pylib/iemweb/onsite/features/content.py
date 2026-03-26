@@ -6,7 +6,7 @@ from datetime import date
 from io import BytesIO
 
 from matplotlib.figure import Figure
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
 from sqlalchemy.engine import Connection
@@ -18,8 +18,7 @@ PATTERN = re.compile(
 )
 
 
-@with_sqlalchemy_conn("mesosite")
-def dblog(yymmdd: str, conn: Connection | None = None):
+def dblog(conn: Connection, yymmdd: str):
     """Log this request"""
     dt = date(2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6]))
     conn.execute(
@@ -114,7 +113,11 @@ def application(environ, start_response):
             )
         )
     try:
-        dblog(data["yymmdd"])
+        with get_sqlalchemy_conn("mesosite", rw=True) as conn:
+            dblog(conn, data["yymmdd"])
+    except Exception:
+        # swallow as uninteresting
+        pass
     finally:
         # Swallow exception
         start_response(status, headers)

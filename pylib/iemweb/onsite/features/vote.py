@@ -15,7 +15,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     vote: Annotated[
-        str,
+        str | None,
         Field(
             description="The vote to cast",
             pattern="^(good|bad|abstain)$",
