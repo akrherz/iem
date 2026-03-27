@@ -50,6 +50,7 @@ jobs:
           n=$((n+1))
           if [ $n -ge 10 ]; then
             echo "iem_database did not become ready in time"
+            docker logs iem_database
             exit 1
           fi
           sleep 6
@@ -64,6 +65,7 @@ jobs:
           n=$((n+1))
           if [ $n -ge 10 ]; then
             echo "iem-web-services did not become ready in time"
+            docker logs iem_web_services
             exit 1
           fi
           sleep 6
