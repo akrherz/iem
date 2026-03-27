@@ -59,7 +59,7 @@ jobs:
     # Required for all matrix jobs
     - name: Run IEM Web Services Container
       run: |
-        docker run -d --name iem_web_services --network iem_network -p 8080:8000 -e IEMWS_DBHOST=iem_database ghcr.io/akrherz/iem-web-services:latest
+        docker run -d --name iem_web_services --network iem_network -p 8080:8000 -e IEMWS_DBHOST=iem_database -e IEMWS_DBUSER=mesonet ghcr.io/akrherz/iem-web-services:latest
         n=0
         until curl -sf http://localhost:8080; do
           n=$((n+1))
