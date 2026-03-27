@@ -38,10 +38,22 @@ jobs:
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
     # Required for all matrix jobs
+    - name: Create Docker Network
+      run: docker network create iem_network
+
+    # Required for all matrix jobs
     - name: Run IEM Database Container label:${{ env.WITH_TEST_DATA }}
       run: |
-        docker run -d --name iem_database -p 5432:5432 ghcr.io/akrherz/iem_database:${{ env.WITH_TEST_DATA }}
+        docker run -d --name iem_database --network iem_network -p 5432:5432 ghcr.io/akrherz/iem_database:${{ env.WITH_TEST_DATA }}
         until docker exec iem_database pg_isready -h localhost; do
+          sleep 6
+        done
+
+    # Required for all matrix jobs
+    - name: Run IEM Web Services Container
+      run: |
+        docker run -d --name iem_web_services --network iem_network -p 8080:8000 ghcr.io/akrherz/iem-web-services:latest
+        until curl -sf http://localhost:8080; do
           sleep 6
         done
 
