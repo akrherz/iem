@@ -61,14 +61,15 @@ jobs:
       run: |
         docker run -d --name iem_web_services --network iem_network -p 8080:8000 -e IEMWS_DBHOST=iem_database -e IEMWS_DBUSER=mesonet ghcr.io/akrherz/iem-web-services:latest
         n=0
-        until curl -sf http://localhost:8080; do
+        # Test something that does a db query
+        until curl -sf http://localhost:8080/networks.geojson; do
           n=$((n+1))
           if [ $n -ge 10 ]; then
             echo "iem-web-services did not become ready in time"
             docker logs iem_web_services
             exit 1
           fi
-          sleep 6
+          sleep 1
         done
 
     # Required for all matrix jobs
