@@ -45,7 +45,13 @@ jobs:
     - name: Run IEM Database Container label:${{ env.WITH_TEST_DATA }}
       run: |
         docker run -d --name iem_database --network iem_network -p 5432:5432 ghcr.io/akrherz/iem_database:${{ env.WITH_TEST_DATA }}
+        n=0
         until docker exec iem_database pg_isready -h localhost; do
+          n=$((n+1))
+          if [ $n -ge 10 ]; then
+            echo "iem_database did not become ready in time"
+            exit 1
+          fi
           sleep 6
         done
 
@@ -53,7 +59,13 @@ jobs:
     - name: Run IEM Web Services Container
       run: |
         docker run -d --name iem_web_services --network iem_network -p 8080:8000 ghcr.io/akrherz/iem-web-services:latest
+        n=0
         until curl -sf http://localhost:8080; do
+          n=$((n+1))
+          if [ $n -ge 10 ]; then
+            echo "iem-web-services did not become ready in time"
+            exit 1
+          fi
           sleep 6
         done
 
