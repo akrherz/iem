@@ -20,6 +20,7 @@ https://mesonet.agron.iastate.edu/wx/afos/text2png.py\
 
 from datetime import datetime, timezone
 from io import BytesIO
+from typing import Annotated
 
 import PIL.ImageDraw
 import PIL.ImageFont
@@ -32,18 +33,22 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """Schema for the CGI app"""
 
-    e: str = Field(
-        default="201612141916",
-        description="The valid time of the product in YYYYMMDDHHMM format",
-        max_length=12,
-        min_length=12,
-        pattern=r"^[12][90]\d\d[01]\d[0-3]\d[0-2]\d[0-5]\d$",
-    )
-    pil: str = Field(
-        default="ADMNFD",
-        description="The AFOS Product Identifier, e.g., ADMNFD",
-        max_length=6,
-    )
+    e: Annotated[
+        str,
+        Field(
+            description="The valid time of the product in YYYYMMDDHHMM format",
+            max_length=12,
+            min_length=12,
+            pattern=r"^[12][90]\d\d[01]\d[0-3]\d[0-2]\d[0-5]\d$",
+        ),
+    ] = "201612141916"
+    pil: Annotated[
+        str,
+        Field(
+            description="The AFOS Product Identifier, e.g., ADMNFD",
+            max_length=6,
+        ),
+    ] = "ADMNFD"
 
 
 def text_image(content):

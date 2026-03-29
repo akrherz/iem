@@ -35,12 +35,15 @@ sts=2024-07-31T00:00:00Z&ets=2024-08-01T00:00:00Z&artcc=ZMP&fmt=shp
 import zipfile
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import shapefile
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 
 
 class Schema(CGIModel):
@@ -50,15 +53,15 @@ class Schema(CGIModel):
         default_factory=list,
         description="The ARTCC to limit the query to, use _ALL for all",
     )
-    ets: AwareDatetime = Field(
-        default=None, description="The end time of the query"
+    ets: Annotated[
+        AwareDatetime | None, Field(description="The end time of the query")
+    ] = None
+    fmt: Annotated[str, Field(description="The format of the output file")] = (
+        "shp"
     )
-    fmt: str = Field(
-        default="shp", description="The format of the output file"
-    )
-    sts: AwareDatetime = Field(
-        default=None, description="The start time of the query"
-    )
+    sts: Annotated[
+        AwareDatetime | None, Field(description="The start time of the query")
+    ] = None
     year1: int = Field(
         default=2000,
         description="The start year of the query, when sts is not provided",
@@ -81,14 +84,8 @@ class Schema(CGIModel):
         default=False,
         description="Should we filter by distance from a point?",
     )
-    lat: float = Field(
-        default=41.99,
-        description="The latitude of the point to filter by",
-    )
-    lon: float = Field(
-        default=-91.99,
-        description="The longitude of the point to filter by",
-    )
+    lat: LATITUDE_FIELD = 41.99
+    lon: LONGITUDE_FIELD = -91.99
     hour1: int = Field(
         default=0,
         description="The start hour of the query, when sts is not provided",
@@ -119,29 +116,29 @@ class Schema(CGIModel):
     )
 
 
-def run(environ, start_response):
+def run(query: Schema, start_response: callable):
     """Go run!"""
     artcc_sql = ""
-    if "_ALL" not in environ["artcc"] and environ["artcc"]:
+    if "_ALL" not in query.artcc and query.artcc:
         artcc_sql = " artcc = ANY(:artcc) and "
     params = {
-        "artcc": environ["artcc"],
-        "distance": environ["degrees"],
-        "lat": environ["lat"],
-        "lon": environ["lon"],
-        "sts": environ["sts"],
-        "ets": environ["ets"],
+        "artcc": query.artcc,
+        "distance": query.degrees,
+        "lat": query.lat,
+        "lon": query.lon,
+        "sts": query.sts,
+        "ets": query.ets,
     }
 
     spatialsql = ""
-    if environ["filter"]:
+    if query.filter:
         spatialsql = (
             "ST_Distance(geom::geometry, ST_Point(:lon, :lat, 4326) "
             ") <= :distance and "
         )
     else:
-        if (environ["ets"] - environ["sts"]).days > 120:
-            environ["ets"] = environ["sts"] + timedelta(days=120)
+        if (query.ets - query.sts).days > 120:
+            query.ets = query.sts + timedelta(days=120)
     sql = """
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
@@ -156,7 +153,7 @@ def run(environ, start_response):
         from pireps WHERE {spatialsql} {artcc_sql}
         valid >= :sts and valid < :ets ORDER by valid ASC
         """
-    fn = f"pireps_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
+    fn = f"pireps_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
 
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
@@ -166,7 +163,7 @@ def run(environ, start_response):
             start_response("200 OK", [("Content-type", "text/plain")])
             return b"ERROR: no results found for your query"
 
-        if environ["fmt"] == "csv":
+        if query.fmt == "csv":
             sio = StringIO()
             headers = [
                 ("Content-type", "application/octet-stream"),
@@ -221,8 +218,9 @@ def run(environ, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
-    if environ["sts"] is None or environ["ets"] is None:
-        raise IncompleteWebRequest("GET start time parameters missing.")
-    return [run(environ, start_response)]
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
+        raise IncompleteWebRequest("GET start/end time parameters missing.")
+    return [run(query, start_response)]

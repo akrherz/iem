@@ -19,12 +19,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/awc_gairmets.py\
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
-# Third Party
 import fiona
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
@@ -39,27 +38,41 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    format: str = Field("shp", description="Output Format")
-    sts: AwareDatetime = Field(None, description="Start Time")
-    ets: AwareDatetime = Field(None, description="End Time")
-    year1: int = Field(
-        None, description="Start Year in UTC, when sts not set."
+    format: Annotated[str, Field(description="Output Format")] = "shp"
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
     )
-    month1: int = Field(
-        None, description="Start Month in UTC, when sts not set."
-    )
-    day1: int = Field(None, description="Start Day in UTC, when sts not set.")
-    hour1: int = Field(0, description="Start Hour in UTC, when sts not set.")
-    minute1: int = Field(
-        0, description="Start Minute in UTC, when sts not set."
-    )
-    year2: int = Field(None, description="End Year in UTC, when ets not set.")
-    month2: int = Field(
-        None, description="End Month in UTC, when ets not set."
-    )
-    day2: int = Field(None, description="End Day in UTC, when ets not set.")
-    hour2: int = Field(0, description="End Hour in UTC, when ets not set.")
-    minute2: int = Field(0, description="End Minute in UTC, when ets not set.")
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
+    year1: Annotated[
+        int | None, Field(description="Start Year in UTC, when sts not set.")
+    ] = None
+    month1: Annotated[
+        int | None, Field(description="Start Month in UTC, when sts not set.")
+    ] = None
+    day1: Annotated[
+        int | None, Field(description="Start Day in UTC, when sts not set.")
+    ] = None
+    hour1: Annotated[
+        int | None, Field(description="Start Hour in UTC, when sts not set.")
+    ] = 0
+    minute1: Annotated[
+        int | None, Field(description="Start Minute in UTC, when sts not set.")
+    ] = 0
+    year2: Annotated[
+        int | None, Field(description="End Year in UTC, when ets not set.")
+    ] = None
+    month2: Annotated[
+        int | None, Field(description="End Month in UTC, when ets not set.")
+    ] = None
+    day2: Annotated[
+        int | None, Field(description="End Day in UTC, when ets not set.")
+    ] = None
+    hour2: Annotated[
+        int | None, Field(description="End Hour in UTC, when ets not set.")
+    ] = 0
+    minute2: Annotated[
+        int | None, Field(description="End Minute in UTC, when ets not set.")
+    ] = 0
 
 
 def run(ctx, start_response):

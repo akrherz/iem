@@ -116,17 +116,20 @@ class Schema(CGIModel):
         False,
         description="If set, only the CSV file is returned.",
     )
-    recent: int = Field(
-        None,
-        description=(
-            "For near realtime requests, the number of seconds to go back in "
-            "time.  The timestamp query is the time of the LSR report, not "
-            "the time it was disseminated by the NWS. Must be less than "
-            "1,000,000 seconds."
+    recent: Annotated[
+        int | None,
+        Field(
+            description=(
+                """
+    For near realtime requests, the number of seconds to go back in
+    time.  The timestamp query is the time of the LSR report, not
+    the time it was disseminated by the NWS. Must be less than
+    1,000,000 seconds."""
+            ),
+            ge=1,
+            le=1_000_000,
         ),
-        ge=1,
-        le=1_000_000,
-    )
+    ] = None
     state: ListOrCSVType = Field(
         None,
         description="Limit results to these states.",
@@ -203,7 +206,7 @@ class Schema(CGIModel):
         return self
 
 
-def get_time_domain(form):
+def get_time_domain(form: dict):
     """Figure out the start and end timestamps"""
     if form["recent"] is not None:
         # Allow for specifying a recent number of seconds
