@@ -143,6 +143,7 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         files: coverage.xml
+        fail_ci_if_error: true
 
     - name: View Apache Logs
       if: ${{ failure() && matrix.TEST_WEB == 'YES' }}

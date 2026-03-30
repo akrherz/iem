@@ -24,12 +24,11 @@ sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
-# Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -42,8 +41,10 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: AwareDatetime = Field(None, description="Start Time")
-    ets: AwareDatetime = Field(None, description="End Time")
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
+    )
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
     year1: int = Field(
         None, description="Start UTC Year when sts is not provided"
     )
@@ -74,7 +75,7 @@ class Schema(CGIModel):
     )
 
 
-def run(ctx, start_response):
+def run(query: Schema, start_response: callable):
     """Do something!"""
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
@@ -106,8 +107,8 @@ def run(ctx, start_response):
             ),
             conn,
             params={
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "sts": query.sts,
+                "ets": query.ets,
             },
             geom_col="geom",
         )  # type: ignore
@@ -115,7 +116,7 @@ def run(ctx, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = f"mcd_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
+    fn = f"mcd_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         df.to_file(f"{tmpdir}/{fn}.shp", schema=schema, engine="fiona")
@@ -138,14 +139,11 @@ def run(ctx, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
-    if environ["sts"] is None or environ["ets"] is None:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET sts/ets parameter not provided")
-    if environ["sts"] > environ["ets"]:
-        environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
-    ctx = {
-        "sts": environ["sts"],
-        "ets": environ["ets"],
-    }
-    return [run(ctx, start_response)]
+    if query.sts > query.ets:
+        query.sts, query.ets = query.ets, query.sts
+    return [run(query, start_response)]

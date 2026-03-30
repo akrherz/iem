@@ -28,12 +28,10 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/cwas.py\
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
 
-# Third Party
 import fiona
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
@@ -117,7 +115,7 @@ def run(ctx, start_response):
                 "ets": ctx["ets"],
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
