@@ -7,6 +7,10 @@
 PORT=${1:-9081}
 CONDA_PREFIX=/opt/miniconda3/envs/prod
 
+# Use a persistent server root under /var/tmp to avoid tmpwatch cleaning /tmp
+# Path includes the port so multiple instances won't collide.
+SERVER_ROOT="/var/tmp/mod_wsgi/iem-tc-${PORT}"
+
 # Use the conda env's binaries directly rather than relying on interactive
 # shell activation (systemd runs non-interactive shells).
 export PATH="${CONDA_PREFIX}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
@@ -36,4 +40,5 @@ exec "${CONDA_PREFIX}/bin/mod_wsgi-express" start-server \
         --include-file "$INCLUDE_FILE" \
         --include-file "/opt/iemwebfarm/apache_conf.d/server-status.conf" \
         --log-level "warn" \
-        --allow-localhost
+        --allow-localhost \
+        --server-root "$SERVER_ROOT"
