@@ -62,18 +62,24 @@ class Schema(CGIModel):
     sts: Annotated[
         AwareDatetime | None, Field(description="The start time of the query")
     ] = None
-    year1: int = Field(
-        default=2000,
-        description="The start year of the query, when sts is not provided",
-    )
-    month1: int = Field(
-        default=1,
-        description="The start month of the query, when sts is not provided",
-    )
-    day1: int = Field(
-        default=1,
-        description="The start day of the query, when sts is not provided",
-    )
+    year1: Annotated[
+        int | None,
+        Field(
+            description="The start year of the query, when sts not provided",
+        ),
+    ] = None
+    month1: Annotated[
+        int | None,
+        Field(
+            description="The start month of the query, when sts not provided",
+        ),
+    ] = None
+    day1: Annotated[
+        int | None,
+        Field(
+            description="The start day of the query, when sts is not provided",
+        ),
+    ] = None
     degrees: float = Field(
         default=1.0,
         description="The distance in degrees for a spatial filter",
@@ -94,18 +100,24 @@ class Schema(CGIModel):
         default=0,
         description="The start minute of the query, when sts is not provided",
     )
-    year2: int = Field(
-        default=2000,
-        description="The end year of the query, when ets is not provided",
-    )
-    month2: int = Field(
-        default=1,
-        description="The end month of the query, when ets is not provided",
-    )
-    day2: int = Field(
-        default=1,
-        description="The end day of the query, when ets is not provided",
-    )
+    year2: Annotated[
+        int | None,
+        Field(
+            description="The end year of the query, when ets is not provided",
+        ),
+    ] = None
+    month2: Annotated[
+        int | None,
+        Field(
+            description="The end month of the query, when ets is not provided",
+        ),
+    ] = None
+    day2: Annotated[
+        int | None,
+        Field(
+            description="The end day of the query, when ets is not provided",
+        ),
+    ] = None
     hour2: int = Field(
         default=0,
         description="The end hour of the query, when ets is not provided",
