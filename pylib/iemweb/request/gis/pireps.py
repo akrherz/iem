@@ -207,10 +207,10 @@ def run(query: Schema, start_response: callable):
             shp.field("LAT", "F", 7, 4)
             shp.field("LON", "F", 9, 4)
             for row in res:
-                if row[-1] is None:
-                    continue
-                shp.point(row[-1], row[-2])
-                shp.record(*row)
+                # Can't support null geoms like other formats do.
+                if row[-1] is not None:
+                    shp.point(row[-1], row[-2])
+                    shp.record(*row)
 
     zio = BytesIO()
     with zipfile.ZipFile(

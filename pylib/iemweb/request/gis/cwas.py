@@ -31,6 +31,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/cwas.py\
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
 import fiona
 import geopandas as gpd
@@ -46,11 +47,13 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: AwareDatetime = Field(default=None, description="Start Time")
-    ets: AwareDatetime = Field(default=None, description="End Time")
-    format: str = Field(
-        default="shp", description="Output format, either kml or shp"
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
     )
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
+    format: Annotated[
+        str, Field(description="Output format, either kml or shp")
+    ] = "shp"
     year1: int = Field(
         default=None, description="Start year when sts is not provided"
     )
@@ -83,7 +86,7 @@ class Schema(CGIModel):
     )
 
 
-def run(ctx, start_response):
+def run(query: Schema, start_response: callable):
     """Do something!"""
     common = "at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:00\"Z\"'"
     schema = {
@@ -111,8 +114,8 @@ def run(ctx, start_response):
             ),
             conn,
             params={
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "sts": query.sts,
+                "ets": query.ets,
             },
             geom_col="geom",
         )  # type: ignore
@@ -120,8 +123,8 @@ def run(ctx, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = f"cwas_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
-    if ctx["format"] == "kml":
+    fn = f"cwas_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
+    if query.format == "kml":
         fp = BytesIO()
         with fiona.Env():
             df.to_file(fp, driver="KML")
@@ -153,8 +156,9 @@ def run(ctx, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
-    if environ["sts"] is None or environ["ets"] is None:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET start time parameters missing")
-    return [run(environ, start_response)]
+    return [run(query, start_response)]

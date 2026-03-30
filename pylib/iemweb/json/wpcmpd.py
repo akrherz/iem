@@ -22,6 +22,7 @@ https://mesonet.agron.iastate.edu/json/wpcmpd.py?lat=42.0&lon=-95.0&fmt=excel
 
 import json
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -42,11 +43,15 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    fmt: str = Field(
-        default="json",
-        description="The format to return data in, either json, excel, or csv",
-        pattern="^(json|excel|csv)$",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description=(
+                "The format to return data in, either json, excel, or csv"
+            ),
+            pattern="^(json|excel|csv)$",
+        ),
+    ] = "json"
     lat: LATITUDE_FIELD = 42.0
     lon: LONGITUDE_FIELD = -95.0
 
@@ -76,14 +81,12 @@ def dowork(lon, lat, conn: Connection | None = None) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
-    lat = environ["lat"]
-    lon = environ["lon"]
-    fmt = environ["fmt"]
+    query: Schema = environ["_cgimodel_schema"]
 
-    mpds = dowork(lon, lat)
-    if fmt == "json":
+    mpds = dowork(query.lon, query.lat)
+    if query.fmt == "json":
         data = json_response_dict({"mpds": []})
         for _, row in mpds.iterrows():
             conf = (
@@ -110,7 +113,7 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return json.dumps(data).encode("ascii")
 
-    if fmt == "excel":
+    if query.fmt == "excel":
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-Disposition", "attachment; filename=wpcmpd.xls"),

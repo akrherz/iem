@@ -17,22 +17,21 @@ Changelog
 Example Requests
 ----------------
 
-Provide a shapefile of WPC MPDs for July 2024
+Provide a shapefile of WPC MPDs for March 2026
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/wpc_mpd.py?\
-sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z
+sts=2026-03-01T00:00Z&ets=2026-04-01T00:00Z
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
-# Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
@@ -42,8 +41,10 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: AwareDatetime = Field(None, description="Start Time")
-    ets: AwareDatetime = Field(None, description="End Time")
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
+    )
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
     year1: int = Field(None, description="Start Time Year")
     year2: int = Field(None, description="End Time Year")
     month1: int = Field(None, description="Start Time Month")
@@ -59,10 +60,11 @@ class Schema(CGIModel):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something!"""
-    if environ["sts"] is None or environ["ets"] is None:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("Missing start time GET params")
-    if environ["sts"] > environ["ets"]:
-        environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
+    if query.sts > query.ets:
+        query.sts, query.ets = query.ets, query.sts
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "Polygon",
@@ -77,25 +79,28 @@ def application(environ, start_response):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            "select "
-            f"to_char(issue {common}) as issue, "
-            f"to_char(expire {common}) as expire, "
-            "product_id as prod_id, year, num, "
-            "concerning as concern, geom "
-            "from mpd WHERE issue >= %s and "
-            "issue < %s ORDER by issue ASC",
-            conn,
-            params=(
-                environ["sts"],
-                environ["ets"],
+            sql_helper(
+                """
+    select to_char(issue {common}) as issue,
+    to_char(expire {common}) as expire,
+    product_id as prod_id, year, num,
+    concerning as concern, geom
+    from mpd WHERE issue >= :sts and
+    issue < :ets ORDER by issue ASC""",
+                common=common,
             ),
+            conn,
+            params={
+                "sts": query.sts,
+                "ets": query.ets,
+            },
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: no results found for your query"]
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = f"mpd_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
+    fn = f"mpd_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         df.to_file(f"{tmpdir}/{fn}.shp", schema=schema, engine="fiona")

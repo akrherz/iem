@@ -10,6 +10,8 @@ Environment=PATH=/opt/miniconda3/envs/prod/bin:/usr/local/sbin:/usr/local/bin:/u
 ExecStartPre=/usr/bin/test -x /opt/miniconda3/envs/prod/bin/mod_wsgi-express
 ExecStartPre=/usr/bin/test -x /opt/iem/deployment/start_tc_wsgi.sh
 ExecStart=/opt/iem/deployment/start_tc_wsgi.sh
+ExecStartPre=/bin/mkdir -p /var/tmp/mod_wsgi
+ExecStartPre=/bin/chown -R apache:apache /var/tmp/mod_wsgi
 Restart=on-failure
 RestartSec=5
 SyslogIdentifier=iem-tc
