@@ -1,7 +1,7 @@
 """Minimal dispatcher for TileCache endpoints /c and /cache.
 
-These are thread-safe and served by a dedicated mod_wsgi-express sidecar
-(1 process, 15 threads) for maximum tile throughput.
+These are thread-safe and served by a dedicated Gunicorn backend for maximum
+tile throughput.
 """
 
 from iemweb.c.tile import application as c_application

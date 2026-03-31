@@ -160,7 +160,7 @@ Alias /tmp /var/webtmp
     RewriteRule wwa.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/us/wwa.map& [QSA,L]
 </Directory>
 
-<Proxy "http://iem.local:9081/*">
+<Proxy "http://127.0.0.1:9081/*">
     # The backend doesn't really care about the hostname attm
     ProxyPreserveHost Off
     RequestHeader set "Host" "iem.local"
@@ -168,8 +168,8 @@ Alias /tmp /var/webtmp
     ProxySet connectiontimeout=5 timeout=60 retry=0 disablereuse=On
 </Proxy>
 
-ProxyPass /c http://iem.local:9081/c
-ProxyPass /cache http://iem.local:9081/cache
+ProxyPass /c http://127.0.0.1:9081/c
+ProxyPass /cache http://127.0.0.1:9081/cache
 
 <Directory "/opt/iem/htdocs/GIS">
     RewriteRule vtec_(.*).png radmap.php?layers[]=places&layers[]=nexrad&layers[]=cities&layers[]=interstates&layers[]=uscounties&vtec=$1&width=797&height=400
