@@ -41,12 +41,10 @@ sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=shp
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
 
-# Third Party
 import fiona
 import geopandas as gpd
 from pydantic import AwareDatetime, Field

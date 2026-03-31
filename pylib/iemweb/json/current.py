@@ -62,29 +62,30 @@ class Schema(CGIModel):
     ]
 
 
-def run(conn: Connection, network, station):
+def run(conn: Connection, query: Schema):
     """Get last ob!"""
     res = conn.execute(
         sql_helper("""
     WITH mystation as (
-             SELECT * from stations where id = :id and network = :net),
-    lastob as (select *, m.iemid as miemid,
+        SELECT iemid, tzname from stations where id = :id and network = :net
+    ), lastob as (
+        select c.*, m.iemid as miemid,
         valid at time zone 'UTC' as utctime,
         valid at time zone m.tzname as localtime
-        from current c JOIN mystation m on (c.iemid = m.iemid)),
-    summ as (SELECT *, s.pday as s_pday from summary s JOIN lastob o
-    on (s.iemid = o.miemid and s.day = date(o.localtime)))
-    select * from summ
+        from current c JOIN mystation m on (c.iemid = m.iemid)
+    )
+    SELECT *, s.pday as s_pday from summary s JOIN lastob o
+    on (s.iemid = o.miemid and s.day = date(o.localtime))
     """),
-        {"id": station, "net": network},
+        {"id": query.station, "net": query.network},
     )
     if res.rowcount == 0:
         return "{}"
     row = res.mappings().fetchone()
     data = json_response_dict({})
     data["server_gentime"] = utc().strftime(ISO8601)
-    data["id"] = station
-    data["network"] = network
+    data["id"] = query.station
+    data["network"] = query.network
     ob = data.setdefault("last_ob", {})
     ob["local_valid"] = row["localtime"].strftime("%Y-%m-%d %H:%M")
     ob["utc_valid"] = row["utctime"].strftime(ISO8601)
@@ -126,13 +127,12 @@ def run(conn: Connection, network, station):
     help=__doc__,
     schema=Schema,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
-    network = environ["network"]
-    station = environ["station"]
+    query: Schema = environ["_cgimodel_schema"]
 
     with get_sqlalchemy_conn("iem") as conn:
-        res = run(conn, network, station)
+        res = run(conn, query)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return res.encode("ascii")

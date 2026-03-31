@@ -35,12 +35,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/misc.py\
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO, StringIO
+from typing import Annotated
 
-# Third Party
 import fiona
 import geopandas as gpd
 import pandas as pd
@@ -50,6 +49,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import HOUR_FIELD, MINUTE_FIELD
+
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -58,11 +59,13 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    format: str = Field(
-        default="shp",
-        description="Output format, either shp, kml, csv, or excel",
-        pattern="^(shp|kml|csv|excel)$",
-    )
+    format: Annotated[
+        str,
+        Field(
+            description="Output format, either shp, kml, csv, or excel",
+            pattern="^(shp|kml|csv|excel)$",
+        ),
+    ] = "shp"
     sts: AwareDatetime = Field(default=None, description="Start Time")
     ets: AwareDatetime = Field(default=None, description="End Time")
     year1: int = Field(default=None, description="Start Year, if sts not set")
@@ -70,20 +73,16 @@ class Schema(CGIModel):
         default=None, description="Start Month, if sts not set"
     )
     day1: int = Field(default=None, description="Start Day, if sts not set")
-    hour1: int = Field(default=None, description="Start Hour, if sts not set")
-    minute1: int = Field(
-        default=None, description="Start Minute, if sts not set"
-    )
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
     year2: int = Field(default=None, description="End Year, if ets not set")
     month2: int = Field(default=None, description="End Month, if ets not set")
     day2: int = Field(default=None, description="End Day, if ets not set")
-    hour2: int = Field(default=None, description="End Hour, if ets not set")
-    minute2: int = Field(
-        default=None, description="End Minute, if ets not set"
-    )
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
-def run(ctx, start_response):
+def run(query: Schema, start_response: callable):
     """Do something!"""
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
@@ -97,8 +96,8 @@ def run(ctx, start_response):
                  """),
             conn,
             params={
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "sts": query.sts,
+                "ets": query.ets,
             },
             geom_col="geom",
         )  # type: ignore
@@ -108,8 +107,8 @@ def run(ctx, start_response):
     for col in ["issue", "expire"]:
         df[col] = df[col].dt.strftime(ISO8601)
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = f"misc_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
-    if ctx["format"] == "kml":
+    fn = f"misc_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
+    if query.format == "kml":
         fp = BytesIO()
         with fiona.Env():
             df.to_file(fp, driver="KML", NameField="NAME", engine="fiona")
@@ -119,7 +118,7 @@ def run(ctx, start_response):
         ]
         start_response("200 OK", headers)
         return fp.getvalue()
-    if ctx["format"] == "csv":
+    if query.format == "csv":
         fp = StringIO()
         df.drop(columns="geom").to_csv(fp, index=False)
         headers = [
@@ -128,7 +127,7 @@ def run(ctx, start_response):
         ]
         start_response("200 OK", headers)
         return fp.getvalue().encode("ascii")
-    if ctx["format"] == "excel":
+    if query.format == "excel":
         fp = BytesIO()
         with pd.ExcelWriter(fp) as writer:
             df.drop(columns="geom").to_excel(writer, index=False)
@@ -169,8 +168,9 @@ def run(ctx, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
-    if environ["sts"] is None or environ["ets"] is None:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET start or end time parameters missing")
-    return [run(environ, start_response)]
+    return [run(query, start_response)]

@@ -20,10 +20,10 @@ Changelog
 Example Requests
 ----------------
 
-Audit CLI for Des Moines on 25 Feb 2026
+Audit CLI for Des Moines on 25 Feb 2024
 
 https://mesonet.agron.iastate.edu/json/cli_audit.py\
-?station=KDSM&date=2026-02-25
+?station=KDSM&date=2024-02-25
 
 """
 
@@ -499,7 +499,8 @@ def add_cf6_events(
 
 def get_mckey(environ: dict):
     """Get the memcache key."""
-    return f"/json/cli_audit/{environ['station']}/{environ['date']}"
+    query: Schema = environ["_cgimodel_schema"]
+    return f"/json/cli_audit/{query.station}/{query.date}"
 
 
 @iemapp(
@@ -511,17 +512,16 @@ def get_mckey(environ: dict):
 )
 def application(environ: dict, start_response: callable):
     """Answer request."""
-    station = environ["station"]
-    dt = environ["date"]
+    query: Schema = environ["_cgimodel_schema"]
     # Create a dataframe to store events that we calculate, which then gets
     # sorted and placed into the response objects
     events: list[Event] = []
-    tzname = get_timezone(station)
+    tzname = get_timezone(query.station)
     tzinfo = ZoneInfo(tzname)
-    add_metar_events(events, station, dt, tzinfo)
-    add_dsm_events(events, environ, station, dt, tzinfo)
-    add_cli_events(events, environ, station, dt, tzinfo)
-    add_cf6_events(events, environ, station, dt, tzinfo)
+    add_metar_events(events, query.station, query.date, tzinfo)
+    add_dsm_events(events, environ, query.station, query.date, tzinfo)
+    add_cli_events(events, environ, query.station, query.date, tzinfo)
+    add_cf6_events(events, environ, query.station, query.date, tzinfo)
 
     high_events = [e for e in events if e.varname == "high"]
     low_events = [e for e in events if e.varname == "low"]
@@ -530,8 +530,8 @@ def application(environ: dict, start_response: callable):
 
     response = json_response_dict(
         {
-            "station": station,
-            "date": f"{dt:%Y-%m-%d}",
+            "station": query.station,
+            "date": f"{query.date:%Y-%m-%d}",
             "tzname": tzname,
             "high": {
                 "events": [e.model_dump(mode="json") for e in high_events],
