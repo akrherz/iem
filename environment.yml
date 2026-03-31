@@ -20,6 +20,8 @@ dependencies:
   - fiona
   # various places
   - gdal
+  # TC backend
+  - gunicorn
   - libgdal-pg
   # ISUSM ingest
   - inotify

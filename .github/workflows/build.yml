@@ -97,6 +97,24 @@ jobs:
       if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
       run: sh .github/setupdata.sh
 
+    - name: IEM TileCache Backend
+      if: ${{ matrix.TEST_WEB == 'YES' }}
+      run: |
+        nohup bash deployment/start_tc_wsgi.sh > /tmp/iem-tilecache.log 2>&1 &
+        echo $! > /tmp/iem-tilecache.pid
+
+        n=0
+        until curl -sS -o /dev/null http://127.0.0.1:9081/; do
+          n=$((n+1))
+          if [ $n -ge 30 ]; then
+            echo "iem-tilecache did not become ready in time"
+            cat /tmp/iem-tilecache.log
+            exit 1
+          fi
+          sleep 1
+        done
+
+
     - name: Configure Webfarm Server
       if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
@@ -150,6 +168,16 @@ jobs:
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
+
+    - name: View TileCache Logs
+      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
+      run: |
+        if [ -f /tmp/iem-tilecache.pid ]; then
+          ps -fp "$(cat /tmp/iem-tilecache.pid)" || true
+        fi
+        if [ -f /tmp/iem-tilecache.log ]; then
+          cat /tmp/iem-tilecache.log
+        fi
 
     - name: View PHP-FPM Logs
       if: ${{ failure() && matrix.TEST_WEB == 'YES' }}

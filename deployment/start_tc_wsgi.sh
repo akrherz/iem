@@ -1,48 +1,34 @@
 #!/bin/bash
-# Start mod_wsgi-express sidecar for TileCache (/c and /cache).
+# Start the dedicated Gunicorn backend for TileCache (/c and /cache).
 #
-# Mirrors the production iemwsgi_tc daemon:
-#   WSGIDaemonProcess iemwsgi_tc processes=1 threads=15
+# Mirrors the legacy iemwsgi_tc daemon sizing while moving the Python app
+# server off Apache.
 
 PORT=${1:-9081}
 CONDA_PREFIX=/opt/miniconda3/envs/prod
-
-# Use a persistent server root under /var/tmp to avoid tmpwatch cleaning /tmp
-# Path includes the port so multiple instances won't collide.
-SERVER_ROOT="/var/tmp/mod_wsgi/iem-tc-${PORT}"
+MAX_REQUESTS=${MAX_REQUESTS:-10000000}
+MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-5000}
 
 # Use the conda env's binaries directly rather than relying on interactive
 # shell activation (systemd runs non-interactive shells).
 export PATH="${CONDA_PREFIX}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 
-# Force the conda-forge OpenSSL libs to load before the system ones.
-# The system httpd that mod_wsgi-express spawns would otherwise resolve
-# /lib64/libcrypto.so.3 first, which is too old for pyproj's bundled
-# libssl.so.3 (built against OpenSSL 3.6.0).
-export LD_PRELOAD="${CONDA_PREFIX}/lib/libcrypto.so.3:${CONDA_PREFIX}/lib/libssl.so.3${LD_PRELOAD:+ $LD_PRELOAD}"
-
 export PYTHONPATH="/opt/iem/pylib/:${PYTHONPATH:-}"
 
-# Directory of this script, used to locate the logging include file.
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-INCLUDE_FILE="$SCRIPT_DIR/mod_wsgi_logger.conf"
-
-# Keep request-count recycling enabled to cap Python memory leaks, but give
-# tile requests more time to finish before a worker is forced down.
-exec "${CONDA_PREFIX}/bin/mod_wsgi-express" start-server \
-        /opt/iem/pylib/iemweb/tilecache_dispatch.py \
-        --port "$PORT" \
-        --processes 2 \
+# Keep request-count recycling enabled to cap Python memory leaks. Gunicorn
+# rotates individual workers instead of restarting an embedded Apache stack.
+exec "${CONDA_PREFIX}/bin/gunicorn" \
+        --bind "127.0.0.1:${PORT}" \
+        --workers 2 \
+        --worker-class gthread \
         --threads 15 \
-        --daemon-backlog 500 \
-        --maximum-requests 10000000 \
+        --backlog 500 \
+        --max-requests "$MAX_REQUESTS" \
+        --max-requests-jitter "$MAX_REQUESTS_JITTER" \
+        --timeout 60 \
         --graceful-timeout 60 \
-        --shutdown-timeout 60 \
-        --server-name iem.local \
-        --server-status \
-        --mount-point / \
-        --include-file "$INCLUDE_FILE" \
-        --include-file "/opt/iemwebfarm/apache_conf.d/server-status.conf" \
-        --log-level "warn" \
-        --allow-localhost \
-        --server-root "$SERVER_ROOT"
+        --keep-alive 5 \
+        --error-logfile - \
+        --capture-output \
+        --log-level warn \
+        iemweb.tilecache_dispatch:application
