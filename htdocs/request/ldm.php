@@ -17,13 +17,64 @@ data around within the computing infrastructure.  Anybody is eligable to request
 a LDM feed, so to get products pushed to you without any fuss!  This page details
 the setup of the LDM feed.</p>
 
+<div class="alert alert-warning" role="alert">
+
 <h3>Looking for low latency ASOS data? Read this first!</h3>
 
-<p>The IEM LDM feed offers no magic in this space and you are not going to get
-live ASOS data via this feed.  You likely want to read this news item about
-<a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1469">Wagering
-on ASOS temperatures</a> before contacting daryl about your "research" needs
-for this data via LDM.</p>
+<p>
+<strong>TL;DR There is no latency magic with the IEM LDM Feed.</strong>
+</p>
+
+<p>
+The IEM continues to get incessant emails believing that the IEM offers some
+magic feed of ASOS data with reduced latency allowing for gambling edge. Please
+see <a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1469">Wagering
+on ASOS temperatures</a> for related info on this topic.  While LDM is a push
+technology that does offer products faster than what you could see off of government
+websites with CDN / caching, it is also sourced from a data stream that bounces
+off of geostationary satellites, which will have many seconds more of latency vs
+folks that have a direct from FAA Internet feed.  Again no IEM LDM magic here,
+but you insist there so, so we continue...
+</p>
+
+<p>
+MADIS processes a stream of data from the FAA with reduced latency, but has
+a major quick with temperatures reported in
+<a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290">Whole
+degree Celsius</a> and without two minute averaging, which makes the data
+very problematic to figure out high temperatures, but people don't believe this
+again and demand the feed of this data from the IEM.  The IEM does not have
+anything lower latency than what you find from the <a href="https://madis-data.cprk.ncep.noaa.gov/madisPublic1/data/LDAD/hfmetar/">
+MADIS website of netcdf files</a>.  So again, we continue...
+</p>
+
+<p>
+Folks still think the IEM LDM feed of NOAAPort/NWS data containining METAR/SPECIs/
+CLIs/DSMs/CF6s will have lower latency and one minute updates, but it does not.
+These are the legacy products with much latency, on the order of minutes for the METARs
+to roundtrip the FAA / NWS to satellite broadcast. But the data is there and some
+folks think it is going to provide some magic money making scheme, so we continue...
+</p>
+
+<p>
+So what the IEM has is a <code>IDS|DDPLUS</code> feed of METARs (<code>^S[AP]</code>), CLIs (<code>/pCLI</code>),
+DSMs (<code>^CDUS27</code>), and CF6s (<code>/pCF6</code>).  The METARs and DSMs are typically found in
+product collectives, so the LDM product name does not contain the airport ICAO
+code within the name.  You have to process the collectives and find your airport of
+choice within it.  The IEM website does a value add of splitting these products into
+airport based identifiers, but this data is not sent over the LDM feed.
+</p>
+
+<p>
+So then finally after the IEM explains all this, people then ask where to find
+lower latency data.  Goodness, yes, if the IEM knew, the IEM would be doing it already.
+Guess what, it does not exist.  Perhaps ASOS modernization will fix this, but
+until then perhaps check out
+<a href="https://demos.synopticdata.com/hf-asos-available/index.html">Synoptic Data</a>
+for a feed of the FAA data that goes into the MADIS product mentioned above.
+</p>
+
+</div>
 
 <div class="row">
     <div class="col-lg-8">

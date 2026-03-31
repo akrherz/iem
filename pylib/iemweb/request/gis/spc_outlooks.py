@@ -26,12 +26,10 @@ type=C&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z
 
 """
 
-# Local
 import tempfile
 import zipfile
 from io import BytesIO
 
-# Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper

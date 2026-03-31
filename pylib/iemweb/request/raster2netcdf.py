@@ -30,6 +30,7 @@ import os
 import tempfile
 from datetime import datetime, timezone
 from io import BytesIO
+from typing import Annotated
 
 import netCDF4
 import numpy as np
@@ -47,13 +48,17 @@ from iemweb.util import acquire_slot, release_slot
 class Schema(CGIModel):
     """See how we are called."""
 
-    dstr: str = Field(
-        "201710251200",
-        description="UTC Datetime (YYYYmmddHHMI) to request data for",
-        max_length=12,
-        pattern=r"^\d{12}$",
-    )
-    prod: str = Field(..., description="Product to request", max_length=100)
+    dstr: Annotated[
+        str,
+        Field(
+            description="UTC Datetime (YYYYmmddHHMI) to request data for",
+            max_length=12,
+            pattern=r"^\d{12}$",
+        ),
+    ] = "201710251200"
+    prod: Annotated[
+        str, Field(description="Product to request", max_length=100)
+    ]
 
     @field_validator("dstr", mode="before")
     @classmethod
