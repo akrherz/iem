@@ -27,6 +27,8 @@ export PYTHONPATH="/opt/iem/pylib/:${PYTHONPATH:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 INCLUDE_FILE="$SCRIPT_DIR/mod_wsgi_logger.conf"
 
+# Keep request-count recycling enabled to cap Python memory leaks, but give
+# tile requests more time to finish before a worker is forced down.
 exec "${CONDA_PREFIX}/bin/mod_wsgi-express" start-server \
         /opt/iem/pylib/iemweb/tilecache_dispatch.py \
         --port "$PORT" \
@@ -34,6 +36,8 @@ exec "${CONDA_PREFIX}/bin/mod_wsgi-express" start-server \
         --threads 15 \
         --daemon-backlog 500 \
         --maximum-requests 10000000 \
+        --graceful-timeout 60 \
+        --shutdown-timeout 60 \
         --server-name iem.local \
         --server-status \
         --mount-point / \
