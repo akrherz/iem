@@ -13,16 +13,19 @@ MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-5000}
 # shell activation (systemd runs non-interactive shells).
 export PATH="${CONDA_PREFIX}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 
+# Attempt to get some logging when bad things happen
+export PYTHONFAULTHANDLER=1
 export PYTHONPATH="/opt/iem/pylib/:${PYTHONPATH:-}"
 
 # Keep request-count recycling enabled to cap Python memory leaks. Gunicorn
 # rotates individual workers instead of restarting an embedded Apache stack.
 exec "${CONDA_PREFIX}/bin/gunicorn" \
         --bind "127.0.0.1:${PORT}" \
-        --workers 2 \
+        --no-control-socket \
+        --workers 3 \
         --worker-class gthread \
         --threads 15 \
-        --backlog 500 \
+        --backlog 2048 \
         --max-requests "$MAX_REQUESTS" \
         --max-requests-jitter "$MAX_REQUESTS_JITTER" \
         --timeout 60 \

@@ -165,7 +165,7 @@ Alias /tmp /var/webtmp
     ProxyPreserveHost Off
     RequestHeader set "Host" "iem.local"
     # Attempt to reduce random proxy noise
-    ProxySet connectiontimeout=5 timeout=60 retry=0 disablereuse=On
+    ProxySet connectiontimeout=5 timeout=55 retry=0 disablereuse=On
 </Proxy>
 
 ProxyPass /c http://127.0.0.1:9081/c
@@ -215,22 +215,6 @@ ProxyPass /cache http://127.0.0.1:9081/cache
     # hacky to keep the paths matching in auto-index
     ProxyPass "http://iem-archive.local/archive/data"
     ProxyPassReverse "http://iem-archive.local/archive/data"
-</Location>
-
-<Proxy "balancer://arcgis">
-    BalancerMember "https://iem-arcgis1.agron.iastate.edu:6443/arcgis"
-    BalancerMember "https://iem-arcgis2.agron.iastate.edu:6443/arcgis"
-</Proxy>
-
-SSLProxyCheckPeerCN off
-SSLProxyCheckPeerExpire off
-SSLProxyCheckPeerName off
-SSLProxyEngine On
-SSLProxyVerify none
-
-<Location "/arcgis">
-    ProxyPass        "balancer://arcgis"
-    ProxyPassReverse "balancer://arcgis"
 </Location>
 
 <Directory "/opt/iem/htdocs/content">
