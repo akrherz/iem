@@ -22,7 +22,7 @@ Example Requests
 Provide the Iowa areal average data for 2020 in Excel format
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/coop.py?\
-station=IA0000&network=IACLIMATE=&year1=2020&year2=2020&what=excel
+station=IA0000&network=IACLIMATE&year1=2020&year2=2020&what=excel
 
 """
 
