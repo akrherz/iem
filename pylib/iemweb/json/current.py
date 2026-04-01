@@ -34,7 +34,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 from iemweb.util import json_response_dict
 
 
@@ -42,15 +42,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    network: Annotated[
-        str,
-        Field(
-            description="The network identifier, such as IA_ASOS",
-            min_length=2,  # OT
-            max_length=32,
-            pattern="^[A-Z0-9_]+$",
-        ),
-    ]
+    network: NETWORK_FIELD
     station: Annotated[
         str,
         Field(

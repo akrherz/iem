@@ -41,7 +41,7 @@ from pyiem.reference import state_names
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import DAY_OF_MONTH_FIELD
+from iemweb.fields import DAY_OF_MONTH_FIELD, NETWORK_FIELD
 
 DEGF = units.degF
 DEGC = units.degC
@@ -86,9 +86,7 @@ class Schema(CGIModel):
             ),
         ),
     ] = None
-    network: Annotated[
-        str, Field(description="The network to use for station lookups.")
-    ] = "IACLIMATE"
+    network: NETWORK_FIELD = "IACLIMATE"
     scenario: Annotated[
         bool,
         Field(

@@ -44,7 +44,7 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 from iemweb.util import json_response_dict
 
 US_CENTRAL = ZoneInfo("America/Chicago")
@@ -54,12 +54,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    network: Annotated[
-        str,
-        Field(
-            description="Network identifier to look for webcams for.",
-        ),
-    ] = "KCRG"
+    network: NETWORK_FIELD = "KCRG"
     ts: Annotated[
         AwareDatetime | None,
         Field(

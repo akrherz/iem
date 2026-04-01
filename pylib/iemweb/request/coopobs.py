@@ -47,7 +47,11 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, STATION_LIST_FIELD
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    NETWORK_FIELD,
+    STATION_LIST_FIELD,
+)
 
 
 class Schema(CGIModel):
@@ -61,11 +65,7 @@ class Schema(CGIModel):
         ),
         pattern="^(comma|tab|space)$",
     )
-    network: str = Field(
-        ...,
-        description="The network to use for station lookups.",
-        pattern="^[A-Z0-9_]+$",
-    )
+    network: NETWORK_FIELD
     stations: STATION_LIST_FIELD
     what: str = Field("view", description="The type of output to generate.")
     sts: date = Field(

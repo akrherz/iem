@@ -34,17 +34,14 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    network: str = Field(
-        default="KCCI",
-        description="Network to query webcams for.",
-    )
+    network: NETWORK_FIELD = "KCCI"
     ts: AwareDatetime = Field(
         default=None,
         description="Optional *legacy* timestamp to request webcams for.",

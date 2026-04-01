@@ -64,6 +64,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import NETWORK_FIELD_OPTIONAL
+
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -77,7 +79,7 @@ class Schema(CGIModel):
         pattern="^(comma|space|tab)$",
     )
     ets: AwareDatetime = Field(None, description="End Time for request")
-    network: str = Field(None, description="Network Identifier")
+    network: NETWORK_FIELD_OPTIONAL = None
     stations: ListOrCSVType = Field(..., description="Station Identifier(s)")
     sts: AwareDatetime = Field(None, description="Start Time for request")
     threshold: float | None = Field(

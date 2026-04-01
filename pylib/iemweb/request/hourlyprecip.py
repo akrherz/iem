@@ -32,7 +32,7 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import TZ_FIELD
+from iemweb.fields import NETWORK_FIELD, TZ_FIELD
 
 
 class Schema(CGIModel):
@@ -44,11 +44,7 @@ class Schema(CGIModel):
     lalo: bool = Field(
         default=False, description="Include the lat/lon in the output."
     )
-    network: str = Field(
-        default="IA_ASOS",
-        description="The network to request data for.",
-        max_length=12,
-    )
+    network: NETWORK_FIELD = "IA_ASOS"
     st: bool = Field(False, description="Include the state in the output.")
     station: ListOrCSVType = Field(
         default_factory=list, description="The station(s) to request data for."

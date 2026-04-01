@@ -48,7 +48,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb import error_log
-from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL
+from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, NETWORK_FIELD
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DEFAULT_COLS = (
@@ -68,7 +68,7 @@ class MyCGI(CGIModel):
         "csv"
     )
     na: Annotated[str, Field(description="The NA value to use")] = "None"
-    network: Annotated[str, Field(description="Network Identifier")]
+    network: NETWORK_FIELD
     station: Annotated[
         ListOrCSVType,
         Field(

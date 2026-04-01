@@ -102,6 +102,18 @@ MONTH_FIELD = Annotated[int, _MF]
 MONTH_FIELD_OPTIONAL = Annotated[int | None, _MF]
 
 # --------------
+_NF = Field(
+    description=(
+        "IEM network identifier.  Typically a combination of a US state "
+        "abbreviation and a network classification, ie IA_ASOS."
+    ),
+    pattern=r"^[A-Z_0-9]+$",
+    min_length=2,  # OT
+)
+NETWORK_FIELD = Annotated[str, _NF]
+NETWORK_FIELD_OPTIONAL = Annotated[str | None, _NF]
+
+# --------------
 _S8F = Field(
     description=(
         "Either provide a single value, multiple parameters each with a "
