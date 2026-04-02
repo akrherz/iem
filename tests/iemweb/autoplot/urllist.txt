@@ -409,6 +409,7 @@
 199/opt:7::date:2024-07-24::_r:t::dpi:100.png
 199/opt:8::date:2024-07-24::_r:t::dpi:100.png
 199/opt:9::date:2024-07-24::_r:t::dpi:100.png
+200/month:all::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:FSD::csector:midwest::fema:7::drawc:no::w:avg::sdate:2002-01-01::sday:1201::eday:0110::max:-1::cmap:jet::_r:t::dpi:100.png
 200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:state::network:WFO::station:ABR::csector:conus::fema:7::drawc:no::w:lastyear::cmap:jet::_r:t::dpi:100.png
 200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:fema::network:WFO::station:DMX::csector:IA::fema:7::drawc:no::w:avg::cmap:jet::_r:t::dpi:100.png
 200/month:jan::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:DMX::csector:southeast::drawc:no::w:avg::edate:2024-09-10::cmap:jet::_r:t::dpi:100.png
