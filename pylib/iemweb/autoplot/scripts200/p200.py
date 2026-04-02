@@ -269,6 +269,28 @@ def get_description():
             default=utc().strftime("%Y/%m/%d"),
         ),
         {
+            "type": "sday",
+            "default": "0101",
+            "optional": True,
+            "label": (
+                "Limit plot to the inclusive start day of the year.  If this "
+                "value is greater than end date, plot will run over winter / "
+                "Jan 1."
+            ),
+            "name": "sday",
+        },
+        {
+            "type": "sday",
+            "default": "1231",
+            "optional": True,
+            "label": (
+                "Limit plot to the inclusive end day of the year.  If this "
+                "value is less than start date, plot will run over winter / "
+                "Jan 1."
+            ),
+            "name": "eday",
+        },
+        {
             "type": "float",
             "default": "-1",
             "label": "Hardcode max value for color ramp, -1 disables",
@@ -317,6 +339,18 @@ def get_raster(ctx: dict):
     if hour != "A":
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
+    if ctx.get("sday") and ctx.get("eday"):
+        params["sday"] = f"{ctx['sday']:%m%d}"
+        params["eday"] = f"{ctx['eday']:%m%d}"
+        hour_limiter = (
+            " and to_char(issue at time zone 'UTC', 'MMDD') >= :sday and "
+            "to_char(issue at time zone 'UTC', 'MMDD') <= :eday "
+        )
+        if params["sday"] > params["eday"]:
+            hour_limiter = (
+                " and (to_char(issue at time zone 'UTC', 'MMDD') >= :sday or "
+                "to_char(issue at time zone 'UTC', 'MMDD') <= :eday) "
+            )
     with get_sqlalchemy_conn("postgis") as conn:
         df: pd.DataFrame = gpd.read_postgis(
             sql_helper(
@@ -386,10 +420,13 @@ def plotter(ctx: dict):
     t = ctx["t"]
     p = ctx["p"]
     month = ctx["month"]
+    sday_extra = ""
+    if ctx.get("sday") and ctx.get("eday"):
+        sday_extra = f" [{ctx['sday']:%b %-d} to {ctx['eday']:%b %-d} only]"
     subtitle = (
         f"Found {len(df.index)} events for CONUS "
         f"between {df['min_issue'].min():%d %b %Y} and "
-        f"{df['min_issue'].max():%d %b %Y}"
+        f"{df['min_issue'].max():%d %b %Y}{sday_extra}"
     )
     csector = ctx.pop("csector")
     if t == "cwa":

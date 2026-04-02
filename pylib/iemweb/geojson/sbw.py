@@ -49,6 +49,7 @@ https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
 
 import json
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -66,17 +67,21 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    ets: AwareDatetime = Field(
-        default=None,
-        description=("UTC end timestamp parameter"),
-        ge=utc(1986, 1, 1),
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=("UTC end timestamp parameter"),
+            ge=utc(1986, 1, 1),
+        ),
+    ] = None
     states: STATE_LIST_FIELD_OPTIONAL = None
-    sts: AwareDatetime = Field(
-        default=None,
-        description=("UTC start timestamp parameter"),
-        ge=utc(1986, 1, 1),
-    )
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=("UTC start timestamp parameter"),
+            ge=utc(1986, 1, 1),
+        ),
+    ] = None
     ts: AwareDatetime = Field(
         default=None,
         description=(
@@ -123,21 +128,21 @@ def df(val: datetime | None):
     return None if val is None else val.strftime(ISO8601)
 
 
-def run(environ: dict):
+def run(query: Schema):
     """Actually do the hard work of getting the current SBW in geojson"""
-    wfos = environ["wfos"]
+    wfos = query.wfos
     if wfos is not None and wfos[0] == "":
         wfos = None
-    if wfos is None and environ["wfo"] is not None:
-        wfos = [environ["wfo"]]
+    if wfos is None and query.wfo is not None:
+        wfos = [query.wfo]
     if wfos:
         wfos = [unrectify_wfo(wfo) for wfo in wfos]
 
     params = {
         "wfos": wfos,
-        "ts": environ["ts"],
-        "sts": environ["sts"],
-        "ets": environ["ets"],
+        "ts": query.ts,
+        "sts": query.sts,
+        "ets": query.ets,
     }
 
     res = {
@@ -152,26 +157,26 @@ def run(environ: dict):
     time_limiter = " s.expire > :sts and s.issue < :ets "
     status_limiter = " and s.status = 'NEW' "
     # Mode 2, ts is provided, so we get polygons valid at this time
-    if environ["ts"] is not None:
+    if query.ts is not None:
         time_limiter = (
             " s.polygon_begin <= :ts and s.polygon_end > :ts and "
             " s.polygon_begin > :pastts "
         )
         status_limiter = ""
-        params["pastts"] = environ["ts"] - timedelta(days=14)  # arb
-        params["sts"] = environ["ts"]
-        params["ets"] = environ["ts"]
-        res["valid_at"] = environ["ts"].strftime(ISO8601)
+        params["pastts"] = query.ts - timedelta(days=14)  # arb
+        params["sts"] = query.ts
+        params["ets"] = query.ts
+        res["valid_at"] = query.ts.strftime(ISO8601)
 
     ss1 = ""
     ss2 = ""
-    if environ["states"] is not None and environ["states"]:
+    if query.states is not None and query.states:
         ss1 = ", states t "
         ss2 = (
             " and ST_Intersects(s.geom, t.the_geom) and "
             " t.state_abbr = ANY(:states) "
         )
-        params["states"] = environ["states"]
+        params["states"] = query.states
 
     # NOTE: we dropped checking for products valid in the future (FL.W)
     # NOTE: we have an arb offset check for child table exclusion
@@ -318,7 +323,8 @@ def get_mckey(environ):
 )
 def application(environ, start_response):
     """Main Workflow"""
+    query: Schema = environ["_cgimodel_schema"]
     headers = [("Content-type", get_ct(environ))]
-    res = run(environ)
+    res = run(query)
     start_response("200 OK", headers)
     return res.encode("utf-8")

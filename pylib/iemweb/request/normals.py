@@ -49,6 +49,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py\
 
 from datetime import date
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -89,10 +90,13 @@ class Schema(CGIModel):
         description="The source of the data, defaults to ncei_climate91",
         pattern=r"^(climate(51|71|81)?|ncdc_climate[78]1|ncei_climate91)$",
     )
-    station: str = Field(
-        default="IA0000",
-        description="The station identifier, only used for station mode",
-    )
+    station: Annotated[
+        str,
+        Field(
+            pattern=r"^[A-Z0-9]{2,}$",
+            description="The station identifier, only used for station mode",
+        ),
+    ] = "IA0000"
 
 
 @iemapp(help=__doc__, schema=Schema)
