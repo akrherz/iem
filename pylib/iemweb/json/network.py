@@ -17,13 +17,11 @@ https://mesonet.agron.iastate.edu/json/network.py?network=SCAN
 """
 
 import json
-from typing import Annotated
 
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 from iemweb.util import json_response_dict
 
 
@@ -31,12 +29,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    network: Annotated[
-        str,
-        Field(
-            description="Optional network identifier to filter results by",
-        ),
-    ] = "IA_ASOS"
+    network: NETWORK_FIELD = "IA_ASOS"
 
 
 def get_mckey(environ):

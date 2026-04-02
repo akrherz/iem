@@ -83,6 +83,7 @@ from iemweb.fields import (
     HOUR_FIELD_OPTIONAL,
     MINUTE_FIELD_OPTIONAL,
     MONTH_FIELD_OPTIONAL,
+    NETWORK_FIELD,
     STATION_LIST_FIELD,
     TZ_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
@@ -141,13 +142,7 @@ class Schema(CGIModel):
         ),
     ] = "atmos"
     stations: STATION_LIST_FIELD
-    network: Annotated[
-        str,
-        Field(
-            description="Network to use",
-            pattern="RWIS",
-        ),
-    ] = "IA_RWIS"
+    network: NETWORK_FIELD = "IA_RWIS"
     sts: Annotated[
         datetime | None,
         Field(

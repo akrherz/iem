@@ -50,7 +50,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 
 XREF = {
     "HAS_HML": "HAS_HML",
@@ -66,14 +66,7 @@ class Schema(CGIModel):
     has_attribute: Annotated[
         str, Field(description="Station Attribute to filter on")
     ] = None
-    network: Annotated[
-        str,
-        Field(
-            description="IEM Network Code",
-            max_length=30,
-            pattern=r"^[A-Z0-9_]+$",
-        ),
-    ] = "IA_ASOS"
+    network: NETWORK_FIELD = "IA_ASOS"
     only_online: Annotated[
         bool, Field(description="Only include online stations")
     ] = False

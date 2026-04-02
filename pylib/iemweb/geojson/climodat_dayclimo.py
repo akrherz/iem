@@ -30,7 +30,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 
 
 class Schema(CGIModel):
@@ -41,13 +41,7 @@ class Schema(CGIModel):
     month: Annotated[int, Field(ge=1, le=12)] = 1
     syear: Annotated[int, Field(ge=1800, le=2050)] = 1800
     eyear: Annotated[int, Field(ge=1800, le=2050)] = datetime.now().year + 1
-    network: Annotated[
-        str,
-        Field(
-            title="Network Identifier",
-            pattern="^[A-Z][A-Z]CLIMATE$",
-        ),
-    ] = "IACLIMATE"
+    network: NETWORK_FIELD = "IACLIMATE"
 
 
 def run(conn: Connection, network, month, day, syear, eyear):

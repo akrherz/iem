@@ -27,6 +27,7 @@ Changelog
 
 from datetime import timedelta
 from io import BytesIO
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from matplotlib.figure import Figure
@@ -36,6 +37,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
 from pyiem.windrose_utils import windrose
+
+from iemweb.fields import NETWORK_FIELD_OPTIONAL
 
 
 class Schema(CGIModel):
@@ -84,26 +87,27 @@ class Schema(CGIModel):
         default=False,
         description="Limit the data to the day of year range provided",
     )
-    monthlimit: bool = Field(
-        default=False,
-        description="Limit the data to the start month provided",
-    )
-    network: str = Field(
-        default=None,
-        description="Network Identifier, best to provide otherwise guessed",
-    )
+    monthlimit: Annotated[
+        bool,
+        Field(
+            description="Limit the data to the start month provided",
+        ),
+    ] = False
+    network: NETWORK_FIELD_OPTIONAL = None
     nsector: int = Field(
         default=36,
         description="Number of sectors to use for windrose plot",
         ge=4,
         le=180,
     )
-    staticrange: int = Field(
-        default=None,
-        description="Static range for windrose plot",
-        ge=1,
-        le=100,
-    )
+    staticrange: Annotated[
+        int | None,
+        Field(
+            description="Static range for windrose plot",
+            ge=1,
+            le=100,
+        ),
+    ] = None
     station: str = Field(..., description="Station Identifier")
     sts: AwareDatetime = Field(
         default=None,
