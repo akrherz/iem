@@ -1,6 +1,9 @@
-""".. title:: SPC MCD Service
+""".. title:: SPC MCD by Point
 
 Return to `API Services </api/#json>`_
+
+This service queries the archive of Storm Prediction Center (SPC) Mesoscale
+Convective Discussions (MCD) for a given lat/lon point.
 
 Changelog
 ---------
@@ -92,15 +95,21 @@ def clean(value):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
-    lat = environ["lat"]
-    lon = environ["lon"]
-    fmt = environ["fmt"]
+    query: Schema = environ["_cgimodel_schema"]
 
-    mcds = dowork(lon, lat)
-    if fmt == "json":
-        data = json_response_dict({"mcds": []})
+    mcds = dowork(query.lon, query.lat)
+    if query.fmt == "json":
+        data = json_response_dict(
+            {
+                "mcds": [],
+                "params": {
+                    "lon": query.lon,
+                    "lat": query.lat,
+                },
+            }
+        )
         for _, row in mcds.iterrows():
             data["mcds"].append(
                 dict(
@@ -122,7 +131,7 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return json.dumps(data).encode("ascii")
 
-    if fmt == "excel":
+    if query.fmt == "excel":
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-Disposition", "attachment; filename=spcmcd.xls"),
