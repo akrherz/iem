@@ -2,7 +2,7 @@ ci:
   autoupdate_schedule: quarterly
 repos:
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v10.1.0'
+    rev: 'v10.2.0'
     hooks:
       - id: eslint
         additional_dependencies:
@@ -16,7 +16,7 @@ repos:
         language_version: 'system'  # Use system Node.js which should support ES modules
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.8"
+    rev: "v0.15.9"
     hooks:
       - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
