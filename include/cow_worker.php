@@ -137,7 +137,7 @@ foreach ($ltype as $k => $w) {
 
 // Build Cow API URL
 $wsuri = sprintf(
-    "%s/api/1/cow.json?wfo=%s&begints=%sZ&enable_shared_border=1&" .
+    "%s/api/1/cow.json?wfo=%s&begints=%sZ&" .
         "endts=%sZ&hailsize=%s&wind=%s%s%s&lsrbuffer=%s&warningbuffer=%s",
     $INTERNAL_BASEURL,
     (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,
@@ -184,11 +184,11 @@ $charturl = sprintf(
 );
 
 if (sizeof($ltype) == 0) {
-    $content .= "<div class='warning'>You did not select any of the Local Storm 
+    $content .= "<div class='warning'>You did not select any of the Local Storm
     Report types above, so none are listed below...<br /><br /></div>";
 }
 if (sizeof($wtype) == 0) {
-    $content .= "<div class='warning'>You did not select any of the Warning 
+    $content .= "<div class='warning'>You did not select any of the Warning
     types above, so none are listed below...<br /><br /></div>";
 }
 
@@ -315,8 +315,8 @@ $content .= <<<EOF
 </div>
 
 <h3>Warnings Issued & Verifying LSRs:</h3>
-<strong>Column Headings:</strong> 
-<i>Issued:</i> UTC timestamp of when the product was issued, 
+<strong>Column Headings:</strong>
+<i>Issued:</i> UTC timestamp of when the product was issued,
 <i>Expired:</i> UTC timestamp of when the product expired,
 <i>Final Status:</i> VTEC action of the last statement issued for the product,
 <i>SBW Area:</i> Size of the storm based warning in square km,
@@ -360,7 +360,7 @@ $content .= <<<EOF
 {$wtable}
 </table>
 
-<h3>Storm Reports without warning:</h3> 
+<h3>Storm Reports without warning:</h3>
 <table class="table table-bordered">
 <tr>
     <th>lsr</th>

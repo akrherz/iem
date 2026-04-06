@@ -154,7 +154,7 @@ $tagselect .= <<<EOM
 > <label for="windhailtag">When possible, verify SVR warnings against
 issuance WIND...HAIL tag</label>
  <a href="/nws/list_tags.php" target="_new"><i class="bi bi-link-45deg" aria-hidden="true"></i> App listing per-WFO tags</a>
-<br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y" 
+<br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y"
 EOM;
 $tagselect .= (($limitwarns == 'Y') ? " CHECKED" : "");
 $tagselect .= '> <label for="limitwarns">When possible, limit considered warnings to your hail/wind threshold</label>';
@@ -186,7 +186,7 @@ $content = <<<EOM
 <tr><th>Warning Buffer:</th><td>{$wbuffer} degrees</td></tr>
 <tr><th>Wind:</th><td>{$wiselect}</td></tr>
 </table>
-    
+
     </div>
     <div class="col-sm-6">
 
@@ -223,7 +223,7 @@ if (isset($_GET["hail"])) {
 
 <p><a href="#api" class="btn btn-primary"><i class="bi bi-download" aria-hidden="true"></i> IEM Cow API Access</a></p>
 
-<p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
+<p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for
 educational purposes only.  This application allows you to view warnings
 and storm reports issued by a Weather Forecast Office (WFO) for a period
 of time of your choice.  The application attempts to automatically provide
@@ -233,9 +233,9 @@ verification numbers for the warnings issued.
 
 <h3>Storm Based Warnings</h3>
 <p>On the first of October 2007, the National Weather
-Service began issuing warnings for tornados, severe weather, floods, and 
+Service began issuing warnings for tornados, severe weather, floods, and
 marine hazards on a storm by storm basis.  Previously, the warnings
-were issued for an entire county. This application attempts to provide 
+were issued for an entire county. This application attempts to provide
 verification statistics for these storm based warnings.
 
 <p>Related links:
@@ -254,10 +254,10 @@ verification statistics for these storm based warnings.
 produces.  The following is a brief description of these values.
 
 <ul>
-<li><strong>SBW Area: (P)</strong> (<i>black/white outline polygon</i>) This is 
+<li><strong>SBW Area: (P)</strong> (<i>black/white outline polygon</i>) This is
 the areal size of the polygon expressed in square kilometers.  The computation
 is done in the projection "US National Atlas Equal Area" (EPSG 9311).</li>
-<li><strong>County Area: (C)</strong> (<i>red outline polygon</i>) Each storm 
+<li><strong>County Area: (C)</strong> (<i>red outline polygon</i>) Each storm
 based warning is associated with one or more counties.  This value is the total
 area of the associated counties.  Same projected used as above.</li>
 <li><strong>Size % (C-P)/C</strong> This is the size <strong>reduction</strong>
@@ -267,41 +267,33 @@ reduction values are desired.</li>
 <li><strong>Perimeter Ratio:</strong> (<i>purple line</i>) This is an attempt
 to determine how much of the storm based warning perimeter is being influenced
 by a county political boundary.  The ratio is simply the portion of the SBW
-perimeter that closely coincides with a political boundary.  A 100% value 
+perimeter that closely coincides with a political boundary.  A 100% value
 implies the warning is simply a retracement of county borders.</li>
-<li><strong>Verification Area %:</strong> (<i>filled ovals</i>) Local Storm 
-Reports are buffered out in a circular fashion and combined to create a 
+<li><strong>Verification Area %:</strong> (<i>filled ovals</i>) Local Storm
+Reports are buffered out in a circular fashion and combined to create a
 coverage of impacted areas.  The area of the buffered LSRs is then compared
 with the area of the storm based warning to yield a percentage.</li>
 </ul>
 
 <h3><a name="api"></a> API for IEM Cow Data</h3>
 
-<p><strong>20 June 2018</strong>:  The IEM is pleased to announce availability
-of an API for programatic access to IEM Cow data and statistics.</p>
-
-<p><strong>6 August 2019</strong>: The API should be considered stable now and
-has been favorably compared against the legacy PHP based Cow statistics. Please
-feel free to use it and <a href="/info/contacts.php">report back</a> any issues
-you find.</p>
-
-<p><strong>25 May 2022</strong>: The website Cow interface was updated to use
-this API service to drive the statistics displayed (dogfooding).  As doing such,
-some shortcomings of the API were realized.  So the JSON schema returned by the
-service was improved some, but should all still be backwards compat.</p>
-
-<p><strong>6 July 2022</strong>: The API returned value for
-<code>unwarned_reports</code> was updated to not include severe thunderstorm
-type reports made during a tornado warning.</p>
-
-<p><strong>28 Nov 2023</strong>: The option to do verification for Snow Squall
-Warnings was added, but note that verifying LSRs only became an option after
-1 October 2023.  So no prior warnings will show as verified prior to that date.
+<p>
+<strong>6 April 2026</strong>:  The backend/database computation of a polygon
+shared-border was too intensive and causing large requests to time-out. Code
+was added to pre-compute the values and store it within the database, but there
+is up to about five minutes of lag for this value to be available for near
+real-time warnings.  Rewording, for warnings issued within the past five minutes,
+the shared border value will be missing.
 </p>
 
 <p><strong>29 May 2024</strong>: A few updates were made to provide some
 accounting of tornado <code>POSSIBLE</code> tags within Severe Thunderstorm
 Warnings.</p>
+
+<p><strong>28 Nov 2023</strong>: The option to do verification for Snow Squall
+Warnings was added, but note that verifying LSRs only became an option after
+1 October 2023.  So no prior warnings will show as verified prior to that date.
+</p>
 
 <p>The JSON emitting service endpoint is:
 <br /><code>{$EXTERNAL_BASEURL}/api/1/cow.json</code></p>
@@ -335,7 +327,7 @@ the parameters are required.</p>
  <td>Last 4 Hour Period</td>
  <td>This start time and end time sets the window to look for NWS Storm Based
  Warnings and Local Storm Reports.  For the case of warnings, the warning must
- have been issued after the start time and have an expiration prior to the end 
+ have been issued after the start time and have an expiration prior to the end
  time.  The tricky issue issue is when warnings cross either the start or end
  time, this can lead to incomplete statistics (ie a storm report was actually
  covered by a warning, but that warning was outside your time domain. <strong>These
@@ -356,7 +348,7 @@ each part of the date, i.e. <code>syear=2018&amp;smonth=6&amp;sday=18&amp;shour=
 <td>phenomena=XX</td>
 <td>All TO, SV, FF, MA, DS</td>
 <td>These are the VTEC phenomena codes that you want the data and stats for.  These
-are two character and the currently supported Storm Based Warning types are 
+are two character and the currently supported Storm Based Warning types are
 Tornado (TO), Severe Thunderstorm (SV), Flash Flood (FF), Marine (MA), and
 Dust Storm (DS). You can
 specify more than one phenomena, i.e. <code>phenomena=TO&amp;phenomena=SV</code>

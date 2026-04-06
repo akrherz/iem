@@ -1,7 +1,7 @@
 # Run every 5 minutes...
 VALID=$(date -u +'%Y-%m-%dT%H:%M'):00
 
-cd cache 
+cd cache
 python nws_wawa_archive.py &
 
 cd ../isusm
@@ -19,7 +19,7 @@ cd ../../dl
 python radar_composite.py --valid=$VALID &
 
 cd ../GIS
-python 24h_lsr.py 
+python 24h_lsr.py
 
 cd ../current
 python lsr_snow_mapper.py &
@@ -27,3 +27,6 @@ python lsr_snow_mapper.py &
 cd ../ingestors/rwis
 python process_rwis.py &
 python process_soil.py
+
+cd ../../sbw
+python compute_shared_border_pct.py --year=$(date -u +%Y)
