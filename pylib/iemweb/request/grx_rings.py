@@ -26,24 +26,23 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/grx_rings.py\
 import math
 from html import escape
 from io import StringIO
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.util import html_escape
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    fn: str = Field(
-        default="placefile_rings.txt", description="Filename to save as"
+    fn: Annotated[str, Field(description="Filename to save as")] = (
+        "placefile_rings.txt"
     )
-    lat: float = Field(
-        default=42.014004, description="Latitude of center point"
-    )
-    lon: float = Field(
-        default=-93.635773, description="Longitude of center point"
-    )
+    lat: LATITUDE_FIELD = 42.014004
+    lon: LONGITUDE_FIELD = -93.635773
     loc: str = Field(default="Jack Trice Stadium", description="Location name")
 
     m0: float = Field(

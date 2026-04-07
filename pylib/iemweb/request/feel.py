@@ -19,6 +19,7 @@ year1=2025&month1=4&day1=14&year2=2025&month2=4&day2=15
 
 from datetime import datetime
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -33,14 +34,18 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: datetime = Field(
-        None,
-        description="Start Time",
-    )
-    ets: datetime = Field(
-        None,
-        description="End Time",
-    )
+    sts: Annotated[
+        datetime | None,
+        Field(
+            description="Start Time",
+        ),
+    ] = None
+    ets: Annotated[
+        datetime | None,
+        Field(
+            description="End Time",
+        ),
+    ] = None
     year1: int = Field(
         None,
         ge=2013,
