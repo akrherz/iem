@@ -81,6 +81,7 @@ https://mesonet.agron.iastate.edu/request/maxcsv/ahpsobs_DEWI4.txt
 
 import re
 from datetime import date, timedelta, timezone
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import ephem
@@ -96,7 +97,7 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    q: str = Field(..., description="Apache mod_rewrite query string.")
+    q: Annotated[str, Field(description="Apache mod_rewrite query string.")]
 
 
 def figure_phase(p1: float, p2: float) -> str:

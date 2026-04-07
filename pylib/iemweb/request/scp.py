@@ -19,6 +19,7 @@ station=KBUR&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
 """
 
 from io import StringIO
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -29,12 +30,14 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 class Schema(CGIModel):
     """Our schema for this request"""
 
-    ets: AwareDatetime = Field(
-        None,
-        description=(
-            "End timestamp with timezone included to request data for."
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "End timestamp with timezone included to request data for."
+            ),
         ),
-    )
+    ] = None
     station: ListOrCSVType = Field(
         None,
         description=(

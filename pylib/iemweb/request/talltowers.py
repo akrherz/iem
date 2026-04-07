@@ -34,6 +34,8 @@ from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import TZ_FIELD
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 TOWERIDS = {0: "ETTI4", 1: "MCAI4"}
@@ -71,7 +73,7 @@ class Schema(CGIModel):
         le=1440,
     )
     z: ListOrCSVType = Field(..., description="Height(s) to query")
-    tz: str = Field(default="Etc/UTC", description="Timezone to use")
+    tz: TZ_FIELD = "Etc/UTC"
     year1: int = Field(None, description="Start Year, if sts not provided")
     month1: int = Field(None, description="Start Month, if sts not provided")
     day1: int = Field(None, description="Start Day, if sts not provided")

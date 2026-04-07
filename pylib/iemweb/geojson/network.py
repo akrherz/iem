@@ -177,19 +177,17 @@ def get_mckey(environ: dict) -> str:
 
 @iemapp(
     memcachekey=get_mckey,
-    memcacheexpire=86400,
+    memcacheexpire=3600,  # without cache invalidation, an hour is about right
     content_type="application/vnd.geo+json",
     help=__doc__,
     schema=Schema,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
+    query: Schema = environ["_cgimodel_schema"]
 
-    network = environ["network"]
-    only_online = environ["only_online"]
-    has_attribute = environ["has_attribute"]
     with get_sqlalchemy_conn("mesosite") as conn:
-        res = run(conn, network, only_online, has_attribute)
+        res = run(conn, query.network, query.only_online, query.has_attribute)
     start_response("200 OK", headers)
     return res

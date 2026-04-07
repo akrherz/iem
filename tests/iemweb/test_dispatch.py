@@ -12,7 +12,7 @@ def test_shared_json_mount():
         environ_overrides={"SCRIPT_NAME": "/json"},
     )
     assert response.status_code == 200
-    assert "gridi" in response.json
+    assert "gridi" in response.get_json()
 
 
 def test_shared_geojson_mount():
