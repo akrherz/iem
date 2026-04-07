@@ -311,7 +311,7 @@ def build_climate_sql(ctx, table):
     return sql
 
 
-def get_data(ctx):
+def get_data(ctx: dict):
     """Compute the data needed for this app."""
     cull = cull_to_list(ctx["cull"])
     date1 = ctx["date1"]
@@ -349,10 +349,12 @@ def get_data(ctx):
     }
     with get_sqlalchemy_conn("coop") as conn:
         for table in tables:
-            LOG.info("Starting %s table query", table)
-            df = gpd.read_postgis(
-                sql_helper(
-                    """
+            netlimiter = "t.network ~* 'CLIMATE'"
+            if table != "alldata":
+                netlimiter = "t.network = :network"
+                params["network"] = f"{table[-2:].upper()}CLIMATE"
+            sql = sql_helper(
+                """
                 WITH obs as (
                     SELECT station,
                     gddxx(:gddbase, :gddceil, high, low) as gdd,
@@ -447,12 +449,16 @@ def get_data(ctx):
                 ST_x(t.geom) as lon, ST_y(t.geom) as lat,
                 t.geom, obs, snow_quorum
                 from agg d JOIN stations t on (d.station = t.id)
-                WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
+                WHERE {netlimiter} and t.online {wfo_limiter}
                 """,
-                    table=table,
-                    wfo_limiter=wfo_limiter,
-                    climatesql=build_climate_sql(ctx, table),
-                ),
+                table=table,
+                netlimiter=netlimiter,
+                wfo_limiter=wfo_limiter,
+                climatesql=build_climate_sql(ctx, table),
+            )
+            LOG.info("Starting %s table query", table)
+            df = gpd.read_postgis(
+                sql,
                 conn,
                 params=params,
                 index_col="station",

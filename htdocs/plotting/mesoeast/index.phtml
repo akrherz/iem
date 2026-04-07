@@ -7,14 +7,10 @@ require_once "../../../include/mesoeast.php";
 $t = new MyView();
 $t->title = "IEM NE Ames Time Series";
 
-if (isset($_GET["year"])) {
-    $year = get_int404("year", date("Y"));
-    $month = get_int404("month", date("m"));
-    $day = get_int404("day", date("d"));
-    $myTime = mktime(0, 0, 0, $month, $day, $year);
-} else {
-    $myTime = strtotime(isset($_GET["date"]) ? xssafe($_GET["date"]) : "now");
-}
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$myTime = mktime(0, 0, 0, $month, $day, $year);
 
 $year = date("Y", $myTime);
 $month = date("m", $myTime);
