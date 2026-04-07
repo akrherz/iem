@@ -124,8 +124,8 @@ $fselect = make_select("fmt", $fmt, $ar);
 $content = <<<EOM
 <h3>Custom Wind Rose Plots</h3>
 
-This application attempts to generate a wind rose for a time period of 
-your choice.  Please be patient when submitting this form, as it may take 
+This application attempts to generate a wind rose for a time period of
+your choice.  Please be patient when submitting this form, as it may take
 up to a few minutes to generate the plot due to the large amount of data
 that this application processes. You can limit the dataset from which the
 windrose is derived in three ways:
@@ -213,9 +213,10 @@ $content .= 'id="r3"> <label for="r3">3. Limit to Range of hours given by start 
 
 $content .= <<<EOM
 <br />
-<input type="text" name="staticrange" value="{$staticrange}" size="3"
+<input type="number" step=".1" min="0" max="100" name="staticrange" value="{$staticrange}" size="3"
  id="staticrange">
-<label for="staticrange">Specify frequency axis limit (1-100%) (0 represents auto-scale).</label>
+<label for="staticrange">Specify frequency axis maximum (number between 1 and 100)
+(0 represents auto-scale) (units are percent).</label>
 EOM;
 
 // Allow setting of wind speed bins
