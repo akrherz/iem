@@ -4,66 +4,17 @@ require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
-require_once "../../../include/jpgraph/jpgraph_led.php";
+require_once "../../../include/mesoeast.php";
 
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
+$myTime = strtotime($year."-".$month."-".$day);
 
 $titleDate = date("M d, Y", $myTime);
-$dirRef = date("Y/m/d", $myTime);
 
-$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
-if (!file_exists($fn)) {
-    $led = new DigitalLED74();
-    $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
-    die();
-}
-
-$fcontents = file($fn);
-$formatFloor = mktime(0, 0, 0, 1, 1, 2016);
-$parts = array();
-$rhf = array();
-$rhi = array();
-$times = array();
-$xlabel = array();
-
-$start = intval( $myTime );
-$i = 0;
-
-$dups = 0;
-$missing = 0;
-$min_yaxis = 110;
-$min_yaxis_i = 110;
-$max_yaxis = 0;
-$max_yaxis_i = 0;
-$prev_Tmpf = 0.0;
-
-foreach($fcontents as $line_num => $line){
-    $parts = explode(" ", $line);
-    $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-            $parts[2], $parts[3], $parts[4]));
-  $thisRhf = $parts[8];
-  $thisRhi = intval($parts[18]);
-  if ($thisRhf < 0 || $thisRhf > 100 ){
-    $thisRhf = "";
-  } 
-  if ($thisRhi < 0 || $thisRhi > 100 ){
-    $thisRhi = "";
-  } 
-
-
-    $rhf[] = $thisRhf;
-    $rhi[] = $thisRhi;
- 
-} // End of while
-
+$data = read_data($myTime);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -90,12 +41,12 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($rhf, $times);
+$lineplot=new LinePlot($data["rh"], $data["times"]);
 $lineplot->SetLegend("Outside RH");
 $lineplot->SetColor("blue");
 
 // Create the linear plot
-$lineplot2=new LinePlot($rhi, $times);
+$lineplot2=new LinePlot($data["inRh"], $data["times"]);
 $lineplot2->SetLegend("Inside RH");
 $lineplot2->SetColor("red");
 
@@ -103,5 +54,3 @@ $graph->Add($lineplot2);
 $graph->Add($lineplot);
 
 $graph->Stroke();
-
-?>

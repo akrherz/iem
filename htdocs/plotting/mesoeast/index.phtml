@@ -2,6 +2,8 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/mesoeast.php";
+
 $t = new MyView();
 $t->title = "IEM NE Ames Time Series";
 
@@ -18,39 +20,15 @@ $year = date("Y", $myTime);
 $month = date("m", $myTime);
 $day = date("d", $myTime);
 
+$data = read_data($myTime, false);
+
 $dirRef = date("Y/m/d", $myTime);
 $dataurl = "/archive/data/$dirRef/text/ot/ot0006.dat";
 
 $valDate = date("Y-m-d", $myTime);
 $titleDate = date("M d, Y", $myTime);
-$dirRef = date("Y/m/d", $myTime);
 $prevDate = date("Y-m-d", strtotime('-1 day', $myTime));
 $nextDate = date("Y-m-d", strtotime('+1 day', $myTime));
-$thisMax = -99;
-$thisMin = 99;
-$maxGust = 0;
-$gustTime = "N/A";
-$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
-if (file_exists($fn)) {
-    $fcontents = file($fn);
-    foreach ($fcontents as $line_num => $line) {
-        if ($line_num < 5) continue;
-        $parts = explode(" ", $line);
-        $tm = $parts[5];
-        if ($tm > $thisMax) {
-            $thisMax = $tm;
-        }
-        if ($tm < $thisMin) {
-            $thisMin = $tm;
-        }
-        $gust = floatval($parts[11]);
-        $gust_time = $parts[12];
-        if ($gust > $maxGust) {
-            $maxGust = $gust;
-            $gustTime = $gust_time;
-        }
-    } // End of while
-}
 
 $t->content = <<<EOM
 <div class="container-fluid">
@@ -123,7 +101,7 @@ $t->content = <<<EOM
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="fw-semibold">Maximum Temperature</div>
-                                    <div class="fs-5 text-danger">{$thisMax}°F</div>
+                                    <div class="fs-5 text-danger">{$data["max_tmpf"]}°F</div>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +112,7 @@ $t->content = <<<EOM
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="fw-semibold">Minimum Temperature</div>
-                                    <div class="fs-5 text-info">{$thisMin}°F</div>
+                                    <div class="fs-5 text-info">{$data["min_tmpf"]}°F</div>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +123,7 @@ $t->content = <<<EOM
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="fw-semibold">Maximum Wind Gust</div>
-                                    <div class="fs-5 text-warning">{$maxGust} mph</div>
+                                    <div class="fs-5 text-warning">{$data["max_gust"]} mph</div>
                                 </div>
                             </div>
                         </div>
@@ -156,7 +134,7 @@ $t->content = <<<EOM
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="fw-semibold">Gust Time</div>
-                                    <div class="fs-6 text-secondary">{$gustTime}</div>
+                                    <div class="fs-6 text-secondary">{$data["max_gust_time"]}</div>
                                 </div>
                             </div>
                         </div>
@@ -187,76 +165,76 @@ $t->content = <<<EOM
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-thermometer-half"></i> Temperature & Dew Point
                                 </h6>
-                                <img src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Temperature and Dew Point Time Series">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="text-center">
                                 <h6 class="text-success mb-3">
                                     <i class="bi bi-house"></i> Indoor Conditions
                                 </h6>
-                                <img src="1min_inside.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="1min_inside.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Indoor Temperature Time Series">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="text-center">
                                 <h6 class="text-info mb-3">
                                     <i class="bi bi-droplet"></i> Relative Humidity
                                 </h6>
-                                <img src="rh.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="rh.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Relative Humidity Time Series">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="text-center">
                                 <h6 class="text-secondary mb-3">
                                     <i class="bi bi-speedometer2"></i> Barometric Pressure
                                 </h6>
-                                <img src="baro.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="baro.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Barometric Pressure Time Series">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="text-center">
                                 <h6 class="text-warning mb-3">
                                     <i class="bi bi-wind"></i> Wind Conditions
                                 </h6>
-                                <img src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Wind Speed and Direction Time Series">
                             </div>
                         </div>
-                        
+
                         <div class="col-lg-6">
                             <div class="text-center">
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-cloud-rain"></i> Daily Precipitation
                                 </h6>
-                                <img src="dailyrain.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="dailyrain.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Daily Precipitation Time Series">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="text-center">
                                 <h6 class="text-danger mb-3">
                                     <i class="bi bi-activity"></i> Temperature vs Relative Humidity
                                 </h6>
-                                <img src="temp_rh.php?year={$year}&amp;month={$month}&amp;day={$day}" 
-                                     class="img-fluid rounded shadow-sm" 
+                                <img src="temp_rh.php?year={$year}&amp;month={$month}&amp;day={$day}"
+                                     class="img-fluid rounded shadow-sm"
                                      alt="Temperature vs Relative Humidity Scatter Plot">
                             </div>
                         </div>

@@ -4,42 +4,16 @@ require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
-require_once "../../../include/jpgraph/jpgraph_led.php";
+require_once "../../../include/mesoeast.php";
 
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
-$formatFloor = mktime(0, 0, 0, 1, 1, 2016);
+$myTime = strtotime($year."-".$month."-".$day);
 $titleDate = date("M d, Y", $myTime);
-$dirRef = date("Y/m/d", $myTime);
 
-$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
-if (!file_exists($fn)) {
-    $led = new DigitalLED74();
-    $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
-    die();
-}
-
-$fcontents = file($fn);
-
-$rh = array();
-$tmpf = Array();
-$times = array();
-
-foreach($fcontents as $line_num => $line){
-    $parts = explode(" ", $line);
-    $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-            $parts[2], $parts[3], $parts[4]));
-  $rh[] = $parts[8];
-  $tmpf[] = $parts[5];
-} // End of while
-
+$data = read_data($myTime);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -73,13 +47,13 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($rh, $times);
+$lineplot=new LinePlot($data["rh"], $data["times"]);
 $graph->AddY2($lineplot);
 $lineplot->SetLegend("Outside RH");
 $lineplot->SetColor("blue");
 
 // Create the linear plot
-$lineplot2=new LinePlot($tmpf, $times);
+$lineplot2=new LinePlot($data["tmpf"], $data["times"]);
 $graph->Add($lineplot2);
 $lineplot2->SetLegend("Air Temperature [F]");
 $lineplot2->SetColor("red");
