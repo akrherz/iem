@@ -30,8 +30,8 @@ if (
     $stname = iem_pg_prepare(
         $pgconn,
         "INSERT into weblog ".
-            "(client_addr, uri, referer, http_status, x_forwarded_for) " .
-            "VALUES ($1, $2, $3, $4, $5)"
+            "(client_addr, uri, referer, http_status) " .
+            "VALUES ($1, $2, $3, $4)"
     );
     pg_execute(
         $pgconn,
@@ -41,7 +41,6 @@ if (
             "/sites/site.php?network={$network}&station={$station}",
             $_SERVER["HTTP_REFERER"],
             404,
-            $_SERVER["HTTP_X_FORWARDED_FOR"]
         )
     );
 

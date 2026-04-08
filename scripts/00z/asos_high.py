@@ -17,7 +17,7 @@ def main():
     """Go Main Go"""
     now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     sts = now - timedelta(hours=12)
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("iem", rw=False) as conn:
         df = pd.read_sql(
             sql_helper(
                 """

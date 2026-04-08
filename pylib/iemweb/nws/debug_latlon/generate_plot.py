@@ -127,7 +127,7 @@ def process(environ: dict):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """The App."""
     res = process(environ)
     headers = [("Content-type", "application/json")]

@@ -90,7 +90,6 @@ function iemws_json($endpoint, $args)
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $res = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
         if ($res === FALSE || $http_status != 200) {
             openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
             syslog(LOG_WARNING, "iemws fail[$i] $http_status ".

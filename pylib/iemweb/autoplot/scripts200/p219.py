@@ -8,10 +8,10 @@ issuance stored in the database.
 import time
 from datetime import datetime, timedelta, timezone
 
-import httpx
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
+import requests
 from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
@@ -59,14 +59,14 @@ def get_description():
     return desc
 
 
-def get_text(product_id):
+def get_text(product_id: str):
     """get the raw text."""
     text = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
     # Allow for some time for the product to show up in AFOS
     for attempt in range(2):
         try:
-            resp = httpx.get(uri, timeout=5)
+            resp = requests.get(uri, timeout=5)
             resp.raise_for_status()
             text = resp.content.decode("ascii", "ignore").replace("\001", "")
             text = "\n".join(text.replace("\r", "").split("\n")[5:])
@@ -165,9 +165,13 @@ def plotter(ctx: dict):
     fig = figure(title=title, apctx=ctx)
 
     ###
-    res = fig.text(0.43, 0.01, text.strip(), va="bottom", fontsize=12)
+    res = fig.text(0.43, 0.02, text.strip(), va="bottom", fontsize=12)
     bbox = res.get_window_extent(fig.canvas.get_renderer())
     figbbox = fig.get_window_extent()
+    # Figure out the width of this box and then side it to the right to make
+    # room for other plotting things
+    new_x0 = 0.98 - (bbox.x1 - bbox.x0) / figbbox.width
+    res.set_position((new_x0, 0.02))
     # one-two line TAFs cause the legend to go off-screen
     yndc = max([bbox.y1 / figbbox.y1, 0.13])
     # Create the main axes that will hold all our hackery

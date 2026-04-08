@@ -57,7 +57,7 @@ class Schema(CGIModel):
     schema=Schema,
     memcacheexpire=3600,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     data = json_response_dict(
         {

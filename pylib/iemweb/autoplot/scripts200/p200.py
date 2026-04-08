@@ -1,17 +1,25 @@
 """This application generates heatmaps of Storm Prediction Center
 convective outlooks.
 
-<p><strong>Major Caveat</strong>: Due to how the IEM stores the outlook
-geometries, the values presented here are for an outlook level and levels
-higher.  For example, if a location was in a moderate risk and you asked
-this app to total slight risks, the moderate risk would count toward the
-slight risk total.</p>
+<p>
+<strong>Statistical Consideration</strong>: It is not necessarily a straight
+forward statistic to compute the number of days that a given location was
+at a outlook threshold.  The near term outlooks are updated multiple times
+per day, so a given location could be under a moderate risk during the morning
+hours and then downgraded to general thunder for the evening hours after the
+storm passes. The algorithm aggregates the selected threshold for each
+convective day (outlooks end at 12 UTC), taking the union of whatever
+geometries are present.  Additionally, the geometries are the area at or
+above the given threshold.  For example, consider Iowa engulfed by a moderate
+risk for the entire day.  If you plotted the enhanced threshold, this event
+would count for that enhanced threshold statistic.  There is no one-right-way
+to do this.
+</p>
 
 <p><i class="bi bi-info-circle" aria-hidden="true"></i>
 <span class="visually-hidden">Info</span>
 This autoplot currently only considers
-outlooks since 2002.  This app is also horribly slow for reasons I have
-yet to fully debug :(</p>
+outlooks since 2002. </p>
 
 <p><strong>Updated 31 Dec 2024</strong>: This autoplot will no longer emit
 a hacky CSV/Excel file.  Instead, it will return a GeoTIFF with the analysis
