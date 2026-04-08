@@ -46,7 +46,7 @@ def get_content_type(val):
 
 
 @iemapp()
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Process this request
 
     This should look something like "/onsite/features/2016/11/161125.png"

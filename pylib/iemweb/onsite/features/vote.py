@@ -56,15 +56,15 @@ def do(environ: dict, headers, vote, conn: Connection | None = None):
             conn.execute(
                 sql_helper(
                     """
-    insert into weblog(uri, referer, http_status, x_forwarded_for)
-    values (:uri, :referer, :status, :xff)
+    insert into weblog(uri, referer, http_status, client_addr)
+    values (:uri, :referer, :status, :host)
     """
                 ),
                 {
                     "uri": environ.get("REQUEST_URI", ""),
                     "referer": environ.get("HTTP_REFERER", ""),
                     "status": 404,
-                    "xff": environ.get("HTTP_X_FORWARDED_FOR", ""),
+                    "host": environ.get("REMOTE_ADDR"),
                 },
             )
         conn.execute(
@@ -90,7 +90,7 @@ def do(environ: dict, headers, vote, conn: Connection | None = None):
 
 
 @iemapp(schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Process this request.
 
     This should look something like "/onsite/features/vote.json"

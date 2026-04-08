@@ -86,20 +86,18 @@ def ptime(val: datetime | None) -> str | None:
     return val.strftime(ISO8601)
 
 
-def run(
-    wfo: str | None, state: str | None, damagetag: str | None, year: int
-) -> dict:
+def run(query: Schema) -> dict:
     """Actually generate output"""
     params = {
-        "wfo": wfo,
-        "state": state,
-        "year": year,
+        "wfo": query.wfo,
+        "state": query.state,
+        "year": query.year,
     }
     sbw_wfolimiter = " w.wfo = :wfo and "
     cbw_wfolimiter = " w.wfo = :wfo and "
     damagelimiter = ""
-    if damagetag is not None:
-        damagetag = damagetag.upper()
+    if query.damagetag is not None:
+        damagetag = query.damagetag.upper()
         assert damagetag in DAMAGE_TAGS
         sbw_wfolimiter = ""
         cbw_wfolimiter = ""
@@ -107,15 +105,15 @@ def run(
         damagelimiter = (
             " (damagetag = :damagetag or floodtag_damage = :damagetag) and "
         )
-    if state is not None:
+    if query.state is not None:
         cbw_wfolimiter = " substr(w.ugc, 1, 2) = :state and "
         sbw_wfolimiter = ""  # Best we can do, the join cleans up our mess
 
     res = json_response_dict(
         {
-            "year": year,
-            "wfo": wfo,
-            "state": state,
+            "year": query.year,
+            "wfo": query.wfo,
+            "state": query.state,
             "results": [],
         }
     )
@@ -163,9 +161,8 @@ def run(
         )
 
         for row in cursor.mappings():
-            # TODO the wfo here is a bug without it being 4 char
             href = (
-                f"{IEM}/vtec/?year={year}&wfo={rectify_wfo(row['wfo'])}&"
+                f"{IEM}/vtec/?year={query.year}&wfo={rectify_wfo(row['wfo'])}&"
                 f"phenomena={row['ph']}&significance=W&"
                 f"eventid={row['eventid']:04.0f}"
             )
@@ -207,13 +204,10 @@ def run(
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
-    year = environ["year"]
-    wfo = environ["wfo"]
-    damagetag = environ["damagetag"]
-    state = environ["state"]
-    res = run(wfo, state, damagetag, year)
+    query: Schema = environ["_cgimodel_schema"]
+    res = run(query)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return res

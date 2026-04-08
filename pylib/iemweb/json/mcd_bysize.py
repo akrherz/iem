@@ -96,11 +96,10 @@ def get_mckey(environ: dict) -> str:
 
 
 @iemapp(help=__doc__, schema=Schema, memcacheexpire=600, memcachekey=get_mckey)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
+    query: Schema = environ["_cgimodel_schema"]
 
-    count = environ["count"]
-    sort = environ["sort"]
-    return dowork(count, sort).encode("ascii")
+    return dowork(query.count, query.sort).encode("ascii")
