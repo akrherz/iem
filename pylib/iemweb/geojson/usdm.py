@@ -33,6 +33,7 @@ https://mesonet.agron.iastate.edu/geojson/usdm.py?date=2024-03-20
 import json
 from datetime import date as dateobj
 from datetime import timedelta
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -48,11 +49,13 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    date: dateobj = Field(
-        default=None,
-        ge=dateobj(2000, 1, 1),
-        description="Date to query for, YYYY-MM-DD",
-    )
+    date: Annotated[
+        dateobj | None,
+        Field(
+            ge=dateobj(2000, 1, 1),
+            description="Date to query for, YYYY-MM-DD",
+        ),
+    ] = None
 
 
 def rectify_date(dt: dateobj):

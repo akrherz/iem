@@ -26,16 +26,16 @@ def get_data(ctx):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     cursor.execute(
-        (
-            "SELECT max(product_ids[cardinality(product_ids)]) as r, "
-            "sumtxt(name::text || ', ') as cnties, "
-            "max(case when is_emergency then 1 else 0 end), "
-            "max(case when is_pds then 1 else 0 end), "
-            "max(updated at time zone 'UTC') from "
-            "warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = %s "
-            "and w.wfo = %s and phenomena = %s and significance = %s "
-            "and eventid = %s"
-        ),
+        """
+    SELECT max(product_ids[cardinality(product_ids)]) as r,
+    sumtxt(name::text || ', ') as cnties,
+    max(case when is_emergency then 1 else 0 end),
+    max(case when is_pds then 1 else 0 end),
+    max(updated at time zone 'UTC') from
+    warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = %s
+    and w.wfo = %s and phenomena = %s and significance = %s
+    and eventid = %s
+        """,
         (
             ctx["year"],
             ctx["wfo4"][-3:],

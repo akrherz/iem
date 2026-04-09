@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import utc
 
 MDICT = {
@@ -86,6 +86,7 @@ PDICT2 = {
     "count": "Event Count",
     "days": "Days with 1+ Events",
     "count_rank": "Rank of Event Count (1=lowest) Since 2003",
+    "count_mean": "Average Event Count Since 2003",
     "count_departure": "Departure from Average of Event Count",
     "count_standard": "Standardized Departure from Average of Event Count",
 }
@@ -119,14 +120,14 @@ def get_description():
             name="sdate",
             default=jan1.strftime("%Y/%m/%d 0000"),
             label="Start Date / Time (UTC, inclusive):",
-            min="2006/01/01 0000",
+            min="2002/01/01 0000",
         ),
         dict(
             type="datetime",
             name="edate",
             default=today.strftime("%Y/%m/%d 0000"),
             label="End Date / Time (UTC):",
-            min="2006/01/01 0000",
+            min="2002/01/01 0000",
             max=today.strftime("%Y/%m/%d 0000"),
         ),
         dict(
@@ -161,6 +162,8 @@ def get_count_bins(df: pd.DataFrame, varname: str):
     maxv = df[varname].max()
     if varname == "count_rank":
         bins = np.arange(1, maxv + 2)
+    elif varname == "count_mean":
+        bins = pretty_bins(minv, maxv)
     elif max([abs(minv), abs(maxv)]) > 100:
         bins = [-200, -150, -100, -50, -25, -10, 0, 10, 25, 50, 100, 150, 200]
     elif max([abs(minv), abs(maxv)]) > 10:
@@ -399,6 +402,9 @@ def plotter(ctx: dict):
         df2 = df[varname]
     if df2.empty:
         raise NoDataFound("No data found.")
+    dtfmt = "%d %b %Y %H:%M"
+    if varname == "count_mean":
+        dtfmt = "%d %b"
     mp = MapPlot(
         apctx=ctx,
         sector="nws",
@@ -408,8 +414,8 @@ def plotter(ctx: dict):
             f"{PDICT[by]}"
         ),
         subtitle=(
-            f"Valid {params['sts']:%d %b %Y %H:%M} - "
-            f"{params['ets']:%d %b %Y %H:%M} UTC, "
+            f"Valid {params['sts'].strftime(dtfmt)} - "
+            f"{params['ets'].strftime(dtfmt)} UTC, "
             f"type limiter: {MDICT.get(myfilter)}"
         ),
         nocaption=True,

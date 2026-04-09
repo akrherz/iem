@@ -376,8 +376,9 @@ def plotter(ctx: dict):
     maxval = ctx["dfin"][ctx["var"]].max()
     minval = ctx["dfin"][ctx["var"]].min()
     drange = maxval - minval
-    ax.set_ylim(minval - drange * 0.1, maxval + drange * 0.1)
-    dy = drange * 0.01
+    if drange > 0:
+        ax.set_ylim(minval - drange * 0.1, maxval + drange * 0.1)
+    dy = max(drange * 0.01, 0.01)
 
     minmax = (
         ctx["dfin"]
@@ -416,6 +417,7 @@ def plotter(ctx: dict):
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %-d"))
     ax.set_xlabel(f"Day of {ctx['year']}")
-    ax.set_xlim(x[0], x[-1])
+    if x[0] != x[-1]:
+        ax.set_xlim(x[0], x[-1])
 
     return fig, df

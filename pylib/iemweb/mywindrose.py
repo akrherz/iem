@@ -94,12 +94,14 @@ class Schema(CGIModel):
         ),
     ] = False
     network: NETWORK_FIELD_OPTIONAL = None
-    nsector: int = Field(
-        default=36,
-        description="Number of sectors to use for windrose plot",
-        ge=4,
-        le=180,
-    )
+    nsector: Annotated[
+        int,
+        Field(
+            description="Number of sectors to use for windrose plot",
+            ge=4,
+            le=180,
+        ),
+    ] = 36
     staticrange: Annotated[
         int | None,
         Field(

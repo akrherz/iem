@@ -95,7 +95,7 @@ def get_mckey(environ: dict) -> str:
     return (
         f"/json/nwstext_search/{environ['sts']:%Y%m%d%H%M}/"
         f"{environ['ets']:%Y%m%d%H%M}/{environ['awipsid']}"
-    ).replace(" ", "")
+    ).strip()
 
 
 @iemapp(
@@ -105,7 +105,7 @@ def get_mckey(environ: dict) -> str:
     schema=Schema,
     default_tz="UTC",
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
     headers = [("Content-type", "application/json")]
 

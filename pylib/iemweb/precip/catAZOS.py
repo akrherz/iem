@@ -33,7 +33,7 @@ def doHeader(environ, start_response, sio):
   <title>IEM | Hourly Precip Grid</title>
 </head>
 <body bgcolor="white">
-<a href="/index.php">Iowa Mesonet</a> &gt;
+<a href="/">Iowa Mesonet</a> &gt;
 <a href="/climate/">Climatology</a> &gt;
 Hourly Precipitation [IA_ASOS]
 

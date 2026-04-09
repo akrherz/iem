@@ -48,8 +48,10 @@ class Schema(CGIModel):
 
 
 @with_sqlalchemy_conn("coop")
-def run(station, syear, eyear, conn: Connection | None = None) -> dict:
-    """Do something"""
+def run(
+    station: str, syear: int, eyear: int, conn: Connection | None = None
+) -> dict:
+    """Generate the data. Note, we have API users of this..."""
     res = conn.execute(
         sql_helper("""
     WITH data as (
@@ -122,17 +124,17 @@ def run(station, syear, eyear, conn: Connection | None = None) -> dict:
                 month=int(row["sday"][:2]),
                 day=int(row["sday"][2:]),
                 years=row["cnt"],
-                avg_high=float(row["h"]),
+                avg_high=None if row["h"] is None else float(row["h"]),
                 max_high=row["xh_high"],
                 max_high_years=row["xh_years"],
                 min_high=row["nh_high"],
                 min_high_years=row["nh_years"],
-                avg_low=float(row["l"]),
+                avg_low=None if row["l"] is None else float(row["l"]),
                 max_low=row["xl_low"],
                 max_low_years=row["xl_years"],
                 min_low=row["nl_low"],
                 min_low_years=row["nl_years"],
-                avg_precip=float(row["p"]),
+                avg_precip=None if row["p"] is None else float(row["p"]),
                 max_precip=row["precip"],
                 max_precip_years=row["mp_years"],
                 max_range=row["max_range"],
@@ -157,11 +159,9 @@ def get_key(environ):
 )
 def application(environ, start_response):
     """Answer request."""
-    station = environ["station"]
-    syear = environ["syear"]
-    eyear = environ["eyear"]
+    query: Schema = environ["_cgimodel_schema"]
 
-    res = run(station, syear, eyear)
+    res = run(query.station, query.syear, query.eyear)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return json.dumps(res)

@@ -57,7 +57,14 @@ from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+    VTEC_PH_FIELD_OPTIONAL,
+    VTEC_SIG_FIELD,
+    VTEC_YEAR_FIELD,
+)
 from iemweb.mlib import rectify_wfo, unrectify_wfo
 from iemweb.util import get_ct
 
@@ -78,20 +85,8 @@ class Schema(CGIModel):
             description="If provided, use the given eventid to find LSRs for.",
         ),
     ] = 103
-    phenomena: Annotated[
-        str | None,
-        Field(
-            description="If provided, use the given VTEC event to find LSRs.",
-            max_length=2,
-        ),
-    ] = None
-    significance: Annotated[
-        str,
-        Field(
-            description="If provided, use the given VTEC event to find LSRs.",
-            max_length=1,
-        ),
-    ] = "W"
+    phenomena: VTEC_PH_FIELD_OPTIONAL = None
+    significance: VTEC_SIG_FIELD = "W"
     states: Annotated[
         ListOrCSVType | None,
         Field(
@@ -132,44 +127,11 @@ class Schema(CGIModel):
             description="If provided, use the given WFOs to find LSRs for.",
         ),
     ] = None
-    year: Annotated[
-        int,
-        Field(
-            description="If provided, use this year for the given VTEC event.",
-        ),
-    ] = 2006
-    east: Annotated[
-        float | None,
-        Field(
-            description="Eastern extent of spatial bounds. (degrees East)",
-            ge=-180,
-            le=180,
-        ),
-    ] = None
-    west: Annotated[
-        float | None,
-        Field(
-            description="Western extent of spatial bounds. (degrees East)",
-            ge=-180,
-            le=180,
-        ),
-    ] = None
-    north: Annotated[
-        float | None,
-        Field(
-            description="Northern extent of spatial bounds. (degrees North)",
-            ge=-90,
-            le=90,
-        ),
-    ] = None
-    south: Annotated[
-        float | None,
-        Field(
-            description="Southern extent of spatial bounds. (degrees North)",
-            ge=-90,
-            le=90,
-        ),
-    ] = None
+    year: VTEC_YEAR_FIELD = 2006
+    east: LONGITUDE_FIELD_OPTIONAL = None
+    west: LONGITUDE_FIELD_OPTIONAL = None
+    north: LATITUDE_FIELD_OPTIONAL = None
+    south: LATITUDE_FIELD_OPTIONAL = None
     fmt: Annotated[
         str,
         Field(

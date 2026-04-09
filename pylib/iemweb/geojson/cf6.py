@@ -25,6 +25,7 @@ https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01&fmt=csv
 """
 
 from datetime import date
+from typing import Annotated
 
 import simplejson as json
 from pydantic import Field
@@ -43,13 +44,15 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    dt: date = Field(default=date.today(), description="Date to query for")
+    dt: Annotated[date, Field(description="Date to query for")] = date.today()
     callback: CALLBACK_FIELD = None
-    fmt: str = Field(
-        description="Format of output",
-        default="geojson",
-        pattern=r"^(geojson|csv)$",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="Format of output",
+            pattern=r"^(geojson|csv)$",
+        ),
+    ] = "geojson"
 
 
 def departure(ob, climo):

@@ -41,7 +41,7 @@ from pyiem.iemre import daily_offset
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.util import json_response_dict
 
 
@@ -49,12 +49,8 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    lat: Annotated[
-        float, Field(description="Latitude of point", ge=-90, le=90)
-    ] = 41.9
-    lon: Annotated[
-        float, Field(description="Longitude of point", ge=-180, le=180)
-    ] = -92.0
+    lat: LATITUDE_FIELD = 41.9
+    lon: LONGITUDE_FIELD = -92.0
     valid: Annotated[
         date | None,
         Field(
