@@ -101,6 +101,7 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         low.standard_name = "2m Air Temperature"
         low.coordinates = "lon lat"
 
+        # Soil Temperature
         ncvar = nc.createVariable(
             "tsoil", np.uint16, ("time", "lat", "lon"), fill_value=65535
         )
@@ -108,6 +109,16 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         ncvar.scale_factor = 0.01
         ncvar.long_name = "0-10 cm Average Soil Temperature"
         ncvar.standard_name = "0-10 cm Average Soil Temperature"
+        ncvar.coordinates = "lon lat"
+
+        # Soil Moisture, 255 levels, 0.25 resolution, so 0 to 63.75 mm
+        ncvar = nc.createVariable(
+            "soil_moisture", np.uint8, ("time", "lat", "lon"), fill_value=255
+        )
+        ncvar.units = "mm"
+        ncvar.scale_factor = 0.25
+        ncvar.long_name = "0-10 cm Average Soil Moisture"
+        ncvar.standard_name = "0-10 cm Average Soil Moisture"
         ncvar.coordinates = "lon lat"
 
         ncvar = nc.createVariable(
@@ -149,6 +160,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
     tmaxgrid = None
     tmingrid = None
     tsoilgrid = None
+    smgrid = None
     pgrid = None
     plast = None
     ptotal = None
@@ -214,6 +226,14 @@ def merge_grib(nc, now, domain: str, dom: dict):
                     tsoilgrid = values
                 else:
                     tsoilgrid += values
+            elif name == "soilw" and str(grb).find("0.0-0.1 m") > -1:
+                # Values of 1 are common/water, which overflows our storage
+                # convert to mm depth
+                values = np.where(values == 1, np.nan, values * 100.0)
+                if smgrid is None:
+                    smgrid = values
+                else:
+                    smgrid += values
 
         grbs.close()
 
@@ -237,6 +257,9 @@ def merge_grib(nc, now, domain: str, dom: dict):
                 nc.variables["tsoil"][days] = reproject2iemre(
                     tsoilgrid / 4.0, affine, EPSG[4326], domain=domain
                 )
+                nc.variables["soil_moisture"][days] = reproject2iemre(
+                    smgrid / 4.0, affine, EPSG[4326], domain=domain
+                )
                 nc.variables["srad"][days] = reproject2iemre(
                     srad, affine, EPSG[4326], domain=domain
                 )
@@ -256,6 +279,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
             tmingrid = None
             tmaxgrid = None
             tsoilgrid = None
+            smgrid = None
             srad = None
             hits = 0
 

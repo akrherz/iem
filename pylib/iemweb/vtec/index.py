@@ -17,6 +17,7 @@ from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
+from iemweb.fields import VTEC_PH_FIELD, VTEC_SIG_FIELD, VTEC_YEAR_FIELD
 from iemweb.mlib import rectify_wfo
 from iemweb.util import error_log
 
@@ -45,24 +46,9 @@ class Schema(CGIModel):
         ge=1,
         le=9999,
     )
-    phenomena: str = Field(
-        "TO",
-        description="VTEC Phenomena",
-        pattern=r"^[A-Z]{2}$",
-        max_length=2,
-    )
-    significance: str = Field(
-        "W",
-        description="VTEC Significance",
-        pattern=r"^[A-Z]$",
-        max_length=1,
-    )
-    year: int = Field(
-        2024,
-        description="VTEC Year",
-        ge=1980,  # first year of VTEC
-        le=utc().year + 1,  # allow next year
-    )
+    phenomena: VTEC_PH_FIELD = "TO"
+    significance: VTEC_SIG_FIELD = "W"
+    year: VTEC_YEAR_FIELD = 2024
 
     @field_validator("wfo", mode="before")
     @classmethod
@@ -76,14 +62,15 @@ def get_data(vtecinfo: dict, conn: Connection | None = None):
     """Get aux data from the database about this event."""
     res = conn.execute(
         sql_helper(
-            "SELECT max(product_ids[cardinality(product_ids)]) as r, "
-            "sumtxt(name::text || ', ') as cnties, "
-            "max(case when is_emergency then 1 else 0 end), "
-            "max(case when is_pds then 1 else 0 end), "
-            "max(updated at time zone 'UTC') from "
-            "warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = :yr "
-            "and w.wfo = :wfo and phenomena = :ph and significance = :sig "
-            "and eventid = :eventid"
+            """
+    SELECT max(product_ids[cardinality(product_ids)]) as r,
+    sumtxt(name::text || ', ') as cnties,
+    max(case when is_emergency then 1 else 0 end),
+    max(case when is_pds then 1 else 0 end),
+    max(updated at time zone 'UTC') from
+    warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = :yr
+    and w.wfo = :wfo and phenomena = :ph and significance = :sig
+    and eventid = :eventid"""
         ),
         {
             "yr": vtecinfo["year"],

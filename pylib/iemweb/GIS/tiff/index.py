@@ -32,6 +32,8 @@ from pyiem.templates.iem import TEMPLATE
 from pyiem.util import archive_fetch, utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD
+
 LOG = logging.getLogger(__name__)
 
 
@@ -54,24 +56,8 @@ class MyModel(CGIModel):
             pattern="^[0-9]{12}$",
         ),
     ] = None
-    day: Annotated[
-        int,
-        Field(
-            title="Day",
-            description="Day of the month",
-            ge=1,
-            le=31,
-        ),
-    ] = utc().day
-    month: Annotated[
-        int,
-        Field(
-            title="Month",
-            description="Month of the year",
-            ge=1,
-            le=12,
-        ),
-    ] = utc().month
+    day: DAY_OF_MONTH_FIELD = utc().day
+    month: MONTH_FIELD = utc().month
     year: Annotated[
         int,
         Field(

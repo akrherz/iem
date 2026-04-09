@@ -87,19 +87,7 @@ def router(group, ts):
       ts (date): date we are interested in
     """
     if group == "coop":
-        return run(
-            ts,
-            [
-                "IA_COOP",
-                "MO_COOP",
-                "KS_COOP",
-                "NE_COOP",
-                "SD_COOP",
-                "MN_COOP",
-                "WI_COOP",
-                "IL_COOP",
-            ],
-        )
+        return run_coop(ts)
     if group == "azos":
         return run_azos(ts)
     return run_cocorahs(ts)
@@ -157,7 +145,7 @@ def run_azos(ts: datetime):
     return json.dumps(res)
 
 
-def run(ts, networks):
+def run_coop(ts):
     """Actually do the hard work of getting the current SPS in geojson"""
     pgconn, cursor = get_dbconnc("iem")
 
@@ -167,10 +155,10 @@ def run(ts, networks):
         extract(hour from coop_valid)::int as hour, max_tmpf as high,
         min_tmpf as low, coop_tmpf, name, network, coop_valid
         from summary s JOIN stations t ON (t.iemid = s.iemid)
-        WHERE s.day = %s and t.network = ANY(%s) and pday >= 0
+        WHERE s.day = %s and t.network ~* 'COOP' and pday >= 0
         and extract(hour from coop_valid) between 5 and 10
     """,
-        (ts.date(), networks),
+        (ts.date(),),
     )
 
     res = {
@@ -262,7 +250,7 @@ def run_cocorahs(ts: datetime):
     help=__doc__,
     schema=Schema,
     memcachekey=lambda x: f"/geojson/7am/{x['dt']}/{x['group']}",
-    memcacheexpire=15,
+    memcacheexpire=120,
     content_type="application/vnd.geo+json",
 )
 def application(environ, start_response):

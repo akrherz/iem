@@ -300,6 +300,7 @@
 163/csector:SD::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:ugc::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 163/csector:midwest::var:days::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 163/csector:midwest::var:count_rank::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+163/csector:midwest::var:count_mean::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 163/csector:midwest::var:count_departure::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 163/csector:midwest::var:count_standard::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 163/csector:IA::var:count::sdate:2024-01-01%200000::edate:2024-09-17%200000::filter:TORNADO::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
