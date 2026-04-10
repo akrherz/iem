@@ -153,20 +153,32 @@ def make_time(string):
     )
 
 
-def qcval(df, colname, floor, ceiling):
+def ensure_float(df: pd.DataFrame, colname: str):
+    """Ensure that the column can be compared with a float."""
+    if isinstance(df[colname].dtype, (object, np.int64)):
+        df[colname] = pd.to_numeric(
+            df[colname], errors="coerce", downcast="float"
+        )
+
+
+def qcval(df: pd.DataFrame, colname: str, floor: float, ceiling: float):
     """Make sure the value falls within some bounds"""
+    ensure_float(df, colname)
     df.loc[df[colname] < floor, colname] = floor
     df.loc[df[colname] > ceiling, colname] = ceiling
     return np.where(
-        np.logical_or(df[colname] == floor, df[colname] == ceiling), "B", None
-    )
+        np.logical_or(df[colname] == floor, df[colname] == ceiling),
+        "B",
+        None,
+    )  # type: ignore
 
 
-def qcval2(df, colname, floor, ceiling):
+def qcval2(df: pd.DataFrame, colname: str, floor: float, ceiling: float):
     """Make sure the value falls within some bounds, Null if not"""
+    ensure_float(df, colname)
     df.loc[df[colname] < floor, colname] = np.nan
     df.loc[df[colname] > ceiling, colname] = np.nan
-    return np.where(pd.isnull(df[colname]), "B", None)
+    return np.where(pd.isnull(df[colname]), "B", None)  # type: ignore
 
 
 def do_inversion(filename, nwsli):
