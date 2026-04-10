@@ -13,6 +13,8 @@ for new applications.
 Changelog
 ---------
 
+- 2026-04-10: Corrected bug with service not providing SBWs issued at the
+  requested timestamp when using the `ts` parameter.
 - 2026-02-24: For IEM consistency, the `generation_time` root attribute was
   renamed `generated_at`.
 - 2025-05-29: Implemented a `states` parameter to limit results to a list of
@@ -25,8 +27,6 @@ Changelog
   discouraged.
 - 2024-11-19: Trimmed caching time from 60s to 15s. Added `ps` attribute that
   holds the VTEC Phenomena and Significance string.
-- 2024-11-04: A number of additional metadata fields were added to the output
-- 2024-07-01: Initial documentation release
 
 Examples
 --------
@@ -194,8 +194,8 @@ def run(query: Schema):
                 as floodtag_damage_catastrophic,
         bool_or(floodtag_damage = 'CONSIDERABLE')
                 as floodtag_damage_considerable
-        from sbw s {ss1} WHERE s.expire > :sts and s.issue < :ets {wfo_limiter}
-        {ss2}
+        from sbw s {ss1} WHERE s.expire > :sts and s.issue <= :ets
+        {wfo_limiter} {ss2}
         GROUP by wfo, phenomena, vtec_year, eventid, significance
     )
             SELECT ST_asGeoJson(geom) as geojson, s.phenomena, s.eventid,
