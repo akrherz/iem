@@ -32,7 +32,7 @@ def main():
             sql_helper(
                 "select distinct wfo, phenomena, significance, eventid "
                 "from warnings where vtec_year = :year and "
-                "phenomena not in ('TR', 'HU', 'SS') ORDER by "
+                "phenomena not in ('TR', 'HU', 'SS', 'TY') ORDER by "
                 "wfo, phenomena, significance, eventid"
             ),
             conn,
