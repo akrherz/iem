@@ -107,8 +107,8 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
         if ($ok < 80) $ocolor = "danger";
 
         $apirate = $jobj->stats->telemetry_rate;
-        if ($apirate < 10) $acolor = "warning";
-        if ($apirate < 5) $acolor = "danger";
+        if ($apirate > 300) $acolor = "warning";
+        if ($apirate > 400) $acolor = "danger";
 
         $bandwidth = $jobj->stats->bandwidth / 1000000.0;
         // grading of the bandwidth (MB/s)
@@ -152,7 +152,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   <div class="mb-2">
     <span>API/Data Services: {$alabel}</span>
     <div class="progress">
-        <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
+        <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="500" style="width: {$apercent}%;">
         </div>
     </div>
   </div>
