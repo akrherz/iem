@@ -319,10 +319,14 @@ Highcharts.chart("{containername}", {{
                 zIndex: 0,
                 tooltip: {{
                     pointFormatter: function() {{
+                        const low = Number.isFinite(this.low) ?
+                            this.low.toFixed(2) : this.low;
+                        const high = Number.isFinite(this.high) ?
+                            this.high.toFixed(2) : this.high;
                         const s = '<span style="color:' + this.color +
                             '">\u25cf</span> '+
-                            this.series.name + ': <b>' + this.low + ' (' +
-                            min_years[this.index] +') to ' + this.high + ' ('+
+                            this.series.name + ': <b>' + low + ' (' +
+                            min_years[this.index] +') to ' + high + ' ('+
                             max_years[this.index] +')</b><br/>';
                         return s;
                     }}

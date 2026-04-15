@@ -126,7 +126,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
     $olabel = sprintf("%.0f%%", $ok);
     $opercent = intval($ok);
     $alabel = sprintf("%.1f req/s", $apirate);
-    $apercent = intval($apirate / 100.0 * 100.0);
+    $apercent = intval($apirate / 500.0 * 100.0);
 
     $s = <<<EOF
 <div class="card mb-3">
@@ -152,7 +152,7 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
   <div class="mb-2">
     <span>API/Data Services: {$alabel}</span>
     <div class="progress">
-        <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="500" style="width: {$apercent}%;">
+        <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
         </div>
     </div>
   </div>
