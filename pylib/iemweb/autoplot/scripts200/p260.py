@@ -23,6 +23,7 @@ from pyiem.nws.vtec import NWS_COLORS
 from pyiem.plot import MapPlot
 from pyiem.reference import (
     SECTORS,
+    SECTORS_NAME,
     Z_OVERLAY2,
     fema_region_bounds,
     wfo_bounds,
@@ -169,6 +170,15 @@ def plotter(ctx: dict):
             else:
                 wfo_limiter = " and substr(w.ugc, 1, 2) = :state "
                 params["state"] = csector
+        else:
+            wfo_limiter = (
+                " and ST_Intersects(geom, "
+                "ST_MakeEnvelope(:minx, :miny, :maxx, :maxy, 4326)) "
+            )
+            params["minx"] = SECTORS[csector][0]
+            params["maxx"] = SECTORS[csector][1]
+            params["miny"] = SECTORS[csector][2]
+            params["maxy"] = SECTORS[csector][3]
     elif opt == "wfo":
         wfo_limiter = " and w.wfo = :wfo "
         params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
@@ -236,7 +246,7 @@ def plotter(ctx: dict):
         if len(csector) == 2:
             title += f"for State of {reference.state_names[csector]}"
         else:
-            title += f"for {SECTORS[csector]}"
+            title += f"for {SECTORS_NAME[csector]}"
     elif opt == "wfo":
         title += f"by {ctx['_sname']}"
         xref = {"TJSJ": "SJU"}
