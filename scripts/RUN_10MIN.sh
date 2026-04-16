@@ -16,11 +16,10 @@ timeout -v 540 python asos2archive.py &
 timeout -v 540 python rwis2archive.py &
 
 cd ../ingestors
-OPENSSL_CONF=dotcams/openssl.conf python dot_truckcams.py &
+python dot_truckcams.py &
 
 cd dotcams
-# Le Sigh
-OPENSSL_CONF=openssl.conf python ingest_dot_webcams.py &
+python ingest_dot_webcams.py &
 
 cd ../../summary
 python update_dailyrain.py

@@ -150,9 +150,11 @@ def process(ncfn):
     )
     data["visibility"] = convert_value(data["visibility"], "meter", "mile")
     data["precipAccum"] = mm2inch(data["precipAccum"])
+    # Assume that this is always OK, ha
     stations = chartostring(data["stationId"][:])
-    presentwxs = chartostring(data["presWx"][:])
-    skycs = chartostring(data["skyCvr"][:])
+    # MADIS folks have refused to fix the GIGO, so downstream folks can't punt
+    presentwxs = safe_convert(data, "presWx", ncfn, stations)
+    skycs = safe_convert(data, "skyCvr", ncfn, stations)
     autoremarks = safe_convert(data, "autoRemark", ncfn, stations)
     opremarks = safe_convert(data, "operatorRemark", ncfn, stations)
 

@@ -1,9 +1,5 @@
 """Ingest DOT RWIS Webcams.
 
-NOTE this uses a custom openssl.conf :/
-
-OPENSSL_CONF=openssl.conf python ingest_dot_webcams.py
-
 RUN from RUN_10MIN.sh
 """
 
@@ -13,7 +9,7 @@ import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.util import exponential_backoff, logger, utc
 
@@ -80,10 +76,10 @@ def process_feature(cursor, domain, feat):
             LOG.debug("skipping %s %s %s", cam, valid, url)
             continue
         try:
-            resp = httpx.get(url, timeout=30)
-        except httpx.TimeoutException:
+            resp = requests.get(url, timeout=30)
+        except requests.Timeout:
             # Try again
-            resp = httpx.get(url, timeout=60)
+            resp = requests.get(url, timeout=60)
         if resp.status_code == 404:
             LOG.debug("cloud 404 %s", url)
             with open(CLOUD404, "a", encoding="utf8") as fh:
@@ -151,7 +147,7 @@ def main():
     cursor.close()
 
     # Fetch the REST service
-    resp = exponential_backoff(httpx.get, URI, timeout=30)
+    resp = exponential_backoff(requests.get, URI, timeout=30)
     if resp is None:
         LOG.info("Failed to fetch REST service, aborting.")
         return
