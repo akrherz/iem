@@ -10,8 +10,8 @@ import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-import httpx
 import pyproj
+import requests
 from pyiem.database import get_dbconn
 from pyiem.util import exponential_backoff, logger
 
@@ -48,7 +48,7 @@ def fetch_features(offset):
     """Fetch Features with the defined offset."""
     LOG.debug("fetch_features for offset: %s", offset)
     url = URI + f"&resultOffset={offset}"
-    req = exponential_backoff(httpx.get, url, timeout=30)
+    req = exponential_backoff(requests.get, url, timeout=30)
     if req is None or req.status_code != 200:
         return False, []
     data = req.json()
@@ -105,7 +105,7 @@ def process_features(features):
             current[label],
             valid,
         )
-        req = exponential_backoff(httpx.get, url, timeout=15)
+        req = exponential_backoff(requests.get, url, timeout=15)
         if req is None or req.status_code != 200:
             LOG.info(
                 "dot_truckcams.py dl fail |%s| %s",
