@@ -10,6 +10,15 @@ EOM;
 $t->jsextra = <<<EOM
 <script type="module" src="soilt.module.js"></script>
 EOM;
+// This plot is confusing during the morning hours before the latest GFS updates
+$d0 = <<<EOM
+    <img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 0">
+EOM;
+// So, if we are before 9 AM local, don't show the $d0 plot
+$now = new DateTimeImmutable("now", new DateTimeZone("America/Chicago"));
+if ($now->format("H") < 9) {
+    $d0 = "";
+}
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -45,7 +54,7 @@ $t->content = <<<EOM
   </div>
   <div class="col-12 col-md-6">
     <h2 class="h5">GFS Forecast</h2>
-    <img src="/data/forecast/gfs_soilt_day_f0.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 0">
+    {$d0}
     <img src="/data/forecast/gfs_soilt_day_f1.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 1">
     <img src="/data/forecast/gfs_soilt_day_f2.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 2">
     <img src="/data/forecast/gfs_soilt_day_f3.png?{$nounce}" class="img-fluid mb-3" alt="GFS soil temperature forecast day 3">
