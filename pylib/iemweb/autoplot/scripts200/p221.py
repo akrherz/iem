@@ -120,7 +120,7 @@ def forecast2image(
                     + grb["DyInMetres"] / 2.0,
                 )
 
-                ref = grb["values"]
+                ref = np.flipud(grb["values"])
         except Exception as exp:
             LOG.exception(exp)
             return fhour, None
