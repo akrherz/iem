@@ -2,8 +2,12 @@
 This application presents an infographic showing the most recent
 date of a given SPC outlook threshold as per IEM unofficial archives.
 
-<p>Note that the probability data can get a little wonky with the changing
-usage of levels with time.
+<p>
+This autoplot attempts to be cute and remove thresholds that are likely no
+longer issued by SPC.  These thresholds are denoted in the plot subtitle, but
+are included in the raw data download for you to make your own life choices
+with.
+</p>
 """
 
 from datetime import date
@@ -142,6 +146,25 @@ def get_description():
     return desc
 
 
+def clean_legacy(df: pd.DataFrame) -> pd.DataFrame:
+    """Try to get cute with what should be removed from the dataframe."""
+    # 1. Remove SIGN if CIG1 is present as a threshold.
+    if "CIG1" in df.index and "SIGN" in df.index:
+        df.at["SIGN", "plotted"] = False
+    # 2. Detect thresholds that are likely discontinued by denoting
+    # non-monotonic day values
+    if "days" in df.columns:
+        lastday = None
+        for thres, row in df.iterrows():
+            if thres in ["CIG1", "CIG2", "CIG3", "SIGN"]:
+                continue
+            if lastday is not None and row["days"] > lastday:
+                df.at[thres, "plotted"] = False
+            else:
+                lastday = row["days"]
+    return df
+
+
 def plotter(ctx: dict):
     """Go"""
     wfo = ctx["wfo"]
@@ -272,11 +295,13 @@ def plotter(ctx: dict):
     conn.close()
     if df.empty:
         raise NoDataFound("No Results For Query.")
+    # Rectify the convective end time back to the previous day
     df["date"] = pd.to_datetime(
         df["max_expire"].dt.date - pd.Timedelta(days=1)
-    )  # type: ignore
-
+    )
     df["days"] = (pd.Timestamp(date.today()) - df["date"]).dt.days
+    df["plotted"] = True
+    df = clean_legacy(df)
     _ll = ""
     if ctx.get("date") is not None:
         _ll = f"Prior to {ctx['date']:%-d %b %Y}, "
@@ -284,10 +309,15 @@ def plotter(ctx: dict):
         f"{_ll}Most Recent {'WPC' if outlook_type == 'E' else 'SPC'} Day "
         f"{day} {PDICT[outlook_type]} Outlook{title3} for {title2}"
     )
+    not_plotted = ""
+    if not df["plotted"].all():
+        not_plotted = "Thresholds excluded from plot: " + ", ".join(
+            df.index[~df["plotted"]]
+        )
     fig = figure(
         apctx=ctx,
         title=title,
-        subtitle="Based on Unofficial IEM Archives.",
+        subtitle=f"Based on Unofficial IEM Archives. {not_plotted}",
     )
     ax = fig.add_axes([0.0, 0.0, 1, 1], frame_on=False)
 
@@ -297,7 +327,7 @@ def plotter(ctx: dict):
     if rowcount > 6:
         boxheight = 0.08
     dmax = max(df["days"].max(), 1)
-    for thres, row in df.iterrows():
+    for thres, row in df[df["plotted"]].iterrows():
         if outlook_type in ["C", "F", "E"]:
             if thres not in COLORS:
                 continue
