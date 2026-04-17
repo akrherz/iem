@@ -21,6 +21,7 @@ There are examples below or feel free to yell at daryl for big a mess this is.
 Changelog
 ---------
 
+- 2026-04-17: Correct returned threshold value to not include CIGs.
 - 2026-03-22: Add a new field to the JSON response called `conditional`,
   which will indicate the CIG1-3 or legacy SIGN for current queries.
 - 2026-03-06: Sadly, the recently changed `time` parameter handling created
@@ -264,13 +265,14 @@ def application(environ: dict, start_response: callable):
             time = utc() + timedelta(hours=(day - 1) * 24)
         outlooks, ts = dotime(time, lon, lat, day, cat)
         if not outlooks.empty:
+            cigs = ["CIG1", "CIG2", "CIG3", "SIGN"]
             # We need to look for SIGN, CIG1, CIG2, and CIG3
-            for _cig in ["CIG3", "CIG2", "CIG1", "SIGN"]:
+            for _cig in cigs:
                 if _cig in outlooks["threshold"].values:
                     conditional = _cig
                     break
             # This will represent the max threshold, but...
-            outlooks = outlooks.iloc[[0]]
+            outlooks = outlooks[~outlooks["threshold"].isin(cigs)].iloc[[0]]
     else:
         outlooks = dowork(lon, lat, day, cat)
 
