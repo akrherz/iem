@@ -477,6 +477,7 @@
 227/pid:202410012036-KDTX-FZUS73-MWSDTX::segnum:0::_r:t::dpi:100.png
 228/mode:normal::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100::_cb:1.png
 228/mode:iadrought::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100.png
+230/outlook_type:F::day:2::w:all::network:WFO::wfo:RAH::mystate:IA::fema:7::ugc:IAZ048::month:spring::_r:t::dpi:100.png
 230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
 230/outlook_type:C::day:1::w:all::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100.png
 230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png
