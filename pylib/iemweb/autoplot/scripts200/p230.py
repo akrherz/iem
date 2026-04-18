@@ -326,7 +326,7 @@ def plotter(ctx: dict):
     rowcount = len(df.index)
     if rowcount > 6:
         boxheight = 0.08
-    dmax = max(df["days"].max(), 1)
+    dmax = max(df.loc[df["plotted"]]["days"].max(), 1)
     for thres, row in df[df["plotted"]].iterrows():
         if outlook_type in ["C", "F", "E"]:
             if thres not in COLORS:
