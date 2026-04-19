@@ -104,6 +104,7 @@ from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
 from typing import Annotated
 
+import pymemcache
 from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
@@ -323,6 +324,20 @@ def get_mckey(environ: dict) -> str | None:
     return None
 
 
+def too_many_requests(environ):
+    """Check internal"""
+    try:
+        mc = pymemcache.Client("iem-memcached:11211", timeout=0.5)
+        key = f"too_many_afos:{environ.get('REMOTE_ADDR')}"
+        val = mc.get(key)
+        if val is not None:
+            return True
+        mc.set(key, "1", expire=600)
+    except Exception:
+        pass
+    return False
+
+
 @iemapp(
     help=__doc__,
     schema=MyModel,
@@ -336,6 +351,11 @@ def application(environ, start_response):
     order = environ["order"]
     # Expand PILs
     pils = pil_logic(environ["pil"])
+    if environ["pil"][0].startswith("DSM") and too_many_requests(environ):
+        start_response(
+            "429 Too Many Requests", [("Content-type", "text/plain")]
+        )
+        return "ERROR: Too many requests, please try later"
     # Establish our date range
     if environ["sdate"] is None:
         environ["sdate"] = utc(1980)

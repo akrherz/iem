@@ -506,11 +506,11 @@ def too_many_requests(environ):
     """Check internal"""
     try:
         mc = pymemcache.Client("iem-memcached:11211", timeout=0.5)
-        key = f"too_many:{environ.get('REMOTE_ADDR')}"
+        key = f"too_many_asos:{environ.get('REMOTE_ADDR')}"
         val = mc.get(key)
         if val is not None:
             return True
-        mc.set(key, 30)
+        mc.set(key, "1", 30)
     except Exception:
         pass
     return False
