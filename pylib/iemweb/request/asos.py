@@ -46,7 +46,6 @@ from io import StringIO
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
-import pymemcache
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -502,20 +501,6 @@ def get_mckey(environ: dict) -> str | None:
     return None
 
 
-def too_many_requests(environ):
-    """Check internal"""
-    try:
-        mc = pymemcache.Client("iem-memcached:11211", timeout=0.5)
-        key = f"too_many_asos:{environ.get('REMOTE_ADDR')}"
-        val = mc.get(key)
-        if val is not None:
-            return True
-        mc.set(key, "1", 30)
-    except Exception:
-        pass
-    return False
-
-
 @iemapp(
     help=__doc__,
     parse_times=False,
@@ -523,18 +508,13 @@ def too_many_requests(environ):
     memcachekey=get_mckey,
     memcacheexpire=600,
     schema=MyModel,
+    ip_throttle_secs=1,
 )
 def application(environ, start_response):
     """Go main"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Allow: GET,POST,OPTIONS"
-        return
-    if too_many_requests(environ):
-        start_response(
-            "429 Too Many Requests", [("Content-type", "text/plain")]
-        )
-        yield b"ERROR: Too many requests, please try later"
         return
     if overloaded(environ):
         start_response(
