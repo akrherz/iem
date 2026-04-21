@@ -12,6 +12,10 @@ returned if the server is under heavy load.
 
 Changelog:
 
+- 2026-04-21: Due to incessant requests against this service a 1 second
+  per-IP throttle is now in place.  There is literally no reason to hit this
+  service at a higher rate.  Just make an hourly request for all stations and
+  be done with it in one shot.
 - 2026-01-23: Added a practical limit of 1,000 station years worth of data
   to be allowed with the request prior to the database query for the actual
   data. You will get a HTTP 422 in this instance with a message to reduce size.
@@ -20,7 +24,6 @@ Changelog:
   was not provided, it would default to `America/Chicago` instead of `UTC`.
 - 2024-03-29: Migrated to pydantic based request validation.  Will be
   monitoring for any issues.
-- 2024-03-14: Initial documentation release.
 
 Example Usage
 -------------

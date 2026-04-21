@@ -13,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-04-21: Due to incessant requests made against this service, a 1 second
+  per remote IP address throttle is in place.
 - 2026-03-13: After gnashing of teeth about the METARs, a compromise was
   reached to return only the latest non-MADISHF METAR when requesting just
   one, but return anything available when requesting more than 1.  Will likely
@@ -28,7 +30,6 @@ Changelog
   for the "faked" PILs used within MOS products.
 - 2025-01-22: Added `aviation_afd` flag for the specific case of retrieving
   the "Aviation" section of an Area Forecast Discussion.
-- 2025-01-08: Added some caching due to incessant requests for the same data.
 
 Examples
 ~~~~~~~~

@@ -9,8 +9,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import pandas as pd
+import requests
 from metpy.units import units
 from psycopg.rows import dict_row
 from pyiem.database import get_dbconn
@@ -210,10 +210,10 @@ def download(year, reprocess=False) -> list:
             return queue
         size = os.stat(filename).st_size
         try:
-            resp = httpx.get(
+            resp = requests.get(
                 f"{URI}/{year}/{filename}",
                 headers={"Range": f"bytes={size}-{size + 16000000}"},
-                timeout=30,
+                timeout=60,  # SSL timeouts at 30?
             )
             # No new data
             if resp.status_code == 416:
@@ -231,7 +231,9 @@ def download(year, reprocess=False) -> list:
                 queue.append([filename, len(resp.content)])
         except Exception as exp:
             dlerrors += 1
-            LOG.warning("uscrn_ingest %s traceback: %s", filename, exp)
+            LOG.warning(
+                "uscrn_ingest %s traceback: [%s] %s", filename, type(exp), exp
+            )
             continue
     if reprocess:
         return [(fn, -1) for fn in files]
