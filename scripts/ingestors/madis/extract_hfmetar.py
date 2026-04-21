@@ -79,7 +79,7 @@ def safe_convert(
         # Try one at a time
         for i, station in enumerate(stations):
             try:
-                res.append(chartostring(data[col][i]))
+                res.append(str(chartostring(data[col][i])))
             except UnicodeDecodeError:
 
                 def safe_decode(val):
@@ -96,7 +96,8 @@ def safe_convert(
                     "".join(safe_decode(x) for x in data[col][i]),
                 )
                 res.append("")
-    return res
+    # Ensure no null bytes
+    return [a.replace("\x00", "") for a in res]
 
 
 def process(ncfn):
