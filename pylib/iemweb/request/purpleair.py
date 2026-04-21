@@ -15,6 +15,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/purpleair.py\
 
 """
 
+from datetime import datetime
 from io import BytesIO
 from typing import Annotated
 
@@ -24,6 +25,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -31,6 +40,24 @@ class Schema(CGIModel):
     excel: Annotated[
         bool, Field(description="Return Excel file instead of CSV")
     ] = False
+    sts: Annotated[
+        datetime | None,
+        Field(description="Start time of data to query, in ISO format"),
+    ] = None
+    ets: Annotated[
+        datetime | None,
+        Field(description="End time of data to query, in ISO format"),
+    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def run(environ, start_response):
