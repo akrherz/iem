@@ -3,8 +3,10 @@ import { escapeHTML } from '/js/iemjs/domUtils.js';
 
 // Legacy anchors looked like PIL-LIMIT, now are PIL:(LIMIT * ORDER)
 const NO_DATE_SET = 'No Limit';
+const INITIAL_LOAD_THROTTLE_MS = 3000;
 
 let tabCounter = 0;
+let startupLoadCounter = 0;
 
 /**
  * Cookie utility functions (replacing js-cookie dependency)
@@ -12,20 +14,20 @@ let tabCounter = 0;
 const Cookies = {
     set: (name, value, options = {}) => {
         let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
-        
+
         if (options.expires) {
             const date = new Date();
             date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
             cookieString += `; expires=${date.toUTCString()}`;
         }
-        
+
         if (options.path) {
             cookieString += `; path=${options.path}`;
         }
-        
+
         document.cookie = cookieString;
     },
-    
+
     get: (name) => {
         const nameEQ = `${encodeURIComponent(name)}=`;
         const ca = document.cookie.split(';');
@@ -70,7 +72,17 @@ function dealWithToken(token) {
     // Last value indicates the order
     const order = (parseInt(tokens2[1], 10) < 0) ? "asc" : "desc";
     const limit = Math.abs(parseInt(tokens2[1], 10));
-    addTab(text(tokens2[0]), "", "", limit, NO_DATE_SET, NO_DATE_SET, false, order);
+    addTab(
+        text(tokens2[0]),
+        "",
+        "",
+        limit,
+        NO_DATE_SET,
+        NO_DATE_SET,
+        false,
+        order,
+        true
+    );
 }
 
 /**
@@ -79,7 +91,7 @@ function dealWithToken(token) {
 function readURLParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const pilParam = urlParams.get('pil');
-    
+
     if (pilParam) {
         const tokenList = pilParam.split("~"); // URL-safe delimiter
         tokenList.forEach(token => {
@@ -133,7 +145,7 @@ function readCookies() {
 function saveCookies() {
     const afospils = [];
     const tabs = document.querySelectorAll(".nav-tabs li[data-pil]");
-    
+
     tabs.forEach(li => {
         // Skip temporary tabs with date restrictions for COOKIES only
         if (li.dataset.sdate !== NO_DATE_SET) {
@@ -149,7 +161,7 @@ function saveCookies() {
         'path': '/wx/afos/',
         'expires': 3650
     });
-    
+
     // Always update URL with ALL current tabs (including temporary ones)
     updateURLFromCurrentTabs();
 }
@@ -159,16 +171,16 @@ function saveCookies() {
  */
 function updateURL(pilTokens = []) {
     const url = new URL(window.location);
-    
+
     if (pilTokens.length > 0) {
         url.searchParams.set('pil', pilTokens.join("~")); // URL-safe delimiter
     } else {
         url.searchParams.delete('pil');
     }
-    
+
     // Clear legacy hash
     url.hash = '';
-    
+
     // Update URL without page reload
     window.history.replaceState({}, '', url);
 }
@@ -179,13 +191,13 @@ function updateURL(pilTokens = []) {
 function updateURLFromCurrentTabs() {
     const afospils = [];
     const tabs = document.querySelectorAll(".nav-tabs li[data-pil]");
-    
+
     tabs.forEach(li => {
         const multi = (li.dataset.order === "desc") ? 1 : -1;
         const val = parseInt(li.dataset.limit, 10) * multi;
         afospils.push(`${li.dataset.pil}.${val}`); // URL-safe delimiter (dot doesn't get encoded)
     });
-    
+
     updateURL(afospils);
 }
 
@@ -194,7 +206,7 @@ function updateURLFromCurrentTabs() {
  */
 async function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, order) {
     div.innerHTML = '<img src="/images/wait24trans.gif"> Searching the database ...';
-    
+
     const urlParams = new URLSearchParams({
         fmt: 'html',
         pil,
@@ -205,9 +217,9 @@ async function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, ord
         ttaaii: ttaaii || '',
         order
     });
-    
+
     const url = `/cgi-bin/afos/retrieve.py?${urlParams.toString()}`;
-    
+
     try {
         const response = await fetch(url);
         const responseText = await response.text();
@@ -218,6 +230,17 @@ async function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, ord
 }
 
 /**
+ * Stagger initial loads to avoid backend rate limiting on startup.
+ */
+function queueStartupTabLoad(div, pil, center, ttaaii, limit, sdate, edate, order) {
+    const delayMs = startupLoadCounter * INITIAL_LOAD_THROTTLE_MS;
+    startupLoadCounter += 1;
+    window.setTimeout(() => {
+        loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, order);
+    }, delayMs);
+}
+
+/**
  * Refresh the currently active tab
  */
 function refreshActiveTab() {
@@ -225,7 +248,7 @@ function refreshActiveTab() {
     if (!activeLink) {
         return;
     }
-    
+
     const activeTab = activeLink.closest('li');
     const pil = activeTab.dataset.pil;
     const limit = parseInt(activeTab.dataset.limit, 10);
@@ -234,14 +257,14 @@ function refreshActiveTab() {
     const sdate = activeTab.dataset.sdate;
     const edate = activeTab.dataset.edate;
     const order = activeTab.dataset.order;
-    
+
     if (pil === undefined) {
         return;
     }
-    
+
     const tabid = activeLink.getAttribute('href');
     const tabDiv = document.querySelector(tabid);
-    
+
     if (tabDiv) {
         loadTabContent(tabDiv, pil, center, ttaaii, limit, sdate, edate, order);
     }
@@ -250,28 +273,38 @@ function refreshActiveTab() {
 /**
  * Add a new tab for AFOS data
  */
-function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
+function addTab(
+    pil,
+    center,
+    ttaaii,
+    limit,
+    sdate,
+    edate,
+    doCookieSave,
+    order,
+    throttleOnLoad = false
+) {
     // Make sure the pil is something
     if (pil === null || pil === "") {
         return;
     }
-    
+
     // Make sure this isn't a duplicate
     const existingTab = document.querySelector(`#thetabs .nav-tabs li[data-pil='${pil}']`);
     if (existingTab) {
         return;
     }
-    
+
     const navTabs = document.querySelector(".nav-tabs");
     const tabContent = document.querySelector('.tab-content');
-    
+
     if (!navTabs || !tabContent) {
         return;
     }
-    
+
     const pos = tabCounter++;
     const tabId = `tab${pos}`;
-    
+
     // Create new tab
     const li = document.createElement('li');
     li.className = 'nav-item';
@@ -283,7 +316,7 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     li.dataset.limit = text(limit.toString());
     li.dataset.pil = text(pil);
     li.dataset.order = text(order);
-    
+
     const link = document.createElement('a');
     link.className = 'nav-link';
     link.href = `#${tabId}`;
@@ -297,10 +330,10 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
         e.preventDefault();
         activateTab(li);
     });
-    
+
     li.appendChild(link);
     navTabs.appendChild(li);
-    
+
     // Create new tab content
     const tabPane = document.createElement('div');
     tabPane.className = 'tab-pane fade';
@@ -308,13 +341,17 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     tabPane.setAttribute('role', 'tabpanel');
     tabPane.setAttribute('aria-labelledby', `${tabId}-tab`);
     tabContent.appendChild(tabPane);
-    
+
     // Activate the new tab
     activateTab(li);
-    
-    // Load content
-    loadTabContent(tabPane, pil, center, ttaaii, limit, sdate, edate, order);
-    
+
+    // Load content; startup loads are throttled to protect backend limits.
+    if (throttleOnLoad) {
+        queueStartupTabLoad(tabPane, pil, center, ttaaii, limit, sdate, edate, order);
+    } else {
+        loadTabContent(tabPane, pil, center, ttaaii, limit, sdate, edate, order);
+    }
+
     if (doCookieSave) {
         saveCookies();
     } else {
@@ -335,13 +372,13 @@ function activateTab(targetTab) {
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
     });
-    
+
     // Add active class to target tab link
     const link = targetTab.querySelector('.nav-link');
     if (link) {
         link.classList.add('active');
         link.setAttribute('aria-selected', 'true');
-        
+
         const tabId = link.getAttribute('href');
         const tabPane = document.querySelector(tabId);
         if (tabPane) {
@@ -349,7 +386,7 @@ function activateTab(targetTab) {
         }
     }
 }
- 
+
 /**
  * Download button handler
  */
@@ -358,13 +395,13 @@ function dlbtn(btn, fmt) {
     if (!activeLink) {
         return;
     }
-    
+
     const activeTab = activeLink.closest('li');
     const pil = activeTab.dataset.pil;
     if (pil === undefined) {
         return;
     }
-    
+
     const limit = activeTab.dataset.limit;
     const center = activeTab.dataset.center;
     const ttaaii = activeTab.dataset.ttaaii;
@@ -373,7 +410,7 @@ function dlbtn(btn, fmt) {
     let edate = activeTab.dataset.edate;
     sdate = (sdate === NO_DATE_SET) ? "" : sdate;
     edate = (edate === NO_DATE_SET) ? "" : edate;
-    
+
     window.location = `/cgi-bin/afos/retrieve.py?dl=1&fmt=${fmt}&pil=${pil}` +
         `&center=${center}&limit=${limit}&sdate=${sdate}&edate=${edate}` +
         `&ttaaii=${ttaaii}&order=${order}`;
@@ -390,7 +427,7 @@ function buildUI() {
             dlbtn(event.target, "text");
         });
     }
-    
+
     // ZIP download button
     const zipBtn = document.getElementById("toolbar-zip");
     if (zipBtn) {
@@ -398,7 +435,7 @@ function buildUI() {
             dlbtn(event.target, "zip");
         });
     }
-    
+
     // Refresh button
     const refreshBtn = document.getElementById("toolbar-refresh");
     if (refreshBtn) {
@@ -407,7 +444,7 @@ function buildUI() {
             event.target.blur();
         });
     }
-    
+
     // Print button
     const printBtn = document.getElementById("toolbar-print");
     if (printBtn) {
@@ -424,7 +461,7 @@ function buildUI() {
             }
             const tabid = activeLink.getAttribute('href');
             const divToPrint = document.querySelector(tabid);
-            
+
             if (divToPrint) {
                 const newWin = window.open('', 'Print-Window');
                 newWin.document.open();
@@ -434,7 +471,7 @@ function buildUI() {
             }
         });
     }
-    
+
     // Close button
     const closeBtn = document.getElementById("toolbar-close");
     if (closeBtn) {
@@ -451,24 +488,24 @@ function buildUI() {
             }
             const tabid = activeLink.getAttribute('href');
             const tabPane = document.querySelector(tabid);
-            
+
             // Remove tab and content
             activeTab.remove();
             if (tabPane) {
                 tabPane.remove();
             }
-            
+
             // Activate the last remaining tab
             const lastTab = document.querySelector(".nav-tabs li:last-child");
             if (lastTab) {
                 activateTab(lastTab);
             }
-            
+
             // Update both cookies and URL
             saveCookies();
         });
     }
-    
+
     // Form submit button
     const submitBtn = document.getElementById("myform-submit");
     if (submitBtn) {
@@ -480,11 +517,11 @@ function buildUI() {
             const sdateInput = document.getElementById("sdate");
             const edateInput = document.getElementById("edate");
             const orderInput = document.querySelector("#myform input[name='order']:checked");
-            
+
             if (!pilInput || !limitInput || !orderInput) {
                 return;
             }
-            
+
             const pil = pilInput.value.toUpperCase();
             const center = centerInput ? centerInput.value.toUpperCase() : '';
             const ttaaii = ttaaiiInput ? ttaaiiInput.value.toUpperCase() : '';
@@ -492,7 +529,7 @@ function buildUI() {
             const sdate = sdateInput ? sdateInput.value : '';
             const edate = edateInput ? edateInput.value : '';
             const order = orderInput.value;
-            
+
             addTab(pil, center, ttaaii, limit, sdate, edate, true, order);
             event.target.blur();
         });
@@ -504,14 +541,15 @@ function buildUI() {
  */
 function init() {
     buildUI();
-    
+    startupLoadCounter = 0;
+
     // Try modern URL params first, fall back to legacy hash, then cookies
     if (!readURLParams()) {
         if (!readAnchorTags()) {
             readCookies();
         }
     }
-    
+
     // Always save to ensure URL is updated to modern format
     saveCookies();
 }

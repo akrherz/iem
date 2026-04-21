@@ -14,7 +14,7 @@ Changelog
 ~~~~~~~~~
 
 - 2026-04-21: Due to incessant requests made against this service, a 1 second
-  per remote IP address throttle is in place.
+  per remote IP address throttle is in place for DSM requests.
 - 2026-03-13: After gnashing of teeth about the METARs, a compromise was
   reached to return only the latest non-MADISHF METAR when requesting just
   one, but return anything available when requesting more than 1.  Will likely
@@ -324,6 +324,13 @@ def get_mckey(environ: dict) -> str | None:
     return None
 
 
+def get_ip_throttle_secs(environ: dict) -> int:
+    """Figure out what the throttle is."""
+    if any(pil.startswith("DSM") for pil in environ["pil"]):
+        return 1
+    return 0
+
+
 @iemapp(
     help=__doc__,
     schema=MyModel,
@@ -331,7 +338,7 @@ def get_mckey(environ: dict) -> str | None:
     memcachekey=get_mckey,
     content_type=get_ct,
     parse_times=False,
-    ip_throttle_secs=1,
+    ip_throttle_secs=get_ip_throttle_secs,
 )
 def application(environ, start_response):
     """Process the request"""
