@@ -63,8 +63,10 @@
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=csv
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=excel
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=json
+/request/maxcsv.py?q=monthlysummary_KDAL_2018_13.txt
 /request/maxcsv.py?q=monthlysummary_KDSM_2024_1
 /request/maxcsv.py?q=moonphase_-95.44_41.99
+/request/maxcsv.py?q=monthlysummary_CYYT_2018.txt
 /request/maxcsv.py?q=moon_-95.44_41.99
 /request/maxcsv.py?q=uvi
 /request/maxcsv.py?q=lsrsnowfall_ia

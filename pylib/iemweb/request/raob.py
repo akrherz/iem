@@ -24,6 +24,7 @@ sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 from datetime import datetime
 from io import StringIO
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -36,15 +37,17 @@ from sqlalchemy.engine import Connection
 class Schema(CGIModel):
     """See how we are called."""
 
-    dl: bool = Field(
-        False,
-        description="Download CSV instead of displaying it",
-    )
-    sts: datetime = Field(..., description="Start time in UTC")
-    ets: datetime = Field(..., description="End time in UTC")
-    station: str = Field(
-        "KOAX", description="IEM Station Identifier", max_length=4
-    )
+    dl: Annotated[
+        bool,
+        Field(
+            description="Download CSV instead of displaying it",
+        ),
+    ] = False
+    sts: Annotated[datetime, Field(description="Start time in UTC")]
+    ets: Annotated[datetime, Field(description="End time in UTC")]
+    station: Annotated[
+        str, Field(description="IEM Station Identifier", max_length=4)
+    ] = "KOAX"
 
 
 def m(val):

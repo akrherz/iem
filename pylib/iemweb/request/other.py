@@ -19,27 +19,31 @@ station=DSM&sts=2024-01-01&ets=2024-01-02
 
 from datetime import date
 from io import StringIO
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL
+
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    station: str = Field(
-        ..., description="Station Identifier", max_length=10, min_length=3
-    )
+    station: Annotated[
+        str,
+        Field(description="Station Identifier", max_length=10, min_length=3),
+    ]
     ets: date = Field(None, description="End Time")
     sts: date = Field(None, description="Start Time")
     year1: int = Field(None, description="Year 1")
     month1: int = Field(None, description="Month 1")
-    day1: int = Field(None, description="Day 1")
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     year2: int = Field(None, description="Year 2")
     month2: int = Field(None, description="Month 2")
-    day2: int = Field(None, description="Day 2")
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
 def fetcher(station: str, sts: date, ets: date):

@@ -124,8 +124,10 @@ def figure_phase(p1: float, p2: float) -> str:
     return "Full Moon"
 
 
-def do_monthly_summary(station, year, month):
+def do_monthly_summary(station: str, year: int, month: int):
     """Compute some requested monthly summary stats."""
+    if month < 1 or month > 12:
+        return "ERROR, invalid month specified"
     sts = date(year, month, 1)
     ets = (sts + timedelta(days=35)).replace(day=1)
     with get_sqlalchemy_conn("iem") as conn:
@@ -824,6 +826,8 @@ def router(appname):
         df = do_moon(float(tokens[1]), float(tokens[2]))
     elif appname.startswith("monthlysummary"):
         tokens = appname.replace(".txt", "").split("_")
+        if len(tokens) != 4:
+            return "ERROR, invalid monthly summary request"
         df = do_monthly_summary(tokens[1], int(tokens[2]), int(tokens[3]))
     else:
         df = "ERROR, unknown report specified"
