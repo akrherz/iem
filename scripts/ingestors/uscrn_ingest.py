@@ -16,6 +16,7 @@ from psycopg.rows import dict_row
 from pyiem.database import get_dbconn
 from pyiem.observation import Observation
 from pyiem.util import logger
+from requests.exceptions import ReadTimeout
 
 LOG = logger()
 BASE = "/mesonet/tmp/uscrn"
@@ -229,6 +230,10 @@ def download(year, reprocess=False) -> list:
                     fh.write(resp.content.decode("utf-8"))
             if resp.status_code < 400 or reprocess:
                 queue.append([filename, len(resp.content)])
+        except ReadTimeout:
+            LOG.info("%s read timeout, continuing", filename)
+            dlerrors += 1
+            continue
         except Exception as exp:
             dlerrors += 1
             LOG.warning(

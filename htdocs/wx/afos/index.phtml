@@ -1,5 +1,4 @@
 <?php
-// AJAX AFOS Retreiver
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 59);
 require_once "../../../include/myview.php";
@@ -9,7 +8,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="index.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script type="module" src="index.module.js?v=3"></script>
+<script type="module" src="index.module.js?v=4"></script>
 EOM;
 $t->title = "NWS Text Product Finder";
 
@@ -57,7 +56,7 @@ $helpdiv = <<<EOM
         <div id="about" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
           <div class="accordion-body">
             <p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">UNIDATA IDD</a> data feed, a simple script archives <strong>recent</strong> NWS text products into a database. You must know the AFOS PIL / AWIPS ID in order to get the products you want.</p>
-            
+
             <div class="alert alert-warning" role="alert">
               <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Important Notice</h6>
               <p class="mb-2">Please do not depend on this page for operational decision making. Errors can and do occur with data processing, data reception and any other error possible with Internet communications.</p>
@@ -65,7 +64,7 @@ $helpdiv = <<<EOM
             </div>
 
             <p>The archive maintains products from at least the most recent 7 days. A daily scrubber runs at 3:30 AM each day to reindex the products and delete old products, so the query interface is off-line at that time. This interruption should only last 10 minutes.</p>
-            
+
             <p class="mb-0">If you don't like this app, <a href="old.phtml" class="btn btn-sm btn-outline-secondary">here is the old one</a>.</p>
           </div>
         </div>
