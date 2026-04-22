@@ -26,8 +26,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
 
 PDICT = {
-    "tmpf": "Air Temperature [F]",
-    "dwpf": "Dew Point Temperature [F]",
+    "tmpf": "Air Temperature [°F]",
+    "dwpf": "Dew Point Temperature [°F]",
     "relh": "Relative Humidity [%]",
     "q": "Specific Humidity [g/kg]",
 }
@@ -101,6 +101,8 @@ def get_description():
             name="smooth",
             default=14,
             label="Centered smooth of data over given days",
+            ge=1,
+            le=60,
         ),
         dict(type="cmap", name="cmap", default="binary", label="Color Ramp:"),
     ]
@@ -181,6 +183,7 @@ def plotter(ctx: dict):
     ets = datetime(2000, 6, 1, h2)
     sd = "same day" if h2 > h1 else "previous day"
     subtitle = f"{ets:%-I %p} minus {sts:%-I %p} ({sd}) (timezone: {tzname})"
+    total_years = df["year"].max() - df["year"].min()
     title = (
         f"{ctx['_sname']}:: {PDICT[varname]} Difference "
         f"({df['year'].min():.0f}-{df['year'].max():.0f})"
@@ -209,7 +212,7 @@ def plotter(ctx: dict):
         cmap = get_cmap(ctx["cmap"])
         cmap.set_under("tan")
         # Days per year / 7
-        data = H.transpose() / 7.0
+        data = H.transpose() / 7.0 / total_years
         bins = pretty_bins(0, np.max(data))
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
         ax.set_position([0.13, 0.1, 0.71, 0.78])
