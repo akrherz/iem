@@ -79,7 +79,7 @@ def get_description():
     return desc
 
 
-def add_context(ctx):
+def add_context(ctx: dict):
     """Do the common work"""
 
     ctx["station"] = ctx["station"].upper()[:8]
@@ -179,14 +179,6 @@ def add_context(ctx):
     ctx["title"] = f"[{ctx['station']}] {ctx['name']}"
     ldt = ctx["dt"].replace(tzinfo=UTC).astimezone(ZoneInfo(ctx["tzname"]))
     ctx["subtitle"] = f"+/- 72 hours around {ldt:%d %b %Y %-I:%M %p %Z}"
-    # Attempt to find a column in ft
-    for i, col in enumerate(ctx["odf"].columns):
-        if col.find("[ft]") > -1:
-            ctx["primary"] = ctx["odf"].columns[i]
-            break
-    for i, col in enumerate(["primary", "secondary"]):
-        if col not in ctx and i < len(ctx["odf"].columns):
-            ctx[col] = ctx["odf"].columns[i]
 
 
 def get_highcharts(ctx: dict) -> str:
@@ -233,30 +225,31 @@ def get_highcharts(ctx: dict) -> str:
     series = ",".join(lines)
     lines = []
     scatter = []
-    for stage in STAGES:
-        val = ctx[f"sigstage_{stage}"]
-        if val is None:
-            continue
-        lines.append(
-            f"{{value: {val}, color: '{COLORS.get(stage, 'black')}', "
-            "dashStyle: 'shortdash', "
-            f"width: 2, label: {{text: '{stage} {val}'}}}}"
-        )
-        # Workaround for plotLines not appearing when out of range
-        scatter.append(
-            f"""
-{{
-      type: 'scatter',
-      data: [[{df["ticks"].values[0]}, {val}]],
-      showInLegend: false,
-      type: 'scatter',
-      marker: {{
-        enabled: false
-      }},
-      enableMouseTracking: false,
-    }}
-            """
-        )
+    if "[ft]" in ctx[ctx["var"]]:
+        for stage in STAGES:
+            val = ctx[f"sigstage_{stage}"]
+            if val is None:
+                continue
+            lines.append(
+                f"{{value: {val}, color: '{COLORS.get(stage, 'black')}', "
+                "dashStyle: 'shortdash', "
+                f"width: 2, label: {{text: '{stage} {val}'}}}}"
+            )
+            # Workaround for plotLines not appearing when out of range
+            scatter.append(
+                f"""
+    {{
+        type: 'scatter',
+        data: [[{df["ticks"].values[0]}, {val}]],
+        showInLegend: false,
+        type: 'scatter',
+        marker: {{
+            enabled: false
+        }},
+        enableMouseTracking: false,
+        }}
+                """
+            )
     scatterentries = ",".join(scatter)
     if scatter:
         scatterentries = f",{scatterentries}"
