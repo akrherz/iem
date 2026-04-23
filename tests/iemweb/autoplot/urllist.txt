@@ -292,6 +292,7 @@
 159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:custom::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
 159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:jun::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
 159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:ytd::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
+159/network:IA_ASOS::zstation:DSM::var:dd::dir:aoa::thres:20::month:ytd::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
 160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.js
 160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.png
 161/network:IA_ASOS::zstation:AMW::var:max_dwpf::dir:aoa::thres:14::month:winter::year:2020::_r:t::dpi:100.png

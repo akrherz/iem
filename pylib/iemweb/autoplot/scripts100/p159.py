@@ -50,6 +50,7 @@ MDICT = {
 METRICS = {
     "tmpf": "Air Temp (°F)",
     "dwpf": "Dew Point Temp (°F)",
+    "dd": "Dew Point Depression (°F)",
     "feel": "Feels Like Temp (°F)",
     "mslp": "Mean Sea Level Pressure (mb)",
     "alti": "Pressure Altimeter (inHg)",
@@ -61,6 +62,7 @@ METRICS = {
 UNITS = {
     "tmpf": "°F",
     "dwpf": "°F",
+    "dd": "°F",
     "feel": "°F",
     "relh": "%",
     "sped": "mph",
@@ -140,7 +142,7 @@ def get_description():
     return desc
 
 
-def set_df(ctx):
+def set_df(ctx: dict):
     """Set the dataframe"""
     offset = "ts"
     ctx["mlabel"] = (
@@ -192,6 +194,8 @@ def set_df(ctx):
         dbvarname = "(sknt * 1.15)"
     elif ctx["var"] == "gust":
         dbvarname = "(gust * 1.15)"
+    elif ctx["var"] == "dd":
+        dbvarname = "(tmpf - dwpf)"
     if ctx["month"] == "ytd":
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
@@ -232,7 +236,7 @@ def set_df(ctx):
         raise NoDataFound("Error, no results returned!")
 
 
-def set_fig(ctx):
+def set_fig(ctx: dict):
     """Set the plot"""
     ydf = ctx["df"].groupby("year").sum()
     title = (
@@ -294,7 +298,7 @@ def set_fig(ctx):
     years = len(df2.index)
     df2 = ctx["df"][ctx["df"]["year"].isin(df2.index.values)]
     hdf = df2.groupby("hour").sum() / years
-    ax1 = ctx["fig"].add_axes([0.07, 0.1, 0.68, 0.4])
+    ax1 = ctx["fig"].add_axes((0.07, 0.1, 0.68, 0.4))
     ax1.bar(
         hdf.index.values,
         hdf["hits"],
