@@ -24,6 +24,7 @@ from iemweb.util import month2months
 
 PDICT = {
     "max_dwpf": "Highest Dew Point Temperature",
+    "max_dd": "Largest Dew Point Depression",
     "min_dwpf": "Lowest Dew Point Temperature",
     "max_tmpf": "Highest Air Temperature",
     "min_tmpf": "Lowest Air Temperature",
@@ -39,6 +40,7 @@ PDICT = {
 }
 UNITS = {
     "max_dwpf": "°F",
+    "max_dd": "°F",
     "max_tmpf": "°F",
     "max_relh": "%",
     "min_relh": "%",
@@ -133,8 +135,8 @@ def plotter(ctx: dict):
 
     varname = ctx["var"]
     varname2 = varname.split("_")[1]
-    if varname2 in ["dwpf", "tmpf", "feel"]:
-        varname2 = "i" + varname2
+    if varname2 in ["dwpf", "tmpf", "feel", "dd"]:
+        varname2 = f"i{varname2}"
     month = ctx["month"]
     station = ctx["zstation"]
     months = month2months(month)
@@ -170,12 +172,14 @@ def plotter(ctx: dict):
             SELECT (valid + '{delta} minutes'::interval)
                 at time zone :tzname as ts,
             tmpf::int as itmpf, dwpf::int as idwpf,
+            tmpf::int - dwpf::int as idd,
             feel::int as ifeel, mslp, alti, p01i, relh from alldata
             where station = :station {doylimiter} {monlimiter}
             ),
         agg1 as (
             SELECT extract(hour from ts) as hr,
             max(idwpf) as max_dwpf,
+            max(idd) as max_dd,
             max(itmpf) as max_tmpf,
             min(idwpf) as min_dwpf,
             min(itmpf) as min_tmpf,
