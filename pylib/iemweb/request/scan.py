@@ -138,6 +138,9 @@ def application(environ, start_response):
     varnames.insert(0, "station")
     what = environ["what"]
     df = get_df(environ)
+    for varname in varnames:
+        if varname not in df.columns:
+            raise IncompleteWebRequest(f"Unknown variable: `{varname}`")
     if what in ["txt", "download"]:
         headers = [
             ("Content-type", "application/octet-stream"),
@@ -147,9 +150,6 @@ def application(environ, start_response):
         headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)
     sio = StringIO()
-    for varname in varnames:
-        if varname not in df.columns:
-            raise IncompleteWebRequest(f"Unknown variable: `{varname}`")
     df.to_csv(
         sio, index=False, sep=DELIMITERS[environ["delim"]], columns=varnames
     )
