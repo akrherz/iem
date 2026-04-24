@@ -97,6 +97,10 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
     </Style>
+    <Style id=\"DSstyle\">
+      <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+      <PolyStyle><color>7dFFE4C4</color></PolyStyle>
+    </Style>
     <Style id=\"FFstyle\">
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
@@ -214,7 +218,7 @@ with possible_events as (
     where is_emergency and $wfolimiter coalesce(issue, polygon_begin) >= $1
     and coalesce(issue, polygon_begin) <= $2 $pslimiter
 )
-    SELECT 
+    SELECT
     s.issue, s.expire, s.phenomena, s.significance, s.eventid, s.wfo, s.status,
     ST_askml(s.geom) as kml,
     round(ST_area(ST_transform(s.geom,2163)) / 1000000.0) as psize,
@@ -232,7 +236,7 @@ with possible_events as (
     where is_emergency and $wfolimiter coalesce(issue, polygon_begin) <= $1
     and expire > $2 $pslimiter
 )
-    SELECT 
+    SELECT
     s.issue, s.expire, s.phenomena, s.significance, s.eventid, s.wfo, s.status,
     ST_askml(s.geom) as kml,
     round(ST_area(ST_transform(s.geom,2163)) / 1000000.0) as psize,
@@ -243,7 +247,7 @@ with possible_events as (
 EOM
         );
     } else {
-        $stname_int = iem_pg_prepare($db, "SELECT 
+        $stname_int = iem_pg_prepare($db, "SELECT
             issue, expire, phenomena, significance, eventid, wfo, status,
             ST_askml(geom) as kml,
             round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
