@@ -495,9 +495,12 @@ def dat_handler(fdict: dict, res: dict) -> str:
     res["pltvars"].append(f"datglobalid:{gid}")
     # Query DAT for the list of events
     ss = '<select name="datglobalid">\n'
-    sts = datetime.strptime(
-        "2024/05/21" if dt == "" else dt, "%Y/%m/%d"
-    ).replace(tzinfo=ZoneInfo("UTC"))
+    try:
+        sts = datetime.strptime(
+            "2024/05/21" if dt == "" else dt, "%Y/%m/%d"
+        ).replace(tzinfo=ZoneInfo("UTC"))
+    except ValueError as exp:
+        raise BadWebRequest("Invalid date format for dat") from exp
     ets = sts + timedelta(hours=36)
     url = (
         "https://services.dat.noaa.gov/arcgis/rest/services/"
