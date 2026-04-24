@@ -34,11 +34,11 @@ const initializeLocationGroups = () => {
     // Function to update visibility based on selected radio
     const updateLocationVisibility = () => {
         const selectedValue = document.querySelector('input[name="location_group"]:checked')?.value;
-        
+
         locationContainers.forEach(container => {
             const containerId = container.id;
             const shouldShow = containerId.endsWith(`-${selectedValue}`);
-            
+
             // Show/hide with smooth transition
             container.style.display = shouldShow ? 'block' : 'none';
             container.style.opacity = shouldShow ? '1' : '0.5';
@@ -95,7 +95,7 @@ const init = () => {
     if (kmlBtn) {
         kmlBtn.addEventListener('click', (event) => {
             event.preventDefault();
-            submitFormWithAction(form, '/kml/sbw_interval.php');
+            setAcceptAndSubmit(form, 'kml');
         });
     }
 
