@@ -2,13 +2,13 @@ ci:
   autoupdate_schedule: quarterly
 repos:
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v10.2.0'
+    rev: 'v10.2.1'
     hooks:
       - id: eslint
         additional_dependencies:
-          - "eslint@^9.28.0"
-          - "@eslint/js@^9.28.0"
-          - "globals@^16.2.0"
+          - "eslint"
+          - "@eslint/js"
+          - "globals"
         files: \.js?$
         types: [file]
         args:
