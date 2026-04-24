@@ -245,17 +245,13 @@ function updateColumnHeaders(selectedDateTime) {
         if (!(col.field in timeOffsets)) return col;
 
         const tOffset = timeOffsets[col.field];
-        let startDateTime = null;
-        let endDateTime = null;
+        let startDateTime = new Date(selectedDateTime.getTime() - (tOffset * 60 * 60 * 1000));
+        let endDateTime = new Date(selectedDateTime);
 
         if (tOffset === 0) {
             // Midnight column: from midnight to selected time
             startDateTime = new Date(selectedDateTime);
             startDateTime.setHours(0, 0, 0, 0);
-            endDateTime = new Date(selectedDateTime);
-        } else {
-            // Other columns: from (selected time - offset) to selected time
-            startDateTime = new Date(selectedDateTime.getTime() - (tOffset * 60 * 60 * 1000));
             endDateTime = new Date(selectedDateTime);
         }
 
@@ -263,10 +259,8 @@ function updateColumnHeaders(selectedDateTime) {
         const endStr = formatColumnDate(endDateTime);
 
         // Create multi-line header
-        let headerText = '';
-        if (tOffset === 0) {
-            headerText = `Midnight<br/>${startStr}<br/>${endStr}`;
-        } else {
+        let headerText = `Midnight<br/>${startStr}<br/>${endStr}`;
+        if (tOffset !== 0) {
             headerText = `${formatTimeOffset(tOffset)}<br/>${startStr}<br/>${endStr}`;
         }
 

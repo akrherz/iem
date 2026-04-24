@@ -16,6 +16,8 @@ services found at
 Changelog
 ---------
 
+- 2026-04-24: KML output support was added via `accept=kml`. The KML include
+  "TimeSpan" information for KML clients that support it.
 - 2026-03-16: Boolean fields were improved to allow for more truthy inputs
   than just `yes` and `no`.
 - 2025-12-17: Improved the error message when provided time information is
@@ -72,6 +74,12 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=csv&at=2024-05-21T21:20Z&timeopt=2&limitps=1&phenomena=TO\
 &significance=W
 
+Same request, but return KML
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=kml&at=2024-05-21T21:20Z&timeopt=2&limitps=1&phenomena=TO\
+&significance=W
+
 Same request, but using the more verbose parameterization for the timestamp
 and also filtering the result by text products signed by john
 
@@ -87,16 +95,19 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from stat import S_IFREG
 from typing import Annotated
+from xml.sax.saxutils import escape as xml_escape
 
 import fiona
 import pandas as pd
 from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
+from sqlalchemy.engine import Connection
 from stream_zip import ZIP_32, stream_zip
 
 from iemweb.fields import VTEC_YEAR_FIELD_OPTIONAL
@@ -110,8 +121,11 @@ class Schema(CGIModel):
     accept: Annotated[
         str,
         Field(
-            pattern="^(shapefile|excel|csv)$",
-            description="The format to return, either shapefile or excel.",
+            pattern="^(shapefile|excel|csv|kml)$",
+            description=(
+                "Materialize the data as the given format, either "
+                "shapefile, excel, csv, or kml.  Default is shapefile."
+            ),
         ),
     ] = "shapefile"
     at: AwareDatetime = Field(
@@ -352,6 +366,20 @@ def dfmt(txt):
     return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]} {txt[8:10]}:{txt[10:12]}"
 
 
+def kml_stamp(txt: str | None) -> str:
+    """Convert YYYYmmddHHMM into KML timestamp format."""
+    if txt is None or len(txt) != 12:
+        return ""
+    return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]}T{txt[8:10]}:{txt[10:12]}:00Z"
+
+
+def kml_nice_date(txt: str | None) -> str:
+    """Convert YYYYmmddHHMM into user-friendly UTC time text."""
+    if txt is None or len(txt) != 12:
+        return "Not available"
+    return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]} {txt[8:10]}:{txt[10:12]} UTC"
+
+
 def char3(wfos):
     """Make sure we don't have any 4 char IDs."""
     res = []
@@ -456,15 +484,20 @@ def build(environ: dict) -> tuple[str, str, dict]:
         sbw_table = f"sbw_{sts.year}"
 
     geomcol = "geom"
+    sbw_geosql = "ST_AsBinary(w.geom)"
     if environ["simple"]:
         geomcol = "simple_geom"
+    cbw_geosql = f"ST_AsBinary(u.{geomcol})"
+    if environ["accept"] == "kml":
+        sbw_geosql = "ST_AsKML(w.geom)"
+        cbw_geosql = f"ST_AsKML(u.{geomcol})"
 
     cols = (
         "wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire, "
         "phenomena, gtype, significance, eventid,  status, ugc, area2d, "
         "utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, "
         "is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag, "
-        "tornadotag, damagetag, product_id, fcster "
+        "tornadotag, damagetag, product_id, fcster, vtec_year "
     )
     if environ["accept"] not in ["excel", "csv"]:
         cols = f"geo, {cols}"
@@ -491,7 +524,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
     return (
         f"""
     WITH stormbased as (
-     SELECT distinct ST_AsBinary(w.geom) as geo, 'P'::text as gtype,
+     SELECT distinct {sbw_geosql} as geo, 'P'::text as gtype,
      significance, wfo, status, eventid, ''::text as ugc,
      phenomena,
      ST_area( ST_transform(w.geom,9311) ) / 1000000.0 as area2d,
@@ -509,13 +542,13 @@ def build(environ: dict) -> tuple[str, str, dict]:
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      windtag, hailtag, tornadotag,
      coalesce(damagetag, floodtag_damage) as damagetag,
-     product_id, product_signature as fcster
+     product_id, product_signature as fcster, vtec_year
      from {sbw_table} w {table_extra}
      WHERE {statuslimit} and {sbwtimelimit}
      {wfo_limiter} {limiter} {elimiter} {pdslimiter} {fcsterlimiter_sbw}
     ),
     countybased as (
-     SELECT ST_AsBinary(u.{geomcol}) as geo, 'C'::text as gtype,
+     SELECT {cbw_geosql} as geo, 'C'::text as gtype,
      significance,
      w.wfo, status, eventid, u.ugc, phenomena,
      u.area2163 as area2d,
@@ -532,7 +565,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      null::real as windtag, null::real as hailtag, null::varchar as tornadotag,
      null::varchar as damagetag,
-     product_ids[1] as product_id, fcster
+     product_ids[1] as product_id, fcster, vtec_year
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
      {timelimit} {wfo_limiter2} {limiter} {elimiter} {pdslimiter}
      {fcsterlimiter_warnings}
@@ -543,6 +576,133 @@ def build(environ: dict) -> tuple[str, str, dict]:
         fn,
         params,
     )
+
+
+def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
+    """Materialize as KML."""
+    res = conn.execute(sql_helper(sql), params)
+    # Careful that the first byte is the XML
+    yield b"""<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+ <name>IEM NWS WWA Export</name>
+ <open>1</open>
+ <StyleMap id="TOstyle">
+        <Pair><key>normal</key><styleUrl>#TOstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#TOstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="TOstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7d0000ff</color></PolyStyle>
+        </Style>
+ <Style id="TOstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a00000ff</color></PolyStyle>
+        </Style>
+ <StyleMap id="MAstyle">
+        <Pair><key>normal</key><styleUrl>#MAstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#MAstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="MAstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7d00ff00</color></PolyStyle>
+        </Style>
+ <Style id="MAstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a000ff00</color></PolyStyle>
+        </Style>
+ <StyleMap id="SVstyle">
+        <Pair><key>normal</key><styleUrl>#SVstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#SVstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="SVstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7d00ffff</color></PolyStyle>
+        </Style>
+ <Style id="SVstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a000ffff</color></PolyStyle>
+        </Style>
+ <StyleMap id="FAstyle">
+        <Pair><key>normal</key><styleUrl>#FAstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#FAstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="FAstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7d00ff00</color></PolyStyle>
+        </Style>
+ <Style id="FAstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a000ff00</color></PolyStyle>
+        </Style>
+ <StyleMap id="DSstyle">
+        <Pair><key>normal</key><styleUrl>#DSstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#DSstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="DSstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7dFFE4C4</color></PolyStyle>
+        </Style>
+ <Style id="DSstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a0FFE4C4</color></PolyStyle>
+        </Style>
+ <StyleMap id="FFstyle">
+        <Pair><key>normal</key><styleUrl>#FFstyle_n</styleUrl></Pair>
+        <Pair><key>highlight</key><styleUrl>#FFstyle_h</styleUrl></Pair>
+ </StyleMap>
+ <Style id="FFstyle_n">
+            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>7d00ff00</color></PolyStyle>
+        </Style>
+ <Style id="FFstyle_h">
+            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
+            <PolyStyle><color>a000ff00</color></PolyStyle>
+        </Style>
+"""
+    for row in res.mappings():
+        if row["geo"] is None:  # Is this possible?
+            continue
+        uri = (
+            f"https://mesonet.agron.iastate.edu/vtec/?year={row['vtec_year']}&"
+            f"phenomena={row['phenomena']}&sig={row['significance']}&"
+            f"eventid={row['eventid']}&wfo={row['wfo']}"
+        )
+        pname = (
+            f"{row['wfo']}.{row['phenomena']}.{row['significance']}."
+            f"{row['eventid']} "
+            f"{get_ps_string(row['phenomena'], row['significance'])}"
+        )
+        pname_xml = xml_escape(pname)
+        issued = kml_stamp(row["utc_issue"])
+        expired = kml_stamp(row["utc_expire"])
+        status = row["status"] or ""
+        gtype = row["gtype"] or ""
+        area2d = row["area2d"] if row["area2d"] is not None else 0.0
+        utce = kml_nice_date(row["utc_expire"])
+        yield (
+            f"""
+<Placemark>
+    <name>{pname_xml}</name>
+    <TimeSpan><begin>{issued}</begin><end>{expired}</end></TimeSpan>
+    <description>
+        <![CDATA[
+  <p>
+    <font color="red"><i>Issued:</i></font> {kml_nice_date(row["utc_issue"])}
+    <br /><font color="red"><i>Expires:</i></font> {utce}
+    <br /><font color="red"><i>Status:</i></font> {status}
+    <br /><font color="red"><i>Geometry Type:</i></font> {gtype}
+    <br /><font color="red"><i>Area:</i></font> {area2d:.2f} km^2
+    <br /><a href="{uri}">IEM VTEC Browser Link</a>
+  </p>
+        ]]>
+    </description>
+    <styleUrl>#{row["phenomena"]}style</styleUrl>
+    {row["geo"]}
+</Placemark>
+"""
+        ).encode()
+    yield b"</Document></kml>"
 
 
 def do_excel(sql, fmt, params):
@@ -576,7 +736,7 @@ def process_results_yield_records(cursor, csv):
         "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
         "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
         "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
-        "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID,FCSTER\n"
+        "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID,FCSTER,VTEC_YEAR\n"
     )
     for row in cursor.mappings():
         if row["geo"] is None:  # Is this possible?
@@ -599,7 +759,7 @@ def process_results_yield_records(cursor, csv):
             f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
             f"{row['hailtag']},{row['tornadotag']},"
             f"{row['damagetag']},{row['product_id']},"
-            f"{row['fcster']}\n"
+            f"{row['fcster']},{row['vtec_year']}\n"
         )
         yield {
             "properties": {
@@ -629,6 +789,7 @@ def process_results_yield_records(cursor, csv):
                 "DAMAGTAG": row["damagetag"],
                 "PROD_ID": row["product_id"],
                 "FCSTER": row["fcster"],
+                "VTEC_YR": row["vtec_year"],
             },
             "geometry": mapping(mp),
         }
@@ -663,6 +824,18 @@ def application(environ, start_response):
         )
         yield str(exp).encode("ascii")
         return
+    if environ["accept"] == "kml":
+        start_response(
+            "200 OK",
+            [
+                ("Content-type", "application/vnd.google-earth.kml+xml"),
+                ("Content-disposition", f"attachment; Filename={fn}.kml"),
+            ],
+        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            yield from do_kml(sql, params, conn)
+        return
+
     if environ["accept"] == "excel":
         headers = [
             ("Content-type", EXL),
@@ -717,6 +890,7 @@ def application(environ, start_response):
                         "DAMAGTAG": "str:16",
                         "PROD_ID": "str:36",
                         "FCSTER": "str:24",
+                        "VTEC_YR": "int:4",
                     },
                 },
             ) as output,

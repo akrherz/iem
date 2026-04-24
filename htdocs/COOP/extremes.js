@@ -33,7 +33,7 @@ function initializeApp() {
     appState.isStationView = Boolean(appState.config.station);
     appState.labelAttribute = appState.config.labelAttribute; // Set from URL parameter
     appState.yearFilter = appState.config.yearFilter; // Set from URL parameter
-    
+
     // Hide/show components based on view mode
     if (appState.isStationView) {
         // Station view - hide map and form controls
@@ -52,9 +52,9 @@ function initializeApp() {
             formContainer.style.display = 'block';
         }
     }
-    
+
     showLoading(true);
-    
+
     fetchData()
         .then(() => {
             renderHeader();
@@ -113,22 +113,14 @@ function getConfig() {
  */
 function fetchData() {
     const vars = appState.config;
-    let apiUrl = '';
-    
-    if (vars.station) {
-        // Station-specific climatology
-        const syear = getStartYear(vars.tbl);
-        const eyear = getEndYear(vars.tbl);
-        apiUrl = `/json/climodat_stclimo.py?station=${vars.station}&syear=${syear}&eyear=${eyear}`;
-    } else {
-        // Day-specific climatology
-        const syear = getStartYear(vars.tbl);
-        const eyear = getEndYear(vars.tbl);
-        apiUrl = `/geojson/climodat_dayclimo.py?network=${vars.network}&month=${vars.month}&day=${vars.day}&syear=${syear}&eyear=${eyear}`;
-    }
+    const syear = getStartYear(vars.tbl);
+    const eyear = getEndYear(vars.tbl);
+    const apiUrl = vars.station
+        ? `/json/climodat_stclimo.py?station=${vars.station}&syear=${syear}&eyear=${eyear}`
+        : `/geojson/climodat_dayclimo.py?network=${vars.network}&month=${vars.month}&day=${vars.day}&syear=${syear}&eyear=${eyear}`;
 
     appState.currentApiUrl = apiUrl;
-    
+
     return fetch(apiUrl)
         .then((response) => {
             if (!response.ok) {
@@ -179,13 +171,10 @@ function getEndYear(tbl) {
 function renderHeader() {
     const headerSection = document.getElementById('header-section');
     const vars = appState.config;
-    
-    let headerHtml = '';
-    
-    if (vars.station) {
+    const headerHtml = vars.station ? (() => {
         // Station mode - Daily Climatology for Single Station
         const backLink = `extremes.php?network=${vars.network}&tbl=${vars.tbl}&month=${vars.month}&day=${vars.day}&label=${appState.labelAttribute}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}`;
-        headerHtml = `
+        return `
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
                     <h3 class="mb-1">🏛️ Daily Climatology for Single Station</h3>
@@ -199,21 +188,20 @@ function renderHeader() {
                 </div>
             </div>
         `;
-    } else {
+    })() : (() => {
         // Date mode - Single Date Climatology for State
         const date = new Date(2000, vars.month - 1, vars.day);
         const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
         const networkName = getNetworkDisplayName(vars.network);
-        
-        headerHtml = `
+        return `
             <div class="mb-3">
                 <h3 class="mb-1">🌡️ Single Date Climatology for State</h3>
                 <h4 class="text-primary mb-0">${dateStr} - ${networkName}</h4>
                 <p class="text-muted mb-0">Showing records for all stations on this date. Click any station ID to see its full year of data.</p>
             </div>
         `;
-    }
-    
+    })();
+
     headerSection.innerHTML = headerHtml;
 };
 
@@ -223,7 +211,7 @@ function renderHeader() {
 function getNetworkDisplayName(network) {
     const networkNames = {
         'IACLIMATE': 'Iowa',
-        'ILCLIMATE': 'Illinois', 
+        'ILCLIMATE': 'Illinois',
         'INCLIMATE': 'Indiana',
         'KSCLIMATE': 'Kansas',
         'KYCLIMATE': 'Kentucky',
@@ -244,11 +232,11 @@ function getNetworkDisplayName(network) {
  */
 function initializeTable() {
     const columns = getTableColumns();
-    
+
     appState.table = new Tabulator("#data-table", {
         data: prepareTableData(), // Use prepared data instead of raw data
         layout: "fitDataTable",
-        responsiveLayout: "hide", 
+        responsiveLayout: "hide",
         pagination: "local",
         paginationSize: 10, // Show 10 rows by default
         paginationSizeSelector: [10, 25, 50, 100],
@@ -266,7 +254,7 @@ function initializeTable() {
             {column: appState.isStationView ? "date_link" : "station_link", dir: "asc"}
         ]
     });
-    
+
     // Add export buttons after table is created
     addExportButtons();
 }
@@ -275,17 +263,9 @@ function initializeTable() {
  * Get column definitions for Tabulator based on view type
  */
 function getTableColumns() {
-    let firstColumnTitle = '';
-    let firstColumnField = '';
-    
-    if (appState.isStationView) {
-        firstColumnTitle = 'Date';
-        firstColumnField = 'date_link';
-    } else {
-        firstColumnTitle = 'Station';
-        firstColumnField = 'station_link';
-    }
-    
+    const firstColumnTitle = appState.isStationView ? 'Date' : 'Station';
+    const firstColumnField = appState.isStationView ? 'date_link' : 'station_link';
+
     return [
         {
             title: firstColumnTitle,
@@ -328,7 +308,7 @@ function getTableColumns() {
             sorter: "number"
         },
         {
-            title: "Max High °F", 
+            title: "Max High °F",
             field: "max_high",
             width: 90,
             formatter(cell) {
@@ -339,7 +319,7 @@ function getTableColumns() {
         },
         {
             title: "Max High Year",
-            field: "max_high_years", 
+            field: "max_high_years",
             width: 100,
             formatter(cell) {
                 return formatYears(cell.getValue());
@@ -365,7 +345,7 @@ function getTableColumns() {
         {
             title: "Min High Year",
             field: "min_high_years",
-            width: 100, 
+            width: 100,
             formatter(cell) {
                 return formatYears(cell.getValue());
             },
@@ -389,7 +369,7 @@ function getTableColumns() {
         },
         {
             title: "Max Low °F",
-            field: "max_low", 
+            field: "max_low",
             width: 90,
             formatter(cell) {
                 return cell.getValue() || '';
@@ -414,7 +394,7 @@ function getTableColumns() {
         {
             title: "Min Low °F",
             field: "min_low",
-            width: 90, 
+            width: 90,
             formatter(cell) {
                 return cell.getValue() || '';
             },
@@ -422,7 +402,7 @@ function getTableColumns() {
             sorter: "number"
         },
         {
-            title: "Min Low Year", 
+            title: "Min Low Year",
             field: "min_low_years",
             width: 100,
             formatter(cell) {
@@ -481,11 +461,11 @@ function updateTable() {
         initializeTable();
         return;
     }
-    
+
     // Prepare data for Tabulator
     const tableData = prepareTableData();
     appState.table.setData(tableData);
-    
+
     // Ensure export buttons are present
     addExportButtons();
 }
@@ -497,14 +477,11 @@ function prepareTableData() {
     if (!appState.data || appState.data.length === 0) {
         return [];
     }
-    
+
     const vars = appState.config;
 
     return appState.data.map((row) => {
-        let linkCell = '';
-        let linkField = '';
-        
-        if (appState.isStationView) {
+        const linkData = appState.isStationView ? (() => {
             // Station view - link to date
             const date = new Date(2000, row.month - 1, row.day);
             const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -515,9 +492,11 @@ function prepareTableData() {
             if (appState.yearFilter) {
                 link += `&year=${appState.yearFilter}`;
             }
-            linkCell = `<a href="${link}">${dateStr}</a>`;
-            linkField = 'date_link';
-        } else {
+            return {
+                linkCell: `<a href="${link}">${dateStr}</a>`,
+                linkField: 'date_link'
+            };
+        })() : (() => {
             // Day view - link to station with name and ID
             let link = `extremes.php?station=${row.station}&network=${vars.network}&tbl=${vars.tbl}`;
             if (appState.labelAttribute) {
@@ -526,23 +505,24 @@ function prepareTableData() {
             if (appState.yearFilter) {
                 link += `&year=${appState.yearFilter}`;
             }
-            
+
             // Use station name if available, otherwise fall back to station ID
             const displayText = row.name ? `${row.name} (${row.station})` : row.station;
-            
-            linkCell = `<a href="${link}">${displayText}</a>`;
-            linkField = 'station_link';
-        }
-        
+            return {
+                linkCell: `<a href="${link}">${displayText}</a>`,
+                linkField: 'station_link'
+            };
+        })();
+
         // Create a new object with the link field
         const tableRow = { ...row };
-        tableRow[linkField] = linkCell;
-        
+        tableRow[linkData.linkField] = linkData.linkCell;
+
         // Add sortable date field for station view (month*100 + day gives proper numeric sort)
         if (appState.isStationView) {
             tableRow.date_sort = row.month * 100 + row.day;
         }
-        
+
         return tableRow;
     });
 }
@@ -569,7 +549,7 @@ function formatYears(years) {
 function showLoading(show) {
     const loadingIndicator = document.getElementById('loading-indicator');
     const contentArea = document.getElementById('content-area');
-    
+
     if (loadingIndicator) {
         loadingIndicator.style.display = show ? 'block' : 'none';
     }
@@ -584,7 +564,7 @@ function showLoading(show) {
 function showApiInfo() {
     const apiInfo = document.getElementById('api-info');
     const apiUrl = document.getElementById('api-url');
-    
+
     if (apiInfo && apiUrl) {
         if (appState.currentApiUrl) {
         apiUrl.textContent = appState.currentApiUrl;
@@ -605,7 +585,7 @@ function showError(message) {
         <p>${message}</p>
         <p>Please try again or contact support if the problem persists.</p>
     `;
-    
+
     if (contentArea) {
         contentArea.insertBefore(errorDiv, contentArea.firstChild);
     }
@@ -723,11 +703,11 @@ function attachEventListeners() {
 function initializeMap() {
     // Create vector source for station data
     appState.vectorSource = new ol.source.Vector();
-    
+
     // Create popup overlay
     const container = document.getElementById('popup');
     const closer = document.getElementById('popup-closer');
-    
+
     appState.popup = new ol.Overlay({
         element: container,
         autoPan: {
@@ -736,14 +716,14 @@ function initializeMap() {
             }
         }
     });
-    
+
     // Close popup when X is clicked
     closer.onclick = function() {
         appState.popup.setPosition();
         closer.blur();
         return false;
     };
-    
+
     // Initialize map
     appState.map = new ol.Map({
         target: 'map-container',
@@ -782,14 +762,14 @@ function initializeMap() {
             zoom: 7
         })
     });
-    
+
     // Add layer switcher control
     const layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Toggle layer visibility',
         groupSelectStyle: 'children'
     });
     appState.map.addControl(layerSwitcher);
-    
+
     // Add click handler for station popups
     appState.map.on('singleclick', (evt) => {
         const clickedFeature = appState.map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
@@ -799,7 +779,7 @@ function initializeMap() {
             appState.popup.setPosition();
         }
     });
-    
+
     // Change cursor when hovering over stations
     appState.map.on('pointermove', (evt) => {
         if (evt.dragging) return;
@@ -810,7 +790,7 @@ function initializeMap() {
             target.style.cursor = hit ? 'pointer' : '';
         }
     });
-    
+
     // Add stations to map if data is available
     if (appState.data) {
         addStationsToMap();
@@ -822,9 +802,9 @@ function initializeMap() {
  */
 function addStationsToMap() {
     if (!appState.vectorSource || appState.isStationView) return;
-    
+
     appState.vectorSource.clear();
-    
+
     // Get the original GeoJSON features (we need to fetch again to get coordinates)
     // Since we already processed the data, we need the original GeoJSON
     fetchGeoJSONForMap();
@@ -838,7 +818,7 @@ function fetchGeoJSONForMap() {
     const syear = getStartYear(vars.tbl);
     const eyear = getEndYear(vars.tbl);
     const apiUrl = `/geojson/climodat_dayclimo.py?network=${vars.network}&month=${vars.month}&day=${vars.day}&syear=${syear}&eyear=${eyear}`;
-    
+
     fetch(apiUrl)
         .then((response) => {
             return response.json();
@@ -859,21 +839,21 @@ function addGeoJSONToMap(geoJsonData) {
     const features = format.readFeatures(geoJsonData, {
         featureProjection: 'EPSG:3857' // Web Mercator for display
     });
-    
+
     // Store all features for filtering
     appState.allFeatures = features;
-    
+
     // Apply current filter
     const filteredFeatures = filterFeaturesByYear(features);
     appState.vectorSource.addFeatures(filteredFeatures);
-    
+
     // Populate year filter dropdown
     populateYearFilter(features);
-    
+
     // Calculate initial color ranges and update legend
     appState.colorRanges = calculateColorRanges();
     updateLegend();
-    
+
     // Fit map to show all stations
     if (filteredFeatures.length > 0) {
         const extent = appState.vectorSource.getExtent();
@@ -1015,7 +995,7 @@ function showStationPopup(feature, coordinate) {
 
     popupHtml += `</table>
         <p style="margin-top: 8px; font-size: 11px;">
-            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? `&label=${appState.labelAttribute}` : ''}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}" 
+            <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? `&label=${appState.labelAttribute}` : ''}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}"
                target="_blank">View station details →</a>
         </p>`;
 
@@ -1030,10 +1010,10 @@ function updateMapLabels() {
     if (appState.vectorSource) {
         // Recalculate color ranges for new attribute
         appState.colorRanges = calculateColorRanges();
-        
+
         // Update legend
         updateLegend();
-        
+
         // Force redraw of all features by changing the style
         const features = appState.vectorSource.getFeatures();
         features.forEach((feature) => {
@@ -1047,13 +1027,13 @@ function updateMapLabels() {
  */
 function updateLegend() {
     const legendElement = document.querySelector('.map-legend');
-    
+
     if (!legendElement) {
         return;
     }
-    
+
     let legendHtml = '';
-    
+
     if (!appState.colorRanges) {
         // No color ranges (e.g., station names) - show info message instead
         legendElement.style.display = 'block';
@@ -1064,18 +1044,18 @@ function updateLegend() {
         `;
         return;
     }
-    
+
     // Show legend with current attribute info
     legendElement.style.display = 'block';
-    
+
     const attributeLabel = getAttributeLabel(appState.labelAttribute);
-    
+
     legendHtml = `
         <div style="font-size: 11px; color: #666; margin-bottom: 4px;">
             ${attributeLabel} ranges:
         </div>
     `;
-    
+
     appState.colorRanges.ranges.forEach((range) => {
         legendHtml += `
             <div class="legend-item">
@@ -1084,7 +1064,7 @@ function updateLegend() {
             </div>
         `;
     });
-    
+
     legendElement.innerHTML = legendHtml;
 }
 
@@ -1112,10 +1092,10 @@ function getAttributeLabel(attribute) {
  */
 function calculateColorRanges() {
     if (!appState.data || appState.data.length === 0) return null;
-    
+
     // Skip color calculation for non-numeric attributes
     if (appState.labelAttribute === 'station') return null;
-    
+
     // Get all numeric values for the selected attribute
     const values = appState.data
         .map((item) => item[appState.labelAttribute])
@@ -1123,21 +1103,21 @@ function calculateColorRanges() {
         .sort((a, b) => a - b);
 
     if (values.length === 0) return null;
-    
+
     const min = values[0];
     const max = values[values.length - 1];
     const range = max - min;
-    
+
     if (range === 0) return null;
-    
+
     // For temperature data, use appropriate decimal places
     const isTemp = appState.labelAttribute.includes('high') || appState.labelAttribute.includes('low');
     const isPrecip = appState.labelAttribute.includes('precip');
     const decimals = isPrecip ? 2 : (isTemp ? 0 : 1);
-    
+
     // Create 5 equal ranges
     const step = range / 5;
-    
+
     return {
         min,
         max,
@@ -1168,7 +1148,7 @@ function getColorForValue(value) {
     if (!appState.colorRanges || typeof value !== 'number') {
         return '#cccccc'; // Default gray for non-numeric or missing data
     }
-    
+
     for (let i = 0; i < appState.colorRanges.ranges.length; i++) {
         const range = appState.colorRanges.ranges[i];
         if (i === appState.colorRanges.ranges.length - 1) {
@@ -1182,7 +1162,7 @@ function getColorForValue(value) {
             }
         }
     }
-    
+
     return '#cccccc'; // Default
 }
 
@@ -1196,46 +1176,46 @@ function handleFormChange() {
     const monthSelect = form.querySelector('select[name="month"]');
     const daySelect = form.querySelector('select[name="day"]');
     const tblSelect = form.querySelector('select[name="tbl"]');
-    
+
     // Build new URL parameters
     const params = new URLSearchParams(window.location.search);
-    
+
     if (networkSelect) params.set('network', networkSelect.value);
     if (monthSelect) params.set('month', monthSelect.value);
     if (daySelect) params.set('day', daySelect.value);
     if (tblSelect) params.set('tbl', tblSelect.value);
-    
+
     // Keep existing sort parameters
     if (appState.config.sortcol) params.set('sortcol', appState.config.sortcol);
     if (appState.config.sortdir) params.set('sortdir', appState.config.sortdir);
-    
+
     // Keep current label attribute setting
     if (appState.labelAttribute) params.set('label', appState.labelAttribute);
-    
+
     // Clear year filter when switching to different dataset (network/date change)
     // The year filter is specific to a particular dataset combination
     appState.yearFilter = null;
     appState.config.yearFilter = null;
-    
+
     // Make sure year parameter is not included in the new URL
     params.delete('year');
-    
+
     // Update URL without page reload
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.pushState({}, '', newUrl);
-    
+
     // Update app config
     appState.config = getConfig();
-    
+
     // Show loading and reload data
     showLoading(true);
-    
+
     // Clear any existing error messages
     const existingErrors = document.querySelectorAll('.error-message');
     existingErrors.forEach((error) => {
         error.remove();
     });
-    
+
     fetchData()
         .then(() => {
             renderHeader();
@@ -1247,13 +1227,13 @@ function handleFormChange() {
                     appState.vectorSource.clear();
                 }
                 addStationsToMap();
-                
+
                 // Reset year filter UI since we have a new dataset
                 const yearSelect = document.getElementById('year-filter');
                 if (yearSelect) {
                     yearSelect.value = '';
                 }
-                
+
                 // Update year filter visibility for current attribute
                 updateYearFilterVisibility();
             }
@@ -1271,13 +1251,13 @@ function handleFormChange() {
  */
 function updateUrl() {
     const params = new URLSearchParams();
-    
+
     // Add all current config values to ensure they're preserved
     params.set('network', appState.config.network);
     params.set('month', appState.config.month);
     params.set('day', appState.config.day);
     params.set('tbl', appState.config.tbl);
-    
+
     // Only add non-default values to keep URLs clean
     if (appState.config.sortcol && appState.config.sortcol !== 'station') {
         params.set('sortcol', appState.config.sortcol);
@@ -1291,7 +1271,7 @@ function updateUrl() {
     if (appState.yearFilter) {
         params.set('year', appState.yearFilter);
     }
-    
+
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.pushState({}, '', newUrl);
 }
@@ -1302,10 +1282,10 @@ function updateUrl() {
 function populateYearFilter(features) {
     const yearSelect = document.getElementById('year-filter');
     if (!yearSelect) return;
-    
+
     // Collect years based on the currently selected attribute
     const allYears = new Set();
-    
+
     // Determine which year field to use based on current label attribute
     let yearField = null;
     switch (appState.labelAttribute) {
@@ -1328,10 +1308,10 @@ function populateYearFilter(features) {
             // For non-record attributes, collect from all year arrays
             yearField = null;
     }
-    
+
     features.forEach((feature) => {
         const props = feature.getProperties();
-        
+
         if (yearField) {
             // Collect years from specific field only
             const years = props[yearField];
@@ -1343,7 +1323,7 @@ function populateYearFilter(features) {
         } else {
             // Collect from all year arrays (for avg attributes)
             const yearArrays = [
-                'max_high_years', 'min_high_years', 'max_low_years', 
+                'max_high_years', 'min_high_years', 'max_low_years',
                 'min_low_years', 'max_precip_years'
             ];
 
@@ -1357,13 +1337,13 @@ function populateYearFilter(features) {
             });
         }
     });
-    
+
     // Sort years in descending order
     const sortedYears = Array.from(allYears).sort((a, b) => b - a);
 
     // Clear existing options except "All Years"
     yearSelect.innerHTML = '<option value="">All Years</option>';
-    
+
     // Add year options
     sortedYears.forEach((year) => {
         const option = document.createElement('option');
@@ -1383,7 +1363,7 @@ function filterFeaturesByYear(features) {
     if (!appState.yearFilter) {
         return features; // No filter applied
     }
-    
+
     // Determine which year field to check based on the currently selected attribute
     let yearField = null;
     switch (appState.labelAttribute) {
@@ -1408,10 +1388,10 @@ function filterFeaturesByYear(features) {
             return features.filter((feature) => {
                 const props = feature.getProperties();
                 const yearArrays = [
-                    'max_high_years', 'min_high_years', 'max_low_years', 
+                    'max_high_years', 'min_high_years', 'max_low_years',
                     'min_low_years', 'max_precip_years'
                 ];
-                
+
                 for (let i = 0; i < yearArrays.length; i++) {
                     const years = props[yearArrays[i]];
                     if (years?.includes?.(parseInt(appState.yearFilter))) {
@@ -1421,7 +1401,7 @@ function filterFeaturesByYear(features) {
                 return false;
             });
     }
-    
+
     // Filter by specific record type
     return features.filter((feature) => {
         const props = feature.getProperties();
@@ -1435,21 +1415,21 @@ function filterFeaturesByYear(features) {
  */
 function applyYearFilter() {
     if (!appState.allFeatures || !appState.vectorSource) return;
-    
+
     // Clear current features first
     appState.vectorSource.clear();
-    
+
     // Filter features based on selected year
     const filteredFeatures = filterFeaturesByYear(appState.allFeatures);
-    
+
     // Add filtered features to the map (even if it's an empty array)
     if (filteredFeatures.length > 0) {
         appState.vectorSource.addFeatures(filteredFeatures);
     }
-    
+
     // Note: We don't zoom/fit the map view when filtering - this preserves
     // the user's current view and spatial context
-    // Note: Color ranges and legend are NOT updated here - they should remain 
+    // Note: Color ranges and legend are NOT updated here - they should remain
     // consistent based on the full dataset, not the filtered subset
 }
 
@@ -1459,10 +1439,10 @@ function applyYearFilter() {
 function updateYearFilterVisibility() {
     const yearFilterRow = document.querySelector('#year-filter').closest('.control-row');
     if (!yearFilterRow) return;
-    
+
     // Hide year filter for average attributes since they don't have specific record years
     const isAverageAttribute = ['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(appState.labelAttribute);
-    
+
     if (isAverageAttribute) {
         yearFilterRow.style.display = 'none';
         // Clear any active year filter when hiding
@@ -1492,7 +1472,7 @@ function addExportButtons() {
     // Create export buttons container
     const tableContainer = document.getElementById('data-table');
     let exportContainer = document.getElementById('table-export-buttons');
-    
+
     if (!exportContainer) {
         exportContainer = document.createElement('div');
         exportContainer.id = 'table-export-buttons';
@@ -1505,11 +1485,11 @@ function addExportButtons() {
                 <i class="bi bi-download" aria-hidden="true"></i><span class="visually-hidden">Download Excel</span> Download Excel
             </button>
         `;
-        
+
         // Insert before the table
         tableContainer.parentNode.insertBefore(exportContainer, tableContainer);
     }
-    
+
     // Add event listeners for export buttons
     document.getElementById('download-csv').addEventListener('click', () => {
         const filename = generateExportFilename('csv');
@@ -1527,17 +1507,15 @@ function addExportButtons() {
  */
 function generateExportFilename(extension) {
     const vars = appState.config;
-    let filename = '';
-    
-    if (appState.isStationView) {
-        filename = `climate_station_${vars.station}`;
-    } else {
+    const filename = appState.isStationView
+        ? `climate_station_${vars.station}`
+        : (() => {
         const monthStr = vars.month.toString().padStart(2, '0');
         const dayStr = vars.day.toString().padStart(2, '0');
         const networkStr = vars.network.toLowerCase();
-        filename = `climate_${networkStr}_${monthStr}-${dayStr}`;
-    }
-    
+        return `climate_${networkStr}_${monthStr}-${dayStr}`;
+    })();
+
     return `${filename}.${extension}`;
 }
 

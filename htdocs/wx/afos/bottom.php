@@ -47,9 +47,6 @@ WARxxx    Retrieve union of Tornado (TOR), Severe T'storm (SVR)
         <b>MOS PILS</b>
         <pre>
 PIL       Description             Product ID for Des Moines
-ECMxxx    ECMWF Guidance M         ECMDSM
-ECSxxx    ECMWF Guidance S         ECSDSM
-ECXxxx    ECMWF Guidance X         ECXDSM
 MAVxxx    GFS MOS Guidance         MAVDSM
 METxxx    NAM MOS Guidance         METDSM
 MEXxxx    GFSX MOS Guidance        MEXDSM
