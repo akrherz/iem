@@ -61,9 +61,8 @@ function updateMap() {
 }
 
 const vectorStyleFunction = feature => {
-    let style = null;
     if (feature.get('value') !== 'M') {
-        style = [
+        return [
             new ol.style.Style({
                 fill: new ol.style.Fill({
                     color: 'rgba(255, 255, 255, 0.6)',
@@ -82,19 +81,10 @@ const vectorStyleFunction = feature => {
                 }),
             }),
         ];
-    } else {
-        style = [
-            new ol.style.Style({
-                image: new ol.style.Circle({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255,255,255,0.4)',
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#3399CC',
-                        width: 1.25,
-                    }),
-                    radius: 5,
-                }),
+    }
+    return [
+        new ol.style.Style({
+            image: new ol.style.Circle({
                 fill: new ol.style.Fill({
                     color: 'rgba(255,255,255,0.4)',
                 }),
@@ -102,10 +92,17 @@ const vectorStyleFunction = feature => {
                     color: '#3399CC',
                     width: 1.25,
                 }),
+                radius: 5,
             }),
-        ];
-    }
-    return style;
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,0.4)',
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#3399CC',
+                width: 1.25,
+            }),
+        }),
+    ];
 };
 
 /**

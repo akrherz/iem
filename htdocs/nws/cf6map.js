@@ -106,7 +106,6 @@ function updateDate() {
 }
 
 const vectorStyleFunction = function (feature) {
-    let style = null;
     const value = feature.get(renderattr);
     let color = '#FFFFFF';
     const outlinecolor = '#000000';
@@ -126,7 +125,7 @@ const vectorStyleFunction = function (feature) {
                 }
             }
         }
-        style = [
+        return [
             new ol.style.Style({
                 fill: new ol.style.Fill({
                     color: 'rgba(255, 255, 255, 0.6)',
@@ -145,19 +144,10 @@ const vectorStyleFunction = function (feature) {
                 }),
             }),
         ];
-    } else {
-        style = [
-            new ol.style.Style({
-                image: new ol.style.Circle({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255,255,255,0.4)',
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#3399CC',
-                        width: 1.25,
-                    }),
-                    radius: 5,
-                }),
+    }
+    return [
+        new ol.style.Style({
+            image: new ol.style.Circle({
                 fill: new ol.style.Fill({
                     color: 'rgba(255,255,255,0.4)',
                 }),
@@ -165,10 +155,17 @@ const vectorStyleFunction = function (feature) {
                     color: '#3399CC',
                     width: 1.25,
                 }),
+                radius: 5,
             }),
-        ];
-    }
-    return style;
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,0.4)',
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#3399CC',
+                width: 1.25,
+            }),
+        }),
+    ];
 };
 
 function updateMap() {
