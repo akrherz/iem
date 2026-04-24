@@ -131,6 +131,13 @@ if (preg_match('/ASOS/', $network) > 0){
     echo sprintf("<a href=\"%s\" class=\"btn btn-outline-primary\"><i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Download</span>Download</a> ",
             $uri);
 
+}elseif (preg_match('/RWIS/', $network) > 0){
+    $uri = sprintf("/request/rwis/fe.phtml?network=%s", $network);
+    echo sprintf(
+        "<a href=\"%s\" class=\"btn btn-outline-primary\">".
+        "<i class=\"bi bi-download me-1\" aria-hidden=\"true\"></i>".
+        "<span class=\"visually-hidden\">Download</span>Download</a> ",
+        $uri);
 }
 ?>
 </div>

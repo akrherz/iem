@@ -225,7 +225,7 @@ def get_highcharts(ctx: dict) -> str:
     series = ",".join(lines)
     lines = []
     scatter = []
-    if "[ft]" in ctx[ctx["var"]]:
+    if "[ft]" in ctx.get(ctx["var"], ""):
         for stage in STAGES:
             val = ctx[f"sigstage_{stage}"]
             if val is None:
