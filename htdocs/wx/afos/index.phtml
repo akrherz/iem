@@ -38,10 +38,13 @@ $helpdiv = <<<EOM
         <div id="updates" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
           <div class="accordion-body">
             <ul class="list-unstyled">
+              <li class="mb-2">
+              <strong>24 April 2026:</strong> Removed mention of the ECMWF Model
+              MOS PILs as these are no longer available for public usage.
+              </li>
               <li class="mb-2"><strong>5 June 2025:</strong> The app was mostly rewritten and now uses a URL Parameters pil= style page reference. Any previous bookmarks should continue to work, but you may want to update them to the new style.</li>
               <li class="mb-2"><strong>29 Mar 2024:</strong> <a href="/cgi-bin/afos/retrieve.py?help" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-earmark"></i> Backend documentation</a> exists for those wishing to script against this service.</li>
               <li class="mb-2"><strong>15 May 2019:</strong> If you specify a three character PIL, you will get any PIL matches that start with those three characters. You can optionally specify a WMO Header (TTAAII) to reduce PIL ambiguity.</li>
-              <li><strong>19 Jan 2012:</strong> Added the ability to limit a AFOS PIL by the issuing center ID (4 character). For example, the AFOS pil RWRTX is issued by a number of centers in Texas. To only get RWRTX from Fort Worth, enter KFWD for the center.</li>
             </ul>
           </div>
         </div>
@@ -86,8 +89,6 @@ $helpdiv = <<<EOM
                 <tr><th>PIL</th><th>Description</th><th>DSM Example</th></tr>
               </thead>
               <tbody>
-                <tr><td>ECMxxx</td><td>ECMWF Guidance M</td><td>ECMDSM</td></tr>
-                <tr><td>ECSxxx</td><td>ECMWF Guidance S</td><td>ECSDSM</td></tr>
                 <tr><td>MAVxxx</td><td>GFS MOS Guidance</td><td>MAVDSM</td></tr>
                 <tr><td>METxxx</td><td>NAM MOS Guidance</td><td>METDSM</td></tr>
                 <tr><td>NBExxx</td><td>National Blend E</td><td>NBEDSM</td></tr>
