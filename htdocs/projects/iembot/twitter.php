@@ -202,10 +202,10 @@ $t->content = <<<EOM
 <h3 class="mt-4 mb-3">IEMBOT + Twitter Integration</h3>
 
 <div class="alert alert-warning" role="alert">
-    2026-03-26: IEMBot + X is currently not working due to X not supporting
-    this usage case.
+    2026-04-25: IEMBot's X support continues to be very touch and go as X
+    continues to break the usage case and is difficult to engage with. This all
+    may just go away sometime soon...
 </div>
-
 
 <p>This page allows for the subscription of a Twitter Account to one or more
 <a href="/projects/iembot/#channels" target="_blank">IEMBot channels</a>.

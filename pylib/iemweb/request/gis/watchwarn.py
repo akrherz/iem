@@ -102,7 +102,7 @@ import pandas as pd
 from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.nws.vtec import get_ps_string
+from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
@@ -380,6 +380,19 @@ def kml_nice_date(txt: str | None) -> str:
     return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]} {txt[8:10]}:{txt[10:12]} UTC"
 
 
+def get_kml_inline_style(
+    phenomena: str, significance: str
+) -> tuple[str, str, int]:
+    """Return line color, polygon color, and line width for KML output.
+
+    KML colors are ABGR (alpha, blue, green, red).
+    Replace this default logic with your phenomena/significance color mapping.
+    """
+    hexrgb = NWS_COLORS.get(f"{phenomena}.{significance}", "#ffffff")
+    hexbgr = hexrgb[5:7] + hexrgb[3:5] + hexrgb[1:3]
+    return ("ff000000", f"7d{hexbgr}", 1)
+
+
 def char3(wfos):
     """Make sure we don't have any 4 char IDs."""
     res = []
@@ -587,78 +600,6 @@ def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
 <Document>
  <name>IEM NWS WWA Export</name>
  <open>1</open>
- <StyleMap id="TOstyle">
-        <Pair><key>normal</key><styleUrl>#TOstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#TOstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="TOstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7d0000ff</color></PolyStyle>
-        </Style>
- <Style id="TOstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a00000ff</color></PolyStyle>
-        </Style>
- <StyleMap id="MAstyle">
-        <Pair><key>normal</key><styleUrl>#MAstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#MAstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="MAstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7d00ff00</color></PolyStyle>
-        </Style>
- <Style id="MAstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a000ff00</color></PolyStyle>
-        </Style>
- <StyleMap id="SVstyle">
-        <Pair><key>normal</key><styleUrl>#SVstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#SVstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="SVstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7d00ffff</color></PolyStyle>
-        </Style>
- <Style id="SVstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a000ffff</color></PolyStyle>
-        </Style>
- <StyleMap id="FAstyle">
-        <Pair><key>normal</key><styleUrl>#FAstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#FAstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="FAstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7d00ff00</color></PolyStyle>
-        </Style>
- <Style id="FAstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a000ff00</color></PolyStyle>
-        </Style>
- <StyleMap id="DSstyle">
-        <Pair><key>normal</key><styleUrl>#DSstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#DSstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="DSstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7dFFE4C4</color></PolyStyle>
-        </Style>
- <Style id="DSstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a0FFE4C4</color></PolyStyle>
-        </Style>
- <StyleMap id="FFstyle">
-        <Pair><key>normal</key><styleUrl>#FFstyle_n</styleUrl></Pair>
-        <Pair><key>highlight</key><styleUrl>#FFstyle_h</styleUrl></Pair>
- </StyleMap>
- <Style id="FFstyle_n">
-            <LineStyle><width>1</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>7d00ff00</color></PolyStyle>
-        </Style>
- <Style id="FFstyle_h">
-            <LineStyle><width>2</width><color>ff000000</color></LineStyle>
-            <PolyStyle><color>a000ff00</color></PolyStyle>
-        </Style>
 """
     for row in res.mappings():
         if row["geo"] is None:  # Is this possible?
@@ -680,11 +621,18 @@ def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
         gtype = row["gtype"] or ""
         area2d = row["area2d"] if row["area2d"] is not None else 0.0
         utce = kml_nice_date(row["utc_expire"])
+        line_color, poly_color, lw = get_kml_inline_style(
+            row["phenomena"], row["significance"]
+        )
         yield (
             f"""
 <Placemark>
     <name>{pname_xml}</name>
     <TimeSpan><begin>{issued}</begin><end>{expired}</end></TimeSpan>
+    <Style>
+      <LineStyle><width>{lw}</width><color>{line_color}</color></LineStyle>
+      <PolyStyle><color>{poly_color}</color></PolyStyle>
+    </Style>
     <description>
         <![CDATA[
   <p>
@@ -697,7 +645,6 @@ def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
   </p>
         ]]>
     </description>
-    <styleUrl>#{row["phenomena"]}style</styleUrl>
     {row["geo"]}
 </Placemark>
 """
