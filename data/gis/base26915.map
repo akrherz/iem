@@ -110,7 +110,7 @@ LAYER
   END
 END
 
-LAYER 
+LAYER
   NAME barbs
   TYPE POINT
 #  DATA datasets/snet_current
@@ -139,7 +139,7 @@ LAYER
         PARTIALS TRUE
     FORCE TRUE
     END
-  END 
+  END
 END
 
 LAYER
@@ -442,7 +442,7 @@ LAYER
   END
   # Flood
   CLASS
-    EXPRESSION /FF|FA/
+    EXPRESSION /FF/
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
@@ -460,13 +460,13 @@ LAYER
     EXPRESSION /ZZ/
     NAME "Storm Based Warning"
     STYLE
-      COLOR -1 -1 -1 
+      COLOR -1 -1 -1
       OUTLINECOLOR 255 255 255
       SIZE    4
       SYMBOL  'circle'
     END
     STYLE
-      COLOR -1 -1 -1 
+      COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
       SIZE    2
       SYMBOL  'circle'
@@ -524,7 +524,7 @@ LAYER
     EXPRESSION /ZZ/
     NAME "Storm Based Warning"
     STYLE
-      COLOR -1 -1 -1 
+      COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
       SIZE    1
       SYMBOL  'circle'
@@ -601,7 +601,7 @@ LAYER
       OUTLINECOLOR 210 210 210
       WIDTH 1.0
     END
-    LABEL 
+    LABEL
       SIZE TINY
       TYPE BITMAP
       POSITION LC
@@ -747,7 +747,7 @@ LAYER
    END
     LABEL
       COLOR  255 255 255
-      OUTLINECOLOR 0 0 0 
+      OUTLINECOLOR 0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 2
       SIZE 8
@@ -777,11 +777,11 @@ LAYER
   CLASS
     STYLE
       COLOR -1 -1 -1
-      OUTLINECOLOR 255 255 255   
+      OUTLINECOLOR 255 255 255
     END
     LABEL
       COLOR  255 255 255
-      OUTLINECOLOR 0 0 0 
+      OUTLINECOLOR 0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 2
       SIZE 8
@@ -807,7 +807,7 @@ LAYER
     END
   CLASS
     STYLE
-      COLOR 0 0 0	
+      COLOR 0 0 0
       WIDTH 2.0
     END
   END

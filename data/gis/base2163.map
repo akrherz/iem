@@ -127,7 +127,7 @@ LAYER
     EXPRESSION /ZZ/
     NAME "Storm Based Warning"
     STYLE
-      COLOR -1 -1 -1 
+      COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
       SIZE    1
       SYMBOL  'circle'
@@ -315,7 +315,7 @@ LAYER
    "init=epsg:4326"
   END
   CLASSITEM 'phenomena'
-  # Tornado 
+  # Tornado
   CLASS
     EXPRESSION /TO/
     STYLE
@@ -365,7 +365,7 @@ LAYER
   END
   # Flood
   CLASS
-    EXPRESSION /FF|FA/
+    EXPRESSION /FF/
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
