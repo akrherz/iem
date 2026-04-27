@@ -199,6 +199,15 @@ TZ_FIELD_OPTIONAL = Annotated[
 ]
 
 # --------------
+_VE = Field(
+    description="VTEC Event ID",
+    ge=1,
+    le=9999,
+)
+VTEC_ETN_FIELD = Annotated[int, _VE]
+VTEC_ETN_FIELD_OPTIONAL = Annotated[int | None, _VE]
+
+# --------------
 _VSF = Field(
     description=("One character (uppercase) VTEC significance code."),
     pattern="^[A-Z]$",
