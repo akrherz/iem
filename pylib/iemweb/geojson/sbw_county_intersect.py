@@ -10,6 +10,8 @@ border that was influenced by the county border.
 Changelog
 ---------
 
+- 2026-04-27: The VTEC eventid name was rectified to `etn` to match other
+  IEM services.
 - 2024-08-16: Initial documentation update
 
 Example Usage
@@ -30,7 +32,13 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, VTEC_YEAR_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_ETN_FIELD,
+    VTEC_PH_FIELD,
+    VTEC_SIG_FIELD,
+    VTEC_YEAR_FIELD,
+)
 
 
 class Schema(CGIModel):
@@ -41,18 +49,12 @@ class Schema(CGIModel):
         str, Field(description="3 or 4 character WFO Identifier")
     ] = "MPX"
     year: VTEC_YEAR_FIELD = 2015
-    phenomena: Annotated[
-        str, Field(description="VTEC Phenomena", max_length=2)
-    ] = "SV"
-    significance: Annotated[
-        str, Field(description="VTEC Significance", max_length=1)
-    ] = "W"
-    eventid: Annotated[
-        int, Field(description="VTEC Event ID", ge=1, le=9999)
-    ] = 1
+    phenomena: VTEC_PH_FIELD = "SV"
+    significance: VTEC_SIG_FIELD = "W"
+    etn: VTEC_ETN_FIELD = 1
 
 
-def run(wfo, year, phenomena, significance, eventid):
+def run(wfo, year, phenomena, significance, etn: int):
     """Do great things"""
     with get_sqlalchemy_conn("postgis") as conn:
         borderdf = gpd.read_postgis(
@@ -81,7 +83,7 @@ def run(wfo, year, phenomena, significance, eventid):
                 wfo=wfo,
                 phenomena=phenomena,
                 significance=significance,
-                eventid=eventid,
+                eventid=etn,
             ),
             geom_col="geom",
         )  # type: ignore
@@ -93,7 +95,7 @@ def get_mckey(environ: dict) -> str:
     return (
         f"/geojson/sbw_county_intersect/{environ['wfo']}/{environ['year']}/"
         f"{environ['phenomena']}/{environ['significance']}/"
-        f"{environ['eventid']}"
+        f"{environ['etn']}"
     )
 
 
@@ -117,7 +119,7 @@ def application(environ, start_response):
         environ["year"],
         environ["phenomena"],
         environ["significance"],
-        environ["eventid"],
+        environ["etn"],
     )
 
     start_response("200 OK", headers)
