@@ -9,7 +9,7 @@ require_once "../../include/forms.php";
 $lat = get_float404('lat', 41.53);
 $lon = get_float404('lon', -93.653);
 $t = new MyView();
-$OL = "10.6.1";
+$OL = "10.9.0";
 $t->jsextra = <<<EOM
 
 <script type="text/javascript" src="wfos.js"></script>
@@ -18,7 +18,7 @@ $t->jsextra = <<<EOM
 <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script type="text/javascript" src="search.js?v=3"></script>
+<script type="text/javascript" src="search.js?v=4"></script>
 EOM;
 $t->headextra = <<<EOM
 <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">

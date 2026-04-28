@@ -98,33 +98,33 @@ function addListParams(params, newParams) {
 function setModeParams(mode, newParams = {}) {
     const params = new URLSearchParams();
     params.set('mode', mode);
-    
+
     // Add only relevant parameters for each mode
     switch (mode) {
         case 'bypoint':
             addByPointParams(params, newParams);
             break;
-            
+
         case 'byugc':
         case 'eventsbypoint':
             addByUGCParams(params, newParams);
             break;
-            
+
         case 'list':
             addListParams(params, newParams);
             break;
-            
+
         default:
             // No additional parameters for unknown modes
             break;
     }
-    
+
     updateURL(params);
 }
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -220,15 +220,15 @@ function updateTable(){
 function updateTable2ByUGC(){
     table2IsByPoint = false;
     document.getElementById("table2title").textContent = `Events for UGC: ${ugcSelect.value}`;
-    
+
     // Set clean URL parameters for this mode only
-    setModeParams('byugc', { 
+    setModeParams('byugc', {
         state: stateSelect.value,
         ugc: ugcSelect.value,
         sdate: sdate.value,
         edate: edate.value
     });
-    
+
     // Do what we need to for table 2
     const urlparams = new URLSearchParams({
         ugc: ugcSelect.value,
@@ -266,16 +266,16 @@ function updateTable2ByPoint(){
         title += ` with ${buffer} degree buffer`;
     }
     document.getElementById("table2title").textContent = title;
-    
+
     // Set clean URL parameters for this mode only
-    setModeParams('eventsbypoint', { 
+    setModeParams('eventsbypoint', {
         lat: document.getElementById("lat2").value,
         lon: document.getElementById("lon2").value,
         buffer: buffer.toString(),
         sdate: sdate.value,
         edate: edate.value
     });
-    
+
     // Do what we need to for table 2
     const urlparams = new URLSearchParams({
         lat: document.getElementById("lat2").value,
@@ -318,7 +318,7 @@ function updateTable3(){
         state: stateSelect3.value,
         year,
     };
-    
+
     // Set clean URL parameters for this mode only
     const urlParams = {
         by,
@@ -332,7 +332,7 @@ function updateTable3(){
         urlParams.significance = params.significance;
     }
     setModeParams('list', urlParams);
-    
+
     // Create descriptive title based on selection type
     let title = `Events for ${by} ${datum} in ${year}`;
     if (single === "single") {
@@ -374,17 +374,17 @@ function updateTable3(){
 function createPhenomenaSummary(tableData, containerId) {
     const titleElement = document.getElementById(containerId);
     if (!titleElement) return;
-    
+
     // Find the card body that contains the title
     const cardBody = titleElement.closest('.card-body');
     if (!cardBody) return;
-    
+
     // Remove existing summary
     const existingSummary = cardBody.querySelector('.phenomena-summary');
     if (existingSummary) {
         existingSummary.remove();
     }
-    
+
     // Count phenomena/significance combinations
     const combinations = {};
     tableData.forEach(row => {
@@ -400,12 +400,12 @@ function createPhenomenaSummary(tableData, containerId) {
         }
         combinations[key].count++;
     });
-    
+
     // Sort by count (descending)
     const sortedCombinations = Object.values(combinations).sort((a, b) => b.count - a.count);
-    
+
     if (sortedCombinations.length === 0) return;
-    
+
     // Create summary panel
     const summaryDiv = document.createElement('div');
     summaryDiv.className = 'phenomena-summary mt-3 mb-3';
@@ -413,8 +413,8 @@ function createPhenomenaSummary(tableData, containerId) {
         <div class="card border-info">
             <div class="card-header bg-light">
                 <h6 class="mb-0">
-                    <button class="btn btn-link text-decoration-none p-0 fw-bold" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#${containerId}-summary" 
+                    <button class="btn btn-link text-decoration-none p-0 fw-bold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#${containerId}-summary"
                             aria-expanded="true" aria-controls="${containerId}-summary">
                         <i class="bi bi-bar-chart-fill me-2" aria-hidden="true"></i>Phenomena Summary (${tableData.length} total events)
                         <i class="bi bi-chevron-up ms-2 summary-chevron" aria-hidden="true"></i>
@@ -428,7 +428,7 @@ function createPhenomenaSummary(tableData, containerId) {
                             <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
                             Click any combination to filter the table:
                         </small>
-                        <button class="btn btn-sm btn-outline-secondary clear-filter-btn" type="button" style="display: none;" 
+                        <button class="btn btn-sm btn-outline-secondary clear-filter-btn" type="button" style="display: none;"
                                 title="Clear current filter and show all results">
                             <i class="bi bi-x-lg me-1" aria-hidden="true"></i>Clear Filter
                         </button>
@@ -452,34 +452,34 @@ function createPhenomenaSummary(tableData, containerId) {
             </div>
         </div>
     `;
-    
+
     // Insert summary before the table-responsive div
     const tableContainer = cardBody.querySelector('.table-responsive');
     if (tableContainer) {
         cardBody.insertBefore(summaryDiv, tableContainer);
     }
-    
+
     // Add event listeners for filtering
     summaryDiv.querySelectorAll('.phenomena-item').forEach(item => {
         item.addEventListener('click', () => {
             const phenomena = item.dataset.phenomena;
             const significance = item.dataset.significance;
             filterTableByPhenomena(containerId, phenomena, significance);
-            
+
             // Update UI state
             summaryDiv.querySelectorAll('.phenomena-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             summaryDiv.querySelector('.clear-filter-btn').style.display = 'inline-block';
         });
     });
-    
+
     // Clear filter button
     summaryDiv.querySelector('.clear-filter-btn').addEventListener('click', () => {
         clearPhenomenaFilter(containerId);
         summaryDiv.querySelectorAll('.phenomena-item').forEach(i => i.classList.remove('active'));
         summaryDiv.querySelector('.clear-filter-btn').style.display = 'none';
     });
-    
+
     // Toggle chevron icon
     const collapseElement = document.getElementById(`${containerId}-summary`);
     collapseElement.addEventListener('show.bs.collapse', () => {
@@ -491,17 +491,17 @@ function createPhenomenaSummary(tableData, containerId) {
 }
 
 function filterTableByPhenomena(containerId, phenomena, significance) {
-    const table = (containerId === 'table1title') ? table1 : 
-                  (containerId === 'table2title') ? table2 : 
+    const table = (containerId === 'table1title') ? table1 :
+                  (containerId === 'table2title') ? table2 :
                   (containerId === 'table3title') ? table3 : null;
     if (!table) return;
-    
+
     // Apply filter to Tabulator
     table.setFilter([
         {field: "phenomena", type: "=", value: phenomena},
         {field: "significance", type: "=", value: significance}
     ]);
-    
+
     // Update table title
     const titleElement = document.getElementById(containerId);
     if (titleElement) {
@@ -509,7 +509,7 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
         const filteredCount = table.getDataCount("active");
     titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${escapeHTML(originalText)} <small class="text-muted">(filtered: ${phenomena} / ${significance} - ${filteredCount} events)</small>`;
     }
-    
+
     // Update toolbar count
     const filteredCount = table.getDataCount("active");
     const tableData = table.getData(); // Get original data for count
@@ -517,14 +517,14 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
 }
 
 function clearPhenomenaFilter(containerId) {
-    const table = (containerId === 'table1title') ? table1 : 
-                  (containerId === 'table2title') ? table2 : 
+    const table = (containerId === 'table1title') ? table1 :
+                  (containerId === 'table2title') ? table2 :
                   (containerId === 'table3title') ? table3 : null;
     if (!table) return;
-    
+
     // Clear filter
     table.clearFilter();
-    
+
     // Reset table title
     const titleElement = document.getElementById(containerId);
     if (titleElement) {
@@ -533,7 +533,7 @@ function clearPhenomenaFilter(containerId) {
         originalText = escapeHTML(originalText);
         titleElement.innerHTML = `<i class="bi bi-table me-2" aria-hidden="true"></i>${originalText}`;
     }
-    
+
     // Update toolbar count (no filter)
     const tableData = table.getData();
     updateTableToolbar(containerId, tableData);
@@ -556,10 +556,10 @@ function formatRecordCountText(totalCount, filteredCount) {
 function updateTableToolbar(containerId, tableData, filteredCount = null) {
     const container = getTableContainer(containerId);
     if (!container) return;
-    
+
     const toolbar = container.querySelector('.table-toolbar');
     if (!toolbar) return;
-    
+
     const countSpan = toolbar.querySelector('.table-count');
     if (countSpan) {
         countSpan.textContent = formatRecordCountText(tableData.length, filteredCount);
@@ -656,7 +656,7 @@ function setupTableConfigurations() {
             {column: "issued", dir: "desc"}
         ]
     });
-    
+
     // Add table toolbar with current view exports
     const table1Title = document.getElementById("table1title");
     if (table1Title && !table1Title.querySelector('.table-toolbar')) {
@@ -679,13 +679,13 @@ function setupTableConfigurations() {
                 </button>
             </div>
         `;
-        
+
         // Insert toolbar after the phenomena summary (or after title if no summary)
         const phenomenaSummary = table1Title.parentNode.querySelector('.phenomena-summary');
         const insertAfter = phenomenaSummary || table1Title;
         insertAfter.parentNode.insertBefore(toolbarDiv, insertAfter.nextSibling);
     }
-    
+
     table2 = new Tabulator("#table2", {
         layout: "fitColumns",
         placeholder: "Drag marker on map or select UGC to auto-populate this table",
@@ -713,7 +713,7 @@ function setupTableConfigurations() {
             {column: "issued", dir: "desc"}
         ]
     });
-    
+
     // Add table toolbar with current view exports for table2
     const table2Title = document.getElementById("table2title");
     if (table2Title && !table2Title.querySelector('.table-toolbar')) {
@@ -736,13 +736,13 @@ function setupTableConfigurations() {
                 </button>
             </div>
         `;
-        
+
         // Insert toolbar after the phenomena summary (or after title if no summary)
         const phenomenaSummary = table2Title.parentNode.querySelector('.phenomena-summary');
         const insertAfter = phenomenaSummary || table2Title;
         insertAfter.parentNode.insertBefore(toolbarDiv, insertAfter.nextSibling);
     }
-    
+
     table3 = new Tabulator("#table3", {
         layout: "fitColumns",
         placeholder: "Select options to auto-populate this table",
@@ -772,7 +772,7 @@ function setupTableConfigurations() {
             {column: "issued", dir: "desc"}
         ]
     });
-    
+
     // Add table toolbar with current view exports for table3
     const table3Title = document.getElementById("table3title");
     if (table3Title && !table3Title.querySelector('.table-toolbar')) {
@@ -795,7 +795,7 @@ function setupTableConfigurations() {
                 </button>
             </div>
         `;
-        
+
         table3Title.parentNode.insertBefore(toolbarDiv, table3Title.nextSibling);
     }
 }
@@ -806,18 +806,18 @@ function setupDateInputs() {
     edate = document.querySelector("input[name='edate']");
     sdate1 = document.querySelector("input[name='sdate1']");
     edate1 = document.querySelector("input[name='edate1']");
-    
+
     // Get tomorrow's UTC date
     const tomorrow = new Date();
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     const tomorrowUTC = tomorrow.toISOString().split('T')[0];
-    
+
     // Set default values
     sdate.value = "1986-01-01";
     edate.value = tomorrowUTC; // Tomorrow's UTC date
     sdate1.value = "2002-01-01";
     edate1.value = tomorrowUTC; // Tomorrow's UTC date
-    
+
     // Set min/max attributes for date validation
     sdate.min = "1986-01-01";
     sdate.max = tomorrowUTC;
@@ -827,7 +827,7 @@ function setupDateInputs() {
     sdate1.max = tomorrowUTC;
     edate1.min = "2002-01-01";
     edate1.max = tomorrowUTC;
-    
+
     // Add event listeners for date changes
     sdate.addEventListener('change', () => {
         updateTable2ByUGC();
@@ -849,11 +849,11 @@ function setupSelectBoxes() {
         id: obj[0],
         text: obj[1]
     }));
-    
+
     // Setup state selects with vanilla JavaScript
     stateSelect3 = document.getElementById("state3");
     stateSelect = document.getElementById("state");
-    
+
     // Populate state selects
     [stateSelect3, stateSelect].forEach(select => {
         // Clear existing options
@@ -865,14 +865,19 @@ function setupSelectBoxes() {
             select.appendChild(option);
         });
     });
-    
+
     stateSelect.addEventListener('change', (e) => {
         const state = e.target.value;
         if (!state) return;
-        
+        const existingUGC = getURLParams().get('ugc');
+        const nextParams = { state };
+        if (existingUGC?.startsWith(state)) {
+            nextParams.ugc = existingUGC;
+        }
+
         // Set clean URL parameters for this mode only
-        setModeParams('byugc', { state });
-        
+        setModeParams('byugc', nextParams);
+
         // Load the ugcSelect box
         fetch(`/json/state_ugc.json?${new URLSearchParams({ state })}`)
         .then(response => response.json())
@@ -897,16 +902,16 @@ function setupSelectBoxes() {
             // Handle error silently
         });
     });
-    
+
     ugcSelect = document.querySelector("select[name='ugc']");
     ugcSelect.innerHTML = '<option value="">Select County/Zone after Selecting Geography</option>';
     ugcSelect.addEventListener('change', (e) => {
         const ugc = e.target.value;
         if (!ugc) return;
         // Set clean URL parameters for this mode only - include both state and ugc
-        setModeParams('byugc', { 
+        setModeParams('byugc', {
             state: stateSelect.value,
-            ugc 
+            ugc
         });
         updateTable2ByUGC();
     });
@@ -930,9 +935,9 @@ function setupManualButtons() {
             return;
         }
         // Set clean URL parameters for this mode only - include both state and ugc
-        setModeParams('byugc', { 
+        setModeParams('byugc', {
             state: stateSelect.value,
-            ugc 
+            ugc
         });
         updateTable2ByUGC();
     });
@@ -960,7 +965,7 @@ function setupDropdownPopulation() {
         option.textContent = `[${obj[0]}] ${obj[1]}`;
         wfoSelect.appendChild(option);
     });
-    
+
     const phSelect = document.querySelector("select[name='ph']");
     phSelect.innerHTML = '<option value="">Select a Phenomena</option>';
     iemdata.vtec_phenomena.forEach(obj => {
@@ -969,7 +974,7 @@ function setupDropdownPopulation() {
         option.textContent = obj[1];
         phSelect.appendChild(option);
     });
-    
+
     const sigSelect = document.querySelector("select[name='sig']");
     sigSelect.innerHTML = '<option value="">Select a Significance</option>';
     iemdata.vtec_significance.forEach(obj => {
@@ -988,21 +993,21 @@ function setupDropdownPopulation() {
         }
         year3.appendChild(option);
     }
-    
+
     // Set up radio button logic for tab 3 (Single vs All VTEC events)
     const singleRadio = document.getElementById('single3');
     const allRadio = document.getElementById('all3');
     const phSelect2 = document.querySelector("select[name='ph']");
     const sigSelect2 = document.querySelector("select[name='sig']");
-    
+
     // Function to update the state of phenomena and significance selects
     function updateVTECSelects() {
         const isSingleSelected = singleRadio.checked;
-        
+
         // Enable/disable the selects based on radio button state
         phSelect2.disabled = !isSingleSelected;
         sigSelect2.disabled = !isSingleSelected;
-        
+
         // Update visual styling
         if (isSingleSelected) {
             phSelect2.parentElement.classList.remove('opacity-50');
@@ -1015,11 +1020,11 @@ function setupDropdownPopulation() {
             sigSelect2.value = '';
         }
     }
-    
+
     // Add event listeners for radio buttons
     singleRadio.addEventListener('change', updateVTECSelects);
     allRadio.addEventListener('change', updateVTECSelects);
-    
+
     // Initialize the state
     updateVTECSelects();
 }
@@ -1048,7 +1053,7 @@ function handleByUGCMode(urlParams) {
     const ugc = urlParams.get('ugc');
     const sdateParam = urlParams.get('sdate');
     const edateParam = urlParams.get('edate');
-    
+
     // Set date values if provided
     if (sdateParam) {
         document.querySelector('input[name="sdate"]').value = sdateParam;
@@ -1056,7 +1061,7 @@ function handleByUGCMode(urlParams) {
     if (edateParam) {
         document.querySelector('input[name="edate"]').value = edateParam;
     }
-    
+
     // If we have a state parameter, use it directly
     if (state) {
         stateSelect.value = state;
@@ -1075,7 +1080,7 @@ function handleByPointMode(urlParams) {
     const buffer = parseFloat(urlParams.get('buffer'));
     const sdate1Param = urlParams.get('sdate1');
     const edate1Param = urlParams.get('edate1');
-    
+
     // Set date values if provided
     if (sdate1Param) {
         document.getElementById('sdate1').value = sdate1Param;
@@ -1083,7 +1088,7 @@ function handleByPointMode(urlParams) {
     if (edate1Param) {
         document.getElementById('edate1').value = edate1Param;
     }
-    
+
     if (!isNaN(lat) && !isNaN(lon)) {
         if (!isNaN(buffer)) {
             document.querySelector('select[name="buffer"]').value = buffer;
@@ -1115,7 +1120,7 @@ function handleListMode(urlParams) {
     const year = urlParams.get('year');
     const phenomena = urlParams.get('phenomena');
     const significance = urlParams.get('significance');
-    
+
     if (by && datum && year) {
         document.querySelector(`input[name='by3'][value='${by}']`).checked = true;
         if (phenomena && significance) {
@@ -1126,7 +1131,7 @@ function handleListMode(urlParams) {
             document.querySelector("input[name='single3'][value='all']").checked = true;
         }
         document.getElementById("year3").value = year;
-        
+
         if (by === "state"){
             stateSelect3.value = datum;
         } else {
@@ -1143,12 +1148,12 @@ function handleListMode(urlParams) {
 function processURLParams(){
     const urlParams = getURLParams();
     let mode = urlParams.get('mode');
-    
+
     // Handle backward compatibility: migrate hash to URL parameters
     if (processHashMigration()) {
         return; // Will reload with new URL params
     }
-    
+
     // Default to first tab if no mode specified
     if (!mode) {
         mode = 'bypoint';
@@ -1156,27 +1161,27 @@ function processURLParams(){
         params.set('mode', mode);
         updateURL(params);
     }
-    
+
     // Activate the appropriate Bootstrap tab
     activateTab(mode);
-    
+
     switch (mode) {
         case 'byugc':
             handleByUGCMode(urlParams);
             break;
-            
+
         case 'bypoint':
             handleByPointMode(urlParams);
             break;
-            
+
         case 'eventsbypoint':
             handleEventsByPointMode(urlParams);
             break;
-            
+
         case 'list':
             handleListMode(urlParams);
             break;
-            
+
         default:
             // Unknown mode, use default (bypoint) already set above
             break;
@@ -1202,7 +1207,7 @@ function activateTab(mode) {
             // Use default tab (bypoint-tab) already set above
             break;
     }
-    
+
     // Activate the tab using Bootstrap 5 API
     const tabElement = document.getElementById(tabId);
     if (tabElement) {
@@ -1250,7 +1255,7 @@ function handleListHashMigration(tokens, params) {
 function migrateHashToURLParams(hash) {
     const tokens = hash.split("/");
     const params = new URLSearchParams();
-    
+
     if (tokens.length >= 2) {
         if (tokens[0] === 'byugc') {
             handleByUGCHashMigration(tokens, params);
@@ -1262,7 +1267,7 @@ function migrateHashToURLParams(hash) {
             handleListHashMigration(tokens, params);
         }
     }
-    
+
     // Replace URL with parameters and remove hash
     const url = new URL(window.location);
     url.search = params.toString();
@@ -1293,7 +1298,7 @@ function customDateTimeSorter(a, b) {
 // Initialize when DOM is ready
 function initializeApp() {
     buildUI();
-    
+
     const res1 = olSelectLonLat("map", updateMarkerPosition);
     marker1 = res1.marker;
     const res2 = olSelectLonLat("map2", updateMarkerPosition2);
@@ -1301,16 +1306,28 @@ function initializeApp() {
 
     // Process URL parameters after markers are initialized
     processURLParams();
-    
+
     // Bootstrap tab event listeners - update URL when tabs change (clean parameters)
     document.getElementById('bypoint-tab').addEventListener('shown.bs.tab', () => {
         setModeParams('bypoint');
     });
-    
+
     document.getElementById('byugc-tab').addEventListener('shown.bs.tab', () => {
-        setModeParams('byugc');
+        const urlParams = getURLParams();
+        const currentMode = urlParams.get('mode');
+        const state = stateSelect?.value || urlParams.get('state') || '';
+        const ugc = ugcSelect?.value || urlParams.get('ugc') || '';
+        const modeParams = {};
+        const targetMode = (!currentMode || currentMode === 'byugc') ? 'byugc' : currentMode;
+        if (state) {
+            modeParams.state = state;
+        }
+        if (ugc) {
+            modeParams.ugc = ugc;
+        }
+        setModeParams(targetMode, modeParams);
     });
-    
+
     document.getElementById('list-tab').addEventListener('shown.bs.tab', () => {
         setModeParams('list');
     });
