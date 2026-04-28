@@ -3,6 +3,8 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 define("THROTTLE_APP", "sites/obhistory");
+define("THROTTLE_LIMIT", 16);
+// sites calls throttle
 require_once "../../include/sites.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";

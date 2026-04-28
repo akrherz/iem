@@ -9,13 +9,14 @@ if (defined("THROTTLE_APP")) {
 } else {
     $key = sprintf("throttle/%s", getClientIp());
 }
+$concurrency_limit = defined("THROTTLE_LIMIT") ? (int)THROTTLE_LIMIT : 5;
 
 // Need to do a custom memcache with BinaryProtocol
 $memcache = MemcacheSingleton::getInstance();
 register_shutdown_function(function () use ($memcache, $key) {
     $memcache->decrement($key);
 });
-if ($memcache->increment($key, 1, 0, 300) > 5) {
+if ($memcache->increment($key, 1, 0, 300) > $concurrency_limit) {
     http_response_code(429);
     die('429: Too Many Requests');
 }
