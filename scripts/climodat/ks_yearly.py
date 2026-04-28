@@ -98,8 +98,8 @@ def main():
         fp.write("stationID,stationName,Latitude,Longitude,")
         fp.writelines(
             f"{i:02.0f}_{v},"
-            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]
             for i in range(1893, ENDYEAR)
+            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]
         )
         fp.write("CYR_MINT,CYR_MAXT,CYR_PREC,CYR_GDD50,CYR_SDD86,\n")
         for sid in keys:

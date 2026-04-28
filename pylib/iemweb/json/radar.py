@@ -13,6 +13,8 @@ and is available for download.
 Changelog
 ---------
 
+- 2026-04-28: A bug was squashed with lat/lon always being enabled
+  for operation=list
 - 2024-07-24: Initial documentation release and pydantic validation
 
 Example Usage
@@ -49,7 +51,11 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+)
 from iemweb.util import json_response_dict
 
 NIDS = {
@@ -77,22 +83,8 @@ class Schema(CGIModel):
             description="End of time period to search for data",
         ),
     ] = None
-    lat: Annotated[
-        float,
-        Field(
-            description="Latitude of location to search for nearby RADARs",
-            ge=-90,
-            le=90,
-        ),
-    ] = 41.9
-    lon: Annotated[
-        float,
-        Field(
-            description="Longitude of location to search for nearby RADARs",
-            ge=-180,
-            le=180,
-        ),
-    ] = -95.0
+    lat: LATITUDE_FIELD_OPTIONAL = None
+    lon: LONGITUDE_FIELD_OPTIONAL = None
     operation: Annotated[
         str,
         Field(
