@@ -17,11 +17,8 @@ $t->content = <<<EOM
 <div class="row g-3">
 <div class="col-md-6">
 
-<p>The IEM and NWS have enjoyed a long standing partnership.  This partnership
-has collected a number of awards including a <a href="https://www.cals.iastate.edu/news/releases/isu-ag-meteorology-web-network-receives-national-award">2002 NWA Award</a>
-and <a href="http://www.noaanews.noaa.gov/stories2007/s2842.htm">2007 NOAA Award</a>.  We also
-worked together on the IEMChat Project, which was later rolled into the present
-day <a href="https://nwschat.weather.gov">NWSChat Project</a>.</p>
+<p>The IEM and NWS have enjoyed a long standing partnership. This page lists
+out the many NWS data resources maintained on the IEM website.</p>
 
 <p><a href="/plotting/auto/"><i class="bi bi-activity" aria-hidden="true"></i> Automated Data Plotting</a> is a very deep rabbit
 hole with hundreds of plotting options for many datasets of NWS interest.</p>
@@ -69,7 +66,7 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
     Simple app to plot out current/historical DCP (river gauges) data for a site of your choice.</li>
     <li>Daily Climate Summary (AFOS: CLI Product)
         <a href="climap.php">Interactive Map</a> or
-	<a href="clitable.php">Text Table</a> or 
+	<a href="clitable.php">Text Table</a> or
         <a href="/nws/cli-audit/">CLI Audit Report</a></li>
     <li>CF6 Summary (AFOS: CF6 Product)
         <a href="cf6map.php">Interactive Map</a> or
