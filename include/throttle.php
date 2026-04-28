@@ -9,7 +9,7 @@ if (defined("THROTTLE_APP")) {
 } else {
     $key = sprintf("throttle/%s", getClientIp());
 }
-$concurrency_limit = defined("THROTTLE_LIMIT") ? (int)THROTTLE_LIMIT : 5;
+$concurrency_limit = defined("THROTTLE_LIMIT") ? max(1, (int) THROTTLE_LIMIT) : 5;
 
 // Need to do a custom memcache with BinaryProtocol
 $memcache = MemcacheSingleton::getInstance();

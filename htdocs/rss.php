@@ -12,8 +12,12 @@ $cached_rss = cacheable("/rss.php", 600)(function(){
         "SELECT id, title, body, entered from news ORDER by entered DESC LIMIT 20"
     );
     $rows = [];
-    while ($row = pg_fetch_assoc($rs)) {
-        $rows[] = $row;
+    if ($rs === FALSE) {
+        error_log("rss.php: Database query failed");
+    } else {
+        while ($row = pg_fetch_assoc($rs)) {
+            $rows[] = $row;
+        }
     }
     $bd = date('D, d M Y H:i:s O');
     if (!empty($rows[0]["entered"])) {
