@@ -1314,16 +1314,18 @@ function initializeApp() {
 
     document.getElementById('byugc-tab').addEventListener('shown.bs.tab', () => {
         const urlParams = getURLParams();
+        const currentMode = urlParams.get('mode');
         const state = stateSelect?.value || urlParams.get('state') || '';
         const ugc = ugcSelect?.value || urlParams.get('ugc') || '';
         const modeParams = {};
+        const targetMode = (!currentMode || currentMode === 'byugc') ? 'byugc' : currentMode;
         if (state) {
             modeParams.state = state;
         }
         if (ugc) {
             modeParams.ugc = ugc;
         }
-        setModeParams('byugc', modeParams);
+        setModeParams(targetMode, modeParams);
     });
 
     document.getElementById('list-tab').addEventListener('shown.bs.tab', () => {
