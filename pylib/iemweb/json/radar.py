@@ -8,13 +8,17 @@ Documentation for /json/radar.py
 This service provides metadata about available NEXRAD RADAR data that the
 IEM has archived.  The data is stored in a directory structure that is
 organized by radar site and product type.  The data is stored in PNG format
-and is available for download.
+and is available for direct download.
+
+The `IEM One <https://mesonet.agron.iastate.edu/one/>`_ makes heavy usage of
+this API endpoint.
 
 Changelog
 ---------
 
 - 2026-04-28: A bug was squashed with lat/lon always being enabled
-  for operation=list
+  for operation=available, which always limited the response to nearby RADARs
+  to that point.
 - 2024-07-24: Initial documentation release and pydantic validation
 
 Example Usage
@@ -58,6 +62,7 @@ from iemweb.fields import (
 )
 from iemweb.util import json_response_dict
 
+BASEDIR = "/mesonet/ARCHIVE/data"
 NIDS = {
     "N0B": "Base Reflectivity (Super Res)",
     "N0Q": "Base Reflectivity (High Res)",
@@ -114,13 +119,13 @@ class Schema(CGIModel):
     ] = None
 
 
-def available_radars(environ):
+def available_radars(query: Schema):
     """
     Return available RADAR sites for the given location and date!
     """
-    lat = environ["lat"]
-    lon = environ["lon"]
-    start_gts = environ["start"]
+    lat = query.lat
+    lon = query.lon
+    start_gts = query.start
     if start_gts is None:
         start_gts = utc()
     params = {
@@ -157,9 +162,7 @@ def available_radars(environ):
         for row in res:
             radar = row[0]
             if not os.path.isdir(
-                start_gts.strftime(
-                    f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/{radar}"
-                )
+                start_gts.strftime(f"{BASEDIR}/%Y/%m/%d/GIS/ridge/{radar}")
             ):
                 continue
             root["radars"].append(
@@ -196,7 +199,7 @@ def find_scans(root: dict, radar, product, sts, ets):
         while now < ets:
             if os.path.isfile(
                 now.strftime(
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"
+                    f"{BASEDIR}/%Y/%m/%d/GIS/uscomp/"
                     f"{product.lower()}_%Y%m%d%H%M.png"
                 )
             ):
@@ -206,7 +209,7 @@ def find_scans(root: dict, radar, product, sts, ets):
         while now < ets:
             if os.path.isfile(
                 now.strftime(
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"
+                    f"{BASEDIR}/%Y/%m/%d/GIS/ridge/"
                     f"{radar}/{product}/{radar}_{product}"
                     "_%Y%m%d%H%M.png"
                 )
@@ -230,16 +233,16 @@ def is_realtime(sts: datetime) -> bool:
     return True
 
 
-def list_files(environ):
+def list_files(query: Schema):
     """
     List available NEXRAD files based on the form request
     """
-    radar = environ["radar"]
-    product = environ["product"]
-    start_gts = environ["start"]
+    radar = query.radar
+    product = query.product
+    start_gts = query.start
     if start_gts is None:
         start_gts = utc()
-    end_gts = environ["end"]
+    end_gts = query.end
     if end_gts is None:
         end_gts = start_gts + timedelta(minutes=1)
     # practical limit here of 10 days
@@ -254,19 +257,19 @@ def list_files(environ):
     return root
 
 
-def list_products(environ):
+def list_products(query: Schema):
     """
     List available NEXRAD products
     """
-    radar = environ["radar"]
-    now = environ["start"]
+    radar = query.radar
+    now = query.start
     if now is None:
         now = utc()
     root = json_response_dict({"products": []})
     if radar == "USCOMP":
         for dirname in ["N0Q", "N0R"]:
             testfp = now.strftime(
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
+                f"{BASEDIR}/%Y/%m/%d/GIS/"
                 f"uscomp/{dirname.lower()}_%Y%m%d0000.png"
             )
             if os.path.isfile(testfp):
@@ -274,9 +277,7 @@ def list_products(environ):
                     {"id": dirname, "name": NIDS.get(dirname, dirname)}
                 )
     else:
-        basedir = now.strftime(
-            f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/{radar}"
-        )
+        basedir = now.strftime(f"{BASEDIR}/%Y/%m/%d/GIS/ridge/{radar}")
         if os.path.isdir(basedir):
             os.chdir(basedir)
             for dirname in glob.glob("???"):
@@ -295,23 +296,38 @@ def get_mckey(environ: dict) -> str:
     ).replace(" ", "")
 
 
+def get_mcexpire(environ: dict) -> int:
+    """Figure out the expiration time for this entry."""
+    if environ["operation"] == "available":
+        return 3600
+    if environ["operation"] == "products":
+        return 3600
+    if (
+        environ["start"] is not None
+        and environ["end"] is not None
+        and environ["end"] < utc()
+    ):
+        return 3600
+    return 60
+
+
 @iemapp(
     help=__doc__,
     schema=Schema,
     memcachekey=get_mckey,
-    memcacheexpire=60,
+    memcacheexpire=get_mcexpire,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Answer request."""
+    query: Schema = environ["_cgimodel_schema"]
 
-    operation = environ["operation"]
     data = ""
-    if operation == "list":
-        data = list_files(environ)
-    elif operation == "available":
-        data = available_radars(environ)
-    elif operation == "products":
-        data = list_products(environ)
+    if query.operation == "list":
+        data = list_files(query)
+    elif query.operation == "available":
+        data = available_radars(query)
+    elif query.operation == "products":
+        data = list_products(query)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
