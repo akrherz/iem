@@ -2,9 +2,10 @@
 // Used in fe.phtml and table.phtml
 
 $mosvars = array(
-    "n_x" => "Max/Min Temp [F]",
-    "tmp" => "Temperature [deg F]",
-    "dpt" => "Dew Point Temperature [deg F]",
+    "n_x" => "Max/Min Temp [°F]",
+    "tmp" => "Temperature [°F]",
+    "dpt" => "Dew Point Temperature [°F]",
+    "wbg" => "Wet Bulb Temperature [°F]",
     "cld" => "Cloud Coverage",
     "wdr" => "Wind Direction [tens of deg]",
     "wsp" => "Wind Speed [kt]",
@@ -55,10 +56,10 @@ $mosvars = array(
     "s24" => "24 Hr Snow Amount [0.1 in]",
     "pzp" => "Legacy MOS Code PZP",
     "prs" => "Legacy MOS Code PRS",
-    "txn" => "18 Hr Max/Min Temperature [deg F]",
-    "xnd" => "Std Dev of Max/Min Temperature [deg F]",
-    "tsd" => "Temperature Std Dev [deg F]",
-    "dsd" => "Dew Point Temperature Std Dev [deg F]",
+    "txn" => "18 Hr Max/Min Temperature [°F]",
+    "xnd" => "Std Dev of Max/Min Temperature [°F]",
+    "tsd" => "Temperature Std Dev [°F]",
+    "dsd" => "Dew Point Temperature Std Dev [°F]",
     "ifc" => "Probability of Ceiling IFR Conditions [%]",
     "ifv" => "Probability of Visibility IFR Conditions [%]",
     "mvc" => "Probability of Ceiling MVFR Conditions [%]",

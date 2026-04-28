@@ -15,9 +15,12 @@ pg_query($mosdb, "SET TIME ZONE 'UTC'");
 $year = get_int404("year", date("Y", time() + 86400));
 $month = get_int404("month", date("m", time() + 86400));
 $day = get_int404("day", date("d", time() + 86400));
-$model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])) : "GFS";
-$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])) : "KAMW";
-$vname = isset($_GET["vname"]) ? strtolower(xssafe($_GET["vname"])) : "tmp";
+$model = get_str404("model", "GFS", 3);
+$station = get_str404("station", "KAMW", 6);
+$vname = strtolower(get_str404("vname", "tmp"));
+if (!array_key_exists($vname, $mosvars)) {
+    $vname = "tmp";
+}
 $models = array(
     "GFS" => "AVN/GIS",
     "MEX" => "GFS Extended (MEX)",
@@ -148,7 +151,6 @@ for ($now = $sts; $now <= ($ets + 3 * 86400); $now += 3600) {
 }
 $table .= "</tbody></table></div></div>";
 
-// Begin Output
 $t->title = "Model Output Statistics Table for $station";
 
 $variableSelect = make_select(
@@ -210,7 +212,7 @@ $content = <<<EOM
         <form name="updator" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label for="station" class="form-label">Station</label>
-                <input id="station" type="text" name="station" value="$station" class="form-control" maxlength="4" pattern="[A-Za-z0-9]{3,4}" required>
+                <input id="station" type="text" name="station" value="$station" class="form-control" maxlength="6" required>
             </div>
             <div class="col-md-5">
                 <label for="vname" class="form-label">Variable</label>

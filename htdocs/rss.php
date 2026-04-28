@@ -6,7 +6,26 @@ require_once "../include/database.inc.php";
 
 $cached_rss = cacheable("/rss.php", 600)(function(){
     global $EXTERNAL_BASEURL;
+    $conn = iemdb("mesosite");
+    $rs = pg_query(
+        $conn,
+        "SELECT id, title, body, entered from news ORDER by entered DESC LIMIT 20"
+    );
+    $rows = [];
+    if ($rs === FALSE) {
+        error_log("rss.php: Database query failed");
+    } else {
+        while ($row = pg_fetch_assoc($rs)) {
+            $rows[] = $row;
+        }
+    }
     $bd = date('D, d M Y H:i:s O');
+    if (!empty($rows[0]["entered"])) {
+        $ts = strtotime($rows[0]["entered"]);
+        if ($ts !== false) {
+            $bd = date('D, d M Y H:i:s O', $ts);
+        }
+    }
     $s = <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -17,18 +36,24 @@ $cached_rss = cacheable("/rss.php", 600)(function(){
 <description>Iowa Environmental Mesonet News and Notes</description>
 <lastBuildDate>{$bd}</lastBuildDate>
 EOM;
-    $conn = iemdb("mesosite");
-    $rs = pg_query($conn, "SELECT id, title, body from news ORDER by entered DESC LIMIT 20");
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    for ($i = 0; $row = $rows[$i] ?? null; $i++) {
         // Properly escape the title for XML; previous logic only replaced '&'.
         $title = htmlspecialchars($row["title"], ENT_XML1 | ENT_COMPAT, 'UTF-8');
         // Guard against a body containing the CDATA termination sequence.
         $body = str_replace("]]>", "]]]><![CDATA[>", $row["body"]);
+        $itemDate = date('D, d M Y H:i:s O');
+        if (!empty($row["entered"])) {
+            $itemTs = strtotime($row["entered"]);
+            if ($itemTs !== false) {
+                $itemDate = date('D, d M Y H:i:s O', $itemTs);
+            }
+        }
         $s .= "<item>\n";
         $s .= "<title>{$title}</title>\n";
         $s .= "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
         $s .= "<link>{$EXTERNAL_BASEURL}/onsite/news.phtml?id=" . $row["id"] . "</link>\n";
         $s .= "<guid>{$EXTERNAL_BASEURL}/onsite/news.phtml?id=" . $row["id"] . "</guid>\n";
+        $s .= "<pubDate>{$itemDate}</pubDate>\n";
         $s .= "<description><![CDATA[" . $body . "]]></description>\n";
         $s .= "</item>\n";
     }
@@ -38,5 +63,5 @@ EOM;
 });
 
 
-header("Content-type: text/xml; charset=UTF-8");
+header("Content-Type: application/rss+xml; charset=UTF-8");
 echo $cached_rss();
