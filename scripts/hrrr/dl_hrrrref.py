@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 import click
 import httpx
 import pygrib
-from pyiem.util import archive_fetch, exponential_backoff, logger
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 AWS = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
 LOG = logger()
@@ -74,7 +74,11 @@ def wait_for_upstream(valid: datetime) -> None:
         except Exception as exp:
             LOG.info("Failed to fetch %s: %s, waiting 60s", uri, exp)
         time.sleep(60)
-    LOG.warning("Failed to find upstream file %s, aborting", uri)
+    # Cloud availability is noisy, so reduce some emails by not complaining
+    # about near realtime failures
+    archived = (utc() - valid).total_seconds() > 43200
+    lglvl = LOG.warning if archived else LOG.info
+    lglvl("Failed to find upstream file %s, aborting", uri)
     sys.exit(1)
 
 
@@ -168,11 +172,12 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
 )
 def main(valid: datetime, skiprecheck: bool):
     """Go Main Go"""
+    valid = valid.replace(tzinfo=timezone.utc)
     if is_archive_complete(valid):
         return
     wait_for_upstream(valid)
     with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp:
-        run(tmpfp, valid.replace(tzinfo=timezone.utc))
+        run(tmpfp, valid)
     if skiprecheck:
         return
     # We are waiting for the archive file to be in place, so that we can
