@@ -18,3 +18,8 @@ repositories found here and how the fit together.
 
     - Python 3.10+ (CI tests with 3.14)
     - PHP 8
+
+## Deployment Notes
+
+- Vendor static assets used by web pages are documented in
+    [docs/deployment/vendor-static-assets.md](docs/deployment/vendor-static-assets.md).
