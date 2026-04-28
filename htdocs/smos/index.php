@@ -4,7 +4,7 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
-$OL = "10.6.1";
+$OL = "10.9.0";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->headextra = <<<EOM
@@ -12,7 +12,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js?v=3"></script>
 <script src="smosmap.js?v=2"></script>
 EOM;
 
@@ -30,17 +30,17 @@ $t->content = <<<EOM
 <p>The <a href="http://www.esa.int/SPECIALS/smos/">SMOS</a> satellite is a polar
 orbiting satellite operated by the European Space Agency.  The satellite provides
 estimates of soil moisture in the approximate top 5 centimeters of soil and the
-amount of vegetation on the land surface.  
-<a href="mailto:bkh@iastate.edu">Dr Brian Hornbuckle</a> leads a 
+amount of vegetation on the land surface.
+<a href="mailto:bkh@iastate.edu">Dr Brian Hornbuckle</a> leads a
 <a href="https://faculty.sites.iastate.edu/bkh/research">local research
 team</a> here at Iowa State that works with this data.  The IEM collects processed
 data from this satellite, generates analysis plots, and makes the raw data available.
 
 <h4>Download Data</h4>
-<p>This form allows you to download a single grid cell's worth of data based on 
-the latitude and longitude pair you provide.  Data is only available here from 
+<p>This form allows you to download a single grid cell's worth of data based on
+the latitude and longitude pair you provide.  Data is only available here from
 the Midwestern United States.  The form will provide an error if you attempt
-to request a point outside of the domain.  Data is available since 
+to request a point outside of the domain.  Data is available since
 <strong>31 May 2010</strong>.<br />
 <form method="GET" action="/cgi-bin/request/smos.py" name="dl">
 <div class="row"><div class="col-md-6">

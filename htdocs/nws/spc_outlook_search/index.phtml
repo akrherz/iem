@@ -6,11 +6,11 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "10.8.0";
+$OL = "10.9.0";
 
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js?v=3"></script>
 <script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
 <script type="text/javascript" src="index.js?v=11"></script>
 EOM;
