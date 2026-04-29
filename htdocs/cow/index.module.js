@@ -36,7 +36,7 @@ const selectAllWarningTypes = () => {
 const init = () => {
     // Find all "Select All" buttons and determine their context
     const buttons = document.querySelectorAll('button');
-    
+
     buttons.forEach(button => {
         if (button.textContent.trim() === 'Select All') {
             // Find the closest table row to determine context
@@ -45,7 +45,7 @@ const init = () => {
                 const header = row.querySelector('th');
                 if (header) {
                     const headerText = header.textContent;
-                    
+
                     if (headerText.includes('Warning Type')) {
                         button.addEventListener('click', (event) => {
                             event.preventDefault();

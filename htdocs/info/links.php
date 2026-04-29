@@ -5,15 +5,14 @@ $t = new MyView();
 $t->title = "Links";
 $t->content = <<<EOM
 
-<h3>Links</h3><p>
+<h3>Mostly Outdated Links :/</h3><p>
 
 <div class="row"><div class="col-sm-6">
 
 <h3>Other State Mesonets:</h3>
 <ul>
- <li><a href="http://www.awis.com/mesonet/index.html">Alabama Mesonet</a></li>
  <li><a href="http://www.georgiaweather.net/">Georgia Environmental Network</a></li>
- <li><a href="http://mesonet.k-state.edu">Kansas Mesonet</a></li>
+ <li><a href="https://mesonet.k-state.edu">Kansas Mesonet</a></li>
  <li><a href="http://www.kymesonet.org">Kentucky Mesonet</a></li>
  <li><a href="http://mesowest.utah.edu/">Meso West</a></li>
  <li><a href="http://agebb.missouri.edu/weather/">Missouri</a></li>
@@ -21,14 +20,14 @@ $t->content = <<<EOM
  <li><a href="https://mesonet.org">Oklahoma Mesonet</a></li>
  <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
- <li><a href="http://agwx.soils.wisc.edu/uwex_agwx/awon">Wisconsin Extension AgWeather</a></li>
+ <li><a href="https://wisconet.wisc.edu/">Wisconsin - Wisconet</a></li>
 </ul>
 
 <h3>Real Time Air Quality Charts and Maps</h3>
 
-<p>Air pollutant concentrations are monitored for the DNR Air Quality 
-Bureau by the University of Iowa Hygienic Laboratory, the Polk County 
-Health Dep- artment, and the Linn County Health Department. You can 
+<p>Air pollutant concentrations are monitored for the DNR Air Quality
+Bureau by the University of Iowa Hygienic Laboratory, the Polk County
+Health Dep- artment, and the Linn County Health Department. You can
 access this data in the following locations:</p>
 
 <ul>
@@ -73,10 +72,6 @@ access this data in the following locations:</p>
 <br>12 Dec 2002, <a href="http://www.ag.iastate.edu/aginfo/agaction/agaction.php?date=2002-12-12&function=view">ISU Agricultural Action</a>
 <br>November 2002, <a href="http://www.nwas.org/2002awards.html">National Weather Association, Larry R Johnson Award</a>
 <br>November 2002, <a href="http://www.cipco.net/images/advocate/200211PDF.pdf">CIPCO Advocate</a>
-
-<p><h3>Misc</h3>
-
-<br>Cool picture of <a href="http://www.ocs.ou.edu/whatsnew/ice_tower.jpg">ice deposition</a> on an Oklahoma Mesonet site.
 
 </div></div>
 

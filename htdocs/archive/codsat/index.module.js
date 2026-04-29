@@ -579,9 +579,10 @@ function isDateWithinBounds(dateStr) {
     const minDate = elements.dateSelect.min ? parseDateISO(elements.dateSelect.min) : null;
     const maxDate = elements.dateSelect.max ? parseDateISO(elements.dateSelect.max) : null;
 
-    if (minDate && selectedDate < minDate) return false;
-    if (maxDate && selectedDate > maxDate) return false;
-    return true;
+    if (minDate && selectedDate < minDate) {
+        return false;
+    }
+    return  !(maxDate && selectedDate > maxDate);
 }
 
 /**

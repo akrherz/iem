@@ -399,6 +399,5 @@ function handleKeyboardNavigation(event) {
         irealtime = false;
         update();
         event.preventDefault();
-        return;
     }
 }
