@@ -18,6 +18,7 @@ $day = get_int404("day", date("d", time() + 86400));
 $model = get_str404("model", "GFS", 3);
 $station = get_str404("station", "KAMW", 6);
 $vname = strtolower(get_str404("vname", "tmp"));
+/** @disregard complaint about mosvars being undefined */
 if (!array_key_exists($vname, $mosvars)) {
     $vname = "tmp";
 }
@@ -153,6 +154,7 @@ $table .= "</tbody></table></div></div>";
 
 $t->title = "Model Output Statistics Table for $station";
 
+/** @disregard complaint about mosvars being undefined */
 $variableSelect = make_select(
     "vname",
     $vname,

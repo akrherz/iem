@@ -6,12 +6,12 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "10.6.1";
+$OL = "10.9.0";
 
 $t->jsextra = <<<EOM
 <script src='https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js?v=3"></script>
 <script type="text/javascript" src="index.js?v=6"></script>
 EOM;
 
@@ -105,7 +105,7 @@ $t->content = <<<EOM
                         <i class="bi bi-geo-alt me-2"></i>Update Location
                     </button>
                 </div>
-                
+
                 <div class="mb-4">
                     <h6 class="text-primary mb-3 fw-bold">
                         <i class="bi bi-calendar-range me-2"></i>Date Range
@@ -123,7 +123,7 @@ $t->content = <<<EOM
                         <input name="edate" type="date" id="edate" class="form-control form-control-lg">
                     </div>
                 </div>
-                
+
                 <div class="bg-light p-4 rounded-3 border">
                     <h6 class="text-primary mb-3 fw-bold">
                         <i class="bi bi-map me-2"></i>Interactive Map
@@ -142,7 +142,7 @@ $t->content = <<<EOM
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-8">
         <div class="card h-100 shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">

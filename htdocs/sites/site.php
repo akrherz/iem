@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
-$OL = "10.7.0";
+$OL = "10.9.0";
 $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;
@@ -113,7 +113,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js?v=3"></script>
 <script src="site.js" type="text/javascript"></script>
 EOM;
 $t->sites_current = "base";

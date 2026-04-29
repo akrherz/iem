@@ -12,8 +12,8 @@ $month1 = get_int404("month1", date("m"));
 $month2 = get_int404("month2", date("m"));
 $day1 = get_int404("day1", date("d"));
 $day2 = get_int404("day2", date("d"));
-$model = isset($_GET["model"]) ? xssafe($_GET["model"]): "GFS";
-$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
+$model = strtoupper(get_str404("model", "GFS"));
+$station = strtoupper(get_str404("station", "KAMW"));
 
 $t->title = "NWS MOS Download Interface";
 
@@ -25,6 +25,7 @@ $ms2 = monthSelect($month1, "month2");
 $ds2 = daySelect($day1, "day2");
 
 $table = "";
+/** @disregard false positive for mosvars being undefined */
 foreach($mosvars as $k => $v){
     $table .= sprintf("<tr><th>%s</th><td>%s</td></tr>\n", $k, $v);
 }

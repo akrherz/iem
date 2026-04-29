@@ -43,7 +43,7 @@ can view/download this dataset.</p>
 
 <form method="GET" action="bypoint.phtml" name="bypoint">
 <b>Instructions:</b> With this form you can request daily estimates of rainfall
-for a particular year and for a particular point.  This point can be specified 
+for a particular year and for a particular point.  This point can be specified
 in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address
 may not be found in the database.  If you first attempt fails, try using a
 popular building address for a location near you.
@@ -99,9 +99,9 @@ popular building address for a location near you.
 <h3>GIS Shapefiles</h3>
 
 <form method="GET" action="dshape.php" name="shapefile">
-<div class="iem-form">
-<b>Instructions:</b>  Please select the date you would like to download a zip 
-file containing a shapefile of rainfall estimates. The duration is the time 
+<div>
+<b>Instructions:</b>  Please select the date you would like to download a zip
+file containing a shapefile of rainfall estimates. The duration is the time
 period during which the estimates are valid for.  For the current month or
 year, the estimates will be current for that period till yesterday.  Values
 are in inches.
@@ -142,7 +142,7 @@ are in inches.
 <h3>OGC Web Services</h3>
 
 <div>
-If your GIS system supports accessing Web Map Service (WMS), 
+If your GIS system supports accessing Web Map Service (WMS),
 you can directly pull in some of these rainfall estimates
 from the IEM server.  Our WMS URI is:
 <pre>
@@ -158,9 +158,9 @@ tested.  If you run into any problems, please let us know!
 
 
 These rainfall estimates are directly based on
-the <a href="http://www.emc.ncep.noaa.gov/mmb/ylin/pcpanl/stage4/">Stage 4</a> 
-precipitation analysis produced by the 
-<a href="http://www.ncep.noaa.gov">National Center for Environmental Prediction</a>.  
+the <a href="http://www.emc.ncep.noaa.gov/mmb/ylin/pcpanl/stage4/">Stage 4</a>
+precipitation analysis produced by the
+<a href="http://www.ncep.noaa.gov">National Center for Environmental Prediction</a>.
 The IEM processes this data source in the following ways:
 <ul>
     <li>Extract data valid for Iowa from the national analyses.</li>
@@ -170,18 +170,18 @@ The IEM processes this data source in the following ways:
 </ul>
 
 <p>Rainfall estimates are produced each day at 3:30 AM for the previous day.
-These estimates are later revised as more information is made available to 
+These estimates are later revised as more information is made available to
 better refine the estimates.  If you downloaded data for yesterday at the time,
-you may wish to redownload that dataset again later, since the estimates may 
-be refined then.  Sounds confusing.  Please 
+you may wish to redownload that dataset again later, since the estimates may
+be refined then.  Sounds confusing.  Please
 <a href="/info/contacts.php">contact us</a> if you have questions.</p>
 
 
 <h3><a name="mrms" href="#mrms"><i class="bi bi-bookmark" aria-hidden="true"></i></a> MRMS Estimates</h3>
 
 <p>NOAA has begun working on an advanced replacement of the system that produces
-rainfall estimates.  This project is called 
-<a href="https://www.nssl.noaa.gov/projects/mrms/">Multi-RADAR Multi-Sensor System</a>.  The IEM 
+rainfall estimates.  This project is called
+<a href="https://www.nssl.noaa.gov/projects/mrms/">Multi-RADAR Multi-Sensor System</a>.  The IEM
 processes some of the data found in this feed and produces products from it.
 
 <h4>GIS RASTER PNG Images of Accumulation Estimates</h4>
@@ -189,7 +189,7 @@ processes some of the data found in this feed and produces products from it.
 <p>The technique used provides 8-bit PNG images whereby a function can be used
 to convert the 8-bit value into a rainfall.  This equation is different for
 the various products produced by the IEM in order to accomodate the data ranges
-necessary to capture.  These images can be found in a 
+necessary to capture.  These images can be found in a
 <a href="/data/gis/images/4326/mrms/">current directory</a>
 and <a href="{$archivedir}">date based archive</a>. The units for the data is
 millimeters.</p>
@@ -211,7 +211,7 @@ millimeters.</p>
 <h4>GIS RASTER in ERDAS Imagine (.IMG) Format</h4>
 
 <p>This tool provides you an ERDAS Imagine file for the time and
-accumulation period of your choice.  The IMG file is an unsigned 16 bit 
+accumulation period of your choice.  The IMG file is an unsigned 16 bit
 image, with a scale unit of 0.1mm.  The 65535 value is set to missing and
 your GIS system hopefully will automatically understand that. The time you
 choose is the end time of the given accumulation period. <strong>This time

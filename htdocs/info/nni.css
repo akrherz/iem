@@ -1,0 +1,27 @@
+.figure {
+    background: #eee;
+    border: 2px dashed #000;
+    text-align: center;
+}
+
+.ptext h3 {
+    border-bottom: 1px solid #00f;
+    padding-top: 30px;
+}
+
+.ptext h4 {
+    padding-left: 45px;
+    color: #f00;
+}
+
+.equation img {
+    float: left;
+}
+
+.equation span {
+    font-size: 0.8em;
+}
+
+table {
+    caption-side: bottom;
+}

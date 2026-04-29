@@ -13,6 +13,7 @@
 // - data-lon-input: ID of longitude input field for bidirectional sync (optional)
 // - data-lat-input: ID of latitude input field for bidirectional sync (optional)
 // - data-precision: Number of decimal places for input values (default: 4)
+// - data-click-to-move: Allow single click map repositioning (default: true)
 
 (function () {
     // Helper functions for olSelectLonLat complexity reduction - encapsulated to avoid conflicts
@@ -31,6 +32,7 @@
             lonInputId: element.dataset.lonInput,
             latInputId: element.dataset.latInput,
             precision: element.dataset.precision ? parseInt(element.dataset.precision) : 4,
+            clickToMove: element.dataset.clickToMove !== 'false',
         };
     }
 
@@ -196,20 +198,49 @@
         }
     }
 
-    function setupMapInteractions(map, marker, vectorSource, callback, config, lonInput, latInput) {
-        const modify = new ol.interaction.Modify({
-            hitDetection: map.getLayers().getArray()[1], // vectorLayer
-            source: vectorSource,
-            features: new ol.Collection([marker]), // Only the original marker is modifiable
+    function setupMapInteractions(
+        map,
+        marker,
+        suggestedMarker,
+        vectorSource,
+        callback,
+        config,
+        lonInput,
+        latInput
+    ) {
+        const translate = new ol.interaction.Translate({
+            features: new ol.Collection([marker]),
         });
-        map.addInteraction(modify);
+        map.addInteraction(translate);
 
-        // Add a listener to the drag-and-drop interaction
-        modify.on('modifyend', e => {
-            const coords = e.features.getArray()[0].getGeometry().getCoordinates();
+        // Direct marker dragging is more intuitive than vertex/handle editing.
+        translate.on('translateend', e => {
+            const coords = e.features.item(0).getGeometry().getCoordinates();
             const lonLat = ol.proj.toLonLat(coords);
             updateCoordinates(callback, config, lonInput, latInput, lonLat[0], lonLat[1]);
         });
+
+        map.on('pointermove', event => {
+            const feature = map.forEachFeatureAtPixel(event.pixel, f => f);
+            const isInteractiveFeature = feature === marker || feature === suggestedMarker;
+            map.getTargetElement().style.cursor = isInteractiveFeature ? 'pointer' : '';
+        });
+
+        if (config.clickToMove) {
+            map.on('singleclick', event => {
+                const feature = map.forEachFeatureAtPixel(event.pixel, f => f);
+                if (feature === marker) {
+                    return;
+                }
+                const coords =
+                    feature === suggestedMarker
+                        ? suggestedMarker.getGeometry().getCoordinates()
+                        : event.coordinate;
+                marker.getGeometry().setCoordinates(coords);
+                const lonLat = ol.proj.toLonLat(coords);
+                updateCoordinates(callback, config, lonInput, latInput, lonLat[0], lonLat[1]);
+            });
+        }
 
         // Add bidirectional sync: input fields → map marker
         if (lonInput && latInput) {
@@ -257,7 +288,16 @@
         );
 
         // Setup interactions
-        setupMapInteractions(map, marker, vectorSource, callback, config, lonInput, latInput);
+        setupMapInteractions(
+            map,
+            marker,
+            suggestedMarker,
+            vectorSource,
+            callback,
+            config,
+            lonInput,
+            latInput
+        );
 
         return { map, marker, suggestedMarker, config, lonInput, latInput };
     }
