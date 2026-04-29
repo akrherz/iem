@@ -279,10 +279,13 @@ def list_products(query: Schema):
     else:
         basedir = now.strftime(f"{BASEDIR}/%Y/%m/%d/GIS/ridge/{radar}")
         if os.path.isdir(basedir):
-            os.chdir(basedir)
-            for dirname in glob.glob("???"):
+            for dirname in glob.glob(os.path.join(basedir, "???")):
+                product_id = os.path.basename(dirname)
                 root["products"].append(
-                    {"id": dirname, "name": NIDS.get(dirname, dirname)}
+                    {
+                        "id": product_id,
+                        "name": NIDS.get(product_id, product_id),
+                    }
                 )
     return root
 
