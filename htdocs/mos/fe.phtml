@@ -12,7 +12,7 @@ $month1 = get_int404("month1", date("m"));
 $month2 = get_int404("month2", date("m"));
 $day1 = get_int404("day1", date("d"));
 $day2 = get_int404("day2", date("d"));
-$model = get_str404("model", "GFS");
+$model = strtoupper(get_str404("model", "GFS"));
 $station = strtoupper(get_str404("station", "KAMW"));
 
 $t->title = "NWS MOS Download Interface";

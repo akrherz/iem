@@ -27,7 +27,7 @@ $t->content = <<<EOM
 
 <p>Air pollutant concentrations are monitored for the DNR Air Quality
 Bureau by the University of Iowa Hygienic Laboratory, the Polk County
-Health Dep- artment, and the Linn County Health Department. You can
+Health Department, and the Linn County Health Department. You can
 access this data in the following locations:</p>
 
 <ul>
