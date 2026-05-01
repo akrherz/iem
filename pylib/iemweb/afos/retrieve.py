@@ -71,7 +71,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=MTRDSM&fmt=html
 
 Use the WAR pil shortcut to retrieve a number of Des Moines products
 
-https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=WARDSM
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=WARDMX
 
 Return the last AFDDMX product in text format
 
@@ -502,10 +502,16 @@ def application(environ: dict, start_response: callable):
     mlimit = " and strpos(data, :matches) > 0 " if request.matches else ""
     if len(request.pil) == 1:
         plimit = " pil = :pil "
-        params["pil"] = request.pil[0].strip()
-        if len(request.pil[0].strip()) == 3:
-            # There's a database index on this
-            plimit = " substr(pil, 1, 3) = :pil "
+        params["pil"] = request.pil[0]
+        if len(request.pil[0]) == 3:
+            # Serious perf issues here.  substr partial index confuses planner
+            # LIKE also triggers filtering, the goose here is to force a
+            # index
+            pil3 = request.pil[0]
+            # for example, pil3=AFD then next_char is E and we have `AFE`
+            next_char = chr(ord(pil3[2]) + 1)
+            params["pil2"] = f"{pil3[:2]}{next_char}"
+            plimit = " pil >= :pil and pil < :pil2 "
     sql = sql_helper(
         "SELECT data, pil, "
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
