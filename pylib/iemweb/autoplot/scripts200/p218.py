@@ -20,9 +20,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import logger
 
-LOG = logger()
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 
 PDICT = {

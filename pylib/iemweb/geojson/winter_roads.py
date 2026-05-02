@@ -14,12 +14,11 @@ https://mesonet.agron.iastate.edu/geojson/winter_roads.geojson
 import json
 
 from pyiem.database import sql_helper, with_sqlalchemy_conn
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -42,12 +41,12 @@ def run(conn: Connection | None = None) -> str:
     """)
     )
 
-    data = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": res.rowcount,
-    }
+    data = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     for row in res:
         data["features"].append(
             dict(
@@ -57,7 +56,7 @@ def run(conn: Connection | None = None) -> str:
                 geometry=json.loads(row[0]),
             )
         )
-
+    data["count"] = len(data["features"])
     return json.dumps(data)
 
 

@@ -53,6 +53,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -130,12 +131,12 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
         """
         args = (year, wfo, etn, significance, phenomena, wfo)
     cursor.execute(sql, args)
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": datetime.now(timezone.utc).strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     for row in cursor:
         res["features"].append(
             dict(
@@ -153,6 +154,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
                 geometry=json.loads(row["geojson"]),
             )
         )
+    res["count"] = len(res["features"])
     pgconn.close()
     return json.dumps(res)
 

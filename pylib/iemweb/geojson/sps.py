@@ -38,6 +38,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -68,13 +69,13 @@ def run(valid: datetime) -> str:
         """),
             {"valid": valid},
         )
-        data = {
-            "type": "FeatureCollection",
-            "features": [],
-            "valid_at": valid.strftime(ISO8601),
-            "generated_at": utc().strftime(ISO8601),
-            "count": res.rowcount,
-        }
+        data = json_response_dict(
+            {
+                "type": "FeatureCollection",
+                "features": [],
+                "valid_at": valid.strftime(ISO8601),
+            }
+        )
 
         for row in res.mappings():
             sts = row["utc_issue"].strftime(ISO8601)
@@ -98,6 +99,7 @@ def run(valid: datetime) -> str:
                     geometry=json.loads(row["geojson"]),
                 )
             )
+    data["count"] = len(data["features"])
     return json.dumps(data)
 
 

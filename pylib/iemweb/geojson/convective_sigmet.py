@@ -45,6 +45,7 @@ from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -113,12 +114,12 @@ def run(environ: dict, conn: Connection = None) -> str:
         environ,
     )
 
-    data = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": res.rowcount,
-    }
+    data = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     for row in res.mappings():
         data["features"].append(
             dict(
@@ -133,6 +134,7 @@ def run(environ: dict, conn: Connection = None) -> str:
                 geometry=json.loads(row["geojson"]),
             )
         )
+    data["count"] = len(data["features"])
     return json.dumps(data)
 
 

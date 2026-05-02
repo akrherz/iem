@@ -36,12 +36,10 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import nwsice, nwssnow
 from pyiem.reference import EPSG
-from pyiem.util import logger
 from pyproj import Transformer
 from scipy.interpolate import Rbf
 from shapely.geometry import Point
 
-LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
 T2163_4326 = Transformer.from_proj(2163, 4326, always_xy=True)
 USEME = "used_for_analysis"

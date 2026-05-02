@@ -19,9 +19,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
-from pyiem.util import logger
+from pyiem.util import LOG
 
-LOG = logger()
 PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
@@ -464,7 +463,7 @@ def get_data(ctx: dict):
                 index_col="station",
                 geom_col="geom",
             )  # type: ignore
-            LOG.info("Finshing %s table query", table)
+            LOG.info("Finishing %s table query", table)
             if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
                 # We need to compute our own GDD Climatology, Le Sigh
                 df = replace_gdd_climo(ctx, df, table, date1, date2)
