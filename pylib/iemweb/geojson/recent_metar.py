@@ -51,7 +51,7 @@ from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -83,7 +83,7 @@ def trace(val):
 def get_data(q):
     """Get the data for this query"""
     pgconn, cursor = get_dbconnc("iem")
-    data = {"type": "FeatureCollection", "features": []}
+    data = json_response_dict({"type": "FeatureCollection", "features": []})
 
     # Fetch the values
     countrysql = ""
