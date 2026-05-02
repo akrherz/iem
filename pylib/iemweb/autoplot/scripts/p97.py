@@ -463,7 +463,7 @@ def get_data(ctx: dict):
                 index_col="station",
                 geom_col="geom",
             )  # type: ignore
-            LOG.info("Finshing %s table query", table)
+            LOG.info("Finishing %s table query", table)
             if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
                 # We need to compute our own GDD Climatology, Le Sigh
                 df = replace_gdd_climo(ctx, df, table, date1, date2)
