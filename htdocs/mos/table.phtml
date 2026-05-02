@@ -88,6 +88,7 @@ for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
     $runtimeEpochs[] = $runtimeDT->getTimestamp();
 }
 
+/** @var array<string, array> $data */
 $data = array();
 $table = sprintf(
     "<div class=\"card shadow-sm border-0 mb-4\">" .

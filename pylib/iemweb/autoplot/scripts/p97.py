@@ -19,9 +19,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
-from pyiem.util import logger
+from pyiem.util import LOG
 
-LOG = logger()
 PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
