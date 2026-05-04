@@ -32,7 +32,13 @@ https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
 Provide the day 1 outlook for Pierre, SD valid at 8 UTC on 3 Aug 2024
 
 https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
-?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00Z
+?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00
+
+Same request, but for 8 AM CDT
+
+https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00-05:00
+
 
 Get only the last day 2 outlook for Washington, DC
 
@@ -49,6 +55,7 @@ from typing import Annotated
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
 from pyiem.util import utc
@@ -108,16 +115,23 @@ def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
     return outlooks
 
 
-def dotime(time, lon, lat, day) -> tuple[pd.DataFrame, datetime]:
+def dotime(time: str, lon, lat, day) -> tuple[pd.DataFrame, datetime]:
     """Query for Outlook based on some timestamp"""
     if time in ["", "current", "now"]:
         ts = utc()
         if day > 1:
             ts += timedelta(days=day - 1)
     else:
-        # ISO formatting
-        ts = datetime.strptime(time[:16], "%Y-%m-%dT%H:%M")
-        ts = ts.replace(tzinfo=timezone.utc)
+        try:
+            ts = datetime.fromisoformat(time.replace("Z", "+00:00"))
+        except ValueError as exp:
+            raise IncompleteWebRequest(
+                "time must be a valid ISO8601 timestamp"
+            ) from exp
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        else:
+            ts = ts.astimezone(timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
             sql_helper("""
