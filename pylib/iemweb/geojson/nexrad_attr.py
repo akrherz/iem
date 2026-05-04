@@ -50,7 +50,7 @@ from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
 from iemweb.fields import CALLBACK_FIELD
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 
 class Schema(CGIModel):
@@ -112,12 +112,12 @@ def run(valid, fmt, conn: Connection = None):
         )
 
     if fmt == "geojson":
-        data = {
-            "type": "FeatureCollection",
-            "features": [],
-            "generated_at": utc().strftime(ISO8601),
-            "count": res.rowcount,
-        }
+        data = json_response_dict(
+            {
+                "type": "FeatureCollection",
+                "features": [],
+            }
+        )
         for i, row in enumerate(res.mappings()):
             data["features"].append(
                 {
@@ -147,6 +147,7 @@ def run(valid, fmt, conn: Connection = None):
                     },
                 }
             )
+        data["count"] = len(data["features"])
         return json.dumps(data)
     data = (
         "nexrad,storm_id,azimuth,range,tvs,meso,posh,poh,max_size,"

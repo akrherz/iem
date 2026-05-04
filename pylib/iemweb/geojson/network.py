@@ -46,11 +46,10 @@ from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
+from iemweb.util import json_response_dict
 
 XREF = {
     "HAS_HML": "HAS_HML",
@@ -114,12 +113,12 @@ def run(conn, network, only_online: bool, has_attribute: str | None):
         params,
     )
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
 
     for row in cursor.mappings():
         ab = row["archive_begin"]
@@ -163,6 +162,7 @@ def run(conn, network, only_online: bool, has_attribute: str | None):
                 geometry=json.loads(row["geojson"]),
             )
         )
+    res["count"] = len(res["features"])
     return json.dumps(res)
 
 

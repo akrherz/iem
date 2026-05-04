@@ -31,6 +31,7 @@ from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
 from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -108,13 +109,15 @@ def run(conn: Connection, network, month, day, syear, eyear):
         ),
         {"sday": sday, "syear": syear, "eyear": eyear},
     )
-    data = {
-        "type": "FeatureCollection",
-        "month": month,
-        "day": day,
-        "network": network,
-        "features": [],
-    }
+    data = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "month": month,
+            "day": day,
+            "network": network,
+            "features": [],
+        }
+    )
 
     for i, row in enumerate(res.mappings()):
         if row["station"] not in nt.sts:

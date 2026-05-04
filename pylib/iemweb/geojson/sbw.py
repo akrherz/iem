@@ -60,7 +60,7 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, STATE_LIST_FIELD_OPTIONAL
 from iemweb.mlib import rectify_wfo, unrectify_wfo
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 
 class Schema(CGIModel):
@@ -145,11 +145,12 @@ def run(query: Schema):
         "ets": query.ets,
     }
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
 
     wfo_limiter = ""
     if wfos:
