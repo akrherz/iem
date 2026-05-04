@@ -116,7 +116,7 @@ def dotime(time, lon, lat, day) -> tuple[pd.DataFrame, datetime]:
             ts += timedelta(days=day - 1)
     else:
         # ISO formatting
-        ts = datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
+        ts = datetime.strptime(time[:16], "%Y-%m-%dT%H:%M")
         ts = ts.replace(tzinfo=timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(

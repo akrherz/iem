@@ -186,8 +186,9 @@ def plotter(ctx: dict):
     y2.set_ylabel("Mean Relative Humidity [%] (black line)")
     y2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     y2.set_ylim(0, 100)
-    ax.set_ylim(xmin, xmax)
-    ax.set_xlim(xmin, xmax)
+    if xmax > xmin:
+        ax.set_ylim(xmin, xmax)
+        ax.set_xlim(xmin, xmax)
     ax.set_xlabel("Air Temperature °F")
 
     if ctx.get("date"):

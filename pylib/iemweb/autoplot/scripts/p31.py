@@ -140,6 +140,8 @@ def get_description():
             name="fdays",
             default=1,
             label="Number of Days in Forward Period (following middle):",
+            ge=1,
+            le=366,
         ),
         dict(
             type="select",
@@ -163,7 +165,7 @@ def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
     days = int(ctx["days"])
-    fdays = int(ctx["fdays"])
+    fdays = max(1, ctx["fdays"])
     mdays = int(ctx["mdays"])
     syear = int(ctx["syear"])
     eyear = int(ctx["eyear"])
