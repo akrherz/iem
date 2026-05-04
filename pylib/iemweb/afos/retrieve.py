@@ -181,7 +181,8 @@ class Schema(CGIModel):
                 "resembles what would have been sent over the NWS NOAAPort "
                 "system. The ``html`` format is a bit more human readable. "
                 "The ``zip`` format will return a zip file containing the "
-                "text products, one file per product."
+                "text products, one file per product. The ``zip`` format is "
+                "not supported for the one-off ``MTR`` METAR service."
             ),
             pattern="^(text|html|zip)$",
         ),
@@ -484,6 +485,12 @@ def application(environ: dict, start_response: callable):
         )
 
     if request.pil[0].startswith("MTR"):
+        if request.fmt == "zip":
+            start_response(
+                "422 Unprocessable Entity",
+                [("Content-type", "text/plain")],
+            )
+            return "ERROR: The zip format is not supported for the MTR service"
         with get_sqlalchemy_conn("iem") as conn:
             start_response("200 OK", headers)
             return special_metar_logic(conn, request)

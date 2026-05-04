@@ -31,12 +31,10 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
-from iemweb.util import get_ct
+from iemweb.util import get_ct, json_response_dict
 
 
 class Schema(CGIModel):
@@ -92,12 +90,12 @@ def run(conn, environ: dict):
         environ,
     )
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
 
     for row in cursor.mappings():
         ab = row["archive_begin"]
@@ -142,6 +140,7 @@ def run(conn, environ: dict):
                 geometry=json.loads(row["geojson"]),
             )
         )
+    res["count"] = len(res["features"])
     return json.dumps(res, ensure_ascii=False)
 
 

@@ -38,11 +38,10 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.reference import ISO8601
-from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -78,7 +77,12 @@ def rectify_date(dt: dateobj):
 
 def run(ts: dateobj):
     """Actually do the hard work of getting the USDM in geojson"""
-    utcnow = utc()
+    data = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
             sql_helper(
@@ -97,12 +101,6 @@ def run(ts: dateobj):
                 {"ts": ts - timedelta(days=7)},
             )
 
-        data = {
-            "type": "FeatureCollection",
-            "features": [],
-            "generated_at": utcnow.strftime(ISO8601),
-            "count": res.rowcount,
-        }
         for row in res.mappings():
             data["features"].append(
                 dict(
@@ -114,6 +112,7 @@ def run(ts: dateobj):
                     geometry=json.loads(row["geojson"]),
                 )
             )
+    data["count"] = len(data["features"])
     return json.dumps(data)
 
 

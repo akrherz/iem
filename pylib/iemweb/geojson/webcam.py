@@ -35,6 +35,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -58,6 +59,16 @@ def run(valid, network):
     if network == "TV":
         networks = ["KCRG", "KCCI", "KELO", "ISUC", "MCFC"]
     params = {"networks": networks, "valid": valid}
+    data = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+            "valid_at": (valid if valid is not None else utc()).strftime(
+                ISO8601
+            ),
+        }
+    )
+
     with get_sqlalchemy_conn("mesosite") as conn:
         if valid is None:
             res = conn.execute(
@@ -81,16 +92,6 @@ def run(valid, network):
             """),
                 params,
             )
-        data = {
-            "type": "FeatureCollection",
-            "features": [],
-            "valid_at": (valid if valid is not None else utc()).strftime(
-                ISO8601
-            ),
-            "generated_at": utc().strftime(ISO8601),
-            "count": res.rowcount,
-        }
-
         for row in res.mappings():
             cv = row["valid"].astimezone(timezone.utc)
             url = (
@@ -119,6 +120,7 @@ def run(valid, network):
                     },
                 )
             )
+    data["count"] = len(data["features"])
     return json.dumps(data)
 
 

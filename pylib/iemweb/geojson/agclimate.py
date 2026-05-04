@@ -42,6 +42,8 @@ from pyiem.tracker import loadqc
 from pyiem.util import convert_value, drct2text, mm2inch, utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.util import json_response_dict
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -130,7 +132,7 @@ def compute_plant_water(row):
 def get_inversion_data(conn, ts):
     """Retrieve inversion data."""
     nt = NetworkTable("ISUSM", only_online=False)
-    data = {"type": "FeatureCollection", "features": []}
+    data = json_response_dict({"type": "FeatureCollection", "features": []})
     res = conn.execute(
         sql_helper(
             "select *, case when tair_10_c_avg > tair_15_c_avg then true else "

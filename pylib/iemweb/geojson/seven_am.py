@@ -48,6 +48,7 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD
+from iemweb.util import json_response_dict
 
 
 class Schema(CGIModel):
@@ -112,12 +113,12 @@ def run_azos(ts: datetime):
         (ts0, ts1),
     )
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     tstamp = ts1.astimezone(timezone.utc).strftime(ISO8601)
     for row in cursor:
         res["features"].append(
@@ -142,6 +143,7 @@ def run_azos(ts: datetime):
             )
         )
     pgconn.close()
+    res["count"] = len(res["features"])
     return json.dumps(res)
 
 
@@ -161,12 +163,12 @@ def run_coop(ts):
         (ts.date(),),
     )
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     for row in cursor:
         res["features"].append(
             dict(
@@ -192,6 +194,7 @@ def run_coop(ts):
             )
         )
     pgconn.close()
+    res["count"] = len(res["features"])
     return json.dumps(res)
 
 
@@ -212,12 +215,12 @@ def run_cocorahs(ts: datetime):
         (ts.date(),),
     )
 
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generated_at": utc().strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
+    res = json_response_dict(
+        {
+            "type": "FeatureCollection",
+            "features": [],
+        }
+    )
     for row in cursor:
         res["features"].append(
             dict(
@@ -243,6 +246,7 @@ def run_cocorahs(ts: datetime):
             )
         )
     pgconn.close()
+    res["count"] = len(res["features"])
     return json.dumps(res)
 
 
