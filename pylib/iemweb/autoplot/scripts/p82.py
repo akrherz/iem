@@ -317,7 +317,11 @@ def plotter(ctx: dict):
             raise NoDataFound("Invalid interval specified.")
         minv, maxv, interval = map(float, tokens)
         # Prevent naughty requests
-        if maxv <= minv or (maxv - minv) / interval > 500:
+        if (
+            maxv <= minv
+            or (maxv - minv) / interval > 500
+            or (maxv - minv) < interval
+        ):
             raise NoDataFound("Invalid min,max,interval specified.")
         norm = BoundaryNorm(
             np.arange(minv, maxv, interval),

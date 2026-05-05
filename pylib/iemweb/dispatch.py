@@ -4,8 +4,6 @@ import re
 from importlib import import_module
 from urllib.parse import parse_qsl, urlencode
 
-from iemweb import error_log
-
 SPECIAL_ROUTES = {
     "json": [
         (
@@ -88,11 +86,8 @@ def add_query(environ: dict, **params) -> None:
     environ["QUERY_STRING"] = urlencode(current)
 
 
-def not_found(
-    environ: dict, start_response: callable, namespace: str, what: str
-) -> list[bytes]:
+def not_found(start_response: callable) -> list[bytes]:
     """Redirect missing content to the API docs page."""
-    error_log(environ, f"{namespace} failed {what}")
     start_response("301 Found", [("Location", "/api/")])
     return []
 
@@ -140,7 +135,7 @@ def dispatch_namespace(
     """Dispatch a request for one namespace."""
     path: str = environ.get("PATH_INFO", "")
     if path.startswith("/index"):
-        return not_found(environ, start_response, namespace, path)
+        return not_found(start_response)
 
     for regex, module_name, transform in SPECIAL_ROUTES[namespace]:
         match = regex.match(path)
@@ -166,12 +161,12 @@ def dispatch_namespace(
 
     endpoint = normalize_path(path, SUFFIXES[namespace])
     if endpoint is None:
-        return not_found(environ, start_response, namespace, path)
+        return not_found(start_response)
 
     try:
         handler = import_module(f"{MODULE_PREFIXES[namespace]}.{endpoint}")
     except ModuleNotFoundError:
-        return not_found(environ, start_response, namespace, path)
+        return not_found(start_response)
 
     return handler.application(environ, start_response)
 
@@ -180,12 +175,7 @@ def application(environ: dict, start_response: callable):
     """WSGI entry point for the consolidated dispatcher."""
     namespace = detect_namespace(environ)
     if namespace is None:
-        return not_found(
-            environ,
-            start_response,
-            "dispatch",
-            environ.get("PATH_INFO", ""),
-        )
+        return not_found(start_response)
     if namespace in DIRECT_ROUTES:
         handler = import_module(DIRECT_ROUTES[namespace])
         return handler.application(environ, start_response)
