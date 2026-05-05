@@ -6,7 +6,7 @@ the dew point temperature.  With that averaged dew point temperature a
 relative humidity value is computed.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 import matplotlib.ticker as mticker
 import metpy.calc as mcalc
@@ -57,6 +57,13 @@ def get_description():
             label="Month Limiter",
             options=MDICT,
         ),
+        {
+            "type": "date",
+            "name": "on",
+            "optional": True,
+            "label": "Overlay observations on given calendar date",
+            "default": date.today().strftime("%Y/%m/%d"),
+        },
     ]
     return desc
 
@@ -66,16 +73,18 @@ def plotter(ctx: dict):
     station = ctx["zstation"]
     month = ctx["month"]
     months = month2months(month)
+    on_date: date | None = ctx.get("on")
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
                 """
             SELECT drct::int as t, dwpf, tmpf, relh,
-            coalesce(mslp, alti * 33.8639, 1013.25) as slp
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp,
+            date(valid at time zone :tzname) as date
             from alldata where station = :station
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and sknt >= 3 and drct::int % 10 = 0
-            and extract(month from valid) = ANY(:months)
+            and extract(month from valid at time zone :tzname) = ANY(:months)
             and report_type = 3
         """
             ),
@@ -83,7 +92,12 @@ def plotter(ctx: dict):
             params={
                 "station": station,
                 "months": months,
+                "tzname": ctx["_nt"].sts[station]["tzname"],
             },
+            parse_dates=[
+                "date",
+            ],
+            index_col=None,
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -169,7 +183,18 @@ def plotter(ctx: dict):
         label="Mean",
         drawstyle="steps-mid",
     )
-    ax.legend(ncol=4)
+    if on_date is not None:
+        series = df[df["date"] == pd.Timestamp(on_date)]
+        if not series.empty:
+            ax.scatter(
+                series["t"].to_numpy(),
+                series["dwpf"].to_numpy(),
+                color="k",
+                s=50,
+                zorder=6,
+                label=f"{on_date:%Y-%m-%d}",
+            )
+    ax.legend(ncol=5)
     ax.grid(True, zorder=11)
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:

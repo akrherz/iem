@@ -36,9 +36,9 @@ PDICT = {
     "AVN": "AVN (1 Jun 2000 - 16 Dec 2003)",
 }
 PDICT2 = {
-    "t": "~Daily Max/Min Air Temperature [F]",
-    "tmp": "Air Temperature [F]",
-    "dpt": "Dew Point Temperature [F]",
+    "t": "~Daily Max/Min Air Temperature [°F]",
+    "tmp": "Air Temperature [°F]",
+    "dpt": "Dew Point Temperature [°F]",
     "wsp": "10 meter Wind Speed [kts]",
 }
 LOOKUP = {
@@ -186,23 +186,25 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
     )
     df["mos_delta"] = df[f"mos_max_{varname}"] - df[f"mos_min_{varname}"]
     # TODO do mos_delta=0 get visibly plotted?
-    if df[f"mos_min_{varname}"].isna().sum() == len(df.index):
+    if df[f"mos_min_{varname}"].isna().all():
         raise NoDataFound("No MOS data found for query.")
 
+    combos = df[df["mos_delta"].notna()]
+
     ax.bar(
-        df["valid"].values,
-        df["mos_delta"].values,
+        combos["valid"].to_numpy(),
+        combos["mos_delta"].to_numpy(),
         facecolor="pink",
         width=0.25,
-        bottom=df[f"mos_min_{varname}"].values,
+        bottom=combos[f"mos_min_{varname}"].to_numpy(),
         label="Range",
         zorder=1,
         alpha=0.5,
         align="center",
     )
     ax.scatter(
-        df["valid"],
-        df[f"ob_{varname}"],
+        combos["valid"].to_numpy(),
+        combos[f"ob_{varname}"].to_numpy(),
         zorder=2,
         s=40,
         c="red",

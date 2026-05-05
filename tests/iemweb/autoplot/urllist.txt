@@ -131,6 +131,7 @@
 76/network:IA_ASOS::station:DSM::season:water_year::varname:vpd::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
 77/network:IACLIMATE::station:IA0262::_r:t::dpi:100.png
 78/network:IA_ASOS::zstation:DSM::month:winter::date:2024-08-01::_r:t::dpi:100.png
+79/network:IA_ASOS::zstation:DSM::month:winter::on:2024-12-31.png
 80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 80/which:ugc::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
