@@ -84,7 +84,7 @@ def plotter(ctx: dict):
             from alldata where station = :station
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and sknt >= 3 and drct::int % 10 = 0
-            and extract(month from valid) = ANY(:months)
+            and extract(month from valid at time zone :tzname) = ANY(:months)
             and report_type = 3
         """
             ),
