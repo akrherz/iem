@@ -43,7 +43,6 @@ ets=2020-05-21T00:00:00Z
 
 """
 
-import hashlib
 import re
 from datetime import datetime, timedelta
 from io import StringIO
@@ -492,23 +491,10 @@ def toobusy(pgconn, environ, name):
     return over
 
 
-def get_mckey(environ: dict) -> str | None:
-    """Figure out our memcache key."""
-    # Arms race against naughty actors attempting to subvert throttles without
-    # understanding data update frequencies. This is a 80% solution
-    request_uri = environ.get("REQUEST_URI")
-    if request_uri is None:
-        return None
-    hashkey = hashlib.blake2s(request_uri.encode()).hexdigest()
-    return f"/asos.py/1/{hashkey}"
-
-
+# NOTE This app can't be cached via iemapp since it is a generator
 @iemapp(
     help=__doc__,
     parse_times=False,
-    content_type="text/plain",  # Only used in the caching
-    memcachekey=get_mckey,
-    memcacheexpire=600,
     schema=MyModel,
     ip_throttle_secs=1,
 )
