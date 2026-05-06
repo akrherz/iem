@@ -496,7 +496,10 @@ def get_mckey(environ: dict) -> str | None:
     """Figure out our memcache key."""
     # Arms race against naughty actors attempting to subvert throttles without
     # understanding data update frequencies. This is a 80% solution
-    hashkey = hashlib.blake2s(environ["REQUEST_URI"].encode()).hexdigest()
+    request_uri = environ.get("REQUEST_URI")
+    if request_uri is None:
+        return None
+    hashkey = hashlib.blake2s(request_uri.encode()).hexdigest()
     return f"/asos.py/1/{hashkey}"
 
 
