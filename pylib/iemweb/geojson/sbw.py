@@ -303,11 +303,10 @@ def get_mckey(environ):
     if wfos is None:
         wfos = []
     states = [] if environ["states"] is None else environ["states"]
-    ts = environ["ts"]
     if environ["sts"] is not None:
         ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
     else:
-        ts = ts.strftime(ISO8601)
+        ts = f"{environ['ts']:%Y%m%d%H%M}"
     return (
         f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}|"
         f"{','.join(states)[:100]}"
