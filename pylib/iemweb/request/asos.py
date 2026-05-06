@@ -43,6 +43,7 @@ ets=2020-05-21T00:00:00Z
 
 """
 
+import hashlib
 import re
 from datetime import datetime, timedelta
 from io import StringIO
@@ -493,15 +494,10 @@ def toobusy(pgconn, environ, name):
 
 def get_mckey(environ: dict) -> str | None:
     """Figure out our memcache key."""
-    # A current incessant caller pattern
-    if (
-        environ["station"] is not None
-        and len(environ["station"]) == 1
-        and environ["data"] == ["tmpf"]
-        and environ["hours"] is not None
-    ):
-        return f"/asos/tmpf/{environ['station'][0]}/{environ['hours']}"
-    return None
+    # Arms race against naughty actors attempting to subvert throttles without
+    # understanding data update frequencies. This is a 80% solution
+    hashkey = hashlib.blake2s(environ["REQUEST_URI"].encode()).hexdigest()
+    return f"/asos.py/1/{hashkey}"
 
 
 @iemapp(
