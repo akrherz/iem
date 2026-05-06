@@ -24,6 +24,24 @@ CLOUD404 = "/mesonet/tmp/dotcloud404.txt"
 CEILING = utc() + timedelta(minutes=30)
 
 
+def fetch_image(url: str) -> requests.Response | None:
+    """Fetch a webcam image with light retry logic for transport failures."""
+    last_exp = None
+    for attempt, timeout in enumerate((30, 60), start=1):
+        try:
+            return requests.get(url, timeout=timeout)
+        except requests.RequestException as exp:
+            last_exp = exp
+            LOG.info(
+                "image fetch attempt %s failed for %s: %s",
+                attempt,
+                url,
+                exp,
+            )
+    LOG.info("Giving up fetching %s after retry: %s", url, last_exp)
+    return None
+
+
 def add_entry(cursor, cam, props):
     """Add a database entry for this camera."""
     cursor.execute(
@@ -35,7 +53,7 @@ def add_entry(cursor, cam, props):
     )
 
 
-def process_feature(cursor, domain, feat):
+def process_feature(cursor, domain, feat: dict):
     """Do what we need to do with this feature."""
     props = feat["attributes"]
     if props["RPUID"] is None or props["CAMERA_POSITION"] is None:
@@ -75,11 +93,9 @@ def process_feature(cursor, domain, feat):
         if url is None or url.find("Not_Available") > -1:
             LOG.debug("skipping %s %s %s", cam, valid, url)
             continue
-        try:
-            resp = requests.get(url, timeout=30)
-        except requests.Timeout:
-            # Try again
-            resp = requests.get(url, timeout=60)
+        resp = fetch_image(url)
+        if resp is None:
+            continue
         if resp.status_code == 404:
             LOG.debug("cloud 404 %s", url)
             with open(CLOUD404, "a", encoding="utf8") as fh:
