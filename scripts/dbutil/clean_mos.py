@@ -21,14 +21,6 @@ def main():
     )
     if cursor.rowcount == 0:
         LOG.warning("Zero LAV rows deleted from MOS database?")
-    cursor.execute(
-        "DELETE from alldata where model in ('NBS', 'NBE') and "
-        "extract(hour from runtime at time zone 'UTC') not in (1, 7, 13, 19) "
-        "and runtime > now() - '31 days'::interval and "
-        "runtime < now() - '7 days'::interval"
-    )
-    if cursor.rowcount == 0:
-        LOG.warning("Zero NBM rows deleted from MOS database?")
     cursor.close()
     pgconn.commit()
 
