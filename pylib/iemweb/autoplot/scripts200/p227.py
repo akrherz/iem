@@ -6,7 +6,7 @@ NWEM plots.
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
-import httpx
+import requests
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
@@ -44,7 +44,7 @@ def get_text(product_id: str) -> str:
     res = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
     try:
-        resp = httpx.get(uri, timeout=5)
+        resp = requests.get(uri, timeout=5)
         resp.raise_for_status()
         res = resp.content.decode("ascii", "ignore").replace("\001", "")
         res = "\n".join(res.replace("\r", "").split("\n")[5:])

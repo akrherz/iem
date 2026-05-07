@@ -15,9 +15,9 @@ at the state scale when normalized by area.
 import calendar
 from datetime import date, timedelta
 
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_fips, state_names
@@ -87,7 +87,7 @@ def plotter(ctx: dict):
     headers["Content-Type"] = "application/json; charset=UTF-8"
     headers["user-agent"] = "requests"
     try:
-        resp = httpx.get(url, params=payload, headers=headers, timeout=30)
+        resp = requests.get(url, params=payload, headers=headers, timeout=30)
         resp.raise_for_status()
         jdata = resp.json()
     except Exception as exp:

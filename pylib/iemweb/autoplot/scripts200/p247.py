@@ -32,8 +32,8 @@ from datetime import timezone
 from io import StringIO
 
 import geopandas as gpd
-import httpx
 import pandas as pd
+import requests
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -294,7 +294,7 @@ def plotter(ctx: dict):
                 f"http://iem.local/plotting/auto/plot/224/opt:{ctx['opt']}::"
                 f"valid:{valid:%Y-%m-%d%%20%H%M}.csv"
             )
-            with httpx.Client() as client:
+            with requests.Session() as client:
                 try:
                     resp = client.get(uri, timeout=60)
                     resp.raise_for_status()

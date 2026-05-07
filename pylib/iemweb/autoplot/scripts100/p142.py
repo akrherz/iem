@@ -13,9 +13,9 @@ If you plot a statewide average, you get no USDM included.
 
 from datetime import date, datetime, timedelta
 
-import httpx
 import matplotlib.dates as mdates
 import pandas as pd
+import requests
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -127,7 +127,7 @@ def underlay_usdm(axis: Axes, sts, ets, lon, lat):
         f"&lon={lon}&lat={lat}"
     )
     try:
-        resp = httpx.get(uri, timeout=30)
+        resp = requests.get(uri, timeout=30)
         resp.raise_for_status()
         data = resp.json()
     except Exception as exp:

@@ -9,8 +9,8 @@ import re
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import httpx
 import pandas as pd
+import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
@@ -509,7 +509,7 @@ def dat_handler(fdict: dict, res: dict) -> str:
         "geometryType=esriGeometryPolyline&"
         f"time={sts:%s}000%2C{ets:%s}000"
     )
-    with httpx.Client() as client:
+    with requests.Session() as client:
         datjson = client.get(url, timeout=30).json()
         for feat in datjson["features"]:
             _globalid = feat["attributes"]["globalid"]
@@ -671,7 +671,7 @@ def generate_form(apid, fdict, headers, cookies):
     if fdict.get("_wait") != "yes":
         if fmt == "text":
             try:
-                resp = httpx.get(
+                resp = requests.get(
                     f"http://iem.local{res['imguri']}.txt",
                     timeout=300,
                 )
@@ -950,7 +950,7 @@ def generate_trending():
     res += "<tr><th>Plot</th><th>Requests</th></tr>\n"
     try:
         # This is external API, so no need for internal routing
-        data = httpx.get(
+        data = requests.get(
             (
                 "http://mesonet.agron.iastate.edu"
                 "/api/1/iem/trending_autoplots.json"
