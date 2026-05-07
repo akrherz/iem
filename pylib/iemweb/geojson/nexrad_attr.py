@@ -66,7 +66,10 @@ class Schema(CGIModel):
     ] = "geojson"
     valid: Annotated[
         datetime | None,
-        Field(description="The timestamp to request data for, in UTC."),
+        Field(
+            description="The timestamp to request data for, in UTC.",
+            ge=datetime(2000, 1, 1),
+        ),
     ] = None
 
 

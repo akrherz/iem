@@ -388,6 +388,8 @@ def plotter(ctx: dict):
         df[["count", "count_rank"]] = thisyear[["count", "rank"]]
         df["count_departure"] = df["count"] - df["count_mean"]
         df["count_standard"] = df["count_departure"] / df["count_std"]
+        if df[varname].isna().all():
+            raise NoDataFound("No data found.")
         bins = get_count_bins(df, varname)
         lformat = "%.0f"
         units = "Count"
