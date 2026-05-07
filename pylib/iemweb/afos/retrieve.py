@@ -13,6 +13,7 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-05-07: The `center` parameter needs to be uppercase and four chars.
 - 2026-04-30: An internal service rewrite was done attempting to remove some
   very slow edge query cases.  Please let me know of any variances you find.
 - 2026-04-21: Due to incessant requests made against this service, a 1 second
@@ -25,11 +26,6 @@ Changelog
   METARs based on the MADIS HF feed.
 - 2026-01-29: This service is now protected by a query timeout of 60 seconds.
   You will get a HTTP status of 503.
-- 2025-11-18: Added `matches` parameter to allow a simple search within
-  candidate text products for a given string.  For some products with
-  ambiguous six character `pil` values and identical issuance `center` values,
-  this allows further refinement of the search.  This is generally only useful
-  for the "faked" PILs used within MOS products.
 
 Examples
 ~~~~~~~~
@@ -149,9 +145,11 @@ class Schema(CGIModel):
         Field(
             description=(
                 "The 4 character source iddentifier to limit the search to. "
-                "This is typically only used when a PIL is ambiguous"
+                "This is typically only used when a PIL is ambiguous like in "
+                "the case of Alaska three character ids conflicting with "
+                "CONUS.  This is not required."
             ),
-            max_length=4,
+            pattern=r"^[A-Z]{4}$",
         ),
     ] = ""
     dl: Annotated[

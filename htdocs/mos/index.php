@@ -11,13 +11,13 @@ $t->content = <<<EOM
 
 <p>The National Weather Service operates a number of operational
 weather prediction models.  These models produce a gridded forecast that is
-then processed thru a series of equations (Model Output Statistics) to 
+then processed thru a series of equations (Model Output Statistics) to
 produce a site specific forecast. You can find out more about
 <a href="https://vlab.noaa.gov/web/mdl">MOS</a> on the
 NWS's website.  The IEM maintains an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
-<p><strong>Archive Status:</strong> 
+<p><strong>Archive Status:</strong>
 <table class="table table-striped">
 <thead><tr><th>Model</th><th>Start</th><th>End</th></tr></thead>
 <tbody>
@@ -28,8 +28,10 @@ local research and makes it available for others to use as well.</p>
 <tr><th>GFS Extended (abbr MEX)</th><td>12 Jul 2020</td><td>--Realtime--</td></tr>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
 <tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>25 Feb 2020</td></tr>
-<tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>--Realtime--</td></tr>
-<tr><th>NBE [1, 7, 13, 19z]</th><td>23 Jul 2020</td><td>--Realtime--</td></tr>
+<tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>5 May 2026</td></tr>
+<tr><th>NBE [1, 7, 13, 19z]</th><td>23 Jul 2020</td><td>5 May 2026</td></tr>
+<tr><th>NBS [0, 6, 12, 18z]</th><td>5 May 2026</td><td>--Realtime--</td></tr>
+<tr><th>NBE [0, 6, 12, 18z]</th><td>5 May 2026</td><td>--Realtime--</td></tr>
 </tbody>
 </table>
 <br />The MOS products are processed in realtime and immediately available from
@@ -72,7 +74,7 @@ the applications listed below.
         temperatures for a month and station of your choice.</li>
 </ul>
 
-<p><strong>Note:</strong> MOS variables are stored as their raw encodings 
+<p><strong>Note:</strong> MOS variables are stored as their raw encodings
 in the text product, except <strong>wdr</strong> (wind direction) which is
 multiplied by 10 for its true value.
 
@@ -80,17 +82,17 @@ multiplied by 10 for its true value.
 <div class="row">
 
 <div class="col-md-4">
-<a href="/timemachine/?product=51"><img src="/data/conus_gfs_mos_T_bias.png" 
+<a href="/timemachine/?product=51"><img src="/data/conus_gfs_mos_T_bias.png"
  class="img-fluid" border="1"/></a>
 </div>
 
 <div class="col-md-4">
-<a href="/timemachine/?product=52"><img src="/data/conus_nam_mos_T_bias.png" 
+<a href="/timemachine/?product=52"><img src="/data/conus_nam_mos_T_bias.png"
  class="img-fluid" border="1"/></a>
 </div>
 
 <div class="col-md-4">
-<a href="/timemachine/?product=50"><img src="/data/conus_nbs_mos_T_bias.png" 
+<a href="/timemachine/?product=50"><img src="/data/conus_nbs_mos_T_bias.png"
  class="img-fluid" border="1"/></a>
 </div>
 

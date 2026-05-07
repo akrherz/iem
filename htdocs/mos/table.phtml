@@ -38,6 +38,8 @@ if (!array_key_exists($model, $models)) {
 $centeredTime = new DateTimeImmutable("$year-$month-$day 12:00:00", new DateTimeZone('UTC'));
 $namSwitch = new DateTimeImmutable("2008-12-09 12:00:00", new DateTimeZone('UTC'));
 $gfsSwitch = new DateTimeImmutable("2003-12-16 12:00:00", new DateTimeZone('UTC'));
+// When archival changed from +1 to standard synop hours
+$nbmSwitch = new DateTimeImmutable("2026-05-07 13:00:00", new DateTimeZone('UTC'));
 if ($model == "NAM" && $centeredTime < $namSwitch) {
     $model = "ETA";
 }
@@ -59,17 +61,18 @@ $runsper = array(
     "AVN" => 6,
     "NAM" => 12,
     "ETA" => 12,
-    "NBS" => 6,
     "MEX" => 12,
     "NBE" => 6,
+    "NBS" => 6,
     "LAV" => 6
 );
 // Offset from hour modulo 6 for some models
 // So 0z becomes 1z
-$hroffset = array(
-    "NBS" => 1,
-    "NBE" => 1,
-);
+$hroffset = array();
+if ($centeredTime < $nbmSwitch) {
+    $hroffset["NBS"] = 1;
+    $hroffset["NBE"] = 1;
+}
 // compute the run times available between the start and end times
 $runtimes = array();
 $runtimeParamValues = array();
