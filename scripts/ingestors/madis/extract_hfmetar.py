@@ -15,6 +15,7 @@ import numpy as np
 from metar import Metar
 from metpy.units import masked_array, units
 from netCDF4 import chartostring
+from psycopg import DataError
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
@@ -290,19 +291,27 @@ def process(ncfn):
                 iem.data["peak_wind_time"] = metar.peak_wind_time.replace(
                     tzinfo=timezone.utc
                 )
+            if not iem.save(
+                icursor, force_current_log=True, skip_current=True
+            ):
+                LOG.warning(
+                    "Unknown station? %s %s %s %s",
+                    sid3,
+                    network,
+                    ts,
+                    mtr,
+                )
+            updates += 1
+        except DataError as exp:
+            LOG.warning(
+                "DataError for %s %s %s",
+                ncfn,
+                iem.data,
+                exp,
+            )
         except Exception as exp:
             LOG.exception("dogfooding %s resulted in error", mtr, exc_info=exp)
-            continue
 
-        if not iem.save(icursor, force_current_log=True, skip_current=True):
-            LOG.warning(
-                "Unknown station? %s %s %s %s",
-                sid3,
-                network,
-                ts,
-                mtr,
-            )
-        updates += 1
         if updates % 100 == 0:
             icursor.close()
             pgconn.commit()
