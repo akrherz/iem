@@ -226,7 +226,7 @@ def process(ncfn):
         presentwx = presentwxs[i]
         if presentwx != "":
             # database storage is comma delimited
-            iem.data["wxcodes"] = presentwx.split(" ")
+            iem.data["wxcodes"] = presentwx.replace("\x00", "").split(" ")
             mtr += f"{presentwx} "
 
         mtr += process_sky(iem.data, skycs[i], data["skyCovLayerBase"][i])
