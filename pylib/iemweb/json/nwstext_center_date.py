@@ -61,8 +61,7 @@ class Schema(CGIModel):
         str,
         Field(
             description="NWS Center Identifier (4 character)",
-            min_length=4,
-            max_length=4,
+            pattern=r"[A-Z]{4}",
         ),
     ] = "KOKX"
     opt: Annotated[

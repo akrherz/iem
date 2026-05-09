@@ -56,6 +56,7 @@
 /geojson/station_neighbors.py?station=XXX&network=IA_ASOS
 /geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
 /geojson/sbw.geojson?sts=200809130559&wfos=HGX
+/geojson/sbw.py?sts=2000&sts=2000
 /geojson/lsr.geojson?east=-80&west=-70&north=42&south=40
 /geojson/lsr.geojson?east=-70&west=-80&north=40&south=50
 /geojson/lsr.geojson?east=-70&west=-80&north=40

@@ -105,6 +105,8 @@ class Schema(CGIModel):
     @classmethod
     def legacy_timestamps(cls, value, _info):
         """Allow the junky old way to work."""
+        if isinstance(value, list):
+            raise ValueError("Cannot be a list")
         fmt = "%Y%m%d%H%M"
         if value.find("T") > 0 and len(value) >= 16:
             fmt = "%Y-%m-%dT%H:%M"
