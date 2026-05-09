@@ -59,7 +59,7 @@ class Schema(CGIModel):
             min_length=28,
             pattern=(
                 r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}"
-                r"-?[A-Z0-9]{0,3}$"
+                r"(?:-[A-Z0-9]{3})?$"
             ),
         ),
     ]

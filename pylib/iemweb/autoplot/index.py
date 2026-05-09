@@ -509,15 +509,20 @@ def dat_handler(fdict: dict, res: dict) -> str:
         "geometryType=esriGeometryPolyline&"
         f"time={sts:%s}000%2C{ets:%s}000"
     )
-    with requests.Session() as client:
-        datjson = client.get(url, timeout=30).json()
-        for feat in datjson["features"]:
-            _globalid = feat["attributes"]["globalid"]
-            ss += (
-                f'<option value="{_globalid}" '
-                f"{'selected=' if _globalid == gid else ''}>"
-                f"{compute_dat_label(feat['attributes'])} </option>\n"
-            )
+    try:
+        with requests.Session() as client:
+            resp = client.get(url, timeout=30)
+            resp.raise_for_status()
+            datjson = resp.json()
+    except Exception as exp:
+        raise BadWebRequest("Unable to load DAT events.") from exp
+    for feat in datjson.get("features", []):
+        _globalid = feat["attributes"]["globalid"]
+        ss += (
+            f'<option value="{_globalid}" '
+            f"{'selected=' if _globalid == gid else ''}>"
+            f"{compute_dat_label(feat['attributes'])} </option>\n"
+        )
     ss += "</select>"
     return (
         f'<input type="text" name="dat" id="dat" autocomplete="off" '
