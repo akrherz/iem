@@ -7,10 +7,10 @@ The vertical highlighted stripes on the plot are just the weekend dates.
 import warnings
 from datetime import date, timedelta
 
-import httpx
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
+import requests
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest, NoDataFound
@@ -78,7 +78,7 @@ def common(ctx: dict):
             weekends.append(now.day)
         now += timedelta(days=1)
     try:
-        resp = httpx.get(
+        resp = requests.get(
             "http://mesonet.agron.iastate.edu/api/1/daily.json",
             params={
                 "station": station,

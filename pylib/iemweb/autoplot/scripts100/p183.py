@@ -7,9 +7,9 @@ plot uses a JSON data service provided by the
 
 from datetime import datetime, timedelta
 
-import httpx
 import matplotlib.dates as mdates
 import pandas as pd
+import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_fips, state_names
@@ -75,7 +75,7 @@ def plotter(ctx: dict):
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
     try:
-        resp = httpx.get(
+        resp = requests.get(
             SERVICE + suffix, params=payload, headers=headers, timeout=30
         )
         resp.raise_for_status()

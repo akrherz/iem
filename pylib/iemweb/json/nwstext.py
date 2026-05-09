@@ -1,4 +1,4 @@
-""".. title:: Single Instance NWS Text Product JSON Service
+""".. title:: Single Product NWS Text Product JSON Service
 
 Return to `API Services </api/#json>`_
 
@@ -13,11 +13,14 @@ in the world of NWS text products.
 
 This service requires that you know the ``product_id`` ahead of time.  This is
 an identifier created by the IEM attempting to uniquely identify a text
-product.
+product.  This ``product_id`` is a dash delimited string seperating a
+UTC timestamp, WMO source, WMO TTAAII, AWIPS ID, and an optional BBB field.
 
 Changelog
 ---------
 
+- 2026-05-08: Service updated to support the bbb field of a product identifier,
+  if not provided, the service does not use it in the database query.
 - 2024-07-26: Initial documentation Release
 
 Example Usage
@@ -54,7 +57,10 @@ class Schema(CGIModel):
             description="Product Identifier to retrieve text for",
             max_length=36,
             min_length=28,
-            pattern=r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}$",
+            pattern=(
+                r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}"
+                r"(?:-[A-Z0-9]{3})?$"
+            ),
         ),
     ]
 
@@ -78,13 +84,22 @@ def application(environ: dict, start_response: callable):
     utc = utc.replace(tzinfo=timezone.utc)
     root = json_response_dict({"products": []})
 
+    sql_bbb = ""
+    if len(tokens) > 4 and tokens[4] != "":
+        sql_bbb = "and bbb is not distinct from :bbb"
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(
             sql_helper(
                 "SELECT data from products "
                 "where pil = :pil and entered = :entered"
+                " {sql_bbb}",
+                sql_bbb=sql_bbb,
             ),
-            {"pil": tokens[3], "entered": utc},
+            {
+                "pil": tokens[3],
+                "entered": utc,
+                "bbb": tokens[4] if len(tokens) > 4 else None,
+            },
         )
         for row in res:
             root["products"].append({"data": row[0]})

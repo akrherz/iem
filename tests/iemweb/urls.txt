@@ -49,6 +49,7 @@
 /json/ibw_tags.py?wfo=DMX&year=2024
 /json/ibw_tags.py?year=2024&damagetag=CONSIDERABLE
 /json/mcd_bysize.py?count=20&sort=ASC
+/json/nwstext.py?product_id=202101010000-KDMX-TTAAII-AAABBB-RRA
 /json/radar.py?radar=USCOMP&start=2020-05-07T15%3A00%3A00Z&operation=products
 /json/raob.py?station=_OAX&ts=2024-07-19T12:00:00Z
 /json/raob.py?ts=202407191200

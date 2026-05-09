@@ -7,7 +7,7 @@ by WFO</a> page and click on the SPS product you are interested in.
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
-import httpx
+import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
@@ -161,11 +161,10 @@ def plotter(ctx: dict, conn: Connection | None = None):
 
     # Plot text on the page, hehe
     try:
-        with httpx.Client() as client:
-            resp = client.get(
-                f"http://mesonet.agron.iastate.edu/api/1/nwstext/{pid}",
-                timeout=10,
-            )
+        resp = requests.get(
+            f"http://mesonet.agron.iastate.edu/api/1/nwstext/{pid}",
+            timeout=10,
+        )
         resp.raise_for_status()
         report = resp.text
     except Exception as exp:

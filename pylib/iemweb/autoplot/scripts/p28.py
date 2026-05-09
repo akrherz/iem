@@ -24,9 +24,9 @@ interactive chart version.
 
 from datetime import date, datetime, timedelta
 
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
@@ -99,7 +99,7 @@ def add_ctx(ctx, conn=None):
         ]
     sts = dt - timedelta(days=14)
     try:
-        resp = httpx.get(
+        resp = requests.get(
             "http://mesonet.agron.iastate.edu/api/1/usdm_bypoint.json",
             params={
                 "sdate": sts.strftime("%Y-%m-%d"),
