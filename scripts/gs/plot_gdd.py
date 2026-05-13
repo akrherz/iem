@@ -24,7 +24,7 @@ def run(gddbase, now, fn):
     LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
-        LOG.warning("failed for gddbase: %s", gddbase)
+        LOG.warning("[gs] failed for gddbase: %s url: %s", gddbase, url)
 
 
 def main():

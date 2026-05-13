@@ -28,7 +28,7 @@ def main(gddbase):
     LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
-        LOG.warning("failed for gddbase: %s", gddbase)
+        LOG.warning("[year] failed for gddbase: %s url: %s", gddbase, url)
 
 
 if __name__ == "__main__":
