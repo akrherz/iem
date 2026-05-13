@@ -1,0 +1,2 @@
+<?php
+Header("Location: /ogc");
