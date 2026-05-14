@@ -67,6 +67,10 @@ def main(newerthan: datetime):
         ):
             continue
         network = f"{row['State']}_COCORAHS"
+        # Don't support this particular network
+        if network == "MP_COCORAHS":
+            LOG.info("Skipping %s due to being MP", sid)
+            continue
         sname = row["StationName"].strip().replace("'", " ")
         elevation = convert_value(row["Elevation"], "foot", "meter")
         dirty = False
