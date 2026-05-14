@@ -22,7 +22,7 @@ def run(gddbase, now, fn):
     pqstr = f"plot c 000000000000 summary/{fn}.png bogus png"
     LOG.info(url)
     LOG.info(pqstr)
-    res = web2ldm(url, pqstr)
+    res = web2ldm(url, pqstr, md5_from_name=True)
     if not res:
         LOG.warning("[gs] failed for gddbase: %s url: %s", gddbase, url)
 
