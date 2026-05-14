@@ -34,6 +34,7 @@ def get_description():
             default="2016/09/15 2340",
             label="Start Time (UTC Time Zone):",
             min="2016/04/01 0000",
+            max="2021/09/01 0000",
         ),
         dict(
             type="int",
@@ -249,15 +250,11 @@ options = {
         }
     }
 };
-$("#ap_container").height("800px");
-$("#ap_container").html(
-'<div class="row"><div id="hc1" class="col-md-6">' +
-'</div><div id="hc2" class="col-md-6"></div></div>' +
-'<div class="row"><div id="hc3\" class="col-md-6"></div>' +
-'<div id="hc4" class="col-md-6\"></div></div>');
-$('<div class="chart">')
-    .appendTo('#hc1')
-    .highcharts({
+function createChart(containerId, title, series) {
+    const chartDiv = document.createElement('div');
+    chartDiv.className = 'chart';
+    document.getElementById(containerId).appendChild(chartDiv);
+    Highcharts.chart(chartDiv, {
         plotOptions: options.plotOptions,
         chart: {
             zoomType: 'x',
@@ -266,7 +263,7 @@ $('<div class="chart">')
             spacingBottom: 20
         },
         title: {
-            text: 'Wind Speed',
+            text: title,
             align: 'left',
             margin: 0,
             x: 30
@@ -288,121 +285,29 @@ $('<div class="chart">')
             }
         },
         tooltip: options.tooltip,
-        series: ["""
+        series: series
+    });
+}
+
+const apContainer = document.getElementById('ap_container');
+apContainer.style.height = '800px';
+apContainer.innerHTML =
+    '<div class="row"><div id="hc1" class="col-md-6">' +
+    '</div><div id="hc2" class="col-md-6"></div></div>' +
+    '<div class="row"><div id="hc3" class="col-md-6"></div>' +
+    '<div id="hc4" class="col-md-6"></div></div>';
+createChart('hc1', 'Wind Speed', ["""
         + series
-        + """]
-});
-$('<div class="chart">')
-    .appendTo('#hc2')
-    .highcharts({
-        plotOptions: options.plotOptions,
-        chart: {
-            zoomType: 'x',
-            marginLeft: 40, // Keep all charts left aligned
-            spacingTop: 20,
-            spacingBottom: 20
-        },
-        title: {
-            text: 'Air Temp',
-            align: 'left',
-            margin: 0,
-            x: 30
-        },
-        credits: {
-            enabled: false
-        },
-        legend: options.legend,
-        xAxis: {
-            type: 'datetime',
-            crosshair: true,
-            events: {
-                setExtremes: syncExtremes
-            }
-        },
-        yAxis: {
-            title: {
-                text: null
-            }
-        },
-        tooltip: options.tooltip,
-        series: ["""
+        + """]);
+createChart('hc2', 'Air Temp', ["""
         + series2
-        + """]
-});
-$('<div class="chart">')
-    .appendTo('#hc3')
-    .highcharts({
-        plotOptions: options.plotOptions,
-        chart: {
-            zoomType: 'x',
-            marginLeft: 40, // Keep all charts left aligned
-            spacingTop: 20,
-            spacingBottom: 20
-        },
-        title: {
-            text: 'RH',
-            align: 'left',
-            margin: 0,
-            x: 30
-        },
-        credits: {
-            enabled: false
-        },
-        legend: options.legend,
-        xAxis: {
-            type: 'datetime',
-            crosshair: true,
-            events: {
-                setExtremes: syncExtremes
-            }
-        },
-        yAxis: {
-            title: {
-                text: null
-            }
-        },
-        tooltip: options.tooltip,
-        series: ["""
+        + """]);
+createChart('hc3', 'RH', ["""
         + series3
-        + """]
-});
-$('<div class="chart">')
-    .appendTo('#hc4')
-    .highcharts({
-        plotOptions: options.plotOptions,
-        chart: {
-            zoomType: 'x',
-            marginLeft: 40, // Keep all charts left aligned
-            spacingTop: 20,
-            spacingBottom: 20
-        },
-        title: {
-            text: 'Wind Direction',
-            align: 'left',
-            margin: 0,
-            x: 30
-        },
-        credits: {
-            enabled: false
-        },
-        legend: options.legend,
-        xAxis: {
-            type: 'datetime',
-            crosshair: true,
-            events: {
-                setExtremes: syncExtremes
-            }
-        },
-        yAxis: {
-            title: {
-                text: null
-            }
-        },
-        tooltip: options.tooltip,
-        series: ["""
+        + """]);
+createChart('hc4', 'Wind Direction', ["""
         + series4
-        + """]
-});
+        + """]);
     """
     )
 

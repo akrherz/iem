@@ -1,0 +1,33 @@
+.iao-content section {
+  margin-top: 2rem;
+  scroll-margin-top: 5rem;
+}
+
+.iao-content img {
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+.iao-sidenav {
+  position: sticky;
+  top: 1rem;
+}
+
+.iao-sidenav .nav-link {
+  color: var(--bs-body-color);
+  padding: 0.35rem 0.75rem;
+}
+
+.iao-sidenav .nav-link:hover,
+.iao-sidenav .nav-link:focus {
+  background-color: var(--bs-light);
+}
+
+.iao-table-wrapper {
+  margin-bottom: 1rem;
+}
+
+div.hangs p {
+  padding-left: 22px;
+  text-indent: -22px;
+}
