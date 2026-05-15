@@ -33,7 +33,7 @@ const Cookies = {
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
             let cc = ca[i];
-            while (cc.charAt(0) === ' ') cc = cc.substring(1, cc.length);
+            while (cc.charAt(0) === ' ') {cc = cc.substring(1, cc.length);}
             if (cc.indexOf(nameEQ) === 0) {
                 return decodeURIComponent(cc.substring(nameEQ.length, cc.length));
             }

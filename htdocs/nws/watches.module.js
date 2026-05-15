@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (index === 2) {
                         baseConfig.headerFilter = "input";
                         baseConfig.headerFilterFunc = (headerValue, rowValue) => {
-                            if (!headerValue) return true;
+                            if (!headerValue) {return true;}
                             // Convert both to uppercase for case-insensitive search
                             const searchTerm = headerValue.toUpperCase();
                             const states = rowValue.toUpperCase();

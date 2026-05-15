@@ -7,7 +7,7 @@ function makeTableInteractive() {
     // Rule: Complex header parsing, multi-row header handling, column grouping
     // Extract data from tbody, skipping empty columns that act as visual separators
     const tbody = tableElem.querySelector('tbody');
-    if (!tbody) return;
+    if (!tbody) {return;}
 
     const rows = Array.from(tbody.querySelectorAll('tr'));
     const data = rows.map(tr => {

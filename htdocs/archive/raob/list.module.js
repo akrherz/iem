@@ -231,7 +231,7 @@ function handleSecondToken(token) {
 
 function parseLegacyHashFormat(hash) {
     const tokens = hash.split(":");
-    if (tokens.length === 0) return false;
+    if (tokens.length === 0) {return false;}
     
     // Set station
     setStationFromToken(tokens[0]);

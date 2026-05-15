@@ -19,7 +19,7 @@ function formatDateForDisplay(date) {
  * @returns {Date|null} parsed date or null
  */
 function parseISODate(val) {
-    if (typeof val !== 'string') return null;
+    if (typeof val !== 'string') {return null;}
     const reIsoDate = /^(\d{4})-(\d{2})-(\d{2})((T)(\d{2}):(\d{2})(:(\d{2})(\.\d*)?)?)?(Z)?$/;
     const mm = val.match(reIsoDate);
     if (mm) {
@@ -389,7 +389,7 @@ function generateTimeOptionsHTML(images) {
     let html = '';
     for (let i = 0; i < images.length; i++) {
         const ts = parseISODate(images[i].valid);
-        if (!ts) continue;
+        if (!ts) {continue;}
         
         const timeStr = formatTimeString(ts);
         html += `<option ts="${images[i].valid}" value="${images[i].href}">${timeStr}</option>`;

@@ -161,11 +161,11 @@ function setupMap() {
                 arrowEl.src = feature.get("is_inversion") ? "/images/red_arrow_down.svg" : "/images/green_arrow_up.svg";
             }
             const temp15El = document.getElementById(`${feature.getId()}_15`);
-            if (temp15El) temp15El.textContent = feature.get('tmpf_15');
+            if (temp15El) {temp15El.textContent = feature.get('tmpf_15');}
             const temp5El = document.getElementById(`${feature.getId()}_5`);
-            if (temp5El) temp5El.textContent = feature.get('tmpf_5');
+            if (temp5El) {temp5El.textContent = feature.get('tmpf_5');}
             const temp10El = document.getElementById(`${feature.getId()}_10`);
-            if (temp10El) temp10El.textContent = feature.get('tmpf_10');
+            if (temp10El) {temp10El.textContent = feature.get('tmpf_10');}
             return [feature.get("is_inversion") ? redArrow : greenArrow];
         }
     });

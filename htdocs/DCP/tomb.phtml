@@ -26,14 +26,21 @@ $table = <<<EOM
 EOM;
 $floor = date("YmdHi", time() - 8 * 86400);
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row["max"], $row["max"]);
-    if (substr($row["max"], 0, 12) < $floor) {
-        $link = $row["max"];
+  $product = htmlspecialchars($row["max"], ENT_QUOTES);
+  $nwsli = htmlspecialchars($row["nwsli"], ENT_QUOTES);
+  $source = htmlspecialchars(substr($row["max"], 13, 4), ENT_QUOTES);
+  $link = sprintf(
+    '<a href="/p.php?pid=%s">%s</a>',
+    urlencode($row["max"]),
+    $product
+  );
+  if (substr($row["max"], 0, 12) < $floor) {
+    $link = $product;
     }
     $table .= sprintf(
-        "<tr><td>%s</td><td>%s</td><td>%s</td>\n",
-        $row["nwsli"],
-        substr($row["max"], 13, 4),
+    "<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+    $nwsli,
+    $source,
         $link
     );
 }

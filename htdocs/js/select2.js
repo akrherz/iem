@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inlineStyle || computedStyle.minWidth !== 'auto') {
             const wrapper = ts.wrapper;
             if (inlineStyle) {
-                if (el.style.minWidth) wrapper.style.minWidth = el.style.minWidth;
-                if (el.style.width) wrapper.style.width = el.style.width;
+                if (el.style.minWidth) {wrapper.style.minWidth = el.style.minWidth;}
+                if (el.style.width) {wrapper.style.width = el.style.width;}
             }
         }
         

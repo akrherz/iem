@@ -36,8 +36,8 @@ export function hideImageLoad() {
  */
 export function setupTiming() {
     const willload = document.getElementById("willload");
-    if (!willload) return;
-    if (!willload.dataset.timingsecs) return;
+    if (!willload) {return;}
+    if (!willload.dataset.timingsecs) {return;}
 
     const timingSecs = parseInt(willload.dataset.timingsecs, 10);
     let timing = 0;

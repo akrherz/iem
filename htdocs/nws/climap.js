@@ -206,7 +206,7 @@ async function fetchCLIReport(url) {
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {throw new Error('Network response was not ok');}
         const data = await response.text();
         reportDiv.innerHTML = `<pre class="mb-0">${data}</pre>`;
     } catch (error) {

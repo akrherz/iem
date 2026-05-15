@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeMapControls() {
         const myForm = document.querySelector('form[name="myform"]');
-        if (!myForm || !(myForm instanceof HTMLFormElement)) return;
+        if (!myForm || !(myForm instanceof HTMLFormElement)) {return;}
 
         // Zoom In button
         const zoominButton = document.querySelector('img[name="zoominButton"]');

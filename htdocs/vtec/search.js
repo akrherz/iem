@@ -69,29 +69,29 @@ function updateURL(params) {
 }
 
 function addByPointParams(params, newParams) {
-    if (newParams.lon) params.set('lon', newParams.lon);
-    if (newParams.lat) params.set('lat', newParams.lat);
-    if (newParams.buffer) params.set('buffer', newParams.buffer);
-    if (newParams.sdate1) params.set('sdate1', newParams.sdate1);
-    if (newParams.edate1) params.set('edate1', newParams.edate1);
+    if (newParams.lon) {params.set('lon', newParams.lon);}
+    if (newParams.lat) {params.set('lat', newParams.lat);}
+    if (newParams.buffer) {params.set('buffer', newParams.buffer);}
+    if (newParams.sdate1) {params.set('sdate1', newParams.sdate1);}
+    if (newParams.edate1) {params.set('edate1', newParams.edate1);}
 }
 
 function addByUGCParams(params, newParams) {
-    if (newParams.state) params.set('state', newParams.state);
-    if (newParams.ugc) params.set('ugc', newParams.ugc);
-    if (newParams.lon) params.set('lon', newParams.lon);
-    if (newParams.lat) params.set('lat', newParams.lat);
-    if (newParams.buffer) params.set('buffer', newParams.buffer);
-    if (newParams.sdate) params.set('sdate', newParams.sdate);
-    if (newParams.edate) params.set('edate', newParams.edate);
+    if (newParams.state) {params.set('state', newParams.state);}
+    if (newParams.ugc) {params.set('ugc', newParams.ugc);}
+    if (newParams.lon) {params.set('lon', newParams.lon);}
+    if (newParams.lat) {params.set('lat', newParams.lat);}
+    if (newParams.buffer) {params.set('buffer', newParams.buffer);}
+    if (newParams.sdate) {params.set('sdate', newParams.sdate);}
+    if (newParams.edate) {params.set('edate', newParams.edate);}
 }
 
 function addListParams(params, newParams) {
-    if (newParams.by) params.set('by', newParams.by);
-    if (newParams.datum) params.set('datum', newParams.datum);
-    if (newParams.year) params.set('year', newParams.year);
-    if (newParams.phenomena) params.set('phenomena', newParams.phenomena);
-    if (newParams.significance) params.set('significance', newParams.significance);
+    if (newParams.by) {params.set('by', newParams.by);}
+    if (newParams.datum) {params.set('datum', newParams.datum);}
+    if (newParams.year) {params.set('year', newParams.year);}
+    if (newParams.phenomena) {params.set('phenomena', newParams.phenomena);}
+    if (newParams.significance) {params.set('significance', newParams.significance);}
 }
 
 // Clean URL parameters to only include those relevant to the current mode
@@ -373,11 +373,11 @@ function updateTable3(){
 // Bean counting and filtering functionality for phenomena/significance combinations
 function createPhenomenaSummary(tableData, containerId) {
     const titleElement = document.getElementById(containerId);
-    if (!titleElement) return;
+    if (!titleElement) {return;}
 
     // Find the card body that contains the title
     const cardBody = titleElement.closest('.card-body');
-    if (!cardBody) return;
+    if (!cardBody) {return;}
 
     // Remove existing summary
     const existingSummary = cardBody.querySelector('.phenomena-summary');
@@ -404,7 +404,7 @@ function createPhenomenaSummary(tableData, containerId) {
     // Sort by count (descending)
     const sortedCombinations = Object.values(combinations).sort((a, b) => b.count - a.count);
 
-    if (sortedCombinations.length === 0) return;
+    if (sortedCombinations.length === 0) {return;}
 
     // Create summary panel
     const summaryDiv = document.createElement('div');
@@ -494,7 +494,7 @@ function filterTableByPhenomena(containerId, phenomena, significance) {
     const table = (containerId === 'table1title') ? table1 :
                   (containerId === 'table2title') ? table2 :
                   (containerId === 'table3title') ? table3 : null;
-    if (!table) return;
+    if (!table) {return;}
 
     // Apply filter to Tabulator
     table.setFilter([
@@ -520,7 +520,7 @@ function clearPhenomenaFilter(containerId) {
     const table = (containerId === 'table1title') ? table1 :
                   (containerId === 'table2title') ? table2 :
                   (containerId === 'table3title') ? table3 : null;
-    if (!table) return;
+    if (!table) {return;}
 
     // Clear filter
     table.clearFilter();
@@ -555,10 +555,10 @@ function formatRecordCountText(totalCount, filteredCount) {
 // Update table toolbar with current data count
 function updateTableToolbar(containerId, tableData, filteredCount = null) {
     const container = getTableContainer(containerId);
-    if (!container) return;
+    if (!container) {return;}
 
     const toolbar = container.querySelector('.table-toolbar');
-    if (!toolbar) return;
+    if (!toolbar) {return;}
 
     const countSpan = toolbar.querySelector('.table-count');
     if (countSpan) {
@@ -868,7 +868,7 @@ function setupSelectBoxes() {
 
     stateSelect.addEventListener('change', (e) => {
         const state = e.target.value;
-        if (!state) return;
+        if (!state) {return;}
         const existingUGC = getURLParams().get('ugc');
         const nextParams = { state };
         if (existingUGC?.startsWith(state)) {
@@ -907,7 +907,7 @@ function setupSelectBoxes() {
     ugcSelect.innerHTML = '<option value="">Select County/Zone after Selecting Geography</option>';
     ugcSelect.addEventListener('change', (e) => {
         const ugc = e.target.value;
-        if (!ugc) return;
+        if (!ugc) {return;}
         // Set clean URL parameters for this mode only - include both state and ugc
         setModeParams('byugc', {
             state: stateSelect.value,
@@ -1276,22 +1276,22 @@ function migrateHashToURLParams(hash) {
 }
 
 function parseLuxonDate(val) {
-    if (!val) return null;
+    if (!val) {return null;}
     let dt = window.luxon.DateTime.fromISO(val);
-    if (!dt.isValid) dt = window.luxon.DateTime.fromFormat(val, "yyyy-MM-dd HH:mm");
+    if (!dt.isValid) {dt = window.luxon.DateTime.fromFormat(val, "yyyy-MM-dd HH:mm");}
     return dt.isValid ? dt : null;
 }
 
 // Custom datetime sorter using Luxon for proper date/time sorting
 function customDateTimeSorter(a, b) {
-    if (!a && !b) return 0;
-    if (!a) return 1;
-    if (!b) return -1;
+    if (!a && !b) {return 0;}
+    if (!a) {return 1;}
+    if (!b) {return -1;}
     const dateA = parseLuxonDate(a);
     const dateB = parseLuxonDate(b);
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
+    if (!dateA && !dateB) {return 0;}
+    if (!dateA) {return 1;}
+    if (!dateB) {return -1;}
     return dateA.toMillis() - dateB.toMillis();
 }
 

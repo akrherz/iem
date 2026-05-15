@@ -170,7 +170,7 @@ function initializeTable() {
     const controls = document.getElementById('table-controls');
     controls.classList.remove('d-none');
     controls.removeAttribute('aria-hidden');
-    if (statusEl) statusEl.textContent = 'Interactive table loaded. Use column headers to sort and filter inputs to refine results.';
+    if (statusEl) {statusEl.textContent = 'Interactive table loaded. Use column headers to sort and filter inputs to refine results.';}
     
     // Hide the original table and button
     const original = document.getElementById('original-table');
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const makeFancyButton = document.getElementById('makefancy');
     if (makeFancyButton) {
         makeFancyButton.addEventListener('click', () => {
-            if (statusEl) statusEl.textContent = 'Initializing interactive table…';
+            if (statusEl) {statusEl.textContent = 'Initializing interactive table…';}
             initializeTable();
         });
     }

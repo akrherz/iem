@@ -303,9 +303,9 @@ function parseURLParams() {
     const durationSelect = document.getElementById('duration');
     const daysInput = document.getElementById('days');
 
-    if (peSelect) peSelect.value = physical_code;
-    if (durationSelect) durationSelect.value = duration;
-    if (daysInput) daysInput.value = days;
+    if (peSelect) {peSelect.value = physical_code;}
+    if (durationSelect) {durationSelect.value = duration;}
+    if (daysInput) {daysInput.value = days;}
 }
 
 /**

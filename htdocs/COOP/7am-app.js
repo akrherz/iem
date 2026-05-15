@@ -151,7 +151,7 @@ function parseURLParams() {
  */
 function updateURL() {
     const datepickerElement = document.getElementById('datepicker');
-    if (!(datepickerElement instanceof HTMLInputElement)) return;
+    if (!(datepickerElement instanceof HTMLInputElement)) {return;}
 
     // Use parseDateISO to avoid timezone issues instead of new Date()
     const selectedDate = parseDateISO(datepickerElement.value);
@@ -187,7 +187,7 @@ function updateMap() {
 function updateDate() {
     // We have a changed date, hello!
     const datepickerElement = document.getElementById('datepicker');
-    if (!(datepickerElement instanceof HTMLInputElement)) return;
+    if (!(datepickerElement instanceof HTMLInputElement)) {return;}
 
     // Use parseDateISO to avoid timezone issues instead of new Date()
     const selectedDate = parseDateISO(datepickerElement.value);
@@ -226,8 +226,8 @@ function updateDate() {
 }
 
 function pretty(val) {
-    if (val === null || val === undefined) return 'M';
-    if (val === 0.0001) return 'T';
+    if (val === null || val === undefined) {return 'M';}
+    if (val === 0.0001) {return 'T';}
     return val;
 }
 
@@ -263,7 +263,7 @@ function makeVectorLayer(dt, title, group) {
 function get_tms_url() {
     // Generate the TMS URL given the current settings
     const datepickerElement = document.getElementById('datepicker');
-    if (!(datepickerElement instanceof HTMLInputElement)) return '';
+    if (!(datepickerElement instanceof HTMLInputElement)) {return '';}
 
     // Use parseDateISO to avoid timezone issues instead of new Date()
     const selectedDate = parseDateISO(datepickerElement.value);

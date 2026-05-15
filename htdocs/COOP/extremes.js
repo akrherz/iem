@@ -531,7 +531,7 @@ function prepareTableData() {
  * Format numeric values with specified decimal places
  */
 function formatNumber(value, decimals) {
-    if (value === null || value === undefined || value === '') return '';
+    if (value === null || value === undefined || value === '') {return '';}
     return parseFloat(value).toFixed(decimals);
 };
 
@@ -539,7 +539,7 @@ function formatNumber(value, decimals) {
  * Format year arrays as comma-separated strings
  */
 function formatYears(years) {
-    if (!years || !Array.isArray(years)) return '';
+    if (!years || !Array.isArray(years)) {return '';}
     return years.join(', ');
 };
 
@@ -782,7 +782,7 @@ function initializeMap() {
 
     // Change cursor when hovering over stations
     appState.map.on('pointermove', (evt) => {
-        if (evt.dragging) return;
+        if (evt.dragging) {return;}
         const pixel = appState.map.getEventPixel(evt.originalEvent);
         const hit = appState.map.hasFeatureAtPixel(pixel);
         const target = appState.map.getTarget();
@@ -801,7 +801,7 @@ function initializeMap() {
  * Add station data to map as features
  */
 function addStationsToMap() {
-    if (!appState.vectorSource || appState.isStationView) return;
+    if (!appState.vectorSource || appState.isStationView) {return;}
 
     appState.vectorSource.clear();
 
@@ -898,7 +898,7 @@ function getStationStyle(feature) {
     }
 
     function getLabelText(val, attr) {
-        if (isNullOrUndefined(val)) return '';
+        if (isNullOrUndefined(val)) {return '';}
         if (attr === 'station' || attr === 'years') {
             return formatStationOrYears(val);
         }
@@ -1091,10 +1091,10 @@ function getAttributeLabel(attribute) {
  * Calculate color ranges for the currently selected attribute
  */
 function calculateColorRanges() {
-    if (!appState.data || appState.data.length === 0) return null;
+    if (!appState.data || appState.data.length === 0) {return null;}
 
     // Skip color calculation for non-numeric attributes
-    if (appState.labelAttribute === 'station') return null;
+    if (appState.labelAttribute === 'station') {return null;}
 
     // Get all numeric values for the selected attribute
     const values = appState.data
@@ -1102,13 +1102,13 @@ function calculateColorRanges() {
         .filter((val) => typeof val === 'number' && !isNaN(val))
         .sort((a, b) => a - b);
 
-    if (values.length === 0) return null;
+    if (values.length === 0) {return null;}
 
     const min = values[0];
     const max = values[values.length - 1];
     const range = max - min;
 
-    if (range === 0) return null;
+    if (range === 0) {return null;}
 
     // For temperature data, use appropriate decimal places
     const isTemp = appState.labelAttribute.includes('high') || appState.labelAttribute.includes('low');
@@ -1136,8 +1136,8 @@ function calculateColorRanges() {
  * Get appropriate units for display based on attribute type
  */
 function getAttributeUnits(attribute) {
-    if (attribute.includes('precip')) return '"';
-    if (attribute.includes('high') || attribute.includes('low')) return '°F';
+    if (attribute.includes('precip')) {return '"';}
+    if (attribute.includes('high') || attribute.includes('low')) {return '°F';}
     return '';
 }
 
@@ -1180,17 +1180,17 @@ function handleFormChange() {
     // Build new URL parameters
     const params = new URLSearchParams(window.location.search);
 
-    if (networkSelect) params.set('network', networkSelect.value);
-    if (monthSelect) params.set('month', monthSelect.value);
-    if (daySelect) params.set('day', daySelect.value);
-    if (tblSelect) params.set('tbl', tblSelect.value);
+    if (networkSelect) {params.set('network', networkSelect.value);}
+    if (monthSelect) {params.set('month', monthSelect.value);}
+    if (daySelect) {params.set('day', daySelect.value);}
+    if (tblSelect) {params.set('tbl', tblSelect.value);}
 
     // Keep existing sort parameters
-    if (appState.config.sortcol) params.set('sortcol', appState.config.sortcol);
-    if (appState.config.sortdir) params.set('sortdir', appState.config.sortdir);
+    if (appState.config.sortcol) {params.set('sortcol', appState.config.sortcol);}
+    if (appState.config.sortdir) {params.set('sortdir', appState.config.sortdir);}
 
     // Keep current label attribute setting
-    if (appState.labelAttribute) params.set('label', appState.labelAttribute);
+    if (appState.labelAttribute) {params.set('label', appState.labelAttribute);}
 
     // Clear year filter when switching to different dataset (network/date change)
     // The year filter is specific to a particular dataset combination
@@ -1281,7 +1281,7 @@ function updateUrl() {
  */
 function populateYearFilter(features) {
     const yearSelect = document.getElementById('year-filter');
-    if (!yearSelect) return;
+    if (!yearSelect) {return;}
 
     // Collect years based on the currently selected attribute
     const allYears = new Set();
@@ -1414,7 +1414,7 @@ function filterFeaturesByYear(features) {
  * Apply year filter to the map
  */
 function applyYearFilter() {
-    if (!appState.allFeatures || !appState.vectorSource) return;
+    if (!appState.allFeatures || !appState.vectorSource) {return;}
 
     // Clear current features first
     appState.vectorSource.clear();
@@ -1438,7 +1438,7 @@ function applyYearFilter() {
  */
 function updateYearFilterVisibility() {
     const yearFilterRow = document.querySelector('#year-filter').closest('.control-row');
-    if (!yearFilterRow) return;
+    if (!yearFilterRow) {return;}
 
     // Hide year filter for average attributes since they don't have specific record years
     const isAverageAttribute = ['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(appState.labelAttribute);

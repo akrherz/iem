@@ -100,6 +100,7 @@ module.exports = [
             ],
 
             // Code quality
+            "curly": ["error", "all"],
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",
@@ -225,6 +226,7 @@ module.exports = [
             ],
 
             // Code quality
+            "curly": ["error", "all"],
             "eqeqeq": "error",
             "no-console": "warn",
             "no-debugger": "error",

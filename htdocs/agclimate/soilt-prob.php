@@ -21,13 +21,13 @@ $stname2 = iem_pg_prepare($conn, "SELECT extract(year from valid) as yr,
 $thresholds = explode(",", $tstr);
 $tblrows = array();
 
-$row1 = "<tr><th>Date:</th>";
+$row1 = '<tr><th scope="col">Date</th>';
 foreach ($thresholds as $k => $thres) {
     if (!is_numeric($thres)){
         // Bad user!
         xssafe("<tag>");
     }
-    $row1 .= "<th>$thres</th>";
+    $row1 .= sprintf('<th scope="col">%s</th>', $thres);
     $rs = pg_execute($conn, $stname1, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
@@ -59,13 +59,21 @@ foreach ($thresholds as $k => $thres) {
         }
     }
 }
-$spring = "<table class=\"table table-sm table-striped table-bordered\">$row1</tr>";
+$spring = '<table class="table table-sm table-striped table-bordered '
+    . 'table-hover align-middle mb-0">'
+    . '<thead class="table-light sticky-top">'
+    . $row1
+    . '</tr></thead><tbody>';
 /* Print webpage */
 for ($i = 0; $i < 182; $i = $i + 5) {
     $ts = mktime(0, 0, 0, 1, 1, 2000) + ($i * 86400);
-    $spring .= sprintf("<tr><th>%s</th>%s</tr>", date("M d", $ts), $tblrows[$i]);
+    $spring .= sprintf(
+        '<tr><th scope="row">%s</th>%s</tr>',
+        date("M d", $ts),
+        $tblrows[$i]
+    );
 }
-$spring .= "</table>";
+$spring .= '</tbody></table>';
 
 /* ________________________FALL ______________ */
 $tblrows = array();
@@ -101,57 +109,98 @@ foreach ($thresholds as $k => $thres) {
         }
     }
 }
-$fall = "<table class=\"table table-sm table-striped table-bordered\">$row1</tr>";
+$fall = '<table class="table table-sm table-striped table-bordered '
+    . 'table-hover align-middle mb-0">'
+    . '<thead class="table-light sticky-top">'
+    . $row1
+    . '</tr></thead><tbody>';
 /* Print webpage */
 for ($i = 182; $i < 366; $i = $i + 5) {
     $ts = mktime(0, 0, 0, 1, 1, 2000) + ($i * 86400);
-    $fall .= sprintf("<tr><th>%s</th>%s</tr>", date("M d", $ts), $tblrows[$i]);
+    $fall .= sprintf(
+        '<tr><th scope="row">%s</th>%s</tr>',
+        date("M d", $ts),
+        $tblrows[$i]
+    );
 }
-$fall .= "</table>";
+$fall .= '</tbody></table>';
 
 $sselect = networkSelect("ISUAG", $station);
 
 $t->title = "ISUSM - Soil Temperature Probabilities";
 $t->content = <<<EOM
-<ol class="breadcrumb">
-        <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-        <li class="active">Soil Temperature Probabilities</li>
-</ol>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Soil Temperature Probabilities</li>
+    </ol>
+</nav>
 
-<h3>4 inch Soil Temperature Probabilities</h3>
+<div class="mb-4">
+    <h1 class="h3 mb-3">4 inch Soil Temperature Probabilities</h1>
 
-<p>This application computes soil temperature exceedance based on the
-observation record of a ISU Ag Climate site.  The average daily 4 inch
-soil temperature is used in this calculation.
-<ul>
- <li>Spring: The values represent the percentage of years that a temperature
-below the given threshold was observed <strong>after</strong> a given date.</li>
- <li>Fall: The values represent the percentage of years that a temperature
-below the given threshold was observed <strong>before</strong> a given date.</li>
-</ul>
+    <p class="mb-3">This application computes soil temperature exceedance based on the
+    observation record of an ISU Ag Climate site. The average daily 4 inch
+    soil temperature is used in this calculation.</p>
 
-<div class="alert alert-info">This application uses the legacy ISU Ag Climate
+    <ul class="mb-3">
+        <li>Spring: The values represent the percentage of years that a temperature
+        below the given threshold was observed <strong>after</strong> a given date.</li>
+        <li>Fall: The values represent the percentage of years that a temperature
+        below the given threshold was observed <strong>before</strong> a given date.</li>
+    </ul>
+</div>
+
+<div class="alert alert-info mb-4" role="alert">This application uses the legacy ISU Ag Climate
 network for its computations.  Data from the newer ISU Soil Moisture Network
 is not considered.</div>
 
-<form method="GET" name='soil'>
-<p><b>Select Station:</b>{$sselect}
-<p><b>Thresholds:</b>
-<input type="text" value="{$tstr}" name="tstr"> <i>Comma Seperated</i>
-<br />
-<input type="submit" value="Request">
+<form method="GET" name="soil" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label for="station" class="form-label fw-semibold">Select Station</label>
+                {$sselect}
+            </div>
+            <div class="col-md-6">
+                <label for="tstr" class="form-label fw-semibold">Thresholds</label>
+                <input type="text" value="{$tstr}" name="tstr" id="tstr" class="form-control">
+                <div class="form-text">Comma separated thresholds.</div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Request</button>
+            </div>
+        </div>
+    </div>
 </form>
 
-<div class="row"><div class="col-md-6">
-
-<h3>Spring Probabilities<br />Given date to July 1rst</h3>
-{$spring}
-
-</div><div class="col-md-6">
-
-<h3>Fall Probabilities<br />July 1rst to given date</h3>
-{$fall}
-
-</div></div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Spring Probabilities</h2>
+                <div class="small text-muted">Given date to July 1</div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    {$spring}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Fall Probabilities</h2>
+                <div class="small text-muted">July 1 to given date</div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    {$fall}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 EOM;
 $t->render('single.phtml');

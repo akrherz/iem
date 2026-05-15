@@ -258,7 +258,7 @@ function makeDraggable(element) {
         // Bring this popup to the front
         element.style.zIndex = 1001;
         popups.forEach(p => {
-            if (p !== element) p.style.zIndex = 1000;
+            if (p !== element) {p.style.zIndex = 1000;}
         });
         
         document.onmouseup = closeDragElement;

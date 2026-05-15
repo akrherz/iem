@@ -12,10 +12,10 @@ function roundValue(value, varType) {
 
 function generateASCIITable(features) {
     const mapDiv = document.getElementById('map');
-    if (!mapDiv) return '';
+    if (!mapDiv) {return '';}
     
     const varname = mapDiv.dataset.var;
-    if (!varname || !datavar) return '';
+    if (!varname || !datavar) {return '';}
     const vardisplay = mapDiv.dataset.vardisplay;
     const period = mapDiv.dataset.period;
     const year = mapDiv.dataset.year;
@@ -55,7 +55,7 @@ function generateASCIITable(features) {
 function createPopupContent(feature) {
     const props = feature.getProperties();
     const mapDiv = document.getElementById('map');
-    if (!mapDiv) return '';
+    if (!mapDiv) {return '';}
     
     if (!datavar) {
         return '';
@@ -83,10 +83,10 @@ function createPopupContent(feature) {
 
 function initMap() {
     const mapDiv = document.getElementById('map');
-    if (!mapDiv) return;
+    if (!mapDiv) {return;}
     const wsuri = mapDiv.dataset.wsuri;
     datavar = mapDiv.dataset.datavar;
-    if (!wsuri || !datavar) return;
+    if (!wsuri || !datavar) {return;}
 
     // Create data layer
     dataLayer = new ol.layer.Vector({
@@ -207,7 +207,7 @@ function initMap() {
     dataLayer.getSource().on('change', () => {
         const state = dataLayer.getSource().getState();
         const tableElement = document.getElementById('datatable');
-        if (!tableElement) return;
+        if (!tableElement) {return;}
         
         if (state === 'loading') {
             tableElement.textContent = 'Loading station data...';
@@ -253,7 +253,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             const datatable = document.getElementById('datatable');
-            if (!datatable) return;
+            if (!datatable) {return;}
             const content = datatable.textContent.split(/\n/).slice(2).join("\n");
             const link = document.createElement('a');
             link.setAttribute('download', 'isusm.csv');

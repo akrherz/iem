@@ -134,8 +134,8 @@ const commonConfig = {
 // Format precipitation values (handle trace amounts)
 function formatPrecipitation(cell) {
     const value = cell.getValue();
-    if (value > 0 && value < 0.009) return "T";
-    if (value === 0 || value === null || value === undefined) return "0.00";
+    if (value > 0 && value < 0.009) {return "T";}
+    if (value === 0 || value === null || value === undefined) {return "0.00";}
     return parseFloat(value).toFixed(2);
 }
 
@@ -208,7 +208,7 @@ function updateStatus(message, type = 'info') {
 
 // Format time offset for display
 function formatTimeOffset(hours) {
-    if (hours < 24) return `${hours} Hour`;
+    if (hours < 24) {return `${hours} Hour`;}
     return `${hours / 24} Day`;
 }
 
@@ -237,12 +237,12 @@ function formatColumnDate(date) {
 
 // Update column headers with dynamic time ranges
 function updateColumnHeaders(selectedDateTime) {
-    if (!precipTable) return;
+    if (!precipTable) {return;}
 
     const columns = precipTable.getColumnDefinitions();
     const updatedColumns = columns.map(col => {
         // Skip columns that don't have precipitation data
-        if (!(col.field in timeOffsets)) return col;
+        if (!(col.field in timeOffsets)) {return col;}
 
         const tOffset = timeOffsets[col.field];
         let startDateTime = new Date(selectedDateTime.getTime() - (tOffset * 60 * 60 * 1000));

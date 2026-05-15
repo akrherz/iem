@@ -6,7 +6,7 @@ import { requireElement } from '/js/iemjs/domUtils.js';
 function showHide() {
     const d2 = document.getElementById('d2');
     const cb = document.getElementById('drange');
-    if (!d2 || !cb) return;
+    if (!d2 || !cb) {return;}
     const expanded = cb.checked;
     d2.style.display = expanded ? 'block' : 'none';
     cb.setAttribute('aria-expanded', expanded ? 'true' : 'false');
@@ -18,7 +18,7 @@ function showHide() {
  */
 function scrollToSection(name) {
     const target = document.getElementById(`sect${name}`);
-    if (!target) return;
+    if (!target) {return;}
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     target.scrollIntoView({
         behavior: prefersReduced ? 'auto' : 'smooth',
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('button[data-jump]').forEach((btn) => {
         btn.addEventListener('click', () => {
             const name = btn.getAttribute('data-jump');
-            if (name) scrollToSection(name);
+            if (name) {scrollToSection(name);}
         });
     });
 });

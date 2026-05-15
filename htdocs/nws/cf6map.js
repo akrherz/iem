@@ -17,7 +17,7 @@ function formatDate(date) {
 
 // Parse date from YYMMDD format (for legacy hash links)
 function parseDateShort(dateStr) {
-    if (dateStr.length !== 6) return null;
+    if (dateStr.length !== 6) {return null;}
     const year = 2000 + parseInt(dateStr.slice(0, 2));
     const month = parseInt(dateStr.slice(2, 4)) - 1;
     const day = parseInt(dateStr.slice(4, 6));

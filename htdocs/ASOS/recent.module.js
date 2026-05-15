@@ -31,18 +31,18 @@ const buildMessageRow = (message) => {
     return row;
 };
 
-const updateStatus = (live, message) => { if (live) live.textContent = message; };
+const updateStatus = (live, message) => { if (live) {live.textContent = message;} };
 
 export const fetchData = async () => {
     const tableBody = document.querySelector('#datatable tbody');
-    if (!tableBody) return;
+    if (!tableBody) {return;}
     const live = document.getElementById('recent-status');
 
     tableBody.replaceChildren(buildMessageRow('Querying server, one moment'));
     updateStatus(live, 'Loading recent METAR reports…');
     try {
         const resp = await fetch(`/geojson/recent_metar.py?q=${encodeURIComponent(report)}`);
-        if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
+        if (!resp.ok) {throw new Error(`${resp.status} ${resp.statusText}`);}
         const j = await resp.json();
         tableBody.replaceChildren();
         j.features.forEach((feat) => tableBody.appendChild(buildRow(feat)));
@@ -106,7 +106,7 @@ export const init = () => {
     if (select instanceof HTMLSelectElement) {
         select.addEventListener('change', (e) => {
             const target = e.currentTarget;
-            if (target instanceof HTMLSelectElement) setReport(target.value);
+            if (target instanceof HTMLSelectElement) {setReport(target.value);}
         });
     }
     initReportFromURL();

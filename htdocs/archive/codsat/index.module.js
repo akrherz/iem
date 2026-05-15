@@ -157,7 +157,7 @@ async function loadStateFromURL() {
     }
 
     // If no date parameter, we're done
-    if (!urlState.date) return false;
+    if (!urlState.date) {return false;}
 
     // Set date and trigger cascade
     elements.dateSelect.value = urlState.date;
@@ -183,7 +183,7 @@ async function loadCascadingSelections(urlState) {
     populateSelect(elements.satelliteSelect, satellites, "Select satellite...");
     elements.satelliteSelect.disabled = false;
 
-    if (!urlState.satellite || !satellites.includes(urlState.satellite)) return;
+    if (!urlState.satellite || !satellites.includes(urlState.satellite)) {return;}
 
     elements.satelliteSelect.value = urlState.satellite;
     state.satellite = urlState.satellite;
@@ -202,7 +202,7 @@ async function loadSectorTypesAndBeyond(urlState) {
     populateSelect(elements.sectorTypeSelect, sectorTypes, "Select sector type...");
     elements.sectorTypeSelect.disabled = false;
 
-    if (!urlState.sectorType || !sectorTypes.includes(urlState.sectorType)) return;
+    if (!urlState.sectorType || !sectorTypes.includes(urlState.sectorType)) {return;}
 
     elements.sectorTypeSelect.value = urlState.sectorType;
     state.sectorType = urlState.sectorType;
@@ -221,7 +221,7 @@ async function loadSectorsAndBeyond(urlState) {
     populateSelect(elements.sectorSelect, sectors, "Select sector...");
     elements.sectorSelect.disabled = false;
 
-    if (!urlState.sector || !sectors.includes(urlState.sector)) return;
+    if (!urlState.sector || !sectors.includes(urlState.sector)) {return;}
 
     elements.sectorSelect.value = urlState.sector;
     state.sector = urlState.sector;
@@ -240,7 +240,7 @@ async function loadPlotTypesAndImages(urlState) {
     populateSelect(elements.plotTypeSelect, plotTypes, "Select plot type...");
     elements.plotTypeSelect.disabled = false;
 
-    if (!urlState.plotType || !plotTypes.includes(urlState.plotType)) return;
+    if (!urlState.plotType || !plotTypes.includes(urlState.plotType)) {return;}
 
     elements.plotTypeSelect.value = urlState.plotType;
     state.plotType = urlState.plotType;
@@ -313,7 +313,7 @@ function updateURL() {
     };
 
     Object.entries(paramMap).forEach(([key, value]) => {
-        if (value) params.set(key, value);
+        if (value) {params.set(key, value);}
     });
 
     // Add current timestamp if available
@@ -322,9 +322,9 @@ function updateURL() {
     }
 
     // Add non-default settings
-    if (state.speed !== 500) params.set('speed', state.speed);
-    if (state.skipFrames !== 1) params.set('skip', state.skipFrames);
-    if (!state.loop) params.set('loop', 'false');
+    if (state.speed !== 500) {params.set('speed', state.speed);}
+    if (state.skipFrames !== 1) {params.set('skip', state.skipFrames);}
+    if (!state.loop) {params.set('loop', 'false');}
 
     const queryString = params.toString();
     const newURL = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
@@ -390,7 +390,7 @@ function attachEventListeners() {
 async function handleDateChange(options = {}) {
     const { preserveSelections = true } = options;
     const date = elements.dateSelect.value;
-    if (!date) return;
+    if (!date) {return;}
 
     // Validate date format is complete (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -507,7 +507,7 @@ async function restoreSelectionsForDate(date, selections) {
  */
 function updateDateNavButtons() {
     const currentDate = elements.dateSelect.value;
-    if (!currentDate || !elements.datePrevBtn || !elements.dateNextBtn) return;
+    if (!currentDate || !elements.datePrevBtn || !elements.dateNextBtn) {return;}
 
     const minDate = elements.dateSelect.min || "2017-04-15";
     const maxDate = elements.dateSelect.max;
@@ -524,10 +524,10 @@ function updateDateNavButtons() {
  */
 function shiftDateByDays(days) {
     const currentDate = elements.dateSelect.value || state.date;
-    if (!currentDate) return;
+    if (!currentDate) {return;}
 
     const newDate = addDaysToDateString(currentDate, days);
-    if (!newDate || !isDateWithinBounds(newDate)) return;
+    if (!newDate || !isDateWithinBounds(newDate)) {return;}
 
     elements.dateSelect.value = newDate;
     updateDateNavButtons();
@@ -539,7 +539,7 @@ function shiftDateByDays(days) {
  */
 function parseDateISO(dateStr) {
     const parts = dateStr.split('-');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) {return null;}
     const year = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1;
     const day = parseInt(parts[2], 10);
@@ -564,7 +564,7 @@ function formatDateISO(date) {
  */
 function addDaysToDateString(dateStr, days) {
     const date = parseDateISO(dateStr);
-    if (!date) return null;
+    if (!date) {return null;}
     date.setDate(date.getDate() + days);
     return formatDateISO(date);
 }
@@ -574,7 +574,7 @@ function addDaysToDateString(dateStr, days) {
  */
 function isDateWithinBounds(dateStr) {
     const selectedDate = parseDateISO(dateStr);
-    if (!selectedDate) return false;
+    if (!selectedDate) {return false;}
 
     const minDate = elements.dateSelect.min ? parseDateISO(elements.dateSelect.min) : null;
     const maxDate = elements.dateSelect.max ? parseDateISO(elements.dateSelect.max) : null;
@@ -590,7 +590,7 @@ function isDateWithinBounds(dateStr) {
  */
 async function handleSatelliteChange() {
     const satellite = elements.satelliteSelect.value;
-    if (!satellite) return;
+    if (!satellite) {return;}
 
     state.satellite = satellite;
     state.sectorType = null;
@@ -616,7 +616,7 @@ async function handleSatelliteChange() {
  */
 async function handleSectorTypeChange() {
     const sectorType = elements.sectorTypeSelect.value;
-    if (!sectorType) return;
+    if (!sectorType) {return;}
 
     state.sectorType = sectorType;
     state.sector = null;
@@ -641,7 +641,7 @@ async function handleSectorTypeChange() {
  */
 async function handleSectorChange() {
     const sector = elements.sectorSelect.value;
-    if (!sector) return;
+    if (!sector) {return;}
 
     state.sector = sector;
     state.plotType = null;
@@ -665,7 +665,7 @@ async function handleSectorChange() {
  */
 async function handlePlotTypeChange() {
     const plotType = elements.plotTypeSelect.value;
-    if (!plotType) return;
+    if (!plotType) {return;}
 
     state.plotType = plotType;
     state.images = [];
@@ -852,7 +852,7 @@ async function fetchDirectoryListing(url) {
  * @param {string} type - Bootstrap alert type: info, success, danger, warning
  */
 function showStatus(message, type = 'info') {
-    if (!elements.statusIndicator || !elements.statusMessage) return;
+    if (!elements.statusIndicator || !elements.statusMessage) {return;}
 
     elements.statusMessage.textContent = message;
     elements.statusIndicator.className = `alert alert-${type} mb-3`;
@@ -864,7 +864,7 @@ function showStatus(message, type = 'info') {
  * Returns null if href is not a valid local directory
  */
 function extractValidDirectoryName(href) {
-    if (!href || !href.endsWith('/')) return null;
+    if (!href || !href.endsWith('/')) {return null;}
 
     // Match simple directory names: alphanumeric, underscores, hyphens, followed by /
     // This excludes ../, /, paths with slashes, and URLs
@@ -938,7 +938,7 @@ function formatOptionText(text) {
  * Load and display an image
  */
 function loadImage(index) {
-    if (index < 0 || index >= state.images.length) return;
+    if (index < 0 || index >= state.images.length) {return;}
 
     state.currentIndex = index;
     const imageData = state.images[index];
@@ -976,7 +976,7 @@ function preloadImages(startIndex) {
  * Render interactive timeline with clickable dots for each frame
  */
 function renderTimeline() {
-    if (!state.images || state.images.length === 0) return;
+    if (!state.images || state.images.length === 0) {return;}
 
     const svg = elements.timeline;
     const width = svg.clientWidth || 800;
@@ -1076,7 +1076,7 @@ function renderTimeline() {
  * Update timeline to highlight current position
  */
 function updateTimelinePosition() {
-    if (!elements.timeline) return;
+    if (!elements.timeline) {return;}
 
     // Get all existing dots
     const dots = elements.timeline.querySelectorAll('.timeline-dot');
@@ -1145,11 +1145,11 @@ function updateTimelinePosition() {
  */
 function handleKeyboardInput(e) {
     // Ignore if focus is on an input or select
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {return;}
 
-    if (handleShiftDayNavigation(e)) return;
+    if (handleShiftDayNavigation(e)) {return;}
 
-    if (state.images.length === 0) return;
+    if (state.images.length === 0) {return;}
 
     const handlers = {
         ArrowLeft: () => handleFrameStep(-1),
@@ -1210,7 +1210,7 @@ function handleLastFrame() {
  * Play animation
  */
 function playAnimation() {
-    if (state.images.length === 0) return;
+    if (state.images.length === 0) {return;}
 
     state.isPlaying = true;
     elements.playBtn.disabled = true;
