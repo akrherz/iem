@@ -46,7 +46,7 @@ function htmlFormatter(cell) {
 
 // Initialize column definitions based on the data structure
 function generateColumns(data) {
-    if (!data || data.length === 0) return [];
+    if (!data || data.length === 0) {return [];}
     
     const columns = [];
     const firstRow = data[0];

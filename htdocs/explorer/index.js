@@ -1,4 +1,4 @@
-/* global windowFactory, Highcharts, ol, bootstrap */
+/* global Highcharts, ol, bootstrap */
 let epoch = 0;
 let olMap = null;
 let overviewMap = null;
@@ -167,7 +167,7 @@ function stationLayerStyleFunc(feature) {
     ];
     for (const rule of rules) {
         const res = rule();
-        if (res !== undefined) return res;
+        if (res !== undefined) {return res;}
     }
     return null;
 }
@@ -354,7 +354,7 @@ function loadImage(elem) {
             } else {
                 modal.classList.remove('show');
                 modal.style.display = 'none';
-                if (modal._cleanup) modal._cleanup();
+                if (modal._cleanup) {modal._cleanup();}
                 setTimeout(() => modal.remove(), 300);
             }
         });
@@ -464,15 +464,15 @@ function changeStations(elem) {
 function loaderClicked(elem) {
     // Use closest containers that carry station metadata
     let container = elem.closest('.datadiv');
-    if (!container) container = elem.closest('.modal');
+    if (!container) {container = elem.closest('.modal');}
 
     // Require station/network context to proceed
-    if (!container || !container.dataset.station || !container.dataset.network) return;
+    if (!container || !container.dataset.station || !container.dataset.network) {return;}
 
     const station = container.dataset.station;
     const network = container.dataset.network;
     const tpl = elem.dataset.urlTemplate;
-    if (!tpl) return; // Nothing to load
+    if (!tpl) {return;} // Nothing to load
 
     const divid = `d${station}${network}`;
 
@@ -489,8 +489,8 @@ function loaderClicked(elem) {
         .replaceAll('{elem}', divid);
 
     // Only replace optional placeholders if present in the template
-    if (uri.includes('{month}')) uri = uri.replaceAll('{month}', month);
-    if (uri.includes('{type}')) uri = uri.replaceAll('{type}', type);
+    if (uri.includes('{month}')) {uri = uri.replaceAll('{month}', month);}
+    if (uri.includes('{type}')) {uri = uri.replaceAll('{type}', type);}
 
     loadAutoplot(container, uri, divid);
 }
@@ -499,7 +499,7 @@ function initUI() {
     document.querySelectorAll('.maprow img').forEach(img => {
         img.setAttribute('tabindex', '0');
         img.setAttribute('role', 'button');
-        if (img.title) img.setAttribute('aria-label', img.title);
+        if (img.title) {img.setAttribute('aria-label', img.title);}
     });
     // Add event delegation for maprow images - Rule: jQuery removal
     document.addEventListener('click', event => {
@@ -531,7 +531,7 @@ function resizeCharts(container) {
 
     // Find all charts within the container and resize them
     Highcharts.charts.forEach(chart => {
-        if (!chart) return; // Skip undefined/null charts
+        if (!chart) {return;} // Skip undefined/null charts
 
         // Check if this chart is within the current container
         const chartContainer = chart.renderTo;
@@ -610,7 +610,7 @@ function windowFactory(initdiv, classID) {
     // Wire aria-controls on autoload buttons to the display area
     sidebarContent.querySelectorAll('.autoload').forEach(btn => {
         btn.setAttribute('aria-controls', displayId);
-        if (!btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed', 'false');
+        if (!btn.hasAttribute('aria-pressed')) {btn.setAttribute('aria-pressed', 'false');}
     });
 
     // Create or ensure data display area exists
@@ -764,7 +764,7 @@ function windowFactory(initdiv, classID) {
             loaderClicked(btn);
         });
         // Initialize ARIA pressed state
-        if (!div.hasAttribute('aria-pressed')) div.setAttribute('aria-pressed', 'false');
+        if (!div.hasAttribute('aria-pressed')) {div.setAttribute('aria-pressed', 'false');}
     });
 
     // Also ensure form elements work properly

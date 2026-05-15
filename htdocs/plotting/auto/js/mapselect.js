@@ -68,7 +68,7 @@ function stationLayerStyleFunc(feature) {
             return stateStyle;
         }
     }
-    if (feature.get("archive_end") !== null) return stationStyleOffline; 
+    if (feature.get("archive_end") !== null) {return stationStyleOffline;} 
     return climateStyle;
 }
 

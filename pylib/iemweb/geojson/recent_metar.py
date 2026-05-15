@@ -7,6 +7,7 @@ Service returns interesting METAR reports.
 Changelog
 ---------
 
+- 2026-05-14: Added pwino option.
 - 2024-08-14: Documentation Update
 
 Example Requests
@@ -40,6 +41,9 @@ Get any recent reports with `PNO` in the METAR
 
 https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=pno
 
+Return any recent METARs with the PWINO code included
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=pwino
 """
 
 import json
@@ -53,8 +57,6 @@ from pyiem.webutil import CGIModel, iemapp
 from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct, json_response_dict
 
-json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
-
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -65,9 +67,9 @@ class Schema(CGIModel):
         Field(
             description=(
                 "The query to perform, one of snowdepth, "
-                "i1, i3, i6, fc, gr, pno, 50, 50A"
+                "i1, i3, i6, fc, gr, pno, 50, 50A, pwino"
             ),
-            pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A)$",
+            pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A|pwino)$",
         ),
     ] = "snowdepth"
     fmt: Annotated[str, Field(description="Output format")] = "geojson"
@@ -77,6 +79,8 @@ def trace(val):
     """Nice Print"""
     if val == TRACE_VALUE:
         return "T"
+    if isinstance(val, float):
+        return round(val, 2)
     return val
 
 
@@ -105,6 +109,9 @@ def get_data(q):
         wheresql = "(sknt >= 50 or gust >= 50)"
         if q == "50":
             countrysql = "and country = 'US'"
+    elif q == "pwino":
+        datasql = "''"
+        wheresql = "raw ~* ' PWINO'"
     else:
         return json.dumps(data, ensure_ascii=False)
     cursor.execute(
@@ -142,6 +149,7 @@ def get_data(q):
 @iemapp(
     content_type=get_ct,
     memcachekey=lambda req: f"/geojson/recent_metar?q={req['q']}",
+    memcacheexpire=120,
     help=__doc__,
     schema=Schema,
 )

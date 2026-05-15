@@ -7,10 +7,10 @@ import { TabulatorFull as Tabulator } from "https://unpkg.com/tabulator-tables@6
 
 window.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("makefancy");
-    if (!btn) return;
+    if (!btn) {return;}
     btn.addEventListener("click", () => {
         const tableElem = document.getElementById("thetable");
-        if (!tableElem) return;
+        if (!tableElem) {return;}
         // Extract columns from thead
         const thead = tableElem.querySelector('thead');
         const headerCells = thead.querySelectorAll('tr th');
@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
         // Extract data rows
         const tbody = tableElem.querySelector('tbody');
-        if (!tbody) return;
+        if (!tbody) {return;}
         const trs = tbody.querySelectorAll('tr');
         const data = [];
         trs.forEach(tr => {

@@ -66,7 +66,7 @@ function extractTableData(table) {
 
 function setupTableButton(buttonId, tableId, columns) {
     const button = document.getElementById(buttonId);
-    if (!button) return;
+    if (!button) {return;}
 
     button.addEventListener('click', () => {
         button.disabled = true;

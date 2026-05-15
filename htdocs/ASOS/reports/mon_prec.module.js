@@ -31,10 +31,10 @@ const commonConfig = {
 // Format precipitation values (handle missing data)
 function formatPrecipitation(cell) {
     const value = cell.getValue();
-    if (value === null || value === undefined || value === "M") return "M";
-    if (typeof value === 'string' && value.trim() === '') return "M";
+    if (value === null || value === undefined || value === "M") {return "M";}
+    if (typeof value === 'string' && value.trim() === '') {return "M";}
     const numValue = parseFloat(value);
-    if (isNaN(numValue)) return "M";
+    if (isNaN(numValue)) {return "M";}
     return numValue.toFixed(2);
 }
 
@@ -167,7 +167,7 @@ function initializeTable() {
     const controls = document.getElementById('table-controls');
     controls.classList.remove('d-none');
     controls.removeAttribute('aria-hidden');
-    if (statusEl) statusEl.textContent = 'Interactive table loaded. Use header inputs to filter and column headers to sort.';
+    if (statusEl) {statusEl.textContent = 'Interactive table loaded. Use header inputs to filter and column headers to sort.';}
     
     // Hide the original table and button
     const original = document.getElementById('original-table');
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const createGridButton = document.getElementById('create-grid');
     if (createGridButton) {
         createGridButton.addEventListener('click', () => {
-            if (statusEl) statusEl.textContent = 'Initializing interactive table…';
+            if (statusEl) {statusEl.textContent = 'Initializing interactive table…';}
             initializeTable();
         });
     }

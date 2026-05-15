@@ -61,7 +61,7 @@ const initializeLocationGroups = () => {
 const init = () => {
     // Find the main form
     const form = document.querySelector('form[action="/cgi-bin/request/gis/watchwarn.py"]');
-    if (!form) return;
+    if (!form) {return;}
 
     // Handle Shapefile download button
     const shapefileBtn = form.querySelector('input[value="Request Shapefile"]');

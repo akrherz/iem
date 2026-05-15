@@ -83,11 +83,11 @@ async function handleStateChange() {
     clearSelect(variableSelect, 'Select Variable...');
     clearMessage();
 
-    if (!selectedState) return;
+    if (!selectedState) {return;}
 
     try {
         const response = await fetch(`/json/network.json?network=${selectedState}_DCP`);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {throw new Error('Network response was not ok');}
         
         const data = await response.json();
         populateStationSelect(data.stations || []);
@@ -120,11 +120,11 @@ async function handleStationChange() {
     clearSelect(variableSelect, 'Select Variable...');
     clearMessage();
 
-    if (!selectedStation) return;
+    if (!selectedStation) {return;}
 
     try {
         const response = await fetch(`/json/dcp_vars.json?station=${selectedStation}`);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {throw new Error('Network response was not ok');}
         
         const data = await response.json();
         populateVariableSelect(data.vars || []);
@@ -323,7 +323,7 @@ function validateURLParams(params) {
  */
 function parseURLParams() {
     const params = extractURLParameters();
-    if (!params) return;
+    if (!params) {return;}
 
     const validation = validateURLParams(params);
     if (!validation.isValid) {
@@ -342,10 +342,10 @@ function parseURLParams() {
  */
 function parseURLHash() {
     const hash = window.location.hash.substring(1); // Remove #
-    if (!hash) return;
+    if (!hash) {return;}
 
     const tokens = hash.split('.');
-    if (tokens.length !== 5) return;
+    if (tokens.length !== 5) {return;}
 
     const [state, station, variable, startDate, dayInterval] = tokens;
 
@@ -379,8 +379,8 @@ function setFormValues(state, station, variable, startDate, dayInterval) {
                             // Wait for variables to load, then set variable
                             setTimeout(() => {
                                 variableSelect.value = variable;
-                                if (dateInput && startDate) dateInput.value = startDate;
-                                if (dayIntervalInput && dayInterval) dayIntervalInput.value = dayInterval;
+                                if (dateInput && startDate) {dateInput.value = startDate;}
+                                if (dayIntervalInput && dayInterval) {dayIntervalInput.value = dayInterval;}
                                 updateImage();
                             }, 100);
                         }

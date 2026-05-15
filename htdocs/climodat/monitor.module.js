@@ -15,10 +15,10 @@ function handleMapStationSelection() {
  * Convert date format from HTML5 date input (YYYY-MM-DD) to PHP format (MM/DD/YYYY)
  */
 function convertDateFormat(dateValue) {
-    if (!dateValue) return null;
+    if (!dateValue) {return null;}
     
     const dateParts = dateValue.split('-');
-    if (dateParts.length !== 3) return null;
+    if (dateParts.length !== 3) {return null;}
     
     const [year, month, day] = dateParts;
     return `${month}/${day}/${year}`;
@@ -40,7 +40,7 @@ function createHiddenInput(name, value) {
  */
 function handleDateFormSubmission() {
     const dateForm = document.querySelector('form[name="dates"]');
-    if (!dateForm) return;
+    if (!dateForm) {return;}
 
     dateForm.addEventListener('submit', () => {
         const sdateInput = requireInputElement('sdate');

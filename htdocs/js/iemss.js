@@ -178,7 +178,7 @@ function selectAllOptions(selectElement) {
  */
 function showIemssAlert(message, type = 'warning', duration = 5000) {
     const cardBody = document.querySelector('.iemss-container .card-body');
-    if (!cardBody) return;
+    if (!cardBody) {return;}
 
     // Remove any existing alerts
     const existingAlerts = cardBody.querySelectorAll('.iemss-alert');
@@ -244,7 +244,7 @@ function setupIemssDom(iemssElement, networkParam, select_name) {
     document.getElementById('iemss-metadata-link').setAttribute('href', `/sites/networks.php?network=${networkParam}`);
     if (iemssElement.getAttribute('data-supports-all') === '0') {
         const addAllBtn = document.getElementById('stations_addall');
-        if (addAllBtn) addAllBtn.style.display = 'none';
+        if (addAllBtn) {addAllBtn.style.display = 'none';}
     }
 }
 
@@ -261,10 +261,10 @@ function setupIemssFormSubmission(iemssElement) {
             if (iemssElement.getAttribute('data-supports-all') !== '0') {
                 if (stationsOut && iemssApp.geojsonSource && stationsOut.options.length >= iemssApp.geojsonSource.getFeatures().length) {
                     Array.from(stationsOut.options).forEach(opt => { opt.selected = false; });
-                    if (stationsCheckbox) stationsCheckbox.checked = true;
+                    if (stationsCheckbox) {stationsCheckbox.checked = true;}
                     return true;
                 } else {
-                    if (stationsCheckbox) stationsCheckbox.checked = false;
+                    if (stationsCheckbox) {stationsCheckbox.checked = false;}
                 }
             }
             if (stationsOut) {
@@ -288,26 +288,26 @@ function setupStationMovementHandlers() {
         stationsOut.addEventListener('dblclick', () => moveSelectedOptions(stationsOut, stationsIn));
     }
     const addBtn = document.getElementById('stations_add');
-    if (addBtn) addBtn.addEventListener('click', () => moveSelectedOptions(stationsIn, stationsOut));
+    if (addBtn) {addBtn.addEventListener('click', () => moveSelectedOptions(stationsIn, stationsOut));}
     const addAllBtn = document.getElementById('stations_addall');
-    if (addAllBtn) addAllBtn.addEventListener('click', () => {
+    if (addAllBtn) {addAllBtn.addEventListener('click', () => {
         moveAllOptions(stationsIn, stationsOut);
         return false;
-    });
+    });}
     const delAllBtn = document.getElementById('stations_delall');
-    if (delAllBtn) delAllBtn.addEventListener('click', () => moveAllOptions(stationsOut, stationsIn));
+    if (delAllBtn) {delAllBtn.addEventListener('click', () => moveAllOptions(stationsOut, stationsIn));}
     const delBtn = document.getElementById('stations_del');
-    if (delBtn) delBtn.addEventListener('click', () => {
+    if (delBtn) {delBtn.addEventListener('click', () => {
         moveSelectedOptions(stationsOut, stationsIn);
         return false;
-    });
+    });}
 }
 
 function setupSortAndFilterHandlers() {
     const sortById = document.getElementById('iemss-sortbyid');
-    if (sortById) sortById.addEventListener('click', (event) => { event.preventDefault(); sortListing("id"); });
+    if (sortById) {sortById.addEventListener('click', (event) => { event.preventDefault(); sortListing("id"); });}
     const sortByName = document.getElementById('iemss-sortbyname');
-    if (sortByName) sortByName.addEventListener('click', (event) => { event.preventDefault(); sortListing("name"); });
+    if (sortByName) {sortByName.addEventListener('click', (event) => { event.preventDefault(); sortListing("name"); });}
 }
 
 function setupIemssMapAndData(iemssElement, networkParam) {
@@ -355,10 +355,10 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
         if (geojsonSourceInstance.getState() === 'ready') {
             const stationsInSelect = document.getElementById('stations_in');
             const iemssContainer = document.querySelector('.iemss-container');
-            if (iemssContainer) iemssContainer.classList.remove('iemss-loading');
+            if (iemssContainer) {iemssContainer.classList.remove('iemss-loading');}
             geojsonSourceInstance.getFeatures().forEach(feat => {
                 let lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
-                if (networkParam !== 'TAF') lbl += ` ${feat.get('time_domain')}`;
+                if (networkParam !== 'TAF') {lbl += ` ${feat.get('time_domain')}`;}
                 const option = document.createElement('option');
                 option.value = feat.get('sid');
                 option.textContent = lbl;
@@ -373,7 +373,7 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
             );
         } else if (geojsonSourceInstance.getState() === 'loading') {
             const iemssContainer = document.querySelector('.iemss-container');
-            if (iemssContainer) iemssContainer.classList.add('iemss-loading');
+            if (iemssContainer) {iemssContainer.classList.add('iemss-loading');}
         }
     });
     // Create popup elements
@@ -405,7 +405,7 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
                 + `<br /><strong>Name:</strong> ${feature.get('sname')}`
                 + `<br /><strong>Period:</strong> ${feature.get("time_domain")}</p>`;
             document.getElementById('popover-content').innerHTML = content;
-            if (popoverInstance) popoverInstance.show();
+            if (popoverInstance) {popoverInstance.show();}
             const stationsInSelect = document.getElementById('stations_in');
             const stationOption = Array.from(stationsInSelect.options).find(option => option.value === sid);
             if (stationOption) {
@@ -429,7 +429,7 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
                 }, 100);
             }
         } else {
-            if (popoverInstance) popoverInstance.hide();
+            if (popoverInstance) {popoverInstance.hide();}
         }
     });
 }
@@ -437,11 +437,11 @@ function setupIemssMapPopups(mapInstance, geojsonInstance, geojsonSourceInstance
 // Main orchestration function (refactored)
 document.addEventListener('DOMContentLoaded', () => {
     const iemssElement = document.getElementById('iemss');
-    if (!iemssElement) return;
+    if (!iemssElement) {return;}
     iemssElement.innerHTML = htmlInterface.join('');
     iemssApp.network = iemssElement.getAttribute('data-network');
     const select_name = iemssElement.getAttribute('data-name');
-    if (!iemssApp.network) return;
+    if (!iemssApp.network) {return;}
     setupIemssDom(iemssElement, iemssApp.network, select_name);
     setupIemssFormSubmission(iemssElement);
     setupStationMovementHandlers();

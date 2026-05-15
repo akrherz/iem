@@ -23,7 +23,7 @@ function updateURL() {
     // Update the URL with the current product and timestamp
     const url = new URL(window.location.href);
     const opt = getSelectedOption();
-    if (!opt) return;
+    if (!opt) {return;}
     const pid = opt.value;
     const stamp = dt.utc().format('YYYYMMDDHHmm');
     url.searchParams.set('product', pid);
@@ -212,7 +212,7 @@ function updateImageDisplay(opt) {
 }
 
 function update() {
-    if (isUpdating) return; // Safeguard to prevent recursion
+    if (isUpdating) {return;} // Safeguard to prevent recursion
     isUpdating = true;
 
     updateTimeDisplay();
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     translateHashLink();
     fetch("/json/products.json")
         .then(response => {
-            if (!response.ok) throw new Error('Failed to load products');
+            if (!response.ok) {throw new Error('Failed to load products');}
             return response.json();
         })
         .then(data => {
@@ -363,10 +363,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleKeyboardNavigation(event) {
     // Ignore if focus is on an input, textarea, or select
     const tag = document.activeElement.tagName;
-    if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) {return;}
 
     const opt = getSelectedOption();
-    if (!opt) return;
+    if (!opt) {return;}
     const interval = parseInt(opt.getAttribute('data-interval'), 10);
 
     // Shift+Arrow for day navigation

@@ -4,7 +4,7 @@ import { TabulatorFull as Tabulator } from 'https://unpkg.com/tabulator-tables@6
 function getUrlParams() {
     const params = Object.create(null); // no prototype
     for (const [key, value] of new URLSearchParams(window.location.search)) {
-        if (Object.prototype.hasOwnProperty.call(params, key)) continue; // skip if already set
+        if (Object.prototype.hasOwnProperty.call(params, key)) {continue;} // skip if already set
         params[key] = value;
     }
     return params;
@@ -13,12 +13,12 @@ function getUrlParams() {
 // Fetch UGC data from API
 async function fetchUgcs(params) {
     const apiParams = {};
-    if (params.just_firewx) apiParams.just_firewx = params.just_firewx;
-    if (params.w === 'wfo' && params.station) apiParams.wfo = params.station;
-    if (params.w === 'state' && params.state) apiParams.state = params.state;
+    if (params.just_firewx) {apiParams.just_firewx = params.just_firewx;}
+    if (params.w === 'wfo' && params.station) {apiParams.wfo = params.station;}
+    if (params.w === 'state' && params.state) {apiParams.state = params.state;}
     const url = `/api/1/nws/ugcs.json?${new URLSearchParams(apiParams).toString()}`;
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error('Failed to fetch UGC data');
+    if (!resp.ok) {throw new Error('Failed to fetch UGC data');}
     return (await resp.json()).data;
 }
 
@@ -73,7 +73,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     // Only render table if placeholder exists
     const tableDiv = document.getElementById('ugcs-table');
-    if (!tableDiv) return;
+    if (!tableDiv) {return;}
     // Fetch and render data
     try {
         const params = getUrlParams();

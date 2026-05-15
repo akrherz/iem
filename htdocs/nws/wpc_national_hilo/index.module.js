@@ -77,7 +77,7 @@ function processTableData(rawData) {
 // Format temperature values with color coding
 function formatTemperature(cell, formatterParams) {
     const value = cell.getValue();
-    if (!value) return '<span class="text-muted">—</span>';
+    if (!value) {return '<span class="text-muted">—</span>';}
     
     const tempClass = formatterParams.type === 'max' ? 'temp-high' : 'temp-low';
     return `<span class="${tempClass}">${value}°F</span>`;
@@ -86,7 +86,7 @@ function formatTemperature(cell, formatterParams) {
 // Format location lists
 function formatLocations(cell) {
     const value = cell.getValue();
-    if (!value) return '<span class="text-muted">No data</span>';
+    if (!value) {return '<span class="text-muted">No data</span>';}
     
     return `<div class="location-list">${value}</div>`;
 }

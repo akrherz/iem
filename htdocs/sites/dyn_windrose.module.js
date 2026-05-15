@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgLoading = document.getElementById('img-loading');
 
     const hideLoading = () => {
-        if (imgLoading) imgLoading.style.display = 'none';
+        if (imgLoading) {imgLoading.style.display = 'none';}
     };
 
     if (windrose) {
         windrose.addEventListener('load', hideLoading);
         // If the element is an <img> and already loaded from cache, hide immediately
-        if (windrose.complete) hideLoading();
+        if (windrose.complete) {hideLoading();}
     }
 });

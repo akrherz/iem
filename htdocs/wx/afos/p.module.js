@@ -22,7 +22,7 @@ const copyText = (text) => {
 const markCopied = (btn) => {
     btn.classList.add('copied');
     const orig = btn.dataset.label || btn.textContent;
-    if (!btn.dataset.label) btn.dataset.label = orig;
+    if (!btn.dataset.label) {btn.dataset.label = orig;}
     btn.textContent = 'Copied';
     setTimeout(() => {
         btn.classList.remove('copied');
@@ -32,19 +32,19 @@ const markCopied = (btn) => {
 
 const init = () => {
     const buttons = document.querySelectorAll('.afos-copy');
-    if (buttons.length === 0) return;
+    if (buttons.length === 0) {return;}
     const status = document.getElementById('afos-status');
     buttons.forEach((btn) => {
         btn.addEventListener('click', async (ev) => {
             ev.preventDefault();
             // data-copy-target="next" means copy the sibling <pre>
             const pre = btn.closest('.afos-block')?.querySelector('.afos-pre');
-            if (!pre) return;
+            if (!pre) {return;}
             const text = pre.innerText.replace(/\s+$/, '');
             try {
                 await copyText(text);
                 markCopied(btn);
-                if (status) status.textContent = 'Product text copied to clipboard.';
+                if (status) {status.textContent = 'Product text copied to clipboard.';}
             } catch {
                 // Silent failure; indicate error state briefly.
                 btn.textContent = 'Error';
@@ -53,7 +53,7 @@ const init = () => {
                         btn.textContent = btn.dataset.label || 'Copy';
                     }
                 }, 2000);
-                if (status) status.textContent = 'Copy failed.';
+                if (status) {status.textContent = 'Copy failed.';}
             }
         });
     });

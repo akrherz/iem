@@ -8,14 +8,16 @@ const initPireps = () => {
     const lon = document.getElementById("lon");
     const lat = document.getElementById("lat");
 
-    if (!inputs.length || !spatial || !summaryEl) return;
+    if (!inputs.length || !spatial || !summaryEl) {return;}
+
+    const getSelectedFilter = () => document.querySelector("input[name='filter']:checked");
 
     const getFilterParts = () => {
         const parts = [];
         if (artcc?.value !== "_ALL") {
             parts.push(`ARTCC=${artcc.value}`);
         }
-        const spatialEnabled = document.querySelector("input[name='filter']").checked;
+        const spatialEnabled = Boolean(getSelectedFilter()?.checked);
         if (spatialEnabled && degrees && lon && lat) {
             parts.push(`Spatial=${degrees.value}° @ (${lon.value}, ${lat.value})`);
         }
@@ -24,7 +26,7 @@ const initPireps = () => {
 
     const setSummaryBadge = (parts) => {
         const badge = summaryEl.querySelector(".badge");
-        if (!badge) return;
+        if (!badge) {return;}
         if (parts.length) {
             badge.textContent = parts.join(' · ');
             badge.className = 'badge bg-info text-dark';
@@ -39,7 +41,7 @@ const initPireps = () => {
     const validateSpatial = () => {
         let ok = true;
         const setInvalid = (el, cond) => {
-            if (!el) return;
+            if (!el) {return;}
             if (cond) {
                 el.classList.add('is-invalid');
                 ok = false;
@@ -61,7 +63,7 @@ const initPireps = () => {
         input.addEventListener('change', (evt) => {
             const checked = Boolean(evt.currentTarget.checked);
             spatial.classList.toggle('d-none', !checked);
-            if (checked) validateSpatial();
+            if (checked) {validateSpatial();}
             updateSummary();
         });
     });
@@ -70,10 +72,10 @@ const initPireps = () => {
         artcc.addEventListener('change', updateSummary);
     }
     [degrees, lon, lat].forEach((el) => {
-        if (!el) return;
+        if (!el) {return;}
         el.addEventListener('input', () => {
             // live validate only if spatial filter enabled
-            if (document.querySelector("input[name='filter']").checked) validateSpatial();
+            if (getSelectedFilter()?.checked) {validateSpatial();}
             updateSummary();
         });
     });

@@ -6,9 +6,9 @@ function onFeatureData(data) {
     const featureMsg = document.getElementById("feature_msg");
     const featureBtns = document.querySelectorAll("button.feature_btn");
     
-    if (goodVotes) goodVotes.textContent = data.good;
-    if (badVotes) badVotes.textContent = data.bad;
-    if (abstainVotes) abstainVotes.textContent = data.abstain;
+    if (goodVotes) {goodVotes.textContent = data.good;}
+    if (badVotes) {badVotes.textContent = data.bad;}
+    if (abstainVotes) {abstainVotes.textContent = data.abstain;}
     
     if (!data.can_vote) {
         if (featureMsg) {

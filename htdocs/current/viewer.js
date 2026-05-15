@@ -106,7 +106,7 @@ function escapeHTML(val) {
 }
 
 function liveShot() {
-    if (aqlive) return;
+    if (aqlive) {return;}
     aqlive = true;
     ts = new Date();
     const webcamImg = document.getElementById("webcam_image");
@@ -174,16 +174,16 @@ function doRWISView() {
     const rwisView = document.getElementById("rwisview");
     const rwisList = document.getElementById("rwislist");
     const rwisMain = document.getElementById("rwismain");
-    if (singleImageView) singleImageView.style.display = "none";
-    if (rwisView) rwisView.style.display = "block";
-    if (rwisList) rwisList.innerHTML = "";
+    if (singleImageView) {singleImageView.style.display = "none";}
+    if (rwisView) {rwisView.style.display = "block";}
+    if (rwisList) {rwisList.innerHTML = "";}
     let i = 0;
     let hit = false;
     while (i < 10) {
         const url = currentCameraFeature.get(`imgurl${i}`);
         if (url !== null && url !== undefined) {
             if (!hit) {
-                if (rwisMain) rwisMain.src = url;
+                if (rwisMain) {rwisMain.src = url;}
                 hit = true;
                 i += 1;
                 continue;
@@ -233,11 +233,11 @@ function setSingleImageViewVisibility() {
     const singleImageView = document.getElementById("singleimageview");
     const rwisView = document.getElementById("rwisview");
     const liveShotBtn = document.getElementById("liveshot");
-    if (singleImageView) singleImageView.style.display = "block";
-    if (rwisView) rwisView.style.display = "none";
-    if (liveShotBtn) liveShotBtn.style.display = "block";
+    if (singleImageView) {singleImageView.style.display = "block";}
+    if (rwisView) {rwisView.style.display = "none";}
+    if (liveShotBtn) {liveShotBtn.style.display = "block";}
     const url = getCameraImageUrl();
-    if (url === undefined && liveShotBtn) liveShotBtn.style.display = "none";
+    if (url === undefined && liveShotBtn) {liveShotBtn.style.display = "none";}
 }
 
 function getSingleImageUrl() {
@@ -253,9 +253,9 @@ function setWebcamImageAndTitle(url) {
     const name = currentCameraFeature.get("name") ?? "Iowa DOT Dash Cam";
     const webcamImg = document.getElementById("webcam_image");
     const webcamTitle = document.getElementById("webcam_title");
-    if (webcamImg) webcamImg.src = url;
-    if (webcamTitle) webcamTitle.innerHTML =
-        `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`;
+    if (webcamImg) {webcamImg.src = url;}
+    if (webcamTitle) {webcamTitle.innerHTML =
+        `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`;}
 }
 
 function getCameraImageUrl() {
@@ -267,7 +267,7 @@ function getFallbackCameraImageUrl() {
 }
 function cronMinute() {
     // We are called every minute
-    if (!realtimeMode) return;
+    if (!realtimeMode) {return;}
     refreshRADAR();
     refreshJSON();
 }
@@ -283,7 +283,7 @@ function getRADARSource() {
     dt.subtract(dt.minutes() % 5, 'minutes');
     const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     const radarTitle = document.getElementById("radar_title");
-    if (radarTitle) radarTitle.innerHTML = `US Base Reflectivity @ ${dt.format("h:mm A")}`;
+    if (radarTitle) {radarTitle.innerHTML = `US Base Reflectivity @ ${dt.format("h:mm A")}`;}
     return new ol.source.XYZ({
         url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
@@ -372,7 +372,7 @@ function parseURI() {
         } else {
             cameraID = escapeHTML(tokens2[0]);
             const toggleBtns = document.querySelectorAll('#toggle_event_mode button');
-            if (toggleBtns[1]) toggleBtns[1].click();
+            if (toggleBtns[1]) {toggleBtns[1].click();}
             const dtpicker = document.getElementById('dtpicker');
             if (dtpicker) {
                 const momentDate = moment(escapeHTML(tokens2[1]));
