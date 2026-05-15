@@ -1,19 +1,35 @@
 
 let report = 'snowdepth';
 
+const getAllowedReports = (select) => new Set([...select.options].map((opt) => opt.value));
+
+const buildCell = (tagName, text) => {
+    const cell = document.createElement(tagName);
+    cell.textContent = text;
+    return cell;
+};
+
 /**
  * Fetch recent interesting METAR reports and populate the table.
  * Exposed for potential reuse (e.g. manual refresh button later).
  */
-const buildRowHTML = (feat) => [
-    '<tr>',
-    `<td>${feat.properties.station}</td>`,
-    `<td>${feat.properties.network}</td>`,
-    `<td>${feat.properties.valid}</td>`,
-    `<td>${feat.properties.value}</td>`,
-    `<td>${feat.properties.metar}</td>`,
-    '</tr>'
-].join('');
+const buildRow = (feat) => {
+    const row = document.createElement('tr');
+    row.appendChild(buildCell('td', feat.properties.station));
+    row.appendChild(buildCell('td', feat.properties.network));
+    row.appendChild(buildCell('td', feat.properties.valid));
+    row.appendChild(buildCell('td', `${feat.properties.value ?? ''}`));
+    row.appendChild(buildCell('td', feat.properties.metar));
+    return row;
+};
+
+const buildMessageRow = (message) => {
+    const row = document.createElement('tr');
+    const cell = buildCell('th', message);
+    cell.colSpan = 5;
+    row.appendChild(cell);
+    return row;
+};
 
 const updateStatus = (live, message) => { if (live) live.textContent = message; };
 
@@ -22,22 +38,22 @@ export const fetchData = async () => {
     if (!tableBody) return;
     const live = document.getElementById('recent-status');
 
-    tableBody.innerHTML = '<tr><th colspan="5">Querying server, one moment</th></tr>';
+    tableBody.replaceChildren(buildMessageRow('Querying server, one moment'));
     updateStatus(live, 'Loading recent METAR reports…');
     try {
         const resp = await fetch(`/geojson/recent_metar.py?q=${encodeURIComponent(report)}`);
         if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
         const j = await resp.json();
-        tableBody.innerHTML = '';
-        j.features.forEach((feat) => tableBody.insertAdjacentHTML('beforeend', buildRowHTML(feat)));
+        tableBody.replaceChildren();
+        j.features.forEach((feat) => tableBody.appendChild(buildRow(feat)));
         if (j.features.length === 0) {
-            tableBody.innerHTML = '<tr><th colspan="5">No results were found, sorry!</th></tr>';
+            tableBody.replaceChildren(buildMessageRow('No results were found, sorry!'));
             updateStatus(live, 'No recent METAR reports found for selected type.');
             return;
         }
         updateStatus(live, `${j.features.length} recent METAR report${j.features.length === 1 ? '' : 's'} loaded.`);
     } catch (error) {
-        tableBody.innerHTML = `<tr><th colspan="5">Error loading data ${error.message}</th></tr>`;
+        tableBody.replaceChildren(buildMessageRow(`Error loading data ${error.message}`));
         updateStatus(live, `Error loading data: ${error.message}`);
     }
 };
@@ -61,6 +77,11 @@ export const setReport = (value) => {
 
 /** Initialize report selection from current URL hash. */
 const initReportFromURL = () => {
+    const select = document.getElementById('report');
+    if (!(select instanceof HTMLSelectElement)) {
+        return;
+    }
+    const allowedReports = getAllowedReports(select);
     const params = new URLSearchParams(window.location.search);
     const fromParam = params.get('report');
     let candidate = fromParam;
@@ -73,12 +94,9 @@ const initReportFromURL = () => {
         const newUrl = `${window.location.pathname}?${migrateParams.toString()}`;
         window.history.replaceState({}, '', newUrl);
     }
-    if (candidate) report = candidate;
-    const select = document.getElementById('report');
-    if (select instanceof HTMLSelectElement) {
-        if ([...select.options].some(opt => opt.value === report)) {
-            select.value = report;
-        }
+    if (candidate?.length && allowedReports.has(candidate)) {
+        report = candidate;
+        select.value = report;
     }
 };
 
