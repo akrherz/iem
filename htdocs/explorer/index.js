@@ -1,4 +1,4 @@
-/* global windowFactory, Highcharts, ol, bootstrap */
+/* global Highcharts, ol, bootstrap */
 let epoch = 0;
 let olMap = null;
 let overviewMap = null;

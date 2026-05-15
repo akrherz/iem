@@ -10,12 +10,14 @@ const initPireps = () => {
 
     if (!inputs.length || !spatial || !summaryEl) {return;}
 
+    const getSelectedFilter = () => document.querySelector("input[name='filter']:checked");
+
     const getFilterParts = () => {
         const parts = [];
         if (artcc?.value !== "_ALL") {
             parts.push(`ARTCC=${artcc.value}`);
         }
-        const spatialEnabled = document.querySelector("input[name='filter']").checked;
+        const spatialEnabled = Boolean(getSelectedFilter()?.checked);
         if (spatialEnabled && degrees && lon && lat) {
             parts.push(`Spatial=${degrees.value}° @ (${lon.value}, ${lat.value})`);
         }
@@ -73,7 +75,7 @@ const initPireps = () => {
         if (!el) {return;}
         el.addEventListener('input', () => {
             // live validate only if spatial filter enabled
-            if (document.querySelector("input[name='filter']").checked) {validateSpatial();}
+            if (getSelectedFilter()?.checked) {validateSpatial();}
             updateSummary();
         });
     });

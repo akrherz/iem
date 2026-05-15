@@ -68,30 +68,34 @@ function updateURL(params) {
     window.history.replaceState({}, '', url);
 }
 
+function hasParamValue(value) {
+    return value !== undefined && value !== null;
+}
+
 function addByPointParams(params, newParams) {
-    if (newParams.lon) {params.set('lon', newParams.lon);}
-    if (newParams.lat) {params.set('lat', newParams.lat);}
-    if (newParams.buffer) {params.set('buffer', newParams.buffer);}
-    if (newParams.sdate1) {params.set('sdate1', newParams.sdate1);}
-    if (newParams.edate1) {params.set('edate1', newParams.edate1);}
+    if (hasParamValue(newParams.lon)) {params.set('lon', newParams.lon);}
+    if (hasParamValue(newParams.lat)) {params.set('lat', newParams.lat);}
+    if (hasParamValue(newParams.buffer)) {params.set('buffer', newParams.buffer);}
+    if (hasParamValue(newParams.sdate1)) {params.set('sdate1', newParams.sdate1);}
+    if (hasParamValue(newParams.edate1)) {params.set('edate1', newParams.edate1);}
 }
 
 function addByUGCParams(params, newParams) {
-    if (newParams.state) {params.set('state', newParams.state);}
-    if (newParams.ugc) {params.set('ugc', newParams.ugc);}
-    if (newParams.lon) {params.set('lon', newParams.lon);}
-    if (newParams.lat) {params.set('lat', newParams.lat);}
-    if (newParams.buffer) {params.set('buffer', newParams.buffer);}
-    if (newParams.sdate) {params.set('sdate', newParams.sdate);}
-    if (newParams.edate) {params.set('edate', newParams.edate);}
+    if (hasParamValue(newParams.state)) {params.set('state', newParams.state);}
+    if (hasParamValue(newParams.ugc)) {params.set('ugc', newParams.ugc);}
+    if (hasParamValue(newParams.lon)) {params.set('lon', newParams.lon);}
+    if (hasParamValue(newParams.lat)) {params.set('lat', newParams.lat);}
+    if (hasParamValue(newParams.buffer)) {params.set('buffer', newParams.buffer);}
+    if (hasParamValue(newParams.sdate)) {params.set('sdate', newParams.sdate);}
+    if (hasParamValue(newParams.edate)) {params.set('edate', newParams.edate);}
 }
 
 function addListParams(params, newParams) {
-    if (newParams.by) {params.set('by', newParams.by);}
-    if (newParams.datum) {params.set('datum', newParams.datum);}
-    if (newParams.year) {params.set('year', newParams.year);}
-    if (newParams.phenomena) {params.set('phenomena', newParams.phenomena);}
-    if (newParams.significance) {params.set('significance', newParams.significance);}
+    if (hasParamValue(newParams.by)) {params.set('by', newParams.by);}
+    if (hasParamValue(newParams.datum)) {params.set('datum', newParams.datum);}
+    if (hasParamValue(newParams.year)) {params.set('year', newParams.year);}
+    if (hasParamValue(newParams.phenomena)) {params.set('phenomena', newParams.phenomena);}
+    if (hasParamValue(newParams.significance)) {params.set('significance', newParams.significance);}
 }
 
 // Clean URL parameters to only include those relevant to the current mode

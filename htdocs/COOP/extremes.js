@@ -1437,8 +1437,14 @@ function applyYearFilter() {
  * Update year filter visibility based on selected attribute
  */
 function updateYearFilterVisibility() {
-    const yearFilterRow = document.querySelector('#year-filter').closest('.control-row');
-    if (!yearFilterRow) {return;}
+    const yearFilter = document.querySelector('#year-filter');
+    if (!yearFilter) {
+        return;
+    }
+    const yearFilterRow = yearFilter.closest('.control-row');
+    if (!yearFilterRow) {
+        return;
+    }
 
     // Hide year filter for average attributes since they don't have specific record years
     const isAverageAttribute = ['avg_high', 'avg_low', 'avg_precip', 'station', 'years'].includes(appState.labelAttribute);
