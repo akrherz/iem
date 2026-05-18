@@ -37,39 +37,39 @@ if (isset($_REQUEST["day"])){
     <?php echo networkSelectAuto($network, $station); ?>
     <input type="submit" class="btn btn-primary" value="Change Station" />
     <span class="text-muted">or</span>
-    <a href="locate.php?network=<?php echo $network; ?>" class="btn btn-outline-secondary btn-sm">Select from map</a>
+    <a href="/sites/locate.php?network=<?php echo $network; ?>" class="btn btn-outline-secondary btn-sm">Select from map</a>
 </div>
 </form>
 
 <div class="d-flex flex-wrap gap-2 mb-3">
 <?php
 $o = Array(
-  "base" => Array("name" => "Information", "uri" => "site.php?",
+  "base" => Array("name" => "Information", "uri" => "/sites/site.php?",
           "metaok" => TRUE, "icon" => "info-circle"),
-  "current" => Array("name" => "Last Ob", "uri" => "current.php?",
+  "current" => Array("name" => "Last Ob", "uri" => "/sites/current.php?",
           "icon" => "clock"),
-  "porclimo" => Array("name" => "Daily Climatology", "uri" => "porclimo.php?",
+  "porclimo" => Array("name" => "Daily Climatology", "uri" => "/sites/porclimo.php?",
           "icon" => "table", "metaok" => TRUE),
-  "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
+  "pics" => Array("name" => "Photographs", "uri" => "/sites/pics.php?",
           "icon" => "camera"),
-  "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
+  "cal" => Array("name" => "Calibration", "uri" => "/sites/cal.phtml?",
         "icon" => "wrench",
         "networks" => Array("IA_ASOS", "IA_RWIS", "ISUAG", "ISUSM")),
-  "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
+  "meteo" => Array("name" => "Meteogram", "uri" => "/sites/meteo.php?",
           "icon" => "graph-up"),
-  "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
+  "tables" => Array("name" => "Network Table", "uri" => "/sites/networks.php?",
           "metaok" => TRUE, "icon" => "table"),
-  "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?",
+  "neighbors" => Array("name" => "Neighbors", "uri" => "/sites/neighbors.php?",
           "metaok" => TRUE, "icon" => "people"),
   "monthsum" => Array("name" => "Monthly Summaries",
-          "uri" => "monthlysum.php?", "icon" => "calendar-month"),
+          "uri" => "/sites/monthlysum.php?", "icon" => "calendar-month"),
   "obhistory" => Array("name" => "Observation History",
-          "uri" => "obhistory.php?", "icon" => "clock-history"),
+          "uri" => "/sites/obhistory.php?", "icon" => "clock-history"),
   "windrose" => Array("name" => "Wind Roses",
-          "uri" => "windrose.phtml?", "icon" => "diagram-3"),
+          "uri" => "/sites/windrose.phtml?", "icon" => "diagram-3"),
   "custom_windrose" => Array("name" => "Custom Wind Roses",
-          "uri" => "dyn_windrose.phtml?", "icon" => "diagram-3"),
-  "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?",
+          "uri" => "/sites/dyn_windrose.phtml?", "icon" => "diagram-3"),
+  "calendar" => Array("name" => "Data Calendar", "uri" => "/sites/hist.phtml?",
           "icon" => "calendar", "metaok" => TRUE),
 );
 
