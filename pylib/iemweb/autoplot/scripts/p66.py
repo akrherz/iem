@@ -35,6 +35,10 @@ PDICT2 = {
     "low": "Low Temperature",
     "high": "High Temperature",
 }
+PDICT3 = {
+    "100": "Scale y-axis to 100%",
+    "data": "Scale y-axis to Data",
+}
 
 
 def get_description():
@@ -63,6 +67,13 @@ def get_description():
             label="Threshold (F or inch):",
         ),
         dict(type="int", name="days", default="7", label="Number of Days:"),
+        {
+            "type": "select",
+            "name": "scale",
+            "default": "100",
+            "label": "Scale Y-Axis:",
+            "options": PDICT3,
+        },
     ]
     return desc
 
@@ -129,8 +140,9 @@ def plotter(ctx: dict):
     fig, ax = figure_axes(apctx=ctx, title=title)
     ax.set_position([0.1, 0.1, 0.7, 0.8])
     ax.set_ylabel("Frequency of Streak Including Day of Year [%]")
-    ax.set_ylim(0, 100)
-    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+    if ctx["scale"] == "100":
+        ax.set_ylim(0, 100)
+        ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
     ax.bar(range(366), freq["hit"], width=1)
 
