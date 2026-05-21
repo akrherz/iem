@@ -204,7 +204,7 @@ function c2f($myC)
 /**
  * Convert Fahrenheit to Celsius
  * @param float|string $tmpf The temperature in Fahrenheit
- * @return float|string The temperature in Celsius or null if input is null
+ * @return float|null The temperature in Celsius or null if input is null
  */
 function f2c($tmpf)
 {
@@ -233,7 +233,7 @@ function dwpf($tmpf, $relh)
  *  /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prrelh.f
  *  @param float $tmpc The temperature in Celsius
  *  @param float $dwpc The dew point temperature in Celsius
- *  @return float The relative humidity in percentage
+ *  @return float|null The relative humidity in percentage
  */
 function relh($tmpc, $dwpc)
 {

@@ -10,7 +10,6 @@ $metar = get_str404("metar", "no");
 $refresh = get_str404("refresh", "yes");
 $sortcol = get_str404("sortcol", "ts");
 $sortdir = get_str404("sortdir", "asc");
-$rsortdir = ($sortdir == 'asc') ? 'desc' : 'asc';
 $expiry = 60 * 60 * 24 * 100; // 100 days
 
 $t = new MyView();
@@ -41,9 +40,6 @@ if ($refresh == 'yes') {
 }
 $t->current_network = "My Favorites";
 
-if (strlen($sortcol) == 0) {
-    $sortcol = "ts";
-}
 $vals = array(
     "valid" => "Observation Time", "tmpf" => "Temperature",
     "dwpf" => "Dew Point", "pres" => "Altimeter", "relh" => "Relative Humidity",
@@ -59,6 +55,12 @@ $vals = array(
     "dry1" => "Sensor 2 - Cond [F]",
     "dry2" => "Sensor 3 - Cond [F]",
     "dry3" => "Sensor 4 - Cond [F]",
+    "tsf0" => "Sensor 1 - Temp [F]",
+    "tsf1" => "Sensor 2 - Temp [F]",
+    "tsf2" => "Sensor 3 - Temp [F]",
+    "tsf3" => "Sensor 4 - Temp [F]",
+    "rwis_subf" => "Subsurface Temp [F]",
+    "pave_avg" => "Average Surface Temp [F]",
     "ts" => "Observation Time", "min_tmpf" => "Low Air Temperature Today",
     "vsby" => "Visibility", "max_tmpf" => "High Air Temperature Today",
     "max_sknt_ts" => "Time of Peak Gust",
@@ -66,6 +68,15 @@ $vals = array(
     "peak_ts" => "Time of Peak Wind Gust",
     "city" => "Site Name"
 );
+
+$allowedSortCols = array_filter(array_keys($vals), "is_string");
+if (!in_array($sortcol, $allowedSortCols, true)) {
+    $sortcol = "ts";
+}
+if ($sortdir !== "asc" && $sortdir !== "desc") {
+    $sortdir = "asc";
+}
+$rsortdir = ($sortdir === "asc") ? "desc" : "asc";
 
 $ar = array(
     "no" => "No",

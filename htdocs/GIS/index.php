@@ -73,28 +73,28 @@ $t->content = <<<EOM
 
 <h2 class="h5 card-title">Links</h2>
 <ul class="list-group list-group-flush">
- <li class="list-group-item px-0"><a href="http://droughtmonitor.unl.edu/MapsAndData.aspx">US Drought Monitor GIS data</a>
+ <li class="list-group-item px-0"><a href="https://droughtmonitor.unl.edu/MapsAndData.aspx">US Drought Monitor GIS data</a>
   <div class="small text-muted">Download current and historical drought monitor products in GIS formats.</div></li>
- <li class="list-group-item px-0"><a href="http://www.ncdc.noaa.gov/swdi/">NCDC Severe Weather Data Inventory</a>
+ <li class="list-group-item px-0"><a href="https://www.ncdc.noaa.gov/swdi/">NCDC Severe Weather Data Inventory</a>
  <div class="small text-muted">A tremendous website with lots of hard to find data.</div></li>
- <li class="list-group-item px-0"><a href="http://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
+ <li class="list-group-item px-0"><a href="https://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <div class="small text-muted">Archive of NCDC provided storm reports (1950-).</div></li>
  <li class="list-group-item px-0"><a href="https://gis.ncdc.noaa.gov/map/viewer/#app=cdo">NCDC GIS Portal</a>
  <div class="small text-muted">National Climate Data Center GIS goodies.</div></li>
 
  <li class="list-group-item px-0">NCEI's <a href="https://www.ncdc.noaa.gov/data-access/radar-data/radar-display-tools">Display and Conversion Tools</a>.</li>
 
- <li class="list-group-item px-0"><a href="http://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
+ <li class="list-group-item px-0"><a href="https://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <div class="small text-muted">Weather data integrated into Google Earth.</div></li>
- <li class="list-group-item px-0"><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
+ <li class="list-group-item px-0"><a href="https://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
     <div class="small text-muted">These folks provide nationwide GIS ready datasets of climate data. Their site is outstanding.</div></li>
 
-  <li class="list-group-item px-0"><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
- <li class="list-group-item px-0">Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
- <li class="list-group-item px-0">NOAA's Ken Waters work with <a href="http://www.weather.gov/regsci/gis/">GIS and NWS warnings</a>
+  <li class="list-group-item px-0"><a href="https://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
+ <li class="list-group-item px-0">Iowa <a href="https://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
+ <li class="list-group-item px-0">NOAA's Ken Waters work with <a href="https://www.weather.gov/regsci/gis/">GIS and NWS warnings</a>
  <div class="small text-muted">They have some historical GIS datasets of warnings too.</div></li>
- <li class="list-group-item px-0"><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
- <li class="list-group-item px-0"><a href="http://map.nasa.gov/MAP06/">NASA MAP'06 program</a>
+ <li class="list-group-item px-0"><a href="https://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
+ <li class="list-group-item px-0"><a href="https://map.nasa.gov/MAP06/">NASA MAP'06 program</a>
   <div class="small text-muted">Has some GIS satellite data.</div></li>
 </ul>
 

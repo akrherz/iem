@@ -9,6 +9,8 @@ require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
 require_once "../../../include/mlib.php";
 
+$ARCHIVE_BEGIN = 1983;
+
 $t = new MyView();
 $t->iemselect2 = TRUE;
 $t->title = "NWS Text Product by Issuing Center by Date";
@@ -24,10 +26,10 @@ $by = get_str404("by", "cccc");
 $view = get_str404("view", 'grid');
 $order = get_str404("order", "asc");
 
-$year = get_int404("year", date("Y"), $minval=1982);
+$year = get_int404("year", date("Y"), $minval=$ARCHIVE_BEGIN);
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$year2 = get_int404("year2", date("Y"), $minval=1982);
+$year2 = get_int404("year2", date("Y"), $minval=$ARCHIVE_BEGIN);
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
@@ -270,10 +272,10 @@ $netselect = make_select(
     $cssclass = "form-select iemselect2"
 );
 
-$yselect = yearSelect(1982, $year, "year");
+$yselect = yearSelect($ARCHIVE_BEGIN, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
-$y2select = yearSelect(1982, $year2, "year2");
+$y2select = yearSelect($ARCHIVE_BEGIN, $year2, "year2");
 $m2select = monthSelect($month2, "month2");
 $d2select = daySelect($day2, "day2");
 
@@ -307,7 +309,7 @@ and a brief associated product name on the NWS website.</p>
 
 <p><strong>Archive Completeness:</strong>
 <ul>
- <li><strong>1983 thru 2001</strong>: Sometimes sparse / missing data.
+ <li><strong>{$ARCHIVE_BEGIN} thru 2001</strong>: Sometimes sparse / missing data.
  Also note that product source IDs
  are likely different back then (prior to NWS Modernization), some work was
  done to assign present day WMO source IDs to the product metadata stored in
