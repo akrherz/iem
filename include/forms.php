@@ -332,7 +332,7 @@ function get_int404($name, $default = null, $minval = null, $maxval = null)
     if ($val != "0" && empty($val)) {
         return $default;
     }
-    if ( (filter_var($val, FILTER_VALIDATE_INT) === false)) {
+    if (! is_numeric($val)) {
         // passed up to iemwebfarm handler
         http_response_code(405);
         die();
