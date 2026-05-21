@@ -24,14 +24,14 @@ $by = get_str404("by", "cccc");
 $view = get_str404("view", 'grid');
 $order = get_str404("order", "asc");
 
-$year = get_int404("year", date("Y"));
+$year = get_int404("year", date("Y"), $minval=1982);
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$year2 = get_int404("year2", date("Y"));
+$year2 = get_int404("year2", date("Y"), $minval=1982);
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
-$res = file_get_contents("{$INTERNAL_BASEURL}/json/reference.py");
+$res = file_get_contents(IEMConfig::INTERNAL_BASEURL . "/json/reference.py");
 $jobj = json_decode($res, $assoc = TRUE, JSON_FORCE_OBJECT);
 $pilselect = make_select("pil", $pil, $jobj['prodDefinitions'], $jscallback = "",
     $cssclass = "form-select iemselect2",
@@ -270,10 +270,10 @@ $netselect = make_select(
     $cssclass = "form-select iemselect2"
 );
 
-$yselect = yearSelect(1983, $year, "year");
+$yselect = yearSelect(1982, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
-$y2select = yearSelect(1993, $year2, "year2");
+$y2select = yearSelect(1982, $year2, "year2");
 $m2select = monthSelect($month2, "month2");
 $d2select = daySelect($day2, "day2");
 
@@ -297,11 +297,11 @@ $t->content = <<<EOM
 <p>This application prints out a listing of IEM archived text products.
 After about
 seven days, the IEM purges a lot of the frequently issued products like
-SHEF and METAR data. Please be patient with this page if you select a 
+SHEF and METAR data. Please be patient with this page if you select a
 range of dates.</p>
 
 <p>See this <a href="/onsite/news.phtml?id=1408">news item</a> for more details
-on this archive and sources used.  You can also find a listing of 
+on this archive and sources used.  You can also find a listing of
 <a href="https://forecast.weather.gov/product_types.php?site=NWS">three character PILs</a>
 and a brief associated product name on the NWS website.</p>
 

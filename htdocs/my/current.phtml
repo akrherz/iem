@@ -6,10 +6,10 @@ require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 
-$metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
-$refresh = isset($_REQUEST["refresh"]) ? strtolower(xssafe($_REQUEST["refresh"])) : 'yes';
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "ts";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']) : 'asc';
+$metar = get_str404("metar", "no");
+$refresh = get_str404("refresh", "yes");
+$sortcol = get_str404("sortcol", "ts");
+$sortdir = get_str404("sortdir", "asc");
 $rsortdir = ($sortdir == 'asc') ? 'desc' : 'asc';
 $expiry = 60 * 60 * 24 * 100; // 100 days
 
@@ -89,7 +89,7 @@ foreach ($stations as $key => $value) {
     $reqstations .= sprintf("station=%s&", $value);
 }
 if ($reqstations != "") {
-    $jdata = file_get_contents($INTERNAL_BASEURL . "/api/1/currents.json?$reqstations");
+    $jdata = file_get_contents(IEMConfig::INTERNAL_BASEURL . "/api/1/currents.json?$reqstations");
     $jobj = json_decode($jdata, $assoc = TRUE);
 } else {
     $jobj = array("data" => array());
@@ -201,7 +201,7 @@ $content = <<<EOM
 
 <h3></h3>
 
-<br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; 
+<br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp;
 Click on a column to sort it.<br>
 
 <form method="GET" action="current.phtml">
@@ -227,7 +227,7 @@ Click on a column to sort it.<br>
   <th><a href="{$uri}vsby">Vsby</a></th>
   <th>Dir</th>
   <th><a href="{$uri}sknt">Speed</a></th>
-  <th><a href="{$uri}peak">Today Gust</a> 
+  <th><a href="{$uri}peak">Today Gust</a>
     <a href="{$uri}peak_ts">@time</a></th>
   <th><a href="{$uri}phour">Hour</a></th>
   <th><a href="{$uri}pday">Today</a></th>
@@ -287,7 +287,7 @@ if ($doSF) {
         if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 
         $table .= ">";
-        $table .= "<td><input type=\"checkbox\" name=\"str[]\" 
+        $table .= "<td><input type=\"checkbox\" name=\"str[]\"
             value=\"" . $key . "_SF\"></td>";
         $table .= "<th>" . $parts["name"] . "</th>";
         $table .= "<td";
@@ -342,7 +342,7 @@ if ($doSF) {
   <td></td>
   <td></td>
 <tr>
-  
+
   <th><a href="{$uri}tmpf">Temp</a></th>
   <th><a href="{$uri}dwpf">Dew P</a></th>
   <th><a href="{$uri}tsf0">Temp</a></th>

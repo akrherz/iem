@@ -51,7 +51,7 @@ foreach ($nt->table as $sid => $data) {
     if (isset($data["archive_begin"]) && $data["archive_begin"] instanceof DateTime) {
         $description .= "<tr><th>Archive Begin:</th><td>" . $data["archive_begin"]->format('Y-m-d') . "</td></tr>\n";
     }
-    $description .= "<tr><th>More Info:</th><td><a href=\"{$EXTERNAL_BASEURL}/sites/site.php?station={$sid_safe}&amp;network={$network}\">View Station Page</a></td></tr>\n";
+    $description .= "<tr><th>More Info:</th><td><a href=\"". IEMConfig::EXTERNAL_BASEURL . "/sites/site.php?station={$sid_safe}&amp;network={$network}\">View Station Page</a></td></tr>\n";
     $description .= "</table>\n";
     $description .= "]]>";
 

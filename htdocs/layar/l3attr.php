@@ -13,10 +13,10 @@ $center_lng = isset($_GET["lon"]) ? floatval(xssafe($_GET["lon"])): -97.0;
 $radius = isset($_GET["radius"]) ? floatval(xssafe($_GET["radius"])): 2000.0; # in meters
 
 $stname = iem_pg_prepare($postgis, "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
-     ST_distance(ST_transform(geom,9311), 
+     ST_distance(ST_transform(geom,9311),
        ST_transform(
         ST_Point($1, $2, 4326),9311)) as dist,
-      * from nexrad_attributes WHERE ST_distance(ST_transform(geom,9311), 
+      * from nexrad_attributes WHERE ST_distance(ST_transform(geom,9311),
        ST_transform(
         ST_Point($1, $2, 4326),9311)) < $3");
 
@@ -27,27 +27,8 @@ if (pg_num_rows($rs) == 0){
   die();
 
 }
-/*
- nexrad         | character(3)             | 
- storm_id       | character(2)             | 
- geom           | geometry                 | 
- azimuth        | smallint                 | 
- range          | smallint                 | 
- tvs            | character varying(10)    | 
- meso           | character varying(10)    | 
- posh           | smallint                 | 
- poh            | smallint                 | 
- max_size       | real                     | 
- vil            | smallint                 | 
- max_dbz        | smallint                 | 
- max_dbz_height | real                     | 
- top            | real                     | 
- drct           | smallint                 | 
- sknt           | smallint                 | 
- valid          | timestamp with time zone | 
-*/
-$json = Array("layer"=>"nexradl3attr", 
-        "errorString"=>"ok", "morePages"=>false, "errorCode"=>0, 
+$json = Array("layer"=>"nexradl3attr",
+        "errorString"=>"ok", "morePages"=>false, "errorCode"=>0,
         "nextPageKey"=>null);
 
 for($i=0;$row=pg_fetch_assoc($rs);$i++)
@@ -61,7 +42,7 @@ for($i=0;$row=pg_fetch_assoc($rs);$i++)
     "id" => $i,
     "imageURL" => null,
     "lat" => (int) str_replace(".", "", $lat),
-    "lon" => (int) str_replace(".", "", $lon), 
+    "lon" => (int) str_replace(".", "", $lon),
     "line2" => sprintf("Azimuth: %.1f Range: %.1f", $row["azimuth"], $row["range"]),
     "line3" => sprintf("POSH: %.0f", $row["posh"]),
     "line4" => sprintf("VIL: %.1f", $row["vil"]),

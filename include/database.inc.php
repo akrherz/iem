@@ -12,7 +12,7 @@ function iem_pg_prepare($dbconn, $sql)
     $stname = uniqid();
     $res = pg_prepare($dbconn, $stname, $sql);
     if ($res === FALSE) {
-        // Thought here is that erroring here is likely a code bug that 
+        // Thought here is that erroring here is likely a code bug that
         // should be fixed, so we die here.
         http_response_code(500);
         error_log(pg_last_error($dbconn));
@@ -21,7 +21,11 @@ function iem_pg_prepare($dbconn, $sql)
     return $stname;
 }
 
-// Helper to get a dbconn string
+/**
+ * Helper function to build a connection string for a given database name
+ * @param string $dbname the database name
+ * @return string the connection string
+ */
 function get_dbconn_str($dbname)
 {
     return sprintf(
@@ -30,8 +34,11 @@ function get_dbconn_str($dbname)
         $dbname
     );
 }
-/*
- * Help function that yields database connections
+
+/**
+ * Helper function that yields database connections
+ * @param string $dbname the database name
+ * @return PgSql\Connection the database connection
  */
 function iemdb($dbname)
 {
