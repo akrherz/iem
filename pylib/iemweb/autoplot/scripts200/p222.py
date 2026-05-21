@@ -89,6 +89,26 @@ def get_data(ctx, meta):
     # Yearly precips
     df = obsdf.groupby("year").sum().copy()
 
+    # it would be good to figure out how much data is missing, this is done
+    # by totalling up the associated climate_site, hopefully
+    climate_site = meta["climate_site"]
+    df["percent_missing"] = pd.NA
+    if climate_site is not None:
+        with get_sqlalchemy_conn("coop") as conn:
+            cldf = pd.read_sql(
+                sql_helper(
+                    """
+                SELECT year, sum(precip) as precip from
+                alldata WHERE station = :station and precip >= 0
+                GROUP by year ORDER by year ASC
+                    """
+                ),
+                conn,
+                params={"station": climate_site},
+                index_col="year",
+            )
+        df["percent_missing"] = 100.0 - (df["precip"] / cldf["precip"] * 100.0)
+
     # Warn only
     df["in"] = obsdf[obsdf["inwarn"]].groupby("year").sum()["precip"]
     # Near warn, but not in
@@ -204,5 +224,15 @@ def plotter(ctx: dict):
         f"coincided with {label} warning"
     )
     ax.grid(True)
+
+    # Lower right
+    if df["percent_missing"].notna().any():
+        ax = fig.add_axes((0.58, 0.09, 0.37, 0.31))
+        ax.set_title("Estimated Percent Missing Data")
+        ax.bar(df.index.astype(int).tolist(), df["percent_missing"], fc="tan")
+        ax.set_ylabel("Percent Missing [%]")
+        ax.set_xlabel("Year")
+        ax.set_ylim(0, 101)
+        ax.grid(True)
 
     return fig, df

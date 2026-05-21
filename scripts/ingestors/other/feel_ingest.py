@@ -58,6 +58,7 @@ def ingest(cursor):
         ts = datetime.strptime(row["TIMESTAMP"][:10], "%Y-%m-%d")
         if ts.date() <= dstart:
             continue
+        dstart = ts.date()
         # We have to do this because the data is in UTC-6
         ob = Observation(
             "OT0011", "OT", ts.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
@@ -104,6 +105,7 @@ def ingest(cursor):
         )
         if ts <= hstart:
             continue
+        hstart = ts
         LOG.info("Hourly ingest: %s", ts)
         # We have to do this because the data is in UTC-6
         ob = Observation("OT0011", "OT", ts)
