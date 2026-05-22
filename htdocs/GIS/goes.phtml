@@ -6,6 +6,7 @@ $t->title = "GOES GIS Products";
 
 $adir = date("Y/m/d");
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <h3>GOES Satellite Imagery for GIS</h3>
 
@@ -71,26 +72,26 @@ a color ramp <a href="legends/ir_ramp.png">here</a>.</li>
 <h3>OGC Web Map Service</h3>
 
 <p><strong>GOES West infrared imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/west_ir.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/west_ir.cgi?</code>
 
 <p><strong>GOES West Alaska infrared imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/alaska_ir.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/alaska_ir.cgi?</code>
 
 <hr />
 
 <p><strong>GOES West visible imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/west_vis.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/west_vis.cgi?</code>
 
 <p><strong>GOES West Alaska visible imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/alaska_vis.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/alaska_vis.cgi?</code>
 
 <hr>
 
 <p><strong>GOES West water vapor imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/west_wv.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/west_wv.cgi?</code>
 
 <p><strong>GOES West Alaska water vapor imagery</strong>
-<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes/alaska_wv.cgi?</code>
+<br /><code>{$eburl}/cgi-bin/wms/goes/alaska_wv.cgi?</code>
 
 <p><b>Note:</b>  To get the WMS capabilities, you need to add
 <br /><code>VER=1.1.1&amp;SERVICE=WMS&amp;REQUEST=GetCapabilities</code>
@@ -150,7 +151,7 @@ east to west.
 
 <div>
 <strong>Today's archive of imagery</strong>
-<br /><code><a href="{$EXTERNAL_BASEURL}/archive/data/{$adir}/GIS/sat/">{$EXTERNAL_BASEURL}/archive/data/{$adir}/GIS/sat/</a></code>
+<br /><code><a href="{$eburl}/archive/data/{$adir}/GIS/sat/">{$eburl}/archive/data/{$adir}/GIS/sat/</a></code>
 <br/>The URL pattern contains the year, month, and day.  The datafiles have
 timestamps in UTC.
 </div>

@@ -2,8 +2,8 @@
 
 /**
  * Convert a vague 3 character WFO identifier to a 4 character one
- * @param wfo3 the 3 character WFO identifier
- * @return the 4 character WFO identifier
+ * @param string $wfo3 the 3 character WFO identifier
+ * @return string the 4 character WFO identifier
  */
 function rectify_wfo($wfo3){
     $xref = Array(
@@ -23,8 +23,8 @@ function rectify_wfo($wfo3){
 
 /**
  * Figure out the vague 3 character ID :/
- * @param wfo3 the 3 character WFO identifier
- * @return the 4 character WFO identifier
+ * @param string $wfo the 4 character WFO identifier
+ * @return string the 3 character WFO identifier
  */
 function unrectify_wfo($wfo){
     if (strlen($wfo) == 4){
@@ -48,7 +48,11 @@ function getClientIp() {
     return $ip;
 }
 
-// Helper
+/**
+ * Generate HTML for a list of tags with links to their respective pages
+ * @param array $tokens An array of tag strings to be displayed
+ * @return string HTML string containing the formatted tags with links
+ */
 function printTags($tokens)
 {
     if (sizeof($tokens) == 0 || $tokens[0] == "") {
@@ -67,14 +71,24 @@ function printTags($tokens)
 }
 
 
-// Workaround round() quirks
+/**
+ * Workaround round() quirks
+ * @param mixed $val The value to be rounded
+ * @param int $prec The precision to round to
+ * @return mixed The rounded value or the original value if it's null or a string
+ */
 function myround($val, $prec){
     if (is_null($val)) return "";
     if (is_string($val)) return $val;
     return round($val, $prec);
 }
 
-// Helper to make an IEM webservice call, returns FALSE if fails
+/**
+ * Helper to make an IEM webservice call, returns FALSE if fails
+ * @param string $endpoint The endpoint of the webservice
+ * @param array $args The arguments to be passed to the webservice
+ * @return mixed The JSON-decoded response from the webservice or FALSE on failure
+ */
 function iemws_json($endpoint, $args)
 {
     // Everything is method get at the moment
@@ -140,6 +154,13 @@ function force_https()
 }
 
 //________________________________________________________
+/**
+ * Sort a multi-dimensional array by a specific second-level index
+ * @param array $multiArray The array to be sorted
+ * @param string|int $secondIndex The second-level index to sort by
+ * @param string $sorder The sort order, either "asc" for ascending or "desc" for descending
+ * @return array The sorted array
+ */
 function aSortBySecondIndex($multiArray, $secondIndex, $sorder = "asc")
 {
     reset($multiArray);
@@ -167,7 +188,11 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder = "asc")
     return $sortedArray;
 }
 
-//_____________________________________________________________
+/**
+ * Convert Celsius to Fahrenheit
+ * @param float|string $myC The temperature in Celsius
+ * @return float|string The temperature in Fahrenheit or an empty string if input is empty
+ */
 function c2f($myC)
 {
     if ($myC == "") {
@@ -176,7 +201,11 @@ function c2f($myC)
     return round(((9.00 / 5.00) * $myC + 32.00), 2);
 } // End of function c2f()
 
-//_____________________________________________________________
+/**
+ * Convert Fahrenheit to Celsius
+ * @param float|string $tmpf The temperature in Fahrenheit
+ * @return float|null The temperature in Celsius or null if input is null
+ */
 function f2c($tmpf)
 {
     if (is_null($tmpf)) return null;
@@ -184,7 +213,12 @@ function f2c($tmpf)
 } // End of function f2c()
 
 
-//______________________________________________________________
+/**
+ * Calculate the dew point temperature in Fahrenheit
+ * @param float $tmpf The temperature in Fahrenheit
+ * @param float $relh The relative humidity in percentage
+ * @return float The dew point temperature in Fahrenheit
+ */
 function dwpf($tmpf, $relh)
 {
     $tmpk = 273.15 + (5.00 / 9.00 * ($tmpf - 32.00));
@@ -193,9 +227,14 @@ function dwpf($tmpf, $relh)
 }
 
 
-//______________________________________________________________
-// /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prvapr.f
-// /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prrelh.f
+/**
+ * Calculate relative humidity
+ *  /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prvapr.f
+ *  /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prrelh.f
+ *  @param float $tmpc The temperature in Celsius
+ *  @param float $dwpc The dew point temperature in Celsius
+ *  @return float|null The relative humidity in percentage
+ */
 function relh($tmpc, $dwpc)
 {
     if (is_null($tmpc) || is_null($dwpc)) return null;
@@ -205,7 +244,11 @@ function relh($tmpc, $dwpc)
     return round($relh, 0);
 }
 
-
+/**
+ * Convert a wind direction in degrees to a textual representation (e.g., N, NE, E, etc.)
+ * @param int|string $dir The wind direction in degrees
+ * @return string The textual representation of the wind direction
+ */
 function drct2txt($dir)
 {
     $dir = intval($dir);

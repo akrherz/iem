@@ -148,6 +148,11 @@ function networkMultiSelect(
     );
 }
 
+/**
+ * Construct a display name for a station based on its database record
+ * @param array $tbl Database record for the station, must include 'id', 'name', and optionally 'archive_begin' and 'archive_end'
+ * @return string Formatted station name with ID, name, and archive years if available
+ */
 function make_sname($tbl)
 {
     // Construct a nice label for the given station
@@ -162,6 +167,17 @@ function make_sname($tbl)
     return sprintf("[%s] %s%s", $tbl['id'], $tbl['name'], $dextra);
 }
 
+/**
+ * Generate a network station selection dropdown
+ * @param string $network Network identifier (case-insensitive)
+ * @param string $selected Currently selected station ID
+ * @param array $extra Additional options to include (key => value pairs)
+ * @param string $selectName Name attribute for the select element
+ * @param bool $only_online Whether to include only online stations
+ * @param string $clsname CSS class for the select element
+ * @param int $size Size attribute for the select element
+ * @return string HTML select element with network station options
+ */
 function networkSelect(
     $network,
     $selected,
@@ -258,8 +274,13 @@ function networkSelectAuto($network, $selected, $extra = array())
     );
 }
 
-//xss mitigation functions
-//https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
+/**
+ * xss mitigation functions
+ * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
+ * @param string $data The input string to be sanitized
+ * @param string $encoding The character encoding to use for escaping (default: 'UTF-8')
+ * @return string The sanitized string with special characters escaped
+*/
 function xssafe($data, $encoding = 'UTF-8')
 {
     if (is_array($data) || is_null($data)) {
@@ -275,7 +296,12 @@ function xssafe($data, $encoding = 'UTF-8')
     return $res;
 }
 
-// Ensure we get a sane string
+/**
+ * Ensure we are getting a string value from request or we 405
+ * @param string $name The name of the request parameter to retrieve
+ * @param string|null $default The default value to return if the parameter is not set
+ * @param int|null $maxlength Optional maximum length for validation
+ */
 function get_str404($name, $default = null, $maxlength = null)
 {
     if (!array_key_exists($name, $_REQUEST)) {
@@ -290,23 +316,45 @@ function get_str404($name, $default = null, $maxlength = null)
     return $val;
 }
 
-// Ensure we are getting int values from request or we 405
-function get_int404($name, $default = null)
+/**
+ * Ensure we are getting integer values from request or we 405
+ * @param string $name The name of the request parameter to retrieve
+ * @param int|null $default The default value to return if the parameter is not set
+ * @param int|null $minval Optional minimum value for validation
+ * @param int|null $maxval Optional maximum value for validation
+ */
+function get_int404($name, $default = null, $minval = null, $maxval = null)
 {
     if (!array_key_exists($name, $_REQUEST)) {
         return $default;
     }
     $val = $_REQUEST[$name];
-    if ($val != "0" && empty($val)) return $default;
-    if (!is_numeric($val)) {
+    if ($val != "0" && empty($val)) {
+        return $default;
+    }
+    if (! is_numeric($val)) {
         // passed up to iemwebfarm handler
         http_response_code(405);
         die();
     }
-    return intval($val);
+    $ival = (int)$val;
+    if ($minval !== null && $ival < $minval) {
+        http_response_code(405);
+        die();
+    }
+    if ($maxval !== null && $ival > $maxval) {
+        http_response_code(405);
+        die();
+    }
+    return $ival;
 }
 
-// Ensure we are getting float values from request or we 405
+/**
+ * Ensure we are getting float values from request or we 405
+ * @param string $name The name of the request parameter to retrieve
+ * @param float|null $default The default value to return if the parameter is not set
+ * @return float The float value from the request or the default
+ */
 function get_float404($name, $default = null)
 {
     if (!array_key_exists($name, $_REQUEST)) {
@@ -322,6 +370,13 @@ function get_float404($name, $default = null)
     return floatval($val);
 }
 
+/**
+ * Generate a set of checkboxes from an array of options
+ * @param string $name The name attribute for the checkbox inputs
+ * @param string|array $selected The selected value(s). Can be a single value or an array for multiple selections
+ * @param array $ar An associative array of options where keys are the checkbox values and values are the labels
+ * @return string The generated HTML for the checkboxes
+ */
 function make_checkboxes($name, $selected, $ar)
 {
     $myselected = $selected;
