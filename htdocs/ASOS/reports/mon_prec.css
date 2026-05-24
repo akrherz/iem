@@ -14,6 +14,17 @@
     border: 1px solid var(--bs-border-color);
 }
 
+#precip-status {
+    border-radius: 0.375rem;
+}
+
+#precip-status:not(.visually-hidden) {
+    background-color: rgba(var(--bs-info-rgb), 0.12);
+    border: 1px solid rgba(var(--bs-info-rgb), 0.25);
+    color: var(--bs-body-color);
+    padding: 0.75rem 1rem;
+}
+
 #table-controls .btn-group {
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
@@ -167,73 +178,42 @@
     border-color: var(--bs-primary);
 }
 
-/* Form styling improvements */
-form[name="change"] {
-    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.05), rgba(var(--bs-info-rgb), 0.05));
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--bs-border-color);
-}
-
-form[name="change"] p {
-    margin-bottom: 1rem;
-}
-
-form[name="change"] select {
-    margin-right: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-form[name="change"] input[type="submit"] {
-    background: var(--bs-primary);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-form[name="change"] input[type="submit"]:hover {
-    background: var(--bs-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #table-controls {
         padding: 0.75rem;
     }
-    
+
+    #original-table {
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    #original-table thead th {
+        position: static;
+    }
+
     #table-controls .btn-group {
         display: flex;
         flex-direction: column;
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     #table-controls .btn {
         margin-right: 0;
         margin-bottom: 0.25rem;
     }
-    
+
     .tabulator .tabulator-header .tabulator-col {
         min-width: 60px;
     }
-    
-    form[name="change"] {
-        padding: 1rem;
-    }
-    
+
     form[name="change"] select {
         width: 100%;
-        margin-right: 0;
-        margin-bottom: 0.75rem;
     }
-    
-    form[name="change"] input[type="submit"] {
+
+    form[name="change"] .btn {
         width: 100%;
     }
 }
@@ -293,23 +273,25 @@ p {
 }
 
 /* Sticky header enhancement */
-.sticky {
+#original-table thead th {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 2;
     background: var(--bs-primary);
     color: white;
 }
 
 /* Table wrapper for original table */
 #original-table {
-    overflow-x: auto;
+    overflow: visible;
     border-radius: 0.375rem;
     border: 1px solid var(--bs-border-color);
+    background-color: var(--bs-body-bg);
 }
 
 #original-table table {
     margin-bottom: 0;
+    min-width: 64rem;
 }
 
 #original-table th {
@@ -332,4 +314,9 @@ p {
 #original-table td:nth-child(2) {
     font-family: inherit;
     text-align: left;
+}
+
+#original-table caption {
+    caption-side: top;
+    padding: 0.75rem 0.75rem 0.5rem;
 }

@@ -11,67 +11,75 @@ $t->content = <<<EOM
 </ol>
 </nav>
 
-<h3>AWOS Sky Coverages</h3>
+<header class="mb-4">
+    <h1 class="h3 mb-3">AWOS Sky Coverage Codes</h1>
+    <p class="mb-2">The Iowa DOT provides the IEM with an <a href="/request/awos/1min.php">archive of 1 minute observations</a> from their AWOS network. This archive contains numerically coded values for sky coverage.</p>
+    <p class="mb-0">There does not appear to be a definitive published cross reference for these values, so the table below reflects an educated best-effort interpretation by Harry Hillaker and Daryl Herzmann.</p>
+</header>
 
-<p>The Iowa DOT provides the IEM with an <a href="/request/awos/1min.php">archive of 1 minute observations</a>
-from their AWOS network.  This archive contains numerically coded values for
-sky coverage.  Unfortunately, there does not appear to be a definitive cross
-reference to match these values up to something humans can understand (ex. overcast).
-Here is our (Harry Hillaker and Daryl Herzmann) educated guess at a cross reference
-to what the sky coverage codes mean that are found in the archive.</p>
-
-<div class="table-responsive">
-<table class="table table-bordered table-striped">
-<thead class="table-light">
-<tr>
-  <th>Code</th>
-  <th>Translated Code:</th>
-  <th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-
-<tr><th>0</th><th>NOREPORT</th>
-  <td>No report, since lower cloud layers are obstructing.</td></tr>
-
-<tr><th>1</th><th>SCATTERED</th>
-  <td>Scattered (10% to 50% coverage)</td></tr>
-
-<tr><th>2</th><th>BROKEN</th>
-  <td>Broken (60% to 90% coverage)</td></tr>
-
-<tr><th>4</th><th>OVERCAST</th>
-  <td>Overcast (More than 90% coverage)</td></tr>
-
-<tr><th>8</th><th>OBSCURATION</th>
-  <td>Full obscuration (no ceiling or cloud amount available)</td></tr>
-
-<tr><th>17</th><th>OBSCURATION</th>
-  <td>Partial obscuration, lowest cloud layer is scattered.</td></tr>
-
-<tr><th>18</th><th>OBSCURATION</th>
-  <td>Partial obscuration, lowest cloud layer is broken.</td></tr>
-
-<tr><th>20</th><th>OBSCURATION</th>
-  <td>Partial obscuration, lowest cloud layer is overcast.</td></tr>
-
-<tr><th>32</th><th>INDEFINITE</th>
-  <td>Indefinite ceiling (no cloud cover amount available?)</td></tr>
-
-<tr><th>64</th><th>CLEAR</th>
-  <td>No clouds below 12000 feet</td></tr>
-
-<tr><th>128</th><th>FEW</th>
-  <td>Few (less than 10% coverage)</td></tr>
-
-<tr><th>255</th><th>MISSING</th>
-  <td>Missing (sky condition not measured).</td></tr>
-
-<tr><th>*</th><th>UNKNOWNCODE</th>
-  <td>All other values that may appear in the database.</td></tr>
-
-</tbody>
-</table>
+<div class="alert alert-info" role="status">
+    Use this page as a lookup reference when working with the archived AWOS one-minute dataset. Code meanings should be treated as interpreted guidance, not an official vendor specification.
 </div>
+
+<section class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h5 mb-0">Sky Coverage Lookup Table</h2>
+            <span class="badge text-bg-light border">Archive reference</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                <caption class="text-start">Interpretive lookup for sky coverage codes stored in the Iowa AWOS one-minute archive.</caption>
+                <thead class="table-light">
+                    <tr>
+                      <th scope="col">Code</th>
+                      <th scope="col">Translated Code</th>
+                      <th scope="col">Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><th scope="row">0</th><td><code>NOREPORT</code></td>
+                      <td>No report, since lower cloud layers are obstructing.</td></tr>
+
+                    <tr><th scope="row">1</th><td><code>SCATTERED</code></td>
+                      <td>Scattered (10% to 50% coverage)</td></tr>
+
+                    <tr><th scope="row">2</th><td><code>BROKEN</code></td>
+                      <td>Broken (60% to 90% coverage)</td></tr>
+
+                    <tr><th scope="row">4</th><td><code>OVERCAST</code></td>
+                      <td>Overcast (more than 90% coverage)</td></tr>
+
+                    <tr><th scope="row">8</th><td><code>OBSCURATION</code></td>
+                      <td>Full obscuration (no ceiling or cloud amount available)</td></tr>
+
+                    <tr><th scope="row">17</th><td><code>OBSCURATION</code></td>
+                      <td>Partial obscuration, lowest cloud layer is scattered.</td></tr>
+
+                    <tr><th scope="row">18</th><td><code>OBSCURATION</code></td>
+                      <td>Partial obscuration, lowest cloud layer is broken.</td></tr>
+
+                    <tr><th scope="row">20</th><td><code>OBSCURATION</code></td>
+                      <td>Partial obscuration, lowest cloud layer is overcast.</td></tr>
+
+                    <tr><th scope="row">32</th><td><code>INDEFINITE</code></td>
+                      <td>Indefinite ceiling (no cloud cover amount available?)</td></tr>
+
+                    <tr><th scope="row">64</th><td><code>CLEAR</code></td>
+                      <td>No clouds below 12000 feet</td></tr>
+
+                    <tr><th scope="row">128</th><td><code>FEW</code></td>
+                      <td>Few (less than 10% coverage)</td></tr>
+
+                    <tr><th scope="row">255</th><td><code>MISSING</code></td>
+                      <td>Missing (sky condition not measured).</td></tr>
+
+                    <tr><th scope="row">*</th><td><code>UNKNOWNCODE</code></td>
+                      <td>All other values that may appear in the database.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 EOM;
 $t->render('single.phtml');

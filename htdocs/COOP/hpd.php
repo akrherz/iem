@@ -15,7 +15,8 @@ $yselect = yearSelect(2008, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
 
-$table = "<p>Please select a station and date.</p>";
+$result_note = '<div class="alert alert-secondary mb-0" role="status">Please select a station and date.</div>';
+$table = "";
 if ($station) {
     $dbconn = iemdb('other');
     $stname = iem_pg_prepare(
@@ -27,7 +28,17 @@ if ($station) {
     $sts = date("Y-m-d 00:00", $valid);
     $ets = date("Y-m-d 23:59", $valid);
     $rs = pg_execute($dbconn, $stname, array($station, $sts, $ets));
-    $table = '<table class="table table-striped"><tr><th>Valid</th><th>Precip</th></tr>';
+    $rowcount = pg_num_rows($rs);
+    $result_note = sprintf(
+        '<div class="alert alert-info mb-3" role="status">Showing %s report(s) for <strong>%s</strong> on <strong>%s</strong>.</div>',
+        $rowcount,
+        htmlspecialchars($station),
+        date("d M Y", $valid)
+    );
+    if ($rowcount === 0) {
+        $table = '<div class="alert alert-warning mb-0" role="status">No HPD reports were found for the selected station and date.</div>';
+    } else {
+        $table = '<div class="table-responsive"><table class="table table-striped table-hover align-middle mb-0"><thead class="table-light"><tr><th scope="col">Valid</th><th scope="col">Precip</th></tr></thead><tbody>';
     while ($row = pg_fetch_assoc($rs)) {
         $table .= sprintf(
             "<tr><td>%s</td><td>%s</td></tr>",
@@ -35,7 +46,8 @@ if ($station) {
             $row["precip"]
         );
     }
-    $table .= "</table>";
+        $table .= "</tbody></table></div>";
+    }
 }
 
 $t = new MyView();
@@ -50,36 +62,49 @@ $t->content = <<<EOM
     </ol>
 </nav>
 
-<p>The IEM maintains an archive of processed rain gauge data from the "Fisher Porter"
-equipment that is run at some NWS COOP locations in Iowa. There is considerable
-delay to the availability of this data from
-<a href="https://www.ncei.noaa.gov/pub/data/hpd/data/">NCEI</a>. Currently, a process
-runs on the 15th each month and downloads data for the previous 3rd, 6th, and 12th month
-to the current date.</p>
+<header class="mb-4">
+    <h1 class="h3 mb-3">Fisher Porter Rain Gauge Data</h1>
+    <p class="mb-2">The IEM maintains an archive of processed rain gauge data from Fisher Porter equipment operated at some Iowa NWS COOP locations. Availability depends on delayed source data from <a href="https://www.ncei.noaa.gov/pub/data/hpd/data/">NCEI</a>.</p>
+    <p class="mb-0">The historical ingest process ran monthly and attempted to backfill the prior 3rd, 6th, and 12th month through the current date.</p>
+</header>
 
-<p><strong>Updated 3 Feb 2023:</strong> As it stands currently, I can not find
-this datasource available from NCEI. So there's no data in this archive since
-~Feb 2021.</p>
-
-<form method="GET" name="st" class="mb-3">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-6">
-            <label for="station" class="form-label">Select Station</label>
-            {$sselect}
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Select Date</label>
-            <div class="d-flex gap-2">{$yselect} {$mselect} {$dselect}</div>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Show</button>
-        </div>
-    </div>
-</form>
-
-<div class="table-responsive">
-{$table}
+<div class="alert alert-warning" role="status">
+    <strong>Updated 3 Feb 2023:</strong> This data source no longer appears to be available from NCEI, so this archive has no data after approximately February 2021.
 </div>
+
+<section class="card shadow-sm mb-4" aria-labelledby="hpd-controls-heading">
+    <div class="card-body">
+        <h2 id="hpd-controls-heading" class="h5 card-title">Lookup Controls</h2>
+        <form method="GET" name="st" class="row g-3 align-items-end mb-0">
+            <div class="col-lg-5">
+                <label for="station" class="form-label">Select Station</label>
+                {$sselect}
+            </div>
+            <div class="col-lg-5">
+                <label class="form-label d-block">Select Date</label>
+                <div class="row g-2">
+                    <div class="col-sm-4">{$yselect}</div>
+                    <div class="col-sm-4">{$mselect}</div>
+                    <div class="col-sm-4">{$dselect}</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <button type="submit" class="btn btn-primary w-100">Show Data</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="card shadow-sm" aria-labelledby="hpd-results-heading">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 id="hpd-results-heading" class="h5 mb-0">Results</h2>
+            <span class="badge text-bg-light border">HPD archive</span>
+        </div>
+        {$result_note}
+        {$table}
+    </div>
+</section>
 
 EOM;
 $t->render('single.phtml');

@@ -1,5 +1,9 @@
 /* COOP Extremes App Styles */
 
+#loading-indicator {
+    min-height: 10rem;
+}
+
 /* Loading indicator */
 .spinner-border {
     width: 3rem;
@@ -56,13 +60,13 @@
     .table-responsive {
         font-size: 0.875rem;
     }
-    
+
     #data-table th,
     #data-table td {
         padding: 0.5rem 0.25rem;
         white-space: nowrap;
     }
-    
+
     /* Hide less critical columns on small screens */
     .hide-mobile {
         display: none;
@@ -92,14 +96,7 @@
 }
 
 /* Form controls styling */
-#controls-form .card {
-    border: 1px solid #dee2e6;
-    margin-bottom: 1.5rem;
-}
-
 #controls-form .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
     padding: 0.75rem 1rem;
 }
 
@@ -199,26 +196,21 @@
     opacity: 1;
 }
 
-/* Map container and view toggle */
-#view-toggle {
-    margin-bottom: 1rem;
-}
-
-#view-toggle .btn-group {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
 #map-container {
-    height: 500px;
-    width: 100%;
-    border: 2px solid var(--bs-border-color);
-    border-radius: 0.375rem;
-    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.map-stage {
     position: relative;
 }
 
-#map-container.hidden {
-    display: none;
+.map-canvas {
+    height: min(68vh, 720px);
+    min-height: 420px;
+    width: 100%;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
 
 /* Map popup styling */
@@ -281,6 +273,20 @@
     color: var(--bs-primary);
 }
 
+.popup-year-highlight {
+    background: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.popup-footer {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+}
+
 .popup-data-table {
     width: 100%;
     font-size: 12px;
@@ -295,34 +301,6 @@
 .popup-data-table .label {
     font-weight: bold;
     color: #666;
-}
-
-/* Mobile responsive map */
-@media (max-width: 768px) {
-    #map-container {
-        height: 400px;
-    }
-    
-    .ol-popup {
-        min-width: 200px;
-        max-width: 280px;
-        font-size: 12px;
-    }
-    
-    .map-controls {
-        position: relative;
-        top: auto;
-        left: auto;
-        margin-bottom: 10px;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .map-controls label {
-        white-space: nowrap;
-    }
 }
 
 /* Layer switcher customization */
@@ -375,70 +353,13 @@
     border: 1px solid #fff;
 }
 
-/* Map controls */
-.map-controls {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 12px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    z-index: 100;
-    font-size: 13px;
-    min-width: 200px;
-}
-
-.control-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.control-row:last-of-type {
-    margin-bottom: 0;
-}
-
-.control-row label {
-    font-weight: 500;
-    margin: 0;
-    white-space: nowrap;
-}
-
-/* Year filter specific styling */
-.control-row:has(#year-filter) {
-    border-top: 1px solid #e9ecef;
-    padding-top: 8px;
-    margin-top: 8px;
-}
-
-.control-row:has(#year-filter) label {
-    color: #6c757d;
-    font-size: 12px;
-}
-
-.legend-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.legend-row label {
-    font-weight: 500;
-    margin: 0;
-    white-space: nowrap;
-    margin-top: 2px;
-}
-
 .map-legend {
-    flex: 1;
     font-size: 11px;
+    min-height: 3.25rem;
 }
 
-.map-controls select {
-    width: auto;
-    display: inline-block;
+.map-toolbar .form-label {
+    font-weight: 500;
 }
 
 /* Tabulator table styling overrides */
@@ -640,11 +561,11 @@
     .tabulator {
         font-size: 0.75rem !important;
     }
-    
+
     .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
         padding: 6px 4px !important;
     }
-    
+
     .tabulator .tabulator-tableHolder .tabulator-table .tabulator-row .tabulator-cell {
         padding: 4px 6px !important;
     }

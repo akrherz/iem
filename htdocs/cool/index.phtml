@@ -5,202 +5,375 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Cool Webcam Lapses";
 
+$recent_video_embed = '<p class="text-muted mb-0">Recent videos are available on <a href="https://www.youtube.com/@akrherz">YouTube</a>.</p>';
+$recent_video_list = "";
+$feed = @file_get_contents("https://www.youtube.com/feeds/videos.xml?user=akrherz");
+if ($feed !== false) {
+  $xml = @simplexml_load_string($feed);
+  if ($xml !== false) {
+    $xml->registerXPathNamespace("atom", "http://www.w3.org/2005/Atom");
+    $entries = $xml->xpath("/atom:feed/atom:entry");
+    if ($entries !== false && !empty($entries)) {
+      $first = $entries[0];
+      $first_video_id = (string) $first->children("http://www.youtube.com/xml/schemas/2015")->videoId;
+      $first_title = htmlspecialchars(
+          (string) $first->children("http://www.w3.org/2005/Atom")->title,
+          ENT_QUOTES
+      );
+      $recent_video_embed = <<<HTML
+<div class="ratio ratio-16x9 mb-3">
+  <iframe src="https://www.youtube.com/embed/{$first_video_id}" title="{$first_title}" allowfullscreen></iframe>
+</div>
+HTML;
+
+      $items = [];
+      foreach (array_slice($entries, 0, 6) as $entry) {
+        $video_id = (string) $entry->children("http://www.youtube.com/xml/schemas/2015")->videoId;
+        $title = htmlspecialchars(
+            (string) $entry->children("http://www.w3.org/2005/Atom")->title,
+            ENT_QUOTES
+        );
+        $items[] = "<a class=\"list-group-item list-group-item-action\" href=\"https://www.youtube.com/watch?v={$video_id}\">{$title}</a>";
+      }
+      $recent_video_list = '<div class="list-group list-group-flush">' . implode("", $items) . '</div>';
+    }
+  }
+}
+
 $t->content = <<<EOM
-<h3>IEM Cool Webcam Lapses</h3>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active" aria-current="page">Cool Webcam Lapses</li>
+  </ol>
+</nav>
 
-<p>The IEM collects and archives still images from many webcams.  We produce
-    <a href="/current/camlapse/">lapses</a> of these still images each day.
-    Sometimes these lapses capture something interesting, so they are shared
-    on <a href="https://youtube.com/akrherz">YouTube</a> for all to easily see.
-    This page highlights some of these lapses.</p>
+<div class="mb-4">
+  <h1 class="h3 mb-3">IEM Cool Webcam Lapses</h1>
+  <p class="lead mb-0">The IEM collects and archives still images from many webcams. We produce <a href="/current/camlapse/">lapses</a> of these still images each day. Sometimes these lapses capture something interesting, so they are shared on <a href="https://youtube.com/akrherz">YouTube</a> for all to easily see. This page highlights some of these lapses.</p>
+</div>
 
-<h4>Most Recent Web Camera Videos:</h4>
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h5 card-title">Most Recent Web Camera Videos</h2>
+    <p class="text-muted">Recent videos are loaded from the public YouTube channel feed.</p>
+    {$recent_video_embed}
+    {$recent_video_list}
+  </div>
+</div>
 
-<p>Click on the three-bar menu in upper left corner to display a listing of
-        recent movies.</p>
+<div class="vstack gap-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">6 May 2007: Gravity Wave</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-6">
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/yXnkzeCU3bE" title="Gravity Wave lapse video" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <p class="mb-3">Just a wonderful lapse of a gravity wave associated with an intense convective line early on 6 May 2007. This lapse is from the Tama webcamera and you can see the distinct wave action and the motion of the clouds within the wave.</p>
+          <a class="btn btn-outline-primary btn-sm" href="/onsite/lapses/tama_gw_070506.mpg">4 MB MPEG1</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<iframe src="https://www.youtube.com/embed/?listType=user_uploads&list=akrherz" width="100%" height="400"></iframe>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">2 March 2007: Iowa Blizzard</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/070302_tractor.jpg" alt="Iowa blizzard tractor image">
+        </div>
+        <div class="col-lg-8">
+          <p>Winter brought everything it could muster during the last week of February and into March of 2007. Two ice and snow storms brought Iowa to halt by shuting down interstates from blowing snow with dangerous whiteout conditions. The webcamera at the ISU Agronomy Farm caught a great lapses of the blowing snow that was common after the storm.</p>
+          <ul class="mb-0">
+            <li>Attacking the drifts with a backhoe: <a href="/onsite/lapses/iemwest_070302_backhoe.mpg">View 640x480 MPG (1 MB)</a></li>
+            <li>Drifts filling back in: <a href="/onsite/lapses/iemwest_070302_2.mpg">View 640x480 MPG (1 MB)</a></li>
+            <li>Finally, the sun setting: <a href="/onsite/lapses/iemwest_070302_sunset.mpg">View 640x480 MPG (1 MB)</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%">
-<thead> <tr><th colspan="2" align="left"><b>6 May 2007: Gravity Wave</b></th></tr></thead>
-<tbody><tr><td>
-<object width="425" height="350"><param name="movie" value="https://www.youtube.com/v/yXnkzeCU3bE"></param><param name="wmode" value="transparent"></param><embed src="https://www.youtube.com/v/yXnkzeCU3bE" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>
-</td><td>
-Just a wonderful lapse of a gravity wave associated with an intense
-convective line early on 6 May 2007.  This lapse is from the Tama
-webcamera and you can see the distinct wave action and the motion of the
-clouds within the wave.
-<br /><br /><a href="/onsite/lapses/tama_gw_070506.mpg">4 MB MPEG1</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">17 Jul 2006: Tama Tornado</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/STQI4_200607172150.jpg" alt="Tama tornado webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p class="mb-3">A very short lapse from the Tama webcamera of a funnel cloud and possible tornado to the north of the webcamera. The tornado appears to touchdown for less than 30 seconds and quickly return to the cloud. The National Weather Service didn't receive any other confirmation of a tornado. It is certainly not clear if this was an actual tornado.</p>
+          <a class="btn btn-outline-primary btn-sm" href="/onsite/lapses/tama_060717_funnel.mpg">View 640x480 MPG (1 MB)</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%">
-<thead> <tr><th colspan="2" align="left"><b>2 March 2007: Iowa Blizzard</b></th></tr></thead>
-<tbody><tr><td>
-<img src="/cool/images/070302_tractor.jpg" style="float: left; margin-right: 15px;"> Winter brought everything it could muster during the last week of February and into March of 2007. Two ice and snow storms brought Iowa to halt by shuting down interstates from blowing snow with dangerous whiteout conditions.  The webcamera at the ISU Agronomy Farm caught a great lapses of the blowing
-snow that was common after the storm.
-<br />
-<ul>
-  <li>Attacking the drifts with a backhoe: <a href="/onsite/lapses/iemwest_070302_backhoe.mpg">View 640x480 MPG (1 MB)</a></li>
-  <li>Drifts filling back in: <a href="/onsite/lapses/iemwest_070302_2.mpg">View 640x480 MPG (1 MB)</a></li>
-  <li>Finally, the sun setting:<a href="/onsite/lapses/iemwest_070302_sunset.mpg">View 640x480 MPG (1 MB)</a></li>
-</ul>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">6 Jun 2006: Explosive Convection</h2>
+      <p>What a tremendous day for webcamera lapses of cumulus convection. This day saw a slow moving cold front provide just enough surface convergence to realize a modest amount of convective energy available in the atmosphere. The clear skies and dry air behind the front allowed from some great lapses.</p>
+      <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-xl-5">
+        <div class="col">
+          <div class="card h-100 border-0 bg-light">
+            <div class="card-body">
+              <img class="img-fluid rounded border mb-3" src="images/creston_060606_cu1.jpg" alt="Creston convection webcam image 1">
+              <h3 class="h6">Creston #1</h3>
+              <a class="d-block" href="/onsite/lapses/creston_060606_cu1.mpg">MPEG (3 MB)</a>
+              <a class="d-block" href="/onsite/lapses/creston_060606_cu1.qt">AVI (3 MB)</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100 border-0 bg-light">
+            <div class="card-body">
+              <img class="img-fluid rounded border mb-3" src="images/creston_060606_cu2.jpg" alt="Creston convection webcam image 2">
+              <h3 class="h6">Creston #2</h3>
+              <a class="d-block" href="/onsite/lapses/creston_060606_cu2.mpg">MPEG (2.5 MB)</a>
+              <a class="d-block" href="/onsite/lapses/creston_060606_cu2.qt">AVI (2.5 MB)</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100 border-0 bg-light">
+            <div class="card-body">
+              <img class="img-fluid rounded border mb-3" src="images/indy_060606_cu1.jpg" alt="Indianola convection webcam image">
+              <h3 class="h6">Indianola</h3>
+              <a class="d-block" href="/onsite/lapses/indy_060606_cu1.mpg">MPEG (3 MB)</a>
+              <a class="d-block" href="/onsite/lapses/indy_060606_cu1.qt">AVI (3 MB)</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100 border-0 bg-light">
+            <div class="card-body">
+              <img class="img-fluid rounded border mb-3" src="images/madrid_060606_cu.jpg" alt="Madrid convection webcam image">
+              <h3 class="h6">Madrid</h3>
+              <a class="d-block" href="/onsite/lapses/madrid_060606_cu.mpg">MPEG (3.4 MB)</a>
+              <a class="d-block" href="/onsite/lapses/madrid_060606_cu.qt">AVI (3.4 MB)</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100 border-0 bg-light">
+            <div class="card-body">
+              <img class="img-fluid rounded border mb-3" src="images/pella_060606_cu.jpg" alt="Pella convection webcam image">
+              <h3 class="h6">Pella (Must see!)</h3>
+              <a class="d-block" href="/onsite/lapses/pella_060606_cu.mpg">MPEG (3 MB)</a>
+              <a class="d-block" href="/onsite/lapses/pella_060606_cu.qt">AVI (3 MB)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">22 Mar 2006: Radiation 101</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/ames_060322_tree.jpg" alt="Radiation 101 webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>After an early spring snow storm, the skies cleared nicely the next day allowing full sunshine to hit these two evergreen trees near the Ames webcam. What happened during the day and shown in this lapse can be found in the radiation 101 book. The green tree absorbs incoming short wave radiation from the sun and then emitts it back to the snow surface as long wave radiation. The snow reflects the short wave and absorbs the long wave thus melting the snow around the tree near the long wave radiation source (the trees).</p>
+          <p class="mb-0"><a href="/onsite/lapses/ames_060322_tree.mpg">View MPG (2 MB)</a><br>
+          <a href="/onsite/lapses/ames_060322_tree.qt">View QT (2 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>17 Jul 2006: Tama Tornado</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/STQI4_200607172150.jpg" width="320"></td><td valign="top"><br />A very short lapse from the Tama webcamera of a funnel cloud and possible tornado to the north of the webcamera.  The tornado appears to touchdown for less than 30 seconds and quickly return to the cloud.  The National Weather Service didn't receive any other confirmation of a tornado.  It is certainly not clear if this was an actual tornado.
-<br /><br /><a href="/onsite/lapses/tama_060717_funnel.mpg">View 640x480 MPG (1 MB)</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">12 Nov 2005: Ames tornado</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/ames_051112.jpg" alt="Ames tornado webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>The second tornado caught by a web camera on this day. This tornado briefly touched down in NW Ames and badly damaged a few houses. It was the second tornado to hit the city of Ames in 2005.</p>
+          <p class="mb-0"><a href="/cases/051112/ames_webcam_tornado_kcci/ames_TORNADO.mpg">View MPG (2 MB)</a><br>
+          <a href="/cases/051112/ames_webcam_tornado_kcci/ames_TORNADO.qt">View QT (2 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th align="left"><b>6 Jun 2006: Explosive Convection</b></th></tr></thead>
-<tbody><tr><td>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">12 Nov 2005: Woodward tornado</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/madrid_051112.jpg" alt="Woodward tornado webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>Just a great time lapse from the Madrid webcamera looking SW toward the city of Woodward. This storm produced extensive damage there, but the dissipation of the tornado shown in this lapse happened just as the tornado approached the city. It could have been much worse.</p>
+          <p class="mb-0"><a href="/cases/051112/madrid_webcam_tornado_kcci/madrid_TORNADO_1.mpg">View MPG (2 MB)</a><br>
+          <a href="/cases/051112/madrid_webcam_tornado_kcci/madrid_TORNADO_1.qt">View QT (2 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p>What a tremendous day for webcamera lapses of cumulus convection! This day
-saw a slow moving cold front provide just enough surface convergence to
-realize a modest amount of convective energy available in the atmosphere. The
-clear skies and dry air behind the front allowed from some great lapses!
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">24 Jul 2005: Tama Cloud Burp</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/tama_050724_burp.jpg" alt="Tama cloud burp webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>Nice little lapse of a quick updraft looking northeast from Tama around 7 PM. If you watch the lapse, you will see a little bit of ice get thrown out of the top of the cloud. It is kind of neat to see. 14 minutes of time elapse during this lapse.</p>
+          <p class="mb-0"><a href="/onsite/lapses/tama_050724.mpg">View MPG (3 MB)</a><br>
+          <a href="/onsite/lapses/tama_050724.qt">View QT (3 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<table>
-<tr>
-  <td><img src="images/creston_060606_cu1.jpg"> <br /><b>Creston #1</b>
-<br /><a href="/onsite/lapses/creston_060606_cu1.mpg">MPEG (3 MB)</a>
-<br /><a href="/onsite/lapses/creston_060606_cu1.qt">AVI (3 MB)</a>
-  <td><img src="images/creston_060606_cu2.jpg"> <br /><b>Creston #2</b>
-<br /><a href="/onsite/lapses/creston_060606_cu2.mpg">MPEG (2.5 MB)</a>
-<br /><a href="/onsite/lapses/creston_060606_cu2.qt">AVI (2.5 MB)</a>
-  <td><img src="images/indy_060606_cu1.jpg"> <br /><b>Indianola</b>
-<br /><a href="/onsite/lapses/indy_060606_cu1.mpg">MPEG (3 MB)</a>
-<br /><a href="/onsite/lapses/indy_060606_cu1.qt">AVI (3 MB)</a>
-<td>
-  <td><img src="images/madrid_060606_cu.jpg"> <br /><b>Madrid</b>
-<br /><a href="/onsite/lapses/madrid_060606_cu.mpg">MPEG (3.4 MB)</a>
-<br /><a href="/onsite/lapses/madrid_060606_cu.qt">AVI (3.4 MB)</a>
-<td>
-  <td><img src="images/pella_060606_cu.jpg"> <br /><b>Pella (Must see!)</b>
-<br /><a href="/onsite/lapses/pella_060606_cu.mpg">MPEG (3 MB)</a>
-<br /><a href="/onsite/lapses/pella_060606_cu.qt">AVI (3 MB)</a>
-<td>
-</tr>
-</table>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">12 Jun 2005: Creston Convection</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/creston_050612.jpg" alt="Creston convection webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>Caught a neat lapse of growing convection looking east from Creston during the late afternoon. These storms were in an environment of about 2000 J/kg of CAPE and not much shear. They did not produce any significant hail or wind.</p>
+          <p class="mb-0"><a href="/onsite/lapses/creston_050612_1.mpg">View MPG (3 MB)</a><br>
+          <a href="/onsite/lapses/creston_050612_1.qt">View QT (3 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-</td></tr></tbody>
-</table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">6 Jun 2005: Newton Convection</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/newton_050606.jpg" alt="Newton convection webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>Caught this thunderstorm looking north from Newton. No severe weather was reported with this cell, but it made for a pretty lapse. You can see how this cell was not able to sustain an updraft. This lapse contains 900 frames between 3:45 and 5:45 PM.</p>
+          <p class="mb-0"><a href="/onsite/lapses/newton_050606.mpg">View MPG (8 MB)</a><br>
+          <a href="/onsite/lapses/newton_050606.qt">View QT (8 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">8 May 2005: Tornado or Not Tornado...</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/carr_dust.jpg" alt="Carroll dust column webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>Was this storm a tornado or not? It is hard to tell. It certainly did not last long. The movie shows a rotating(?) dust column to the west of Carroll between 5:06 and 5:09 PM. The cloud base is at about 4,000 feet and RADAR returns at the time were not indicating much rotation. You can decide for yourself.</p>
+          <p class="mb-0"><a href="/onsite/lapses/carr_050508_1.mpg">View MPG (1.2 MB)</a><br>
+          <a href="/onsite/lapses/carr_050508_1.qt">View QT (1.2 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>22 Mar 2006: Radiation 101</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/ames_060322_tree.jpg" width="320"></td><td valign="top"><br />After an early spring snow storm, the skies cleared nicely the next day allowing full sunshine to hit these two evergreen trees near the Ames webcam.  What happened during the day and shown in this lapse can be found in the radiation 101 book.  The green tree absorbs incoming short wave radiation from the sun and then emitts it back to the snow surface as long wave radiation.  The snow reflects the short wave and absorbs the long wave thus melting the snow around the tree near the long wave radiation source (the trees).
-<br /><br /><a href="/onsite/lapses/ames_060322_tree.mpg">View MPG (2 MB)</a>
-<br /><br /><a href="/onsite/lapses/ames_060322_tree.qt">View QT (2 MB)</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">29 Oct 2004: Super Cell!</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/winterset_041029.jpg" alt="Winterset supercell webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>This is a fancy video at the anvil and overshooting top of a supercell east of the Winterset Camera. The day was characterized by very strong speed shear and good-enough convective available potential energy (CAPE). Storms away from the cold front were able to have decent organized structure.</p>
+          <p class="mb-0"><a href="/onsite/lapses/winterset_041029.mpg">View MPG (3.2 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">27 Aug 2004: Humboldt Convection</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/humboldt_cu.jpg" alt="Humboldt convection webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>This is a video of a supercell east of Humboldt. The convection in this storm is very vigorous and supported very large hail. This was one of the first cells to fire on a very active weather day in Iowa.</p>
+          <p class="mb-0"><a href="/onsite/lapses/humboldt_040826_cu.mpg">View MPG (3.3 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>12 Nov 2005: Ames tornado</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/ames_051112.jpg" width="320"></td><td valign="top"><br />The second tornado caught by a web camera on this day.  This tornado briefly touched down in NW Ames and badly damaged a few houses.  It was the second tornado to hit the city of Ames in 2005.
-<br /><br /><a href="/cases/051112/ames_webcam_tornado_kcci/ames_TORNADO.mpg">View MPG (2 MB)</a>
-<br /><br /><a href="/cases/051112/ames_webcam_tornado_kcci/ames_TORNADO.qt">View QT (2 MB)</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">27 Aug 2004: Rockwell City Beaver Tail</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/rock_beaver.jpg" alt="Rockwell City beaver tail webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>This is a fantastic lapse of a beaver tail flowing into a vigorous thunderstorm. Storms on this day produced baseball-sized hail in numerous locations. This view is looking west.</p>
+          <p class="mb-0"><a href="../onsite/lapses/rockcity_040826_1.mpg">View MPG (1.7 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>12 Nov 2005: Woodward tornado</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/madrid_051112.jpg" width="320"></td><td valign="top"><br />Just a great time lapse from the Madrid webcamera looking SW toward the city of Woodward.  This storm produced extensive damage there, but the dissipation of the tornado shown in this lapse happened just as the tornado approached the city.  It could have been much worse.
-<br /><br /><a href="/cases/051112/madrid_webcam_tornado_kcci/madrid_TORNADO_1.mpg">View MPG (2 MB)</a>
-<br /><br /><a href="/cases/051112/madrid_webcam_tornado_kcci/madrid_TORNADO_1.qt">View QT (2 MB)</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">11 July 2004: Carroll Convection Video #2</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/carr_conv2.jpg" alt="Carroll convection webcam image two">
+        </div>
+        <div class="col-lg-8">
+          <p>Another movie of bubbling convection from Carroll. This shot is looking northwest. This is not as nice as the #1 video, but it is still worth the download for you weather junkies.</p>
+          <p class="mb-0"><a href="/onsite/lapses/carroll_040711_1.mpg">View MPG (6.4 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p><div>
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>24 Jul 2005: Tama Cloud Burp</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/tama_050724_burp.jpg" width="320"></td><td valign="top"><br />Nice little lapse of a quick updraft looking northeast from Tama around 7 PM.  If you watch the lapse, you will see a little bit of ice get thrown out of the top of the cloud!  It is kind of neat to see.  14 minutes of time elapse during this lapse.
-<br /><br /><a href="/onsite/lapses/tama_050724.mpg">View MPG (3 MB)</a>
-<br /><br /><a href="/onsite/lapses/tama_050724.qt">View QT (3 MB)</a>
-</td></tr></tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">4 July 2004: Carroll Convection Video #1</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/carr_conv1.jpg" alt="Carroll convection webcam image one">
+        </div>
+        <div class="col-lg-8">
+          <p>This is a fantastic movie of bubbling convection as captured by the webcamera in Carroll. This image is looking due east and near sunset.</p>
+          <p class="mb-0"><a href="../onsite/lapses/carroll_040704_1.mpg">View MPG (4.6 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>12 Jun 2005: Creston Convection</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/creston_050612.jpg" width="320"></td><td valign="top"><br />Caught a neat lapse of growing convection looking east from Creston during the late afternoon.  These storms were in an environment of about 2000 J/kg of CAPE and not much shear.  They did not produce any significant hail or wind.
-<br /><br /><a href="/onsite/lapses/creston_050612_1.mpg">View MPG (3 MB)</a>
-<br /><br /><a href="/onsite/lapses/creston_050612_1.qt">View QT (3 MB)</a>
-</td></tr></tbody></table></div>
-
-
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>6 Jun 2005: Newton Convection</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/newton_050606.jpg" width="320"></td>
-<td valign="top"><br />Caught this thunderstorm looking north from Newton.  No severe weather was reported with this cell, but it made for a pretty lapse.  You can see how this cell was not able to sustain an updraft.  This lapse contains
-900 frames between 3:45 and 5:45 PM.
-<br /><br /><a href="/onsite/lapses/newton_050606.mpg">View MPG (8 MB)</a>
-<br /><br /><a href="/onsite/lapses/newton_050606.qt">View QT (8 MB)</a>
-</td></tr></tbody></table></div>
-
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>8 May 2005: Tornado or Not Tornado...</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/carr_dust.jpg" width="320"></td>
-<td valign="top"><br />Was this storm a tornado or not?  It is hard to tell. It certainly did not last long.  The movie shows a rotating(?) dust column to the west of Carroll between 5:06 and 5:09 PM.  The cloud base is at about 4,000 feet and RADAR returns at the time were not indicating much rotation.  You can decide for yourself!
-<br /><br /><a href="/onsite/lapses/carr_050508_1.mpg">View MPG (1.2 MB)</a>
-<br /><br /><a href="/onsite/lapses/carr_050508_1.qt">View QT (1.2 MB)</a>
-</td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>29 Oct 2004: Super Cell!</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/winterset_041029.jpg" width="320"></td>
-<td valign="top"><br />This is a fancy video at the anvil and overshooting top of a supercell east of the Winterset Camera.  The day was characterized by very strong speed shear and 'good-enough' convective available potential energy (CAPE).  Storms away from the cold front were able to have decent organized structure.
-.<br /><br /><a href="/onsite/lapses/winterset_041029.mpg">View MPG (3.2 MB)</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>27 Aug 2004: Humboldt Convection</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/humboldt_cu.jpg"></td>
-<td valign="top"><br />This is a video of a supercell east of Humboldt. The
-convection in this storm is very vigorous and supported very large hail.  This was one of the first cells to fire on a very active weather day in Iowa
-.<br /><br /><a href="/onsite/lapses/humboldt_040826_cu.mpg">View MPG (3.3 MB)</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>27 Aug 2004: Rockwell City Beaver Tail</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/rock_beaver.jpg"></td>
-<td valign="top"><br />This is a fantastic lapse of a beaver tail flowing
-into a vigorous thunderstorms.  Storms on this day produced baseball sized
-in numerous locations.  This view is looking west.<br /><br /><a href="../onsite/lapses/rockcity_040826_1.mpg">View MPG (1.7
-MB)</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>11 July 2004: Carroll Convection Video
-#2</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/carr_conv2.jpg"></td>
-<td valign="top"><br />Another movie of bubbling convection from Carroll.  This shot is looking
-northwest.  This is not as nice as the #1 video, but it is still worth the
-download for you weather junkies.<br /><br /><a
-href="/onsite/lapses/carroll_040711_1.mpg">View MPG (6.4
-MB)</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>4 July 2004: Carroll Convection Video #1</b></th></tr></thead>
-<tbody><tr><td><br /><img src="/cool/images/carr_conv1.jpg"></td>
-<td valign="top"><br />This is a fantastic movie of bubbling convection as captured by the
-webcamera in Carroll.  This image is looking due east and near sunset.<br /><br /><a href="../onsite/lapses/carroll_040704_1.mpg">View MPG (4.6 MB)</a>
-</td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div>
-<table width="100%"><thead><tr><th colspan="2" align="left"><b>11 June 2004: Tornado on Webster City
-Webcamera</b></th></tr></thead>
-<tbody><tr><td>
-<br /><img src="/cool/images/web_thumb.jpg"></td>
-<td valign="top"><br />This tornado was caught by the Webster City webcamera that is a part of <a href="/schoolnet/">KCCI's SchoolNet project</a>.  The movie is taken looking
-far south and a bit west.<br /><br /><a href="/onsite/lapses/webstercity_040611_full.mpg">View MPG (3
-MB)</a></td></tr><tbody></table></div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 card-title">11 June 2004: Tornado on Webster City Webcamera</h2>
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <img class="img-fluid rounded border" src="/cool/images/web_thumb.jpg" alt="Webster City tornado webcam image">
+        </div>
+        <div class="col-lg-8">
+          <p>This tornado was caught by the Webster City webcamera that is a part of <a href="/schoolnet/">KCCI's SchoolNet project</a>. The movie is taken looking far south and a bit west.</p>
+          <p class="mb-0"><a href="/onsite/lapses/webstercity_040611_full.mpg">View MPG (3 MB)</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 EOM;
 $t->render('single.phtml');

@@ -45,7 +45,8 @@ $tr = sprintf(
     $sts->format("Y-m-d"),
     $ets->format("Y-m-d")
 );
-$tr .= "# Download From: {$EXTERNAL_BASEURL}/GIS/apps/coop/gsplot.phtml
+$eburl = IEMConfig::EXTERNAL_BASEURL;
+$tr .= "# Download From: {$eburl}/GIS/apps/coop/gsplot.phtml
 # Download Date: " . date("d M Y") . "
 # CLIM_ values are based on climatology 1951-today
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
@@ -185,9 +186,9 @@ $t->content = <<<EOM
 </nav>
 
 <p>With this application, you can total a parameter of your
-choice over a duration of your choice.  The resulting data is presented 
-graphically as well as textually for use in a GIS. 
-<strong>The end date is inclusive to the data presented.</strong> 
+choice over a duration of your choice.  The resulting data is presented
+graphically as well as textually for use in a GIS.
+<strong>The end date is inclusive to the data presented.</strong>
 The raw daily data used for this application can be downloaded
 from <a href="/request/coop/fe.phtml">here</a>.
 
@@ -223,7 +224,7 @@ from <a href="/request/coop/fe.phtml">here</a>.
 </table>
 </form>
 
-<p>*Note: Only a sub-sample of stations are plotted on the map due to 
+<p>*Note: Only a sub-sample of stations are plotted on the map due to
 space restrictions.  The small four digit label is the station identifier used
 in the data listing below (without the 2 character state identifier included).
 <br />
@@ -234,7 +235,7 @@ in the data listing below (without the 2 character state identifier included).
 <pre>{$tr}</pre>
 
 <p>You should be able to 'copy &amp; paste' this raw data listing into a simple
-text editor and save the data file on your machine.  Most GIS systems can 
+text editor and save the data file on your machine.  Most GIS systems can
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
 EOM;

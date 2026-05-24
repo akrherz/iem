@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 163);
 require_once "../../../include/myview.php";
@@ -191,10 +191,16 @@ $content .= <<<EOM
           </tr>
         </thead>
         <tbody>
-          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>PIL</code></td><td>Six character AWIPS/AFOS ID</td></tr>
-          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>Issuance UTC Time</td></tr>
-          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>Expiration UTC Time</td></tr>
-          <tr><td>3</td><td><span class="badge bg-info">String</span></td><td><code>PROD_ID</code></td><td>IEM NWS Text Product Identifier, which can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service</td></tr>
+          <tr><td>0</td><td><span class="badge bg-info">String</span></td>
+          <td><code>PIL</code></td><td>Six character AWIPS/AFOS ID</td></tr>
+          <tr><td>1</td><td><span class="badge bg-info">String</span></td>
+          <td><code>ISSUE</code></td><td>Issuance UTC Time</td></tr>
+          <tr><td>2</td><td><span class="badge bg-info">String</span></td>
+          <td><code>EXPIRE</code></td><td>Expiration UTC Time</td></tr>
+          <tr><td>3</td><td><span class="badge bg-info">String</span></td>
+          <td><code>PROD_ID</code></td>
+          <td>IEM NWS Text Product Identifier, which can be used against the
+          /api/1/nwstext/&lt;PROD_ID&gt; service</td></tr>
         </tbody>
       </table>
     </div>

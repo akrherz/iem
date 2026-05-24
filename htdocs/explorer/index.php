@@ -2,7 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 138);
 require_once "../../include/myview.php";
-$OL = "10.6.1";
+$OL = "10.9.0";
 $t = new MyView();
 $t->title = "IEM Explorer";
 $YEAR = intval(date('Y'));
@@ -33,17 +33,17 @@ $t->content = <<<EOM
     <a class="skip-link" href="#legend">Skip to legend</a>
     <a class="skip-link" href="#quick-plots">Skip to quick plots</a>
 
-    <div id="popover">
+    <div id="popover" hidden aria-hidden="true">
         <span id="info-name"></span>
     </div>
 
-    <div class="container-fluid">
+    <main class="container-fluid" aria-label="IEM Explorer content">
         <div class="row g-3">
             <!-- Left Sidebar: Symbol Legend and Overview Map -->
             <div class="col-xl-2 col-lg-3 col-md-4 order-1" id="legend">
                 <div class="legend-panel">
                     <h5 class="panel-title">Symbol Legend</h5>
-                    
+
                     <div class="legend-controls">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input cs" id="isusm" checked="checked">
@@ -51,28 +51,28 @@ $t->content = <<<EOM
                                 <img src="img/isu.svg" alt="ISU"> ISU Soil Moisture
                             </label>
                         </div>
-                        
+
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input cs" id="asos" checked="checked">
                             <label class="form-check-label" for="asos">
                                 <img src="img/airport.svg" alt="Airport"> Airports
                             </label>
                         </div>
-                        
+
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input cs" id="coop" checked="checked">
                             <label class="form-check-label" for="coop">
                                 <img src="img/green_dot.svg" alt="Climate"> Climate Stations
                             </label>
                         </div>
-                        
+
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input cs" id="cd" checked="checked">
                             <label class="form-check-label" for="cd">
                                 <img src="img/blue_square.svg" alt="District"> Climate Districts
                             </label>
                         </div>
-                        
+
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input cs" id="state" checked="checked">
                             <label class="form-check-label" for="state">
@@ -83,7 +83,7 @@ $t->content = <<<EOM
                     <div id="overviewmap"></div>
                 </div>
             </div>
-            
+
             <!-- Center: Main Map -->
             <div class="col-xl-7 col-lg-6 col-md-8 order-2 order-md-2" id="main-map">
                 <div class="map-panel">
@@ -91,21 +91,25 @@ $t->content = <<<EOM
                     <div id="olmap"></div>
                 </div>
             </div>
-            
+
             <!-- Right Sidebar: Quick Access Plots -->
             <div class="col-xl-3 col-lg-3 col-md-12 order-3" id="quick-plots">
                 <div class="quick-plots-panel maprow">
                     <h5 class="panel-title">Quick Access Plots</h5>
-                    
+
                     <div class="plot-item">
                         <h6>4 inch Soil Temperatures</h6>
-                        <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures" class="img-fluid"
+                            <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures" class="img-fluid"
+                                alt="4 inch soil temperatures quick plot"
+                                loading="lazy" decoding="async"
                              data-target="{$EXTERNAL_BASEURL}/agclimate/soilt.php">
                     </div>
 
                     <div class="plot-item">
                         <h6>Today's Precipitation</h6>
-                        <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall" class="img-fluid"
+                            <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall" class="img-fluid"
+                                alt="Today's precipitation quick plot"
+                                loading="lazy" decoding="async"
                              data-target="{$EXTERNAL_BASEURL}">
                     </div>
 
@@ -113,26 +117,34 @@ $t->content = <<<EOM
                         <h6>Precipitation Departure</h6>
                         <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:{$AUG1}::edate:{$TODAY}::cmap:BrBG::_r:43.png"
                              role="button" title="Precip Departure Aug 1" class="img-fluid"
+                                alt="Precipitation departure quick plot"
+                                loading="lazy" decoding="async"
                              data-target="{$EXTERNAL_BASEURL}">
                     </div>
 
                     <div class="plot-item">
                         <h6>Days to Accum 2 inches</h6>
-                        <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button" class="img-fluid"
+                            <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button" class="img-fluid"
+                                alt="Days to accumulate two inches quick plot"
+                                loading="lazy" decoding="async"
                              title="Days to Accumulate 2 inches"
                              data-target="{$EXTERNAL_BASEURL}">
                     </div>
 
                     <div class="plot-item">
                         <h6>Iowa Drought Coverage</h6>
-                        <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:{$JAN1}::_r:43.png" role="button" class="img-fluid"
+                            <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:{$JAN1}::_r:43.png" role="button" class="img-fluid"
+                                alt="Iowa drought coverage quick plot"
+                                loading="lazy" decoding="async"
                              title="Iowa Drought Coverage"
                              data-target="{$EXTERNAL_BASEURL}">
                     </div>
 
                     <div class="plot-item">
                         <h6>NASS Corn Denting Progress</h6>
-                        <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button" class="img-fluid"
+                            <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button" class="img-fluid"
+                                alt="NASS corn denting progress quick plot"
+                                loading="lazy" decoding="async"
                              title="USDA NASS Corn Denting Progress"
                              data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
                     </div>
@@ -140,18 +152,20 @@ $t->content = <<<EOM
                     <div class="plot-item">
                         <h6>Climate District Ranks</h6>
                         <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:{$YEAR}::month:summer::cmap:RdBu_r::_r:43.png" role="button"
+                        alt="Climate district ranks quick plot"
+                        loading="lazy" decoding="async"
                         title="Climate District Precip Ranks"
                         data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year={$YEAR}&month=summer&sdate={$YEAR}%2F04%2F05&edate={$YEAR}%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <div class="row isusm-data-template ddisplay"
     style="display:none; min-height: 0px; height: 100%; width: 100%;">
        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}" aria-label="Open site mainpage in new tab"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" rel="noopener" href="/sites/site.php?station={station}&amp;network={network}" aria-label="Open site mainpage in new tab"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:{$YEAR}::_r:86.png"><i class="bi bi-thermometer-half" aria-hidden="true"></i> 4in Soil Temps</button>
@@ -169,16 +183,16 @@ $t->content = <<<EOM
     <div class="row asos-data-template ddisplay"
      style="display:none; min-height: 0px; height: 100%; width: 100%;">
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" rel="noopener" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:{$YEAR}::_r:86.png">
             <i class="bi bi-wind" aria-hidden="true"></i> April Wind Speed</button>
-            
+
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:{$YEAR}::_r:43.png">
             <i class="bi bi-fire" aria-hidden="true"></i> Summer Dew Points</button>
-            
+
             <button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:{$YEAR}::var:heatindex::ytd:yes::inc:no::_r:43.png">
             <i class="bi bi-table" aria-hidden="true"></i> {$YEAR} Heat Index Hrs</button>
@@ -196,8 +210,8 @@ $t->content = <<<EOM
             <i class="bi bi-droplet" aria-hidden="true"></i> {$YEAR} GS Accum Precip</button>
 
             <h3>Wind Roses</h3>
-            <strong>Month/Season:</strong>
-            <select name="month">
+            <label for="windrose-month"><strong>Month/Season:</strong></label>
+            <select id="windrose-month" name="month">
                 <option value="yearly">Calendar Year</option>
                 <option value="jan">January</option>
                 <option value="feb">February</option>
@@ -223,7 +237,7 @@ $t->content = <<<EOM
     <div class="row coop-data-template ddisplay"
      style="display:none; min-height: 0px; height: 100%; width: 100%;">
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
-            <a class="btn btn-secondary" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
+            <a class="btn btn-secondary" target="_blank" rel="noopener" href="/sites/site.php?station={station}&amp;network={network}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Site Mainpage</a>
 
             <br /><button role="button" type="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"

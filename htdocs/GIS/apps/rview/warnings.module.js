@@ -1,9 +1,19 @@
-/**
- * Warnings Application - Vanilla JavaScript ES Module
- * Migrated from jQuery to vanilla JavaScript
- */
 
 import { getElement } from '/js/iemjs/domUtils.js';
+
+const CONTROL_PANELS = [
+    'layers-control',
+    'locations-control',
+    'time-control',
+    'options-control',
+];
+
+function setButtonExpanded(controlName, expanded) {
+    const button = document.querySelector(`button[data-control="${controlName}"]`);
+    if (button) {
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+}
 
 /**
  * Show or hide control panels
@@ -12,16 +22,18 @@ import { getElement } from '/js/iemjs/domUtils.js';
 function showControl(layerName) {
     const targetElement = getElement(layerName);
     const oldval = targetElement ? targetElement.style.display : 'none';
-    
+
     // Hide all control panels
-    setLayerDisplay("layers-control", 'none');
-    setLayerDisplay("locations-control", 'none');
-    setLayerDisplay("time-control", 'none');
-    setLayerDisplay("options-control", 'none');
-    
+    CONTROL_PANELS.forEach((panelId) => {
+        setLayerDisplay(panelId, 'none');
+        setButtonExpanded(panelId.replace('-control', ''), false);
+    });
+
     // Show the target panel if it was hidden
     if (oldval === 'none') {
         setLayerDisplay(layerName, 'block');
+        setButtonExpanded(layerName.replace('-control', ''), true);
+        targetElement?.querySelector('input, select, button, textarea')?.focus();
     }
 }
 
@@ -34,6 +46,7 @@ function setLayerDisplay(layerName, displayValue) {
     const element = getElement(layerName);
     if (element) {
         element.style.display = displayValue;
+        element.hidden = displayValue === 'none';
     }
 }
 
@@ -46,14 +59,23 @@ function init() {
     if (dataWindow) {
         const buttons = dataWindow.querySelectorAll('button[data-control]');
         buttons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const controlType = event.target.getAttribute('data-control');
+            button.addEventListener('click', () => {
+                const controlType = button.getAttribute('data-control');
                 if (controlType) {
                     showControl(`${controlType}-control`);
                 }
             });
         });
     }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            CONTROL_PANELS.forEach((panelId) => {
+                setLayerDisplay(panelId, 'none');
+                setButtonExpanded(panelId.replace('-control', ''), false);
+            });
+        }
+    });
 
     // Set up auto-refresh for non-archive mode
     const urlParams = new URLSearchParams(window.location.search);
