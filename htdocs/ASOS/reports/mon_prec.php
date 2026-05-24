@@ -56,6 +56,7 @@ function friendly($val)
     if (is_null($val)) return "M";
     return sprintf("%.2f", $val);
 }
+$station_count = count($data);
 $table = "";
 foreach ($data as $key => $val) {
     $table .= sprintf(
@@ -87,7 +88,7 @@ foreach ($data as $key => $val) {
     );
 }
 
-$d = date("d M Y h a");
+$d = date("d M Y g:i a T");
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
@@ -96,34 +97,52 @@ $t->content = <<<EOM
 </ol>
 </nav>
 
-<h1 class="h4 mb-3">{$year} {$network} Monthly Precipitation</h1>
-<p>This table was generated at <strong>{$d}</strong> and is based on available ASOS data. <strong>No attempt was made to estimate missing data.</strong></p>
-
-<form name="change" class="mb-4">
-<div class="row align-items-end">
-    <div class="col-md-4 mb-3">
-        <label for="network" class="form-label">Network:</label>
-        {$netselect}
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="year" class="form-label">Year:</label>
-        {$yselect}
-    </div>
-    <div class="col-md-4 mb-3">
-        <button type="submit" class="btn btn-primary">Change Year</button>
-    </div>
-</div>
-</form>
-
-<div>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 mb-0">Monthly Precipitation Data</h2>
+<header class="mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+        <div>
+            <h1 class="h4 mb-2">{$year} {$network} Monthly Precipitation</h1>
+            <p class="mb-2">This report summarizes available ASOS daily precipitation totals by station and month. <strong>No attempt was made to estimate missing data.</strong></p>
+            <p class="text-body-secondary mb-0">Generated <strong>{$d}</strong> for <strong>{$station_count}</strong> station(s).</p>
+        </div>
+        <div>
             <button id="create-grid" type="button" class="btn btn-success" aria-controls="tabulator-container precip-status" aria-expanded="false">Make Table Interactive</button>
+        </div>
     </div>
+</header>
+
+<div class="alert alert-info d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2" role="status">
+    <span>MJJA is the May through August seasonal total. Use the interactive table for sorting, filtering, and export tools.</span>
+    <span class="small text-body-secondary">The static table remains available until you choose the interactive view.</span>
+</div>
+
+<section class="card shadow-sm mb-4" aria-labelledby="report-controls-heading">
+    <div class="card-body">
+        <h2 id="report-controls-heading" class="h5 card-title">Report Controls</h2>
+        <form name="change" class="row g-3 align-items-end mb-0">
+            <div class="col-md-4">
+                <label for="network" class="form-label">Network</label>
+                {$netselect}
+            </div>
+            <div class="col-md-4">
+                <label for="year" class="form-label">Year</label>
+                {$yselect}
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Update Report</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="card shadow-sm" aria-labelledby="precip-table-heading">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 id="precip-table-heading" class="h5 mb-0">Monthly Precipitation Data</h2>
+            <span class="badge text-bg-light border">Units: inches</span>
+        </div>
 
     <div id="precip-status" class="mb-3 visually-hidden" role="status" aria-live="polite"></div>
 
-<!-- Tabulator Table Controls (hidden initially) -->
 <div id="table-controls" class="d-none" aria-hidden="true">
     <div class="d-flex flex-wrap align-items-center">
         <div class="btn-group me-3 mb-2" role="group" aria-label="Download data">
@@ -145,33 +164,31 @@ $t->content = <<<EOM
     </div>
 </div>
 
-<!-- Modern Tabulator Table (hidden initially) -->
 <div id="tabulator-container" class="d-none" aria-label="Interactive precipitation data table">
     <div id="precipitation-tabulator-table"></div>
 </div>
 
-<!-- Original Table (shown initially) -->
 <div id="original-table">
-<table class="table table-striped table-sm" id="datagrid">
+<table class="table table-striped table-sm table-hover align-middle mb-0" id="datagrid">
 <caption class="text-start">Monthly and seasonal (MJJA) precipitation totals (inches) for stations in the {$network} network, year {$year}. M denotes missing.</caption>
 <thead class="sticky">
 <tr>
-<th>ID</th>
-<th>Name</th>
-<th>Jan</th>
-<th>Feb</th>
-<th>Mar</th>
-<th>Apr</th>
-<th>May</th>
-<th>Jun</th>
-<th>Jul</th>
-<th>Aug</th>
-<th>Sep</th>
-<th>Oct</th>
-<th>Nov</th>
-<th>Dec</th>
-<th><strong>MJJA</strong></th>
-<th><strong>Year</strong></th>
+<th scope="col">ID</th>
+<th scope="col">Name</th>
+<th scope="col">Jan</th>
+<th scope="col">Feb</th>
+<th scope="col">Mar</th>
+<th scope="col">Apr</th>
+<th scope="col">May</th>
+<th scope="col">Jun</th>
+<th scope="col">Jul</th>
+<th scope="col">Aug</th>
+<th scope="col">Sep</th>
+<th scope="col">Oct</th>
+<th scope="col">Nov</th>
+<th scope="col">Dec</th>
+<th scope="col"><strong>MJJA</strong></th>
+<th scope="col"><strong>Year</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -179,5 +196,7 @@ $t->content = <<<EOM
 </tbody>
 </table>
 </div>
+</div>
+</section>
 EOM;
 $t->render('single.phtml');

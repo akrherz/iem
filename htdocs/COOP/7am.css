@@ -1,34 +1,68 @@
 .map {
-    height: 400px;
+    min-height: 420px;
+    height: min(70vh, 720px);
     width: 100%;
     background-color: #FFFFFF;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
 
-.popover {
-    width: 300px;
+.map.map-loading {
+    cursor: progress;
 }
 
-/* Custom popup styles for map feature popover */
+#status {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.legend-panel img {
+    max-height: 48px;
+}
+
 #popup {
     position: relative;
     background: white;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    font-size: 12px;
+    font-size: 0.875rem;
     line-height: 1.4;
-    min-width: 200px;
-    max-width: 300px;
-    display: none; /* Hidden by default */
+    min-width: 220px;
+    max-width: 340px;
+    display: none;
 }
 
-/* Visible state for popup */
 #popup.popup-visible {
     display: block;
 }
 
-/* Style for links within popup */
+#popup .popup-card {
+    position: relative;
+}
+
+#popup .popup-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+#popup .popup-metrics {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+}
+
+#popup .popup-metrics dt {
+    font-weight: 600;
+}
+
+#popup .popup-metrics dd {
+    margin: 0;
+}
+
 #popup a {
     color: #0066cc;
     text-decoration: none;

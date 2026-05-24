@@ -100,7 +100,11 @@ function make_iem_tms(title, layername, visible, type) {
  * @returns string converted string
  */
 function escapeHTML(val) {
+    if (val === null || val === undefined) {
+        return '';
+    }
     return val
+        .toString()
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -137,6 +141,9 @@ function mapClickHandler(event) {
     const links = newdiv.querySelectorAll('a');
     links.forEach(a => {
         a.href = a.href.replaceAll('{station}', station).replaceAll('{network}', network);
+        if (a.target === '_blank') {
+            a.rel = 'noopener';
+        }
     });
     newdiv.classList.remove(`${prefix}-data-template`);
     const classID = `${station}_${epoch}`;
@@ -178,9 +185,10 @@ function displayFeature(evt) {
         popup.element.hidden = false;
         popup.element.setAttribute('aria-hidden', 'false');
         popup.setPosition(evt.coordinate);
-        // Rule: jQuery removal - replace simple HTML content update
-        document.getElementById('info-name').innerHTML =
-            `[${feature.get('sid')}] ${escapeHTML(feature.get('sname'))}`;
+        const infoName = document.getElementById('info-name');
+        if (infoName) {
+            infoName.textContent = `[${feature.get('sid')}] ${feature.get('sname')}`;
+        }
     } else {
         popup.element.hidden = true;
         popup.element.setAttribute('aria-hidden', 'true');
@@ -276,6 +284,7 @@ function loadImage(elem) {
     const ahref = document.createElement('a');
     ahref.href = tgt;
     ahref.target = '_blank';
+    ahref.rel = 'noopener';
     ahref.text = 'IEM Website Link';
     ahref.classList.add('btn');
     ahref.classList.add('btn-secondary');
@@ -285,6 +294,7 @@ function loadImage(elem) {
     img.classList.add('img');
     img.classList.add('img-fluid');
     img.src = elem.src;
+    img.alt = elem.alt || elem.title || 'Plot image';
     div.appendChild(img);
 
     // Rule: jQuery removal - replace jQuery UI dialog with Bootstrap modal
@@ -406,11 +416,19 @@ function loadAutoplot(container, uri, divid) {
     target.setAttribute('aria-label', regionLabel);
     target.setAttribute('aria-live', 'polite');
     target.setAttribute('aria-busy', 'true');
+    const loading = document.createElement('div');
+    loading.className = 'chart-loading';
+    loading.setAttribute('aria-hidden', 'true');
+    const loadingText = document.createElement('span');
+    loadingText.textContent = 'Loading plot...';
+    loading.appendChild(loadingText);
+    target.appendChild(loading);
     const iemhref = compute_href(uri);
     const pp = document.createElement('p');
     const ahref = document.createElement('a');
     ahref.href = iemhref;
     ahref.target = '_blank';
+    ahref.rel = 'noopener';
     ahref.text = 'IEM Website Link';
     ahref.classList.add('btn');
     ahref.classList.add('btn-secondary');
@@ -427,8 +445,20 @@ function loadAutoplot(container, uri, divid) {
         // Rule: jQuery removal - replace $.getScript with vanilla JS
         const script = document.createElement('script');
         script.src = uri;
-        script.onload = () => target.setAttribute('aria-busy', 'false');
-        script.onerror = () => target.setAttribute('aria-busy', 'false');
+        script.onload = () => {
+            loading.remove();
+            target.setAttribute('aria-busy', 'false');
+            script.remove();
+        };
+        script.onerror = () => {
+            loading.remove();
+            target.setAttribute('aria-busy', 'false');
+            const msg = document.createElement('div');
+            msg.className = 'alert alert-warning';
+            msg.textContent = 'The plot failed to load.';
+            target.appendChild(msg);
+            script.remove();
+        };
         document.head.appendChild(script);
     } else {
         const img = document.createElement('img');
@@ -436,8 +466,18 @@ function loadAutoplot(container, uri, divid) {
         img.classList.add('img-fluid');
         img.src = uri;
         img.alt = 'Plot image';
-        img.onload = () => target.setAttribute('aria-busy', 'false');
-        img.onerror = () => target.setAttribute('aria-busy', 'false');
+        img.onload = () => {
+            loading.remove();
+            target.setAttribute('aria-busy', 'false');
+        };
+        img.onerror = () => {
+            loading.remove();
+            target.setAttribute('aria-busy', 'false');
+            const msg = document.createElement('div');
+            msg.className = 'alert alert-warning';
+            msg.textContent = 'The plot image failed to load.';
+            target.appendChild(msg);
+        };
         target.appendChild(img);
     }
 }

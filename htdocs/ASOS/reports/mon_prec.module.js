@@ -42,25 +42,28 @@ function formatPrecipitation(cell) {
 function getPrecipitationColumns() {
     return [
         {
-            title: "Station ID", 
-            field: "id", 
-            frozen: true, 
-            width: 100, 
+            title: "Station ID",
+            field: "id",
+            frozen: true,
+            width: 100,
             sorter: "string",
-            formatter: "link",
-            formatterParams: {
-                urlPrefix: '/sites/site.php?station=',
-                urlSuffix: () => `&network=${getNetworkFromURL()}`,
-                target: "_blank"
+            formatter: cell => {
+                const stationId = cell.getValue();
+                const anchor = document.createElement('a');
+                anchor.href = `/sites/site.php?station=${stationId}&network=${getNetworkFromURL()}`;
+                anchor.target = '_blank';
+                anchor.rel = 'noopener';
+                anchor.textContent = stationId;
+                return anchor;
             },
             headerFilter: "input",
             headerFilterPlaceholder: "Filter ID..."
         },
         {
-            title: "Station Name", 
-            field: "name", 
-            frozen: true, 
-            minWidth: 200, 
+            title: "Station Name",
+            field: "name",
+            frozen: true,
+            minWidth: 200,
             sorter: "string",
             headerFilter: "input",
             headerFilterPlaceholder: "Filter name..."
@@ -78,19 +81,19 @@ function getPrecipitationColumns() {
         {title: "Nov", field: "nov", width: 80, sorter: "number", formatter: formatPrecipitation, headerTooltip: "November precipitation (inches)"},
         {title: "Dec", field: "dec", width: 80, sorter: "number", formatter: formatPrecipitation, headerTooltip: "December precipitation (inches)"},
         {
-            title: "MJJA", 
-            field: "mjja", 
-            width: 90, 
-            sorter: "number", 
+            title: "MJJA",
+            field: "mjja",
+            width: 90,
+            sorter: "number",
             formatter: formatPrecipitation,
             headerTooltip: "May-June-July-August total (growing season)",
             cssClass: "highlight-summer"
         },
         {
-            title: "Annual", 
-            field: "annual", 
-            width: 90, 
-            sorter: "number", 
+            title: "Annual",
+            field: "annual",
+            width: 90,
+            sorter: "number",
             formatter: formatPrecipitation,
             headerTooltip: "Annual total precipitation",
             cssClass: "highlight-annual"
@@ -149,7 +152,7 @@ function loadTableData() {
 function initializeTable() {
     // Load data from existing table
     originalData = loadTableData();
-    
+
     if (originalData.length === 0) {
         return;
     }
@@ -164,14 +167,16 @@ function initializeTable() {
     // Show the new table and controls
     const container = document.getElementById('tabulator-container');
     container.classList.remove('d-none');
+    container.removeAttribute('aria-hidden');
     const controls = document.getElementById('table-controls');
     controls.classList.remove('d-none');
     controls.removeAttribute('aria-hidden');
     if (statusEl) {statusEl.textContent = 'Interactive table loaded. Use header inputs to filter and column headers to sort.';}
-    
+
     // Hide the original table and button
     const original = document.getElementById('original-table');
     original.style.display = 'none';
+    original.setAttribute('aria-hidden', 'true');
     const btn = document.getElementById('create-grid');
     btn.style.display = 'none';
     btn.setAttribute('aria-expanded', 'true');
@@ -201,6 +206,7 @@ function setupControls() {
     document.getElementById('copy-clipboard').addEventListener('click', () => {
         if (precipTable) {
             precipTable.copyToClipboard("active");
+            if (statusEl) {statusEl.textContent = 'Filtered table copied to the clipboard.';}
         }
     });
 
@@ -208,6 +214,7 @@ function setupControls() {
     document.getElementById('clear-filters').addEventListener('click', () => {
         if (precipTable) {
             precipTable.clearHeaderFilter();
+            if (statusEl) {statusEl.textContent = 'Table filters cleared.';}
         }
     });
 }

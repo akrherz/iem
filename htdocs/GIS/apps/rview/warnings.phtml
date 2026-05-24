@@ -55,7 +55,7 @@ $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
 $site = isset($_GET["site"]) ? strtoupper(substr(xssafe($_GET["site"]), 0, 4)) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
-$sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
+$sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issue";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "DESC";
 $lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
 $lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
@@ -293,16 +293,16 @@ $ivselect = make_select("interval", $interval, $ar);
 $ar = array("0" => "No", "1" => "Yes");
 $wfselect = make_select("filter", $filter, $ar);
 
-$pradio = "<br /><input type=\"radio\" value=\"0\" name=\"cu\" ";
+$pradio = "<br /><input id=\"cu-all\" type=\"radio\" value=\"0\" name=\"cu\" ";
 if ($cu == 0) {
     $pradio .= "checked";
 }
-$pradio .= ">Show All";
-$pradio .= "<br /><input type=\"radio\" value=\"1\" name=\"cu\" ";
+$pradio .= "> <label for=\"cu-all\">Show All</label>";
+$pradio .= "<br /><input id=\"cu-convective\" type=\"radio\" value=\"1\" name=\"cu\" ";
 if ($cu == 1) {
     $pradio .= "checked";
 }
-$pradio .= ">Convective Only";
+$pradio .= "> <label for=\"cu-convective\">Convective Only</label>";
 
 $ar = array("DESC" => "DESC", "ASC" => "ASC");
 if (!array_key_exists($sortdir, $ar)){ $sortdir = "DESC"; }
@@ -320,19 +320,19 @@ $dwheight = $height + 100;
 $content .= <<<EOM
 <div id="datawindow"
  style="background: #eee; height: {$dwheight}px; width: {$dwwidth}px; z-index: 2;">
-<button type="button" data-control="layers" style="background: #73FA4D;">
+<button type="button" data-control="layers" aria-controls="layers-control" aria-expanded="false" style="background: #73FA4D;">
 Layers</button>
-<button type="button" data-control="locations" style="background: #F2FE5A;">
+<button type="button" data-control="locations" aria-controls="locations-control" aria-expanded="false" style="background: #F2FE5A;">
 Locations</button>
-<button type="button" data-control="time" style="background: #FF5EC4;">
+<button type="button" data-control="time" aria-controls="time-control" aria-expanded="false" style="background: #FF5EC4;">
 Time</button>
-<button type="button" data-control="options" style="background: #2EA7F2;">
+<button type="button" data-control="options" aria-controls="options-control" aria-expanded="false" style="background: #2EA7F2;">
 Options</button>
 <input type="submit" value="Update Map">
 <br />
-<div id="layers-control" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
+<div id="layers-control" hidden aria-labelledby="layers-heading" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
 
-<strong>Available Layers</strong>
+<strong id="layers-heading">Available Layers</strong>
 {$rtlselect}
 {$lselect}
 <input type="hidden" name="layers[]" value="blank">
@@ -341,8 +341,8 @@ Options</button>
 <button type="button" data-control="layers">Save Settings</button>
 <input type="submit" value="Save + Update Map"> </div>
 </div>
-<div id="locations-control" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
-<strong>NWS CWSU/WFO/RFC Office:</strong><br />
+<div id="locations-control" hidden aria-labelledby="locations-heading" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<strong id="locations-heading">NWS CWSU/WFO/RFC Office:</strong><br />
 {$wselect}
 
 <br />Selecting a different office will move the display to that office.
@@ -350,12 +350,12 @@ Options</button>
 <button type="button" data-control="locations">Save Settings</button>
 <input type="submit" value="Save + Update Map"> </div>
 </div>
-<div id="time-control" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
-<p><strong>Select Time Zone</strong><br />
+<div id="time-control" hidden aria-labelledby="time-heading" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<p><strong id="time-heading">Select Time Zone</strong><br />
 {$tzselect}
 
 <p><strong>Archive Options</strong><br />
-<input type="checkbox" value="yes" name="archive"{$achecked}>Set Archive Mode</td>
+<input id="archive-mode" type="checkbox" value="yes" name="archive"{$achecked}><label for="archive-mode"> Set Archive Mode</label>
 <br />If you are producing an animation, this date specifies the end date of
 the loop.</p>
 <table class="table table-sm">
@@ -369,8 +369,8 @@ the loop.</p>
 <button type="button" data-control="time">Save Settings</button>
 <input type="submit" value="Save + Update Map"> </div>
 </div>
-<div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
-<strong>Warning geography:</strong>
+<div id="options-control" hidden aria-labelledby="options-heading" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<strong id="options-heading">Warning geography:</strong>
 <br />Short term warnings (SVR,TOR,SMW) have a storm based and county
 geography associated with them.  You can pick which or both to display:
 <br />{$wgselect}
@@ -442,14 +442,12 @@ EOM;
     $imgi = 0;
     require "../../../../include/warnings_plot.php";
     $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
-    $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\">\n";
+    $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\" alt=\"Weather warning map. Click to recenter the display.\">\n";
     $content .= "</form>";
 }
 $content .= <<<EOM
 </div>
 EOM;
-
-$content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
 
 // Position legend outside datawindow to prevent layout conflicts
 $content .= <<<EOM
@@ -576,6 +574,7 @@ foreach ($wA as $key => $val) {
         "<div class=\"issued\">Issued: " . date($dformat, $issue) . "</div>" .
         "<div class=\"updated\">Updated: " .  date($dformat, $updated) . "</div>&nbsp;</div>\n";
 }
+$msg = "";
 if ($k == 0 && $filter) {
     $msg = "<p>No warnings currently valid for " . $nt->table[$site]["name"];
 } else if ($k == 0) {

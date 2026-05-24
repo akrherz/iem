@@ -5,7 +5,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/network.php";
 
-$OL = "10.6.1";
+$OL = "10.9.0";
 $t = new MyView();
 $t->title = "NWS COOP Daily Climatology";
 
@@ -44,11 +44,23 @@ $tblselect = make_select("tbl", $tbl, $ar);
 
 
 $t->content = <<<EOM
-<div id="loading-indicator" class="text-center my-4" style="display: none;">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small mb-3">
+        <li class="breadcrumb-item"><a href="/COOP/">NWS COOP</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Daily Climatology</li>
+    </ol>
+</nav>
+
+<header class="mb-4">
+    <h1 class="h3 mb-2">NWS COOP Daily Climatology</h1>
+    <p class="mb-0 text-body-secondary">Explore daily climate records by state and date, then switch into a station view to compare one station across the full calendar year.</p>
+</header>
+
+<div id="loading-indicator" class="text-center my-4 d-none" aria-live="polite">
     <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">Loading climatology data</span>
     </div>
-    <p class="mt-2">Loading climatology data...</p>
+    <p class="mt-2 mb-0">Loading climatology data...</p>
 </div>
 
 <div id="content-area">
@@ -56,15 +68,15 @@ $t->content = <<<EOM
         <!-- Header will be populated by JavaScript -->
     </div>
 
-    <div class="alert alert-info">
-        <h5 class="alert-heading">Two App Modes Available:</h5>
+    <div class="alert alert-info shadow-sm border-0">
+        <h2 class="h5 alert-heading">Two App Modes Available</h2>
         <div class="row">
             <div class="col-md-6">
-                <strong>🌡️ Single Date Climatology for State</strong>
+                <strong>Single Date Climatology for State</strong>
                 <p class="mb-0 small">Select a specific date to see records for all stations on that day. Use the form below to choose date and state.</p>
             </div>
             <div class="col-md-6">
-                <strong>🏛️ Daily Climatology for Single Station</strong>
+                <strong>Daily Climatology for Single Station</strong>
                 <p class="mb-0 small">Click any station ID in the table to see all daily records for that station throughout the year.</p>
             </div>
         </div>
@@ -78,7 +90,7 @@ $t->content = <<<EOM
     <p><a href="/COOP/dl/normals.phtml" class="btn btn-primary">
     <i class="bi bi-download" aria-hidden="true"></i> Download Daily Climatology</a></p>
 
-    <div id="api-info" class="alert alert-info" style="display: none;">
+    <div id="api-info" class="alert alert-light border shadow-sm d-none">
         <p class="mb-0">The data found in this table was derived from the following
         <a href="/json/">JSON webservice</a>:<br />
         <code id="api-url"></code>
@@ -86,9 +98,9 @@ $t->content = <<<EOM
     </div>
 
     <form method="GET" action="extremes.php" name="myform" id="controls-form">
-    <div class="card">
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-header">
-            <h6 class="mb-0">🌡️ Single Date Mode Controls</h6>
+            <h2 class="h6 mb-0">Single Date Mode Controls</h2>
             <small class="text-muted">Change state or date to view different climatology data</small>
         </div>
         <div class="card-body p-3">
@@ -118,49 +130,68 @@ $t->content = <<<EOM
     </div>
     </form>
 
-    <br />
-
     <!-- Map Container (only visible for all stations mode) -->
-    <div id="map-container">
-        <div class="map-controls">
-            <div class="control-row">
-                <label for="label-attribute">Label Points With:</label>
-                <select id="label-attribute" class="form-select form-select-sm">
-                    <option value="station">Station ID</option>
-                    <option value="avg_high" selected>Avg High</option>
-                    <option value="max_high">Max High</option>
-                    <option value="min_high">Min High</option>
-                    <option value="avg_low">Avg Low</option>
-                    <option value="max_low">Max Low</option>
-                    <option value="min_low">Min Low</option>
-                    <option value="avg_precip">Avg Precip</option>
-                    <option value="max_precip">Max Precip</option>
-                    <option value="years">Years</option>
-                </select>
+    <section id="map-container" class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-body-tertiary border-0">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-2 align-items-lg-center">
+                <div>
+                    <h2 class="h5 mb-1">Station Map</h2>
+                    <p class="small text-body-secondary mb-0">Choose a map label, filter extreme-year records, and click a station for full daily-climatology details.</p>
+                </div>
+                <div class="small text-body-secondary">Use the layer switcher in the upper-right corner to change basemaps.</div>
             </div>
-            <div class="control-row">
-                <label for="year-filter">Filter by Record Year:</label>
-                <select id="year-filter" class="form-select form-select-sm">
-                    <option value="">All Years</option>
-                    <!-- Options populated dynamically -->
-                </select>
+        </div>
+        <div class="card-body">
+            <div class="map-toolbar row g-3 align-items-end mb-3">
+                <div class="col-md-5 col-xl-4">
+                    <label for="label-attribute" class="form-label small mb-1">Label Points With</label>
+                    <select id="label-attribute" class="form-select form-select-sm">
+                        <option value="station">Station ID</option>
+                        <option value="avg_high" selected>Avg High</option>
+                        <option value="max_high">Max High</option>
+                        <option value="min_high">Min High</option>
+                        <option value="avg_low">Avg Low</option>
+                        <option value="max_low">Max Low</option>
+                        <option value="min_low">Min Low</option>
+                        <option value="avg_precip">Avg Precip</option>
+                        <option value="max_precip">Max Precip</option>
+                        <option value="years">Years</option>
+                    </select>
+                </div>
+                <div class="col-md-4 col-xl-3">
+                    <label for="year-filter" class="form-label small mb-1">Filter by Record Year</label>
+                    <select id="year-filter" class="form-select form-select-sm">
+                        <option value="">All Years</option>
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-3 col-xl-5">
+                    <div class="small text-uppercase text-body-secondary mb-1">Legend</div>
+                    <div class="map-legend rounded border bg-light-subtle p-2">
+                        <!-- Legend will be populated dynamically by JavaScript -->
+                    </div>
+                </div>
             </div>
-            <div class="legend-row">
-                <label>Legend:</label>
-                <div class="map-legend">
-                    <!-- Legend will be populated dynamically by JavaScript -->
+            <div class="map-stage">
+                <div id="map" class="map-canvas" role="region" aria-label="Climate station map"></div>
+                <div id="popup" class="ol-popup">
+                    <a href="#" id="popup-closer" class="ol-popup-closer" aria-label="Close station details"></a>
+                    <div id="popup-content" class="ol-popup-content"></div>
                 </div>
             </div>
         </div>
-        <div id="popup" class="ol-popup">
-            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-            <div id="popup-content" class="ol-popup-content"></div>
-        </div>
-    </div>
+    </section>
 
-    <div class="table-responsive">
-        <div id="data-table"></div>
-    </div>
+    <section class="card shadow-sm border-0">
+        <div class="card-header bg-body-tertiary border-0">
+            <h2 class="h5 mb-0">Climatology Table</h2>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <div id="data-table"></div>
+            </div>
+        </div>
+    </section>
 </div>
 EOM;
 $t->headextra = <<<EOM

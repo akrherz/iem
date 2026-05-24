@@ -551,10 +551,10 @@ function showLoading(show) {
     const contentArea = document.getElementById('content-area');
 
     if (loadingIndicator) {
-        loadingIndicator.style.display = show ? 'block' : 'none';
+        loadingIndicator.classList.toggle('d-none', !show);
     }
     if (contentArea) {
-        contentArea.style.display = show ? 'none' : 'block';
+        contentArea.classList.toggle('d-none', show);
     }
 };
 
@@ -567,8 +567,8 @@ function showApiInfo() {
 
     if (apiInfo && apiUrl) {
         if (appState.currentApiUrl) {
-        apiUrl.textContent = appState.currentApiUrl;
-        apiInfo.style.display = 'block';
+            apiUrl.textContent = appState.currentApiUrl;
+            apiInfo.classList.remove('d-none');
         }
     }
 };
@@ -615,9 +615,6 @@ function attachEventListeners() {
         // Update submit button text for dynamic mode
         if (submitBtn) {
             submitBtn.value = 'Update View';
-            submitBtn.style.backgroundColor = '#0d6efd';
-            submitBtn.style.color = 'white';
-            submitBtn.style.border = '1px solid #0d6efd';
         }
 
         // Show dynamic indicator
@@ -726,7 +723,7 @@ function initializeMap() {
 
     // Initialize map
     appState.map = new ol.Map({
-        target: 'map-container',
+        target: 'map',
         layers: [
             // Base layers group
             new ol.layer.Group({
@@ -974,7 +971,7 @@ function showStationPopup(feature, coordinate) {
     // If year filter is active, highlight records from that year
     if (appState.yearFilter) {
         const filterYear = parseInt(appState.yearFilter);
-        popupHtml += `<div style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 11px;">
+        popupHtml += `<div class="popup-year-highlight">
             <strong>Showing records from ${filterYear}</strong>
         </div>`;
     }
@@ -994,9 +991,9 @@ function showStationPopup(feature, coordinate) {
     popupHtml += window.popupRow('Max Precip', formatNumber(props.max_precip, 2), props.max_precip_years, appState.yearFilter, '"', formatYears);
 
     popupHtml += `</table>
-        <p style="margin-top: 8px; font-size: 11px;">
+        <p class="popup-footer">
             <a href="extremes.php?station=${props.station}&network=${appState.config.network}&tbl=${appState.config.tbl}${appState.labelAttribute ? `&label=${appState.labelAttribute}` : ''}${appState.yearFilter ? `&year=${appState.yearFilter}` : ''}"
-               target="_blank">View station details →</a>
+               target="_blank" rel="noopener">View station details →</a>
         </p>`;
 
     content.innerHTML = popupHtml;
@@ -1038,7 +1035,7 @@ function updateLegend() {
         // No color ranges (e.g., station names) - show info message instead
         legendElement.style.display = 'block';
         legendElement.innerHTML = `
-            <div style="font-size: 11px; color: #666;">
+            <div class="text-body-secondary small">
                 ${getAttributeLabel(appState.labelAttribute)} (no color coding)
             </div>
         `;
@@ -1051,7 +1048,7 @@ function updateLegend() {
     const attributeLabel = getAttributeLabel(appState.labelAttribute);
 
     legendHtml = `
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">
+        <div class="text-body-secondary small mb-1">
             ${attributeLabel} ranges:
         </div>
     `;
@@ -1060,7 +1057,7 @@ function updateLegend() {
         legendHtml += `
             <div class="legend-item">
                 <div class="legend-color" style="background: ${range.color};"></div>
-                <span style="font-size: 10px;">${range.label}${appState.colorRanges.units}</span>
+                <span class="small">${range.label}${appState.colorRanges.units}</span>
             </div>
         `;
     });
