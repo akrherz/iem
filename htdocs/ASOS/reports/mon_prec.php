@@ -20,7 +20,7 @@ $nt = new NetworkTable($network);
 $cities = $nt->table;
 
 $stname = iem_pg_prepare($pgconn, <<<EOM
-SELECT 
+SELECT
  id,
  sum(pday) as precip,
  extract(month from day) as month
@@ -51,6 +51,12 @@ $t->jsextra = <<<EOM
 EOM;
 
 reset($data);
+
+/**
+ * Format a precipitation value for display, handling nulls as "M" for missing.
+ * @param float|null $val The precipitation value to format.
+ * @return string A formatted string representation of the precipitation value.
+ */
 function friendly($val)
 {
     if (is_null($val)) return "M";
@@ -98,14 +104,16 @@ $t->content = <<<EOM
 </nav>
 
 <header class="mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-        <div>
+    <div class="row g-3 align-items-start mb-3">
+        <div class="col-lg-8">
             <h1 class="h4 mb-2">{$year} {$network} Monthly Precipitation</h1>
             <p class="mb-2">This report summarizes available ASOS daily precipitation totals by station and month. <strong>No attempt was made to estimate missing data.</strong></p>
             <p class="text-body-secondary mb-0">Generated <strong>{$d}</strong> for <strong>{$station_count}</strong> station(s).</p>
         </div>
-        <div>
-            <button id="create-grid" type="button" class="btn btn-success" aria-controls="tabulator-container precip-status" aria-expanded="false">Make Table Interactive</button>
+        <div class="col-lg-4 d-flex justify-content-lg-end">
+            <div class="d-grid d-lg-block w-100 w-lg-auto">
+                <button id="create-grid" type="button" class="btn btn-success" aria-controls="tabulator-container precip-status" aria-expanded="false">Make Table Interactive</button>
+            </div>
         </div>
     </div>
 </header>
@@ -116,8 +124,10 @@ $t->content = <<<EOM
 </div>
 
 <section class="card shadow-sm mb-4" aria-labelledby="report-controls-heading">
+    <div class="card-header bg-body-tertiary">
+        <h2 id="report-controls-heading" class="h5 card-title mb-0">Report Controls</h2>
+    </div>
     <div class="card-body">
-        <h2 id="report-controls-heading" class="h5 card-title">Report Controls</h2>
         <form name="change" class="row g-3 align-items-end mb-0">
             <div class="col-md-4">
                 <label for="network" class="form-label">Network</label>
@@ -130,21 +140,28 @@ $t->content = <<<EOM
             <div class="col-md-4">
                 <button type="submit" class="btn btn-primary">Update Report</button>
             </div>
+            <div class="col-12">
+                <p class="form-text mb-0">Switch the ASOS network or reporting year to rebuild the monthly totals table below.</p>
+            </div>
         </form>
     </div>
 </section>
 
 <section class="card shadow-sm" aria-labelledby="precip-table-heading">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div class="card-header bg-body-tertiary">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <h2 id="precip-table-heading" class="h5 mb-0">Monthly Precipitation Data</h2>
-            <span class="badge text-bg-light border">Units: inches</span>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="badge text-bg-light border">Units: inches</span>
+                <span class="badge text-bg-light border">Stations: {$station_count}</span>
+            </div>
         </div>
-
+    </div>
+    <div class="card-body">
     <div id="precip-status" class="mb-3 visually-hidden" role="status" aria-live="polite"></div>
 
 <div id="table-controls" class="d-none" aria-hidden="true">
-    <div class="d-flex flex-wrap align-items-center">
+    <div class="d-flex flex-wrap align-items-center gap-2">
         <div class="btn-group me-3 mb-2" role="group" aria-label="Download data">
             <button id="download-csv" type="button" class="btn btn-outline-primary">
                 <i class="bi bi-download" aria-hidden="true"></i> Download CSV
@@ -168,6 +185,18 @@ $t->content = <<<EOM
     <div id="precipitation-tabulator-table"></div>
 </div>
 
+EOM;
+
+if ($station_count === 0) {
+    $t->content .= <<<EOM
+<div class="alert alert-warning mb-0" role="status">
+    No precipitation totals were available for this network and year.
+</div>
+</div>
+</section>
+EOM;
+} else {
+    $t->content .= <<<EOM
 <div id="original-table">
 <table class="table table-striped table-sm table-hover align-middle mb-0" id="datagrid">
 <caption class="text-start">Monthly and seasonal (MJJA) precipitation totals (inches) for stations in the {$network} network, year {$year}. M denotes missing.</caption>
@@ -199,4 +228,5 @@ $t->content = <<<EOM
 </div>
 </section>
 EOM;
+}
 $t->render('single.phtml');

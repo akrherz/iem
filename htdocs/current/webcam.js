@@ -9,8 +9,8 @@ const ISO8601 = 'Y-m-d\\TH:i:s\\Z';
 
 /**
  * Convert a date to UTC
- * @param {Date} dt 
- * @returns 
+ * @param {Date} dt
+ * @returns
  */
 function toUTC(dt) {
     return Ext.Date.add(dt, Ext.Date.MINUTE, dt.getTimezoneOffset());
