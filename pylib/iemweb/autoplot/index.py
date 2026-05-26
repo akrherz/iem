@@ -930,7 +930,8 @@ plot type.</p>
 def generate_autoplot_list(apid):
     """The select list of available autoplots."""
     s = (
-        '<select name="q" class="iemselect2 form-control-lg" '
+        '<select id="chart-select" name="q" '
+        'class="iemselect2 form-control-lg autoplot-chart-select" '
         'data-width="100%">'
         "\n"
     )

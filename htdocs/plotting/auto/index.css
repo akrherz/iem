@@ -60,3 +60,32 @@
 .cmapselect {
     width: 400px;
 }
+
+#chart-select + .ts-wrapper,
+.autoplot-chart-select.ts-wrapper {
+    width: 100%;
+}
+
+#chart-select + .ts-wrapper .ts-control,
+.autoplot-chart-select.ts-wrapper .ts-control {
+    min-height: calc(1.5em + 1rem + 2px);
+    flex-wrap: nowrap;
+}
+
+#chart-select + .ts-wrapper .item,
+.autoplot-chart-select.ts-wrapper .item {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#chart-select + .ts-wrapper .ts-control > input,
+.autoplot-chart-select.ts-wrapper .ts-control > input {
+    min-width: 1rem;
+}
+
+#chart-select + .ts-wrapper .ts-dropdown .ts-dropdown-content,
+.autoplot-chart-select.ts-wrapper .ts-dropdown .ts-dropdown-content {
+    max-height: 24rem;
+}
