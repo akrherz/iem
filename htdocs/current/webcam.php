@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * This is an Extjs application that allows historical and current viewing of
  * webcam images.
  */
@@ -22,7 +22,7 @@ $t->content = <<<EOM
   <div class="col-md-12">
   <h3><i class="bi bi-camera" aria-hidden="true"></i> Web Camera Interactive Viewer</h3>
     <p class="lead">
-      View current and historical webcam imagery from across Iowa. 
+      View current and historical webcam imagery from across Iowa.
       Switch to archived mode to browse historical images.
     </p>
   </div>
@@ -38,7 +38,7 @@ $t->content = <<<EOM
   <div class="col-md-12">
     <div class="card">
       <div class="card-header">
-        <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" 
+        <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse"
                 data-bs-target="#helpContent" aria-expanded="false" aria-controls="helpContent">
           <i class="bi bi-info-circle" aria-hidden="true"></i> Help & Cool Archived Images
         </button>
@@ -49,7 +49,7 @@ $t->content = <<<EOM
           web camera imagery. Click on the 'Real Time' button above to switch the
           application into 'Archived Mode'. You can then select the time of interest
           and the application will automatically update to show you the images. The IEM has archived images every 5 minutes, but may have an image every minute during active weather.</p>
-          
+
           <h5>Cool Archived Images:</h5>
           <ul>
            <li><a class="ccool" href="#" data-opt="KCCI-200406120032">11 Jun 2004 - 7:32 PM, Webster City Tornado</a></li>

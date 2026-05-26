@@ -218,6 +218,15 @@ Multi-RADAR Multi-Sensor (MRMS) 6 hour precipitation estimates computed by
 combining hourly esimates.
 EOM
         ),
+        "month_mrms_iowa" => array(
+            "label" => "MRMS This Month Precip",
+            "timemachine" => "?product=62&timestamp={$daylink}",
+            "img" => "/data/summary/iowa_mrms_q3_month.png",
+            "desc" => <<<EOM
+Multi-RADAR Multi-Sensor (MRMS) monthly precipitation estimates computed by
+combining daily estimates.
+EOM
+        ),
         "today_asos_iowa" => array(
             "label" => "Iowa ASOS Today's Precip",
             "timemachine" => null,
@@ -259,15 +268,6 @@ EOM
             "label" => "Stage IV Today's Precip",
             "timemachine" => "?product=42&timestamp={$daylink}",
             "img" => "/data/midwest_stage4_1d.png",
-            "desc" => <<<EOM
-IEM totaling of available NCEP Stage IV hourly precipitation for the central
-time zone calendar day.
-EOM
-        ),
-        "today_stage4_iowa" => array(
-            "label" => "Stage IV Today's Precip",
-            "timemachine" => "?product=41&timestamp={$daylink}",
-            "img" => "/data/iowa_stage4_1d.png",
             "desc" => <<<EOM
 IEM totaling of available NCEP Stage IV hourly precipitation for the central
 time zone calendar day.

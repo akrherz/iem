@@ -9,7 +9,7 @@ require_once "../../include/forms.php";
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */
-$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 4) : null;
+$network = get_str404("network", null, $maxlength=4);
 if (is_null($network)) {
     http_response_code(422);
     die("network not found, ERROR");
