@@ -1,15 +1,15 @@
 <?php
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
-
-function dwpf($tmpf, $relh)
-{
-    $tmpk = 273.15 + (5.00 / 9.00 * ($tmpf - 32.00));
-    $dwpk = $tmpk / (1 + 0.000425 * $tmpk * - (log10($relh / 100)));
-    return round(($dwpk - 273.15) * 9.00 / 5.00 + 32, 2);
-}
+require_once "../../../include/mlib.php";
 
 
+/**
+ * Read the IEM Northeast data file
+ * @param int $dt The timestamp for the date to read (UTC)
+ * @param bool $candie Whether to display a "no data" message using the Digital LED if the file does not exist. Defaults to TRUE.
+ * @return array An associative array containing the parsed data, including times, temperatures, humidity, dew points, barometric pressure, wind speed
+ */
 function read_data($dt, $candie = TRUE) {
     $dirRef = date("Y/m/d", $dt);
     $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
@@ -63,12 +63,14 @@ function read_data($dt, $candie = TRUE) {
         }
         $data["times"][] = $linedt;
 
-        $thisTmpf = $parts[5];
-        $thisrh = $parts[8];
-        $thisDwpf = dwpf($thisTmpf, $thisrh);
-        if ($thisTmpf < -50 || $thisTmpf > 150) {
+        $thisTmpf = (float)$parts[5];
+        $thisrh = (float)$parts[8];
+        if ($thisTmpf < -50 || $thisTmpf > 150 || $thisrh < 1) {
             $thisTmpf = "";
             $thisDwpf = "";
+            $thisrh = "";
+        } else {
+            $thisDwpf = dwpf($thisTmpf, $thisrh);
         }
         $data["tmpf"][] = $thisTmpf;
         $data["dwpf"][] = $thisDwpf;
@@ -82,8 +84,8 @@ function read_data($dt, $candie = TRUE) {
             $data["min_tmpf"] = $thisTmpf;
         }
 
-        $thisMPH = intval($parts[9]);
-        $thisDRCT = intval($parts[10]);
+        $thisMPH = (float)$parts[9];
+        $thisDRCT = (float)$parts[10];
 
         if ($line_num % 5 == 0){
         $data["drct"][] = $thisDRCT;
@@ -92,7 +94,7 @@ function read_data($dt, $candie = TRUE) {
         }
         $data["mph"][] = $thisMPH;
 
-        $gust = floatval($parts[11]);
+        $gust = (float)$parts[11];
         $data["gust"][] = $gust;
         $gust_time = $parts[12];
         if ($gust > $data["max_gust"]) {
@@ -100,11 +102,11 @@ function read_data($dt, $candie = TRUE) {
             $data["max_gust_time"] = $gust_time;
         }
 
-        $data["precip"][] = floatval($parts[14]);
+        $data["precip"][] = (float)$parts[14];
 
         // Inside
-        $inTmpf = floatval($parts[17]);
-        $inRH = floatval($parts[18]);
+        $inTmpf = (float)$parts[17];
+        $inRH = (float)$parts[18];
         $inDwpf = dwpf($inTmpf, $inRH);
 
         $data["inTmpf"][] = $inTmpf;
@@ -112,8 +114,8 @@ function read_data($dt, $candie = TRUE) {
         $data["inRh"][] = $inRH;
 
         // Barometer
-        $value = $parts[13];
-        $value = round((floatval($value) * 33.8639), 2);
+        $value = (float)$parts[13];
+        $value = round(($value * 33.8639), 2);
         if ($value < 900 || $value > 1100) {
             $value = "";
         }
