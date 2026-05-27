@@ -158,6 +158,8 @@ def plotter(ctx: dict):
         title1 = state_names[state]
     doy_limiter = ""
     title = "Entire Year"
+    year_field = "vtec_year"
+    label_extra = ""
     if limit.lower() == "yes":
         title = f"thru ~{date.today():%-d %b}"
         doy_limiter = (
@@ -165,13 +167,24 @@ def plotter(ctx: dict):
             "extract(doy from 'TODAY'::date) "
         )
     elif limit.lower() == "udf":
-        title = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
-        doy_limiter = (
-            " and to_char(issue at time zone :tzname, 'mmdd') >= :sday "
-            " and to_char(issue at time zone :tzname, 'mmdd') <= :eday "
-        )
         params["sday"] = f"{ctx['sday']:%m%d}"
         params["eday"] = f"{ctx['eday']:%m%d}"
+        title = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+        if ctx["sday"] < ctx["eday"]:
+            doy_limiter = (
+                " and to_char(issue at time zone :tzname, 'mmdd') >= :sday "
+                " and to_char(issue at time zone :tzname, 'mmdd') <= :eday "
+            )
+        else:
+            label_extra = " (year for start of period)"
+            year_field = (
+                "case when to_char(issue at time zone :tzname, 'mmdd') "
+                ">= :sday then vtec_year else vtec_year - 1 end"
+            )
+            doy_limiter = (
+                " and (to_char(issue at time zone :tzname, 'mmdd') >= :sday "
+                " or to_char(issue at time zone :tzname, 'mmdd') <= :eday) "
+            )
 
     desc = "wfo, "
     if phenomena in ["TR", "HU"]:
@@ -187,13 +200,14 @@ def plotter(ctx: dict):
                 """
             with data as (
                 SELECT distinct
-                extract(year from issue at time zone :tzname)::int as yr,
+                {year_field} as yr,
                 {desc} eventid
                 from warnings where phenomena = :ph and significance = :sig
                 {wfo_limiter} {doy_limiter})
 
             SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
         """,
+                year_field=year_field,
                 desc=desc,
                 wfo_limiter=wfo_limiter,
                 doy_limiter=doy_limiter,
@@ -240,7 +254,7 @@ def plotter(ctx: dict):
     xlabel = ""
     if limit != "udf":
         xlabel = f"{xx} thru approximately {date.today():%-d %b}."
-    ax.set_xlabel(f"{xlabel} Timezone: {tzname}")
+    ax.set_xlabel(f"{xlabel} Timezone: {tzname}{label_extra}")
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
