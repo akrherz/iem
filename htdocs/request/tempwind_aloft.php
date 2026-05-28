@@ -131,6 +131,7 @@ and end date.</i>
 <h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+</form>
 
 </div></div>
 

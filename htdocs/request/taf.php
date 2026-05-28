@@ -65,13 +65,13 @@ $t->content .= <<<EOM
 <h3>2. Timezone of Observations:</h3>
 <i>The timestamps used in the downloaded files will be set in the
 timezone you specify.</i>
-<SELECT name="tz">
+<select name="tz">
     <option value="UTC">UTC Time</option>
     <option value="America/New_York">Eastern Time</option>
     <option value="America/Chicago">Central Time</option>
     <option value="America/Denver">Mountain Time</option>
     <option value="America/Los_Angeles">Western Time</option>
-</SELECT>
+</select>
 
 <h3>3. Select Start/End Time:</h3><br>
 <i>This defines the time domain to look for TAFs <strong>issued</strong>
@@ -111,6 +111,7 @@ within.</i>
 <h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+</form>
 
 <p><strong>Data Columns</strong>
 <table class="table table-striped">
@@ -124,7 +125,7 @@ within.</i>
 <tr><th>sknt</th><td>Wind Speed (kts)</td></tr>
 <tr><th>drct</th><td>Wind Direction (deg)</td></tr>
 <tr><th>gust</th><td>Wind Gust (kts)</td></tr>
-<tr><th>visibility</th><td>Horizontal Visibility (miles). <strong>Note</strong> 
+<tr><th>visibility</th><td>Horizontal Visibility (miles). <strong>Note</strong>
 Greater than 6 miles is encoded as 6.01</td></tr>
 <tr><th>skyc</th><td>Sky Coverages</td></tr>
 <tr><th>skyl</th><td>Sky Coverage Levels (feet)</td></tr>
