@@ -4,6 +4,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/iemprop.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/request_gis.php";
 
 define("IEM_APPID", 30);
 $t = new MyView();
@@ -38,26 +39,27 @@ while ($row = pg_fetch_assoc($rs)) {
 $sselect = make_select("station", "KDSM", $sids, '', '', FALSE, TRUE);
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS Mainpage</a></li>
- <li class="active">Download Temps and Winds Aloft (FD) Data</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Download Temps and Winds Aloft (FD) Data</li>
+  </ol>
+</nav>
 
 <p>This page allows for download of raw data found within products like this:
 <a href="/wx/afos/p.php?pil=FD1US1">FD1US1</a>.  They contain
-near term forecasts of temperatures and wind speed aloft.  More details on the 
+near term forecasts of temperatures and wind speed aloft.  More details on the
 product can be found with the <a href="https://weather.gov/directives/sym/pd01008012curr.pdf">NWS Directive 10-812</a>.</p>
 
 <p><a href="/cgi-bin/request/tempwind_aloft.py?help" class="btn btn-secondary">
 <i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a> exists for those wishing to script against this
 service. The archive dates back to 23 September 2004.</p>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="/request/gis/cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="/request/gis/awc_gairmets.phtml">Graphical AIRMETs</a>
-<a class="btn btn-primary" href="/request/gis/pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="/request/gis/awc_sigmets.phtml">SIGMETs</a>
-</p>
+EOM;
+
+$t->content .= aviation_request_related_links("tempwind_aloft");
+
+$t->content .= <<<EOM
 
 <form method="GET" action="/cgi-bin/request/tempwind_aloft.py" name="dl" target="_blank">
 <div class="form2url"></div>
@@ -76,9 +78,9 @@ service. The archive dates back to 23 September 2004.</p>
 <tr><td>obtime</td><td>The timestamp within the FD product by which the forecast
 is said to be based off.</td></tr>
 <tr><td>ftime</td><td>The timestamp the values are valid for / forecast timestamp</td></tr>
-<tr><td>tmpc#####</td><td>Air Temperature (&deg;C) at given altitude</td></tr> 
-<tr><td>sknt#####</td><td>Wind Speed (kts) at given altitude</td></tr> 
-<tr><td>drct#####</td><td>Wind Direction (&deg;) at given altitude</td></tr> 
+<tr><td>tmpc#####</td><td>Air Temperature (&deg;C) at given altitude</td></tr>
+<tr><td>sknt#####</td><td>Wind Speed (kts) at given altitude</td></tr>
+<tr><td>drct#####</td><td>Wind Direction (&deg;) at given altitude</td></tr>
 </tbody>
 </table>
 </p>
@@ -129,10 +131,9 @@ and end date.</i>
 <h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+</form>
 
 </div></div>
-
-</form>
 
 EOM;
 $t->render('full.phtml');

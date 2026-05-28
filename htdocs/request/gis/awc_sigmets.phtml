@@ -3,23 +3,26 @@ require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 134);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/request_gis.php";
 $t = new MyView();
 $t->title = "Download Aviation Weather Center SIGMETs Shapefile/KML";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">AWC SIGMETs Download</li>
-</ul>
-</p>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+<li class="breadcrumb-item active" aria-current="page">AWC SIGMETs Download</li>
+</ol>
+</nav>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="awc_gairmets.phtml">Graphical-AIRMETs</a>
-<a class="btn btn-primary" href="pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="/request/taf.php">TAFs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+<header class="mb-4">
+  <h1 class="h3 mb-3">Download Aviation Weather Center SIGMETs</h1>
+  <p class="mb-0">Download archived AWC SIGMET polygons as shapefile, KML, CSV, or Excel based on issuance time in UTC.</p>
+</header>
+EOM;
+
+$content .= aviation_request_related_links("awc_sigmets.phtml");
+
+$content .= <<<EOM
 
 <p><a href="/cgi-bin/request/gis/sigmets.py?help"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 for those wishing to script against this download portal.</p>

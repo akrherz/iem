@@ -7,6 +7,7 @@ require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
 require_once "../../../../include/myview.php";
 require_once "../../../../include/memcache.php";
+require_once "../../../../include/warnings_plot.php";
 $t = new MyView();
 require_once "../../../../include/rview_lib.php";
 $baseuri = "warnings.phtml";
@@ -29,8 +30,11 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
 }
 
 $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
-    "cwas", "warnings",
-    "uscounties", "nexrad", "watches"
+    "cwas",
+    "warnings",
+    "uscounties",
+    "nexrad",
+    "watches"
 );
 if (!is_array($layers)) {
     $layers = array($layers);
@@ -40,8 +44,14 @@ $loop = get_int404("loop", 0);
 if ($loop == 2) $loop = 1;
 $tz = isset($_GET["tz"]) ? strtoupper(xssafe($_GET["tz"])) : "CDT";
 $tzdict = array(
-    "UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000,
-    "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200,
+    "UTC" => 0,
+    "EDT" => 14400,
+    "EST" => 18000,
+    "CDT" => 18000,
+    "CST" => 21600,
+    "MDT" => 21600,
+    "MST" => 25200,
+    "PDT" => 25200,
     "PST" => 28800
 );
 if (!array_key_exists($tz, $tzdict)) {
@@ -109,12 +119,13 @@ if ($isarchive && $basets < $wfo_filter_ts) {
     $filter = 0;
 }
 
-$nt = new NetworkTable(Array("WFO", "RFC", "CWSU"), TRUE);
+$nt = new NetworkTable(array("WFO", "RFC", "CWSU"), TRUE);
 $nt->table["NHC"] = array(
-    "lat" => 25.75, "lon" => -80.38,
+    "lat" => 25.75,
+    "lon" => -80.38,
     "name" => "National Hurricane Center"
 );
-if (!array_key_exists($site, $nt->table)){
+if (!array_key_exists($site, $nt->table)) {
     http_response_code(422);
     die("Invalid Site Identifier");
 }
@@ -177,7 +188,7 @@ $rtlselect = "";
 foreach ($rtl as $key => $val) {
     $rtlselect .= sprintf(
         '<br /><input id="layer%s" name="layers[]" type="checkbox" '
-            .' value="%s"%s> <label for="layer%s">%s</label>',
+            . ' value="%s"%s> <label for="layer%s">%s</label>',
         $key,
         $key,
         (in_array($key, $layers)) ? ' checked="checked"' : '',
@@ -202,7 +213,7 @@ $lselect = "";
 foreach ($ll as $key => $val) {
     $lselect .= sprintf(
         '<br /><input id="layer%s" name="layers[]" type="checkbox" '
-            .' value="%s"%s> <label for="layer%s">%s</label>',
+            . ' value="%s"%s> <label for="layer%s">%s</label>',
         $key,
         $key,
         (in_array($key, $layers)) ? ' checked="checked"' : '',
@@ -220,11 +231,14 @@ foreach ($nt->table as $key => $value) {
 $wselect .= "</select>";
 
 $ar = array(
-    "UTC" => "UTC", "EDT" => "EDT", "EST" => "EST",
+    "UTC" => "UTC",
+    "EDT" => "EDT",
+    "EST" => "EST",
     "CDT" => "CDT",
     "CST" => "CST",
     "MDT" => "MDT",
-    "MST" => "MST", "PDT" => "PDT",
+    "MST" => "MST",
+    "PDT" => "PDT",
     "PST" => "PST"
 );
 $tzselect = make_select("tz", $tz, $ar);
@@ -237,23 +251,37 @@ $ar = array(
 $wgselect = make_select("warngeo", $warngeo, $ar);
 
 $ar = array(
-    5 => "5 km", 10 => "10 km", 25 => "25 km", 50 => "50 km",
-    100 => "100 km", 250 => "250 km", 500 => "500 km", 1000 => "1000 km",
+    5 => "5 km",
+    10 => "10 km",
+    25 => "25 km",
+    50 => "50 km",
+    100 => "100 km",
+    250 => "250 km",
+    500 => "500 km",
+    1000 => "1000 km",
     3000 => "3000 km"
 );
 $zselect = make_select("zoom", $zoom, $ar);
 
 $ar = array(
-    0 => "Hide", 5 => "5 minutes", 10 => "10 minutes",
-    15 => "15 minutes", 30 => "30 minutes", 60 => "60 minutes"
+    0 => "Hide",
+    5 => "5 minutes",
+    10 => "10 minutes",
+    15 => "15 minutes",
+    30 => "30 minutes",
+    60 => "60 minutes"
 );
 $lwselect = make_select("lsrwindow", $lsrwindow, $ar);
 
 $ar = array(
-    "fcster" => "Product Author", "phenomena" => "Product Type",
-    "expire" => "Product Expiration", "issue" => "Product Issued",
-    "sname" => "State Name", "updated" => "Product Updated",
-    "wfo" => "Weather Office", "eventid" => "VTEC Event ID",
+    "fcster" => "Product Author",
+    "phenomena" => "Product Type",
+    "expire" => "Product Expiration",
+    "issue" => "Product Issued",
+    "sname" => "State Name",
+    "updated" => "Product Updated",
+    "wfo" => "Weather Office",
+    "eventid" => "VTEC Event ID",
     "status" => "VTEC Status"
 );
 $sselect = make_select("sortcol", $sortcol, $ar);
@@ -305,7 +333,9 @@ if ($cu == 1) {
 $pradio .= "> <label for=\"cu-convective\">Convective Only</label>";
 
 $ar = array("DESC" => "DESC", "ASC" => "ASC");
-if (!array_key_exists($sortdir, $ar)){ $sortdir = "DESC"; }
+if (!array_key_exists($sortdir, $ar)) {
+    $sortdir = "DESC";
+}
 $sdselect = make_select("sortdir", $sortdir, $ar);
 
 $yselect = yearSelect(2003, $year, "year");
@@ -420,7 +450,21 @@ if ($loop === 1 || $loop === 2) {
     $urls = array();
     for ($i = 0; $i < $frames; $i++) {
         $imgi = $frames - 1 - $i;
-        include "../../../../include/warnings_plot.php";
+        $url = generate_radmap_url(
+            $basets,
+            $tzoff,
+            $imgi,
+            $interval,
+            $width,
+            $height,
+            $tz,
+            $zoom,
+            $lon0,
+            $lat0,
+            $layers,
+            $warngeo,
+            $lsrwindow,
+        );
         $hidden_list .= sprintf('<li>%s</li>', $url);
         $urls[] = "'{$url}'";
     }
@@ -437,10 +481,29 @@ if ($loop === 1 || $loop === 2) {
 <div id="iemjsani" style="width: {$width}px; height: {$height}px;"></div>
 {$hidden_list}
 EOM;
-
 } else {
     $imgi = 0;
-    require "../../../../include/warnings_plot.php";
+    $url = generate_radmap_url(
+        $basets,
+        $tzoff,
+        $imgi,
+        $interval,
+        $width,
+        $height,
+        $tz,
+        $zoom,
+        $lon0,
+        $lat0,
+        $layers,
+        $warngeo,
+        $lsrwindow,
+    );
+    $lpad = $zoom / 100.0;
+    $x0 = $lon0 - $lpad;
+    $y0 = $lat0 - $lpad;
+    $x1 = $lon0 + $lpad;
+    $y1 = $lat0 + $lpad;
+
     $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
     $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\" alt=\"Weather warning map. Click to recenter the display.\">\n";
     $content .= "</form>";
@@ -554,8 +617,14 @@ foreach ($wA as $key => $val) {
     $expire = $tokens[5];
     $status = $tokens[6];
 
-    $warningscat = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",
-        $year, $wfo, $phenomena, $significance, $eventid);
+    $warningscat = sprintf(
+        "/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",
+        $year,
+        $wfo,
+        $phenomena,
+        $significance,
+        $eventid
+    );
 
     $k += 1;
     $issue = strtotime($iA[$key]) - $tzoff;
@@ -563,7 +632,7 @@ foreach ($wA as $key => $val) {
     $updated = strtotime($uA[$key]) - $tzoff;
     $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-    $pp = (array_key_exists($phenomena, $reference["vtec_phenomena"])) ? $reference["vtec_phenomena"][$phenomena]: "(($phenomena))";
+    $pp = (array_key_exists($phenomena, $reference["vtec_phenomena"])) ? $reference["vtec_phenomena"][$phenomena] : "(($phenomena))";
     $content .= "<div class=\"wwa-state\">$sname</div>" .
         "<div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" .
         $pp . " " . $reference["vtec_significance"][$significance] .

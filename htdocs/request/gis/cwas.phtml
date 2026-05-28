@@ -1,34 +1,37 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 133);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/request_gis.php";
 
 $t = new MyView();
 $t->title = "Download CWSU Center Weather Advisory (CWA) Shapefile/KML";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">CWSU CWA Download</li>
-</ul>
-</p>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+<li class="breadcrumb-item active" aria-current="page">CWSU CWA Download</li>
+</ol>
+</nav>
+
+<header class="mb-4">
+  <h1 class="h3 mb-3">Download CWSU Center Weather Advisories</h1>
+  <p class="mb-0">Download archived Center Weather Advisories by issuance time in UTC as shapefile or KML.</p>
+</header>
 
 <p>The IEM has a database archive of
 <a href="https://www.aviationweather.gov/cwamis">CWSU Center Weather Advisories</a>.
 The archive presently dates back to 1 January 2014 and is updated in real-time as
 new products are received and processed.  Robust processing of the CWA has been
 problematic as the raw products are more free-form text than adhering to a format
-specification.  Presently, attempts are not made at processing cancellation statements. 
+specification.  Presently, attempts are not made at processing cancellation statements.
 </p>
+EOM;
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="awc_gairmets.phtml">AWC Graphical-AIRMETs</a>
-<a class="btn btn-primary" href="pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="awc_sigmets.phtml">SIGMETs</a>
-<a class="btn btn-primary" href="/request/taf.php">TAFs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+$content .= aviation_request_related_links("cwas.phtml");
+
+$content .= <<<EOM
 
 <div class="alert alert-warning">
 <p>The data presented here is beta quality and refinements are being made yet

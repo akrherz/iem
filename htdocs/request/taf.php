@@ -4,6 +4,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/iemprop.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/request_gis.php";
 
 define("IEM_APPID", 139);
 $t = new MyView();
@@ -42,13 +43,11 @@ try looking <a href="/wx/afos/p.php?pil=TAFDSM">here</a> as a starting point.</p
 <p><a href="/cgi-bin/request/taf.py?help" class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 exists for those wishing to script against this service. The TAF archive dates back to 1 January 1996.</p>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="/request/gis/cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="/request/gis/awc_gairmets.phtml">Graphical AIRMETs</a>
-<a class="btn btn-primary" href="/request/gis/pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="/request/gis/awc_sigmets.phtml">SIGMETs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+EOM;
+
+$t->content .= aviation_request_related_links("taf");
+
+$t->content .= <<<EOM
 
 <form method="GET" action="/cgi-bin/request/taf.py" name="dl" target="_blank">
 <div class="form2url"></div>
@@ -66,13 +65,13 @@ exists for those wishing to script against this service. The TAF archive dates b
 <h3>2. Timezone of Observations:</h3>
 <i>The timestamps used in the downloaded files will be set in the
 timezone you specify.</i>
-<SELECT name="tz">
+<select name="tz">
     <option value="UTC">UTC Time</option>
     <option value="America/New_York">Eastern Time</option>
     <option value="America/Chicago">Central Time</option>
     <option value="America/Denver">Mountain Time</option>
     <option value="America/Los_Angeles">Western Time</option>
-</SELECT>
+</select>
 
 <h3>3. Select Start/End Time:</h3><br>
 <i>This defines the time domain to look for TAFs <strong>issued</strong>
@@ -112,6 +111,7 @@ within.</i>
 <h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+</form>
 
 <p><strong>Data Columns</strong>
 <table class="table table-striped">
@@ -125,7 +125,7 @@ within.</i>
 <tr><th>sknt</th><td>Wind Speed (kts)</td></tr>
 <tr><th>drct</th><td>Wind Direction (deg)</td></tr>
 <tr><th>gust</th><td>Wind Gust (kts)</td></tr>
-<tr><th>visibility</th><td>Horizontal Visibility (miles). <strong>Note</strong> 
+<tr><th>visibility</th><td>Horizontal Visibility (miles). <strong>Note</strong>
 Greater than 6 miles is encoded as 6.01</td></tr>
 <tr><th>skyc</th><td>Sky Coverages</td></tr>
 <tr><th>skyl</th><td>Sky Coverage Levels (feet)</td></tr>
@@ -139,8 +139,6 @@ Greater than 6 miles is encoded as 6.01</td></tr>
 </table>
 
 </div></div>
-
-</form>
 
 EOM;
 $t->render('full.phtml');

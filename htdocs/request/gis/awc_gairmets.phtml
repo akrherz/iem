@@ -3,47 +3,49 @@ require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 132);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/request_gis.php";
 
 $t = new MyView();
 $t->title = "Download Aviation Weather Center G-AIRMETs Shapefile/KML";
 $content = <<<EOM
-<p>
-<ul class="breadcrumb">
-<li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">AWC G-AIRMETs Download</li>
-</ul>
-</p>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">AWC G-AIRMETs Download</li>
+  </ol>
+</nav>
 
-<p>The IEM has a database archive of
-<a href="https://www.aviationweather.gov/gairmet/">AWC G-AIRMETs</a>
-since their inception on about 3 March 2021.  The IEM also maintains an
-archive of the raw XML text, which you can find listed on the main
-<a href="/wx/afos/list.phtml?source=KKCI">AFOS List Page for KKCI</a>. These
-products are assigned a product identifier of <code>GMT</code> on that page.
-</p>
+<header class="mb-4">
+  <h1 class="h3 mb-3">Download Aviation Weather Center G-AIRMETs</h1>
+  <p class="mb-2">The IEM archives <a href="https://www.aviationweather.gov/gairmet/">AWC G-AIRMETs</a> from their inception around 3 March 2021. The IEM also maintains the raw XML text archive listed on the <a href="/wx/afos/list.phtml?source=KKCI">KKCI AFOS list page</a>, where these products use the identifier <code>GMT</code>.</p>
+  <p class="mb-0"><a href="/cgi-bin/request/gis/awc_gairmets.py?help" class="btn btn-outline-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a></p>
+</header>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="awc_sigmets.phtml">SIGMETs</a>
-<a class="btn btn-primary" href="/request/taf.php">TAFs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+<div class="alert alert-info" role="status">
+  Query this archive by G-AIRMET issue time in UTC and download the result as a shapefile or KML.
+</div>
+EOM;
 
-<p><a href="/cgi-bin/request/gis/awc_gairmets.py?help" class="btn btn-secondary">
-<i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a> exists for those wishing to script against this
-service.</p>
+$content .= aviation_request_related_links("awc_gairmets.phtml");
 
-<form method="GET" action="/cgi-bin/request/gis/awc_gairmets.py">
-<table class="table">
-<thead><tr><th colspan="6">Time Interval for G-AIRMET
-<strong>Issue Time (<code>G-AIRMETISSUETIME</code>)</strong> (UTC)</th></tr></thead>
-<tr>
-    <td></td><th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
-</tr>
-
-<tr>
+$content .= <<<EOM
+<section class="card shadow-sm mb-4" aria-labelledby="request-controls-heading">
+  <div class="card-header bg-body-tertiary">
+    <h2 id="request-controls-heading" class="h5 mb-0">Request Options</h2>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="/cgi-bin/request/gis/awc_gairmets.py" class="mb-0">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-4">
+          <thead class="table-light">
+            <tr><th colspan="6">Time Interval for G-AIRMET Issue Time (<code>G-AIRMETISSUETIME</code>) (UTC)</th></tr>
+            <tr>
+              <th></th><th>Year</th><th>Month</th><th>Day</th>
+              <th>Hour</th><th>Minute</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
 EOM;
 $content .= "<th>Start:</th>
     <td>
@@ -81,21 +83,33 @@ $content .= "<th>Start:</th>
      " . minuteSelect(0, "minute2") . "
     </td>
   </tr>
+</tbody>
 </table>";
 
 $content .= <<<EOM
+      <fieldset class="mb-4">
+        <legend class="h6">Format</legend>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="format" value="shp" checked="checked" id="shp" />
+          <label class="form-check-label" for="shp">Shapefile</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="format" value="kml" id="kml" />
+          <label class="form-check-label" for="kml">KML</label>
+        </div>
+      </fieldset>
 
-<p><strong>Format:</strong><br />
-<input type="radio" name="format" value="shp" checked="checked" id="shp" />
-<label for="shp">Shapefile</label>
-<input type="radio" name="format" value="kml" id="kml" />
-<label for="kml">KML</label>
+      <button type="submit" class="btn btn-primary">Get data</button>
+    </form>
+  </div>
+</section>
 
-<p><input type="submit" value="Giveme data right now!"></p>
-</form>
-
-<h4>Shapefile DBF schema:</h4>
-<pre>
+<section class="card shadow-sm mb-4" aria-labelledby="schema-heading">
+  <div class="card-header bg-body-tertiary">
+    <h2 id="schema-heading" class="h5 mb-0">Shapefile DBF Schema</h2>
+  </div>
+  <div class="card-body">
+<pre class="mb-0">
 Field 0: Type=C/String, Title=`NAME', GML_ID + VALID_AT timestamp
 Field 1: Type=C/String, Title=`LABEL', Event label from GML_ID
 Field 2: Type=C/String, Title=`GML_ID', Verbatim GML_ID from product
@@ -108,11 +122,17 @@ Field 8: Type=C/String, Title=`STATUS', Status of AIRMET
 Field 9: Type=C/String, Title=`HZTYPE', Hazard Type
 Field 10: Type=C/String, Title=`WXCOND', Comma list of weather conditions
 </pre>
+  </div>
+</section>
 
-<h4>Archive / Usage Notes:</h4>
-<ol>
-</ol>
-</form>
+<section class="card shadow-sm" aria-labelledby="notes-heading">
+  <div class="card-header bg-body-tertiary">
+    <h2 id="notes-heading" class="h5 mb-0">Archive and Usage Notes</h2>
+  </div>
+  <div class="card-body">
+    <ol class="mb-0"></ol>
+  </div>
+</section>
 EOM;
 
 $t->content = $content;

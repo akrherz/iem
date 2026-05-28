@@ -16,6 +16,7 @@ $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type='text/css'>
 <link rel="stylesheet" type="text/css" href="index.css" />
 EOM;
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
@@ -102,7 +103,7 @@ $t->content = <<<EOM
                             <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures" class="img-fluid"
                                 alt="4 inch soil temperatures quick plot"
                                 loading="lazy" decoding="async"
-                             data-target="{$EXTERNAL_BASEURL}/agclimate/soilt.php">
+                             data-target="{$eburl}/agclimate/soilt.php">
                     </div>
 
                     <div class="plot-item">
@@ -110,7 +111,7 @@ $t->content = <<<EOM
                             <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall" class="img-fluid"
                                 alt="Today's precipitation quick plot"
                                 loading="lazy" decoding="async"
-                             data-target="{$EXTERNAL_BASEURL}">
+                             data-target="{$eburl}">
                     </div>
 
                     <div class="plot-item">
@@ -119,7 +120,7 @@ $t->content = <<<EOM
                              role="button" title="Precip Departure Aug 1" class="img-fluid"
                                 alt="Precipitation departure quick plot"
                                 loading="lazy" decoding="async"
-                             data-target="{$EXTERNAL_BASEURL}">
+                             data-target="{$eburl}">
                     </div>
 
                     <div class="plot-item">
@@ -128,7 +129,7 @@ $t->content = <<<EOM
                                 alt="Days to accumulate two inches quick plot"
                                 loading="lazy" decoding="async"
                              title="Days to Accumulate 2 inches"
-                             data-target="{$EXTERNAL_BASEURL}">
+                             data-target="{$eburl}">
                     </div>
 
                     <div class="plot-item">
@@ -137,7 +138,7 @@ $t->content = <<<EOM
                                 alt="Iowa drought coverage quick plot"
                                 loading="lazy" decoding="async"
                              title="Iowa Drought Coverage"
-                             data-target="{$EXTERNAL_BASEURL}">
+                             data-target="{$eburl}">
                     </div>
 
                     <div class="plot-item">
@@ -146,7 +147,7 @@ $t->content = <<<EOM
                                 alt="NASS corn denting progress quick plot"
                                 loading="lazy" decoding="async"
                              title="USDA NASS Corn Denting Progress"
-                             data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
+                             data-target="{$eburl}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
                     </div>
 
                     <div class="plot-item">
@@ -155,7 +156,7 @@ $t->content = <<<EOM
                         alt="Climate district ranks quick plot"
                         loading="lazy" decoding="async"
                         title="Climate District Precip Ranks"
-                        data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year={$YEAR}&month=summer&sdate={$YEAR}%2F04%2F05&edate={$YEAR}%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
+                        data-target="{$eburl}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year={$YEAR}&month=summer&sdate={$YEAR}%2F04%2F05&edate={$YEAR}%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
                     </div>
                 </div>
             </div>
