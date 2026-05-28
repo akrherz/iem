@@ -1,7 +1,8 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/request_gis.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();
@@ -44,7 +45,7 @@ $content = <<<EOM
 
 <p>The IEM attempts to process a feed of Pilot Reports (PIREPs). This
 processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/pirep.py">PyIEM Library</a>.
-Sadly, there is not strict coherence to a format specification and so a 
+Sadly, there is not strict coherence to a format specification and so a
 number of reports are simply unparsable.  This archive should not be
 considered 'complete'.</p>
 
@@ -62,13 +63,11 @@ longer periods of data. <a href="/cgi-bin/request/gis/pireps.py?help"
 class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 exists for those wishing to script against this service.</p>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="awc_gairmets.phtml">Graphical AIRMETs</a>
-<a class="btn btn-primary" href="awc_sigmets.phtml">SIGMETs</a>
-<a class="btn btn-primary" href="/request/taf.php">TAFs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+EOM;
+
+$content .= aviation_request_related_links("pireps.php");
+
+$content .= <<<EOM
 
 <form method="GET" action="/cgi-bin/request/gis/pireps.py">
 <div class="form2url"></div>
@@ -213,7 +212,7 @@ Field 4: Type=C/String, Title='ICING', The icing /IC portion of the PIREP
 Field 5: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
 Field 6: Type=C/String, Title='ARTCC', The ARTCC identifier, when applicable.
 Field 7: Type=N/Double, Title='LAT', Latitude
-Field 8: Type=N/Double, Title='LON', Longitude 
+Field 8: Type=N/Double, Title='LON', Longitude
 Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
 </pre>
 
@@ -226,7 +225,7 @@ Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
  reprocessed to fix this issue.</li>
  <li><strong>31 July 2024:</strong> Going forward, a IEM product identifier
  field has been added to allow the retrieval of the raw NWS text product that
- the report was extracted from.  Hope to backfill this, at some point.</li> 
+ the report was extracted from.  Hope to backfill this, at some point.</li>
  <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
  portions of the PIREP. Added the associated, when applicable, ARTCC
  identifier for the location of the PIREP.</li>

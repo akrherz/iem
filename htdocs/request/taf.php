@@ -4,6 +4,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/iemprop.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/request_gis.php";
 
 define("IEM_APPID", 139);
 $t = new MyView();
@@ -42,13 +43,11 @@ try looking <a href="/wx/afos/p.php?pil=TAFDSM">here</a> as a starting point.</p
 <p><a href="/cgi-bin/request/taf.py?help" class="btn btn-secondary"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
 exists for those wishing to script against this service. The TAF archive dates back to 1 January 1996.</p>
 
-<p><strong>Related:</strong>
-<a class="btn btn-primary" href="/request/gis/cwas.phtml">CWSU Center Weather Advisories</a>
-<a class="btn btn-primary" href="/request/gis/awc_gairmets.phtml">Graphical AIRMETs</a>
-<a class="btn btn-primary" href="/request/gis/pireps.php">PIREPs</a>
-<a class="btn btn-primary" href="/request/gis/awc_sigmets.phtml">SIGMETs</a>
-<a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
-</p>
+EOM;
+
+$t->content .= aviation_request_related_links("taf");
+
+$t->content .= <<<EOM
 
 <form method="GET" action="/cgi-bin/request/taf.py" name="dl" target="_blank">
 <div class="form2url"></div>
@@ -139,8 +138,6 @@ Greater than 6 miles is encoded as 6.01</td></tr>
 </table>
 
 </div></div>
-
-</form>
 
 EOM;
 $t->render('full.phtml');
