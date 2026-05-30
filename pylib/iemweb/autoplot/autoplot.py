@@ -34,7 +34,7 @@ from iemweb.autoplot import import_script
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all="ignore")
 
-
+AUTOPLOT_TIMING = "AutoplotTiming "
 HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
 HTTP422 = "422 Unprocessable Entity"
@@ -376,11 +376,22 @@ def workflow(mc, environ: dict, fmt: str):
         error_log(environ, f"Exception while writting key: {mckey} {exp}")
     if isinstance(mixedobj, mpl.figure.Figure):
         mixedobj.clear()
+    # scripts/dbutil/mine_autoplot persists the log messages to the database.
+    # Emit a structured payload so the miner is not tied to free-form text.
+    # rsyslog files these prefixed messages to a special log file
     syslog.syslog(
         syslog.LOG_LOCAL1 | syslog.LOG_INFO,
-        f"Autoplot[{scriptnum:3.0f}] "
-        f"Timing: {(utc() - start_time).total_seconds():.3f}s "
-        f"Key: {mckey} Cache: {dur}[s]",
+        AUTOPLOT_TIMING
+        + json.dumps(
+            {
+                "appid": scriptnum,
+                "timing": round((utc() - start_time).total_seconds(), 3),
+                "uri": mckey,
+                "cache": dur,
+            },
+            separators=(",", ":"),
+            sort_keys=True,
+        ),
     )
     return HTTP200, content
 
