@@ -18,12 +18,18 @@ def parse_timing_line(line: str):
     """Parse json payload."""
     pos = line.find(AUTOPLOT_TIMING)
     if pos > -1:
-        payload = json.loads(line[pos + len(AUTOPLOT_TIMING) :].strip())
-        return (
-            payload["appid"],
-            payload["timing"],
-            payload["uri"],
-        )
+        try:
+            payload = json.loads(line[pos + len(AUTOPLOT_TIMING) :].strip())
+            return (
+                payload["appid"],
+                payload["timing"],
+                payload["uri"],
+            )
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            # Producer bounds payload size, but syslog truncation can still
+            # leave a partial JSON document in the log file.
+            LOG.debug("Skipping malformed autoplot timing payload")
+            return None
     return None
 
 

@@ -2,6 +2,8 @@
 
 from http.client import responses as HTTP_RESPONSES
 
+from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import TELEMETRY, write_telemetry
 
 from iemweb import error_log
@@ -20,6 +22,7 @@ def application(environ, start_response):
             environ.get("REDIRECT_SCRIPT_URL"),
             environ.get("REQUEST_URI"),
             environ.get("HTTP_HOST"),
+            utc().strftime(ISO8601),
         )
     )
 

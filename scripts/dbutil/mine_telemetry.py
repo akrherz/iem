@@ -20,11 +20,15 @@ def parse_telemetry_line(line: str):
     """Parse json payload."""
     pos = line.find(PREFIX)
     if pos > -1:
-        payload = json.loads(line[pos + len(PREFIX) :].strip())
-        payload["valid"] = datetime.strptime(
-            payload["valid"], ISO8601
-        ).replace(tzinfo=timezone.utc)
-        return TELEMETRY(**payload)
+        try:
+            payload = json.loads(line[pos + len(PREFIX) :].strip())
+            payload["valid"] = datetime.strptime(
+                payload["valid"], ISO8601
+            ).replace(tzinfo=timezone.utc)
+            return TELEMETRY(**payload)
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exp:
+            LOG.debug("Skipping malformed telemetry payload: %s", exp)
+            return None
     return None
 
 

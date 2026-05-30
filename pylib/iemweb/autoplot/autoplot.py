@@ -35,6 +35,7 @@ from iemweb.autoplot import import_script
 np.seterr(all="ignore")
 
 AUTOPLOT_TIMING = "AutoplotTiming "
+AUTOPLOT_TIMING_URI_MAXLEN = 1024
 HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
 HTTP422 = "422 Unprocessable Entity"
@@ -377,8 +378,8 @@ def workflow(mc, environ: dict, fmt: str):
     if isinstance(mixedobj, mpl.figure.Figure):
         mixedobj.clear()
     # scripts/dbutil/mine_autoplot persists the log messages to the database.
-    # Emit a structured payload so the miner is not tied to free-form text.
-    # rsyslog files these prefixed messages to a special log file
+    # Keep the URI bounded so the JSON payload stays below common syslog size
+    # assumptions; the miner still skips malformed or truncated lines.
     syslog.syslog(
         syslog.LOG_LOCAL1 | syslog.LOG_INFO,
         AUTOPLOT_TIMING
@@ -386,7 +387,7 @@ def workflow(mc, environ: dict, fmt: str):
             {
                 "appid": scriptnum,
                 "timing": round((utc() - start_time).total_seconds(), 3),
-                "uri": mckey,
+                "uri": mckey[:AUTOPLOT_TIMING_URI_MAXLEN],
                 "cache": dur,
             },
             separators=(",", ":"),
