@@ -25,7 +25,7 @@ def parse_timing_line(line: str):
                 payload["timing"],
                 payload["uri"],
             )
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        except (KeyError, TypeError, ValueError):
             # Producer bounds payload size, but syslog truncation can still
             # leave a partial JSON document in the log file.
             LOG.debug("Skipping malformed autoplot timing payload")
