@@ -3,27 +3,46 @@
 Run from RUN_10_AFTER.sh
 """
 
-import re
+import json
 from datetime import datetime, timedelta
 
+from iemweb.autoplot.autoplot import AUTOPLOT_TIMING
 from pyiem.database import get_dbconn
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
-LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
 LOGFN = "/var/log/app/autoplot_log"
+
+
+def parse_timing_line(line: str):
+    """Parse json payload."""
+    pos = line.find(AUTOPLOT_TIMING)
+    if pos > -1:
+        try:
+            payload = json.loads(line[pos + len(AUTOPLOT_TIMING) :].strip())
+            return (
+                payload["appid"],
+                payload["timing"],
+                payload["uri"],
+            )
+        except (KeyError, TypeError, ValueError):
+            # Producer bounds payload size, but syslog truncation can still
+            # leave a partial JSON document in the log file.
+            LOG.debug("Skipping malformed autoplot timing payload")
+            return None
+    return None
 
 
 def archive(cursor):
     """Move data out of the way."""
+    begints = utc() - timedelta(days=10)
     cursor.execute(
         "insert into autoplot_timing_archive select * from autoplot_timing "
-        "WHERE valid < now() - '10 days'::interval"
+        "WHERE valid < %s",
+        (begints,),
     )
-    cursor.execute(
-        "DELETE from autoplot_timing where valid < now() - '10 days'::interval"
-    )
-    LOG.info("Archived %s rows", cursor.rowcount)
+    cursor.execute("DELETE from autoplot_timing where valid < %s", (begints,))
+    LOG.info("Archived %s rows prior to %s", cursor.rowcount, begints)
 
 
 def get_dbendts(cursor):
@@ -45,10 +64,10 @@ def find_and_save(cursor, dbendts):
     with open(LOGFN, "rb") as fh:
         for line_in in fh:
             line = line_in.decode("utf-8", "ignore")
-            tokens = LOGRE.findall(line)
-            if len(tokens) != 1:
+            parsed = parse_timing_line(line)
+            if parsed is None:
                 continue
-            (appid, timing, uri) = tokens[0]
+            (appid, timing, uri) = parsed
             try:
                 valid = datetime.strptime(
                     f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"

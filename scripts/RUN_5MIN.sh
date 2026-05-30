@@ -4,6 +4,9 @@ VALID=$(date -u +'%Y-%m-%dT%H:%M'):00
 cd cache
 python nws_wawa_archive.py &
 
+cd ../dbutil
+python mine_telemetry.py &
+
 cd ../isusm
 python agg_precip.py &
 python csv2ldm.py &
