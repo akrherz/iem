@@ -12,6 +12,8 @@ temperature reports from the major ASOS sites.
 Changelog
 ---------
 
+- 2026-05-31: A bug was squashed with the METAR observation consideration so
+  to get a proper local standard time window for the given day.
 - 2026-02-26: Updates to hopefully have full closure over potential changes
   found with subsequent CLI and CF6 updates.  Previously, a 144 hour forward
   time window was assumed.
@@ -20,10 +22,10 @@ Changelog
 Example Requests
 ----------------
 
-Audit CLI for Des Moines on 25 Feb 2024
+Audit CLI for Des Moines on 25 Feb 2020
 
 https://mesonet.agron.iastate.edu/json/cli_audit.py\
-?station=KDSM&date=2024-02-25
+?station=KDSM&date=2020-02-25
 
 """
 
@@ -137,8 +139,8 @@ def add_metar_events(
     # Till midnight standard the next day
     midnight_local = datetime(dt.year, dt.month, dt.day, tzinfo=tzinfo)
     if midnight_local.dst() != timedelta(0):
-        # We are in DST, so we need to shift back an hour
-        midnight_local = midnight_local - timedelta(hours=1)
+        # We are in DST, so we need to shift an hour ahead
+        midnight_local = midnight_local + timedelta(hours=1)
     sts = midnight_local - timedelta(minutes=10)
     # Jump well into the next day and then set back to midnight
     ets = (midnight_local + timedelta(hours=26)).replace(hour=0, minute=0)
