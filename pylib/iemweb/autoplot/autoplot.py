@@ -149,9 +149,19 @@ def handle_error(exp, fmt, environ: dict):
     return str(exp)
 
 
-def get_res_by_fmt(p, fmt, fdict):
+def get_res_by_fmt(p, fmt: str, fdict):
     """Do the work of actually calling things"""
     mod = import_script(p)
+    # Ensure fmt and autoplot module jive
+    fmt2method = {
+        "geotiff": "get_raster",
+        "geojson": "geojson",
+        "js": "get_highcharts",
+    }
+    if fmt in fmt2method and not hasattr(mod, fmt2method[fmt]):
+        raise BadWebRequest(
+            f"Format {fmt} is not supported by this autoplot module"
+        )
 
     meta = mod.get_description()
     # When _gallery is set, inspect meta to see if it has something hardcoded
@@ -240,7 +250,10 @@ def workflow(mc, environ: dict, fmt: str):
     fdict = parser(q)
     # p=number is the python backend code called by this framework
     scriptnum = int(environ["p"])
-    fdict["dpi"] = max(min([int(float(fdict.get("dpi", 100))), 500]), 50)
+    try:
+        fdict["dpi"] = max(min([int(float(fdict.get("dpi", 100))), 500]), 50)
+    except ValueError as exp:
+        raise BadWebRequest("dpi must be a number") from exp
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
@@ -268,6 +281,7 @@ def workflow(mc, environ: dict, fmt: str):
                 environ.get("SCRIPT_NAME"),
                 environ.get("REQUEST_URI"),
                 environ.get("HTTP_HOST"),
+                utc().strftime(ISO8601),
             )
         )
         # Everything else should be considered fatal

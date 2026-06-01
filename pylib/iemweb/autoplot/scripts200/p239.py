@@ -197,6 +197,8 @@ def plotter(ctx: dict):
     dcol = f"{ctx['how']}_departure"
     deltas = df[dcol].to_numpy()
     extent = df[dcol].abs().max()
+    if extent == 0:
+        raise NoDataFound("No departures found, cannot make a plot.")
     bins = pretty_bins(0 - extent, extent)
     cmap = get_cmap(ctx["cmap"])
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
