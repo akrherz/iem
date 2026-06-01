@@ -1,6 +1,8 @@
 /afos/retrieve.py?sdate=2024-1-1&edate=2024-1-31&pil=DSMDSMDSM
 /afos/retrieve.py?pil=MTRDSM&fmt=zip
 /autoplot/autoplot.py?q=84&sector=IA&network=WFO&src:mrms&opt=per&usdm=yes&ptype=g&date=2021-07-25\xc2\xa7or&edate=2021-07-31&clip=yes&cmap=BrBG::_r=t&dpi=100&fmt=geotiff
+/autoplot/autoplot.py?p=160&fmt=geojson
+/autoplot/autoplot.py?p=160&q=dpi:100.csv
 /autoplot/index.py?edate=2013%2F10%2F14&opt=acc&ptype=c&q=84&sdate=2013%2F10%2F01§or%3DIA&src=mrms&usdm=no
 /autoplot/index.py?_opt_edate=on&_opt_sdate=on&_r=t&_wait=no&cmap=jet&dpi=100&edate=0729%C2%A7or%3Dmidwest&month=all&opt=both&q=125&sdate=0723&src=ncei_climate91&state=IA&var=avg_high
 /autoplot/index.py?network=IA_ASOS&ets=2024%2F07%2F30%201200&_r=43&_wait=no&q=211&zstation=DSM&ptype=meteo&sts=scnr_engine_sink_tracer_47ac7a1a8e11a2a64c14b1607dbac6be
