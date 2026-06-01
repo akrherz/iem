@@ -4,61 +4,45 @@ ignore_user_abort(true);
 
 require_once "../../../include/throttle.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/mlib.php";
 
-date_default_timezone_set('UTC');
-putenv("TZ=GMT");
-/* This bad boy converts a PNG to a geo-tiff */
+$tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('php_tmp_', true);
+mkdir($tempDir, 0700, true);
+chdir($tempDir);
 
-$dstr = get_str404("dstr", null);
-if (is_null($dstr)) {
-    http_response_code(422);
-    die("Invalid date format");
-}
+$dt = dstr2dt(get_str404("dstr"));
+
 $sector = substr(get_str404("sector", "us"), 0, 2);
-$year = intval(substr($dstr, 0, 4));
-$month = intval(substr($dstr, 4, 2));
-$day = intval(substr($dstr, 6, 2));
-$hour = intval(substr($dstr, 8, 2));
-$minute = intval(substr($dstr, 10, 2));
-$ts = mktime($hour, $minute, 0, $month, $day, $year);
-$now = time();
-if ($ts > $now) {
-    die("Request from the future?");
-}
-if (! is_dir("/tmp/png2gtiff")){
-    mkdir("/tmp/png2gtiff", 0755);
-}
-chdir("/tmp/png2gtiff");
 
-$outFile = sprintf("n0r_%s", date("YmdHi", $ts));
-$zipFile = sprintf("n0r_%s.zip", date("YmdHi", $ts));
-
-if (is_file($zipFile)) {
-    header("Content-type: application/octet-stream");
-    header("Content-Disposition: attachment; filename={$zipFile}");
-    readfile($zipFile);
-    die();
-}
+$outFile = sprintf("n0r_%s", $dt->format("YmdHi"));
+$zipFile = sprintf("n0r_%s.zip", $dt->format("YmdHi"));
 
 $S = strtoupper($sector);
-if ($ts > ($now - 360.0)) {
+$now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
+if ($dt > ($now->sub(new DateInterval('PT6M')))) {
     $inFile = "/mesonet/ldmdata/gis/images/4326/{$S}COMP/n0r_0.tif";
 } else {
-    $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/{$sector}comp/n0r_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts));
+    $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/{$sector}comp/n0r_%s.png", $dt->format("Y/m/d"), $dt->format("YmdHi"));
 }
 
 if (!is_file($inFile)) die("No GIS composite found for this time!");
 
+$cmd = sprintf("gdalwarp -t_srs %s -s_srs %s -of GTIFF %s %s.tif",
+    escapeshellarg("EPSG:4326"),
+    escapeshellarg("EPSG:4326"),
+    escapeshellarg($inFile),
+    escapeshellarg($outFile));
+shell_exec($cmd);
 
-$cmd = sprintf("gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
-`$cmd`;
-
-$cmd = "zip $zipFile {$outFile}.tif";
-`$cmd`;
+$cmd = sprintf("zip %s %s.tif",
+    escapeshellarg($zipFile),
+    escapeshellarg($outFile));
+shell_exec($cmd);
 
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename={$zipFile}");
 readfile($zipFile);
 
-unlink($zipFile);
-unlink("{$outFile}.tif");
+// Cleanup temp files
+chdir("..");
+shell_exec("rm -rf ". escapeshellarg($tempDir));
