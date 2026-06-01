@@ -2,8 +2,8 @@
 
 import json
 import os
+import socket
 import sys
-import syslog
 import tempfile
 import traceback
 from datetime import timezone
@@ -24,7 +24,7 @@ from pyiem.exceptions import (
     UnknownStationException,
 )
 from pyiem.reference import ISO8601
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 
@@ -395,9 +395,10 @@ def workflow(mc, environ: dict, fmt: str):
     # scripts/dbutil/mine_autoplot persists the log messages to the database.
     # Keep the URI bounded so the JSON payload stays below common syslog size
     # assumptions; the miner still skips malformed or truncated lines.
-    syslog.syslog(
-        syslog.LOG_LOCAL1 | syslog.LOG_INFO,
-        AUTOPLOT_TIMING
+    # 141 is local1.notice
+    payload = (
+        "<141>"
+        + AUTOPLOT_TIMING
         + json.dumps(
             {
                 "appid": scriptnum,
@@ -407,8 +408,15 @@ def workflow(mc, environ: dict, fmt: str):
             },
             separators=(",", ":"),
             sort_keys=True,
-        ),
-    )
+        )
+    ).encode("utf-8")
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sock:
+            sock.setblocking(False)
+            sock.sendto(payload, "/run/rsyslog/telemetry.sock")
+    except (BlockingIOError, OSError):
+        LOG.exception("Failed to send telemetry payload")
+
     return HTTP200, content
 
 
