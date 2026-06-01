@@ -28,7 +28,7 @@ from pyiem.util import LOG, utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 
-from iemweb import error_log
+from iemweb import RSYSLOG_SIDEDOOR_SOCKET, error_log
 from iemweb.autoplot import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy
@@ -413,7 +413,7 @@ def workflow(mc, environ: dict, fmt: str):
     try:
         with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sock:
             sock.setblocking(False)
-            sock.sendto(payload, "/run/rsyslog/telemetry.sock")
+            sock.sendto(payload, RSYSLOG_SIDEDOOR_SOCKET)
     except (BlockingIOError, OSError):
         LOG.exception("Failed to send telemetry payload")
 
