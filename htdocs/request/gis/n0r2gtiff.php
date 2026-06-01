@@ -10,17 +10,12 @@ $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('php_tmp_', true);
 mkdir($tempDir, 0700, true);
 chdir($tempDir);
 
+$dt = dstr2dt(get_str404("dstr"));
+
 $sector = substr(get_str404("sector", "us"), 0, 2);
 
 $outFile = sprintf("n0r_%s", $dt->format("YmdHi"));
 $zipFile = sprintf("n0r_%s.zip", $dt->format("YmdHi"));
-
-if (is_file($zipFile)) {
-    header("Content-type: application/octet-stream");
-    header("Content-Disposition: attachment; filename={$zipFile}");
-    readfile($zipFile);
-    die();
-}
 
 $S = strtoupper($sector);
 $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
@@ -50,4 +45,4 @@ readfile($zipFile);
 
 // Cleanup temp files
 chdir("..");
-shell_exec("rm -rf $tempDir");
+shell_exec("rm -rf ". escapeshellarg($tempDir));

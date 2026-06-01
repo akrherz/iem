@@ -53,4 +53,4 @@ unlink($zipFile);
 unlink("{$outFile}.tif");
 
 chdir("..");
-shell_exec("rm -rf $tempDir");
+shell_exec("rm -rf ". escapeshellarg($tempDir));

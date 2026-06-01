@@ -18,11 +18,17 @@ function dstr2dt($dstr, $minute_modulo = 5) {
         http_response_code(422);
         die("Invalid date format");
     }
-    $year = intval(substr($dstr, 0, 4));
-    $month = intval(substr($dstr, 4, 2));
-    $day = intval(substr($dstr, 6, 2));
-    $hour = intval(substr($dstr, 8, 2));
-    $minute = intval(substr($dstr, 10, 2));
+    // The bang ensures all values are zeroed out
+    $dt = DateTimeImmutable::createFromFormat(
+        "!YmdHi",
+        $dstr,
+        new DateTimeZone("UTC")
+    );
+    if ($dt === false) {
+        http_response_code(422);
+        die("Invalid date format");
+    }
+    $minute = (int)$dt->format("i");
 
     // Ensure the minute is modulo the specified value
     if ($minute % $minute_modulo != 0) {
@@ -30,10 +36,6 @@ function dstr2dt($dstr, $minute_modulo = 5) {
         die("Minute must be a multiple of $minute_modulo");
     }
 
-    $dt = new DateTimeImmutable(
-        sprintf("%04d-%02d-%02d %02d:%02d:00", $year, $month, $day, $hour, $minute),
-        new DateTimeZone("UTC"),
-    );
     $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
     if ($dt > $now) {
         http_response_code(422);
