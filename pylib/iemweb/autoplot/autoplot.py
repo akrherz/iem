@@ -2,7 +2,6 @@
 
 import json
 import os
-import socket
 import sys
 import tempfile
 import traceback
@@ -24,11 +23,11 @@ from pyiem.exceptions import (
     UnknownStationException,
 )
 from pyiem.reference import ISO8601
-from pyiem.util import LOG, utc
+from pyiem.util import utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 
-from iemweb import RSYSLOG_SIDEDOOR_SOCKET, error_log
+from iemweb import emit_to_sidedoor, error_log
 from iemweb.autoplot import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy
@@ -410,12 +409,7 @@ def workflow(mc, environ: dict, fmt: str):
             sort_keys=True,
         )
     ).encode("utf-8")
-    try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sock:
-            sock.setblocking(False)
-            sock.sendto(payload, RSYSLOG_SIDEDOOR_SOCKET)
-    except (BlockingIOError, OSError):
-        LOG.exception("Failed to send telemetry payload")
+    emit_to_sidedoor(payload)
 
     return HTTP200, content
 
