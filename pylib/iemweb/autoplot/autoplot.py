@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-import syslog
 import tempfile
 import traceback
 from datetime import timezone
@@ -28,7 +27,7 @@ from pyiem.util import utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 
-from iemweb import error_log
+from iemweb import emit_to_sidedoor, error_log
 from iemweb.autoplot import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy
@@ -395,9 +394,10 @@ def workflow(mc, environ: dict, fmt: str):
     # scripts/dbutil/mine_autoplot persists the log messages to the database.
     # Keep the URI bounded so the JSON payload stays below common syslog size
     # assumptions; the miner still skips malformed or truncated lines.
-    syslog.syslog(
-        syslog.LOG_LOCAL1 | syslog.LOG_INFO,
-        AUTOPLOT_TIMING
+    # 141 is local1.notice
+    payload = (
+        "<141>"
+        + AUTOPLOT_TIMING
         + json.dumps(
             {
                 "appid": scriptnum,
@@ -407,8 +407,10 @@ def workflow(mc, environ: dict, fmt: str):
             },
             separators=(",", ":"),
             sort_keys=True,
-        ),
-    )
+        )
+    ).encode("utf-8")
+    emit_to_sidedoor(payload)
+
     return HTTP200, content
 
 

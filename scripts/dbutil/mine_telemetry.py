@@ -47,10 +47,10 @@ def get_dbendts(cursor):
     ts = cursor.fetchone()[0]
     if ts is None:
         ts = datetime.now(timezone.utc) - timedelta(hours=1)
-    return ts
+    return ts.astimezone(timezone.utc)
 
 
-def find_and_save(cursor, dbendts):
+def find_and_save(cursor, dbendts: datetime):
     """Do work please"""
     utcnow = datetime.now(timezone.utc)
     inserts = 0
