@@ -251,8 +251,9 @@ def workflow(mc, environ: dict, fmt: str):
     # p=number is the python backend code called by this framework
     scriptnum = int(environ["p"])
     try:
-        fdict["dpi"] = max(min([int(float(fdict.get("dpi", 100))), 500]), 50)
-    except ValueError as exp:
+        dpi = int(float(fdict.get("dpi", 100)))
+        fdict["dpi"] = max(min(dpi, 500), 50)
+    except (TypeError, ValueError, OverflowError) as exp:
         raise BadWebRequest("dpi must be a number") from exp
 
     # memcache keys can not have spaces
