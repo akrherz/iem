@@ -1,6 +1,48 @@
 <?php
 
 /**
+ * Common logic for converting a hacky 12 char time string in UTC
+ *
+ * @param string $dstr The date string in the format YYYYMMDDHHMM
+ * @param int $minute_modulo The minute must be a multiple of this value (default is 5)
+ * @return DateTimeImmutable The corresponding DateTimeImmutable object in UTC
+ * @throws Exception If the date string is invalid or represents a future time
+ */
+function dstr2dt($dstr, $minute_modulo = 5) {
+    if (is_null($dstr)) {
+        http_response_code(422);
+        die("Invalid date format");
+    }
+    // Validate dstr format (12 digits: YYYYMMDDHHMM)
+    if (!preg_match('/^\d{12}$/', $dstr)) {
+        http_response_code(422);
+        die("Invalid date format");
+    }
+    $year = intval(substr($dstr, 0, 4));
+    $month = intval(substr($dstr, 4, 2));
+    $day = intval(substr($dstr, 6, 2));
+    $hour = intval(substr($dstr, 8, 2));
+    $minute = intval(substr($dstr, 10, 2));
+
+    // Ensure the minute is modulo the specified value
+    if ($minute % $minute_modulo != 0) {
+        http_response_code(422);
+        die("Minute must be a multiple of $minute_modulo");
+    }
+
+    $dt = new DateTimeImmutable(
+        sprintf("%04d-%02d-%02d %02d:%02d:00", $year, $month, $day, $hour, $minute),
+        new DateTimeZone("UTC"),
+    );
+    $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
+    if ($dt > $now) {
+        http_response_code(422);
+        die("Request from the future?");
+    }
+    return $dt;
+}
+
+/**
  * Convert a vague 3 character WFO identifier to a 4 character one
  * @param string $wfo3 the 3 character WFO identifier
  * @return string the 4 character WFO identifier
