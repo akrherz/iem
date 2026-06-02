@@ -483,8 +483,7 @@ def plotter(ctx: dict):
             0.02,
         )
         rng = pretty_bins(0, maxval)
-        if rng[0] > 0.011:
-            rng[0] = 0.01
+        rng[0] = 0.01
 
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
