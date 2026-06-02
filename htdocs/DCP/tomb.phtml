@@ -8,8 +8,8 @@ require_once "../../include/iemprop.php";
 $prop = get_iemprop("nwsli.syncdate");
 $nwsli_sync_date = is_null($prop) ? "N/A": $prop;
 $pgconn = iemdb('hads');
-$rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
-    . " WHERE length(nwsli) = 5 and "
+$rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown "
+    . "WHERE length(nwsli) = 5 and "
     . "nwsli ~* '[A-Z][A-Z][A-Z][A-Z][0-9]' "
     . "GROUP by nwsli ORDER by nwsli ASC");
 $table = <<<EOM

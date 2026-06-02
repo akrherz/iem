@@ -2,7 +2,6 @@
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/vendor/mapscript.php";
 
-
 $map = new mapObj("robins.map");
 
 $counties = $map->getLayerByName("counties");

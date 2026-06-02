@@ -1,10 +1,10 @@
-<?php 
+<?php
 require_once "../../../../config/settings.inc.php";
 
 require_once "../../../../include/myview.php";
 require_once "../../../../include/mlib.php";
 force_https();
-$OL = "10.6.1";
+$OL = "10.9.0";
 $t = new MyView();
 $t->title = "Profitability Map";
 $t->headextra = <<<EOM
@@ -23,7 +23,7 @@ $t->content = <<<EOM
   <div class="col-md-12">
   <h3><i class="bi bi-bar-chart" aria-hidden="true"></i> Iowa Corn/Soybean Profitability Map</h3>
     <p class="lead">
-      This interactive map shows estimates of profitability for corn and soybean production 
+      This interactive map shows estimates of profitability for corn and soybean production
       across Iowa fields. Select a year to view profitability data for that growing season.
     </p>
   </div>
@@ -37,7 +37,7 @@ $t->content = <<<EOM
       </div>
     </div>
   </div>
-  
+
   <div class="col-md-3">
     <!-- Year Selection Panel -->
     <div class="card mb-3">
@@ -48,16 +48,16 @@ $t->content = <<<EOM
         <div class="btn-group-vertical d-grid gap-1" role="group" aria-label="Year selection">
           <input type="radio" class="btn-check" name="whichyear" id="y2010" value="2010" checked>
           <label class="btn btn-outline-primary" for="y2010">2010</label>
-          
+
           <input type="radio" class="btn-check" name="whichyear" id="y2011" value="2011">
           <label class="btn btn-outline-primary" for="y2011">2011</label>
-          
+
           <input type="radio" class="btn-check" name="whichyear" id="y2012" value="2012">
           <label class="btn btn-outline-primary" for="y2012">2012</label>
-          
+
           <input type="radio" class="btn-check" name="whichyear" id="y2013" value="2013">
           <label class="btn btn-outline-primary" for="y2013">2013</label>
-          
+
           <input type="radio" class="btn-check" name="whichyear" id="y2015" value="2015">
           <label class="btn btn-outline-primary" for="y2015">2015</label>
         </div>
@@ -80,8 +80,8 @@ $t->content = <<<EOM
   <div class="col-md-12">
     <div class="card">
       <div class="card-header">
-        <button class="btn btn-link p-0 text-decoration-none" type="button" id="disclaimer_btn" 
-                data-bs-toggle="collapse" data-bs-target="#disclaimerContent" 
+        <button class="btn btn-link p-0 text-decoration-none" type="button" id="disclaimer_btn"
+                data-bs-toggle="collapse" data-bs-target="#disclaimerContent"
                 aria-expanded="false" aria-controls="disclaimerContent">
           <i class="bi bi-info-circle" aria-hidden="true"></i> View Disclaimer
         </button>
@@ -109,29 +109,29 @@ $t->content = <<<EOM
           description of the underlying data and methods, please refer to the
           research article "Subfield profitability analysis reveals an
           economic case for cropland diversification," that can be freely
-          accessed <a href="http://iopscience.iop.org/article/10.1088/1748-9326/11/1/014009/meta;jsessionid=0059946EA9A46A2380CB698ABA6BAA8C.c4.iopscience.cld.iop.org">online</a>.
+          accessed <a href="https://iopscience.iop.org/article/10.1088/1748-9326/11/1/014009/meta">online</a>.
           </p>
 
           <p>The analysis was
           performed for fields that were planted in corn or soybeans according
-          to the <a href="http://nassgeodata.gmu.edu/CropScape/">cropland data
+          to the <a href="https://nassgeodata.gmu.edu/CropScape/">cropland data
           layer</a> (CDL) for 2010-2013. The 2013 CDL was used for 2015.
-          Patches of similar profitability are defined by <a href="http://websoilsurvey.sc.egov.usda.gov/">soil
-          survey</a> (SSURGO) and <a href="http://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-products/common-land-unit-clu/index">common
+          Patches of similar profitability are defined by <a href="https://websoilsurvey.sc.egov.usda.gov/">soil
+          survey</a> (SSURGO) and <a href="https://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-products/common-land-unit-clu/index">common
           land unit</a> (CLU, 2008) delineations. Profitability was calculated
           by deducting cash rent and crop production cost estimates from the
           crop revenue (crop yield x grain price). Potential yields were taken
-          from the <a href="http://www.extension.iastate.edu/soils/ispaid">Iowa
+          from the <a href="https://www.extension.iastate.edu/soils/ispaid">Iowa
           soil properties and interpretations database (ISPAID)</a> and
-          adjusted to <a href="http://quickstats.nass.usda.gov">average county
-          yields</a> (NASS, 2010-2013) or to <a href="http://webapp.rma.usda.gov/apps/actuarialinformationbrowser/">trend
+          adjusted to <a href="https://quickstats.nass.usda.gov">average county
+          yields</a> (NASS, 2010-2013) or to <a href="https://webapp.rma.usda.gov/apps/actuarialinformationbrowser/">trend
           county yields</a> (USDA RMA, 2015). Grain prices are the average
           monthly prices of each marketing year, and the forecast for 2015 from
-          the <a href="http://usda.mannlib.cornell.edu/MannUsda/viewDocumentInfo.do?documentID=1194">USDA
+          the <a href="https://usda.mannlib.cornell.edu/MannUsda/viewDocumentInfo.do?documentID=1194">USDA
           WASDE report</a> of May 2016. Cash rents are taken from <a href="https://www.extension.iastate.edu/agdm/wholefarm/html/c2-10.html">county
           surveys</a> (ISU extension, 2010-2013, 2015), adjusted to corn
           suitability rating (CSR). Crop production costs were taken from the
-          <a href="http://www.extension.iastate.edu/agdm/crops/html/a1-20.html">ISU
+          <a href="https://www.extension.iastate.edu/agdm/crops/html/a1-20.html">ISU
           Ag Decision Maker cost estimates</a>.
           </p>
         </div>

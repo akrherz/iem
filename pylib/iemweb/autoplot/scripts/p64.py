@@ -14,10 +14,11 @@ from datetime import date, datetime, timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -51,10 +52,9 @@ def get_description():
     return desc
 
 
-def get_data(ctx):
+@with_sqlalchemy_conn("coop")
+def get_data(ctx: dict, conn: Connection | None = None):
     """Get some data please"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
     station = ctx["station"]
     threshold = ctx["threshold"]
     threshold = TRACE_VALUE if threshold in ["T", "t"] else float(threshold)
@@ -67,21 +67,20 @@ def get_data(ctx):
 
     snow = np.zeros((eyear - syear + 1, 366))
     snowd = np.zeros((eyear - syear + 1, 366))
-    cursor.execute(
-        """
-        SELECT extract(doy from day), year,
+    res = conn.execute(
+        sql_helper("""
+        SELECT extract(doy from day) as doy, year,
         case when snow > 0 and snow < 0.09 and low >= 40 then 0 else snow end,
-        snowd from alldata where station = %s and year >= %s
-        """,
-        (station, syear),
+        snowd from alldata where station = :station and year >= :syear
+        """),
+        {"station": station, "syear": syear},
     )
-    for row in cursor:
+    for row in res:
         # On non-leap year, duplicate our snowdepth on 31 Dec
         if row[0] == 365 and not calendar.isleap(row[1]):
             snowd[row[1] - syear, int(row[0])] = row[3]
         snow[row[1] - syear, int(row[0] - 1)] = row[2]
         snowd[row[1] - syear, int(row[0] - 1)] = row[3]
-    pgconn.close()
     # reset any nan
     snow = np.where(np.isnan(snow), 0, snow)
     snowd = np.where(np.isnan(snowd), -1, snowd)
@@ -224,10 +223,10 @@ def plotter(ctx: dict):
     ax.legend(
         (p0, p1, p2, p3),
         (
-            "> 31 days [%s]" % (len(df[df["color"] == "purple"].index),),
-            "10 - 31 [%s]" % (len(df[df["color"] == "g"].index),),
-            "3 - 10 [%s]" % (len(df[df["color"] == "b"].index),),
-            "< 3 days [%s]" % (len(df[df["color"] == "r"].index),),
+            f"> 31 days [{len(df[df['color'] == 'purple'].index)}]",
+            f"10 - 31 [{len(df[df['color'] == 'g'].index)}]",
+            f"3 - 10 [{len(df[df['color'] == 'b'].index)}]",
+            f"< 3 days [{len(df[df['color'] == 'r'].index)}]",
         ),
         ncol=2,
         fontsize=11,

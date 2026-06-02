@@ -60,8 +60,14 @@ else
     $oextents = isset($_GET['extents']) ? xssafe($_GET['extents']) : "-105,36,-86,50";
 $zoom = isset($_GET['zoom']) ? intval($_GET['zoom']) : 0;
 /**
- * Something simple to enable click interface on a PHP mapcript
- * application
+ * Something simple to enable click interface on a PHP mapcript application
+ * @param string $oextents The original extents of the map
+ * @param int $click_x The X pixel value of the click
+ * @param int $click_y The Y pixel value of the click
+ * @param int $imgsz_x The width of the image in pixels
+ * @param int $imgsz_y The height of the image in pixels
+ * @param int $zoom The zoom factor, negative values are 1/zoom
+ * @return string The new extents of the map after the click and zoom
  */
 function click2geo($oextents, $click_x, $click_y, $imgsz_x, $imgsz_y, $zoom)
 {
@@ -228,12 +234,12 @@ $t->content = <<<EOM
 
 <br>
 
-<div class="alert alert-info">This application uses the 
+<div class="alert alert-info">This application uses the
 <a class="alert-link" href="/GIS/radmap_api.phtml">IEM RadMap API</a> to generate
 the image you see above.  You could place the above image on your webpage by
 right-clicking the image above and select "Copy Image URL" and then use that
 as your image source on your webpage.</div>
-        
+
 <p><b>IEM Freeze</b> lets you quickly evaluate air
 and pavement temperatures, along with concurrent radar observations
 of precipitation:<br>
@@ -243,10 +249,13 @@ of precipitation:<br>
 <li><b>Current Composite RADAR</b> also is overlain on each plot.</li>
 </ul>
 
-<p>This <a href="/cool/images/freeze_031215.png">historical plot</a> 
+<p>This <a href="/cool/images/freeze_031215.png">historical plot</a>
     shows how IEM Freeze looks when the winter weather gets interesting.</p>
 
-        <p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
+<p>
+Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a>
+how you would like this
 application to behave.
+</p>
 EOM;
 $t->render("single.phtml");

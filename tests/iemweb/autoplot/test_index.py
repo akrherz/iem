@@ -1,6 +1,6 @@
 """Run a bunch of URLs through the autoplot system."""
 
-import os
+from pathlib import Path
 
 import pytest
 from iemweb.autoplot.index import application, networkselect_handler
@@ -10,7 +10,7 @@ from werkzeug.test import Client
 
 def get_test_urls():
     """yield a list of URLs to test."""
-    listfn = os.path.join(os.path.dirname(__file__), "urllist_index.txt")
+    listfn = Path(__file__).parent / "urllist_index.txt"
     with open(listfn) as fh:
         for line_in in fh:
             line = line_in.strip()

@@ -16,6 +16,7 @@ $day = get_int404("day", date("d"));
 $month = get_int404("month", date("m"));
 $year = get_int404("year", date("Y"));
 
+
 $now = time() - 3600;
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
 $nt = new NetworkTable(array($network));
@@ -58,7 +59,6 @@ $stname = iem_pg_prepare($pgconn, "SELECT t.* from $tbl t, stations s WHERE " .
 
 $rs = pg_execute($pgconn, $stname, array($dstr, $network));
 
-/* Load up the data into a big fat array */
 $data = array();
 $datakeys = array();
 while ($row = pg_fetch_assoc($rs)) {
@@ -74,13 +74,13 @@ $keys = array_keys($datakeys);
 asort($stations);
 asort($keys);
 
-$table = "<table class=\"table table-sm table-striped table-bordered\">";
-$header = "<tr style=\"background: #eee;\">
- <th>NWS ID</th><th>Station</th>";
+$table = '<table class="table table-sm table-striped table-bordered">';
+$header = '<tr style="background: #eee;">
+ <th>NWS ID</th><th>Station</th>';
 foreach ($keys as $k => $v) {
-    $header .= sprintf("<th>%s</th>", $v);
+    $header .= sprintf('<th>%s</th>', $v);
 }
-$header .= "</tr>";
+$header .= '</tr>';
 
 $row = 0;
 foreach ($stations as $k => $v) {
@@ -89,14 +89,16 @@ foreach ($stations as $k => $v) {
     }
     $row += 1;
 
-    $table .= sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
+    $table .= sprintf(
+        '<tr><td><a href="site.phtml?station=%s&year=%s&month=%s&day=%s">%s</a></td><td>%s</td>',
+        $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
     reset($keys);
-    foreach ($keys as $k => $key) {
-        $table .= sprintf("<td>%s</td>", $data[$v][$key] ?? '');
+    foreach ($keys as $k2 => $key) {
+        $table .= sprintf('<td>%s</td>', $data[$v][$key] ?? '');
     }
-    $table .= "</tr>";
+    $table .= '</tr>';
 }
-$table .= "</table>";
+$table .= '</table>';
 
 $t->content = <<<EOM
 <div class="breadcrumb">
@@ -108,9 +110,9 @@ $t->content = <<<EOM
 
 <p>This application will display a table of observations valid at a given
 time.  The SHEF encoded variable identifier is used to show which sites
-reported which variables.  All times displayed are in <strong>central 
+reported which variables.  All times displayed are in <strong>central
 standard/daylight time</strong>.  If you click on the site identifier, you will
-get a listing of all observations for that site for the date of your 
+get a listing of all observations for that site for the date of your
 choice.
 
 <form method="GET" action="cat.phtml">
