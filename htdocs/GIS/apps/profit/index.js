@@ -1,7 +1,3 @@
-/**
- * Profitability Map Application
- * Simplified vanilla JavaScript implementation
- */
 /* global ol */
 
 let map = null;
@@ -37,7 +33,7 @@ function initializeMap() {
             zoom: 7
         })
     });
-    
+
     // Add layer switcher control
     map.addControl(new ol.control.LayerSwitcher());
 }

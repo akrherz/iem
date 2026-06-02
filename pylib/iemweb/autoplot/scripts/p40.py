@@ -57,7 +57,7 @@ def get_description():
     return desc
 
 
-def plot_sky(days, vsby, data, ctx, sts):
+def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
     # vsby plot
@@ -102,7 +102,7 @@ def plot_sky(days, vsby, data, ctx, sts):
         aspect="auto",
         extent=[0, days * 24, 0, 250],
         cmap=cmap,
-        vmin=1,
+        vmin=min(1, np.min(data)),
     )
     ax.set_yticks(range(0, 260, 50))
     ax.set_yticklabels(range(0, 26, 5))

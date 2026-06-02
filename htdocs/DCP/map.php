@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Produce a map of SHEF values
  */
@@ -9,7 +9,7 @@ force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "SHEF Physical Code Map";
-$OL = '10.5.0';
+$OL = '10.9.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
@@ -51,7 +51,7 @@ limits the map to only show stations that have reported the value within the
 given number of days.  This is a work-in-progress here and <a href="/info/contacts.php">your feedback</a> would
 be wonderful.</p>
 
-<form name='bah'><p><strong>Select Physical Code:</strong> 
+<form name='bah'><p><strong>Select Physical Code:</strong>
 <select id="pe">
 <option value="AD">[AD] Reserved</option>
 <option value="AF">[AF] Surface frost intensity (coded, see Table 20)</option>

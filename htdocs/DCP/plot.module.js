@@ -1,11 +1,9 @@
-// ES Module for DCP plotting application
-
-import { escapeHTML, requireSelectElement } from '/js/iemjs/domUtils.js';
+import { escapeHTML, requireElement, requireSelectElement } from '/js/iemjs/domUtils.js';
 import { states } from '/js/iemjs/iemdata.js';
 
 // DOM element references
 let stateSelect = null;
-let stationSelect = null; 
+let stationSelect = null;
 let variableSelect = null;
 let dateInput = null;
 let dayIntervalInput = null;
@@ -20,10 +18,10 @@ function initializeForm() {
     stateSelect = requireSelectElement('state-select');
     stationSelect = requireSelectElement('station-select');
     variableSelect = requireSelectElement('variable-select');
-    dateInput = document.getElementById('date-input');
-    dayIntervalInput = document.getElementById('day-interval');
-    imageDisplay = document.getElementById('imagedisplay');
-    messageDiv = document.getElementById('msg');
+    dateInput = requireElement('date-input');
+    dayIntervalInput = requireElement('day-interval');
+    imageDisplay = requireElement('imagedisplay');
+    messageDiv = requireElement('msg');
 
     // Populate state dropdown
     populateStateSelect();
@@ -31,26 +29,18 @@ function initializeForm() {
     // Set up event handlers
     stateSelect.addEventListener('change', handleStateChange);
     stationSelect.addEventListener('change', handleStationChange);
-    
+
     // Set up form submission
-    const plotButton = document.getElementById('plot-button');
-    if (plotButton) {
-        plotButton.addEventListener('click', updateImage);
-    }
+    const plotButton = requireElement('plot-button');
+    plotButton.addEventListener('click', updateImage);
 
-    // Set default values
-    if (dateInput) {
-        const today = new Date();
-        dateInput.value = formatDateForInput(today);
-        dateInput.setAttribute('min', '2002-01-01');
-        dateInput.setAttribute('max', formatDateForInput(today));
-    }
-
-    if (dayIntervalInput) {
-        dayIntervalInput.value = '5';
-        dayIntervalInput.min = '1';
-        dayIntervalInput.max = '31';
-    }
+    const today = new Date();
+    dateInput.value = formatDateForInput(today);
+    dateInput.setAttribute('min', '2002-01-01');
+    dateInput.setAttribute('max', formatDateForInput(today));
+    dayIntervalInput.value = '5';
+    dayIntervalInput.min = '1';
+    dayIntervalInput.max = '31';
 
     // Check URL for initial values (supports both legacy hash and modern URLParams)
     parseURLHash();
@@ -63,7 +53,7 @@ function initializeForm() {
 function populateStateSelect() {
     // Clear existing options except the first placeholder
     stateSelect.innerHTML = '<option value="">Select State...</option>';
-    
+
     states.forEach(([abbr, name]) => {
         const option = document.createElement('option');
         option.value = abbr;
@@ -77,7 +67,7 @@ function populateStateSelect() {
  */
 async function handleStateChange() {
     const selectedState = stateSelect.value;
-    
+
     // Clear dependent dropdowns
     clearSelect(stationSelect, 'Select Station...');
     clearSelect(variableSelect, 'Select Variable...');
@@ -88,7 +78,7 @@ async function handleStateChange() {
     try {
         const response = await fetch(`/json/network.json?network=${selectedState}_DCP`);
         if (!response.ok) {throw new Error('Network response was not ok');}
-        
+
         const data = await response.json();
         populateStationSelect(data.stations || []);
     } catch (error) {
@@ -101,7 +91,7 @@ async function handleStateChange() {
  */
 function populateStationSelect(stations) {
     clearSelect(stationSelect, 'Select Station...');
-    
+
     stations.forEach(station => {
         const option = document.createElement('option');
         option.value = station.id;
@@ -115,7 +105,7 @@ function populateStationSelect(stations) {
  */
 async function handleStationChange() {
     const selectedStation = stationSelect.value;
-    
+
     // Clear variable dropdown
     clearSelect(variableSelect, 'Select Variable...');
     clearMessage();
@@ -125,10 +115,10 @@ async function handleStationChange() {
     try {
         const response = await fetch(`/json/dcp_vars.json?station=${selectedStation}`);
         if (!response.ok) {throw new Error('Network response was not ok');}
-        
+
         const data = await response.json();
         populateVariableSelect(data.vars || []);
-        
+
         if (data.vars && data.vars.length === 0) {
             showMessage('Sorry, did not find any variables for this site!');
         }
@@ -142,7 +132,7 @@ async function handleStationChange() {
  */
 function populateVariableSelect(variables) {
     clearSelect(variableSelect, 'Select Variable...');
-    
+
     variables.forEach(variable => {
         const option = document.createElement('option');
         option.value = variable.id;
@@ -162,18 +152,14 @@ function clearSelect(selectElement, placeholderText) {
  * Show message to user
  */
 function showMessage(message) {
-    if (messageDiv) {
-        messageDiv.textContent = message;
-    }
+    messageDiv.textContent = message;
 }
 
 /**
  * Clear message
  */
 function clearMessage() {
-    if (messageDiv) {
-        messageDiv.textContent = '';
-    }
+    messageDiv.textContent = '';
 }
 
 /**
@@ -227,7 +213,7 @@ function generatePlotImageUrl(values) {
         eday: endDate,
         var: variable
     });
-    
+
     return `plot.php?${params.toString()}`;
 }
 
@@ -236,7 +222,7 @@ function generatePlotImageUrl(values) {
  */
 function updateImage() {
     const validation = validatePlotInputs();
-    
+
     if (!validation.isValid) {
         showMessage(validation.error);
         return;
@@ -244,7 +230,7 @@ function updateImage() {
 
     try {
         const imageUrl = generatePlotImageUrl(validation.values);
-        
+
         if (imageDisplay) {
             imageDisplay.src = imageUrl;
         }
@@ -252,7 +238,7 @@ function updateImage() {
         // Update browser URL
         const { state, station, variable, startDate, dayInterval } = validation.values;
         updateURL(state, station, variable, startDate, dayInterval);
-        
+
         clearMessage();
     } catch (error) {
         showMessage(`Error creating plot: ${error.message}`);
@@ -269,7 +255,7 @@ function updateURL(state, station, variable, startDate, dayInterval) {
     url.searchParams.set('variable', variable);
     url.searchParams.set('startDate', startDate);
     url.searchParams.set('dayInterval', dayInterval);
-    
+
     // Update URL without reloading the page
     window.history.replaceState({}, '', url);
 }
@@ -280,7 +266,7 @@ function updateURL(state, station, variable, startDate, dayInterval) {
  */
 function extractURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
-    
+
     const state = urlParams.get('state');
     const station = urlParams.get('station');
     const variable = urlParams.get('variable');
@@ -357,7 +343,7 @@ function parseURLHash() {
     url.searchParams.set('startDate', startDate);
     url.searchParams.set('dayInterval', dayInterval);
     url.hash = ''; // Clear the hash
-    
+
     // Update URL and set form values
     window.history.replaceState({}, '', url);
     setFormValues(state, station, variable, startDate, dayInterval);

@@ -3,11 +3,9 @@
 import socket
 
 from pyiem.util import LOG
+from pyiem.webutil import RSYSLOG_SIDEDOOR_SOCKET
 
 __version__ = "0.1.0"
-# Established via akrherz/infra-ansible as a side-door socket to avoid
-# the systemd managed /bin/logger , which pollutes the journal/httpd logs
-RSYSLOG_SIDEDOOR_SOCKET = "/run/rsyslog/iemweb.sock"
 
 
 def emit_to_sidedoor(payload: bytes) -> None:
