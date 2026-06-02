@@ -109,7 +109,7 @@ $t->content = <<<EOM
           description of the underlying data and methods, please refer to the
           research article "Subfield profitability analysis reveals an
           economic case for cropland diversification," that can be freely
-          accessed <a href="https://iopscience.iop.org/article/10.1088/1748-9326/11/1/014009/meta;jsessionid=0059946EA9A46A2380CB698ABA6BAA8C.c4.iopscience.cld.iop.org">online</a>.
+          accessed <a href="https://iopscience.iop.org/article/10.1088/1748-9326/11/1/014009/meta">online</a>.
           </p>
 
           <p>The analysis was

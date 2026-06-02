@@ -97,13 +97,14 @@ def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
     cmap = get_cmap("gray_r")
     cmap.set_bad("white")
     cmap.set_under("skyblue")
-    ax.imshow(
-        np.flipud(data),
-        aspect="auto",
-        extent=[0, days * 24, 0, 250],
-        cmap=cmap,
-        vmin=min(1, np.min(data)),
-    )
+    if np.max(data) > 0:
+        ax.imshow(
+            np.flipud(data),
+            aspect="auto",
+            extent=[0, days * 24, 0, 250],
+            cmap=cmap,
+            vmin=1,
+        )
     ax.set_yticks(range(0, 260, 50))
     ax.set_yticklabels(range(0, 26, 5))
     ax.set_ylabel("Cloud Levels [1000s feet]")
