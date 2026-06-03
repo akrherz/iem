@@ -2,7 +2,6 @@
 
 from http.client import responses as HTTP_RESPONSES
 
-from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import TELEMETRY, write_telemetry
 
@@ -16,13 +15,13 @@ def application(environ, start_response):
     ip = environ.get("REMOTE_ADDR")
     write_telemetry(
         TELEMETRY(
-            0,
-            status_code,
-            ip,
-            environ.get("REDIRECT_SCRIPT_URL"),
-            environ.get("REQUEST_URI"),
-            environ.get("HTTP_HOST"),
-            utc().strftime(ISO8601),
+            timing=0,
+            status_code=status_code,
+            client_addr=ip,
+            app=environ.get("REDIRECT_SCRIPT_URL"),
+            request_uri=environ.get("REQUEST_URI"),
+            vhost=environ.get("HTTP_HOST"),
+            valid=utc(),
         )
     )
 
