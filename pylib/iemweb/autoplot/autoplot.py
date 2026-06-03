@@ -275,13 +275,13 @@ def workflow(mc, environ: dict, fmt: str):
         # Log this so that my review scripts see it.
         write_telemetry(
             TELEMETRY(
-                (utc() - start_time).total_seconds(),
-                500,
-                environ.get("REMOTE_ADDR", "127.0.0.1"),
-                environ.get("SCRIPT_NAME"),
-                environ.get("REQUEST_URI"),
-                environ.get("HTTP_HOST"),
-                utc().strftime(ISO8601),
+                timing=(utc() - start_time).total_seconds(),
+                status_code=500,
+                client_addr=environ.get("REMOTE_ADDR", "127.0.0.1"),
+                app=environ.get("SCRIPT_NAME"),
+                request_uri=environ.get("REQUEST_URI"),
+                vhost=environ.get("HTTP_HOST"),
+                valid=utc(),
             )
         )
         # Everything else should be considered fatal
