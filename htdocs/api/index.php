@@ -237,7 +237,7 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/gis/sigmets.py?help">SIGMETs (/cgi-bin/request/gis/sigmets.py)</a></li>
 <li><a href="/cgi-bin/request/smos.py?help">SMOS (/cgi-bin/request/smos.py)</a></li>
 <li><a href="/cgi-bin/request/gis/spc_mcd.py?help">SPC MCD (/cgi-bin/request/gis/spc_mcd.py)</a></li>
-<li><a href="/cgi-bin/request/gis/spc_outlooks.py?help">SPC/WPC Outlooks (/cgi-bin/request/gis/spc_outlooks.py)</a></li>
+<li><a href="/cgi-bin/request/gis/outlooks.py?help">SPC/WPC Outlooks (/cgi-bin/request/gis/outlooks.py)</a></li>
 <li><a href="/cgi-bin/request/gis/spc_watch.py?help">SPC Convective Watches (/cgi-bin/request/gis/spc_watch.py)</a></li>
 <li><a href="/cgi-bin/request/gis/sps.py?help">Special Weather Statements SPS (/cgi-bin/request/gis/sps.py)</a></li>
 <li><a href="/cgi-bin/request/talltowers.py?help">Talltowers (/cgi-bin/request/talltowers.py)</a></li>

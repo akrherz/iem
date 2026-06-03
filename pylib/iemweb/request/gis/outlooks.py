@@ -1,9 +1,9 @@
 """.. title:: Download SPC Convective and Fire Weather or WPC ERO Outlooks
 
 Return to `API Services </api/#cgi>`_ or
-`User Frontend </request/gis/spc_outlooks.phtml>`_
+`User Frontend </request/gis/outlooks.phtml>`_
 
-Documentation for /cgi-bin/request/gis/spc_outlooks.py
+Documentation for /cgi-bin/request/gis/outlooks.py
 ------------------------------------------------------
 
 This application allows for the download of SPC Convective and Fire Weather
@@ -12,6 +12,9 @@ or WPC Excessive Rainfall Outlooks in shapefile format.
 Changelog
 ---------
 
+- 2026-06-03: Renamed this backend to just `outlooks.py` to be less confusing
+  as it emits WPC outlooks as well.  The previous endpoint is aliased to this
+  one.
 - 2025-04-08: A limit was placed on the number of years and outlook types
   that can be requested at one time.  This limit is currently 10.
 - 2024-06-14: Initial documentation of this backend
@@ -21,7 +24,7 @@ Example Requests
 
 Provide all of the day 2 convective outlooks for the year 2024:
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_outlooks.py?d=2&\
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/outlooks.py?d=2&\
 type=C&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z
 
 """
@@ -60,7 +63,11 @@ class Schema(CGIModel):
         None, description="Start of the period to include"
     )
     type: ListOrCSVType = Field(
-        ["C", "F"], description="Outlook types to include"
+        ["C", "F"],
+        description=(
+            "Outlook types to include, "
+            "C==Convective(SPC), E=Excessive Rain(WPC)"
+        ),
     )
     year1: int = Field(None, description="Start year when sts is not set.")
     month1: int = Field(None, description="Start month when sts is not set.")

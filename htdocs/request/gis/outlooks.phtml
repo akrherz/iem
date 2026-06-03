@@ -22,14 +22,14 @@ $content = <<<EOM
     </div>
     <div class="flex-grow-1 ms-3">
       <p class="mb-2">The IEM attempts to process and archive the convective and fire weather
-      outlooks issued by the Storm Prediction Center and the excessive rainfall 
+      outlooks issued by the Storm Prediction Center and the excessive rainfall
       outlooks issued by the Weather Prediction Center. This processing is done by
       parsing the PTS product via <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/spcpts.py">pyIEM decoder</a>.</p>
       <p class="mb-2">Recently, the SPC website has added direct single outlook downloads in various
       GIS formats. <strong>Your best data quality will come from scraping their website</strong>, but
       maybe that approach is not for all users of this data! So here it is, a means
       to bulk download the IEM's SPC/WPC Outlook database.</p>
-      <a href="/cgi-bin/request/gis/spc_outlooks.py?help" class="btn btn-outline-primary btn-sm">
+      <a href="/cgi-bin/request/gis/outlooks.py?help" class="btn btn-outline-primary btn-sm">
         <i class="bi bi-file-text"></i> Backend Documentation
       </a>
     </div>
@@ -69,7 +69,7 @@ $content = <<<EOM
   </div>
 </div>
 
-<form method="GET" action="/cgi-bin/request/gis/spc_outlooks.py" class="mb-4">
+<form method="GET" action="/cgi-bin/request/gis/outlooks.py" class="mb-4">
 <div class="card">
   <div class="card-header bg-primary text-white">
     <h5 class="card-title mb-0">
