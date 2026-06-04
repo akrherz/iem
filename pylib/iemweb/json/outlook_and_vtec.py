@@ -133,6 +133,7 @@ def do_query(query: Schema) -> dict:
         # OFFSET 0 hacks are for continued query planner pain
         dbentries = pd.read_sql(
             sql_helper("""
+-- Candidate outlooks that spatially intersect the requested CWA
 with pop as (
     select o.issue, o.expire, date(o.issue) as odate, geom, outlook_type,
     to_char(o.issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as utc_issue,
@@ -143,30 +144,37 @@ with pop as (
     outlook_date <= :edate and st_intersects(o.geom, c.the_geom)
     and c.cwa = :wfo and outlook_type = :outlook_type
     offset 0),
+
+-- Compute the overlap percentage
 candy as (
     select p.*,
     st_area(st_intersection(p.geom::geography, c.the_geom::geography)) /
     st_area(c.the_geom::geography) * 100. as overlap_percent
-    from pop p, cwa c WHERE c.cwa = :wfo
-    offset 0),
+    from pop p, cwa c WHERE c.cwa = :wfo and
+    st_area(st_intersection(p.geom::geography, c.the_geom::geography)) /
+    st_area(c.the_geom::geography) * 100. >= :overlap),
+
+-- Do the temporal join
 warns as (
     select w.eventid, c.odate, c.overlap_percent, w.geom, w.vtec_year,
     w.phenomena, w.significance, w.wfo
     from sbw w, candy c WHERE w.status = 'NEW' and w.wfo = :wfo and
     w.phenomena || '.' || w.significance = Any(:phsig)
-    and w.issue <= c.expire and w.expire > c.issue and
-    overlap_percent >= :overlap
+    and w.issue <= c.expire and w.expire > c.issue
     offset 0),
+
+-- Again, we do a two step query due to planer issues
 warns2 as (
     select f.eventid, f.vtec_year, p.odate, f.phenomena, f.significance,
-    f.wfo
+    f.wfo, f.overlap_percent
     from warns f, pop p where
     f.odate = p.odate and st_intersects(f.geom, p.geom)
 )
+    -- Finally
     select p.odate, p.utc_issue, p.utc_expire, f.eventid, f.vtec_year,
     p.day, p.threshold, p.outlook_type, p.cycle, f.phenomena,
-    f.significance, f.wfo
-    from pop p LEFT JOIN warns2 f on (p.odate = f.odate)
+    f.significance, f.wfo, p.overlap_percent
+    from candy p LEFT JOIN warns2 f on (p.odate = f.odate)
     order by odate, f.eventid asc
         """),
             conn,
@@ -204,6 +212,7 @@ warns2 as (
         res["outlooks"].append(
             {
                 "date": dt.isoformat(),
+                "overlap_percent": round(row["overlap_percent"], 2),
                 "utc_issue": row["utc_issue"],
                 "utc_expire": row["utc_expire"],
                 "day": int(row["day"]),
