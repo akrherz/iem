@@ -13,23 +13,11 @@ EOM;
 
 $table = "";
 $tags = Array();
-$rs = pg_query(
-    $dbconn,
-    "SELECT appid, string_agg(tag, ',') as t from iemapps_tags ".
-    "GROUP by appid"
-);
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-    $tags[$row["appid"]] = $row["t"];
-}
 $rs = pg_query($dbconn, "SELECT * from iemapps ORDER by appid ASC");
 while ($row=pg_fetch_assoc($rs)){
-    $tt = "";
-    if (array_key_exists($row["appid"], $tags)){
-        $tt = $tags[$row["appid"]];
-    }
     $table .= sprintf(
-        "<tr><th><a href='%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n",
-        $row["url"],  $row["name"], $row["description"], $tt);
+        "<tr><th><a href='%s'>%s</a></th><td>%s</td></tr>\n",
+        $row["url"],  $row["name"], $row["description"]);
 }
 
 $t->content = <<<EOM
@@ -45,7 +33,7 @@ $t->content = <<<EOM
 
  <table class="table table-striped table-bordered" id="table1">
  <thead>
- <tr><th>Title</th><th>Description</th><th>Tags</th></tr>
+ <tr><th>Title</th><th>Description</th></tr>
  </thead>
  <tbody>
 {$table}

@@ -69,8 +69,8 @@ $get_iemapps_tags = cacheable("iemappstags")(function($tagname)
     $pgconn = iemdb("mesosite");
     $stname = iem_pg_prepare(
         $pgconn,
-        "SELECT name, description, url from iemapps WHERE "
-            . "appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
+        "SELECT name, description, url, tags from iemapps WHERE "
+            . "tags @> ARRAY[$1]::text[] "
             . "ORDER by name ASC"
     );
     $rs = pg_execute($pgconn, $stname, array($tagname));
@@ -176,8 +176,8 @@ EOF;
 /**
  * Generate the HTML for the most recent feature
  * With 2 minutes of caching
- * param object $t Template object
- * return string HTML
+ * @param object $t The template object to add any extra JS/CSS to
+ * @return string HTML
  */
 function gen_feature($t)
 {

@@ -66,7 +66,7 @@ class Schema(CGIModel):
         ),
     ]
     overlap: Annotated[
-        int,
+        float,
         Field(
             description="Overlap minimum percentage for a WFO + ERO",
             ge=1,

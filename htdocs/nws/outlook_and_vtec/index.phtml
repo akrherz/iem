@@ -14,6 +14,7 @@ $sdate = get_str404("sdate", "{$thisyear}-01-01");
 $edate = get_str404("edate", "{$thisyear}-12-31");
 $otype = get_str404("otype", "1.C.13");
 $threshold = get_str404("threshold", "SLGT");
+$overlap = get_float404("overlap", 5.0);
 $oparts = explode(".", $otype);
 $phsig = $_GET["phsig"] ?? [];
 
@@ -26,7 +27,9 @@ $wsurl = sprintf("http://iem.local/json/outlook_and_vtec.py?%s", http_build_quer
     "sdate" => $sdate,
     "edate" => $edate,
     "phsig" => implode(",", $phsig),
+    "overlap" => $overlap,
 ]));
+$wsurl_external = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $wsurl);
 $jobj = file_get_contents($wsurl);
 $jobj = json_decode($jobj, true);
 
@@ -154,7 +157,7 @@ foreach ($wopts as $k => $v) {
 
 $pcp = $jobj["stats"]["total_outlooks"] > 0 ? round(100.0 * $jobj["stats"]["outlooks_with_events"] / $jobj["stats"]["total_outlooks"], 2) : 0.0;
 $tableRowsJson = json_encode($rows, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-$safeWsurl = h($wsurl);
+$safeWsurl = h($wsurl_external);
 $safeSdate = h($sdate);
 $safeEdate = h($edate);
 
@@ -170,8 +173,11 @@ $t->content = <<<EOM
     <header class="outlook-header">
         <h1>SPC/WPC Outlooks and Coincident Warnings</h1>
         <p>
-            Explore outlook issuances and quickly identify matching warning events by office,
-            date range, and product type.
+            This page lists SPC and WPC outlooks for a given WFO and date range, along with any
+            coincident Tornado, Severe Thunderstorm, Flash Flood, or Marine Warnings issued by that
+            WFO during the outlook period.  Use the filters below to customize the outlook types,
+            thresholds, and event types shown.  The "CWA Overlap %" column indicates the percent
+            of the outlook area that overlaps with the issuing WFO's county warning area (CWA).
         </p>
     </header>
 
@@ -204,13 +210,18 @@ $t->content = <<<EOM
                 <label for="threshold">Outlook Threshold</label>
                 $tselect
             </div>
+            <div class="field">
+                <label for="overlap">CWA Overlap %</label>
+                <input id="overlap" type="number" name="overlap" value="{$overlap}"
+                class="form-control" min="1" max="100" step="0.1">
+            </div>
             <div class="field actions">
                 <input type="submit" value="Apply Filters" class="btn btn-primary">
             </div>
         </form>
         <p class="service-link">
             JSON Web Service:
-            <a href="{$safeWsurl}">{$safeWsurl}</a>
+            <a href="{$safeWsurl}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">View JSON</a>
         </p>
     </section>
 
