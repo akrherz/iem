@@ -31,7 +31,13 @@ $wsurl = sprintf("http://iem.local/json/outlook_and_vtec.py?%s", http_build_quer
 ]));
 $wsurl_external = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $wsurl);
 $jobj = file_get_contents($wsurl);
+if ($jobj === false) {
+    die("Error fetching data from web service");
+}
 $jobj = json_decode($jobj, true);
+if (is_null($jobj)) {
+    die("Error decoding JSON from web service");
+}
 
 /**
  * Simple helper to escape output for HTML contexts.  We use this for all
@@ -190,11 +196,13 @@ $t->content = <<<EOM
             </div>
             <div class="field">
                 <label for="sdate">Start Date</label>
-                <input id="sdate" type="date" name="sdate" value="{$safeSdate}" class="form-control">
+                <input id="sdate" type="date" name="sdate" value="{$safeSdate}"
+                 class="form-control" min="2001-01-01">
             </div>
             <div class="field">
                 <label for="edate">End Date</label>
-                <input id="edate" type="date" name="edate" value="{$safeEdate}" class="form-control">
+                <input id="edate" type="date" name="edate" value="{$safeEdate}"
+                 class="form-control" min="2001-01-01">
             </div>
             <div class="field field-wide">
                 <label for="phsig">Phenomena / Significance</label>

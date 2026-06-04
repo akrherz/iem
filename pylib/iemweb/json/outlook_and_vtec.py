@@ -56,13 +56,14 @@ class Schema(CGIModel):
         date,
         Field(
             description="Inclusive outlook start date.",
-            ge=date(2019, 1, 1),
+            ge=date(2001, 1, 1),
         ),
     ]
     edate: Annotated[
         date,
         Field(
             description="Inclusive outlook end date.",
+            ge=date(2001, 1, 1),
         ),
     ]
     overlap: Annotated[
