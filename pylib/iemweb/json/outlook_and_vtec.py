@@ -3,7 +3,7 @@
 Return to `API Services </api/>`_.
 
 Documentation for /json/outlook_and_vtec.py
--------------------------------------
+-------------------------------------------
 
 This service emits the combination of SPC/WPC Outlooks and coincident VTEC
 events.  This service is exploratory at the moment and may change as feedback
@@ -23,8 +23,8 @@ Flash Flood Warnings for NWS Des Moines.  Require that 5% of the Des Moines CWA
 be covered by the given outlook to be considered.
 Only include events during 2024.
 
-https://mesonet.agron.iastate.edu/json/outlook_and_vtec.py\
-?wfo=DMX&sdate=2024-01-01&edate=2024-12-31&day=1&overlap=5&threshold=SLGT&\
+https://mesonet.agron.iastate.edu/json/outlook_and_vtec.py?\
+wfo=DMX&sdate=2024-01-01&edate=2024-12-31&day=1&overlap=5&threshold=SLGT&\
 cycle=8&outlook_type=E&phsig=FF.W
 
 """
@@ -147,7 +147,7 @@ candy as (
     select p.*,
     st_area(st_intersection(p.geom::geography, c.the_geom::geography)) /
     st_area(c.the_geom::geography) * 100. as overlap_percent
-    from pop p, cwa c WHERE c.cwa = 'DMX'
+    from pop p, cwa c WHERE c.cwa = :wfo
     offset 0),
 warns as (
     select w.eventid, c.odate, c.overlap_percent, w.geom, w.vtec_year,
