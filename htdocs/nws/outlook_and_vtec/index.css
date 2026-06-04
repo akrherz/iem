@@ -1,0 +1,229 @@
+:root {
+	--oav-bg: linear-gradient(135deg, #f4f7f0 0%, #e8f0e7 45%, #dee8f3 100%);
+	--oav-panel: #ffffff;
+	--oav-border: #c6d4df;
+	--oav-text: #1d2a33;
+	--oav-muted: #4c6270;
+	--oav-accent: #17635f;
+	--oav-shadow: 0 10px 24px rgba(19, 53, 76, 0.1);
+}
+
+.outlook-app {
+	color: var(--oav-text);
+	background: var(--oav-bg);
+	border: 1px solid var(--oav-border);
+	border-radius: 14px;
+	padding: 1.1rem;
+}
+
+.outlook-header {
+	margin-bottom: 1rem;
+}
+
+.outlook-header h1 {
+	font-size: 1.6rem;
+	margin-bottom: 0.25rem;
+}
+
+.outlook-header p {
+	margin: 0;
+	color: var(--oav-muted);
+	max-width: 68ch;
+}
+
+.card {
+	background: var(--oav-panel);
+	border: 1px solid var(--oav-border);
+	border-radius: 12px;
+	padding: 0.95rem;
+	box-shadow: var(--oav-shadow);
+}
+
+.outlook-controls {
+	margin-bottom: 1rem;
+}
+
+.outlook-controls h2,
+.results-card h2 {
+	font-size: 1.15rem;
+	margin-bottom: 0.7rem;
+}
+
+.outlook-form {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.8rem 1rem;
+	align-items: end;
+}
+
+.field {
+	min-width: 0;
+}
+
+.field-wide {
+	grid-column: span 2;
+}
+
+.field label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+	color: #213845;
+}
+
+.field .form-select,
+.field .form-control,
+.field select {
+	width: 100%;
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.service-link {
+	margin: 0.8rem 0 0;
+	font-size: 0.93rem;
+	color: var(--oav-muted);
+	word-break: break-all;
+}
+
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.8rem;
+	margin-bottom: 1rem;
+}
+
+.stat-card {
+	background: #ffffffd1;
+	border: 1px solid var(--oav-border);
+	border-radius: 10px;
+	padding: 0.7rem 0.8rem;
+}
+
+.stat-card h3 {
+	font-size: 0.86rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin: 0 0 0.2rem;
+	color: #2f5667;
+}
+
+.stat-card p {
+	margin: 0;
+	font-size: 1.45rem;
+	font-weight: 700;
+	color: #13353f;
+}
+
+.results-toolbar {
+	display: flex;
+	gap: 0.8rem;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.7rem;
+	flex-wrap: wrap;
+}
+
+.table-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	flex-wrap: wrap;
+}
+
+.table-controls .form-control {
+	width: min(340px, 100%);
+}
+
+.checkbox-control {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0;
+	color: #23404f;
+	font-size: 0.95rem;
+}
+
+.table-summary {
+	margin: 0 0 0.55rem;
+	color: var(--oav-muted);
+	font-size: 0.92rem;
+}
+
+.events-table {
+	border: 1px solid var(--oav-border);
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.events-table .tabulator {
+	border: 0;
+}
+
+.events-table .tabulator-header {
+	background: #dde9f4;
+	border-bottom: 1px solid #b8cad8;
+}
+
+.events-table .tabulator-col-title {
+	font-weight: 700;
+}
+
+.events-table .tabulator-row .tabulator-cell {
+	line-height: 1.3;
+	padding-top: 0.45rem;
+	padding-bottom: 0.45rem;
+}
+
+.events-table .tabulator-row:nth-child(even) {
+	background: #f8fbfd;
+}
+
+.events-table a {
+	color: #005f88;
+	text-decoration: underline;
+}
+
+@media (max-width: 992px) {
+	.outlook-form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.field-wide {
+		grid-column: span 2;
+	}
+
+	.stats-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 640px) {
+	.outlook-app {
+		padding: 0.75rem;
+	}
+
+	.outlook-form,
+	.stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.field-wide {
+		grid-column: span 1;
+	}
+
+	.actions {
+		justify-content: flex-start;
+	}
+
+	.table-controls {
+		width: 100%;
+	}
+
+	.table-controls .form-control {
+		width: 100%;
+	}
+}

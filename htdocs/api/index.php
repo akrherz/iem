@@ -166,6 +166,7 @@ not be implied as an endorsement. Of course, you can just search google for
   <div class="card-body">
   <ul>
       <li><a href="/geojson/sbw.py?help">Storm Based Warnings</a></li>
+      <li><a href="/json/outlook_and_vtec.py?help">SPC/WPC Outlooks and Coincident Warnings</a></li>
       <li><a href="/json/sbw_by_point.py?help">Storm Based Warnings by Point</a></li>
       <li><a href="/geojson/sbw_county_intersect.py?help">SBW Polygon County Intersection</a></li>
       <li><a href="/geojson/vtec_event.py?help">VTEC Event Data</a></li>
