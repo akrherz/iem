@@ -23,6 +23,8 @@ from pydantic import (
     WithJsonSchema,
 )
 
+from iemweb.mlib import unrectify_wfo
+
 
 def _clean_strings(val: list[str], re_pattern: str) -> list[str]:
     """Clean up the list strings."""
@@ -112,6 +114,15 @@ _NF = Field(
 )
 NETWORK_FIELD = Annotated[str, _NF]
 NETWORK_FIELD_OPTIONAL = Annotated[str | None, _NF]
+
+# --------------
+_OF = Field(
+    description=("The integer value for outlook day, between 1 and 8"),
+    le=8,
+    ge=1,
+)
+OUTLOOK_DAY_FIELD = Annotated[int, _OF]
+OUTLOOK_DAY_FIELD_OPTIONAL = Annotated[int | None, _OF]
 
 # --------------
 _S8F = Field(
@@ -234,6 +245,20 @@ _VYF = Field(
 )
 VTEC_YEAR_FIELD = Annotated[int, _VYF]
 VTEC_YEAR_FIELD_OPTIONAL = Annotated[int | None, _VYF]
+
+# -----------------
+_WF = Field(
+    description=(
+        "Three character WFO field.  You may optionally specify this as a "
+        "four character full identifier."
+    ),
+    pattern=r"^[A-Z]{3,4}$",
+)
+
+WFO3_FIELD = Annotated[str, BeforeValidator(unrectify_wfo), _WF]
+WFO3_FIELD_OPTIONAL = Annotated[
+    str | None, BeforeValidator(unrectify_wfo), _WF
+]
 
 # -----------------
 _YF = Field(

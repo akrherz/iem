@@ -1,0 +1,249 @@
+<?php
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 170);
+require_once "../../../include/mlib.php";
+require_once "../../../include/forms.php";
+force_https();
+require_once "../../../include/myview.php";
+require_once "../../../include/iemprop.php";
+$t = new MyView();
+
+$wfo = get_str404("wfo", "DMX");
+$sdate = get_str404("sdate", "2024-01-01");
+$edate = get_str404("edate", "2024-01-31");
+$otype = get_str404("otype", "1.C.13");
+$threshold = get_str404("threshold", "SLGT");
+$oparts = explode(".", $otype);
+$phsig = $_GET["phsig"] ?? [];
+
+$wsurl = sprintf("http://iem.local/json/outlook_and_vtec.py?%s", http_build_query([
+    "wfo" => $wfo,
+    "day" => $oparts[0],
+    "threshold" => $threshold,
+    "outlook_type" => $oparts[1],
+    "cycle" => $oparts[2],
+    "sdate" => $sdate,
+    "edate" => $edate,
+    "phsig" => implode(",", $phsig),
+]));
+$jobj = file_get_contents($wsurl);
+$jobj = json_decode($jobj, true);
+
+function h($value) {
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8");
+}
+
+$table = "";
+$rows = [];
+foreach ($jobj["outlooks"] as $o) {
+    $safeDate = h($o["date"]);
+    $safeIssue = h($o["utc_issue"]);
+    $safeExpire = h($o["utc_expire"]);
+    $safeOutlook = h("{$o["day"]} {$o["threshold"]} {$o["outlook_type"]}@{$o["cycle"]}");
+    $eventCount = count($o["events"]);
+    $eventsHtml = "";
+    $eventsText = [];
+
+    $table .= "<tr><td>{$safeDate}</td>".
+    "<td>{$safeIssue}</td><td>{$safeExpire}</td>".
+    "<td>{$safeOutlook}</td><td data-event-count='{$eventCount}'>";
+    foreach ($o["events"] as $e) {
+        $uri = h($e["vtec_app_uri"]);
+        $label = h($e["label"]);
+        $eventsHtml .= sprintf('<a href="%s" target="_new">%s</a><br />', $uri, $label);
+        $eventsText[] = $e["label"];
+    }
+    $table .= $eventsHtml ?: "<span class='text-muted'>None</span>";
+    $table .= "</td></tr>";
+    $rows[] = [
+        "date" => $o["date"],
+        "utc_issue" => $o["utc_issue"],
+        "utc_expire" => $o["utc_expire"],
+        "outlook" => "{$o["day"]} {$o["threshold"]} {$o["outlook_type"]}@{$o["cycle"]}",
+        "event_count" => $eventCount,
+        "events_html" => $eventsHtml,
+        "events_text" => implode(" | ", $eventsText),
+    ];
+}
+
+$t->jsextra = <<<EOM
+<script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script src="index.module.js" type="module"></script>
+EOM;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" />
+<link rel="stylesheet" type="text/css" href="index.css" />
+EOM;
+$t->title = "SPC/WPC Outlooks with Warnings by WFO";
+
+$wfoSelect = networkSelect("WFO", $wfo, [], $selectName="wfo");
+
+$opts = [
+    "1.C.1" => "Day 1 Convective @1z",
+    "1.C.20" => "Day 1 Convective @20z",
+    "1.C.16" => "Day 1 Convective @16z",
+    "1.C.13" => "Day 1 Convective @13z",
+    "1.C.6" => "Day 1 Convective @6z",
+    "1.F.17" => "Day 1 Fire Weather @17z",
+    "1.F.7" => "Day 1 Fire Weather @7z",
+    "1.E.1" => "Day 1 Excessive Rainfall @1z",
+    "1.E.20" => "Day 1 Excessive Rainfall @20z",
+    "1.E.16" => "Day 1 Excessive Rainfall @16z",
+    "1.E.8" => "Day 1 Excessive Rainfall @8z",
+    "2.C.17" => "Day 2 Convective @17z",
+    "2.C.7" => "Day 2 Convective @7z",
+    "2.F.18" => "Day 2 Fire Weather @18z",
+    "2.F.8" => "Day 2 Fire Weather @8z",
+    "2.E.20" => "Day 2 Excessive Rainfall @20z",
+    "2.E.8" => "Day 2 Excessive Rainfall @8z",
+    "3.C.20" => "Day 3 Convective @20z",
+    "3.C.8" => "Day 3 Convective @8z",
+    "3.F.21" => "Day 3 Fire Weather @21z",
+    "3.E.20" => "Day 3 Excessive Rainfall @20z",
+    "3.E.8" => "Day 3 Excessive Rainfall @8z",
+    "4.C.10" => "Day 4 Convective @10z",
+    "4.E.20" => "Day 4 Excessive Rainfall @20z",
+    "4.E.8" => "Day 4 Excessive Rainfall @8z",
+    "4.F.21" => "Day 4 Fire Weather @21z",
+    "5.C.10" => "Day 5 Convective @10z",
+    "5.E.20" => "Day 5 Excessive Rainfall @20z",
+    "5.E.8" => "Day 5 Excessive Rainfall @8z",
+    "5.F.21" => "Day 5 Fire Weather @21z",
+    "6.C.10" => "Day 6 Convective @10z",
+    "6.F.21" => "Day 6 Fire Weather @21z",
+    "7.C.10" => "Day 7 Convective @10z",
+    "7.F.21" => "Day 7 Fire Weather @21z",
+    "8.C.10" => "Day 8 Convective @10z",
+    "8.F.21" => "Day 8 Fire Weather @21z",
+];
+$oselect = make_select("otype", $otype, $opts);
+
+$topts = [
+    "MRGL" => "Marginal",
+    "SLGT" => "Slight",
+    "ENH" => "Enhanced",
+    "MDT" => "Moderate",
+    "HIGH" => "High",
+];
+$tselect = make_select("threshold", $threshold, $topts);
+
+$wopts = [
+    "TO.W" => "Tornado Warning",
+    "SV.W" => "Severe Thunderstorm Warning",
+    "FF.W" => "Flash Flood Warning",
+    "MA.W" => "Marine Warning",
+];
+$wselect = "";
+foreach ($wopts as $k => $v) {
+    $sel = in_array($k, $phsig) ? "selected" : "";
+    $wselect .= "<option value='$k' $sel>$v</option>";
+}
+
+$pcp = $jobj["stats"]["total_outlooks"] > 0 ? round(100.0 * $jobj["stats"]["outlooks_with_events"] / $jobj["stats"]["total_outlooks"], 2) : 0.0;
+$tableRowsJson = json_encode($rows, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+$safeWsurl = h($wsurl);
+$safeSdate = h($sdate);
+$safeEdate = h($edate);
+
+$t->content = <<<EOM
+<div class="outlook-app">
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/nws/">NWS Mainpage</a></li>
+        <li class="breadcrumb-item active" aria-current="page">SPC/WPC Outlooks and Coincident Warnings</li>
+    </ol>
+    </nav>
+
+    <header class="outlook-header">
+        <h1>SPC/WPC Outlooks and Coincident Warnings</h1>
+        <p>
+            Explore outlook issuances and quickly identify matching warning events by office,
+            date range, and product type.
+        </p>
+    </header>
+
+    <section class="outlook-controls card">
+        <h2>Filters</h2>
+        <form name="opt" action="/nws/outlook_and_vtec/" method="GET" class="outlook-form">
+            <div class="field">
+                <label for="wfo">WFO</label>
+                $wfoSelect
+            </div>
+            <div class="field">
+                <label for="sdate">Start Date</label>
+                <input id="sdate" type="date" name="sdate" value="{$safeSdate}" class="form-control">
+            </div>
+            <div class="field">
+                <label for="edate">End Date</label>
+                <input id="edate" type="date" name="edate" value="{$safeEdate}" class="form-control">
+            </div>
+            <div class="field field-wide">
+                <label for="phsig">Phenomena / Significance</label>
+                <select id="phsig" name="phsig[]" class="form-select" multiple size="5">
+                $wselect
+                </select>
+            </div>
+            <div class="field field-wide">
+                <label for="otype">Outlook Type</label>
+                $oselect
+            </div>
+            <div class="field">
+                <label for="threshold">Outlook Threshold</label>
+                $tselect
+            </div>
+            <div class="field actions">
+                <input type="submit" value="Apply Filters" class="btn btn-primary">
+            </div>
+        </form>
+        <p class="service-link">
+            JSON Web Service:
+            <a href="{$safeWsurl}">{$safeWsurl}</a>
+        </p>
+    </section>
+
+    <section class="stats-grid" aria-label="Summary statistics">
+        <article class="stat-card">
+            <h3>Outlooks Listed</h3>
+            <p>{$jobj["stats"]["total_outlooks"]}</p>
+        </article>
+        <article class="stat-card">
+            <h3>Outlooks With Events</h3>
+            <p>{$jobj["stats"]["outlooks_with_events"]}</p>
+        </article>
+        <article class="stat-card">
+            <h3>Percent Outlooks with 1+ Event</h3>
+            <p>{$pcp}%</p>
+        </article>
+    </section>
+
+    <section class="results-card card" aria-label="Outlook and event results">
+        <div class="results-toolbar">
+            <h2>Coincident Events</h2>
+            <div class="table-controls">
+                <label for="tableSearch" class="visually-hidden">Search rows</label>
+                <input id="tableSearch" type="search" class="form-control" placeholder="Search dates, outlooks, or events">
+                <label class="checkbox-control" for="onlyWithEvents">
+                    <input id="onlyWithEvents" type="checkbox">
+                    Show only rows with events
+                </label>
+            </div>
+        </div>
+        <p id="tableSummary" class="table-summary"></p>
+        <div id="eventsTable" class="events-table" aria-live="polite"></div>
+        <noscript>
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr><th>Date</th><th>UTC Issue</th><th>UTC Expire</th><th>Outlook Type</th><th>Coincident VTEC Events</th></tr>
+                </thead>
+                <tbody>
+                {$table}
+                </tbody>
+            </table>
+        </noscript>
+    </section>
+
+    <script type="application/json" id="tableRows">{$tableRowsJson}</script>
+</div>
+
+EOM;
+$t->render('full.phtml');

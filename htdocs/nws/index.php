@@ -172,6 +172,10 @@ Simple table showing IEM indicated PDS Tornado / Flash Flood Warnings.</li>
  <li><a href="/nws/debug_latlon/">Debug / Create Simple Graphic</a> from LAT...LON text.</li>
    <li><a href="/cow/">IEM Cow</a><br />
     Interactive Storm Based Warning verification app.</li>
+  <li>
+    <a href="/nws/outlook_and_vtec/">SPC/WPC Outlooks with WFO Warnings</a>
+    <br />List out SPC/WPC Convective Outlooks and any coincident WFO issued VTEC Warnings.
+  </li>
 </ul>
 
 <!-- Removed empty list -->
