@@ -14,7 +14,7 @@ $month2 = get_int404("month2", 2);
 $vars = array_key_exists("vars", $_GET) ? $_GET["vars"] : ["tmpf"];
 $sample = get_str404("sample", "1min");
 $dl_option = get_str404("dl_option", "display");
-$delim = get_str404("delim", ",");
+$delim = get_str404("delim", "comma");
 
 $ts1 = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ts2 = mktime($hour2, 0, 0, $month2, $day2, $year2);
@@ -45,6 +45,10 @@ $d = array(
     "space" => " ",
     "tab" => "\t"
 );
+if (!array_key_exists($delim, $d)){
+    http_response_code(422);
+    die("Invalid delimiter specified!");
+}
 
 $stations = array_key_exists("station", $_GET) ? $_GET["station"] : ["SAMI4"];
 $stationSQL = "{". implode(",", $stations) . "}";

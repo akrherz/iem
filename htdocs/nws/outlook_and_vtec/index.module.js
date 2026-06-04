@@ -59,6 +59,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: "plaintext",
             },
             {
+                title: "Overlap %",
+                field: "overlap_percent",
+                hozAlign: "center",
+                width: 120,
+            },
+            {
                 title: "Event Count",
                 field: "event_count",
                 hozAlign: "center",
