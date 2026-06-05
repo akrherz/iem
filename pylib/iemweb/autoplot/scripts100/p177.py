@@ -682,7 +682,7 @@ def make_daily_water_change_plot(ctx):
     return fig, df
 
 
-def plot_sm(ctx):
+def plot_sm(ctx: dict):
     """Just soil moisture."""
     with get_sqlalchemy_conn("isuag") as conn:
         # Find all columns in the sm_hourly table that have vwc in them
@@ -712,26 +712,97 @@ def plot_sm(ctx):
             },
             index_col="valid",
         )
+    if df.empty:
+        raise NoDataFound("No Data Found for Query")
     valid = df.index.values
 
-    title = f"ISUSM Station: {ctx['_sname']} :: Soil Moisture Timeseries"
-    (fig, ax) = figure_axes(apctx=ctx, title=title)
+    (fig, ax) = figure_axes(
+        apctx=ctx,
+        title=(
+            f"Soil Moisture Time Series, {ctx['sts']:%-d %b %Y} - "
+            f"{ctx['ets']:%-d %b %Y}"
+        ),
+        subtitle=f"ISU Station: {ctx['_sname']}",
+    )
+
+    # Adjust main axis and make lhs and rhs sliver plots for a first/last plot
+    ax.set_position((0.23, 0.1, 0.6, 0.75))
+    lhs = fig.add_axes((0.05, 0.1, 0.1, 0.7))
+    lhs.set_ylabel("Depth [inch]")
+    lhs.set_xlabel("VWC [m³/m³]")
+    lhs.grid(True)
+    rhs = fig.add_axes((0.88, 0.1, 0.1, 0.7))
+    rhs.set_ylabel("Depth [inch]")
+    rhs.set_xlabel("VWC [m³/m³]")
+    rhs.grid(True)
+
     ax.grid(True)
     depth_re = re.compile(r"(\d+)")
     plotted = False
+
+    first_row = df.iloc[0]
+    lhs.set_title("First\nObservation", fontsize=9)
+    last_row = df.iloc[-1]
+    rhs.set_title("Last\nObservation", fontsize=9)
+    maxdepth = 0
+    # Sort by depth so the legend plots in order
+    cols = sorted(cols, key=lambda x: int(depth_re.findall(x)[0]))
     for col in cols:
         if df[col].isnull().all():
             continue
         plotted = True
         depth = depth_re.findall(col)[0]
-        ax.plot(valid, df[col].to_numpy(), linewidth=2, label=f"{depth}in")
+        maxdepth = max(int(depth), maxdepth)
+        lp = ax.plot(
+            valid, df[col].to_numpy(), linewidth=2, label=f"{depth}in"
+        )
+        lhs.barh(
+            int(depth),
+            first_row[col],
+            color=lp[0].get_color(),
+            height=1,
+        )
+        lhs.annotate(
+            f"{first_row[col]:.2f}",
+            xy=(first_row[col], int(depth)),
+            xytext=(5, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=8,
+            bbox=dict(boxstyle="round,pad=0.2", fc="white"),
+        )
+        rhs.barh(
+            int(depth),
+            last_row[col],
+            color=lp[0].get_color(),
+            height=1,
+        )
+        rhs.annotate(
+            f"{last_row[col]:.2f}",
+            xy=(last_row[col], int(depth)),
+            xytext=(5, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=8,
+            bbox=dict(boxstyle="round,pad=0.2", fc="white"),
+        )
     if not plotted:
         raise NoDataFound("No Soil Moisture Data for this station")
+
+    xmax = max(lhs.get_xlim()[1], rhs.get_xlim()[1]) * 1.15
+
+    lhs.set_ylim(maxdepth + 2, 0)
+    lhs.set_xlim(0, xmax)
+    rhs.set_ylim(maxdepth + 2, 0)
+    rhs.set_xlim(0, xmax)
+
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
     ax.legend(
         bbox_to_anchor=(0.5, 1.0),
-        ncol=10,
+        ncol=7,
         loc="lower center",
         fontsize=9,
     )

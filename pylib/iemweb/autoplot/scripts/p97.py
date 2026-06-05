@@ -260,9 +260,9 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
         "gddbase": ctx["gddbase"],
         "gddceil": ctx["gddceil"],
     }
-    daylimit = "sday >= :d1 and sday <= :d2"
+    daylimit = "WHERE sday >= :d1 and sday <= :d2"
     if params["d1"] > params["d2"]:
-        daylimit = "sday >= :d2 or sday <= :d1"
+        daylimit = "WHERE sday >= :d2 or sday <= :d1"
     if (date2 - date1) > timedelta(days=365):
         daylimit = ""
     with get_sqlalchemy_conn("coop") as conn:
@@ -273,7 +273,7 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
                 avg(gddxx(:gddbase, :gddceil, high, low)) as datum
                 from {table} GROUP by station, sday)
             select station, sum(datum) as gdd from obs
-            WHERE {daylimit} GROUP by station ORDER by station
+            {daylimit} GROUP by station ORDER by station
             """,
                 table=table,
                 daylimit=daylimit,
