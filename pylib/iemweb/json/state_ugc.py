@@ -73,6 +73,6 @@ def application(environ, start_response):
                     "name": row["name"],
                 }
             )
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(data)
+    payload = json.dumps(data)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

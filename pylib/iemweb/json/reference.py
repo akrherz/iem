@@ -49,8 +49,7 @@ class Schema(CGIModel):
 def application(_environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(
+    payload = json.dumps(
         json_response_dict(
             {
                 "prodDefinitions": reference.prodDefinitions,
@@ -60,3 +59,5 @@ def application(_environ, start_response):
             }
         )
     )
+    start_response("200 OK", headers)
+    return payload

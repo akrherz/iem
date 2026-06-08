@@ -21,6 +21,7 @@ https://mesonet.agron.iastate.edu/json/stations.py
 
 import json
 from datetime import date as dateobj
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -36,13 +37,16 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    date: dateobj = Field(
-        default=dateobj.today(),
-        description="Query metadata changes since this date.",
-    )
+    date: Annotated[
+        dateobj,
+        Field(
+            default_factory=dateobj.today,
+            description="Query metadata changes since this date.",
+        ),
+    ]
 
 
-def run(dt):
+def run(dt: dateobj):
     """Actually run for this product"""
 
     data = json_response_dict()
@@ -77,6 +81,5 @@ def run(dt):
 def application(environ, start_response):
     """Answer request."""
     res = run(environ["date"])
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

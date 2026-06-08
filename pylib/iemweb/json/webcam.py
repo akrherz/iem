@@ -82,6 +82,6 @@ def application(environ, start_response):
         end_ts = datetime.strptime(end_ts, "%Y%m%d%H%M")
         end_ts = end_ts.replace(tzinfo=ZoneInfo("UTC"))
 
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return [json.dumps(dance(cid, start_ts, end_ts)).encode("ascii")]
+    payload = json.dumps(dance(cid, start_ts, end_ts)).encode("ascii")
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

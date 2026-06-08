@@ -104,7 +104,7 @@ def mckey(environ: dict) -> str:
 @iemapp(help=__doc__, schema=Schema, memcachekey=mckey, memcacheexpire=600)
 def application(environ: dict, start_response: callable):
     """Answer request."""
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
     with get_sqlalchemy_conn("postgis") as conn:
-        return run(conn, environ["year"], environ["is_pds"])
+        payload = run(conn, environ["year"], environ["is_pds"])
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

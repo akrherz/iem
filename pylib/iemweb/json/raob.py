@@ -31,6 +31,7 @@ ts=2024-03-24T12:00:00Z&pressure=500
 
 import json
 from datetime import datetime, timezone
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -51,18 +52,24 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    pressure: int = Field(-1, description="Pressure Level of Interest")
-    station: str = Field(
-        default=None,
-        description="3(assuming K***) or 4 char Station Identifier",
-        min_length=3,
-        max_length=4,
-        pattern="^[A-Z0-9_]{3,4}$",
-    )
-    ts: datetime = Field(
-        ...,
-        description="Timestamp of Interest, ISO-8601 preferred",
-    )
+    pressure: Annotated[
+        int, Field(description="Pressure Level of Interest")
+    ] = -1
+    station: Annotated[
+        str | None,
+        Field(
+            description="3(assuming K***) or 4 char Station Identifier",
+            min_length=3,
+            max_length=4,
+            pattern="^[A-Z0-9_]{3,4}$",
+        ),
+    ] = None
+    ts: Annotated[
+        datetime,
+        Field(
+            description="Timestamp of Interest, ISO-8601 preferred",
+        ),
+    ]
 
     @field_validator("ts", mode="before")
     @classmethod

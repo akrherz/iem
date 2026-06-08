@@ -85,6 +85,5 @@ def run():
 def application(_environ: dict, start_response: callable):
     """Answer request."""
     res = run()
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res
