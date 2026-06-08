@@ -28,14 +28,18 @@ if (array_key_exists("e", $_GET)) {
         xssafe("<tag>");
     }
 }
-$pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']), 0, 6)) : null;
-$bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : null;
-$dir = get_str404('dir', null);
-
+$pil = get_str404("pil", null, $maxlength=6);
 if (is_null($pil) || trim($pil) == "") {
     http_response_code(422);
     die("No 'pil' provided by URL, it is required.");
 }
+$pil = strtoupper($pil);
+
+$bbb = get_str404("bbb", null, $maxlength=3);
+if (! is_null($bbb)){
+    $bbb = strtoupper($bbb);
+}
+$dir = get_str404('dir', null);
 
 $conn = iemdb("afos");
 $st_nobbb = iem_pg_prepare(
@@ -49,6 +53,14 @@ $st_bbb = iem_pg_prepare(
         "from products WHERE pil = $1 and entered = $2 and bbb = $3"
 );
 
+/**
+ * Locate the product
+ * @param PgSql\Connection $conn
+ * @param DateTimeImmutable $e
+ * @param string $pil
+ * @param string $dir "next" or "prev"
+ * @return PgSql\Result
+ */
 function locate_product($conn, $e, $pil, $dir)
 {
     $sortdir = ($dir == 'next') ? "ASC" : "DESC";
@@ -90,6 +102,12 @@ function locate_product($conn, $e, $pil, $dir)
     die();
 }
 
+/**
+ * Find the latest product for the given pil
+ * @param PgSql\Connection $conn
+ * @param string $pil
+ * @return PgSql\Result
+ */
 function last_product($conn, $pil)
 {
     // Get the latest
@@ -110,6 +128,15 @@ function last_product($conn, $pil)
     }
     return $rs;
 }
+
+/**
+ * Find the exact product for the given pil and timestamp
+ * @param PgSql\Connection $conn
+ * @param DateTimeImmutable $e
+ * @param string $pil
+ * @param string|null $bbb
+ * @return PgSql\Result
+ */
 function exact_product($conn, $e, $pil, $bbb)
 {
     if (is_null($bbb)) {
@@ -273,7 +300,7 @@ for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
  class="img-fluid"></p>
 EOM;
-        } else if (substr($pil, 0, 3) == "SPS") {
+        } else if (substr($pil, 0, 3) == "SPS" && (int)date("Y", $basets) >= 2001) {
             // Account for multi-segment SPS by counting $$ occurrences
             $segments = substr_count($row["data"], "$$");
             // Can only do one, so this is the best we can do
