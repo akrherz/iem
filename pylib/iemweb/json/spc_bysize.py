@@ -37,7 +37,7 @@ from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, OUTLOOK_DAY_FIELD
 from iemweb.util import json_response_dict
 
 
@@ -48,9 +48,7 @@ class Schema(CGIModel):
     category: Annotated[str, Field(description="SPC outlook category")] = (
         "CATEGORICAL"
     )
-    day: Annotated[
-        int, Field(description="SPC outlook day to query", ge=1, le=8)
-    ]
+    day: OUTLOOK_DAY_FIELD
     sort: Annotated[
         str,
         Field(
@@ -126,7 +124,6 @@ def get_mckey(environ: dict) -> str:
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)
 def application(environ, start_response):
     """Answer request."""
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
     res = dowork(environ)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res.encode("ascii")

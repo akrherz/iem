@@ -109,9 +109,9 @@ def application(environ: dict, start_response: callable):
                     most_prob_gust=row["most_prob_gust"],
                 )
             )
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
-        return json.dumps(data).encode("ascii")
+        payload = json.dumps(data).encode("ascii")
+        start_response("200 OK", [("Content-type", "application/json")])
+        return payload
 
     if query.fmt == "excel":
         headers = [
@@ -127,5 +127,6 @@ def application(environ: dict, start_response: callable):
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=wpcmpd.csv"),
     ]
+    payload = mpds.to_csv(index=False).encode("ascii")
     start_response("200 OK", headers)
-    return mpds.to_csv(index=False).encode("ascii")
+    return payload

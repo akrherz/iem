@@ -65,6 +65,7 @@ from iemweb.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD,
     LONGITUDE_FIELD,
+    OUTLOOK_DAY_FIELD,
 )
 from iemweb.util import json_response_dict
 
@@ -85,9 +86,7 @@ class Schema(CGIModel):
     last: Annotated[
         int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
     ] = 0
-    day: Annotated[
-        int, Field(description="Day to query for, 1-8", ge=1, le=8)
-    ] = 1
+    day: OUTLOOK_DAY_FIELD = 1
     time: Annotated[
         str | None,
         Field(
@@ -230,9 +229,9 @@ def application(environ: dict, start_response: callable):
                 "utc_issue": pd.Timestamp(row0["i"]).strftime(ISO8601),
                 "utc_expire": pd.Timestamp(row0["e"]).strftime(ISO8601),
             }
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
-        return json.dumps(res)
+        payload = json.dumps(res)
+        start_response("200 OK", [("Content-type", "application/json")])
+        return payload
     if fmt == "json":
         running = {}
         res = {"outlooks": []}
@@ -252,9 +251,9 @@ def application(environ: dict, start_response: callable):
                     category=row["category"],
                 )
             )
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
-        return json.dumps(res)
+        payload = json.dumps(res)
+        start_response("200 OK", [("Content-type", "application/json")])
+        return payload
 
     outlooks = outlooks.rename(
         columns={
@@ -277,5 +276,6 @@ def application(environ: dict, start_response: callable):
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=outlooks.csv"),
     ]
+    payload = outlooks.to_csv(index=False)
     start_response("200 OK", headers)
-    return outlooks.to_csv(index=False)
+    return payload

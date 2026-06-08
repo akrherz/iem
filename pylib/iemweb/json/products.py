@@ -101,6 +101,6 @@ def application(_environ: dict, start_response: callable):
     with get_sqlalchemy_conn("mesosite") as conn:
         add_archive_products(conn, data)
         add_webcam(conn, data)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(data)
+    payload = json.dumps(data)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

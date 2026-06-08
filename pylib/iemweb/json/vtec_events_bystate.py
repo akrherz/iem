@@ -39,7 +39,13 @@ from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, STATE_FIELD, VTEC_YEAR_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    STATE_FIELD,
+    VTEC_PH_FIELD_OPTIONAL,
+    VTEC_SIG_FIELD_OPTIONAL,
+    VTEC_YEAR_FIELD,
+)
 from iemweb.mlib import rectify_wfo
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -56,20 +62,8 @@ class Schema(CGIModel):
             pattern="^(json|csv|xlsx)$",
         ),
     ] = "json"
-    phenomena: Annotated[
-        str,
-        Field(
-            description="2 character phenomena identifier",
-            max_length=2,
-        ),
-    ] = "__"
-    significance: Annotated[
-        str,
-        Field(
-            description="1 character significance identifier",
-            max_length=1,
-        ),
-    ] = "_"
+    phenomena: VTEC_PH_FIELD_OPTIONAL = None
+    significance: VTEC_SIG_FIELD_OPTIONAL = None
     state: STATE_FIELD
     year: VTEC_YEAR_FIELD
 
@@ -83,9 +77,9 @@ def get_res(state, year, phenomena, significance):
     """
 
     limits = ["phenomena is not null", "significance is not null"]
-    if phenomena != "__":
+    if phenomena is not None:
         limits[0] = "phenomena = :ph"
-    if significance != "_":
+    if significance is not None:
         limits[1] = "significance = :sig"
     plimit = " and ".join(limits)
     data = {"state": state, "year": year, "events": []}
@@ -175,9 +169,9 @@ def application(environ, start_response):
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         pd.DataFrame(res["events"]).to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
     if fmt == "csv":
         fn = f"vtec_{state}_{year}_{phenomena}_{significance}.csv"
@@ -185,13 +179,11 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         pd.DataFrame(res["events"]).to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
 
-    res = json.dumps(res)
-
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    payload = json.dumps(res)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload
