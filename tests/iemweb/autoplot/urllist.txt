@@ -2,6 +2,7 @@
 1/truncate:no::network:IACLIMATE::station:IA0203::threshold:44::month1:10::num1:4::var1:hdd65::month2:6::num2:2::var2:gdd41::year:2007.png
 2/network:IACLIMATE::station:IA0203::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
 2/network:IACLIMATE::station:IATAME::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
+2/network:IACLIMATE::station:IATAME::month:6::year:2020::gddbase:50::gddceil:86::xvar:sdd86::xagg:sigma::yvar:total_snow::yagg:sigma::quorum:25::_r:43::dpi:100::_cb:1.png
 3/network:IACLIMATE::station:IATAME::month:summer::type:sum-precip::threshold:-99::syear:1850::eyear:2024::decadal:yes::_r:43::dpi:100.png
 4/year:2024::threshold:1.0::period:7::state:IA::_r:t::dpi:100.png
 5/network:IACLIMATE::station:IATAME::var:max_snow::_r:43::dpi:100.png
