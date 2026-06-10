@@ -110,15 +110,14 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                             (x0, y0),
                         )
                         continue
-                    else:
-                        meanval = np.mean(data)
-                        LOG.info(
-                            "Replacing masked values with mean %.2f for %s %s",
-                            meanval,
-                            dt,
-                            (x0, y0),
-                        )
-                        data = data.filled(meanval)
+                    meanval = np.mean(data)
+                    LOG.warning(
+                        "Replacing masked values with mean %.2f for %s %s",
+                        meanval,
+                        dt,
+                        (x0, y0),
+                    )
+                    data = data.filled(meanval)
                 i, j = gridnav.find_ij(x0, y0)
                 # NASA Power is 1 degree for Solar, so repeat 8x
                 data = np.repeat(np.repeat(data, 8, axis=0), 8, axis=1)
