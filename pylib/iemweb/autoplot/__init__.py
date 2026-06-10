@@ -429,7 +429,7 @@ monthly_opts = [
     {"id": 115, "label": "Monthly Heatmap of Summary Totals"},
     {
         "id": 2,
-        "label": "Month Precip vs Month Growing Degree Day Departures",
+        "label": "Month Summary Statistics Scatter Plot",
     },
     {
         "id": 223,

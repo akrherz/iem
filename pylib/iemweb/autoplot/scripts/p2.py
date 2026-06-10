@@ -210,10 +210,10 @@ def plotter(ctx: dict):
             )
 
     # Ensure the axes are balanced for non-value plots
-    if ctx["xagg"] != "value":
+    if ctx["xagg"] != "value" and not df[xvar].isna().all():
         xmax = df[xvar].abs().max() + 0.25
         ax.set_xlim(0 - xmax, xmax)
-    if ctx["yagg"] != "value":
+    if ctx["yagg"] != "value" and not df[yvar].isna().all():
         ymax = df[yvar].abs().max() + 0.25
         ax.set_ylim(0 - ymax, ymax)
 
