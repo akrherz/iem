@@ -74,7 +74,7 @@ class Schema(CGIModel):
         Field(
             description="End of period of interest",
         ),
-    ]
+    ] = None
     phenomena: VTEC_PH_FIELD_OPTIONAL = None
     significance: VTEC_SIG_FIELD_OPTIONAL = None
     wfo: WFO3_FIELD = "DMX"

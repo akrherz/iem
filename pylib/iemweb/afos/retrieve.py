@@ -13,7 +13,7 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
-- 2026-06-09: The `pil` needs to be ASCII characters.
+- 2026-06-09: The `pil` needs to be alphanumeric characters (A-Z 0-9).
 - 2026-05-07: The `center` parameter needs to be uppercase and four chars.
 - 2026-04-30: An internal service rewrite was done attempting to remove some
   very slow edge query cases.  Please let me know of any variances you find.
