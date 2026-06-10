@@ -25,31 +25,23 @@ https://mesonet.agron.iastate.edu/json/snowfall_observations_v2.py?wfo=MFL
 """
 
 from datetime import timedelta
-from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import httpx
 import pandas as pd
-from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, WFO3_FIELD
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    wfo: Annotated[
-        str,
-        Field(
-            description="The WFO to return data for",
-            pattern="^[A-Z]{3}$",
-        ),
-    ] = "DVN"
+    wfo: WFO3_FIELD = "DVN"
 
 
 def dowork(wfo: str) -> list:
@@ -137,6 +129,5 @@ def dowork(wfo: str) -> list:
 def application(environ, start_response):
     """Answer request."""
     data = dowork(environ["wfo"])
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return data

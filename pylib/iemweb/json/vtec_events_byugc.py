@@ -42,6 +42,7 @@ https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
 import json
 from datetime import datetime
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -62,11 +63,13 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    fmt: str = Field(
-        default="json",
-        description="Response format, either json, csv, or excel",
-        pattern="^(csv|json|excel|xlsx)$",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="Response format, either json, csv, or excel",
+            pattern="^(csv|json|excel|xlsx)$",
+        ),
+    ] = "json"
     edate: str = Field(
         default=f"{utc().year}-12-31",
         description="End Date (midnight US Central) to end query for issuance",

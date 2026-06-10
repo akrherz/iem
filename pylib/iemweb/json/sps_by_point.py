@@ -36,6 +36,7 @@ https://mesonet.agron.iastate.edu/json/sps_by_point.py\
 import json
 from datetime import date
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -58,25 +59,33 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    fmt: str = Field(
-        "json",
-        pattern="^(json|csv|xlsx)$",
-        description="The format of the output, either json, csv, or xlsx",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            pattern="^(json|csv|xlsx)$",
+            description="The format of the output, either json, csv, or xlsx",
+        ),
+    ] = "json"
     lat: LATITUDE_FIELD = 41.99
     lon: LONGITUDE_FIELD = -92.0
-    sdate: date = Field(
-        default=date(2002, 1, 1),
-        description="Start date of search",
-    )
-    edate: date = Field(
-        default=date(2099, 1, 1),
-        description="End date of search",
-    )
-    valid: AwareDatetime = Field(
-        default=None,
-        description="If provided, only include events valid at this time.",
-    )
+    sdate: Annotated[
+        date,
+        Field(
+            description="Start date of search",
+        ),
+    ] = date(2002, 1, 1)
+    edate: Annotated[
+        date,
+        Field(
+            description="End date of search",
+        ),
+    ] = date(2099, 1, 1)
+    valid: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="If provided, only include events valid at this time.",
+        ),
+    ] = None
 
 
 def get_events(environ):
@@ -158,9 +167,9 @@ def application(environ, start_response):
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
     if fmt == "csv":
         fn = f"sps_{environ['lat']:.4f}N_{(0 - environ['lon']):.4f}W.csv"
@@ -168,11 +177,11 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         df.to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
     res = to_json(data, df)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return [json.dumps(res).replace(" NaN", " null").encode("ascii")]
+    payload = json.dumps(res).replace(" NaN", " null").encode("ascii")
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

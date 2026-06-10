@@ -78,6 +78,6 @@ def run(conn: Connection = None):
 )
 def application(_environ, start_response):
     """Answer request."""
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return run()
+    payload = run()
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

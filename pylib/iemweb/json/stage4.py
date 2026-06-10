@@ -29,6 +29,7 @@ https://mesonet.agron.iastate.edu/json/stage4.py\
 import json
 import os
 from datetime import date, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -53,7 +54,7 @@ class Schema(CGIModel):
     callback: CALLBACK_FIELD = None
     lat: LATITUDE_FIELD
     lon: LONGITUDE_FIELD
-    valid: date = Field(..., description="Valid date of data")
+    valid: Annotated[date, Field(description="Valid date of data")]
     tz: TZ_FIELD = "UTC"
 
 
@@ -64,13 +65,13 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def dowork(environ):
+def dowork(query: Schema):
     """Do work!"""
-    valid = environ["valid"]
+    valid = query.valid
     # We want data for the UTC date and timestamps are in the rears, so from
     # 1z through 1z
     sts = datetime(
-        valid.year, valid.month, valid.day, 1, tzinfo=ZoneInfo(environ["tz"])
+        valid.year, valid.month, valid.day, 1, tzinfo=ZoneInfo(query.tz)
     )
     ets = sts + timedelta(hours=24)
     sidx = hourly_offset(sts)
@@ -81,13 +82,13 @@ def dowork(environ):
         {
             "gridi": -1,
             "gridj": -1,
-            "for_date_in_timezone": environ["tz"],
+            "for_date_in_timezone": query.tz,
             "data": [],
         }
     )
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    i, j = get_nav("STAGE4").find_ij(environ["lon"], environ["lat"])
+    i, j = get_nav("STAGE4").find_ij(query.lon, query.lat)
     if i is not None:
         with ncopen(ncfn) as nc:
             res["gridi"] = i
@@ -108,7 +109,7 @@ def dowork(environ):
     return json.dumps(res)
 
 
-def get_mckey(environ):
+def get_mckey(environ: dict):
     """Get the memcachekey."""
     return (
         f"/json/stage4/{environ['lon']:.2f}/{environ['lat']:.2f}/"
@@ -121,7 +122,6 @@ def get_mckey(environ):
 )
 def application(environ, start_response):
     """Answer request."""
-    res = dowork(environ)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    res = dowork(environ["_cgimodel_schema"])
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

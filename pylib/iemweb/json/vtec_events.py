@@ -39,6 +39,7 @@ https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo=DMX&year=2024\
 
 import json
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
@@ -53,6 +54,7 @@ from iemweb.fields import (
     VTEC_PH_FIELD_OPTIONAL,
     VTEC_SIG_FIELD_OPTIONAL,
     VTEC_YEAR_FIELD,
+    WFO3_FIELD,
 )
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
@@ -64,20 +66,22 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    combo: bool = Field(
-        default=False,
-        description="Special one-off to get all SV, TO, FF, MA events",
-    )
-    fmt: str = Field(
-        default="json",
-        description="Output format, json, csv, xlsx",
-        pattern="^(json|csv|xlsx)$",
-    )
+    combo: Annotated[
+        bool,
+        Field(
+            description="Special one-off to get all SV, TO, FF, MA events",
+        ),
+    ] = False
+    fmt: Annotated[
+        str,
+        Field(
+            description="Output format, json, csv, xlsx",
+            pattern="^(json|csv|xlsx)$",
+        ),
+    ] = "json"
     phenomena: VTEC_PH_FIELD_OPTIONAL = None
     significance: VTEC_SIG_FIELD_OPTIONAL = None
-    wfo: str = Field(
-        "MPX", description="3 character WFO identifier", max_length=4
-    )
+    wfo: WFO3_FIELD = "MPX"
     year: VTEC_YEAR_FIELD = 2015
 
 
@@ -183,49 +187,41 @@ def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ["wfo"]
-    if len(wfo) == 4:
-        wfo = wfo[1:]
-    year = environ["year"]
-
-    phenomena = environ["phenomena"]
-    significance = environ["significance"]
-    combo = environ["combo"]
-
-    fmt = environ["fmt"]
+    query: Schema = environ["_cgimodel_schema"]
     with get_sqlalchemy_conn("postgis") as pgconn:
         res = get_res(
             pgconn,
-            wfo,
-            year,
-            phenomena,
-            significance,
-            combo,
+            query.wfo,
+            query.year,
+            query.phenomena,
+            query.significance,
+            query.combo,
         )
 
-    if fmt == "xlsx":
-        fn = f"vtec_{wfo}_{year}_{phenomena}_{significance}.xlsx"
+    fnbase = (
+        f"vtec_{query.wfo}_{query.year}_{query.phenomena}_{query.significance}"
+    )
+    if query.fmt == "xlsx":
+        fn = f"{fnbase}.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         pd.DataFrame(res["events"]).to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
-    if fmt == "csv":
-        fn = f"vtec_{wfo}_{year}_{phenomena}_{significance}.csv"
+    if query.fmt == "csv":
+        fn = f"{fnbase}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         pd.DataFrame(res["events"]).to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
 
     res = json.dumps(res)
-
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    start_response("200 OK", [("Content-type", "application/json")])
+    return res

@@ -180,6 +180,6 @@ def application(environ, start_response):
 
     res = run(station, sdate, edate, gddbase, gddceil)
 
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(res)
+    payload = json.dumps(res)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

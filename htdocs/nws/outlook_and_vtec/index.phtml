@@ -141,19 +141,28 @@ $opts = [
 $oselect = make_select("otype", $otype, $opts);
 
 $topts = [
+    "0.15" => "15% (day 4+)",
+    "0.30" => "30% (day 4+)",
+    "TSTM" => "General Thunder",
     "MRGL" => "Marginal",
     "SLGT" => "Slight",
     "ENH" => "Enhanced",
     "MDT" => "Moderate",
     "HIGH" => "High",
+    "CRIT" => "Critical (Fire)",
+    "ELEV" => "Elevated (Fire)",
+    "EXTM" => "Extreme (Fire)",
+    "IDRT" => "IDRT (Fire)",
+    "SDRT" => "SDRT (Fire)",
 ];
 $tselect = make_select("threshold", $threshold, $topts);
 
 $wopts = [
-    "TO.W" => "Tornado Warning",
-    "SV.W" => "Severe Thunderstorm Warning",
     "FF.W" => "Flash Flood Warning",
     "MA.W" => "Marine Warning",
+    "FW.W" => "Red Flag Warning",
+    "SV.W" => "Severe Thunderstorm Warning",
+    "TO.W" => "Tornado Warning",
 ];
 $wselect = "";
 foreach ($wopts as $k => $v) {

@@ -179,6 +179,5 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("iem") as conn:
         res = get_data(conn, station, year, environ["fmt"])
-    headers = [("Content-type", get_ct(environ))]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", get_ct(environ))])
     return res

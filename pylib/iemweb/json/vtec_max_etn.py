@@ -135,7 +135,6 @@ def application(environ, start_response):
     year = environ["year"]
     fmt = environ["format"]
     headers = [("Content-type", get_ct(environ))]
-
     res = run(year, fmt)
     start_response("200 OK", headers)
     return res
