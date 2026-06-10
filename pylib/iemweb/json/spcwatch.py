@@ -145,14 +145,16 @@ def application(environ, start_response):
             ("Content-type", get_ct(environ)),
             ("Content-Disposition", "attachment; filename=watches.xls"),
         ]
-        start_response("200 OK", headers)
         with BytesIO() as bio:
             watches.drop(columns="geom").to_excel(bio, index=False)
-            return bio.getvalue()
+            payload = bio.getvalue()
+        start_response("200 OK", headers)
+        return payload
 
     headers = [
         ("Content-type", get_ct(environ)),
         ("Content-Disposition", "attachment; filename=watches.csv"),
     ]
+    payload = watches.drop(columns="geom").to_csv(index=False).encode("ascii")
     start_response("200 OK", headers)
-    return watches.drop(columns="geom").to_csv(index=False).encode("ascii")
+    return payload

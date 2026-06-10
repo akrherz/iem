@@ -234,6 +234,5 @@ def application(environ: dict, start_response: callable):
 
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, station, year, fmt)
-    headers = [("Content-type", get_ct(environ))]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", get_ct(environ))])
     return data.encode("ascii")

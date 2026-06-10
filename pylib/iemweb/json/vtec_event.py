@@ -39,10 +39,11 @@ https://mesonet.agron.iastate.edu/json/vtec_event.py\
 
 import json
 from datetime import datetime
+from typing import Annotated
 
 import httpx
 import pandas as pd
-from pydantic import Field, field_validator
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import LOG
@@ -50,11 +51,12 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import (
     CALLBACK_FIELD,
+    VTEC_ETN_FIELD,
     VTEC_PH_FIELD,
     VTEC_SIG_FIELD,
     VTEC_YEAR_FIELD,
+    WFO3_FIELD,
 )
-from iemweb.mlib import unrectify_wfo
 from iemweb.util import json_response_dict
 
 
@@ -62,29 +64,19 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    include_text: bool = Field(
-        default=True,
-        description=(
-            "Include the raw NWS text in the response, default is True"
+    include_text: Annotated[
+        bool,
+        Field(
+            description=(
+                "Include the raw NWS text in the response, default is True"
+            ),
         ),
-    )
-    wfo: str = Field(
-        ...,
-        description="Three character WFO identifier",
-        min_length=3,
-        max_length=4,
-        pattern=r"^[A-Z]{3,4}$",
-    )
+    ] = True
+    wfo: WFO3_FIELD
     year: VTEC_YEAR_FIELD
     phenomena: VTEC_PH_FIELD
     significance: VTEC_SIG_FIELD
-    etn: int = Field(..., description="Event Tracking Number", ge=1, le=9999)
-
-    @field_validator("wfo")
-    @classmethod
-    def validate_wfo(cls, v: str) -> str:
-        """VTEC storage is 3 chars, so here we do the necessary evil."""
-        return unrectify_wfo(v)
+    etn: VTEC_ETN_FIELD
 
 
 def run(environ: dict) -> str:
@@ -224,4 +216,4 @@ def application(environ, start_response):
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return res.encode("utf-8")
+    return res

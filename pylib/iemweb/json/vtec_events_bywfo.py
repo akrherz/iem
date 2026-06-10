@@ -29,6 +29,7 @@ wfo=DMX&year=2024&phenomena=TO&significance=W&fmt=xlsx
 
 import json
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -41,6 +42,7 @@ from iemweb.fields import (
     VTEC_PH_FIELD_OPTIONAL,
     VTEC_SIG_FIELD_OPTIONAL,
     VTEC_YEAR_FIELD,
+    WFO3_FIELD,
 )
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
@@ -52,24 +54,30 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    fmt: str = Field(
-        default="json",
-        description="The format of the response, either json or csv or xlsx",
-        pattern="^(json|csv|xlsx)$",
-    )
-    start: AwareDatetime = Field(
-        default=None,
-        description="Start of period of interest",
-    )
-    end: AwareDatetime = Field(
-        default=None,
-        description="End of period of interest",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description=(
+                "The format of the response, either json or csv or xlsx"
+            ),
+            pattern="^(json|csv|xlsx)$",
+        ),
+    ] = "json"
+    start: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Start of period of interest",
+        ),
+    ] = None
+    end: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="End of period of interest",
+        ),
+    ]
     phenomena: VTEC_PH_FIELD_OPTIONAL = None
     significance: VTEC_SIG_FIELD_OPTIONAL = None
-    wfo: str = Field(
-        default="DMX", description="3 character WFO identifier", max_length=3
-    )
+    wfo: WFO3_FIELD = "DMX"
     year: VTEC_YEAR_FIELD = utc().year
 
 
@@ -164,37 +172,36 @@ def as_json(df: pd.DataFrame) -> str:
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ["wfo"]
-    year = environ["year"]
-    start = environ["start"]
-    end = environ["end"]
+    query: Schema = environ["_cgimodel_schema"]
+    year = query.year
+    start = query.start
+    end = query.end
     if start is None or end is None:
         start = utc(year)
         end = utc(year + 1)
-    phenomena = environ["phenomena"]
-    significance = environ["significance"]
-    fmt = environ["fmt"]
+    phenomena = query.phenomena
+    significance = query.significance
 
-    df = get_df(wfo, start, end, phenomena, significance)
-    if fmt == "xlsx":
-        fn = f"vtec_{wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.xlsx"
+    df = get_df(query.wfo, start, end, phenomena, significance)
+    if query.fmt == "xlsx":
+        fn = f"vtec_{query.wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
-    if fmt == "csv":
-        fn = f"vtec_{wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.csv"
+    if query.fmt == "csv":
+        fn = f"vtec_{query.wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         df.to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
 
     res = as_json(df)

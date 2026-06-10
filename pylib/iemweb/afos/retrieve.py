@@ -13,6 +13,7 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-06-09: The `pil` needs to be ASCII characters.
 - 2026-05-07: The `center` parameter needs to be uppercase and four chars.
 - 2026-04-30: An internal service rewrite was done attempting to remove some
   very slow edge query cases.  Please let me know of any variances you find.
@@ -24,8 +25,6 @@ Changelog
   regret this decision as well.
 - 2026-03-09: The METAR service was updated to not consider the IEM generated
   METARs based on the MADIS HF feed.
-- 2026-01-29: This service is now protected by a query timeout of 60 seconds.
-  You will get a HTTP status of 503.
 
 Examples
 ~~~~~~~~
@@ -122,6 +121,7 @@ from sqlalchemy.sql.expression import TextClause
 from iemweb import error_log
 from iemweb.util import get_ct
 
+AFOS_RE = re.compile(r"^[A-Z0-9]{3,6}$", re.IGNORECASE)
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
 STATEMENT_TIMEOUT: str = "60s"
@@ -257,9 +257,8 @@ class Schema(CGIModel):
         pils = [val.strip().upper() for val in pils]
         res = []
         for pil in pils:
-            # The enclosing parenthesis here is a lame code smell
-            if not (3 <= len(pil) <= 6):  # skipcq
-                raise ValueError(f"Invalid PIL length: {pil}")
+            if not AFOS_RE.match(pil):
+                raise ValueError(f"Invalid PIL: {pil}")
             # Lame WAR alias
             if pil.startswith("WAR") and len(pil) == 6:
                 res.extend(f"{q}{pil[3:6]}" for q in WARPIL)

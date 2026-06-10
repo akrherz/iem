@@ -188,21 +188,24 @@ def application(environ, start_response):
             }
         )
         headers = [("Content-type", get_ct(environ))]
+        payload = json.dumps(res).replace("NaN", "null")
         start_response("200 OK", headers)
-        return json.dumps(res).replace("NaN", "null")
+        return payload
     if fmt == "excel":
         headers = [
             ("Content-type", get_ct(environ)),
             ("Content-Disposition", "attachment; filename=outlooks.xls"),
         ]
-        start_response("200 OK", headers)
         with BytesIO() as bio:
             outlooks.to_excel(bio, index=False)
-            return bio.getvalue()
+            payload = bio.getvalue()
+        start_response("200 OK", headers)
+        return payload
 
     headers = [
         ("Content-type", get_ct(environ)),
         ("Content-Disposition", "attachment; filename=outlooks.csv"),
     ]
+    payload = outlooks.to_csv(index=False)
     start_response("200 OK", headers)
-    return outlooks.to_csv(index=False)
+    return payload

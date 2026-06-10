@@ -186,7 +186,9 @@ class MyModel(CGIModel):
         Field(
             description=(
                 "If set to 'yes', the column headers will not be included "
-                "in the output."
+                "in the output and the station and valid output files will "
+                "not be included by default.  This is often used with the "
+                "data=metar parameter to get just METARs."
             ),
         ),
     ] = False

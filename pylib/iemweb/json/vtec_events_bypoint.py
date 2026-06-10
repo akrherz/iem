@@ -58,6 +58,7 @@ lat=41.99&lon=-93.61&buffer=0.5
 import json
 from datetime import date, datetime
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -80,27 +81,33 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    at: AwareDatetime = Field(
-        None,
-        description=(
-            "Specific time to query for VTEC events. In the case of long "
-            "fuse events, the at value is compared against the product "
-            "issuance time as well."
+    at: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "Specific time to query for VTEC events. In the case of long "
+                "fuse events, the at value is compared against the product "
+                "issuance time as well."
+            ),
         ),
-    )
-    fmt: str = Field(
-        default="json",
-        description="The format to return the data in, either json or csv",
-        pattern="^(json|csv|xlsx)$",
-    )
-    buffer: float = Field(
-        0,
-        description="Buffer in decimal degrees around the provided point",
-        ge=0,
-        le=1,
-    )
-    sdate: date = Field(date(1986, 1, 1), description="Start Date")
-    edate: date = Field(date(2099, 1, 1), description="End Date")
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="The format to return the data in, either json or csv",
+            pattern="^(json|csv|xlsx)$",
+        ),
+    ] = "json"
+    buffer: Annotated[
+        float,
+        Field(
+            description="Buffer in decimal degrees around the provided point",
+            ge=0,
+            le=1,
+        ),
+    ] = 0.0
+    sdate: Annotated[date, Field(description="Start Date")] = date(1986, 1, 1)
+    edate: Annotated[date, Field(description="End Date")] = date(2099, 1, 1)
     lat: LATITUDE_FIELD = 42.0
     lon: LONGITUDE_FIELD = -93.0
 
@@ -231,9 +238,9 @@ def application(environ, start_response):
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
     if fmt == "csv":
         fn = (
@@ -244,13 +251,11 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         df.to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
 
     res = to_json(df)
-
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    start_response("200 OK", [("Content-type", "application/json")])
+    return res
