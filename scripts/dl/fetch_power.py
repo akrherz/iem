@@ -67,7 +67,6 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     for x0 in np.arange(gridnav.left, gridnav.right, 10.0):
         for y0 in np.arange(gridnav.bottom, gridnav.top, 10.0):
             queue.append([x0, y0])  # noqa
-    prev_meanval = None
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
             "https://power.larc.nasa.gov/api/temporal/daily/regional?"
@@ -106,14 +105,11 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                 if np.ma.is_masked(data):
                     if data.mask.all():
                         LOG.info(
-                            "All values masked for %s at %s, assigning %s",
+                            "Ignoring all masked values for %s %s",
                             dt,
                             (x0, y0),
-                            prev_meanval,
                         )
-                        if prev_meanval is None:
-                            continue
-                        data = data.filled(prev_meanval)
+                        continue
                     else:
                         meanval = np.mean(data)
                         LOG.info(
@@ -123,7 +119,6 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                             (x0, y0),
                         )
                         data = data.filled(meanval)
-                prev_meanval = np.mean(data)
                 i, j = gridnav.find_ij(x0, y0)
                 # NASA Power is 1 degree for Solar, so repeat 8x
                 data = np.repeat(np.repeat(data, 8, axis=0), 8, axis=1)
