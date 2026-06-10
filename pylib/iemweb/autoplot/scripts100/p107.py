@@ -192,7 +192,7 @@ def plotter(ctx: dict):
         culler = " and merra_srad is not null"
     elif varname.find("narr") > -1:
         culler = " and narr_srad is not null"
-    elif varname.find("power") > -1:
+    elif varname.find("power_srad") > -1:
         culler = " and power_srad is not null"
 
     with get_sqlalchemy_conn("coop") as conn:
