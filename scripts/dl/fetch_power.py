@@ -1,6 +1,13 @@
 """Fetch the NASA POWER Dataset.
 
-For now, we just run each Monday for the current year RUN_2AM.sh
+Based on present documentation that suggests ~4 day availability, but we have
+found at least coarse resolution data at ~2 day availability.  This coarse
+resolution data confuses the processing as we see there is data, but we don't
+want it.  So we attempt to detect this by doing a unique values count.
+
+The processing runs for the current year from RUN_2AM.sh and will attempt
+to get whatever data it can find from the service.  We also force a
+reprocessing for a 5 month old date, FWIW.
 """
 
 import subprocess
@@ -37,9 +44,15 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     now = ets
     while now >= sts:
         ds = get_grids(now, varnames="power_swdn", domain=domain)
-        maxval = ds["power_swdn"].values.max()
-        if force or np.isnan(maxval) or maxval < 0:
-            LOG.info("adding %s as currently empty or forced: %s", now, force)
+        # A backhanded way to detect if we have all missing data or if we
+        # have a very coarse resolution product currently saved.
+        unique_count = len(np.unique(ds["power_swdn"].values))
+        if force or unique_count < 1_000:
+            LOG.info(
+                "adding %s to queue because %s",
+                now,
+                "--force" if force else f"unique_count={unique_count}<1000",
+            )
             current[now] = {"data": ds, "dirty": False}
         now -= timedelta(days=1)
     if not current:
@@ -54,7 +67,6 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     for x0 in np.arange(gridnav.left, gridnav.right, 10.0):
         for y0 in np.arange(gridnav.bottom, gridnav.top, 10.0):
             queue.append([x0, y0])  # noqa
-    prev_meanval = None
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
             "https://power.larc.nasa.gov/api/temporal/daily/regional?"
@@ -93,24 +105,19 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                 if np.ma.is_masked(data):
                     if data.mask.all():
                         LOG.info(
-                            "All values masked for %s at %s, assigning %s",
-                            dt,
-                            (x0, y0),
-                            prev_meanval,
-                        )
-                        if prev_meanval is None:
-                            continue
-                        data = data.filled(prev_meanval)
-                    else:
-                        meanval = np.mean(data)
-                        LOG.info(
-                            "Replacing masked values with mean %.2f for %s %s",
-                            meanval,
+                            "Ignoring all masked values for %s %s",
                             dt,
                             (x0, y0),
                         )
-                        data = data.filled(meanval)
-                prev_meanval = np.mean(data)
+                        continue
+                    meanval = np.mean(data)
+                    LOG.warning(
+                        "Replacing masked values with mean %.2f for %s %s",
+                        meanval,
+                        dt,
+                        (x0, y0),
+                    )
+                    data = data.filled(meanval)
                 i, j = gridnav.find_ij(x0, y0)
                 # NASA Power is 1 degree for Solar, so repeat 8x
                 data = np.repeat(np.repeat(data, 8, axis=0), 8, axis=1)

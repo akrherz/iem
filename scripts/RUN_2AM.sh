@@ -59,8 +59,18 @@ python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=conus
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=sa
+# Force a ~5 month old data
+python fetch_power.py --date=$(date --date '150 days ago' +'%Y-%m-%d') --domain=conus --force
+python fetch_power.py --date=$(date --date '150 days ago' +'%Y-%m-%d') --domain=china --force
+python fetch_power.py --date=$(date --date '150 days ago' +'%Y-%m-%d') --domain=europe --force
+python fetch_power.py --date=$(date --date '150 days ago' +'%Y-%m-%d') --domain=sa --force
 cd ../climodat
-python power_extract.py &
+# This is vanilla looking for any missing data that could be estimated
+python power_extract.py
+# Force a reprocess with hopefully higher res data
+python power_extract.py --date=$(date --date '14 days ago' +'%Y-%m-%d')
+# Offset a little due to quirks with what a "day" is
+python power_extract.py --date=$(date --date '152 days ago' +'%Y-%m-%d')
 
 cd ../cache
 python warn_cache.py &

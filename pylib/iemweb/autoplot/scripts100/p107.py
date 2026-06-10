@@ -55,6 +55,9 @@ PDICT = {
     "avg_narr_srad": "Average Daily Solar Radiation (NARR)",
     "max_narr_srad": "Max Daily Solar Radiation (NARR)",
     "min_narr_srad": "Min Daily Solar Radiation (NARR)",
+    "avg_power_srad": "Average Daily Solar Radiation (NASA POWER)",
+    "max_power_srad": "Max Daily Solar Radiation (NASA POWER)",
+    "min_power_srad": "Min Daily Solar Radiation (NASA POWER)",
     "precip": "Total Precipitation",
     "snow": "Total Snowfall",
     "days-precip-above": (
@@ -189,6 +192,8 @@ def plotter(ctx: dict):
         culler = " and merra_srad is not null"
     elif varname.find("narr") > -1:
         culler = " and narr_srad is not null"
+    elif varname.find("power_srad") > -1:
+        culler = " and power_srad is not null"
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -199,7 +204,7 @@ def plotter(ctx: dict):
         high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
         era5land_soilt4_avg, era5land_soilm1m_avg,
-        merra_srad, narr_srad
+        merra_srad, narr_srad, power_srad
         from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC
         """,
@@ -231,7 +236,6 @@ def plotter(ctx: dict):
                     if not g["hit"].any()
                     else g.loc[: g.low[g["hit"]].index[0]]
                 ),
-                include_groups=False,
             )
             .reset_index()
             .transform(lambda g: g)
@@ -274,6 +278,9 @@ def plotter(ctx: dict):
             avg_narr_srad=("narr_srad", "mean"),
             min_narr_srad=("narr_srad", "min"),
             max_narr_srad=("narr_srad", "max"),
+            avg_power_srad=("power_srad", "mean"),
+            min_power_srad=("power_srad", "min"),
+            max_power_srad=("power_srad", "max"),
         )
         .reset_index()
         .rename(
