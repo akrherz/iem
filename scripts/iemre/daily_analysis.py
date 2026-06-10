@@ -431,7 +431,7 @@ def workflow(ts: date, domain: str):
     LOG.info("loaded %s variables from IEMRE database", len(ds))
 
     # rsds -> grid_rsds.py
-    # power_swdn -> TODO
+    # power_swdn -> ../dl/fetch_power.py
 
     # high_tmpk, low_tmpk, p01d, wind_speed, min_rh, max_rh, high_soil4t,
     # low_soil4t, high_tmpk_12z low_tmpk_12z p01d_12z

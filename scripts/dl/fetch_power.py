@@ -1,6 +1,13 @@
 """Fetch the NASA POWER Dataset.
 
-For now, we just run each Monday for the current year RUN_2AM.sh
+Based on present documentation that suggests ~4 day availability, but we have
+found at least coarse resolution data at ~2 day availability.  This coarse
+resolution data confuses the processing as we see there is data, but we don't
+want it.  So we attempt to detect this by doing a unique values count.
+
+The processing runs for the current year from RUN_2AM.sh and will attempt
+to get whatever data it can find from the service.  We also force a
+reprocessing for a 5 month old date, FWIW.
 """
 
 import subprocess
@@ -37,9 +44,15 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
     now = ets
     while now >= sts:
         ds = get_grids(now, varnames="power_swdn", domain=domain)
-        maxval = ds["power_swdn"].values.max()
-        if force or np.isnan(maxval) or maxval < 0:
-            LOG.info("adding %s as currently empty or forced: %s", now, force)
+        # A backhanded way to detect if we have all missing data or if we
+        # have a very coarse resolution product currently saved.
+        unique_count = len(np.unique(ds["power_swdn"].values))
+        if force or unique_count < 1_000:
+            LOG.info(
+                "adding %s to queue because %s",
+                now,
+                "--force" if force else f"unique_count={unique_count}<1000",
+            )
             current[now] = {"data": ds, "dirty": False}
         now -= timedelta(days=1)
     if not current:

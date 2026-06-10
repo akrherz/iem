@@ -215,6 +215,7 @@
 107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_era5land_soilt4_avg::thres:-99::base:50::ceil:86::year:2022::_r:43::dpi:100.png
 107/network:IACLIMATE::station:IATAME::sday:1225::eday:0104::stop:32::varname:min_merra_srad::thres:-99::base:50::ceil:86::year:2024::_r:43::dpi:100.png
 107/network:IACLIMATE::station:IATAME::sday:0228::eday:0301::varname:avg_temp::thres:-99::base:50::ceil:86::year:2025::_r:t::dpi:100.png
+107/network:IACLIMATE::station:IATAME::sday:0228::eday:0301::varname:avg_power_srad::thres:-99::base:50::ceil:86::year:2025::_r:t::dpi:100.png
 108/network:IACLIMATE::station:IATAME::sdate:2023-09-20::edate:2024-03-07::base:50::ceil:86::which:gdd::_r:t::dpi:100.png
 108/network:IACLIMATE::station:IATAME::sdate:2023-09-20::edate:2024-03-07::base:50::ceil:86::year2:2022::which:precip::_r:t::dpi:100.png
 108/network:IACLIMATE::station:IATAME::sdate:2023-09-20::edate:2024-03-07::base:50::ceil:86::year2:2022::year3:1929::which:sdd::_r:t::dpi:100.png
