@@ -52,7 +52,14 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_ETN_FIELD,
+    VTEC_PH_FIELD,
+    VTEC_SIG_FIELD,
+    VTEC_YEAR_FIELD,
+    WFO3_FIELD,
+)
 from iemweb.util import json_response_dict
 
 
@@ -60,22 +67,11 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    wfo: Annotated[
-        str,
-        Field(
-            description="3 or 4 character WFO Identifier",
-            min_length=3,
-            max_length=4,
-        ),
-    ] = "MPX"
-    year: Annotated[int, Field(description="Year of interest")] = 2015
-    phenomena: Annotated[
-        str, Field(description="VTEC Phenomena", max_length=2)
-    ] = "SV"
-    significance: Annotated[
-        str, Field(description="VTEC Significance", max_length=1)
-    ] = "W"
-    etn: Annotated[int, Field(description="VTEC Event ID", ge=1, le=9999)] = 1
+    wfo: WFO3_FIELD = "MPX"
+    year: VTEC_YEAR_FIELD = 2015
+    phenomena: VTEC_PH_FIELD = "SV"
+    significance: VTEC_SIG_FIELD = "W"
+    etn: VTEC_ETN_FIELD = 1
     sbw: Annotated[
         bool,
         Field(
@@ -95,11 +91,11 @@ class Schema(CGIModel):
     ] = False
 
 
-def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
+def run_lsrs(query: Schema):
     """Do great things"""
     pgconn, cursor = get_dbconnc("postgis")
 
-    if sbw == 1:
+    if query.sbw:
         sql = """
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson,
@@ -112,7 +108,14 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             w.significance = %s and w.phenomena = %s
             ORDER by l.valid ASC
         """
-        args = (year, wfo, wfo, etn, significance, phenomena)
+        args = (
+            query.year,
+            query.wfo,
+            query.wfo,
+            query.etn,
+            query.significance,
+            query.phenomena,
+        )
     else:
         sql = """
             WITH countybased as (
@@ -129,7 +132,14 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             l.valid >= c.issued and l.valid < c.expired and
             l.wfo = %s ORDER by l.valid ASC
         """
-        args = (year, wfo, etn, significance, phenomena, wfo)
+        args = (
+            query.year,
+            query.wfo,
+            query.etn,
+            query.significance,
+            query.phenomena,
+            query.wfo,
+        )
     cursor.execute(sql, args)
     res = json_response_dict(
         {
@@ -159,7 +169,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     return json.dumps(res)
 
 
-def run_sbw(wfo, year, phenomena, significance, etn):
+def run_sbw(query: Schema):
     """Do great things"""
     pgconn, cursor = get_dbconnc("postgis")
 
@@ -173,7 +183,13 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     and eventid = %s and phenomena = %s and significance = %s
     and status = 'NEW'
     """,
-        (year, wfo, etn, phenomena, significance),
+        (
+            query.year,
+            query.wfo,
+            query.etn,
+            query.phenomena,
+            query.significance,
+        ),
     )
     res = {
         "type": "FeatureCollection",
@@ -186,7 +202,9 @@ def run_sbw(wfo, year, phenomena, significance, etn):
             dict(
                 type="Feature",
                 properties=dict(
-                    phenomena=phenomena, significance=significance, eventid=etn
+                    phenomena=query.phenomena,
+                    significance=query.significance,
+                    eventid=query.etn,
                 ),
                 geometry=json.loads(row["geojson"]),
             )
@@ -195,7 +213,7 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
-def run(wfo, year, phenomena, significance, etn):
+def run(query: Schema):
     """Do great things"""
     pgconn, cursor = get_dbconnc("postgis")
 
@@ -210,7 +228,13 @@ def run(wfo, year, phenomena, significance, etn):
     WHERE w.vtec_year = %s and w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     """,
-        (year, wfo, etn, phenomena, significance),
+        (
+            query.year,
+            query.wfo,
+            query.etn,
+            query.phenomena,
+            query.significance,
+        ),
     )
     res = {
         "type": "FeatureCollection",
@@ -224,7 +248,9 @@ def run(wfo, year, phenomena, significance, etn):
                 type="Feature",
                 id=row["ugc"],
                 properties=dict(
-                    phenomena=phenomena, significance=significance, eventid=etn
+                    phenomena=query.phenomena,
+                    significance=query.significance,
+                    eventid=query.etn,
                 ),
                 geometry=json.loads(row["geojson"]),
             )
@@ -251,38 +277,15 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ, start_response):
     """Main()"""
-    headers = [("Content-type", "application/vnd.geo+json")]
+    query: Schema = environ["_cgimodel_schema"]
 
-    wfo = environ["wfo"]
-    if len(wfo) == 4:
-        wfo = wfo[1:]
-
-    if environ["lsrs"]:
-        res = run_lsrs(
-            wfo,
-            environ["year"],
-            environ["phenomena"],
-            environ["significance"],
-            environ["etn"],
-            environ["sbw"],
-        )
+    if query.lsrs:
+        res = run_lsrs(query)
     else:
-        if environ["sbw"]:
-            res = run_sbw(
-                wfo,
-                environ["year"],
-                environ["phenomena"],
-                environ["significance"],
-                environ["etn"],
-            )
+        if query.sbw:
+            res = run_sbw(query)
         else:
-            res = run(
-                wfo,
-                environ["year"],
-                environ["phenomena"],
-                environ["significance"],
-                environ["etn"],
-            )
+            res = run(query)
 
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res.encode("ascii")

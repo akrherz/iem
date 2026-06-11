@@ -117,8 +117,6 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ: dict, start_response):
     """Do Main"""
-    headers = [("Content-type", "application/vnd.geo+json")]
-
     res = run(environ["valid"])
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

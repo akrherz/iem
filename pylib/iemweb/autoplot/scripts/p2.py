@@ -190,8 +190,7 @@ def plotter(ctx: dict):
 
     # Find interesting values to label
     df["distance"] = (
-        df[f"{ctx['xvar'].replace('_sigma', '')}_sigma"] ** 2
-        + df[f"{ctx['yvar'].replace('_sigma', '')}_sigma"] ** 2
+        df[f"{ctx['xvar']}_sigma"] ** 2 + df[f"{ctx['yvar']}_sigma"] ** 2
     ) ** 0.5
     events = df.query(f"distance > 2.5 or year == {year:.0f}")
     for _year, row in events.iterrows():

@@ -127,23 +127,25 @@ def application(environ: dict, start_response: callable):
                     most_prob_gust=clean(row["most_prob_gust"]),
                 )
             )
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
-        return json.dumps(data).encode("ascii")
+        payload = json.dumps(data).encode("ascii")
+        start_response("200 OK", [("Content-type", "application/json")])
+        return payload
 
     if query.fmt == "excel":
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-Disposition", "attachment; filename=spcmcd.xls"),
         ]
-        start_response("200 OK", headers)
         with BytesIO() as bio:
             mcds.to_excel(bio, index=False)
-            return bio.getvalue()
+            payload = bio.getvalue()
+        start_response("200 OK", headers)
+        return payload
 
     headers = [
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=spcmcd.csv"),
     ]
+    payload = mcds.to_csv(index=False).encode("ascii")
     start_response("200 OK", headers)
-    return mcds.to_csv(index=False).encode("ascii")
+    return payload

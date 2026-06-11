@@ -184,10 +184,9 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ: dict, start_response: callable):
     """Main Workflow"""
-    headers = [("Content-type", "application/vnd.geo+json")]
     query: Schema = environ["_cgimodel_schema"]
 
     with get_sqlalchemy_conn("mesosite") as conn:
         res = run(conn, query.network, query.only_online, query.has_attribute)
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

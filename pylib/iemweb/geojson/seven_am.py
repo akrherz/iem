@@ -264,6 +264,5 @@ def application(environ, start_response):
     ts = utc(dt.year, dt.month, dt.day, 12)
 
     res = router(group, ts)
-    headers = [("Content-type", "application/vnd.geo+json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

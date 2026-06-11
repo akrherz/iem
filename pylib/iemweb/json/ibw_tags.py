@@ -40,7 +40,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import CALLBACK_FIELD, STATE_FIELD_OPTIONAL
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 
@@ -55,13 +55,7 @@ class Schema(CGIModel):
     damagetag: Annotated[
         str | None, Field(description="Damage Tag", max_length=20)
     ] = None
-    state: Annotated[
-        str | None,
-        Field(
-            description="State identifier is used first if wfo provided too",
-            max_length=2,
-        ),
-    ] = None
+    state: STATE_FIELD_OPTIONAL = None
     wfo: Annotated[
         str | None, Field(description="WFO Identifier", max_length=4)
     ] = None
@@ -208,6 +202,5 @@ def application(environ: dict, start_response: callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
     res = run(query)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

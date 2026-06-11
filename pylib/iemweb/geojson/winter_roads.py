@@ -69,7 +69,6 @@ def run(conn: Connection | None = None) -> str:
 )
 def application(_environ, start_response):
     """Main Workflow"""
-    headers = [("Content-type", "application/vnd.geo+json")]
     res = run()
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res
