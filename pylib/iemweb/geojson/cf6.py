@@ -43,7 +43,10 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    dt: Annotated[date, Field(description="Date to query for")] = date.today()
+    dt: Annotated[
+        date,
+        Field(default_factory=date.today, description="Date to query for"),
+    ]
     callback: CALLBACK_FIELD = None
     fmt: Annotated[
         str,
@@ -187,6 +190,6 @@ def application(environ, start_response):
     fmt = environ["fmt"]
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("iem") as conn:
-        data = get_data(conn, dt, fmt)
+        data = get_data(conn, dt, fmt).encode("utf-8")
     start_response("200 OK", headers)
-    return data.encode("utf-8")
+    return data

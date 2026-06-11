@@ -350,7 +350,6 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ, start_response):
     """Go Main Go"""
-    headers = [("Content-type", "application/vnd.geo+json")]
     dt = environ["dt"]
     if dt is None:
         dt = utc().replace(minute=0, second=0, microsecond=0)
@@ -358,5 +357,5 @@ def application(environ, start_response):
     with get_sqlalchemy_conn("isuag") as conn:
         data = func(conn, dt)
 
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return data

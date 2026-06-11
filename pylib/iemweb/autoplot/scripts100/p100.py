@@ -135,7 +135,7 @@ def plotter(ctx: dict):
     for i in range(30, len(data)):
         tavg.append(np.average(data.values[i - 30 : i]))
 
-    a1981_2010 = df.loc[1981:2011, ptype].mean()
+    a1991_2020 = df.loc[1991:2020, ptype].mean()
 
     colorabove = "tomato"
     colorbelow = "dodgerblue"
@@ -163,8 +163,8 @@ def plotter(ctx: dict):
             mybar.set_edgecolor(colorbelow)
     lbl = "Avg: " + precision % (avgv,)
     ax.axhline(avgv, lw=2, color="k", zorder=2, label=lbl)
-    lbl = "1981-2010: " + precision % (a1981_2010,)
-    ax.axhline(a1981_2010, lw=2, color="brown", zorder=2, label=lbl)
+    lbl = "1991-2020: " + precision % (a1991_2020,)
+    ax.axhline(a1991_2020, lw=2, color="brown", zorder=2, label=lbl)
     if len(years) == len(tavg):
         ax.plot(
             years, tavg, lw=1.5, color="g", zorder=4, label="Trailing 30yr"

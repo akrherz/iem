@@ -81,6 +81,6 @@ def application(environ: dict, start_response: callable):
                     "id": row[0],
                 }
             )
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(data)
+    payload = json.dumps(data)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

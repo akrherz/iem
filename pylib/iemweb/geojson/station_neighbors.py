@@ -159,10 +159,10 @@ def get_mckey(environ) -> str:
     help=__doc__,
     schema=Schema,
 )
-def application(environ: dict, start_response):
+def application(environ: dict, start_response: callable):
     """Main Workflow"""
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("mesosite") as conn:
-        res = run(conn, environ)
+        res = run(conn, environ).encode("utf-8")
     start_response("200 OK", headers)
-    return res.encode("utf-8")
+    return res

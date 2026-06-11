@@ -127,6 +127,5 @@ def application(environ, start_response):
     dt: date = environ["valid"]
 
     res = run(dt)
-    headers = [("Content-type", "application/vnd.geo+json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

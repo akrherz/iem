@@ -4,7 +4,7 @@ years with similiar observation counts are used in this data presentation.
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -59,7 +59,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """WITH one as (
+            sql_helper("""WITH one as (
         SELECT year, sum(precip) as one_total_precip,
         avg(high) as one_avg_high, avg(low) as one_avg_low,
         avg((high+low)/2.) as one_avg_temp,
@@ -67,7 +67,7 @@ def plotter(ctx: dict):
         min(high) as one_min_high,
         min(low) as one_min_low,
         max(low) as one_max_low, count(*) as obs from alldata WHERE
-        station = %s GROUP by year),
+        station = :station1 GROUP by year),
         two as (
         SELECT year, sum(precip) as two_total_precip,
         avg(high) as two_avg_high, avg(low) as two_avg_low,
@@ -76,7 +76,7 @@ def plotter(ctx: dict):
         min(high) as two_min_high,
         min(low) as two_min_low,
         max(low) as two_max_low, count(*) as obs from alldata WHERE
-        station = %s GROUP by year
+        station = :station2 GROUP by year
         )
 
         SELECT o.year, one_total_precip, one_avg_high, one_avg_low,
@@ -85,9 +85,9 @@ def plotter(ctx: dict):
         two_avg_low, two_avg_temp, two_max_high, two_min_low, two_min_high,
         two_max_low from one o, two t
         WHERE o.year = t.year and abs(o.obs - t.obs) < 5 ORDER by o.year ASC
-        """,
+        """),
             conn,
-            params=(station1, station2),
+            params={"station1": station1, "station2": station2},
             index_col="year",
         )
     if df.empty:
@@ -95,7 +95,7 @@ def plotter(ctx: dict):
     df["one_station"] = station1
     df["two_station"] = station2
     for col in PDICT:
-        df["diff_" + col] = df["one_" + col] - df["two_" + col]
+        df[f"diff_{col}"] = df[f"one_{col}"] - df[f"two_{col}"]
 
     title = f"Yearly {PDICT[varname]} Difference"
     subtitle = (

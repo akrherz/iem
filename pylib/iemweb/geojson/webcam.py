@@ -27,6 +27,7 @@ https://mesonet.agron.iastate.edu/geojson/webcam.geojson
 
 import json
 from datetime import timezone
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -43,14 +44,18 @@ class Schema(CGIModel):
 
     callback: CALLBACK_FIELD = None
     network: NETWORK_FIELD = "KCCI"
-    ts: AwareDatetime = Field(
-        default=None,
-        description="Optional *legacy* timestamp to request webcams for.",
-    )
-    valid: AwareDatetime = Field(
-        default=None,
-        description="Optional timestamp to request webcams for.",
-    )
+    ts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Optional *legacy* timestamp to request webcams for.",
+        ),
+    ] = None
+    valid: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Optional timestamp to request webcams for.",
+        ),
+    ] = None
 
 
 def run(valid, network):
@@ -143,11 +148,9 @@ def get_mckey(environ):
 )
 def application(environ: dict, start_response: callable):
     """Do Main"""
-    headers = [("Content-type", "application/vnd.geo+json")]
-
     stamp = environ["valid"]
     if stamp is None:
         stamp = environ["ts"]
     res = run(stamp, environ["network"])
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

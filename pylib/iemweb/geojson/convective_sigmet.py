@@ -145,9 +145,6 @@ def run(environ: dict, conn: Connection = None) -> str:
 )
 def application(environ, start_response):
     """Do Something"""
-    # Go Main Go
-    headers = [("Content-type", "application/vnd.geo+json")]
-
-    res = run(environ)
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    res = run(environ).encode("ascii")
+    start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
+    return res

@@ -25,10 +25,7 @@ https://mesonet.agron.iastate.edu/geojson/sbw_county_intersect.py\
 
 """
 
-from typing import Annotated
-
 import geopandas as gpd
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
@@ -38,6 +35,7 @@ from iemweb.fields import (
     VTEC_PH_FIELD,
     VTEC_SIG_FIELD,
     VTEC_YEAR_FIELD,
+    WFO3_FIELD,
 )
 
 
@@ -45,16 +43,14 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: CALLBACK_FIELD = None
-    wfo: Annotated[
-        str, Field(description="3 or 4 character WFO Identifier")
-    ] = "MPX"
+    wfo: WFO3_FIELD = "MPX"
     year: VTEC_YEAR_FIELD = 2015
     phenomena: VTEC_PH_FIELD = "SV"
     significance: VTEC_SIG_FIELD = "W"
     etn: VTEC_ETN_FIELD = 1
 
 
-def run(wfo, year, phenomena, significance, etn: int):
+def run(query: Schema) -> str:
     """Do great things"""
     with get_sqlalchemy_conn("postgis") as conn:
         borderdf = gpd.read_postgis(
@@ -79,11 +75,11 @@ def run(wfo, year, phenomena, significance, etn: int):
         """),
             conn,
             params=dict(
-                year=year,
-                wfo=wfo,
-                phenomena=phenomena,
-                significance=significance,
-                eventid=etn,
+                year=query.year,
+                wfo=query.wfo,
+                phenomena=query.phenomena,
+                significance=query.significance,
+                eventid=query.etn,
             ),
             geom_col="geom",
         )  # type: ignore
@@ -108,19 +104,8 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ, start_response):
     """Main()"""
-    headers = [("Content-type", "application/vnd.geo+json")]
+    query: Schema = environ["_cgimodel_schema"]
+    res = run(query).encode("ascii")
 
-    wfo = environ["wfo"]
-    if len(wfo) == 4:
-        wfo = wfo[1:]
-
-    res = run(
-        wfo,
-        environ["year"],
-        environ["phenomena"],
-        environ["significance"],
-        environ["etn"],
-    )
-
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    start_response("200 OK", [("Content-Type", "application/vnd.geo+json")])
+    return res
