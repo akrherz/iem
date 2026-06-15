@@ -137,7 +137,7 @@ def get_data(conn, query: Schema):
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = :ts
     """),
-        {"ts": query.ts},
+        {"ts": query.dt},
     )
     for i, row in enumerate(res.mappings()):
         data["features"].append(
