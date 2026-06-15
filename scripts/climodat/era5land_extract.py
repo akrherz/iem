@@ -4,14 +4,14 @@ Gridcell sample the ERA5Land NetCDF files to save srad to climodat database.
 Run from RUN_0Z.sh for seven UTC days ago.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
-from pyiem.grid import nav
+from pyiem.grid.nav import get_nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import hourly_offset
 from pyiem.util import convert_value, logger, ncopen, utc
@@ -31,9 +31,12 @@ def compute_regions(data, varname, df):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(nav.ERA5LAND_CONUS.affine_image)
+    czs = CachingZonalStats(get_nav("ERA5LAND", "CONUS").affine_image)
     data = czs.gen_stats(np.flipud(data), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
+        if np.ma.is_masked(data[i]):
+            LOG.info("No data for %s %s", sid, varname)
+            continue
         df.at[sid, varname] = data[i]
 
 
@@ -55,6 +58,8 @@ def build_stations(dt) -> pd.DataFrame:
         )
     for col in [
         "era5land_srad",
+        "era5land_soilt4_min",
+        "era5land_soilt4_max",
         "era5land_soilt4_avg",
         "era5land_soilm4_avg",
         "era5land_soilm1m_avg",
@@ -85,7 +90,9 @@ def compute(df, sids, dt, do_regions=False):
                 + np.mean(nc.variables["soilm"][idx0:, 1], 0) * 21.0
                 + np.mean(nc.variables["soilm"][idx0:, 2], 0) * 72.0
             ) / 100.0
-            soilt = np.mean(nc.variables["soilt"][idx0:, 0], 0)
+            soiltavg = np.mean(nc.variables["soilt"][idx0:, 0], 0)
+            soiltmin = np.min(nc.variables["soilt"][idx0:, 0], 0)
+            soiltmax = np.max(nc.variables["soilt"][idx0:, 0], 0)
             ncfn2 = f"/mesonet/data/era5/{ets.year}_era5land_hourly.nc"
             with ncopen(ncfn2) as nc2:
                 rsds += np.sum(nc2.variables["rsds"][:idx1], 0) * factor
@@ -97,29 +104,38 @@ def compute(df, sids, dt, do_regions=False):
                 + np.mean(nc.variables["soilm"][idx0:idx1, 1], 0) * 21.0
                 + np.mean(nc.variables["soilm"][idx0:idx1, 2], 0) * 72.0
             ) / 100.0
-            soilt = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
+            soiltavg = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
+            soiltmin = np.min(nc.variables["soilt"][idx0:idx1, 0], 0)
+            soiltmax = np.max(nc.variables["soilt"][idx0:idx1, 0], 0)
 
     rsds = rsds.filled(np.nan)
     soilm = soilm.filled(np.nan)
     soilm1m = soilm1m.filled(np.nan)
-    soilt = soilt.filled(np.nan)
+    soiltavg = soiltavg.filled(np.nan)
+    soiltmin = soiltmin.filled(np.nan)
+    soiltmax = soiltmax.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        i, j = nav.ERA5LAND_CONUS.find_ij(row["lon"], row["lat"])
+        i, j = get_nav("ERA5LAND", "CONUS").find_ij(row["lon"], row["lat"])
         if i is None:
             continue
         df.at[sid, "era5land_srad"] = rsds[j, i]
-        df.at[sid, "era5land_soilt4_avg"] = soilt[j, i]
+        df.at[sid, "era5land_soilt4_avg"] = soiltavg[j, i]
+        df.at[sid, "era5land_soilt4_min"] = soiltmin[j, i]
+        df.at[sid, "era5land_soilt4_max"] = soiltmax[j, i]
         df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
         df.at[sid, "era5land_soilm1m_avg"] = soilm1m[j, i]
 
     if do_regions:
         compute_regions(rsds, "era5land_srad", df)
-        compute_regions(soilt, "era5land_soilt4_avg", df)
+        compute_regions(soiltavg, "era5land_soilt4_avg", df)
+        compute_regions(soiltmin, "era5land_soilt4_min", df)
+        compute_regions(soiltmax, "era5land_soilt4_max", df)
         compute_regions(soilm, "era5land_soilm4_avg", df)
         compute_regions(soilm1m, "era5land_soilm1m_avg", df)
 
-    LOG.info("IA0200 %s", df.loc["IA0200"])
+    if "IA0200" in df.index:
+        LOG.info("IA0200 %s", df.loc["IA0200"])
 
 
 def do(dt):
@@ -139,6 +155,12 @@ def do(dt):
     df["era5land_soilt4_avg"] = convert_value(
         df["era5land_soilt4_avg"].values, "degK", "degF"
     )
+    df["era5land_soilt4_min"] = convert_value(
+        df["era5land_soilt4_min"].values, "degK", "degF"
+    )
+    df["era5land_soilt4_max"] = convert_value(
+        df["era5land_soilt4_max"].values, "degK", "degF"
+    )
 
     # prevent NaN from being inserted
     df = df.replace({np.nan: None})
@@ -148,6 +170,8 @@ def do(dt):
         """
         UPDATE alldata set era5land_srad = %(era5land_srad)s,
         era5land_soilt4_avg = %(era5land_soilt4_avg)s,
+        era5land_soilt4_min = %(era5land_soilt4_min)s,
+        era5land_soilt4_max = %(era5land_soilt4_max)s,
         era5land_soilm4_avg = %(era5land_soilm4_avg)s,
         era5land_soilm1m_avg = %(era5land_soilm1m_avg)s
         where station = %(station)s and day = %(day)s
@@ -159,8 +183,8 @@ def do(dt):
 
 
 @click.command()
-@click.option("--date", "valid", type=click.DateTime())
-def main(valid):
+@click.option("--date", "valid", type=click.DateTime(), required=True)
+def main(valid: datetime):
     """Go Main Go"""
     do(valid.date())
 

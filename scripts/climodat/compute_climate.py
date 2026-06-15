@@ -4,12 +4,15 @@ Run for a previous date from RUN_2AM.sh
 """
 
 from datetime import date, datetime
+from typing import NamedTuple
 
 import click
-from pyiem.database import get_dbconnc
+import pandas as pd
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
 from pyiem.util import logger
+from sqlalchemy.engine import Connection
 
 LOG = logger()
 
@@ -34,30 +37,46 @@ META = {
 }
 
 
-def daily_averages(table, ts):
+@with_sqlalchemy_conn("coop")
+def daily_averages(
+    table: str, ts: datetime | None, conn: Connection | None = None
+):
     """
     Compute and Save the simple daily averages
     """
-    pgconn, cursor = get_dbconnc("coop")
+    params = {
+        "sts": META[table]["sts"].strftime("%Y-%m-%d"),
+        "ets": META[table]["ets"].strftime("%Y-%m-%d"),
+    }
     sday_limiter = ""
     day_limiter = ""
     if ts is not None:
-        sday_limiter = f" and sday = '{ts:%m%d}' "
-        day_limiter = f" and valid = '2000-{ts:%m-%d}' "
+        params["sday"] = f"{ts:%m%d}"
+        params["valid"] = f"2000-{ts:%m-%d}"
+        sday_limiter = " and sday = :sday "
+        day_limiter = " and valid = :valid "
     for st in state_names:
         nt = NetworkTable(f"{st}CLIMATE")
         if not nt.sts:
             LOG.info("Skipping %s as it has no stations", st)
             continue
         LOG.info("Computing Daily Averages for state: %s", st)
-        cursor.execute(
-            f"DELETE from {table} WHERE substr(station, 1, 2) = %s "
-            f"{day_limiter}",
-            (st,),
+        params["state"] = st
+        res = conn.execute(
+            sql_helper(
+                "DELETE from {table} WHERE substr(station, 1, 2) = :state "
+                "{day_limiter}",
+                day_limiter=day_limiter,
+                table=table,
+            ),
+            params,
         )
-        LOG.info("    removed %s rows from %s", cursor.rowcount, table)
-        cursor.execute(
-            f"""
+        LOG.info("    removed %s rows from %s", res.rowcount, table)
+        params["sids"] = list(nt.sts.keys())
+
+        res = conn.execute(
+            sql_helper(
+                """
     INSERT into {table} (station, valid, high, low,
         max_high, min_high,
         max_low, min_low,
@@ -65,7 +84,7 @@ def daily_averages(table, ts):
         snow, years,
         gdd32, gdd41, gdd46, gdd48, gdd50, gdd51, gdd52,
         sdd86, hdd65, cdd65, max_range,
-        min_range, srad)
+        min_range, srad, sgdd32, sgdd50, sgdd52)
     (SELECT station, ('2000-'|| to_char(day, 'MM-DD'))::date as d,
     avg(high) as avg_high, avg(low) as avg_low,
     max(high) as max_high, min(high) as min_high,
@@ -83,105 +102,121 @@ def daily_averages(table, ts):
     avg( hdd65(high,low) ) as hdd65,
     avg(cdd65(high,low)) as cdd65,
     max( high - low) as max_range, min(high - low) as min_range,
-    avg(merra_srad) as srad
-    from alldata_{st} WHERE day >= %s and day < %s and
+    avg(merra_srad) as srad,
+    avg(gddxx(32, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd32,
+    avg(gddxx(50, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd50,
+    avg(gddxx(52, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd52
+    from {table_alldata} WHERE day >= :sts and day < :ets and
     precip is not null and high is not null and low is not null
-    and station = ANY(%s) {sday_limiter}
+    and station = ANY(:sids) {sday_limiter}
     GROUP by d, station)""",
-            (
-                META[table]["sts"].strftime("%Y-%m-%d"),
-                META[table]["ets"].strftime("%Y-%m-%d"),
-                list(nt.sts.keys()),
+                table=table,
+                sday_limiter=sday_limiter,
+                table_alldata=f"alldata_{st}",
             ),
+            params,
         )
-        LOG.info("    added %s rows to %s", cursor.rowcount, table)
-    cursor.close()
-    pgconn.commit()
+        LOG.info("    added %s rows to %s", res.rowcount, table)
+        conn.commit()
 
 
-def do_date(ccursor2, table, row, col, agg_col):
+def do_date(
+    conn: Connection, table: str, row: NamedTuple, col: str, lookfor: float
+):
     """Process date"""
-    ccursor2.execute(
-        f"""
-        SELECT year from alldata_{row["station"][:2]} where station = %s and
-        abs({col} - {row[agg_col]}) < 0.001 and
-        sday = %s and day >= %s and day < %s ORDER by year ASC
+    res = conn.execute(
+        sql_helper(
+            """
+        SELECT year from {table} where station = :station and
+        abs({col} - cast(:lookfor as real)) < 0.001 and
+        sday = :sday and day >= :sts and day <= :ets
+        ORDER by year ASC
     """,
-        (
-            row["station"],
-            row["valid"].strftime("%m%d"),
-            META[table]["sts"],
-            META[table]["ets"],
+            table=f"alldata_{row.station[:2].lower()}",
+            col=col,
         ),
+        {
+            "station": row.station,
+            "sday": row.valid.strftime("%m%d"),
+            "sts": META[table]["sts"],
+            "ets": META[table]["ets"],
+            "lookfor": lookfor,
+        },
     )
-    years = [row2["year"] for row2 in ccursor2]
+    years = [row2[0] for row2 in res]
     if not years:
         LOG.info(
-            "None %s %s %s %s %s",
-            row["station"],
-            row["valid"],
-            row[agg_col],
+            "None %s %s %s %s",
+            row.station,
+            row.valid,
+            lookfor,
             col,
-            agg_col,
         )
     return years
 
 
-def set_daily_extremes(table, ts):
+@with_sqlalchemy_conn("coop")
+def set_daily_extremes(table, ts, conn: Connection | None = None):
     """Set the extremes on a given table"""
-    pgconn, cursor = get_dbconnc("coop")
+    params = {}
     sday_limiter = ""
     if ts is not None:
-        sday_limiter = f" and valid = '2000-{ts:%m-%d}' "
-    cursor.execute(
-        f"""
+        params["valid"] = f"2000-{ts:%m-%d}"
+        sday_limiter = " and valid = :valid "
+    climodf = pd.read_sql(
+        sql_helper(
+            """
         SELECT * from {table} WHERE max_high_yr is null and
         max_high is not null
         and min_high_yr is null and min_high is not null
         and max_low_yr is null and max_low is not null
         and min_low_yr is null and min_low is not null {sday_limiter}
-        """
-    )
-    ccursor2 = pgconn.cursor()
-    cnt = 0
-    for row in cursor:
-        data = {}
-        data["max_high_yr"] = do_date(ccursor2, table, row, "high", "max_high")
-        data["min_high_yr"] = do_date(ccursor2, table, row, "high", "min_high")
-        data["max_low_yr"] = do_date(ccursor2, table, row, "low", "max_low")
-        data["min_low_yr"] = do_date(ccursor2, table, row, "low", "min_low")
-        data["max_precip_yr"] = do_date(
-            ccursor2, table, row, "precip", "max_precip"
-        )
-        ccursor2.execute(
-            f"""
-            UPDATE {table} SET max_high_yr = %s, min_high_yr = %s,
-            max_low_yr = %s, min_low_yr = %s, max_precip_yr = %s
-            WHERE station = %s and valid = %s
         """,
-            (
-                data["max_high_yr"],
-                data["min_high_yr"],
-                data["max_low_yr"],
-                data["min_low_yr"],
-                data["max_precip_yr"],
-                row["station"],
-                row["valid"],
+            table=table,
+            sday_limiter=sday_limiter,
+        ),
+        conn,
+        params=params,
+    )
+    cnt = 0
+    for row in climodf.itertuples():
+        data = {}
+        data["max_high_yr"] = do_date(conn, table, row, "high", row.max_high)
+        data["min_high_yr"] = do_date(conn, table, row, "high", row.min_high)
+        data["max_low_yr"] = do_date(conn, table, row, "low", row.max_low)
+        data["min_low_yr"] = do_date(conn, table, row, "low", row.min_low)
+        data["max_precip_yr"] = do_date(
+            conn, table, row, "precip", row.max_precip
+        )
+        conn.execute(
+            sql_helper(
+                """
+    UPDATE {table} SET max_high_yr = :max_high_yr, min_high_yr = :min_high_yr,
+    max_low_yr = :max_low_yr, min_low_yr = :min_low_yr,
+    max_precip_yr = :max_precip_yr
+    WHERE station = :station and valid = :valid
+        """,
+                table=table,
             ),
+            {
+                "max_high_yr": data["max_high_yr"],
+                "min_high_yr": data["min_high_yr"],
+                "max_low_yr": data["max_low_yr"],
+                "min_low_yr": data["min_low_yr"],
+                "max_precip_yr": data["max_precip_yr"],
+                "station": row.station,
+                "valid": row.valid,
+            },
         )
         cnt += 1
         if cnt % 1000 == 0:
-            ccursor2.close()
-            pgconn.commit()
-            ccursor2 = pgconn.cursor()
-    ccursor2.close()
-    cursor.close()
-    pgconn.commit()
+            conn.commit()
+    conn.commit()
 
 
 @click.command()
 @click.option("--date", "dt", help="Date to process", type=click.DateTime())
-def main(dt):
+def main(dt: datetime | None):
     """Go Main Go"""
     if dt is not None:
         dt = dt.date()
