@@ -9,10 +9,12 @@ require_once "../../include/mlib.php";
 
 $t = new MyView();
 $count = get_int404("count", 10);
-$wsargs = Array(
-    "count" => $count,
-);
 
+/**
+ * Do the necessary work.
+ * @param int $count
+ * @param string $sort
+ */
 function dowork($count, $sort)
 {
     $wsargs = Array(

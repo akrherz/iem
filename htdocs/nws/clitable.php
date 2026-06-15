@@ -39,7 +39,7 @@ if ($opt === "bystation") {
         "dt" => date("Y-m-d", $day)
     );
     $json = require_json_response("/geojson/cli.py", $wsargs);
-    $uri = sprintf("/json/cli.py?%s", http_build_query($wsargs));
+    $uri = sprintf("/geojson/cli.py?%s", http_build_query($wsargs));
     $arr = $json['features'];
 }
 $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
