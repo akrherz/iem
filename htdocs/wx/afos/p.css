@@ -1,7 +1,8 @@
 /* AFOS product display styles */
 .afos-block { position: relative; margin-top: 1rem; }
 .afos-block:first-of-type { margin-top: 0.5rem; }
-.afos-pre { background:#f8f9fa; padding: .75rem; border:1px solid #dee2e6; border-radius:.25rem; font-size: .85rem; overflow-x:auto; }
+
+.afos-pre { background:#f8f9fa; padding: .75rem; border:1px solid #dee2e6; border-radius:.25rem; font-size: .85rem; overflow-x:scroll; }
 .afos-toolbar { position:absolute; top:.25rem; right:.25rem; display:flex; gap:.25rem; }
 .afos-copy.copied { color:#198754; border-color:#198754; }
 .afos-copy.copied::after { content:" ✓"; }

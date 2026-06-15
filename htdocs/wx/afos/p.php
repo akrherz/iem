@@ -7,7 +7,7 @@ require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/wx/afos/p.css">
+<link rel="stylesheet" type="text/css" href="/wx/afos/p.css?v2">
 EOM;
 $t->jsextra = <<<EOM
 <script type="module" src="/wx/afos/p.module.js"></script>
