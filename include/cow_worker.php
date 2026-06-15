@@ -146,15 +146,6 @@ function printWARN($lsrs, $warn)
     return $s;
 }
 
-$phenoms = "";
-foreach ($wtype as $k => $w) {
-    $phenoms .= sprintf("&phenomena=%s", $w);
-}
-$lsrtypes = "";
-foreach ($ltype as $k => $w) {
-    $lsrtypes .= sprintf("&lsrtype=%s", $w);
-}
-
 // Build Cow API URL
 $wsargs = [
     "wfo" => (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,
@@ -164,6 +155,8 @@ $wsargs = [
     "wind" => $wind,
     "lsrbuffer" => $lsrbuffer,
     "warningbuffer" => floatval($warnbuffer) * 100., // approx to km
+    "lsrtype" => implode(",", $ltype),
+    "phenomena" => implode(",", $wtype),
 ];
 if ($fcster != '') {
     $wsargs["fcster"] = $fcster;
