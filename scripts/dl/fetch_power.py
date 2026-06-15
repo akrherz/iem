@@ -47,11 +47,12 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
         # A backhanded way to detect if we have all missing data or if we
         # have a very coarse resolution product currently saved.
         unique_count = len(np.unique(ds["power_swdn"].values))
-        if force or unique_count < 1_000:
+        # 1_000 threshold was found to be noisey for winter months
+        if force or unique_count < 500:
             LOG.info(
                 "adding %s to queue because %s",
                 now,
-                "--force" if force else f"unique_count={unique_count}<1000",
+                "--force" if force else f"unique_count={unique_count}<500",
             )
             current[now] = {"data": ds, "dirty": False}
         now -= timedelta(days=1)
@@ -105,17 +106,22 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
                 if np.ma.is_masked(data):
                     if data.mask.all():
                         LOG.info(
-                            "Ignoring all masked values for %s %s",
+                            "[%s] Ignoring all masked values for %s %s",
+                            domain,
                             dt,
                             (x0, y0),
                         )
                         continue
                     meanval = np.mean(data)
                     LOG.warning(
-                        "Replacing masked values with mean %.2f for %s %s",
-                        meanval,
+                        "[%s] Replacing %.1f%% masked values for %s "
+                        "with mean %.2f for %.1f %.1f",
+                        domain,
+                        100.0 * np.sum(data.mask) / data.size,
                         dt,
-                        (x0, y0),
+                        meanval,
+                        x0,
+                        y0,
                     )
                     data = data.filled(meanval)
                 i, j = gridnav.find_ij(x0, y0)

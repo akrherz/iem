@@ -11,6 +11,7 @@ site and network combination.
 Changelog
 ---------
 
+- 2026-06-14: Added `feelslike[F]` as the apparent temperature in Fahrenheit.
 - 2026-03-03: Please migrate usage of root attribute `server_gentime` to
   `generated_at`.
 - 2024-08-01: Documentation update
@@ -85,6 +86,7 @@ def run(conn: Connection, query: Schema):
     ob["max_dayairtemp[F]"] = row["max_tmpf"]
     ob["min_dayairtemp[F]"] = row["min_tmpf"]
     ob["dewpointtemp[F]"] = row["dwpf"]
+    ob["feelslike[F]"] = None if row["feel"] is None else round(row["feel"], 1)
     ob["windspeed[kt]"] = row["sknt"]
     ob["winddirection[deg]"] = row["drct"]
     ob["altimeter[in]"] = row["alti"]
@@ -106,6 +108,10 @@ def run(conn: Connection, query: Schema):
     ob["presentwx"] = [] if row["wxcodes"] is None else row["wxcodes"]
     ob["precip_today[in]"] = row["s_pday"]
     ob["c1tmpf[F]"] = row["c1tmpf"]
+    ob["c2tmpf[F]"] = row["c2tmpf"]
+    ob["c3tmpf[F]"] = row["c3tmpf"]
+    ob["c4tmpf[F]"] = row["c4tmpf"]
+    ob["c5tmpf[F]"] = row["c5tmpf"]
     ob["srad_1h[J m-2]"] = row["srad_1h_j"]
     for depth in [4, 8, 16, 20, 32, 40, 64, 128]:
         ob[f"tsoil[{depth}in][F]"] = row[f"tsoil_{depth}in_f"]

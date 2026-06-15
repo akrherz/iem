@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import DateFormatter
 from metpy.units import masked_array, units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes
 from pyiem.util import utc
@@ -73,13 +73,18 @@ def get_data(ctx):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
         df = pd.read_sql(
-            "SELECT valid at time zone 'UTC' as valid, "
-            "case when precip > 0.49 then null else precip end as precip, "
-            "sknt, drct, gust_sknt, tmpf, dwpf, pres1 "
-            "from alldata_1minute WHERE station = %s "
-            "and valid >= %s and valid < %s ORDER by valid ASC",
+            sql_helper("""
+    SELECT valid at time zone 'UTC' as valid,
+    case when precip > 0.49 then null else precip end as precip,
+    sknt, drct, gust_sknt, tmpf, dwpf, pres1
+    from alldata_1minute WHERE station = :station
+    and valid >= :sts and valid < :ets ORDER by valid ASC"""),
             conn,
-            params=(ctx["zstation"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["zstation"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col="valid",
         )
     if df.empty:
@@ -281,6 +286,7 @@ def make_meteo_plot(ctx):
     )
     ax.grid(True)
     ax.set_ylabel("Temperature [°F]")
+    ax.legend(loc="best", ncol=2)
     do_xaxis(ctx, ax, False)
 
     # -----------------------------
