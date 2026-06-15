@@ -4,7 +4,7 @@ Gridcell sample the NLDAS NetCDF files to save srad to climodat database.
 Run from RUN_0Z.sh for six UTC days ago.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import click
 import geopandas as gpd
@@ -54,7 +54,13 @@ def build_stations(dt) -> pd.DataFrame:
             params=(dt,),
             index_col="station",
         )
-    for col in ["nldas_soilt4_avg", "nldas_soilm4_avg", "nldas_soilm1m_avg"]:
+    for col in [
+        "nldas_soilt4_min",
+        "nldas_soilt4_avg",
+        "nldas_soilt4_max",
+        "nldas_soilm4_avg",
+        "nldas_soilm1m_avg",
+    ]:
         df[col] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
@@ -84,31 +90,43 @@ def compute(df, sids, dt, do_regions=False):
             + np.mean(nc.variables["soilm"][tsel, 1], 0) * 30.0
             + np.mean(nc.variables["soilm"][tsel, 2], 0) * 60.0
         ) / 100.0
-        soilt = np.mean(nc.variables["soilt"][tsel, 0], 0)
+        soiltmin = np.min(nc.variables["soilt"][tsel, 0], 0)
+        soiltmax = np.max(nc.variables["soilt"][tsel, 0], 0)
+        soiltavg = np.mean(nc.variables["soilt"][tsel, 0], 0)
 
     df["i"] = np.digitize(df["lon"].values, lons)
     df["j"] = np.digitize(df["lat"].values, lats)
     soilm = soilm.filled(np.nan)
     soilm1m = soilm1m.filled(np.nan)
-    soilt = soilt.filled(np.nan)
+    soiltmin = soiltmin.filled(np.nan)
+    soiltmax = soiltmax.filled(np.nan)
+    soiltavg = soiltavg.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        df.at[sid, "nldas_soilt4_avg"] = soilt[int(row["j"]), int(row["i"])]
+        df.at[sid, "nldas_soilt4_avg"] = soiltavg[int(row["j"]), int(row["i"])]
+        df.at[sid, "nldas_soilt4_min"] = soiltmin[int(row["j"]), int(row["i"])]
+        df.at[sid, "nldas_soilt4_max"] = soiltmax[int(row["j"]), int(row["i"])]
         df.at[sid, "nldas_soilm4_avg"] = soilm[int(row["j"]), int(row["i"])]
         df.at[sid, "nldas_soilm1m_avg"] = soilm1m[int(row["j"]), int(row["i"])]
 
     if do_regions:
-        compute_regions(soilt, "nldas_soilt4_avg", df)
+        compute_regions(soiltavg, "nldas_soilt4_avg", df)
+        compute_regions(soiltmin, "nldas_soilt4_min", df)
+        compute_regions(soiltmax, "nldas_soilt4_max", df)
         compute_regions(soilm, "nldas_soilm4_avg", df)
-        compute_regions(soilm, "nldas_soilm1m_avg", df)
+        compute_regions(soilm1m, "nldas_soilm1m_avg", df)
 
-    LOG.info("IA0200 %s", df.loc["IA0200"])
+    if "IA0200" in df.index:
+        LOG.info("IA0200 %s", df.loc["IA0200"])
 
 
 def do(dt):
     """Process for a given date."""
     LOG.info("do(%s)", dt)
     df = build_stations(dt)
+    if df.empty:
+        LOG.warning("Aborting as no database obs to update for %s", dt)
+        return
     df["day"] = dt
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's values
@@ -122,6 +140,12 @@ def do(dt):
     df["nldas_soilt4_avg"] = convert_value(
         df["nldas_soilt4_avg"].values, "degK", "degF"
     )
+    df["nldas_soilt4_min"] = convert_value(
+        df["nldas_soilt4_min"].values, "degK", "degF"
+    )
+    df["nldas_soilt4_max"] = convert_value(
+        df["nldas_soilt4_max"].values, "degK", "degF"
+    )
 
     # prevent NaN from being inserted
     df = df.replace({np.nan: None})
@@ -130,6 +154,8 @@ def do(dt):
         """
         UPDATE alldata set
         nldas_soilt4_avg = %(nldas_soilt4_avg)s,
+        nldas_soilt4_min = %(nldas_soilt4_min)s,
+        nldas_soilt4_max = %(nldas_soilt4_max)s,
         nldas_soilm4_avg = %(nldas_soilm4_avg)s,
         nldas_soilm1m_avg = %(nldas_soilm1m_avg)s
         where station = %(station)s and day = %(day)s
@@ -141,8 +167,8 @@ def do(dt):
 
 
 @click.command()
-@click.option("--valid", type=click.DateTime())
-def main(valid):
+@click.option("--valid", type=click.DateTime(), required=True)
+def main(valid: datetime):
     """Go Main Go"""
     do(valid.date())
 
