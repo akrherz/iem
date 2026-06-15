@@ -1,0 +1,50 @@
+.cow-filter-card {
+	border-color: var(--bs-border-color);
+}
+
+.cow-filter-card table {
+	border: 1px solid var(--bs-border-color);
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.cow-filter-card th {
+	background-color: var(--bs-tertiary-bg);
+	white-space: nowrap;
+	width: 11rem;
+}
+
+.cow-filter-card th,
+.cow-filter-card td {
+	border: 1px solid var(--bs-border-color) !important;
+}
+
+.cow-filter-card td {
+	vertical-align: middle;
+}
+
+.cow-filter-card input[type="checkbox"] + label {
+	margin-right: 1rem;
+}
+
+.cow-filter-card .btn {
+	margin-right: 0.5rem;
+}
+
+.cow-results-table,
+.cow-results-legend {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.cow-results-table th,
+.cow-results-table td,
+.cow-results-legend th,
+.cow-results-legend td {
+	border: 1px solid var(--bs-border-color) !important;
+}
+
+.cow-results-table th,
+.cow-results-legend th {
+	background-color: var(--bs-tertiary-bg);
+}
