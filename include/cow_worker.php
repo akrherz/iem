@@ -326,10 +326,12 @@ $content .= <<<EOF
 <i>Areal Verification %:</i> Percentage of the polygon warning that received a verifying report (report is buffered {$lsrbuffer} km).
 
  <table class="table table-sm table-bordered cow-results-legend">
-<tr><th>LSR Leadtime Color Key</th>
+<tr>
+<th>LSR Leadtime Color Key</th>
 <td style="background: #0F0;">LSR verified warning</td>
 <td style="background: #8FBC8F;">LSR covered by earlier warning</td>
 <td style="background: #AAA;">LSR non-verifying type for warning</td>
+</tr>
 </table>
 
 <br />
