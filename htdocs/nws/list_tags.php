@@ -5,6 +5,7 @@ putenv("TZ=UTC");
 date_default_timezone_set('UTC');
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
 $t = new MyView();
 
@@ -28,33 +29,32 @@ $bydamagetagchecked = "";
 $bystatechecked = "";
 if ($opt == "bywfo") {
     $bywfochecked = "checked";
-    $jsonuri = sprintf(
-        "%s/json/ibw_tags.py?wfo=%s&year=%s",
-        $INTERNAL_BASEURL,
-        $wfo,
-        $year
+    $wsargs = Array(
+        "wfo" => $wfo,
+        "year" => $year
     );
+    $json = require_json_response("/json/ibw_tags.py", $wsargs);
+    $uri = sprintf("/json/ibw_tags.py?%s", http_build_query($wsargs));
     $title = "NWS $wfo issued Impact Based Warning Tags for $year";
 } else if ($opt == "bystate") {
     $bystatechecked = "checked";
-    $jsonuri = sprintf(
-        "%s/json/ibw_tags.py?state=%s&year=%s",
-        $INTERNAL_BASEURL,
-        $state,
-        $year
+    $wsargs = Array(
+        "state" => $state,
+        "year" => $year
     );
+    $json = require_json_response("/json/ibw_tags.py", $wsargs);
+    $uri = sprintf("/json/ibw_tags.py?%s", http_build_query($wsargs));
     $title = "NWS issued Impact Based Warning Tags for $state during $year";
 } else {
     $bydamagetagchecked = "checked";
-    $jsonuri = sprintf(
-        "%s/json/ibw_tags.py?damagetag=%s&year=%s",
-        $INTERNAL_BASEURL,
-        $damagetag,
-        $year
+    $wsargs = Array(
+        "damagetag" => $damagetag,
+        "year" => $year
     );
+    $json = require_json_response("/json/ibw_tags.py", $wsargs);
+    $uri = sprintf("/json/ibw_tags.py?%s", http_build_query($wsargs));
     $title = "NWS Damage Tags of $damagetag for $year";
 }
-$publicjsonuri = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $jsonuri);
 
 $t->title = $title;
 $t->headextra = <<<EOM
@@ -183,9 +183,6 @@ $ffwtable = <<<EOM
  <th>Leeve Tag</th></tr></thead>
  <tbody>
 EOM;
-
-$data = file_get_contents($jsonuri);
-$json = json_decode($data, $assoc = TRUE);
 
 // Enhanced bean counting to track all tag types and prevent double counting
 $counts = [
@@ -422,7 +419,7 @@ $t->content = <<<EOM
                  <div class="d-flex align-items-center fw-semibold text-primary"><i class="bi bi-download me-2"></i>Data Access</div>
                  <div class="flex-grow-1">
                      <div class="text-muted">JSON endpoint:</div>
-                     <code class="small text-break d-block">{$publicjsonuri}</code>
+                     <code class="small text-break d-block">{$uri}</code>
                  </div>
                  <div>
                      <a href="/json/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-info-circle me-1"></i>API Docs</a>

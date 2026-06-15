@@ -3,6 +3,7 @@ define("IEM_APPID", 114);
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
 
 $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
@@ -52,8 +53,8 @@ $d2 = daySelect($ets->format("d"), "day2");
 $h2 = hourSelect($ets->format("H"), "hour2");
 
 // Retreive the autoplot description JSON
-$content = file_get_contents($INTERNAL_BASEURL . "/plotting/auto/meta/177.json");
-$meta = json_decode($content, $assoc=TRUE);
+$meta = require_json_response("/plotting/auto/meta/177.json", Array());
+
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = array();

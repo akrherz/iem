@@ -1,16 +1,16 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 122);
-
 require_once "../../include/myview.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
+
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
-$uri = "{$INTERNAL_BASEURL}/json/vtec_pds.py";
-$data = file_get_contents($uri);
-$json = json_decode($data, $assoc = TRUE);
+$uri = "/json/vtec_pds.py";
+$json = require_json_response($uri, Array());
 $table = "";
 foreach ($json['events'] as $key => $val) {
     $table .= sprintf(
@@ -40,7 +40,7 @@ $t->jsextra = <<<EOM
 <script type="module" src="pds.module.js?v=3"></script>
 EOM;
 
-
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
@@ -60,7 +60,7 @@ The phrasing can occur in either the issuance and/or followup statements.</p>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>{$EXTERNAL_BASEURL}/json/vtec_pds.py</code></p>
+<br /><code>{$eburl}/json/vtec_pds.py</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>

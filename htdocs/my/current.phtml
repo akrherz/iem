@@ -1,7 +1,6 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 93);
-
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
@@ -90,18 +89,18 @@ $ar = array(
 $refresh_select = make_select("refresh", $refresh, $ar);
 
 // Build a listing of stations to get data for
-$reqstations = "";
+$reqstations = Array();
 $doSF = FALSE;
 foreach ($stations as $key => $value) {
     if (strpos($value, '_SF') == 5) {
         $value = substr($value, 0, 5);
         $doSF = TRUE;
     }
-    $reqstations .= sprintf("station=%s&", $value);
+    $reqstations[] = $value;
 }
-if ($reqstations != "") {
-    $jdata = file_get_contents(IEMConfig::INTERNAL_BASEURL . "/api/1/currents.json?$reqstations");
-    $jobj = json_decode($jdata, $assoc = TRUE);
+
+if (!empty($reqstations)) {
+    $jobj = require_json_response("/api/1/currents.json", array("station" => $reqstations));
 } else {
     $jobj = array("data" => array());
 }

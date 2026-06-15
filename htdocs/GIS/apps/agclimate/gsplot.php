@@ -3,15 +3,16 @@
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/forms.php";
+require_once "../../../../include/mlib.php";
 require_once "../../../../include/vendor/mapscript.php";
 
-$var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
+$var = get_str404("var", "gdd50");
 $year = get_int404("year", date("Y"));
 $smonth = get_int404("smonth", 5);
 $emonth = get_int404("emonth", 9);
 $sday = get_int404("sday", 1);
 $eday = get_int404("eday", 30);
-$imgsz = isset($_GET["imgsz"]) ? $_GET["imgsz"] : "640x480";
+$imgsz = get_str404("imgsz", "640x480");
 $ar = explode("x", $imgsz);
 $width = $ar[0];
 $height = $ar[1];
@@ -27,18 +28,13 @@ if (substr($var, 0, 4) == "sgdd") {
     $datavar = "sgdd";
 }
 
-$wsuri = sprintf(
-    "/api/1/isusm/daily.geojson?sdate=%s-%02.0f-%02.0f&edate=%s-%02.0f-%02.0f&" .
-        "gddbase=%s&gddceil=%s",
-    $year,
-    $smonth,
-    $sday,
-    $year,
-    $emonth,
-    $eday,
-    $gddbase,
-    86
+$wsargs = array(
+    "sdate" => sprintf("%s-%02.0f-%02.0f", $year, $smonth, $sday),
+    "edate" => sprintf("%s-%02.0f-%02.0f", $year, $emonth, $eday),
+    "gddbase" => $gddbase,
+    "gddceil" => 86
 );
+
 
 $varDef = array(
     "gdd32" => "Growing Degree Days (base=32)",
@@ -101,8 +97,7 @@ $edate = new DateTime("{$year}-{$emonth}-{$eday}");
 $sstr_txt = $sdate->format("M j");
 $estr_txt = $edate->format("M j");
 
-$jdata = file_get_contents($INTERNAL_BASEURL . $wsuri);
-$jobj = json_decode($jdata, $assoc = TRUE);
+$jobj = iemws_json("isusm/daily.geojson", $wsargs);
 
 foreach ($jobj["features"] as $bogus => $value) {
     $props = $value["properties"];
@@ -132,7 +127,7 @@ foreach ($jobj["features"] as $bogus => $value) {
         $lat -= 0.05;
     }
 
-    // Red Dot... 
+    // Red Dot...
     $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
     $pt->draw($map, $ponly, $img, 0, "");

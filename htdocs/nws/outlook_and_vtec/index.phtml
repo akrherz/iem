@@ -18,7 +18,7 @@ $overlap = get_float404("overlap", 5.0);
 $oparts = explode(".", $otype);
 $phsig = $_GET["phsig"] ?? [];
 
-$wsurl = sprintf("http://iem.local/json/outlook_and_vtec.py?%s", http_build_query([
+$wsargs = [
     "wfo" => $wfo,
     "day" => $oparts[0],
     "threshold" => $threshold,
@@ -28,16 +28,10 @@ $wsurl = sprintf("http://iem.local/json/outlook_and_vtec.py?%s", http_build_quer
     "edate" => $edate,
     "phsig" => implode(",", $phsig),
     "overlap" => $overlap,
-]));
-$wsurl_external = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $wsurl);
-$jobj = file_get_contents($wsurl);
-if ($jobj === false) {
-    die("Error fetching data from web service");
-}
-$jobj = json_decode($jobj, true);
-if (is_null($jobj)) {
-    die("Error decoding JSON from web service");
-}
+];
+$wsurl = "/json/outlook_and_vtec.py";
+$wsurl_external = sprintf("%s?%s", $wsurl, http_build_query($wsargs));
+$jobj = require_json_response($wsurl, $wsargs);
 
 /**
  * Simple helper to escape output for HTML contexts.  We use this for all

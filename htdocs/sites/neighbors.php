@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/sites.php";
 require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
 
 $ctx = get_sites_context();
 // boilerplate is used in rendering :/
@@ -10,13 +11,14 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
-$uri = sprintf("/geojson/station_neighbors.py?station=%s&network=%s", $station, $network);
+$wsuri = "/geojson/station_neighbors.py";
+$wsargs = [
+    "station" => $station,
+    "network" => $network,
+];
 
-$resp = file_get_contents("{$INTERNAL_BASEURL}{$uri}");
-if ($resp === FALSE) {
-    die("Failed to fetch data");
-}
-$jobj = json_decode($resp, $assoc=TRUE);
+$jobj = require_json_response($wsuri, $wsargs);
+
 
 $table = <<<EOM
 <table class="table table-striped">

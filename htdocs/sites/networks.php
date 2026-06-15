@@ -6,6 +6,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/network.php";
 require_once "../../include/vendor/mapscript.php";
+require_once "../../include/mlib.php";
 
 $pgconn = iemdb("mesosite");
 
@@ -77,31 +78,28 @@ if ($network == '_ALL_') {
         $cities[$row["id"]] = $row;
     }
 } else {
-    $resp = file_get_contents(
-        "{$INTERNAL_BASEURL}/geojson/network/{$network}.geojson");
-    if ($resp === FALSE) {
-        $cities = array();
-    } else {
-        $jobj = json_decode($resp, $assoc = TRUE);
-        $cities = array();
-        foreach ($jobj["features"] as $k => $v) {
-            $props = $v["properties"];
-            $cities[$props["sid"]] = Array(
-                "id" => $props["sid"],
-                "name" => $props["sname"],
-                "elevation" => $props["elevation"],
-                "archive_begin" => $props["archive_begin"],
-                "archive_end" => $props["archive_end"],
-                "network" => $props["network"],
-                "lon" => $v["geometry"]["coordinates"][0],
-                "lat" => $v["geometry"]["coordinates"][1],
-                "attributes" => $props["attributes"],
-                "state" => $props["state"],
-                "synop" => $props["synop"],
-                "country" => $props["country"],
-                "attributes" => $props["attributes"],
-            );
-        }
+    $wsuri = "/geojson/network.py";
+    $wsargs = [
+        "network" => $network,
+    ];
+    $jobj = require_json_response($wsuri, $wsargs);
+    $cities = array();
+    foreach ($jobj["features"] as $k => $v) {
+        $props = $v["properties"];
+        $cities[$props["sid"]] = Array(
+            "id" => $props["sid"],
+            "name" => $props["sname"],
+            "elevation" => $props["elevation"],
+            "archive_begin" => $props["archive_begin"],
+            "archive_end" => $props["archive_end"],
+            "network" => $props["network"],
+            "lon" => $v["geometry"]["coordinates"][0],
+            "lat" => $v["geometry"]["coordinates"][1],
+            "attributes" => $props["attributes"],
+            "state" => $props["state"],
+            "synop" => $props["synop"],
+            "country" => $props["country"],
+        );
     }
 }
 

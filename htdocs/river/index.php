@@ -9,8 +9,8 @@ $t = new MyView();
 $t->title = "River Forecast Point Monitor";
 $content = "";
 
-$wfo = substr(get_str404("wfo", "DMX"), 0, 3);
-$state = substr(get_str404("state", "IA"), 0, 2);
+$wfo = get_str404("wfo", "DMX", 3);
+$state = get_str404("state", "IA", 2);
 
 $sevcol = array(
     "N" => "#0f0",
@@ -30,22 +30,21 @@ $c3 = "";
 $rivers = array();
 $used = array();
 foreach ($jobs as $key => $val) {
-    $url = "{$EXTERNAL_BASEURL}/api/1/nws/current_flood_{$val}.json";
+    $url = "nws/current_flood_{$val}.json";
+    $wsargs = Array();
     if (array_key_exists("state", $_REQUEST)) {
         $c2 = " bg-light border rounded p-3";
-        $url .= "?state={$state}";
+        $wsargs["state"] = $state;
         $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
     } else if (array_key_exists("all", $_REQUEST)) {
         $c3 = " bg-light border rounded p-3";
         $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
     } else {
         $c1 = " bg-light border rounded p-3";
-        $url .= "?wfo={$wfo}";
+        $wsargs["wfo"] = $wfo;
         $ptitle = "<h3>River Forecast Point Monitor by NWS WFO</h3>";
     }
-
-    $jdata = file_get_contents($url);
-    $jobj = json_decode($jdata, $assoc = TRUE);
+    $jobj = iemws_json($url, $wsargs);
 
     foreach ($jobj["data"] as $bogus => $row) {
         if (in_array($row["nwsli"], $used)) {
@@ -88,6 +87,7 @@ foreach ($jobs as $key => $val) {
 $content .= $ptitle;
 $nselect = networkSelect("WFO", $wfo, array(), 'wfo');
 $sselect = stateSelect($state);
+$wsurl = sprintf("/api/1/%s?%s", $url, http_build_query($wsargs));
 $content .= <<<EOM
 <p>This page produces a summary listing for National Weather Service Flood
 Forecast Points when the point is currently in a flood watch or warning state.
@@ -97,7 +97,7 @@ details regarding flood state, severity, forecasted stage and impact. By clickin
 on the graph icon near the location identfier, you are taken to an IEM Autoplot
 which shows forecasted stage and observations.</p>
 
-<p>Data presented here was provided by this <a href="{$url}">JSON Web Service</a>.
+<p>Data presented here was provided by this <a href="{$wsurl}">JSON Web Service</a>.
 Documentation on this webservice is
 <a href="/api/1/docs#/default/service_nws_current_flood_warnings__fmt__get">here</a>.</p>
 

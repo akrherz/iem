@@ -5,6 +5,7 @@ require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/network.php";
+require_once "../../include/mlib.php";
 
 $nt = new NetworkTable("NWSCLI");
 
@@ -22,27 +23,23 @@ $byday = false;
 if ($opt === "bystation") {
     $title = sprintf("Station: %s for Year: %s", $station, $year);
     $col1label = "Date";
-    $uri = sprintf(
-        "%s/json/cli.py?station=%s&year=%s",
-        $INTERNAL_BASEURL,
-        $station,
-        $year
+    $wsargs = Array(
+        "station" => $station,
+        "year" => $year
     );
-    $data = file_get_contents($uri);
-    $json = json_decode($data, $assoc = TRUE);
+    $json = require_json_response("/json/cli.py", $wsargs);
+    $uri = sprintf("/json/cli.py?%s", http_build_query($wsargs));
     $arr = $json['results'];
 } else {
     $col1label = "Station";
     $byday = true;
     $day = mktime(0, 0, 0, $month, $day, $year);
     $title = sprintf("All Stations for Date: %s", date("d F Y", $day));
-    $uri = sprintf(
-        "%s/geojson/cli.py?dt=%s",
-        $INTERNAL_BASEURL,
-        date("Y-m-d", $day)
+    $wsargs = Array(
+        "dt" => date("Y-m-d", $day)
     );
-    $data = file_get_contents($uri);
-    $json = json_decode($data, $assoc = TRUE);
+    $json = require_json_response("/geojson/cli.py", $wsargs);
+    $uri = sprintf("/json/cli.py?%s", http_build_query($wsargs));
     $arr = $json['features'];
 }
 $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
