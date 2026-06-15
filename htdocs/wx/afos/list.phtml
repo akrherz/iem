@@ -8,6 +8,7 @@ require_once "../../../include/forms.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
 require_once "../../../include/mlib.php";
+require_once "../../../include/reference.php";
 
 $ARCHIVE_BEGIN = 1983;
 
@@ -33,9 +34,7 @@ $year2 = get_int404("year2", date("Y"), $minval=$ARCHIVE_BEGIN);
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
-$res = file_get_contents(IEMConfig::INTERNAL_BASEURL . "/json/reference.py");
-$jobj = json_decode($res, $assoc = TRUE, JSON_FORCE_OBJECT);
-$pilselect = make_select("pil", $pil, $jobj['prodDefinitions'], $jscallback = "",
+$pilselect = make_select("pil", $pil, $reference['prodDefinitions'], $jscallback = "",
     $cssclass = "form-select iemselect2",
     $multiple=FALSE,
     $showvalue=TRUE);

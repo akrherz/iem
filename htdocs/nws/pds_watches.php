@@ -1,13 +1,15 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 136);
-
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
-$uri = "{$INTERNAL_BASEURL}/json/watches.py?is_pds=1";
-$data = file_get_contents($uri);
-$json = json_decode($data, $assoc = TRUE);
+$wsargs = [
+    "is_pds" => "1",
+];
+$uri = "/json/watches.py";
+$json = require_json_response($uri, $wsargs);
 $table = "";
 foreach ($json['events'] as $key => $val) {
     $spclink = sprintf(
@@ -45,6 +47,7 @@ $t->jsextra = <<<EOM
 <script type="module" src="pds_watches.module.js"></script>
 EOM;
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb bg-light px-2 py-2 mb-3">
@@ -58,7 +61,7 @@ $t->content = <<<EOM
 
 <div class="mb-3">
   There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can directly access it here:
-  <br><code>{$EXTERNAL_BASEURL}/json/watches.py?is_pds=1</code>
+  <br><code>{$eburl}/json/watches.py?is_pds=1</code>
 </div>
 
 <div class="mb-4">

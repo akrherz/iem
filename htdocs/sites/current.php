@@ -130,41 +130,21 @@ EOM;
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $extremumcodes[$row['code']] = $row['name'];
     }
-    $arr = array(
+    $wsargs = [
         "station" => $station,
-    );
-    $jobj = iemws_json("last_shef.json", $arr);
-    $exturi = sprintf(
-        "%s/api/1/last_shef.json?" .
-            "station=%s",
-        $EXTERNAL_BASEURL,
-        $station,
-    );
+    ];
+    $jobj = iemws_json("last_shef.json", $wsargs);
+    $exturi = sprintf("/api/1/last_shef.json?%s", http_build_query($wsargs));
     $table .= make_shef_table($jobj["data"], TRUE);
     $table .= make_shef_table($jobj["data"], FALSE);
 } else {
-    $wsuri = sprintf(
-        "%s/json/current.py?network=%s&station=%s",
-        $INTERNAL_BASEURL,
-        $network,
-        $station
-    );
-    $exturi = sprintf(
-        "%s/json/current.py?network=%s&station=%s",
-        $EXTERNAL_BASEURL,
-        $network,
-        $station
-    );
-    $data = file_get_contents($wsuri);
-    if ($data === FALSE) {
-        http_response_code(503);
-        die("Backend query failed, please try again later.");
-    }
-    $json = json_decode($data, $assoc = TRUE);
-    if (is_null($json) || !is_array($json)) {
-        http_response_code(503);
-        die("Backend query failed, please try again later.");
-    }
+    $wsuri = "/json/current.py";
+    $wsargs = [
+        "network" => $network,
+        "station" => $station,
+    ];
+    $exturi = sprintf("%s?%s", $wsuri, http_build_query($wsargs));
+    $json = require_json_response($wsuri, $wsargs);
 
     $vardict = array(
         "local_valid" => "Observation Local Time",

@@ -1,14 +1,16 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 137);
-
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
-$year = get_int404("year", date("Y"));
-$uri = sprintf("%s/json/watches.py?year=%s", $INTERNAL_BASEURL, $year);
-$data = file_get_contents($uri);
-$json = json_decode($data, $assoc = TRUE);
+$year = get_int404("year", (int)date("Y"));
+$uri = "/json/watches.py";
+$wsargs = [
+    "year" => $year,
+];
+$json = require_json_response($uri, $wsargs);
 $table = "";
 foreach ($json['events'] as $key => $val) {
     $spclink = sprintf(
@@ -50,6 +52,7 @@ $t->jsextra = <<<EOM
 <script src="watches.module.js" type="module"></script>
 EOM;
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -71,7 +74,7 @@ $t->content = <<<EOM
       <i class="bi bi-info-circle-fill me-2 mt-1 flex-shrink-0"></i>
       <div>
         <strong>JSON API Available:</strong> This table is backed by a JSON webservice that you can access directly:
-        <br><code class="mt-1 d-block">{$EXTERNAL_BASEURL}/json/watches.py?year=$year</code>
+        <br><code class="mt-1 d-block">{$eburl}/json/watches.py?year=$year</code>
         <small class="text-muted mt-1 d-block">
           <i class="bi bi-link-45deg me-1"></i>
           Visit our <a href="/json/" class="alert-link">JSON(P) webservice documentation</a> for more details.

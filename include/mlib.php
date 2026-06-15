@@ -128,17 +128,20 @@ function myround($val, $prec){
 }
 
 /**
- * Helper to make an IEM webservice call, returns FALSE if fails
- * @param string $endpoint The endpoint of the webservice
- * @param array $args The arguments to be passed to the webservice
- * @return mixed The JSON-decoded response from the webservice or FALSE on failure
+ * Helper to make a service request and enforce a JSON response.
+ * NOTE: Failures are fatal.
+ * @param string $url The URL to make the request to, if this starts with just
+ *   a '/', the internal base URL will be prepended.
+ * @param array $args The arguments to be passed to the service
+ * @return array The decoded JSON response if all goes well.
  */
-function iemws_json($endpoint, $args)
-{
+function require_json_response($url, $args) {
     // Everything is method get at the moment
     $cgi = http_build_query($args);
-    // Nginx lives here
-    $uri = "http://iem-web-services.agron.iastate.edu:8080/{$endpoint}?{$cgi}";
+    if (strpos($url, "/") === 0) {
+        $url = IEMConfig::INTERNAL_BASEURL . $url;
+    }
+    $uri = "{$url}?{$cgi}";
     // Try twice to get the content
     $jobj = FALSE;
     for ($i = 0; $i < 2; $i++) {
@@ -177,9 +180,23 @@ function iemws_json($endpoint, $args)
     if ($jobj === FALSE) {
         header("Content-type: text/plain");
         http_response_code(503);
-        die("Backend web service failure, please try again later.");
+        echo "Backend web service failure, please try again later.";
+        exit();
     }
     return $jobj;
+}
+
+/**
+ * Helper to make an iem-web-services call.
+ * NOTE: Failures are fatal and will return a 503 to the client.
+ * @param string $endpoint The endpoint of the webservice
+ * @param array $args The arguments to be passed to the webservice
+ * @return array The decoded JSON response if all goes well.
+ */
+function iemws_json($endpoint, $args)
+{
+     $uri = "http://iem-web-services.agron.iastate.edu:8080/{$endpoint}";
+     return require_json_response($uri, $args);
 }
 
 // Make sure a page is HTTPS when called

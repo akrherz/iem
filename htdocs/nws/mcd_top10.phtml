@@ -5,20 +5,24 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
+require_once "../../include/mlib.php";
 
 $t = new MyView();
 $count = get_int404("count", 10);
-$baseurl = sprintf(
-    "%s/json/mcd_bysize.py?count=%s&sort=",
-    $INTERNAL_BASEURL,
-    $count
-);
 
-function dowork($baseurl, $sort)
+/**
+ * Do the necessary work.
+ * @param int $count
+ * @param string $sort
+ */
+function dowork($count, $sort)
 {
-    global $INTERNAL_BASEURL, $EXTERNAL_BASEURL;
-    $uri = $baseurl . $sort;
-    $public = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
+    $wsargs = Array(
+        "count" => $count,
+        "sort" => $sort,
+    );
+    $baseurl = "/json/mcd_bysize.py";
+    $public = sprintf("%s?%s", $baseurl, http_build_query($wsargs));
     $s = <<<EOM
 
     <p>JSON Webservice for the data below:<br />
@@ -27,8 +31,7 @@ function dowork($baseurl, $sort)
     <tr><th>Year</th><th>Number</th><th>Issuance UTC</th><th>Size (sq km)</th></tr>
 
 EOM;
-    $jdata = file_get_contents($uri);
-    $json = json_decode($jdata, $assoc = TRUE);
+    $json = require_json_response($baseurl, $wsargs);
     foreach ($json["mcds"] as $key => $val) {
         $s .= sprintf(
             "<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%.2f</td></tr>",
@@ -43,8 +46,8 @@ EOM;
     return $s;
 }
 
-$ltable = dowork($baseurl, "DESC");
-$stable = dowork($baseurl, "ASC");
+$ltable = dowork($count, "DESC");
+$stable = dowork($count, "ASC");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

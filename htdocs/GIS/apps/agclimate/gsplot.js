@@ -13,30 +13,30 @@ function roundValue(value, varType) {
 function generateASCIITable(features) {
     const mapDiv = document.getElementById('map');
     if (!mapDiv) {return '';}
-    
+
     const varname = mapDiv.dataset.var;
     if (!varname || !datavar) {return '';}
     const vardisplay = mapDiv.dataset.vardisplay;
     const period = mapDiv.dataset.period;
     const year = mapDiv.dataset.year;
-    
+
     let output = `# ${year} ${vardisplay} (${period})\n`;
     output += "#-----------------------snip------------------\n";
     output += `ID   ,StationName                             ,City           ,Latitude  ,Longitude ,${varname.padEnd(10)},climate_${varname}\n`;
-    
+
     const climovar = `climo_${datavar}`;
-    
+
     features.forEach(feature => {
         const props = feature.getProperties();
         if (props[datavar] === null || props[datavar] === undefined) {
             return; // Skip missing data
         }
-        
+
         let climo = "M";
         if (props[climovar] !== null && props[climovar] !== undefined) {
             climo = roundValue(props[climovar], datavar);
         }
-        
+
         // Format each field with proper width and alignment
         const station = props.station.toString().padEnd(5);
         const name = props.name.substring(0, 40).padEnd(40);
@@ -45,10 +45,10 @@ function generateASCIITable(features) {
         const lon = props.lon.toFixed(4).padStart(10);
         const value = roundValue(props[datavar], datavar).toString().padStart(10);
         const climoStr = climo.toString().padStart(10);
-        
+
         output += `${station},${name},${city},${lat},${lon},${value},${climoStr}\n`;
     });
-    
+
     return output;
 }
 
@@ -56,19 +56,19 @@ function createPopupContent(feature) {
     const props = feature.getProperties();
     const mapDiv = document.getElementById('map');
     if (!mapDiv) {return '';}
-    
+
     if (!datavar) {
         return '';
     }
     const vardisplay = mapDiv.dataset.vardisplay;
-    
+
     let value = props[datavar];
     if (value === null || value === undefined) {
         value = "M";
     } else {
         value = roundValue(value, datavar);
     }
-    
+
     return `
         <div class="popup-content">
             <h4>${props.name}</h4>
@@ -99,7 +99,7 @@ function initMap() {
         style: (feature) => {
             const props = feature.getProperties();
             const value = props[datavar];
-            
+
             if (value === null || value === undefined) {
                 // Missing data - gray circle
                 return new ol.style.Style({
@@ -110,10 +110,10 @@ function initMap() {
                     })
                 });
             }
-            
+
             // Display value as text on the map
             const displayValue = roundValue(value, datavar);
-            
+
             return new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 18,
@@ -137,7 +137,7 @@ function initMap() {
         visible: true,
         source: new ol.source.OSM()
     });
-    
+
     const stateLayer = new ol.layer.Tile({
         title: 'State Boundaries',
         source: new ol.source.XYZ({
@@ -179,7 +179,7 @@ function initMap() {
         box-shadow: 0 1px 4px rgba(0,0,0,0.2);
         max-width: 300px;
     `;
-    
+
     popup = new ol.Overlay({
         element: popupElement,
         positioning: 'bottom-center',
@@ -193,7 +193,7 @@ function initMap() {
         const feature = map.forEachFeatureAtPixel(evt.pixel, (feature2) => {
             return feature2;
         });
-        
+
         if (feature) {
             const coordinates = feature.getGeometry().getCoordinates();
             popup.setPosition(coordinates);
@@ -208,7 +208,7 @@ function initMap() {
         const state = dataLayer.getSource().getState();
         const tableElement = document.getElementById('datatable');
         if (!tableElement) {return;}
-        
+
         if (state === 'loading') {
             tableElement.textContent = 'Loading station data...';
         } else if (state === 'ready') {
@@ -217,14 +217,14 @@ function initMap() {
                 // Generate and populate ASCII table
                 const tableContent = generateASCIITable(features);
                 tableElement.textContent = tableContent;
-                
+
                 // Fit map to data extent with padding
                 map.getView().fit(dataLayer.getSource().getExtent(), {
                     size: map.getSize(),
                     padding: [50, 50, 50, 50],
                     maxZoom: 10
                 });
-                
+
             } else {
                 tableElement.textContent = 'No data available for the selected period.';
             }

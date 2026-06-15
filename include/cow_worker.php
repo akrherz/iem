@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__) . "/../config/settings.inc.php";
+require_once dirname(__FILE__) . "/mlib.php";
 
 
 function printLSR($lsr, $verified = FALSE)
@@ -136,42 +137,26 @@ foreach ($ltype as $k => $w) {
 }
 
 // Build Cow API URL
-$wsuri = sprintf(
-    "%s/api/1/cow.json?wfo=%s&begints=%sZ&" .
-        "endts=%sZ&hailsize=%s&wind=%s%s%s&lsrbuffer=%s&warningbuffer=%s",
-    $INTERNAL_BASEURL,
-    (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,
-    $sts->format("Y-m-d\\TH:i:00"),
-    $ets->format("Y-m-d\\TH:i:00"),
-    $hail,
-    $wind,
-    $phenoms,
-    $lsrtypes,
-    $lsrbuffer,
-    floatval($warnbuffer) * 100., // approx to km
-);
+$wsargs = [
+    "wfo" => (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,
+    "begints" => $sts->format("Y-m-d\\TH:i:00"),
+    "endts" => $ets->format("Y-m-d\\TH:i:00"),
+    "hailsize" => $hail,
+    "wind" => $wind,
+    "lsrbuffer" => $lsrbuffer,
+    "warningbuffer" => floatval($warnbuffer) * 100., // approx to km
+];
 if ($fcster != '') {
-    $wsuri .= sprintf("&fcster=%s", $fcster);
+    $wsargs["fcster"] = $fcster;
 }
 if (isset($useWindHailTag) && $useWindHailTag == 'Y') {
-    $wsuri .= "&windhailtag=Y";
+    $wsargs["windhailtag"] = "Y";
 }
 if (isset($limitwarns) && $limitwarns == 'Y') {
-    $wsuri .= "&limitwarns=Y";
+    $wsargs["limitwarns"] = "Y";
 }
 
-$res = file_get_contents($wsuri);
-if ($res === FALSE) {
-    echo <<< EOM
-<h3>IEM Cow API Error</h3>
-
-<p>Sorry, the backend service for your request had an unexpected failure.  Please
-consider contacting daryl, akrherz@iastate.edu and copy/paste the long URL that
-appears at the top of this webpage for his review and fix!</p>
-EOM;
-    die();
-}
-$jobj = json_decode($res, True);
+$jobj = iemws_json("cow.json", $wsargs);
 $stats = $jobj['stats'];
 
 $charturl = sprintf(

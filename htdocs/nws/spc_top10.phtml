@@ -5,107 +5,12 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
+require_once "../../include/mlib.php";
 
 $t = new MyView();
 $year = get_int404("year", 1987);
 $day = get_int404("day", 1);
-$level = isset($_GET["level"]) ? xssafe($_GET["level"]): "CATEGORICAL.HIGH";
-
-$tokens = explode(".", $level, 2);
-$category = $tokens[0];
-$threshold = $tokens[1];
-
-$url = sprintf(
-    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s&sort=desc",
-    $INTERNAL_BASEURL,
-    $day,
-    $threshold,
-    urlencode($category),
-    $year,
-);
-
-$public = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $url);
-$table = <<<EOM
-
-<p>JSON Webservice for the data below:<br />
-<code>{$public}</code></p>
-<table class="table table-striped">
-<thead>
-<tr><th>Rank</th>
-<th>Canonical Outlook Date</th>
-<th>Cycle Hour UTC</th><th>Size (sq km)</th><th>SPC Link/Image</th></tr></thead>
-<tbody>
-
-EOM;
-
-$stable = str_replace("sort=desc", "sort=asc", $table);
-
-$jdata = file_get_contents($url);
-$json = json_decode($jdata, $assoc = TRUE);
-if (sizeof($json["outlooks"]) == 0) {
-    $table .= "<tr><td colspan=\"5\">No Data Found</td></tr>";
-} else {
-    $rank = 1;
-    foreach ($json["outlooks"] as $key => $val) {
-        $table .= sprintf(
-            "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
-            "<td><img src=\"%s\" class=\"img-fluid\">".
-            "</div></tr>",
-            $rank,
-            $val["date"],
-            $val["cycle"],
-            $val["area_sqkm"],
-            $val["imgsrc"],
-        );
-        $rank += 1;
-    }
-}
-$table .= "</tbody></table>\n";
-
-$url = sprintf(
-    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s&sort=asc",
-    $INTERNAL_BASEURL,
-    $day,
-    $threshold,
-    urlencode($category),
-    $year,
-);
-
-
-$jdata = file_get_contents($url);
-$json = json_decode($jdata, $assoc = TRUE);
-if (sizeof($json["outlooks"]) == 0) {
-    $stable .= "<tr><td colspan=\"5\">No Data Found</td></tr>";
-} else {
-    $rank = 1;
-    foreach ($json["outlooks"] as $key => $val) {
-        $stable .= sprintf(
-            "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
-            "<td><img src=\"%s\" class=\"img-fluid\">".
-            "</div></tr>",
-            $rank,
-            $val["date"],
-            $val["cycle"],
-            $val["area_sqkm"],
-            $val["imgsrc"],
-        );
-        $rank += 1;
-    }
-}
-$stable .= "</tbody></table>\n";
-
-
-$days = Array(
-    "1" => "Day 1",
-    "2" => "Day 2",
-    "3" => "Day 3",
-    "4" => "Day 4",
-    "5" => "Day 5",
-    "6" => "Day 6",
-    "7" => "Day 7",
-    "8" => "Day 8",
-);
-$dayselect = make_select("day", $day, $days);
+$level = get_str404("level", "CATEGORICAL.HIGH");
 // copied from autoplot 200, sans firewx
 $levels = Array(
     "ANY SEVERE.0.02" => "Any Severe 2% (Day 3+)",
@@ -164,6 +69,95 @@ $levels = Array(
     "WIND.CIG2" => "Wind CIG2 (Days 1+2)",
     "WIND.CIG3" => "Wind CIG3 (Days 1+2)",
 );
+if (!array_key_exists($level, $levels)) {
+    die("Invalid level");
+}
+
+$tokens = explode(".", $level, 2);
+$category = $tokens[0];
+$threshold = $tokens[1];
+
+$url = "/json/spc_bysize.py";
+$wsargs = [
+    "day" => $day,
+    "threshold" => $threshold,
+    "category" => $category,
+    "syear" => $year,
+    "sort" => "desc",
+];
+
+$public = sprintf("%s?%s", $url, http_build_query($wsargs));
+
+$table = <<<EOM
+
+<p>JSON Webservice for the data below:<br />
+<code>{$public}</code></p>
+<table class="table table-striped">
+<thead>
+<tr><th>Rank</th>
+<th>Canonical Outlook Date</th>
+<th>Cycle Hour UTC</th><th>Size (sq km)</th><th>SPC Link/Image</th></tr></thead>
+<tbody>
+
+EOM;
+
+$stable = str_replace("sort=desc", "sort=asc", $table);
+
+$json = require_json_response($url, $wsargs);
+if (sizeof($json["outlooks"]) == 0) {
+    $table .= "<tr><td colspan=\"5\">No Data Found</td></tr>";
+} else {
+    $rank = 1;
+    foreach ($json["outlooks"] as $key => $val) {
+        $table .= sprintf(
+            "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
+            "<td><img src=\"%s\" class=\"img-fluid\">".
+            "</div></tr>",
+            $rank,
+            $val["date"],
+            $val["cycle"],
+            $val["area_sqkm"],
+            $val["imgsrc"],
+        );
+        $rank += 1;
+    }
+}
+$table .= "</tbody></table>\n";
+
+$wsargs["sort"] = "asc";
+$json = require_json_response($url, $wsargs);
+if (sizeof($json["outlooks"]) == 0) {
+    $stable .= "<tr><td colspan=\"5\">No Data Found</td></tr>";
+} else {
+    $rank = 1;
+    foreach ($json["outlooks"] as $key => $val) {
+        $stable .= sprintf(
+            "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
+            "<td><img src=\"%s\" class=\"img-fluid\">".
+            "</div></tr>",
+            $rank,
+            $val["date"],
+            $val["cycle"],
+            $val["area_sqkm"],
+            $val["imgsrc"],
+        );
+        $rank += 1;
+    }
+}
+$stable .= "</tbody></table>\n";
+
+
+$days = Array(
+    "1" => "Day 1",
+    "2" => "Day 2",
+    "3" => "Day 3",
+    "4" => "Day 4",
+    "5" => "Day 5",
+    "6" => "Day 6",
+    "7" => "Day 7",
+    "8" => "Day 8",
+);
+$dayselect = make_select("day", $day, $days);
 $lselect = make_select("level", $level, $levels);
 $yrselect = yearSelect(1987, $year);
 
