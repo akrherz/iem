@@ -161,7 +161,7 @@ EOM;
         die("Backend query failed, please try again later.");
     }
     $json = json_decode($data, $assoc = TRUE);
-    if ($json === FALSE) {
+    if (is_null($json) || !is_array($json)) {
         http_response_code(503);
         die("Backend query failed, please try again later.");
     }
@@ -182,11 +182,11 @@ EOM;
         "pday" => "Daily Precipitation [inches]",
         "pmonth" => "Monthly Precipitation [inches]",
         "gust" => "Wind Gust [knots]",
-        "c1tmpf" => "Soil Temperature [°F]",
-        "c2tmpf" => "Soil Temperature [°F]",
-        "c3tmpf" => "Soil Temperature [°F]",
-        "c4tmpf" => "Soil Temperature [°F]",
-        "c5tmpf" => "Soil Temperature [°F]",
+        "c1tmpf[F]" => "Soil Temperature [°F]",
+        "c2tmpf[F]" => "Soil Temperature [°F]",
+        "c3tmpf[F]" => "Soil Temperature [°F]",
+        "c4tmpf[F]" => "Soil Temperature [°F]",
+        "c5tmpf[F]" => "Soil Temperature [°F]",
         "c1smv" => "Soil Moisture [%]",
         "c2smv" => "Soil Moisture [%]",
         "c3smv" => "Soil Moisture [%]",
@@ -205,10 +205,10 @@ EOM;
     );
 
     if ($network == 'ISUSM') {
-        $vardict["c1tmpf"] = "4 inch Soil Temperature [°F]";
-        $vardict["c2tmpf"] = "12 inch Soil Temperature [°F]";
-        $vardict["c3tmpf"] = "24 inch Soil Temperature [°F]";
-        $vardict["c4tmpf"] = "50 inch Soil Temperature [°F]";
+        $vardict["c1tmpf[F]"] = "4 inch Soil Temperature [°F]";
+        $vardict["c2tmpf[F]"] = "12 inch Soil Temperature [°F]";
+        $vardict["c3tmpf[F]"] = "24 inch Soil Temperature [°F]";
+        $vardict["c4tmpf[F]"] = "50 inch Soil Temperature [°F]";
         $vardict["c2smv"] = "12 inch Soil Moisture [%]";
         $vardict["c3smv"] = "24 inch Soil Moisture [%]";
         $vardict["c4smv"] = "50 inch Soil Moisture [%]";

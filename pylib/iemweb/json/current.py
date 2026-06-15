@@ -108,6 +108,10 @@ def run(conn: Connection, query: Schema):
     ob["presentwx"] = [] if row["wxcodes"] is None else row["wxcodes"]
     ob["precip_today[in]"] = row["s_pday"]
     ob["c1tmpf[F]"] = row["c1tmpf"]
+    ob["c2tmpf[F]"] = row["c2tmpf"]
+    ob["c3tmpf[F]"] = row["c3tmpf"]
+    ob["c4tmpf[F]"] = row["c4tmpf"]
+    ob["c5tmpf[F]"] = row["c5tmpf"]
     ob["srad_1h[J m-2]"] = row["srad_1h_j"]
     for depth in [4, 8, 16, 20, 32, 40, 64, 128]:
         ob[f"tsoil[{depth}in][F]"] = row[f"tsoil_{depth}in_f"]
