@@ -11,6 +11,7 @@ site and network combination.
 Changelog
 ---------
 
+- 2026-06-14: Added `feelslike[F]` as the apparent temperature in Fahrenheit.
 - 2026-03-03: Please migrate usage of root attribute `server_gentime` to
   `generated_at`.
 - 2024-08-01: Documentation update
@@ -85,6 +86,7 @@ def run(conn: Connection, query: Schema):
     ob["max_dayairtemp[F]"] = row["max_tmpf"]
     ob["min_dayairtemp[F]"] = row["min_tmpf"]
     ob["dewpointtemp[F]"] = row["dwpf"]
+    ob["feelslike[F]"] = None if row["feel"] is None else round(row["feel"], 1)
     ob["windspeed[kt]"] = row["sknt"]
     ob["winddirection[deg]"] = row["drct"]
     ob["altimeter[in]"] = row["alti"]

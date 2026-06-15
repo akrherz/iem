@@ -25,6 +25,14 @@ $LOOKUP = array(
     'OT0014' => 'carroll',
     'OT0015' => 'jefferson'
 );
+/**
+ * Format values for display, this is a bit of a hack to get the altimeter
+ * to display with two decimal places, but the rest of the values are just
+ * returned as is.
+ * @param float $val The value to format
+ * @param string $varname The variable name, used to determine how to format the value
+ * @return string The formatted value
+ */
 function fmt($val, $varname)
 {
     if ($varname == 'altimeter[in]') {
@@ -32,6 +40,13 @@ function fmt($val, $varname)
     }
     return $val;
 }
+
+/**
+ * Make a table of SHEF encoded data, this is used for both recent and older data, the $iscurrent parameter determines which data to include in the table.
+ * @param array $data The data to include in the table
+ * @param bool $iscurrent Whether to include recent data (true) or older data (false)
+ * @return string The HTML table of SHEF encoded data
+ */
 function make_shef_table($data, $iscurrent)
 {
     global $shefcodes, $durationcodes, $extremumcodes, $metadata;
@@ -141,6 +156,10 @@ EOM;
         $station
     );
     $data = file_get_contents($wsuri);
+    if ($data === FALSE) {
+        http_response_code(503);
+        die("Backend query failed, please try again later.");
+    }
     $json = json_decode($data, $assoc = TRUE);
     if ($json === FALSE) {
         http_response_code(503);
@@ -150,10 +169,11 @@ EOM;
     $vardict = array(
         "local_valid" => "Observation Local Time",
         "utc_valid" => "Observation UTC Time",
-        "airtemp[F]" => "Air Temp [F]",
-        "max_dayairtemp[F]" => "Maximum Air Temperature [F]",
-        "min_dayairtemp[F]" => "Minimum Air Temperature [F]",
-        "dewpointtemp[F]" => "Dew Point [F]",
+        "airtemp[F]" => "Air Temp [°F]",
+        "max_dayairtemp[F]" => "Maximum Air Temperature [°F]",
+        "min_dayairtemp[F]" => "Minimum Air Temperature [°F]",
+        "dewpointtemp[F]" => "Dew Point [°F]",
+        "feelslike[F]" => "Feels Like Temperature [°F]",
         "relh" => "Relative Humidity [%]",
         "winddirection[deg]" => "Wind Direction",
         "windspeed[kt]" => "Wind Speed [knots]",
@@ -162,33 +182,33 @@ EOM;
         "pday" => "Daily Precipitation [inches]",
         "pmonth" => "Monthly Precipitation [inches]",
         "gust" => "Wind Gust [knots]",
-        "c1tmpf" => "Soil Temperature [F]",
-        "c2tmpf" => "Soil Temperature [F]",
-        "c3tmpf" => "Soil Temperature [F]",
-        "c4tmpf" => "Soil Temperature [F]",
-        "c5tmpf" => "Soil Temperature [F]",
+        "c1tmpf" => "Soil Temperature [°F]",
+        "c2tmpf" => "Soil Temperature [°F]",
+        "c3tmpf" => "Soil Temperature [°F]",
+        "c4tmpf" => "Soil Temperature [°F]",
+        "c5tmpf" => "Soil Temperature [°F]",
         "c1smv" => "Soil Moisture [%]",
         "c2smv" => "Soil Moisture [%]",
         "c3smv" => "Soil Moisture [%]",
         "c4smv" => "Soil Moisture [%]",
         "c5smv" => "Soil Moisture [%]",
         "srad_1h[J m-2]" => "Solar Radiation [past 60 minutes] [J m-2]",
-        "tsoil[4in][F]" => "Soil Temperature [4 inch / 10 cm] [F]",
-        "tsoil[8in][F]" => "Soil Temperature [8 inch / 20 cm] [F]",
-        "tsoil[16in][F]" => "Soil Temperature [16 inch / 40 cm] [F]",
-        "tsoil[20in][F]" => "Soil Temperature [20 inch / 50 cm] [F]",
-        "tsoil[32in][F]" => "Soil Temperature [32 inch / 80 cm] [F]",
-        "tsoil[40in][F]" => "Soil Temperature [40 inch / 100 cm] [F]",
-        "tsoil[64in][F]" => "Soil Temperature [64 inch / 160 cm] [F]",
-        "tsoil[128in][F]" => "Soil Temperature [128 inch / 320 cm] [F]",
+        "tsoil[4in][F]" => "Soil Temperature [4 inch / 10 cm] [°F]",
+        "tsoil[8in][F]" => "Soil Temperature [8 inch / 20 cm] [°F]",
+        "tsoil[16in][F]" => "Soil Temperature [16 inch / 40 cm] [°F]",
+        "tsoil[20in][F]" => "Soil Temperature [20 inch / 50 cm] [°F]",
+        "tsoil[32in][F]" => "Soil Temperature [32 inch / 80 cm] [°F]",
+        "tsoil[40in][F]" => "Soil Temperature [40 inch / 100 cm] [°F]",
+        "tsoil[64in][F]" => "Soil Temperature [64 inch / 160 cm] [°F]",
+        "tsoil[128in][F]" => "Soil Temperature [128 inch / 320 cm] [°F]",
         "raw" => "Raw Observation/Product"
     );
 
     if ($network == 'ISUSM') {
-        $vardict["c1tmpf"] = "4 inch Soil Temperature [F]";
-        $vardict["c2tmpf"] = "12 inch Soil Temperature [F]";
-        $vardict["c3tmpf"] = "24 inch Soil Temperature [F]";
-        $vardict["c4tmpf"] = "50 inch Soil Temperature [F]";
+        $vardict["c1tmpf"] = "4 inch Soil Temperature [°F]";
+        $vardict["c2tmpf"] = "12 inch Soil Temperature [°F]";
+        $vardict["c3tmpf"] = "24 inch Soil Temperature [°F]";
+        $vardict["c4tmpf"] = "50 inch Soil Temperature [°F]";
         $vardict["c2smv"] = "12 inch Soil Moisture [%]";
         $vardict["c3smv"] = "24 inch Soil Moisture [%]";
         $vardict["c4smv"] = "50 inch Soil Moisture [%]";
@@ -277,7 +297,7 @@ $t->content = <<<EOM
 <h3>Most Recent Observation</h3>
 
 <p>This application displays the last observation received by the IEM
- from this site. The time stamp is in 
+ from this site. The time stamp is in
  <strong>{$metadata["tzname"]}</strong> timezone.</p>
 
 {$interface}
