@@ -24,10 +24,6 @@ Provide CLI data for 2024-07-01 in GeoJSON format:
 
 https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=geojson
 
-Same data, but in CSV format:
-
-https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv
-
 Same data, but in CSV format and force download:
 
 https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
@@ -59,7 +55,10 @@ class Schema(CGIModel):
     dl: Annotated[bool, Field(description="Force download of CSV file.")] = (
         False
     )
-    dt: Annotated[date, Field(description="Date of interest.")] = date.today()
+    dt: Annotated[
+        date,
+        Field(default_factory=date.today, description="Date of interest."),
+    ]
     fmt: Annotated[
         str,
         Field(
@@ -103,7 +102,7 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(conn, ts, fmt):
+def get_data(conn, query: Schema):
     """Get the data for this timestamp"""
     data = json_response_dict(
         {
@@ -138,7 +137,7 @@ def get_data(conn, ts, fmt):
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = :ts
     """),
-        {"ts": ts},
+        {"ts": query.ts},
     )
     for i, row in enumerate(res.mappings()):
         data["features"].append(
@@ -233,7 +232,7 @@ def get_data(conn, ts, fmt):
                 },
             }
         )
-    if fmt == "geojson":
+    if query.fmt == "geojson":
         # Ensure unicode is preserved; JSONP wrapping happens in application()
         return json.dumps(data, ensure_ascii=False)
     cols = (
@@ -276,14 +275,14 @@ def get_mckey(environ: dict) -> str:
     memcachekey=get_mckey,
     memcacheexpire=600,  # Excessive usage
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """see how we are called"""
-    fmt = environ["fmt"]
+    query: Schema = environ["_cgimodel_schema"]
 
     # Derive content-type from shared utility
     headers = [("Content-type", get_ct(environ))]
     # Add attachment header only when CSV download is requested
-    if fmt == "csv" and environ["dl"]:
+    if query.fmt == "csv" and query.dl:
         headers.append(
             (
                 "Content-disposition",
@@ -292,7 +291,7 @@ def application(environ, start_response):
         )
 
     with get_sqlalchemy_conn("iem") as conn:
-        data = get_data(conn, environ["dt"], fmt)
+        data = get_data(conn, query)
     start_response("200 OK", headers)
     # Use UTF-8 to support non-ASCII station names, etc.
     return data.encode("utf-8")

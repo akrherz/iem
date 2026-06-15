@@ -3,14 +3,27 @@ require_once dirname(__FILE__) . "/../config/settings.inc.php";
 require_once dirname(__FILE__) . "/mlib.php";
 
 
+/**
+ * Helper to print LSR information
+ * @param array $lsr LSR properties
+ * @param bool $verified Whether this LSR is verified by the warning or not
+ * @return string HTML table row for this LSR
+ */
 function printLSR($lsr, $verified = FALSE)
 {
     $valid = new DateTime($lsr["valid"]);
     $lt = array(
-        "x" => "Debris Flow", "q" => "Snow Squall",
-        "F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
-        "H" => "Hail", "G" => "Wind Gust", "W" => "Waterspout",
-        "M" => "Marine Tstm Wnd", "2" => "Dust Storm", "h" => "Marine Hail",
+        "x" => "Debris Flow",
+        "q" => "Snow Squall",
+        "F" => "Flash Flood",
+        "T" => "Tornado",
+        "D" => "Tstm Wnd Dmg",
+        "H" => "Hail",
+        "G" => "Wind Gust",
+        "W" => "Waterspout",
+        "M" => "Marine Tstm Wnd",
+        "2" => "Dust Storm",
+        "h" => "Marine Hail",
     );
     $background = ($lsr["warned"] == False) ? "#f00" : "#0f0";
     if (is_null($lsr["leadtime"])) {
@@ -48,6 +61,12 @@ function printLSR($lsr, $verified = FALSE)
     );
 }
 
+/**
+ * Helper to print warning information
+ * @param array $lsrs List of all LSRs to check for verification
+ * @param array $warn Warning properties
+ * @return string HTML table rows for this warning and its verifying LSRs
+ */
 function printWARN($lsrs, $warn)
 {
     global $lsrbuffer;
@@ -69,7 +88,7 @@ function printWARN($lsrs, $warn)
             $warn["windtag"],
         );
     }
-    if ($warn["phenomena"] == "SV"){
+    if ($warn["phenomena"] == "SV") {
         $windhail .= sprintf(
             "<br />T: %s",
             $warn["svr_tornado_possible"] ? "Poss" : "N",
@@ -157,6 +176,11 @@ if (isset($limitwarns) && $limitwarns == 'Y') {
 }
 
 $jobj = iemws_json("cow.json", $wsargs);
+$wsuri = sprintf(
+    "%s/api/1/cow.json?%s",
+    IEMConfig::EXTERNAL_BASEURL,
+    http_build_query($wsargs),
+);
 $stats = $jobj['stats'];
 
 $charturl = sprintf(
@@ -252,11 +276,9 @@ $lsruri = sprintf(
     $ets->format("Y-m-d\\TH:i"),
 );
 
-// lame
-$extwsuri = str_replace("http://iem.local", "", $wsuri);
 $content .= <<<EOF
 <strong>Related Downloads:</strong>
-<a href="{$extwsuri}" class="btn btn-primary">JSON Web Service</a> &nbsp;
+<a href="{$wsuri}" class="btn btn-primary">JSON Web Service</a> &nbsp;
 <a href="{$shpuri}" class="btn btn-primary">Shapefile of Warnings</a> &nbsp;
 <a href="{$lsruri}" class="btn btn-primary">Shapefile of LSRs</a> &nbsp;
 
@@ -271,7 +293,7 @@ $content .= <<<EOF
       <img src="{$charturl}"  class="img-fluid"/>
   </div>
     <div class="col-sm-5">
- <table class="table">
+ <table class="table table-sm table-bordered cow-results-table">
  <tr><th>Listed Warnings:</th><th>{$wsz}</th></tr>
  <tr><th>Verified: (A<sub>w</sub>)</th><th>{$aw}</th></tr>
  <tr><th>% Verified</th><th>{$pv}%</th></tr>
@@ -285,7 +307,7 @@ $content .= <<<EOF
  </table>
     </div>
     <div class="col-sm-5">
- <table class="table">
+ <table class="table table-sm table-bordered cow-results-table">
  <tr><th>SVRs with Tornado Possible Tag</th><th>{$stats["svr_with_torpossible_total"]}</th></tr>
  <tr><th>SVRs with Tornado Possible Tag and Tor LSR</th><th>{$stats["svr_with_torpossible_verified"]}</th></tr>
  <tr><th>FAR == C / (A<sub>w</sub>+C)</th><th>{$far}</th></tr>
@@ -310,7 +332,7 @@ $content .= <<<EOF
 <i>Perimeter Ratio:</i> Estimated percentage of the storm based warning polygon border that was influenced by political boundaries (0% is ideal).
 <i>Areal Verification %:</i> Percentage of the polygon warning that received a verifying report (report is buffered {$lsrbuffer} km).
 
-<table class="table-condensed">
+ <table class="table table-sm table-bordered cow-results-legend">
 <tr><th>LSR Leadtime Color Key</th>
 <td style="background: #0F0;">LSR verified warning</td>
 <td style="background: #8FBC8F;">LSR covered by earlier warning</td>
@@ -318,7 +340,8 @@ $content .= <<<EOF
 </table>
 
 <br />
-<table cellspacing="0" cellpadding="2" border="1">
+<table cellspacing="0" cellpadding="2" border="1" class="cow-results-table">
+<thead class="sticky">
 <tr>
     <td></td>
     <th>Issued:</th>
@@ -342,11 +365,15 @@ $content .= <<<EOF
     <th>Magnitude</th>
     <th colspan="5">Remarks</th>
 </tr>
+</thead>
+<tbody>
 {$wtable}
+</tbody>
 </table>
 
 <h3>Storm Reports without warning:</h3>
-<table class="table table-bordered">
+<table class="table table-sm table-bordered cow-results-table">
+<thead class="sticky">
 <tr>
     <th>lsr</th>
     <th>Valid</th>
@@ -357,6 +384,9 @@ $content .= <<<EOF
     <th>Magnitude</th>
     <th>Remark</th>
 </tr>
+</thead>
+<tbody>
 {$ltable}
+</tbody>
 </table>
 EOF;
