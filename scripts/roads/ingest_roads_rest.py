@@ -37,12 +37,13 @@ import sys
 import zipfile
 from datetime import datetime, timedelta
 
-import httpx
 import pandas as pd
+import requests
 import shapefile
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import logger, utc
 from shapely.wkb import loads
+from tqdm import tqdm
 
 LOG = logger()
 URI = (
@@ -98,6 +99,7 @@ ROADCOND = {
 
 def export_shapefile(txn, valid):
     """Export a Shapefile of Road Conditions"""
+    LOG.info("Exporting for %s", valid)
     os.chdir("/tmp")
     shp = shapefile.Writer("iaroad_cond")
     shp.field("SEGID", "N", 6, 0)
@@ -173,11 +175,20 @@ def main():
             conn,
             index_col="idot_id",
         )
-
-    req = exponential_backoff(httpx.get, URI, timeout=30)
-    if req is None:
-        sys.exit()
-    jobj = req.json()
+    LOG.info("Found %s current entries", len(current))
+    for attempt in range(2):
+        LOG.info("Attempt %s/1 fetching", attempt)
+        try:
+            resp = requests.get(URI, timeout=30)
+            LOG.info("Got status_code %s", resp.status_code)
+            resp.raise_for_status()
+            jobj = resp.json()
+            break
+        except Exception as exp:
+            LOG.info("Error fetching %s", exp, exc_info=True)
+            if attempt == 1:
+                LOG.info("Giving up...")
+                return
 
     if "features" not in jobj:
         LOG.warning(
@@ -187,7 +198,8 @@ def main():
         return
 
     dirty = False
-    for feat in jobj["features"]:
+    progress = tqdm(jobj["features"], disable=not sys.stdout.isatty())
+    for feat in progress:
         props = feat["attributes"]
         idot_id = props["SEGMENT_ID"]
         if idot_id not in current.index:
@@ -223,6 +235,8 @@ def main():
             valid = utc()
         # Save to log, if difference
         if cond != current.at[idot_id, "cond_code"]:
+            if not progress.disable:
+                progress.write("Inserting %s to roads_log", segid)
             cursor.execute(
                 """
                 INSERT into roads_log(segid, valid, cond_code, raw)
