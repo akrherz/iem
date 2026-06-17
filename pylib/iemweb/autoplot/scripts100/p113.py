@@ -14,6 +14,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.json.climodat_stclimo import Schema
 from iemweb.json.climodat_stclimo import run as climodat_stclimo_run
 
 PDICT = {
@@ -128,7 +129,8 @@ def plotter(ctx: dict):
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
     )
-    climo = climodat_stclimo_run(station, bs.year, be.year + 1)
+    query = Schema(station=station, syear=bs.year, eyear=be.year + 1)
+    climo = climodat_stclimo_run(query)
     df = pd.DataFrame(climo["climatology"])
     if df.empty:
         raise NoDataFound("Climatology was not found.")

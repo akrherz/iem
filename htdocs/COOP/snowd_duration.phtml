@@ -7,7 +7,7 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 $coopdb = iemdb('coop');
-$station = get_str404("station", 'IA0200');
+$station = strtoupper(get_str404("station", 'IA0200', 6));
 $month = get_int404("month", 12);
 $day = get_int404("day", 25);
 
@@ -27,7 +27,7 @@ $table = <<<EOM
 EOM;
 
 // Find all snow days for this date!
-$rs = pg_execute($coopdb, $stname1, array(strtoupper($station), $sday));
+$rs = pg_execute($coopdb, $stname1, array($station, $sday));
 $data = array();
 while ($row = pg_fetch_assoc($rs)) {
     $rs2 = pg_execute($coopdb, $stname2, array($row["day"], $station));

@@ -63,7 +63,7 @@ def test_php(app):
 
     # Test that the HTML generated is well formed.
     if resp.status_code == 200 and "html" in resp.headers["Content-Type"]:
-        soup = BeautifulSoup(resp.text, "xml")
+        soup = BeautifulSoup(resp.text, "html.parser")
         assert soup.find("title") is not None
 
 
