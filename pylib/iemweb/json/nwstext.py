@@ -73,8 +73,6 @@ class Schema(CGIModel):
 )
 def application(environ: dict, start_response: callable):
     """Answer request."""
-    headers = [("Content-type", "application/json")]
-
     pid = environ["product_id"]
     tokens = pid.split("-")
     try:
@@ -105,5 +103,5 @@ def application(environ: dict, start_response: callable):
             root["products"].append({"data": row[0]})
 
     data = json.dumps(root)
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return data.encode("ascii")

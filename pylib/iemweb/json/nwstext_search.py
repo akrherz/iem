@@ -62,12 +62,12 @@ class Schema(CGIModel):
     ]
 
 
-def run(sts, ets, awipsid):
+def run(query: Schema) -> str:
     """Actually do some work!"""
 
     data = json_response_dict({"results": []})
     pillimit = "pil"
-    if len(awipsid) == 3:
+    if len(query.awipsid) == 3:
         pillimit = "substr(pil, 1, 3) "
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(
@@ -81,7 +81,7 @@ def run(sts, ets, awipsid):
         """,
                 pillimit=pillimit,
             ),
-            {"sts": sts, "ets": ets, "awipsid": awipsid},
+            {"sts": query.sts, "ets": query.ets, "awipsid": query.awipsid},
         )
         for row in res:
             data["results"].append(
@@ -107,8 +107,7 @@ def get_mckey(environ: dict) -> str:
 )
 def application(environ: dict, start_response: callable):
     """Answer request."""
-    headers = [("Content-type", "application/json")]
-
-    res = run(environ["sts"], environ["ets"], environ["awipsid"])
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    query: Schema = environ["_cgimodel_schema"]
+    res = run(query)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return res

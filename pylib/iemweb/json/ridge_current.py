@@ -79,6 +79,5 @@ def application(environ, start_response):
     product = environ["product"].upper()
 
     res = run(product)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

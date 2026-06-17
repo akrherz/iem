@@ -7,7 +7,7 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 $coopdb = iemdb('coop');
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : 'IA0200';
+$station = get_str404("station", 'IA0200');
 $month = get_int404("month", 12);
 $day = get_int404("day", 25);
 
@@ -26,7 +26,7 @@ $table = <<<EOM
  <th>Duration [days]</th></tr>
 EOM;
 
-/* Find all snow days for this date! */
+// Find all snow days for this date!
 $rs = pg_execute($coopdb, $stname1, array(strtoupper($station), $sday));
 $data = array();
 while ($row = pg_fetch_assoc($rs)) {
@@ -61,7 +61,7 @@ $t->content = <<<EOM
 
 <h3>Snow Depth Duration</h3>
 
-<p>This application creates a table of duration of snow cover for a given 
+<p>This application creates a table of duration of snow cover for a given
 day.  The default example answers the question, "When there is snow on the
 ground for Christmas in Ames, how long does it stick around for?"</p>
 

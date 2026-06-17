@@ -19,7 +19,7 @@ $valid_sortcols = array(
     "sum_precip",
     "sum_snow",
 );
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "avg_high";
+$sortcol = get_str404("sortcol", "avg_high");
 if (!in_array($sortcol, $valid_sortcols, true)) {
     $sortcol = "avg_high";
 }

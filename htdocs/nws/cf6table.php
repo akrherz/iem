@@ -107,7 +107,10 @@ foreach ($arr as $entry) {
     $wxcodes = "";
     if (!is_null($row["wxcodes"])){
         foreach (str_split($row["wxcodes"]) as $code) {
-            $wxcodes .= sprintf("%s ", $wxlookup[$code]);
+            $wxcodes .= sprintf(
+                "%s ",
+                array_key_exists($code, $wxlookup) ? $wxlookup[$code] : "[[$code]]"
+            );
         }
     }
     $table .= sprintf(

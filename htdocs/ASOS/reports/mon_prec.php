@@ -1,17 +1,17 @@
 <?php
 require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 29);
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
-$year = get_int404("year", date("Y"));
+$network = get_str404("network", "IA_ASOS");
+$year = get_int404("year", (int)date("Y"));
 
 $netselect = selectNetworkType("ASOS", $network);
 $yselect = yearSelect(2004, $year, "year");
 
-define("IEM_APPID", 29);
 $t = new MyView();
 $t->title = "{$year} {$network} Monthly Precipitation";
 

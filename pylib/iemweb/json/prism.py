@@ -155,6 +155,5 @@ def get_mckey(environ):
 def application(environ, start_response):
     """Answer request."""
     res = dowork(environ)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

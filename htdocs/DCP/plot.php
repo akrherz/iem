@@ -44,7 +44,7 @@ $graph->img->SetMargin(40, 40, 45, 120);
 
 $title = sprintf(
     "%s [%s] \nPlot of SHEF Variable [%s]",
-    $nt->table[$station]['name'],
+    array_key_exists($station, $nt->table) ? $nt->table[$station]['name'] : "",
     $station,
     $varname
 );
@@ -61,11 +61,9 @@ $graph->xaxis->SetTitle(sprintf(
 $graph->xaxis->SetTitleMargin(90);
 $graph->xaxis->SetLabelAngle(90);
 
-// Create the linear plot
 $lineplot = new LinePlot($data, $times);
 $lineplot->SetColor("red");
 $lineplot->SetWeight(2);
 $graph->Add($lineplot);
 
-// Display the graph
 $graph->Stroke();
