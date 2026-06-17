@@ -48,7 +48,7 @@ class Schema(CGIModel):
 
 
 @with_sqlalchemy_conn("coop")
-def run(query: Schema, conn: Connection | None = None) -> str:
+def run(query: Schema, conn: Connection | None = None) -> dict:
     """Generate the data. Note, we have API users of this..."""
     res = conn.execute(
         sql_helper("""
@@ -139,7 +139,7 @@ def run(query: Schema, conn: Connection | None = None) -> str:
                 min_range=row["min_range"],
             )
         )
-    return json.dumps(data)
+    return data
 
 
 def get_key(environ):
@@ -159,6 +159,6 @@ def application(environ, start_response):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 
-    payload = run(query)
+    payload = json.dumps(run(query))
     start_response("200 OK", [("Content-type", "application/json")])
     return payload
