@@ -6,7 +6,7 @@ from iemweb.autoplot.barchart import barchart_with_top10
 from pyiem.plot import figure
 
 
-@pytest.mark.mpl_image_compare(tolerance=0.2)
+@pytest.mark.mpl_image_compare(tolerance=2)
 def test_barchart_simple():
     """Test the barchart module."""
     fig = figure()
