@@ -11,8 +11,8 @@ from io import StringIO
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
@@ -82,20 +82,20 @@ def run(conn: Connection, model, station, lon, lat, ts):
         "&accept=csv&point=true"
     )
     try:
-        fp = httpx.get(url, timeout=120)
-        if fp.status_code == 404:
+        resp = requests.get(url, timeout=120)
+        if resp.status_code == 404:
             LOG.info(url)
             LOG.warning("Grid %s %s missing", model, ts)
             return 0
-        sio = StringIO(fp.text)
+        resp.raise_for_status()
+        sio = StringIO(resp.text)
     except Exception as exp:
-        print(exp)
-        print(url)
         LOG.warning(
             "FAIL ts: %s station: %s model: %s",
             ts.strftime("%Y-%m-%d %H"),
             station,
             model,
+            exc_info=exp,
         )
         return None
 
@@ -155,6 +155,7 @@ def run_model(conn: Connection, model, runtime):
             NT.sts[sid]["lat"],
             runtime,
         )
+        LOG.info("Finished K%s %s %s with %s rows", sid, runtime, model, cnt)
         if cnt == 0:
             LOG.warning("No data K%s %s %s", sid, runtime, model)
 
