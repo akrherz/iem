@@ -36,7 +36,8 @@ dependencies:
   # Unknown problem with netCDF4 not loading
   - libnetcdf=4.9
   - mastodon.py
-  - matplotlib-base
+  # Font rendering changed, for consistent test
+  - matplotlib-base>=3.11.0
   # various places
   - metar
   # duh
