@@ -1,10 +1,10 @@
 <?php
-/* Print last two days worth of some PIL */
+// Print last two days worth of some PIL
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 
-$pil = strtoupper(substr(get_str404('pil', "AFD"), 0, 3));
+$pil = strtoupper(get_str404('pil', "AFD", 3));
 
 $conn = iemdb("afos");
 $stname = iem_pg_prepare($conn, "SELECT data from products " .

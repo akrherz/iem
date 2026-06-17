@@ -89,7 +89,12 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
+    OUTLOOK_DAY_FIELD,
+)
 from iemweb.util import json_response_dict
 
 VALID_CATS = [
@@ -132,9 +137,7 @@ class Schema(CGIModel):
     last: Annotated[
         int, Field(description="Limit to last N outlooks, 0 for all", ge=0)
     ] = 0
-    day: Annotated[
-        int, Field(ge=1, le=8, description="Day to query for, 1-8")
-    ] = 1
+    day: OUTLOOK_DAY_FIELD = 1
     time: Annotated[
         AwareDatetime | None,
         Field(
@@ -298,8 +301,7 @@ def application(environ: dict, start_response: callable):
                 "utc_issue": pd.Timestamp(row0["i"]).strftime(ISO8601),
                 "utc_expire": pd.Timestamp(row0["e"]).strftime(ISO8601),
             }
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
+        start_response("200 OK", [("Content-type", "application/json")])
         return json.dumps(res)
     if fmt == "json":
         running = {}
@@ -320,8 +322,7 @@ def application(environ: dict, start_response: callable):
                     category=row["category"],
                 )
             )
-        headers = [("Content-type", "application/json")]
-        start_response("200 OK", headers)
+        start_response("200 OK", [("Content-type", "application/json")])
         return json.dumps(res)
 
     outlooks = outlooks.rename(
@@ -336,14 +337,16 @@ def application(environ: dict, start_response: callable):
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-Disposition", "attachment; filename=outlooks.xls"),
         ]
-        start_response("200 OK", headers)
         with BytesIO() as bio:
             outlooks.to_excel(bio, index=False)
-            return bio.getvalue()
+            payload = bio.getvalue()
+        start_response("200 OK", headers)
+        return payload
 
     headers = [
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=outlooks.csv"),
     ]
+    payload = outlooks.to_csv(index=False)
     start_response("200 OK", headers)
-    return outlooks.to_csv(index=False)
+    return payload

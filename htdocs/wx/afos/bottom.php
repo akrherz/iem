@@ -25,14 +25,14 @@
         to use it. More modern interfaces exist with the <a href="list.phtml">list by source/date</a>
         and <a href="/wx/afos/">list by pil</a> interfaces.</p>
 
-    <p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">Unidata IDD</a>
+    <p>Using our local <a href="https://www.unidata.ucar.edu/projects/idd/index.html">Unidata IDD</a>
         data feed, a simple script archives NWS text products into a database.
         The above form allows you to query this database for recent products. You must know
-        the <a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">AFOS PIL</a> in order to
+        the <a href="https://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">AFOS PIL</a> in order to
         get the products you want.</p>
 
     <ul>
-        <li><a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">NNN Categories</a></li>
+        <li><a href="https://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">NNN Categories</a></li>
     </ul>
 
 

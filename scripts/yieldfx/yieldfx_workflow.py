@@ -183,10 +183,7 @@ def replace_forecast(df: pd.DataFrame, location: str):
     nextjan1 = date(today.year + 1, 1, 1)
     coop = XREF[location]["climodat"]
     years = [
-        int(y)
-        for y in np.arange(
-            df.index.values.min().year, df.index.values.max().year + 1
-        )
+        int(y) for y in np.arange(df.index.min().year, df.index.max().year + 1)
     ]
     cursor.execute(
         """

@@ -545,5 +545,6 @@ def application(environ: dict, start_response: callable):
     )
 
     headers = [("Content-type", get_ct(environ))]
+    payload = json.dumps(response).encode("utf-8")
     start_response("200 OK", headers)
-    return json.dumps(response).encode("utf-8")
+    return payload

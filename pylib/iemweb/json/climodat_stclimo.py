@@ -48,9 +48,7 @@ class Schema(CGIModel):
 
 
 @with_sqlalchemy_conn("coop")
-def run(
-    station: str, syear: int, eyear: int, conn: Connection | None = None
-) -> dict:
+def run(query: Schema, conn: Connection | None = None) -> dict:
     """Generate the data. Note, we have API users of this..."""
     res = conn.execute(
         sql_helper("""
@@ -108,13 +106,13 @@ def run(
     WHERE xh.sday = a.sday and xh.sday = nh.sday and xh.sday = xl.sday and
     xh.sday = nl.sday and xh.sday = mp.sday ORDER by sday ASC
     """),
-        {"station": station, "syear": syear, "eyear": eyear},
+        {"station": query.station, "syear": query.syear, "eyear": query.eyear},
     )
     data = json_response_dict(
         {
-            "station": station,
-            "start_year": syear,
-            "end_year": eyear,
+            "station": query.station,
+            "start_year": query.syear,
+            "end_year": query.eyear,
             "climatology": [],
         }
     )
@@ -161,7 +159,6 @@ def application(environ, start_response):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 
-    res = run(query.station, query.syear, query.eyear)
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(res)
+    payload = json.dumps(run(query))
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

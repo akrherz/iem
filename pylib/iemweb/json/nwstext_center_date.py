@@ -127,8 +127,6 @@ def application(environ: dict, start_response: callable):
         for row in res:
             root["products"].append({"data": row.data, "entered": row.e})
 
-    data = json.dumps(root)
-
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return data.encode("ascii")
+    payload = json.dumps(root).encode("ascii")
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

@@ -1,7 +1,8 @@
 """test cgi-bin/request/gis/watchwarn.py"""
 
+import xml.etree.ElementTree as ET
+
 from iemweb.request.gis.watchwarn import application
-from lxml import etree
 from werkzeug.test import Client
 
 
@@ -13,5 +14,5 @@ def test_valid_kml():
         "&phenomena=TO&significance=W"
     )
     assert res.status_code == 200
-    doc = etree.fromstring(res.data)
+    doc = ET.fromstring(res.data)
     assert doc.tag == "{http://www.opengis.net/kml/2.2}kml"

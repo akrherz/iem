@@ -10,8 +10,8 @@ import warnings
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import numpy as np
+import requests
 from netCDF4 import chartostring
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
@@ -24,10 +24,11 @@ WEBROOT = "https://madis-data.cprk.ncep.noaa.gov/madisPublic1/data/"
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-def find_file(variant, valid: datetime):
+def find_file(variant: str, valid: datetime):
     """Find the most recent file"""
     fn = None
-    if valid < utc().replace(hour=0, minute=0):
+    yesterday0z = (utc() - timedelta(hours=24)).replace(hour=0, minute=0)
+    if valid < yesterday0z:
         if (utc() - valid).days > 5:
             uri = (
                 f"{WEBROOT}archive/{valid:%Y/%m/%d}/LDAD/{variant[:-1]}/netCDF/"
@@ -36,18 +37,18 @@ def find_file(variant, valid: datetime):
         else:
             uri = f"{WEBROOT}LDAD/{variant[:-1]}/netCDF/{valid:%Y%m%d_%H}00.gz"
         try:
+            resp = requests.get(uri, timeout=30)
+            resp.raise_for_status()
             # Prevent script errors from filling up /tmp
             with open("/tmp/madis_download.gz", "wb") as tmp:
-                resp = httpx.get(uri)
-                resp.raise_for_status()
                 tmp.write(resp.content)
                 fn = tmp.name
             # gunzip the file
-            subprocess.call(["gunzip", "-f", fn])
+            subprocess.run(["gunzip", "-f", fn], check=True)
             fn = fn[:-3]
             return fn
         except Exception as exp:
-            LOG.info("Failed to fetch %s %s", uri, exp)
+            LOG.info("Failed to process %s", uri, exc_info=exp)
             return None
 
     for j in range(300, -1, -1):

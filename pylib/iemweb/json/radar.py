@@ -332,6 +332,6 @@ def application(environ: dict, start_response: callable):
     elif query.operation == "products":
         data = list_products(query)
 
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return json.dumps(data).encode("ascii")
+    payload = json.dumps(data)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload

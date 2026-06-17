@@ -11,12 +11,17 @@ $t = new MyView();
 $nt = new NetworkTable("WFO");
 $mesosite = iemdb("mesosite");
 
-$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_COOP';
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST['wfo']) : null;
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
-$sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']) : 'desc';
+$network = get_str404("network", 'IA_COOP');
+$wfo = get_str404("wfo", null);
+$sortcol = get_str404("sortcol", 'ts');
+$sortdir = get_str404("sortdir", 'desc');
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
+/**
+ * Format precipitation values, 0.0001 is a trace, negative is missing
+ * @param string|float $val
+ * @return string
+ */
 function precip_formatter($val)
 {
     if ($val === '') return '';
@@ -25,6 +30,12 @@ function precip_formatter($val)
     return $val;
 }
 
+/**
+ * Make a table row for the given station data
+ * @param array $dict
+ * @param bool $oddrow
+ * @return string
+ */
 function make_row($dict, $oddrow)
 {
     $s = "<tr";
@@ -135,6 +146,14 @@ foreach ($db as $site => $value) {
     }
 }
 
+/**
+ * Get the URL for sorting a column, if the column is currently sorted, reverse the sort direction
+ * @param string $baseurl
+ * @param string $column
+ * @param string $sortCol
+ * @param string $sortDir
+ * @return string
+ */
 function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 {
     $newSort = ($sortDir == "asc") ? "desc" : "asc";

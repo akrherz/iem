@@ -33,17 +33,17 @@ if (!is_null($src) && array_key_exists($src, $old2new)) {
 $data = array(
     1 => array(
         "mapurl" => "/data/agclimate/air-temp-out.png",
-        "desc" => "High and low air temperature for a local day. Measurements are 
+        "desc" => "High and low air temperature for a local day. Measurements are
             made at a 2 meter height.",
     ),
     2 => array(
         "mapurl" => "/data/agclimate/4in-temp-out.png",
-        "desc" => "Average 4 inch soil depth temperature.  Usually under a 
+        "desc" => "Average 4 inch soil depth temperature.  Usually under a
             bare soil.",
     ),
     3 => array(
         "mapurl" => "/data/agclimate/soil-hilo-out.png",
-        "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
+        "desc" => "High and low 4 inch soil depth temperature.  Usually under a
             bare soil.",
     ),
     4 => array(
@@ -53,7 +53,7 @@ $data = array(
     5 => array(
         "mapurl" => "/data/agclimate/prec-out.png",
         "desc" => "Daily total precipitation.  This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
-used with extreme caution.  For various reasons, the reported values are 
+used with extreme caution.  For various reasons, the reported values are
 often too low.",
     ),
     6 => array(
@@ -82,19 +82,24 @@ often too low.",
     11 => array(
         "mapurl" => "/GIS/apps/agclimate/month.php?dvar=rain_in_tot&year=$year&month=$month",
         "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
-used with extreme caution.  For various reasons, the reported values are 
+used with extreme caution.  For various reasons, the reported values are
 often too low."
     ),
     12 => array(
         "mapurl" => "/data/agclimate/chill-sum.png",
-        "desc" => "The Standard Chill Unit map is a summation of hours during 
-   which the temperature was between 32 and 45 degrees <b>after</b> 
-   1 September.  The value has application for 
-   fruit growers in the state.  The departure from average is also 
+        "desc" => "The Standard Chill Unit map is a summation of hours during
+   which the temperature was between 32 and 45 degrees <b>after</b>
+   1 September.  The value has application for
+   fruit growers in the state.  The departure from average is also
    presented.  This average is computed from the observational record at
    the site."
     ),
 );
+if (!array_key_exists($prod, $data)){
+    // trigger 422 handler
+    xssafe("<invalid>");
+    die();
+}
 
 $extra = "";
 if ($prod == 10 || $prod == 11) {

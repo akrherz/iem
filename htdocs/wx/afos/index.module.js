@@ -1,4 +1,3 @@
-// AFOS Text Product Finder - ES Module
 import { escapeHTML } from '/js/iemjs/domUtils.js';
 
 // Legacy anchors looked like PIL-LIMIT, now are PIL:(LIMIT * ORDER)
