@@ -49,7 +49,13 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import HOUR_FIELD, MINUTE_FIELD
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -68,16 +74,14 @@ class Schema(CGIModel):
     ] = "shp"
     sts: AwareDatetime = Field(default=None, description="Start Time")
     ets: AwareDatetime = Field(default=None, description="End Time")
-    year1: int = Field(default=None, description="Start Year, if sts not set")
-    month1: int = Field(
-        default=None, description="Start Month, if sts not set"
-    )
-    day1: int = Field(default=None, description="Start Day, if sts not set")
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour1: HOUR_FIELD = 0
     minute1: MINUTE_FIELD = 0
-    year2: int = Field(default=None, description="End Year, if ets not set")
-    month2: int = Field(default=None, description="End Month, if ets not set")
-    day2: int = Field(default=None, description="End Day, if ets not set")
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
 

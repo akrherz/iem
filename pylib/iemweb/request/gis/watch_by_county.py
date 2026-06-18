@@ -22,10 +22,18 @@ import zipfile
 from io import BytesIO
 
 from osgeo import ogr
-from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD_OPTIONAL,
+    MINUTE_FIELD_OPTIONAL,
+    MONTH_FIELD_OPTIONAL,
+    VTEC_ETN_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 
 ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -34,12 +42,12 @@ PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    etn: int = Field(default=None, description="Event ID")
-    year: int = Field(default=None, description="Year of valid timestamp")
-    month: int = Field(default=None, description="Month of valid timestamp")
-    day: int = Field(default=None, description="Day of valid timestamp")
-    hour: int = Field(default=None, description="Hour of valid timestamp")
-    minute: int = Field(default=None, description="Minute of valid timestamp")
+    etn: VTEC_ETN_FIELD_OPTIONAL = None
+    year: YEAR_FIELD_OPTIONAL = None
+    month: MONTH_FIELD_OPTIONAL = None
+    day: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour: HOUR_FIELD_OPTIONAL = None
+    minute: MINUTE_FIELD_OPTIONAL = None
 
 
 def get_ts_fn(environ):

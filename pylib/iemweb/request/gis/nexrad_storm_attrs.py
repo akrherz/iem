@@ -51,6 +51,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+from iemweb.fields import HOUR_FIELD_OPTIONAL, MINUTE_FIELD_OPTIONAL
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -59,7 +61,9 @@ class Schema(CGIModel):
     fmt: str = Field(
         "shp", description="Format of output", pattern="^(shp|csv)$"
     )
-    radar: ListOrCSVType = Field([], description="Radar Sites to include")
+    radar: ListOrCSVType = Field(
+        default_factory=list, description="Radar Sites to include"
+    )
     sts: AwareDatetime = Field(None, description="Start of Time for request")
     year1: int = Field(
         None, description="Year for start of time if sts not set"
@@ -68,21 +72,15 @@ class Schema(CGIModel):
         None, description="Month for start of time if sts not set"
     )
     day1: int = Field(None, description="Day for start of time if sts not set")
-    hour1: int = Field(
-        None, description="Hour for start of time if sts not set"
-    )
-    minute1: int = Field(
-        None, description="Minute for start of time if sts not set"
-    )
+    hour1: HOUR_FIELD_OPTIONAL = None
+    minute1: MINUTE_FIELD_OPTIONAL = None
     year2: int = Field(None, description="Year for end of time if ets not set")
     month2: int = Field(
         None, description="Month for end of time if ets not set"
     )
     day2: int = Field(None, description="Day for end of time if ets not set")
-    hour2: int = Field(None, description="Hour for end of time if ets not set")
-    minute2: int = Field(
-        None, description="Minute for end of time if ets not set"
-    )
+    hour2: HOUR_FIELD_OPTIONAL = None
+    minute2: MINUTE_FIELD_OPTIONAL = None
     min_hail_size: float = Field(
         None,
         description="Minimum hail size (inch) to include in the results.",
@@ -146,13 +144,13 @@ def run(environ, start_response):
                 ("Content-type", "application/octet-stream"),
                 ("Content-Disposition", f"attachment; filename={fn}.csv"),
             ]
-            start_response("200 OK", headers)
             sio.write(
                 "VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
                 "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,LAT,LON\n"
             )
             for row in res:
                 sio.write(",".join([str(s) for s in row]) + "\n")
+            start_response("200 OK", headers)
             return sio.getvalue().encode("ascii", "ignore")
 
         shpio = BytesIO()
@@ -211,6 +209,6 @@ def run(environ, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
     return [run(environ, start_response)]

@@ -32,6 +32,7 @@ type=C&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
@@ -48,20 +49,23 @@ class Schema(CGIModel):
     d: ListOrCSVType = Field(
         ["1", "2", "3", "4", "5", "6", "7", "8"], description="Days to include"
     )
-    ets: AwareDatetime = Field(
-        None, description="End of the period to include"
-    )
-    geom: str = Field(
-        "geom_layers",
-        description=(
-            "Express geometries either as layers or non-overlapping "
-            "geometries."
+    ets: Annotated[
+        AwareDatetime | None, Field(description="End of the period to include")
+    ] = None
+    geom: Annotated[
+        str,
+        Field(
+            description=(
+                "Express geometries either as layers or non-overlapping "
+                "geometries."
+            ),
+            pattern="^(geom_layers|geom)$",
         ),
-        pattern="geom_layers|geom",
-    )
-    sts: AwareDatetime = Field(
-        None, description="Start of the period to include"
-    )
+    ] = "geom_layers"
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(description="Start of the period to include"),
+    ] = None
     type: ListOrCSVType = Field(
         ["C", "F"],
         description=(
@@ -69,16 +73,36 @@ class Schema(CGIModel):
             "C==Convective(SPC), E=Excessive Rain(WPC)"
         ),
     )
-    year1: int = Field(None, description="Start year when sts is not set.")
-    month1: int = Field(None, description="Start month when sts is not set.")
-    day1: int = Field(None, description="Start day when sts is not set.")
-    hour1: int = Field(None, description="Start hour when sts is not set.")
-    minute1: int = Field(None, description="Start minute when sts is not set.")
-    year2: int = Field(None, description="End year when ets is not set.")
-    month2: int = Field(None, description="End month when ets is not set.")
-    day2: int = Field(None, description="End day when ets is not set.")
-    hour2: int = Field(None, description="End hour when ets is not set.")
-    minute2: int = Field(None, description="End minute when ets is not set.")
+    year1: Annotated[
+        int | None, Field(description="Start year when sts is not set.")
+    ] = None
+    month1: Annotated[
+        int | None, Field(description="Start month when sts is not set.")
+    ] = None
+    day1: Annotated[
+        int | None, Field(description="Start day when sts is not set.")
+    ] = None
+    hour1: Annotated[
+        int | None, Field(description="Start hour when sts is not set.")
+    ] = None
+    minute1: Annotated[
+        int | None, Field(description="Start minute when sts is not set.")
+    ] = None
+    year2: Annotated[
+        int | None, Field(description="End year when ets is not set.")
+    ] = None
+    month2: Annotated[
+        int | None, Field(description="End month when ets is not set.")
+    ] = None
+    day2: Annotated[
+        int | None, Field(description="End day when ets is not set.")
+    ] = None
+    hour2: Annotated[
+        int | None, Field(description="End hour when ets is not set.")
+    ] = None
+    minute2: Annotated[
+        int | None, Field(description="End minute when ets is not set.")
+    ] = None
 
 
 def get_context(environ):

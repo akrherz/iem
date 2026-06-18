@@ -144,12 +144,16 @@ class Schema(CGIModel):
             ),
         ),
     ] = False
-    ets: AwareDatetime = Field(
-        default=None,
-        description="The end timestamp in UTC. The format is ISO8601, e.g. "
-        "2010-06-01T00:00Z.",
-        ge=utc(1986, 1, 1),
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "The end timestamp in UTC. The format is ISO8601, e.g. "
+                "2010-06-01T00:00Z."
+            ),
+            ge=utc(1986, 1, 1),
+        ),
+    ] = None
     limit0: Annotated[
         bool,
         Field(

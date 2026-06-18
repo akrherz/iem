@@ -21,6 +21,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
 
 from datetime import datetime, timedelta, timezone
 from io import StringIO
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -34,13 +35,15 @@ SIMULTANEOUS_REQUESTS: int = 30
 class Schema(CGIModel):
     """Our schema for this request"""
 
-    valid: AwareDatetime = Field(
-        ...,
-        description=(
-            "Hour truncated UTC timestamp to request data for. The "
-            "format is `YYYYMMDDHH`."
+    valid: Annotated[
+        AwareDatetime,
+        Field(
+            description=(
+                "Hour truncated UTC timestamp to request data for. The "
+                "format is `YYYYMMDDHH`."
+            ),
         ),
-    )
+    ]
 
     @field_validator("valid", mode="before")
     @classmethod
@@ -76,7 +79,6 @@ def application(environ, start_response):
                 "503 Service Unavailable", [("Content-type", "text/plain")]
             )
             return [b"ERROR: server over capacity, please try later"]
-        start_response("200 OK", [("Content-type", "text/plain")])
         valid = environ["valid"]
         res = conn.execute(
             sql_helper("""
@@ -89,4 +91,5 @@ def application(environ, start_response):
         sio = StringIO()
         for row in res:
             sio.write("%s\n" % (row[0].replace("\n", " "),))
+    start_response("200 OK", [("Content-type", "text/plain")])
     return [sio.getvalue().encode("ascii", "ignore")]

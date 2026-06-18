@@ -35,6 +35,7 @@ stations=96404&sts=2020-08-01T00:00Z&ets=2020-08-31T23:59Z&format=json
 """
 
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -48,16 +49,20 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class MyModel(CGIModel):
     """Our model"""
 
-    format: str = Field(
-        "csv",
-        description="The format of the data response. csv, json, or excel",
-        pattern=r"^(csv|json|excel)$",
-    )
+    format: Annotated[
+        str,
+        Field(
+            description="The format of the data response. csv, json, or excel",
+            pattern=r"^(csv|json|excel)$",
+        ),
+    ] = "csv"
     ets: AwareDatetime = Field(
         None,
         description="The end time for the data request",
     )
-    stations: ListOrCSVType = Field(..., description="The station identifiers")
+    stations: Annotated[
+        ListOrCSVType, Field(description="The station identifiers")
+    ]
     sts: AwareDatetime = Field(
         None,
         description="The start time for the data request",
@@ -140,11 +145,13 @@ def application(environ, start_response):
     stations = environ["stations"]
     fmt = environ["format"]
     if fmt != "excel":
+        payload = get_data(environ["sts"], environ["ets"], stations, fmt)
         start_response("200 OK", [("Content-type", "text/plain")])
-        return get_data(environ["sts"], environ["ets"], stations, fmt)
+        return payload
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=uscrn.xlsx"),
     ]
+    payload = get_data(environ["sts"], environ["ets"], stations, fmt)
     start_response("200 OK", headers)
-    return [get_data(environ["sts"], environ["ets"], stations, fmt)]
+    return payload
