@@ -107,15 +107,19 @@ class Schema(CGIModel):
             description="The end of the period you are interested in.",
         ),
     ] = None
-    fmt: str = Field(
-        None,
-        description="The output format you desire.",
-        pattern="^(csv|kml|excel|shp)$",
-    )
-    justcsv: bool = Field(
-        False,
-        description="If set, only the CSV file is returned.",
-    )
+    fmt: Annotated[
+        str,
+        Field(
+            description="The output format you desire.",
+            pattern="^(csv|kml|excel|shp)$",
+        ),
+    ] = "shp"
+    justcsv: Annotated[
+        bool,
+        Field(
+            description="If set, only the CSV file is returned.",
+        ),
+    ] = False
     recent: Annotated[
         int | None,
         Field(

@@ -13,7 +13,7 @@ consider the date period crossing 1 January.</p>
 <p>If you pick the same start and end date, you effectively get the
 extremes for that date.</p>
 
-<p>The CSV/Excel download option for this autoplot will return 100
+<p>The CSV/Excel download option for this autoplot will return 500
 unfiltered events for further usage as you see fit.</p>
 """
 
@@ -218,7 +218,7 @@ def plotter(ctx: dict):
 
                 SELECT distinct v at time zone :tzname as valid, speed as gust
                 from data WHERE speed is not null
-                ORDER by gust DESC, valid DESC LIMIT 100
+                ORDER by gust DESC, valid DESC LIMIT 500
             """,
                     date_limiter=date_limiter,
                 ),
@@ -239,7 +239,7 @@ def plotter(ctx: dict):
                     from alldata WHERE station = :station {date_limiter})
 
                 SELECT v as valid, {dbvar} from data
-                ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
+                ORDER by {dbvar} {sorder} NULLS LAST LIMIT 500
             """,
                     dbvar=dbvar,
                     sorder=sorder,
@@ -260,7 +260,7 @@ def plotter(ctx: dict):
                     "{dbvar} from "
                     "alldata WHERE station = :station {date_limiter} and "
                     "{dbvar} {op} {threshold} "
-                    "ORDER by valid DESC LIMIT 100",
+                    "ORDER by valid DESC LIMIT 500",
                     dbvar=dbvar,
                     op=op,
                     threshold=str(threshold),
@@ -327,9 +327,8 @@ def plotter(ctx: dict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel(f"{METRICS[varname]} {UNITS[dbvar]}")
-    if min(y) > 100:
-        rng = max(y) - min(y)
-        ax.set_xlim(min(y) - 0.1 * rng, max(y) + 0.1 * rng)
+    rng = max(y) - min(y)
+    ax.set_xlim(min(y) - 0.1 * rng, max(y) + 0.1 * rng)
     fig.text(
         0.98,
         0.03,

@@ -185,6 +185,6 @@ def run(environ, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict, start_response: callable):
     """Do something fun!"""
     return [run(environ, start_response)]

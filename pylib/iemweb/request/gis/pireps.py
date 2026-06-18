@@ -43,7 +43,12 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
+from iemweb.fields import (
+    HOUR_FIELD,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
+    MINUTE_FIELD,
+)
 
 
 class Schema(CGIModel):
@@ -92,14 +97,8 @@ class Schema(CGIModel):
     )
     lat: LATITUDE_FIELD = 41.99
     lon: LONGITUDE_FIELD = -91.99
-    hour1: int = Field(
-        default=0,
-        description="The start hour of the query, when sts is not provided",
-    )
-    minute1: int = Field(
-        default=0,
-        description="The start minute of the query, when sts is not provided",
-    )
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
     year2: Annotated[
         int | None,
         Field(
@@ -118,14 +117,8 @@ class Schema(CGIModel):
             description="The end day of the query, when ets is not provided",
         ),
     ] = None
-    hour2: int = Field(
-        default=0,
-        description="The end hour of the query, when ets is not provided",
-    )
-    minute2: int = Field(
-        default=0,
-        description="The end minute of the query, when ets is not provided",
-    )
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def run(query: Schema, start_response: callable):
@@ -181,13 +174,13 @@ def run(query: Schema, start_response: callable):
                 ("Content-type", "application/octet-stream"),
                 ("Content-Disposition", f"attachment; filename={fn}.csv"),
             ]
-            start_response("200 OK", headers)
             sio.write(
                 "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,"
                 "PRODUCT_ID,FL,LAT,LON\n"
             )
             for row in res:
                 sio.write(",".join([str(s) for s in row]) + "\n")
+            start_response("200 OK", headers)
             return sio.getvalue().encode("ascii", "ignore")
 
         shpio = BytesIO()

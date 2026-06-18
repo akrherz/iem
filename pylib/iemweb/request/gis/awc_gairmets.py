@@ -31,6 +31,8 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import HOUR_FIELD, MINUTE_FIELD
+
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
@@ -52,12 +54,8 @@ class Schema(CGIModel):
     day1: Annotated[
         int | None, Field(description="Start Day in UTC, when sts not set.")
     ] = None
-    hour1: Annotated[
-        int | None, Field(description="Start Hour in UTC, when sts not set.")
-    ] = 0
-    minute1: Annotated[
-        int | None, Field(description="Start Minute in UTC, when sts not set.")
-    ] = 0
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
     year2: Annotated[
         int | None, Field(description="End Year in UTC, when ets not set.")
     ] = None
@@ -67,12 +65,8 @@ class Schema(CGIModel):
     day2: Annotated[
         int | None, Field(description="End Day in UTC, when ets not set.")
     ] = None
-    hour2: Annotated[
-        int | None, Field(description="End Hour in UTC, when ets not set.")
-    ] = 0
-    minute2: Annotated[
-        int | None, Field(description="End Minute in UTC, when ets not set.")
-    ] = 0
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def run(ctx, start_response):

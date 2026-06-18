@@ -26,6 +26,7 @@ sts=2024-08-01T00:00Z&ets=2024-09-01T00:00Z
 import tempfile
 import zipfile
 from io import BytesIO
+from typing import Annotated
 
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
@@ -39,9 +40,10 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: AwareDatetime = Field(
-        None, description="Start timestamp for the data request"
-    )
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(description="Start timestamp for the data request"),
+    ] = None
     ets: AwareDatetime = Field(
         None, description="End timestamp for the data request"
     )
