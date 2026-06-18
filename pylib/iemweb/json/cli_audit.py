@@ -42,11 +42,10 @@ from pyiem.nws.products.cf6 import parser as cf6_parser
 from pyiem.nws.products.cli import parser as cli_parser
 from pyiem.nws.products.dsm import parser as dsm_parser
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
+from pyiem.webutil import CGIModel, error_log, iemapp
 from simplejson import encoder
 from sqlalchemy.engine import Connection
 
-from iemweb import error_log
 from iemweb.util import get_ct, json_response_dict
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")

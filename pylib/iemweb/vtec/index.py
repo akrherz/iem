@@ -14,12 +14,11 @@ from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
-from pyiem.webutil import CGIModel, iemapp
+from pyiem.webutil import CGIModel, error_log, iemapp
 from sqlalchemy.engine import Connection
 
 from iemweb.fields import VTEC_PH_FIELD, VTEC_SIG_FIELD, VTEC_YEAR_FIELD
 from iemweb.mlib import rectify_wfo
-from iemweb.util import error_log
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_FORM = (

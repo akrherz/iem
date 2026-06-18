@@ -53,9 +53,8 @@ from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, error_log, iemapp
 
-from iemweb import error_log
 from iemweb.fields import TZ_FIELD
 
 NETWORK_RE = re.compile(r"^[A-Z0-9_]{3,32}$")

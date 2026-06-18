@@ -45,9 +45,8 @@ from pydantic import Field
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, error_log, iemapp
 
-from iemweb import error_log
 from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, NETWORK_FIELD
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
