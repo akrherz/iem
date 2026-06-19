@@ -5,15 +5,16 @@
 export DISPLAY=localhost:1
 export GEMCOLTBL=coltbl.xwp
 
-yy=`date -u +%y`
-mm=`date -u +%m`
-dd=`date -u +%d`
-date=${yy}${mm}${dd}
-hh=`date -u +%H`
-ftime="`date -u +'%Y%m%d%H'`00"
+yy="$(date -u +%y)"
+mm="$(date -u +%m)"
+dd="$(date -u +%d)"
+date="${yy}${mm}${dd}"
+hh="$(date -u +%H)"
+ftime="$(date -u +'%Y%m%d%H')00"
 YYYYmmdd="$(date -u +'%Y%m%d')"
 
 GIF="wcht.gif"
+rm -f "${GIF}"
 LOGFILE="/tmp/WCHT_plot.out"
 DEVICE="GIF|${GIF}|1024;768"
 

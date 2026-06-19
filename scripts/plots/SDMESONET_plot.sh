@@ -1,52 +1,44 @@
 #!/bin/bash
-# Called from RUN_59_AFTER.sh and HOURLY_PLOTS
 
 . /mesonet/nawips/Gemenviron.profile
 
 export GEMCOLTBL=coltbl.xwp
-export DISPLAY=localhost:1
 
-YYYYmmdd="$(date -u --date '1 minute' +'%Y%m%d')"
-yy=$(date -u --date '1 minute' +%y)
-mm=$(date -u --date '1 minute' +%m)
-dd=$(date -u --date '1 minute' +%d)
-date=${yy}${mm}${dd}
-hh=$(date -u --date '1 minute' +%H)
-timestamp=$(date -u --date '1 minute' +'%Y%m%d%H00')
-yyyymmddhh_1h=$(date -u --date '1 hour ago' +'%Y%m%d%H')
-yyyymmddhh_2h=$(date -u --date '2 hour ago' +'%Y%m%d%H')
+yy="$(date -u +%y)"
+mm="$(date -u +%m)"
+dd="$(date -u +%d)"
+date="${yy}${mm}${dd}"
+dateY="$(date -u +%Y%m%d)"
+hh="$(date -u +%H)"
+yyyymmddhh_1h="$(date -u --date '1 hour ago' +'%Y%m%d%H')"
+yyyymmddhh_2h="$(date -u --date '2 hour ago' +'%Y%m%d%H')"
 
-GIF="MWmesonet.gif"
+GIF="mesonet.gif"
+rm -f "${GIF}"
 DEVICE="GIF|${GIF}|1024;768"
-AREA="37;-105;48.5;-85"
-LOGFILE="/tmp/MW_mesonet.out"
-
-# Ensure our output file does not exist, otherwise GEMPAK will be naughty
-if [ -e ${GIF} ]; then
-    rm ${GIF}
-fi
+AREA="42.6;-104.5;46;-96"
+LOGFILE="/tmp/SDMESONET_sfmap.out"
 
 # Now we plot
 sfmap << EOF > ${LOGFILE}
     AREA    = ${AREA}
-    GAREA	= ${AREA}
+    GAREA    = ${AREA}
     SATFIL   =
     RADFIL   =
-    SFPARM   =  skyc:.6;tmpf;wsym:1.2:2;alti;;dwpf;;;;brbk:0.8:1:231
-    COLORS   =  32;2;32;0;(50;70/4;23;23/DWPF);32
+    SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
+    COLORS   =  32;2;32;0;4;32
     DATTIM   =  ${date}/${hh}
-    SFFILE   =  /data/gempak/surface/${YYYYmmdd}_sao.gem
+    SFFILE   =  /data/gempak/surface/${dateY}_sao.gem
     LATLON   =  0
-    TITLE    =  32/-1/~ MidWest Mesonet Data
+    TITLE    =  32/-1/GMT: ~ South Dakota Mesonet Data
     CLEAR    =  yes
     PANEL    =  0
     DEVICE   = ${DEVICE}
     PROJ     =  LCC
-    FILTER   =  .5
-    TEXT     = 1
+    FILTER   =  .3
+    TEXT     =  1/1//hw
     LUTFIL   =
     STNPLT   =
-    CLRBAR =
     MAP	= 25 + 25//2
     \$MAPFIL = HICNUS.NWS + hipowo.cia
     list
@@ -62,16 +54,14 @@ if [ ! -e "${gdfile}" ]; then
     fhour="F002"
 fi
 
-
 gdcntr << EOF >> ${LOGFILE}
-    AREA	= ${AREA}
     GAREA    = ${AREA}
     GDATTIM  = ${fhour}
     GLEVEL   = 0
     GVCORD   = NONE
     GFUNC    = SM9S(PMSL)
-    GDFILE   = $gdfile
-    CINT     = 4
+    GDFILE   = ${gdfile}
+    CINT     = 1
     LINE     = 4
     MAP      = 0
     TEXT     = 1
@@ -81,7 +71,7 @@ gdcntr << EOF >> ${LOGFILE}
     PROJ     = LCC
     CLEAR    = no
     PANEL	= 0
-    TITLE	= 32/-2/^ HRRR PMSL
+    TITLE	= 32/-2/~ HRRR PMSL
     SCALE    = 0
     LATLON   = 0
     HILO     =
@@ -100,10 +90,10 @@ gdcntr << EOF >> ${LOGFILE}
     exit
 EOF
 
+
 gpend
 
-if [ -e ${GIF} ]; then
-    pqinsert -p "plot ac $timestamp ${GIF} MWmesonet_${hh}00.gif gif" ${GIF} >& /dev/null
-    rm ${GIF}
+if [ -e "${GIF}" ]; then
+    pqinsert -p "plot c 000000000000 SD/${GIF} bogus gif" "${GIF}" >& /dev/null
+    rm -f "${GIF}"
 fi
-

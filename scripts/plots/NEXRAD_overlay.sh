@@ -4,16 +4,16 @@
 
 RADAR=$1
 
-yy=`date -u +%y`
-YY=`date -u +%Y`
-mm=`date -u +%m`
-dd=`date -u +%d`
-date=${yy}${mm}${dd}
-dateY=${YY}${mm}${dd}
-hh=`date -u +%H`
+yy="$(date -u +%y)"
+YY="$(date -u +%Y)"
+mm="$(date -u +%m)"
+dd="$(date -u +%d)"
+date="${yy}${mm}${dd}"
+dateY="${YY}${mm}${dd}"
+hh="$(date -u +%H)"
 
 GIF="${RADAR}_radar.gif"
-rm ${GIF}* >& /dev/null
+rm -f "${GIF}"
 DEVICE1="GIF|${GIF}|1024;768"
 
 DATA_DIR="/data/gempak/nexrad/NIDS/${RADAR}/N0B"
@@ -22,10 +22,11 @@ DATA_DIR="/data/gempak/nexrad/NIDS/${RADAR}/N0B"
 # find a file like N0B_20260619_1257
 grid=""
 for i in {0..30}; do
-    hhmm="$(date -u -d "-${i} minutes" +'%H%M')"
-    file="${DATA_DIR}/N0B_${dateY}_${hhmm}"
+    dt="$(date -u -d "-${i} minutes" +'%Y%m%d_%H%M')"
+    file="${DATA_DIR}/N0B_${dt}"
     if [ -f "$file" ]; then
         grid="$file"
+        hhmm="$(date -u -d "-${i} minutes" +'%H%M')"
         break
     fi
 done
@@ -45,7 +46,7 @@ elif [ "$RADAR" = "MPX" ]; then
     area="msp"
 fi
 
-sfmap << EOF > /tmp/${RADAR}_overlay_sfmap.out
+sfmap << EOF > "/tmp/${RADAR}_overlay_sfmap.out"
     AREA	= ${area}+
     GAREA	= ${area}+
     DATTIM  = ${date}/${hh}00
@@ -88,7 +89,7 @@ EOF
 
 gpend
 
-if [ -f $GIF ]; then
-    pqinsert -p "plot c 000000000000 ${RADAR}_radar.gif bogus gif" $GIF >& /dev/null
-    rm $GIF
+if [ -f "${GIF}" ]; then
+    pqinsert -p "plot c 000000000000 ${RADAR}_radar.gif bogus gif" "${GIF}" >& /dev/null
+    rm -f "${GIF}"
 fi

@@ -3,19 +3,19 @@
 set ftime="`date -u +'%Y%m%d%H'`00"
 
 csh createGrids.csh
-csh SDMESONET_plot.csh
-sh MW_mesonet.sh
-sh TEMPS_plot.sh
+bash SDMESONET_plot.sh
+bash MW_mesonet.sh
+bash TEMPS_plot.sh
 csh DEWPS_plot.csh
-sh NEXRAD_overlay.sh DMX
-sh NEXRAD_overlay.sh OAX
-sh NEXRAD_overlay.sh DVN
-sh NEXRAD_overlay.sh FSD
-sh NEXRAD_overlay.sh ARX
-sh NEXRAD_overlay.sh EAX
-sh NEXRAD_overlay.sh MPX
+bash NEXRAD_overlay.sh DMX
+bash NEXRAD_overlay.sh OAX
+bash NEXRAD_overlay.sh DVN
+bash NEXRAD_overlay.sh FSD
+bash NEXRAD_overlay.sh ARX
+bash NEXRAD_overlay.sh EAX
+bash NEXRAD_overlay.sh MPX
 csh HEAT_plot.csh
-sh WCHT_plot.sh
+bash WCHT_plot.sh
 csh RELH_plot.csh
 csh ASOS_plot.csh
 

@@ -5,13 +5,14 @@
 
 export GEMCOLTBL=coltbl.xwp
 
-yy=`date -u +%y`
-mm=`date -u +%m`
-dd=`date -u +%d`
-date=${yy}${mm}${dd}
-hh=`date -u +%H`
+yy="$(date -u +%y)"
+mm="$(date -u +%m)"
+dd="$(date -u +%d)"
+date="${yy}${mm}${dd}"
+hh="$(date -u +%H)"
 
 GIF="temps.gif"
+rm -f "${GIF}"
 DEVICE="GIF|${GIF}|1024;768"
 
 sfmap << EOF > /tmp/TEMPS_plot.out
@@ -54,7 +55,7 @@ sfmap << EOF >> /tmp/TEMPS_plot.out
     exit
 EOF
 
-$GEMEXE/gpend
+gpend
 
 if [ -f ${GIF} ]; then
     pqinsert -p "plot c 000000000000 ${GIF} bogus gif" ${GIF} >& /dev/null
