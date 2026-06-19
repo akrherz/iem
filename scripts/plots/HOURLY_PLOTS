@@ -5,7 +5,7 @@ set ftime="`date -u +'%Y%m%d%H'`00"
 csh createGrids.csh
 csh SDMESONET_plot.csh
 sh MW_mesonet.sh
-csh TEMPS_plot.csh
+sh TEMPS_plot.sh
 csh DEWPS_plot.csh
 csh DMX_overlay.csh
 csh OAX_overlay.csh
@@ -15,7 +15,7 @@ csh ARX_overlay.csh
 csh EAX_overlay.csh
 csh MPX_overlay.csh
 csh HEAT_plot.csh
-csh WCHT_plot.csh
+sh WCHT_plot.sh
 csh RELH_plot.csh
 csh ASOS_plot.csh
 
