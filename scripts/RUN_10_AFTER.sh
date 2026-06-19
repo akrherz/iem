@@ -149,7 +149,6 @@ then
 fi
 
 cd ../mos || exit 1
-python ingest_mos.py --date="$(date +'%Y-%m-%d')"
 python current_bias.py --model=NAM
 python current_bias.py --model=GFS
 python current_bias.py --model=NBS
