@@ -13,6 +13,7 @@ set dd=`date -u --date '1 minute' +'%d'`
 set hh=`date -u --date '1 minute' +'%H'`
 set yymmdd="$yy$mm$dd"
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
+set yyyymmddhh_2h="`date -u --date '2 hour ago' +'%Y%m%d%H'`"
 set gtime="`date -u --date '1 hour ago' +'%y%m%d/%H00'`"
 
 if (! -e /mesonet/data/iemplot/grid_25_25.grd) then
@@ -41,9 +42,11 @@ GDFILE = /mesonet/data/iemplot/grid_25_25.grd
 exit
 EOF
 
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
+set fhour="F001"
 if (! -e ${gdfile}) then
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap130.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
+set fhour="F002"
 endif
 
 gdbiint << EOF > /tmp/oa_gdbiint.out
@@ -52,8 +55,8 @@ GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
  GFUNC    = MUL(0.01,MSLMA)
  GLEVEL   = 0
  GVCORD   = NONE
- GDATTIM  = F001
- GDNUM    = 
+ GDATTIM  = ${fhour}
+ GDNUM    =
  list
  run
 
@@ -64,7 +67,7 @@ gddiag << EOF > /tmp/oa_gddiag.out
  GDFILE = /mesonet/data/iemplot/grid_oa.grd
  GDOUTF = /mesonet/data/iemplot/grid_oa.grd
  GFUNC  = MMSL
- GDATTIM = F001
+ GDATTIM = ${fhour}
  GLEVEL  = 0
  GVCORD = NONE
  GRDNAM = ALTM
@@ -103,7 +106,7 @@ oabsfc << EOF > /tmp/oa_oabsfc.out
  DATTIM   = /${hh}
  DTAAREA  = ia
  GUESS    =
- GUESFUN = 
+ GUESFUN =
  GAMMA    = .3
  SEARCH   = 10/EX
  NPASS    = 2
