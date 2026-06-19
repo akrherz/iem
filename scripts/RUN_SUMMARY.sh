@@ -1,6 +1,7 @@
+#!/bin/bash
 
 cd current || exit 1
-python plot_hilo.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
+python plot_hilo.py --date="$(date --date '1 day ago' +'%Y-%m-%d')"
 
 cd ../12z || exit 1
 python asos_low.py

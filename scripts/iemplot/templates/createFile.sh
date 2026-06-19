@@ -2,10 +2,12 @@
 
 . /mesonet/nawips/Gemenviron.profile
 
-rm grid_25_25.grd
-which gdcfil
+GDFILE="grid_25_25.grd"
+GDOUTF="grid_oa.grd"
+
+rm -f "$GDFILE"
 gdcfil << EOF
-    GDOUTF   = grid_25_25.grd
+    GDOUTF   = $GDFILE
     PROJ     = LCC/42;-95;45
     GRDAREA  = IA
     KXKY     = 25;25
@@ -20,4 +22,4 @@ EOF
 
 gpend
 
-cp grid_25_25.grd grid_oa.grd
+cp "$GDFILE" "/mesonet/data/iemplot/$GDOUTF"

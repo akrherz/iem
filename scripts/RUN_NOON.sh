@@ -1,58 +1,57 @@
-###
-# Run at noon local time
-#
+#!/bin/bash
+
 cd smos || exit 1
-python plot.py --valid=$(date +'%Y-%m-%d')T00:00:00 --realtime
+python plot.py --valid="$(date +'%Y-%m-%d')T00:00:00" --realtime
 
 cd ../iemre || exit 1
 # We hopefully have a 12z 24h file by now
-python stage4_12z_adjust.py --date=$(date +'%Y-%m-%d')
+python stage4_12z_adjust.py --date="$(date +'%Y-%m-%d')"
 # Copy the data to IEMRE hourly
-python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
-python ingest_nohrsc.py --date=$(date +'%Y-%m-%d')
+python precip_ingest.py --valid12z="$(date +'%Y-%m-%dT12:00:00')"
+python ingest_nohrsc.py --date="$(date +'%Y-%m-%d')"
 # Need 12z analyses done for climodat
-python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
+python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
 # Already tomorrow and need ready for DEP china to run
-python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=china
+python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=china
 
 cd ../prism || exit 1
 # 1 Dec 2025, we used to have data for yesterday by now, but not anymore
-python ingest_prism.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
+python ingest_prism.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
 
 cd ../iemre || exit 1
 # adjusts stage IV hourly file to PRISM reality
-python prism_adjust_stage4.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
+python prism_adjust_stage4.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
 # Prepare for daily analysis update for t-10 days
-python prism_adjust_stage4.py --date=$(date --date '9 days ago' +'%Y-%m-%d')
+python prism_adjust_stage4.py --date="$(date --date '9 days ago' +'%Y-%m-%d')"
 # Copies updated stage IV hourly into IEMRE hourly
-python precip_ingest.py --valid12z=$(date --date '2 days ago' +'%Y-%m-%dT12:00:00')
+python precip_ingest.py --valid12z="$(date --date '2 days ago' +'%Y-%m-%dT12:00:00')"
 
 cd ../climodat || exit 1
-python daily_estimator.py --date=$(date +'%Y-%m-%d')
-python daily_estimator.py --date=$(date --date '2 days ago'  +'%Y-%m-%d')
+python daily_estimator.py --date="$(date +'%Y-%m-%d')"
+python daily_estimator.py --date="$(date --date '2 days ago'  +'%Y-%m-%d')"
 # Perhaps some more QC happened, that we now need to pick up
-python daily_estimator.py --date=$(date --date '7 days ago'  +'%Y-%m-%d')
-python compute4regions.py --date=$(date +'%Y-%m-%d')
-python hrrr_solarrad.py --date=$(date --date '2 days ago'  +'%Y-%m-%d')
+python daily_estimator.py --date="$(date --date '7 days ago'  +'%Y-%m-%d')"
+python compute4regions.py --date="$(date +'%Y-%m-%d')"
+python hrrr_solarrad.py --date="$(date --date '2 days ago'  +'%Y-%m-%d')"
 # Sync any coop data that may have updated over the past 24 hours
 python sync_coop_updates.py
 
 cd ../iemre || exit 1
 # Since we have now adjusted the 12z precip 1 day ago, we should rerun
 # iemre for two days ago
-python ingest_nohrsc.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
-python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=conus
+python ingest_nohrsc.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
+python daily_analysis.py --date="$(date --date '2 days ago' +'%Y-%m-%d')" --domain=conus
 # NOTE: Careful to align this date with DEP reprocessing at 8 PM
-python ingest_nohrsc.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
+python ingest_nohrsc.py --date="$(date --date '10 days ago' +'%Y-%m-%d')"
 # Updated soil temperature data from ERA5
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=conus
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=sa
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=china
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=europe
+python daily_analysis.py --date="$(date --date '10 days ago' +'%Y-%m-%d')" --domain=conus
+python daily_analysis.py --date="$(date --date '10 days ago' +'%Y-%m-%d')" --domain=sa
+python daily_analysis.py --date="$(date --date '10 days ago' +'%Y-%m-%d')" --domain=china
+python daily_analysis.py --date="$(date --date '10 days ago' +'%Y-%m-%d')" --domain=europe
 
 # and now recompute climodat statewide/climate from two days ago
 cd ../climodat || exit 1
-python compute4regions.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
+python compute4regions.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
 
 # CFS workflow, first two are for yesterday and we actually run for two
 # days ago
@@ -61,7 +60,7 @@ bash download_cpc.sh
 
 cd ../dl || exit 1
 # NB used for drydown
-python download_cfs.py --date=$(date --date '3 days ago' +'%Y-%m-%d')
-python download_cfs.py --date=$(date --date '4 days ago' +'%Y-%m-%d')
+python download_cfs.py --date="$(date --date '3 days ago' +'%Y-%m-%d')"
+python download_cfs.py --date="$(date --date '4 days ago' +'%Y-%m-%d')"
 cd ../yieldfx || exit 1
 python cfs2iemre_netcdf.py

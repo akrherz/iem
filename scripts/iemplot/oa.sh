@@ -40,10 +40,13 @@ if [ ! -e "${gdfile}" ]; then
     fhour="F002"
 fi
 
+# Save for IAMESONET_plot.sh usage
+echo "${fhour}" > /mesonet/data/iemplot/fhour.txt
+
 gdbiint << EOF > /tmp/oa_gdbiint.out
     GDFILE   = $gdfile
     GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
-    GFUNC    = MUL(0.01,MSLMA)
+    GFUNC    = PMSL
     GLEVEL   = 0
     GVCORD   = NONE
     GDATTIM  = ${fhour}
@@ -57,7 +60,7 @@ EOF
 gddiag << EOF > /tmp/oa_gddiag.out
     GDFILE = /mesonet/data/iemplot/grid_oa.grd
     GDOUTF = /mesonet/data/iemplot/grid_oa.grd
-    GFUNC  = MMSL
+    GFUNC  = PMSL
     GDATTIM = ${fhour}
     GLEVEL  = 0
     GVCORD = NONE
@@ -96,6 +99,7 @@ oabsfc << EOF > /tmp/oa_oabsfc.out
     SFPARM   = ALTM
     DATTIM   = /${hh}
     DTAAREA  = ia
+    GDATTIM = ${fhour}
     GUESS    =
     GUESFUN =
     GAMMA    = .3

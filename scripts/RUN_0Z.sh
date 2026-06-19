@@ -1,3 +1,4 @@
+#!/bin/bash
 # Ensure this is actually being run at 00z, since crontab is in CST/CDT
 HH=$(date -u +%H)
 if [ "$HH" -ne "00" ]
@@ -21,12 +22,12 @@ python ingest_climdiv.py &
 
 cd ../iemre || exit 1
 # need to run daily analysis for climodat estimator to then work
-python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
-python daily_analysis.py --date=$(date --date='1 day ago' +'%Y-%m-%d') --domain=europe
+python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
+python daily_analysis.py --date="$(date --date='1 day ago' +'%Y-%m-%d')" --domain=europe
 
 cd ../climodat || exit 1
 python sync_coop_updates.py
-python daily_estimator.py --date=$(date +'%Y-%m-%d')
+python daily_estimator.py --date="$(date +'%Y-%m-%d')"
 
 cd ../asos || exit 1
 python cf6_to_iemaccess.py
@@ -36,21 +37,21 @@ python elnino.py
 
 # nexrad N0R and N0Q composites
 cd ../summary || exit 1
-python max_reflect.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT00:00:00')
+python max_reflect.py --valid="$(date -u --date '1 days ago' +'%Y-%m-%dT00:00:00')"
 
 cd ../nldas || exit 1
-python process_nldasv2_noah.py --date=$(date -u --date '5 days ago' +'%Y-%m-%d') &
+python process_nldasv2_noah.py --date="$(date -u --date '5 days ago' +'%Y-%m-%d')" &
 
 cd ../qc || exit 1
-python check_n0q.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
+python check_n0q.py --date="$(date -u --date '1 days ago' +'%Y-%m-%d')"
 
 cd ../climodat || exit 1
-python nldas_extract.py --valid=$(date -u --date '6 days ago' +'%Y-%m-%d')
+python nldas_extract.py --valid="$(date -u --date '6 days ago' +'%Y-%m-%d')"
 
 cd ../iemre || exit 1
 # We have hopefully gotten a refreshed 12z stage4 file, so we chunk it again
-python stage4_12z_adjust.py --date=$(date +'%Y-%m-%d')
+python stage4_12z_adjust.py --date="$(date +'%Y-%m-%d')"
 # Run precip ingest to copy this to IEMRE
-python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
+python precip_ingest.py --valid12z="$(date +'%Y-%m-%dT12:00:00')"
 # grid rsds using ERA5Land for 8 days ago, to be safe
-python grid_rsds.py --date=$(date -u --date '8 days ago' +'%Y-%m-%d')
+python grid_rsds.py --date="$(date -u --date '8 days ago' +'%Y-%m-%d')"

@@ -30,6 +30,10 @@ def save_other(data):
             )
         )
         columns = [row[0] for row in res]
+        for col in columns:
+            if col not in data:
+                LOG.info("Missing %s", col)
+                data[col] = None
         # do a bulk insert
         vals = [f":{x}" for x in columns]
         conn.execute(
