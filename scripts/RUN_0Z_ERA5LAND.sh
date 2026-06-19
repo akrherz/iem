@@ -7,14 +7,14 @@ fi
 D6=$(date -u --date '6 days ago' +'%Y-%m-%d')
 D7=$(date -u --date '7 days ago' +'%Y-%m-%d')
 
-cd era5
+cd era5 || exit 1
 python fetch_era5.py --date=$D6
 
-cd ../climodat
+cd ../climodat || exit 1
 python era5land_extract.py --date=$D7
 
 # So fetch_era5 got files from six days ago from 1z on
-cd ../iemre
+cd ../iemre || exit 1
 for domain in "europe" "sa" "china"; do
     for hr in {0..23}; do
         python precip_ingest.py --domain=$domain --valid="${D6}T${hr}:00:00"
@@ -30,5 +30,5 @@ for domain in "conus" "europe" "sa" "china"; do
     python daily_analysis.py --domain=$domain --date="${D7}"
 done
 
-cd ../isusm
+cd ../isusm || exit 1
 python fix_soil4t.py --date="${D7}"

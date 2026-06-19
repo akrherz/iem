@@ -11,12 +11,14 @@ mm=$(date -u +%m)
 dd=$(date -u +%d)
 date=${yy}${mm}${dd}
 hh=$(date -u +%H)
+dateY="$(date -u +'%Y%m%d')"
 
 GIF="dewps.gif"
 rm -f "${GIF}"
 DEVICE="GIF|${GIF}|1024;768"
+LOGFILE="/tmp/DEWPS_plot.log"
 
-sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
+sfmap << EOF > "${LOGFILE}"
     AREA    = 40.25;-97;43.75;-90
     GAREA    = 40.25;-97;43.75;-90
     SATFIL   =
@@ -24,7 +26,7 @@ sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
     SFPARM   =  dwpf<120
     COLORS   =  2
     DATTIM   =  ${date}/${hh}
-    SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
+    SFFILE   =  /data/gempak/surface/${dateY}_sao.gem
     LATLON   =  0
     TITLE    =  32/-1/~ Dew Point Comp [ASOS red]  [RWIS blue]
     CLEAR    =  no
@@ -42,7 +44,7 @@ sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
 
 EOF
 
-sfmap << EOF > "${LOGFILE}"
+sfmap << EOF >> "${LOGFILE}"
     COLORS  =  4
     SFFILE	= /mesonet/data/gempak/rwis/${date}_rwis.gem
     TITLE	= 0
@@ -58,6 +60,6 @@ EOF
 gpend
 
 if [ -f "${GIF}" ]; then
-    pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" "${GIF}" >& /dev/null
+    pqinsert -p "plot c 000000000000 ${GIF} ${GIF} gif" "${GIF}" >& /dev/null
     rm -f "${GIF}"
 fi

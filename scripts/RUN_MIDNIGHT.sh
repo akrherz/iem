@@ -4,50 +4,50 @@ MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
 # Need this done so that certain variables are there for DEP
-cd summary
+cd summary || exit 1
 python compute_daily.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
-cd ../other
+cd ../other || exit 1
 python update_daily_srad.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 # Need this done so that IEMRE daily grids are there for DEP
-cd ../iemre
+cd ../iemre || exit 1
 python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d') --domain=sa
 
-cd ../asos
+cd ../asos || exit 1
 python adjust_report_type.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 
-cd ../smos
+cd ../smos || exit 1
 python plot.py --valid=$(date --date '1 day ago' +'%Y-%m-%d')T12:00:00 --realtime
 
 # Wait a bit before doing this
 sleep 600
-cd ../qc
+cd ../qc || exit 1
 python check_station_geom.py
 python check_vtec_eventids.py
 python check_afos.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
-cd ../iemre
+cd ../iemre || exit 1
 python grid_rsds.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
-cd ../dbutil
+cd ../dbutil || exit 1
 python set_attribute_phour.py
 
-cd ../hads
+cd ../hads || exit 1
 python dedup_hml_forecasts.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 python raw2obs.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
-cd ../mrms
+cd ../mrms || exit 1
 python mrms_monthly_plot.py
 
 # Assume we have MERRA data by the 28th each month
 if [ $DD -eq "28" ]
 then
-    cd ../dl
+    cd ../dl || exit 1
     python fetch_merra.py
     MM=$(date -u --date '1 month ago' +'%m')
     YYYY=$(date -u --date '1 month ago' +'%Y')
-    cd ../climodat
+    cd ../climodat || exit 1
     python merra_solarrad.py --year=$YYYY --month=$MM
 fi
