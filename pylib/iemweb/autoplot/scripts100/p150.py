@@ -4,14 +4,15 @@ a given sounding profile against the long term record for the site. These
 percentiles are computed against all other soundings for the valid hour of
 the profile of interest.  For example, a 00 UTC sounding is only compared
 against other 00 UTC soundings for the given month or for the period of
-record.
+record.  Since 18 UTC soundings are now more common, these are compared
+against 00 UTC climatology.
 
 <br /><br />The 'Select Station' option provides some 'virtual' stations
 that are spliced together archives of close by stations.  For some
 locations, the place that the sounding is made has moved over the years.
 
 <br /><br />A process runs at 3:10 and 15:10z each day to ingest the
-current 0 and 12z soundings respectively.  You may not find the current
+current soundings.  You may not find the current
 day's sounding if running this application prior to those ingest times.
 """
 
@@ -23,7 +24,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
 
-PDICT = {"00": "00 UTC", "12": "12 UTC"}
+PDICT = {"00": "00 UTC", "12": "12 UTC", "18": "18 UTC"}
 PDICT2 = {
     "none": "No Comparison Limit (All Soundings)",
     "month": "Month of the Selected Profile",
@@ -118,8 +119,12 @@ def plotter(ctx: dict):
         vlimit = " and extract(month from f.valid) = :month "
         params["month"] = ts.month
 
-    hrlimit = "and extract(hour from f.valid at time zone 'UTC') = :hour "
-    params["hour"] = hour
+    hrlimit = (
+        "and extract(hour from f.valid at time zone 'UTC') = any(:hours) "
+    )
+    params["hours"] = [hour]
+    if hour == 18:
+        params["hours"] = [hour, 0]
     if ctx["h"].upper() == "ALL":
         hrlimit = ""
     with get_sqlalchemy_conn("raob") as conn:
