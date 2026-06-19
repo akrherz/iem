@@ -73,7 +73,7 @@ then
 fi
 
 cd ../plots || exit 1
-bash RUN_PLOTS
+bash RUN_PLOTS.sh
 
 cd ../ingestors || exit 1
 python flux_ingest.py
