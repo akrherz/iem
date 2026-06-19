@@ -7,7 +7,6 @@ csh SDMESONET_plot.csh
 sh MW_mesonet.sh
 csh TEMPS_plot.csh
 csh DEWPS_plot.csh
-csh WINDS_plot.csh
 csh DMX_overlay.csh
 csh OAX_overlay.csh
 csh DVN_overlay.csh
