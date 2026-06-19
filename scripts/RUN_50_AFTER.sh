@@ -17,9 +17,9 @@ python gfs2iemre.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H'):00:00
 # for ISUSM et al
 HH=$(date +%H)
 if [ "$HH" -eq "22" ]
-    then
-        cd ../climodat
-        python hrrr_solarrad.py --date=$(date +'%Y-%m-%d')
+then
+    cd ../climodat
+    python hrrr_solarrad.py --date=$(date +'%Y-%m-%d')
 fi
 
 # END

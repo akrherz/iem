@@ -19,8 +19,8 @@ set DEVICE="GIF|dewps.gif"
 $GEMEXE/sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
     AREA    = 40.25;-97;43.75;-90
     GAREA    = 40.25;-97;43.75;-90
-     SATFIL   =  
-    RADFIL   =  
+     SATFIL   =
+    RADFIL   =
     SFPARM   =  dwpf<120
     COLORS   =  2
      DATTIM   =  ${date}/${hh}
@@ -49,7 +49,7 @@ $GEMEXE/sfmap << EOF > /tmp/DEWPS_plot_sfmap2.out
     MAP	= 0
     CLEAR	= no
         DEVICE   = ${DEVICE}
-    list	
+    list
     run
 
     exit
@@ -58,6 +58,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e dewps.gif) then
-pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" dewps.gif >& /dev/null
-rm dewps.gif
-endif
+    pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" dewps.gif >& /dev/null
+    rm dewps.gif
+    endif

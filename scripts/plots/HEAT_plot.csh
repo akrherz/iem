@@ -21,8 +21,8 @@ set DEVICE="GIF|heat.gif"
 $GEMEXE/sfmap_gf << EOF > /tmp/HEAT_plot_sfmap.out
     AREA	= 40.25;-97;43.75;-90
     GAREA	= 40.25;-97;43.75;-90
-     SATFIL   =  
-    RADFIL   =  
+     SATFIL   =
+    RADFIL   =
     SFPARM   =  HEAT
     COLORS   =  2
      DATTIM   =  ${date}/${hh}
@@ -46,6 +46,6 @@ EOF
 
 
 if (-e heat.gif) then
-  pqinsert -p "plot ac $ftime heat.gif heat_${hh}00.gif gif" heat.gif >& /dev/null
-rm heat.gif
-endif
+    pqinsert -p "plot ac $ftime heat.gif heat_${hh}00.gif gif" heat.gif >& /dev/null
+    rm heat.gif
+    endif

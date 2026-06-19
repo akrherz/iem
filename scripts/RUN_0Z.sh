@@ -1,8 +1,8 @@
 # Ensure this is actually being run at 00z, since crontab is in CST/CDT
 HH=$(date -u +%H)
 if [ "$HH" -ne "00" ]
-    then
-        exit
+then
+    exit
 fi
 
 python dbutil/xcheck_SFQ.py

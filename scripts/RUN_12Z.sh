@@ -2,8 +2,8 @@
 DOW=$(date +%w)
 HH=$(date -u +%H)
 if [ "$HH" -ne "12" ]
-    then
-        exit
+then
+    exit
 fi
 
 cd asos
@@ -11,9 +11,9 @@ python cf6_to_iemaccess.py
 
 # On Tuedays, fetch the Sunday update
 if [ "$DOW" -eq "2" ]
-    then
-        cd ../nass
-        python ingest_iowa_pdf.py --sunday=$(date --date '2 days ago' +'%Y-%m-%d')
+then
+    cd ../nass
+    python ingest_iowa_pdf.py --sunday=$(date --date '2 days ago' +'%Y-%m-%d')
 fi
 
 cd ../hads

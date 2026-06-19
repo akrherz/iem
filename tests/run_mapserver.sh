@@ -8,11 +8,11 @@ then
 fi
 
 for fn in $(find . -type f -name '*.map' -print); do
-  echo $fn;
-  ($MSEXEC -o /dev/null -m $fn || touch MSFAIL);
+    echo $fn;
+    ($MSEXEC -o /dev/null -m $fn || touch MSFAIL);
 done
 
 if [ -e MSFAIL ]; then
-  rm -f MSFAIL
-  exit 1
+    rm -f MSFAIL
+    exit 1
 fi

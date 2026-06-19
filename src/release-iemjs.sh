@@ -58,12 +58,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Commit the version change
     git add src/iemjs/package.json
     git commit -m "Release iemjs v${VERSION}"
-    
+
     # Create and push the tag
     git tag "${TAG}"
     git push origin main
     git push origin "${TAG}"
-    
+
     echo "✅ Released iemjs v${VERSION}"
     echo "🚀 GitHub Actions will now publish to npm"
     echo "📦 Check progress at: https://github.com/akrherz/iem/actions"

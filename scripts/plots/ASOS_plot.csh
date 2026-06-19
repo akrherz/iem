@@ -21,14 +21,14 @@ set DEVICE="GIF|asos.gif"
 $GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out
     AREA    = 40.25;-97;43.75;-90
     GAREA    = 40.25;-97;43.75;-90
-     SATFIL   =  
-    RADFIL   =  
+     SATFIL   =
+    RADFIL   =
     SFPARM   =  skyc;tmpf;wsym:1.2:2;altm;;dwpf;;;;brbk:1:2:231
     COLORS   =  32;2;32;25;4;32
      DATTIM   =  ${date}/${hh}${mm}
      SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
      LATLON   =  0
-    TITLE    =  32/-1/~ ASOS Data 
+    TITLE    =  32/-1/~ ASOS Data
     CLEAR    =  no
     PANEL    =  0
     DEVICE   = ${DEVICE}
@@ -48,4 +48,4 @@ EOF
 if (-e asos.gif ) then
     pqinsert -p "plot c 000000000000 asos.gif bogus gif" asos.gif >& /dev/null
     rm asos.gif
-endif
+    endif

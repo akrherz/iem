@@ -2,7 +2,7 @@
 
 YYYY=$(date +%Y)
 
-python ks_yearly.py 
+python ks_yearly.py
 python ks_monthly.py
 
 python avg_temp.py --year=$YYYY

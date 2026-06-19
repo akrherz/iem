@@ -17,9 +17,9 @@ setenv DISPLAY localhost:1
 $GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
     AREA	= 40.25;-97;43.75;-90
     GAREA	= 40.25;-97;43.75;-90
-     SATFIL   =  
-    RADFIL   =  
-  CLRBAR = 
+     SATFIL   =
+    RADFIL   =
+  CLRBAR =
     SFPARM   =  STID;RELH
     COLORS   =  25;(60;80;100/32;23;2;2/RELH/L)
      DATTIM   =  ${date}/${hh}
@@ -44,4 +44,4 @@ EOF
 if (-e relh.gif) then
     pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
     rm relh.gif
-endif
+    endif

@@ -17,17 +17,17 @@ set yyyymmddhh_2h="`date -u --date '2 hour ago' +'%Y%m%d%H'`"
 set gtime="`date -u --date '1 hour ago' +'%y%m%d/%H00'`"
 
 if (! -e /mesonet/data/iemplot/grid_25_25.grd) then
-	echo "Missing grid_25_25.grd, copying template over..."
-	cp templates/grid_25_25.grd /mesonet/data/iemplot/
-endif
+    echo "Missing grid_25_25.grd, copying template over..."
+    cp templates/grid_25_25.grd /mesonet/data/iemplot/
+    endif
 
-if (! -e /mesonet/data/iemplot/surface.gem) then
-	echo "Missing surface.gem, copying template over..."
-	cp templates/surface.gem /mesonet/data/iemplot/
-endif
+    if (! -e /mesonet/data/iemplot/surface.gem) then
+        echo "Missing surface.gem, copying template over..."
+        cp templates/surface.gem /mesonet/data/iemplot/
+        endif
 
 
-gddelt << EOF > /tmp/oa_gddelt.out
+        gddelt << EOF > /tmp/oa_gddelt.out
 GDFILE = /mesonet/data/iemplot/grid_25_25.grd
  GDATTIM = ALL
  GLEVEL = ALL
@@ -42,14 +42,14 @@ GDFILE = /mesonet/data/iemplot/grid_25_25.grd
 exit
 EOF
 
-set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
-set fhour="F001"
-if (! -e ${gdfile}) then
-set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
-set fhour="F002"
-endif
+        set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
+        set fhour="F001"
+        if (! -e ${gdfile}) then
+            set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
+            set fhour="F002"
+            endif
 
-gdbiint << EOF > /tmp/oa_gdbiint.out
+            gdbiint << EOF > /tmp/oa_gdbiint.out
  GDFILE   = $gdfile
 GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
  GFUNC    = MUL(0.01,MSLMA)
@@ -63,7 +63,7 @@ GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
 exit
 EOF
 
-gddiag << EOF > /tmp/oa_gddiag.out
+            gddiag << EOF > /tmp/oa_gddiag.out
  GDFILE = /mesonet/data/iemplot/grid_oa.grd
  GDOUTF = /mesonet/data/iemplot/grid_oa.grd
  GFUNC  = MMSL
@@ -78,7 +78,7 @@ gddiag << EOF > /tmp/oa_gddiag.out
 exit
 EOF
 
-sfdelt << EOF > /tmp/oa_sfdelt.out
+            sfdelt << EOF > /tmp/oa_sfdelt.out
  SFFILE = /mesonet/data/iemplot/surface.gem
  DATTIM = ALL
  AREA   = DSET
@@ -88,9 +88,9 @@ sfdelt << EOF > /tmp/oa_sfdelt.out
 exit
 EOF
 
-python dump_altm.py
+            python dump_altm.py
 
-sfedit << EOF > /tmp/oa_sfedit.out
+            sfedit << EOF > /tmp/oa_sfedit.out
 SFEFIL   = /mesonet/data/iemplot/altm.txt
  SFFILE   = /mesonet/data/iemplot/surface.gem
  list
@@ -99,7 +99,7 @@ SFEFIL   = /mesonet/data/iemplot/altm.txt
 exit
 EOF
 
-oabsfc << EOF > /tmp/oa_oabsfc.out
+            oabsfc << EOF > /tmp/oa_oabsfc.out
  SFFILE = /mesonet/data/iemplot/surface.gem
  GDFILE   = /mesonet/data/iemplot/grid_25_25.grd
  SFPARM   = ALTM
@@ -117,4 +117,4 @@ oabsfc << EOF > /tmp/oa_oabsfc.out
 exit
 EOF
 
-gpend
+            gpend

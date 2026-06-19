@@ -10,8 +10,8 @@ bash run_plots.sh
 python backfill_summary.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 python backfill_summary.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 if [ $DD -eq "07" ]
-    then
-        python nmp_monthly_email.py
+then
+    python nmp_monthly_email.py
 fi
 python fix_high_low.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 python fix_high_low.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
@@ -19,7 +19,7 @@ python fix_high_low.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 cd ../ua
 # Only run on Mondays to match upstream data availability
 if [ "$(date +%u)" -eq "1" ]
-    then
+then
     python igra2_ingest.py &
 fi
 
@@ -40,20 +40,20 @@ bash run.sh &
 
 cd ../coop
 if [ $DD -eq "01" ]
-    then
+then
     python first_guess_for_harry.py
 fi
 
 cd ../util
 if [ $DD -eq "02" ]
-    then
-        bash monthly.sh $(date --date '3 days ago' +'%y %m')
+then
+    bash monthly.sh $(date --date '3 days ago' +'%y %m')
 fi
 
 cd ../dl
 if [ $DD -eq "09" ]
-    then
-         python download_narr.py --year=$(date --date '13 days ago' +%Y) --month=$(date --date '13 days ago' +%m) &
+then
+    python download_narr.py --year=$(date --date '13 days ago' +%Y) --month=$(date --date '13 days ago' +%m) &
 fi
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=conus
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
@@ -84,7 +84,7 @@ python unknown_stations.py
 
 cd ../ingestors/ncei
 if [ $DD -eq "15" ]
-    then
+then
     python ingest_fisherporter.py
 fi
 

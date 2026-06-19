@@ -19,20 +19,20 @@ export PYTHONFAULTHANDLER=1
 # Keep request-count recycling enabled to cap Python memory leaks. Gunicorn
 # rotates individual workers instead of restarting an embedded Apache stack.
 exec "${CONDA_PREFIX}/bin/gunicorn" \
-        --bind "127.0.0.1:${PORT}" \
-        --no-control-socket \
-        --workers 3 \
-        --worker-class gthread \
-        --threads 15 \
-        --backlog 2048 \
-        --pythonpath /opt/iem/pylib/ \
-        --max-requests "$MAX_REQUESTS" \
-        --max-requests-jitter "$MAX_REQUESTS_JITTER" \
-        --timeout 60 \
-        --graceful-timeout 60 \
-        --error-logfile - \
-        --capture-output \
-        --log-level warn \
-        --log-syslog \
-        --log-syslog-facility local1 \
-        iemweb.tilecache_dispatch:application
+    --bind "127.0.0.1:${PORT}" \
+    --no-control-socket \
+    --workers 3 \
+    --worker-class gthread \
+    --threads 15 \
+    --backlog 2048 \
+    --pythonpath /opt/iem/pylib/ \
+    --max-requests "$MAX_REQUESTS" \
+    --max-requests-jitter "$MAX_REQUESTS_JITTER" \
+    --timeout 60 \
+    --graceful-timeout 60 \
+    --error-logfile - \
+    --capture-output \
+    --log-level warn \
+    --log-syslog \
+    --log-syslog-facility local1 \
+    iemweb.tilecache_dispatch:application

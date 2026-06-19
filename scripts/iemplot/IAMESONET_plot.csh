@@ -36,8 +36,8 @@ set AREA="40.15;-97.1;43.85;-89.9"
 sfmap << EOF > /dev/null
 	AREA    = ${AREA}
 	GAREA    = ${AREA}
- 	SATFIL   =  
-	RADFIL   =  
+ 	SATFIL   =
+	RADFIL   =
 	SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
 	COLORS   =  32;2;32;0;4;32
  	DATTIM   =  ${date}/${hh}
@@ -73,24 +73,24 @@ gdcntr << EOF > /tmp/IAMESONETplot_gdcntr.out
 	MAP      = 0
 	TEXT     = 1
 	DEVICE   = ${DEVICE}
-	SATFIL   =  
-	RADFIL   =  
+	SATFIL   =
+	RADFIL   =
 	PROJ     = LCC
 	CLEAR    = no
 	PANEL	= 0
 	TITLE	= 32/-2/LOCAL: ${nicetime}
 	SCALE    = 0
 	LATLON   = 0
-	HILO     =  
-	HLSYM    =  
+	HILO     =
+	HLSYM    =
 	CLRBAR   = 1
 	CONTUR   = 3/3
 	SKIP     = 0
 	FINT     = 0
 	FLINE    = 10-20
 	CTYPE    = C
-	LUTFIL   =  
-	STNPLT   =  
+	LUTFIL   =
+	STNPLT   =
 	list
 	run
 
@@ -100,6 +100,6 @@ EOF
 gpend
 
 if (-e mesonet.gif) then
-	pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif
-	rm -f mesonet.gif
-endif
+    pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif
+    rm -f mesonet.gif
+    endif
