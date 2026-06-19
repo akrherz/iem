@@ -6,6 +6,7 @@
 export GEMCOLTBL=coltbl.xwp
 export DISPLAY=localhost:1
 
+YYYYmmdd="$(date -u --date '1 minute' +'%Y%m%d')"
 yy=$(date -u --date '1 minute' +%y)
 mm=$(date -u --date '1 minute' +%m)
 dd=$(date -u --date '1 minute' +%d)
@@ -15,32 +16,37 @@ timestamp=$(date -u --date '1 minute' +'%Y%m%d%H00')
 yyyymmddhh_1h=$(date -u --date '1 hour ago' +'%Y%m%d%H')
 yyyymmddhh_2h=$(date -u --date '2 hour ago' +'%Y%m%d%H')
 
-rm MWmesonet.gif* >& /dev/null
+GIF="MWmesonet.gif"
+DEVICE="GIF|${GIF}|1024;768"
+AREA="37;-105;48.5;-85"
+LOGFILE="/tmp/MW_mesonet.out"
 
-DEVICE="GIF|MWmesonet.gif|900;700"
-AREA="37;-104;48.5;-86"
+# Ensure our output file does not exist, otherwise GEMPAK will be naughty
+if [ -e ${GIF} ]; then
+    rm ${GIF}
+fi
 
 # Now we plot
-sfmap << EOF > /tmp/MW_mesonet_sfmap.out
+sfmap << EOF > ${LOGFILE}
     AREA    = ${AREA}
     GAREA	= ${AREA}
-     SATFIL   =
+    SATFIL   =
     RADFIL   =
     SFPARM   =  skyc:.6;tmpf;wsym:1.2:2;alti;;dwpf;;;;brbk:0.8:1:231
     COLORS   =  32;2;32;0;(50;70/4;23;23/DWPF);32
-     DATTIM   =  ${date}/${hh}
-     SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
-     LATLON   =  0
-        TITLE    =  32/-1/~ MidWest Mesonet Data
-        CLEAR    =  yes
-        PANEL    =  0
-        DEVICE   = ${DEVICE}
-        PROJ     =  LCC
-        FILTER   =  .5
-        TEXT     = 1
-        LUTFIL   =
-        STNPLT   =
-  CLRBAR =
+    DATTIM   =  ${date}/${hh}
+    SFFILE   =  /data/gempak/surface/${YYYYmmdd}_sao.gem
+    LATLON   =  0
+    TITLE    =  32/-1/~ MidWest Mesonet Data
+    CLEAR    =  yes
+    PANEL    =  0
+    DEVICE   = ${DEVICE}
+    PROJ     =  LCC
+    FILTER   =  .5
+    TEXT     = 1
+    LUTFIL   =
+    STNPLT   =
+    CLRBAR =
     MAP	= 25 + 25//2
     \$MAPFIL = HICNUS.NWS + hipowo.cia
     list
@@ -57,7 +63,7 @@ if [ ! -e ${gdfile} ]; then
 fi
 
 
-gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
+gdcntr << EOF >> ${LOGFILE}
     AREA	= ${AREA}
     GAREA    = ${AREA}
     GDATTIM  = ${fhour}
@@ -75,7 +81,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
     PROJ     = LCC
     CLEAR    = no
     PANEL	= 0
-    TITLE	= 32/-2/~ HRRR PMSL
+    TITLE	= 32/-2/^ HRRR PMSL
     SCALE    = 0
     LATLON   = 0
     HILO     =
@@ -96,8 +102,8 @@ EOF
 
 gpend
 
-if [ -e MWmesonet.gif ]; then
-  pqinsert -p "plot ac $timestamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif >& /dev/null
-  rm MWmesonet.gif
+if [ -e ${GIF} ]; then
+  pqinsert -p "plot ac $timestamp ${GIF} MWmesonet_${hh}00.gif gif" ${GIF} >& /dev/null
+  rm ${GIF}
 fi
 
