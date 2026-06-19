@@ -7,13 +7,13 @@ csh SDMESONET_plot.csh
 sh MW_mesonet.sh
 sh TEMPS_plot.sh
 csh DEWPS_plot.csh
-csh DMX_overlay.csh
-csh OAX_overlay.csh
-csh DVN_overlay.csh
-csh FSD_overlay.csh
-csh ARX_overlay.csh
-csh EAX_overlay.csh
-csh MPX_overlay.csh
+sh NEXRAD_overlay.sh DMX
+sh NEXRAD_overlay.sh OAX
+sh NEXRAD_overlay.sh DVN
+sh NEXRAD_overlay.sh FSD
+sh NEXRAD_overlay.sh ARX
+sh NEXRAD_overlay.sh EAX
+sh NEXRAD_overlay.sh MPX
 csh HEAT_plot.csh
 sh WCHT_plot.sh
 csh RELH_plot.csh
