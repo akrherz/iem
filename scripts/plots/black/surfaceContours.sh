@@ -1,17 +1,18 @@
-#! /bin/csh
+#! /bin/bash
+# called from HOURLY_PLOTS.sh
 
-source /mesonet/nawips/Gemenviron
+. /mesonet/nawips/Gemenviron.profile
 
-setenv DISPLAY localhost:1
+export DISPLAY=localhost:1
 
-set date=`date -u +%y%m%d`
-set hh=`date -u +%H`
-set hhmm="`date -u +%H`00"
-set ftime="`date -u +'%Y%m%d%H'`00"
+date="$(date -u +%y%m%d)"
+hh="$(date -u +%H)"
+hhmm="$(date -u +%H)00"
+ftime="$(date -u +'%Y%m%d%H')00"
 
-set grid1=/mesonet/data/gempak/surface50x50.grd
+grid1="/mesonet/data/gempak/surface50x50.grd"
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot1.out
+gdplot2_gf << EOF > /tmp/sf_gdplot1.out
     GDFILE	= $grid1
     GDATTIM	= ${date}/${hh}00
     PANEL	= 0
@@ -50,7 +51,7 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot1.out
     exit
 EOF
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot2.out
+gdplot2_gf << EOF > /tmp/sf_gdplot2.out
     GLEVEL	= 0
     DEVICE	= GF|surfaceDW.gif|720;540
     GAREA	= 40.25;-97;43.75;-90
@@ -82,7 +83,7 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot2.out
     exit
 EOF
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot3.out
+gdplot2_gf << EOF > /tmp/sf_gdplot3.out
     GLEVEL	= 0
     DEVICE	= GF|surfaceMD.gif|720;540
     GAREA	= 40.25;-97;43.75;-90
@@ -115,7 +116,7 @@ FINT=-2;-1.6;-1.2;-0.8;-0.4;-0.3;-0.2;-0.1;0;0.1;0.2;0.3;0.4;0.8;1.2;1.6;2
     exit
 EOF
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_DIV.out
+gdplot2_gf << EOF > /tmp/sf_DIV.out
         GLEVEL  = 0
         DEVICE  = GF|surfaceDIV.gif|720;540
         GAREA   = 40.25;-97;43.75;-90
@@ -148,7 +149,7 @@ FINT=-2;-1.6;-1.2;-0.8;-0.4;-0.3;-0.2;-0.1;0;0.1;0.2;0.3;0.4;0.8;1.2;1.6;2
         exit
 EOF
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
+gdplot2_gf << EOF > /tmp/sf_gdplot4.out
     GLEVEL   = 0
     DEVICE	= GF|surfaceTE.gif|720;540
     GAREA	= 40.25;-97;43.75;-90
@@ -181,7 +182,7 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
     exit
 EOF
 
-$GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
+gdplot2_gf << EOF > /tmp/sf_gdplot4.out
         GLEVEL   = 0
         DEVICE  = GF|surfaceFRNT.gif|720;540
         GAREA   = 40.25;-97;43.75;-90
@@ -214,34 +215,32 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
         exit
 EOF
 
-
-if (-e surfaceTW.gif ) then
+if [ -f surfaceTW.gif ]; then
     pqinsert -p "plot ar $ftime surfaceTW surfaceTW_${hhmm}.gif gif" surfaceTW.gif >& /dev/null
     rm surfaceTW.gif
-    endif
+fi
 
-    if (-e surfaceDW.gif ) then
-        pqinsert -p "plot ar $ftime surfaceDW surfaceDW_${hhmm}.gif gif" surfaceDW.gif >& /dev/null
-        rm surfaceDW.gif
-        endif
+if [ -f surfaceDW.gif ]; then
+    pqinsert -p "plot ar $ftime surfaceDW surfaceDW_${hhmm}.gif gif" surfaceDW.gif >& /dev/null
+    rm surfaceDW.gif
+fi
 
-        if (-e surfaceMD.gif ) then
-            pqinsert -p "plot ar $ftime surfaceMD surfaceMD_${hhmm}.gif gif" surfaceMD.gif >& /dev/null
-            rm surfaceMD.gif
-            endif
+if [ -f surfaceMD.gif ]; then
+    pqinsert -p "plot ar $ftime surfaceMD surfaceMD_${hhmm}.gif gif" surfaceMD.gif >& /dev/null
+    rm surfaceMD.gif
+fi
 
-            if (-e surfaceTE.gif ) then
-                pqinsert -p "plot ar $ftime surfaceTE surfaceTE_${hhmm}.gif gif" surfaceTE.gif >& /dev/null
-                rm surfaceTE.gif
-                endif
+if [ -f surfaceTE.gif ]; then
+    pqinsert -p "plot ar $ftime surfaceTE surfaceTE_${hhmm}.gif gif" surfaceTE.gif >& /dev/null
+    rm surfaceTE.gif
+fi
 
-                if (-e surfaceDIV.gif ) then
-                    pqinsert -p "plot ar $ftime surfaceDIV surfaceDIV_${hhmm}.gif gif" surfaceDIV.gif >& /dev/null
-                    rm surfaceDIV.gif
-                    endif
+if [ -f surfaceDIV.gif ]; then
+    pqinsert -p "plot ar $ftime surfaceDIV surfaceDIV_${hhmm}.gif gif" surfaceDIV.gif >& /dev/null
+    rm surfaceDIV.gif
+fi
 
-                    if (-e surfaceFRNT.gif ) then
-                        pqinsert -p "plot ar $ftime surfaceFRNT surfaceFRNT_${hhmm}.gif gif" surfaceFRNT.gif >& /dev/null
-                        rm surfaceFRNT.gif
-                        endif
-
+if [ -f surfaceFRNT.gif ]; then
+    pqinsert -p "plot ar $ftime surfaceFRNT surfaceFRNT_${hhmm}.gif gif" surfaceFRNT.gif >& /dev/null
+    rm surfaceFRNT.gif
+fi

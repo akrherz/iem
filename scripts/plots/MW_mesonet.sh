@@ -1,5 +1,5 @@
 #!/bin/bash
-# Called from RUN_59_AFTER.sh and HOURLY_PLOTS
+# Called from RUN_59_AFTER.sh and HOURLY_PLOTS.sh
 
 . /mesonet/nawips/Gemenviron.profile
 

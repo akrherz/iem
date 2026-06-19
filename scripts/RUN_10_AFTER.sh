@@ -1,4 +1,4 @@
-#
+#!/bin/bash
 # We are run at :10 after the hour, some of these processes are intensive
 #
 YYYY=$(date -u +'%Y')
@@ -25,45 +25,45 @@ fi
 
 cd mrms
 # MRMS hourly totals arrive shortly after the top of the hour
-if [ $LHH -eq "00" ]
+if [ "$LHH" -eq "00" ]
 then
-    python merge_mrms_q3.py	--date=$(date --date '1 days ago' +'%Y-%m-%d')
+    python merge_mrms_q3.py	--date="$(date --date '1 days ago' +'%Y-%m-%d')"
 else
-    python merge_mrms_q3.py --date=$(date +'%Y-%m-%d')
+    python merge_mrms_q3.py --date="$(date +'%Y-%m-%d')"
 fi
 # QC comes about an hour delayed, so rerun the previous day
-if [ $LHH -eq "03" ]
+if [ "$LHH" -eq "03" ]
 then
-    python merge_mrms_q3.py	--date=$(date --date '1 days ago' +'%Y-%m-%d')
+    python merge_mrms_q3.py	--date="$(date --date '1 days ago' +'%Y-%m-%d')"
 fi
 # Special processing for DEP, to run at 5 PM, as DEP runs at 6 PM
-if [ $LHH -eq "17" ]
+if [ "$LHH" -eq "17" ]
 then
-    python merge_mrms_q3.py	--date=$(date +'%Y-%m-%d') --for-dep
+    python merge_mrms_q3.py	--date="$(date +'%Y-%m-%d')" --for-dep
 fi
 
 cd ../ingestors/other
 python feel_ingest.py &
 
 cd ../../iemre
-python merge_ifc.py --date=$(date +'%Y-%m-%d')
-if [ $LHH -eq "01" ]
+python merge_ifc.py --date="$(date +'%Y-%m-%d')"
+if [ "$LHH" -eq "01" ]
 then
-    python merge_ifc.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
+    python merge_ifc.py --date="$(date --date '1 day ago' +'%Y-%m-%d')"
 fi
 
-if [ $HH -eq 12 ]
+if [ "$HH" -eq 12 ]
 then
     cd ../current
-    python mrms_today_total.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
+    python mrms_today_total.py --date="$(date --date '1 day ago' +'%Y-%m-%d')"
 fi
 
 # We have troubles with IEMRE daily_analysis running timely at midnight, so
 # we run at 11 PM for today as well
-if [ $LHH -eq "23" ]
+if [ "$LHH" -eq "23" ]
 then
-    python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
-    python grid_rsds.py	--date=$(date +'%Y-%m-%d')
+    python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
+    python grid_rsds.py	--date="$(date +'%Y-%m-%d')"
 fi
 
 if [ $LHH -eq "05" ]
@@ -73,7 +73,7 @@ then
 fi
 
 cd ../plots
-./RUN_PLOTS
+bash RUN_PLOTS
 
 cd ../ingestors
 python flux_ingest.py
@@ -107,7 +107,7 @@ cd ../week
 python plot_obs.py
 
 cd ../iemplot
-./RUN.csh
+bash RUN.sh
 
 cd ../iemre
 python hourly_analysis.py --valid=$(date -u +'%Y-%m-%dT%H:00:00')

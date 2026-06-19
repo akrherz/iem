@@ -1,3 +1,4 @@
+#!/bin/bash
 # Run at 40 minutes after the hour, there are some expensive scripts here
 
 DT6="$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00"
@@ -7,21 +8,21 @@ DT12="$(date -u --date '12 hours ago' +'%Y-%m-%dT%H'):00:00"
 cd dl
 python download_ffg.py &
 (python download_hrrr_rad.py ; python download_hrrr_tsoil.py) &
-python download_nam.py --valid=$(date -u --date '3 hours ago' +'%Y-%m-%dT%H'):00:00 &
+python download_nam.py --valid="$(date -u --date '3 hours ago' +'%Y-%m-%dT%H'):00:00" &
 
 cd ../rtma
 python wind_power.py &
 
 cd ../iemre
-python use_ifs.py --valid=$DT
-python use_ifs.py --valid=$DT12 &
+python use_ifs.py --valid="$DT"
+python use_ifs.py --valid="$DT12" &
 
 cd ../qc
 python check_webcams.py
 python check_isusm_online.py
 
 cd ../iemplot
-./RUN.csh
+bash RUN.sh
 
 cd ../ingestors/squaw
 python ingest_squaw.py
@@ -33,13 +34,14 @@ python extract_madis.py
 python extract_hfmetar.py --hours=0 &
 
 cd ../cocorahs
-python cocorahs_stations.py --newerthan=$(date --date '7 days ago' +'%Y-%m-%d')T00:00:00
+python cocorahs_stations.py --newerthan="$(date --date '7 days ago' +'%Y-%m-%d')T00:00:00"
 
 cd ../../plots
-./RUN_PLOTS
+bash RUN_PLOTS.sh
+
 cd black
-./surfaceContours.csh
+bash surfaceContours.sh
 
 cd ../../model
 # set above incase this bleeds into the next hour
-python motherlode_ingest.py --valid=$DT6
+python motherlode_ingest.py --valid="$DT6"

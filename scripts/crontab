@@ -16,12 +16,12 @@ S=/opt/iem/scripts
 51 1 * * * cd $S; sh RUN_2AM.sh
 10 6,7 * * * cd $S; sh RUN_12Z.sh
 
-10 * * * * cd $S; sh RUN_10_AFTER.sh 
-20 * * * * cd $S; sh RUN_20_AFTER.sh 
-40 * * * * cd $S; sh RUN_40_AFTER.sh 
-50 * * * * cd $S; sh RUN_50_AFTER.sh 
-59 * * * * cd $S; sh RUN_59_AFTER.sh 
-59 * * * * cd $S; sh RUN_STAGE4.sh 
+10 * * * * cd $S; sh RUN_10_AFTER.sh
+20 * * * * cd $S; sh RUN_20_AFTER.sh
+40 * * * * cd $S; sh RUN_40_AFTER.sh
+50 * * * * cd $S; sh RUN_50_AFTER.sh
+59 * * * * cd $S; sh RUN_59_AFTER.sh
+59 * * * * cd $S; sh RUN_STAGE4.sh
 
 1 1,7 * * * cd $S; sh RUN_SUMMARY.sh
 10 6,7,8,9,10 * * * cd $S; sh RUN_COOP.sh
@@ -42,7 +42,7 @@ S=/opt/iem/scripts
 # Process RT asos 1 min
 6 15 * * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py --date=$(date +'\%Y-\%m-\%d')
 
-03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
+03,13,24 * * * * cd $S/plots; bash HOURLY_PLOTS.sh
 
 # webalizer
 0 0 * * * cd $S/webalizer; sh processlogs.sh

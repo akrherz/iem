@@ -1,12 +1,10 @@
-#!/bin/csh -f
+#!/bin/bash
 
-set ftime="`date -u +'%Y%m%d%H'`00"
-
-csh createGrids.csh
+bash createGrids.sh
 bash SDMESONET_plot.sh
 bash MW_mesonet.sh
 bash TEMPS_plot.sh
-csh DEWPS_plot.csh
+bash DEWPS_plot.sh
 bash NEXRAD_overlay.sh DMX
 bash NEXRAD_overlay.sh OAX
 bash NEXRAD_overlay.sh DVN
@@ -14,10 +12,9 @@ bash NEXRAD_overlay.sh FSD
 bash NEXRAD_overlay.sh ARX
 bash NEXRAD_overlay.sh EAX
 bash NEXRAD_overlay.sh MPX
-csh HEAT_plot.csh
+bash HEAT_plot.sh
 bash WCHT_plot.sh
-csh RELH_plot.csh
-csh ASOS_plot.csh
+bash RELH_plot.sh
+bash ASOS_plot.sh
 
-cd black
-csh surfaceContours.csh
+cd black && bash surfaceContours.sh
