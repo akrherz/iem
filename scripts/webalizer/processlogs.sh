@@ -22,7 +22,7 @@ iemvs39-dc iemvs40-dc iemvs41-dc iemvs42-dc iemvs43-dc iemvs44-dc"
 CONFBASE="/opt/iem/scripts/webalizer"
 
 # Go to temp directory, that hopefully has enough space!
-cd /mnt/webalizer/tmp
+cd /mnt/webalizer/tmp || exit 1
 
 # Step 1, bring all these log files back to roost and delete them remotely
 for MACH in $MACHINES
@@ -76,6 +76,6 @@ mkdir -p ../save/$yyyy/$mm
 mv ./*-${yyyymmdd}.log.gz ../save/$yyyy/$mm/
 
 # Step 7, delete files from local cache
-cd ../save
+cd ../save || exit 1
 tmpwatch 10d .
 # Done!

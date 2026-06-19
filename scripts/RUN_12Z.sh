@@ -2,35 +2,35 @@
 DOW=$(date +%w)
 HH=$(date -u +%H)
 if [ "$HH" -ne "12" ]
-    then
-        exit
+then
+    exit
 fi
 
-cd asos
+cd asos || exit 1
 python cf6_to_iemaccess.py
 
 # On Tuedays, fetch the Sunday update
 if [ "$DOW" -eq "2" ]
-    then
-        cd ../nass
-        python ingest_iowa_pdf.py --sunday=$(date --date '2 days ago' +'%Y-%m-%d')
+then
+    cd ../nass || exit 1
+    python ingest_iowa_pdf.py --sunday=$(date --date '2 days ago' +'%Y-%m-%d')
 fi
 
-cd ../hads
+cd ../hads || exit 1
 python compute_hads_pday.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
 
 # Run this twice as to account for some timezones west of Hawaii
-cd ../summary
+cd ../summary || exit 1
 python compute_daily.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
 python compute_daily.py --date=$(date -u --date '2 days ago' +'%Y-%m-%d')
 
-cd ../dailyb
+cd ../dailyb || exit 1
 python spammer.py
 
-cd ../uscrn
+cd ../uscrn || exit 1
 python compute_uscrn_pday.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 python compute_uscrn_pday.py --date=$(date --date '7 days ago' +'%Y-%m-%d')
 
-cd ../yieldfx
+cd ../yieldfx || exit 1
 python yieldfx_workflow.py
 python dump_hybridmaize.py

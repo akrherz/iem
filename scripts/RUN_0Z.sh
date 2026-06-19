@@ -1,53 +1,53 @@
 # Ensure this is actually being run at 00z, since crontab is in CST/CDT
 HH=$(date -u +%H)
 if [ "$HH" -ne "00" ]
-    then
-        exit
+then
+    exit
 fi
 
 python dbutil/xcheck_SFQ.py
 python hads/assign_has_hml.py
 
-cd util
+cd util || exit 1
 python make_archive_baseline.py
 
-cd ../00z
+cd ../00z || exit 1
 # Wait a bit, so that more obs can come in
 sleep 600
 python asos_high.py
 
-cd ../ncei
+cd ../ncei || exit 1
 python ingest_climdiv.py &
 
-cd ../iemre
+cd ../iemre || exit 1
 # need to run daily analysis for climodat estimator to then work
 python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=conus
 python daily_analysis.py --date=$(date --date='1 day ago' +'%Y-%m-%d') --domain=europe
 
-cd ../climodat
+cd ../climodat || exit 1
 python sync_coop_updates.py
 python daily_estimator.py --date=$(date +'%Y-%m-%d')
 
-cd ../asos
+cd ../asos || exit 1
 python cf6_to_iemaccess.py
 
-cd ../ingestors
+cd ../ingestors || exit 1
 python elnino.py
 
 # nexrad N0R and N0Q composites
-cd ../summary
+cd ../summary || exit 1
 python max_reflect.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT00:00:00')
 
-cd ../nldas
+cd ../nldas || exit 1
 python process_nldasv2_noah.py --date=$(date -u --date '5 days ago' +'%Y-%m-%d') &
 
-cd ../qc
+cd ../qc || exit 1
 python check_n0q.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
 
-cd ../climodat
+cd ../climodat || exit 1
 python nldas_extract.py --valid=$(date -u --date '6 days ago' +'%Y-%m-%d')
 
-cd ../iemre
+cd ../iemre || exit 1
 # We have hopefully gotten a refreshed 12z stage4 file, so we chunk it again
 python stage4_12z_adjust.py --date=$(date +'%Y-%m-%d')
 # Run precip ingest to copy this to IEMRE

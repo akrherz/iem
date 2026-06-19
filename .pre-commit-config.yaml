@@ -1,6 +1,10 @@
 ci:
   autoupdate_schedule: quarterly
 repos:
+  - repo: https://github.com/lovesegfault/beautysh
+    rev: "v6.4.3"
+    hooks:
+      - id: beautysh
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: 'v10.5.0'
     hooks:
