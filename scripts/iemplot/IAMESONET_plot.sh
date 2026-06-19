@@ -33,6 +33,11 @@ rm -f "${GIF}"
 DEVICE="GIF|${GIF}|900;700"
 AREA="40.15;-97.1;43.85;-89.9"
 LOGFILE="/tmp/IAMESONET_plot.log"
+FHOUR_FILE="/mesonet/data/iemplot/fhour.txt"
+fhour="F001"
+if [ -s "${FHOUR_FILE}" ]; then
+    fhour="$(cat "${FHOUR_FILE}")"
+fi
 
 # Now we plot
 sfmap << EOF > "${LOGFILE}"
@@ -65,7 +70,7 @@ EOF
 
 gdcntr << EOF >> "${LOGFILE}"
     GAREA    = ${AREA}
-    GDATTIM  = ${date}/${hh}00F001
+    GDATTIM  = ${date}/${hh}00${fhour}
     GLEVEL   = 0
     GVCORD   = NONE
     GFUNC    = SM9S(PMSL)

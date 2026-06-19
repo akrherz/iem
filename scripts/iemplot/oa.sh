@@ -40,6 +40,9 @@ if [ ! -e "${gdfile}" ]; then
     fhour="F002"
 fi
 
+# Save for IAMESONET_plot.sh usage
+echo "${fhour}" > /mesonet/data/iemplot/fhour.txt
+
 gdbiint << EOF > /tmp/oa_gdbiint.out
     GDFILE   = $gdfile
     GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
