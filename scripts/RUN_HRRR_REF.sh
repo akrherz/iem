@@ -1,6 +1,7 @@
+#!/bin/bash
 # Run at 30 minutes after the hour
 
 cd hrrr || exit 1
-python hrrr_jobs.py --valid=$(date -u --date '1 hours ago' +'%Y-%m-%dT%H'):00:00 --is-realtime
+python hrrr_jobs.py --valid="$(date -u --date '1 hours ago' +'%Y-%m-%dT%H'):00:00" --is-realtime
 # Reprocess 6 hours ago
-python hrrr_jobs.py --valid=$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00
+python hrrr_jobs.py --valid="$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00"

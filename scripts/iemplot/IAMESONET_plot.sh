@@ -21,6 +21,7 @@ yy=$(date -u --date '1 minute' +'%y')
 mm=$(date -u --date '1 minute' +'%m')
 dd=$(date -u --date '1 minute' +'%d')
 date=${yy}${mm}${dd}
+dateY="$(date -u --date '1 minute' +'%Y%m%d')"
 hh=$(date -u --date '1 minute' +'%H')
 timestamp=$(date -u --date '1 minute' +'%Y%m%d%H00')
 
@@ -31,9 +32,10 @@ GIF="mesonet.gif"
 rm -f "${GIF}"
 DEVICE="GIF|${GIF}|900;700"
 AREA="40.15;-97.1;43.85;-89.9"
+LOGFILE="/tmp/IAMESONET_plot.log"
 
 # Now we plot
-sfmap << EOF > /dev/null
+sfmap << EOF > "${LOGFILE}"
     AREA    = ${AREA}
     GAREA    = ${AREA}
     SATFIL   =
@@ -41,7 +43,7 @@ sfmap << EOF > /dev/null
     SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
     COLORS   =  32;2;32;0;4;32
     DATTIM   =  ${date}/${hh}
-    SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
+    SFFILE   =  /data/gempak/surface/${dateY}_sao.gem
     LATLON   =  0
     TITLE    =  32/-1/GMT: ~ Generated: $generated IEM Plot
     CLEAR    =  yes
@@ -61,12 +63,12 @@ sfmap << EOF > /dev/null
 EOF
 
 
-gdcntr << EOF > /tmp/IAMESONETplot_gdcntr.out
+gdcntr << EOF >> "${LOGFILE}"
     GAREA    = ${AREA}
     GDATTIM  = ${date}/${hh}00F001
     GLEVEL   = 0
     GVCORD   = NONE
-    GFUNC    = SM9S(MMSL)
+    GFUNC    = SM9S(PMSL)
     GDFILE   = /mesonet/data/iemplot/grid_25_25.grd
     CINT     = 1
     LINE     = 4
@@ -98,6 +100,12 @@ gdcntr << EOF > /tmp/IAMESONETplot_gdcntr.out
 EOF
 
 gpend
+
+if [ ! -f "${GIF}" ]; then
+    echo "${GIF} was not crated, here is the log"
+    cat $LOGFILE
+    exit 1
+fi
 
 if [ -f "${GIF}" ]; then
     pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" "${GIF}"

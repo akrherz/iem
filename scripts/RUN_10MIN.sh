@@ -1,3 +1,4 @@
+#!/bin/bash
 # Run every 10 minutes please
 
 cd current || exit 1
