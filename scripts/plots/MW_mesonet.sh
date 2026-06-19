@@ -4,7 +4,7 @@
 . /mesonet/nawips/Gemenviron.profile
 
 export GEMCOLTBL=coltbl.xwp
-export DISPLAY=localhost:1
+export DISPLAY="localhost:1"
 
 YYYYmmdd="$(date -u --date '1 minute' +'%Y%m%d')"
 yy=$(date -u --date '1 minute' +%y)

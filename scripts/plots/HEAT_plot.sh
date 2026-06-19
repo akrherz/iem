@@ -1,9 +1,8 @@
 #!/bin/bash
 
 . /mesonet/nawips/Gemenviron.profile
-export DISPLAY=localhost:1
 
-
+export DISPLAY="localhost:1"
 export GEMCOLTBL=coltbl.xwp
 
 yy=$(date -u +%y)

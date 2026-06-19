@@ -2,6 +2,9 @@
 
 . /mesonet/nawips/Gemenviron.profile
 
+export DISPLAY="localhost:1"
+export GEMCOLTBL=coltbl.xwp
+
 RADAR=$1
 
 yy="$(date -u +%y)"

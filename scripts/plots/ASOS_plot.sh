@@ -3,7 +3,7 @@
 
 . /mesonet/nawips/Gemenviron.profile
 
-export DISPLAY=localhost:1
+export DISPLAY="localhost:1"
 
 yy="$(date -u +%y)"
 MM="$(date -u +%m)"

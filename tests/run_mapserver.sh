@@ -1,3 +1,4 @@
+#!/bin/bash
 # Test mapserver files
 
 # map2img is mapserver 8, shp2img is mapserver 7
@@ -7,9 +8,9 @@ then
     MSEXEC="shp2img"
 fi
 
-for fn in $(find . -type f -name '*.map' -print); do
-    echo $fn;
-    ($MSEXEC -o /dev/null -m $fn || touch MSFAIL);
+find . -type f -name '*.map' -print0 | while IFS= read -r -d '' fn; do
+    echo "$fn"
+    ("$MSEXEC" -o /dev/null -m "$fn" || touch MSFAIL)
 done
 
 if [ -e MSFAIL ]; then

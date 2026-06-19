@@ -4,32 +4,32 @@ SHELL=/bin/bash
 S=/opt/iem/scripts
 
 # Datateam additions
-0 6 * * * sh /opt/datateam/scripts/RUN_6AM.sh
+0 6 * * * bah /opt/datateam/scripts/RUN_6AM.sh
 
 #
-0 18,19 * * * cd $S; sh RUN_0Z.sh
-1 18,19 * * * cd $S; sh RUN_0Z_ERA5LAND.sh
-0 0 * * * cd $S; sh RUN_MIDNIGHT.sh
-30 4 * * * cd $S; sh RUN_CLIMODAT_STATE.sh
-0 12 * * * cd $S; sh RUN_NOON.sh
+0 18,19 * * * cd $S; bah RUN_0Z.sh
+1 18,19 * * * cd $S; bah RUN_0Z_ERA5LAND.sh
+0 0 * * * cd $S; bah RUN_MIDNIGHT.sh
+30 4 * * * cd $S; bah RUN_CLIMODAT_STATE.sh
+0 12 * * * cd $S; bah RUN_NOON.sh
 # Run at 1:51 to avoid issue with 2AM on DST switch
-51 1 * * * cd $S; sh RUN_2AM.sh
-10 6,7 * * * cd $S; sh RUN_12Z.sh
+51 1 * * * cd $S; bah RUN_2AM.sh
+10 6,7 * * * cd $S; bah RUN_12Z.sh
 
-10 * * * * cd $S; sh RUN_10_AFTER.sh
-20 * * * * cd $S; sh RUN_20_AFTER.sh
-40 * * * * cd $S; sh RUN_40_AFTER.sh
-50 * * * * cd $S; sh RUN_50_AFTER.sh
-59 * * * * cd $S; sh RUN_59_AFTER.sh
-59 * * * * cd $S; sh RUN_STAGE4.sh
+10 * * * * cd $S; bah RUN_10_AFTER.sh
+20 * * * * cd $S; bah RUN_20_AFTER.sh
+40 * * * * cd $S; bah RUN_40_AFTER.sh
+50 * * * * cd $S; bah RUN_50_AFTER.sh
+59 * * * * cd $S; bah RUN_59_AFTER.sh
+59 * * * * cd $S; bah RUN_STAGE4.sh
 
-1 1,7 * * * cd $S; sh RUN_SUMMARY.sh
-10 6,7,8,9,10 * * * cd $S; sh RUN_COOP.sh
+1 1,7 * * * cd $S; bah RUN_SUMMARY.sh
+10 6,7,8,9,10 * * * cd $S; bah RUN_COOP.sh
 
-*/20 * * * * cd $S; sh RUN_20MIN.sh
-1,11,21,31,41,51 * * * * cd $S; sh RUN_10MIN.sh
-*/5 * * * * cd $S; sh RUN_5MIN.sh
-* * * * * cd $S; sh RUN_1MIN.sh
+*/20 * * * * cd $S; bah RUN_20MIN.sh
+1,11,21,31,41,51 * * * * cd $S; bah RUN_10MIN.sh
+*/5 * * * * cd $S; bah RUN_5MIN.sh
+* * * * * cd $S; bah RUN_1MIN.sh
 
 # Drought Monitor
 30 8 * * 4 cd /opt/iem/scripts/usdm; python process_usdm.py
@@ -45,10 +45,10 @@ S=/opt/iem/scripts
 03,13,24 * * * * cd $S/plots; bash HOURLY_PLOTS.sh
 
 # webalizer
-0 0 * * * cd $S/webalizer; sh processlogs.sh
+0 0 * * * cd $S/webalizer; bah processlogs.sh
 
 # Run 36h runs dont finish until 50 after
-55 * * * * cd $S; sh RUN_40_AFTER_2.sh
+55 * * * * cd $S; bah RUN_40_AFTER_2.sh
 
 */2 * * * * cd $S/mrms; sleep 40; timeout 60 python mesh_contours.py --minutes=2 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M'):00
 */2 * * * * cd $S/mrms; timeout 240 python mesh_contours.py -minutes=30 --valid=$(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M'):00

@@ -3,6 +3,7 @@
 . /mesonet/nawips/Gemenviron.profile
 
 export GEMCOLTBL=coltbl.xwp
+export DISPLAY="localhost:1"
 
 yy="$(date -u +%y)"
 mm="$(date -u +%m)"
