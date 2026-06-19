@@ -3,7 +3,7 @@ cd ingestors/madis
 python extract_hfmetar.py --hours=0 &
 
 cd ../../plots
-csh MW_mesonet.csh
+sh MW_mesonet.sh
 csh RUN_PLOTS
 
 cd ../iemplot

@@ -4,7 +4,7 @@ set ftime="`date -u +'%Y%m%d%H'`00"
 
 csh createGrids.csh
 csh SDMESONET_plot.csh
-csh MW_mesonet.csh
+sh MW_mesonet.sh
 csh TEMPS_plot.csh
 csh DEWPS_plot.csh
 csh WINDS_plot.csh

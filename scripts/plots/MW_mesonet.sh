@@ -1,27 +1,27 @@
-#!/bin/csh
+#!/bin/bash
+# Called from RUN_59_AFTER.sh and HOURLY_PLOTS
 
-source /mesonet/nawips/Gemenviron
+. /mesonet/nawips/Gemenviron.profile
 
-setenv GEMCOLTBL coltbl.xwp
-setenv DISPLAY localhost:1
+export GEMCOLTBL=coltbl.xwp
+export DISPLAY=localhost:1
 
-set yy=`date -u --date '1 minute' +%y`
-set mm=`date -u --date '1 minute' +%m`
-set dd=`date -u --date '1 minute' +%d`
-set date=${yy}${mm}${dd}
-set hh=`date -u --date '1 minute' +%H`
-set timestamp="`date -u --date '1 minute' +'%Y%m%d%H00'`"
-set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
-set yyyymmddhh_2h="`date -u --date '2 hour ago' +'%Y%m%d%H'`"
+yy=$(date -u --date '1 minute' +%y)
+mm=$(date -u --date '1 minute' +%m)
+dd=$(date -u --date '1 minute' +%d)
+date=${yy}${mm}${dd}
+hh=$(date -u --date '1 minute' +%H)
+timestamp=$(date -u --date '1 minute' +'%Y%m%d%H00')
+yyyymmddhh_1h=$(date -u --date '1 hour ago' +'%Y%m%d%H')
+yyyymmddhh_2h=$(date -u --date '2 hour ago' +'%Y%m%d%H')
 
 rm MWmesonet.gif* >& /dev/null
 
-set DEVICE="GIF|MWmesonet.gif|900;700"
-
-set AREA="37;-104;48.5;-86"
+DEVICE="GIF|MWmesonet.gif|900;700"
+AREA="37;-104;48.5;-86"
 
 # Now we plot
-sfmap << EOF > /tmp/MWmesonet_sfmap.out
+sfmap << EOF > /tmp/MW_mesonet_sfmap.out
     AREA    = ${AREA}
     GAREA	= ${AREA}
      SATFIL   =
@@ -49,12 +49,12 @@ sfmap << EOF > /tmp/MWmesonet_sfmap.out
     exit
 EOF
 
-set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
-set fhour="F001"
-if (! -e ${gdfile}) then
-set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
-set fhour="F002"
-endif
+gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
+fhour="F001"
+if [ ! -e ${gdfile} ]; then
+    gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
+    fhour="F002"
+fi
 
 
 gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
@@ -64,7 +64,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
     GLEVEL   = 0
     GVCORD   = NONE
     GFUNC    = SM9S(PMSL)
-GDFILE   = $gdfile
+    GDFILE   = $gdfile
     CINT     = 4
     LINE     = 4
     MAP      = 0
@@ -94,11 +94,10 @@ GDFILE   = $gdfile
     exit
 EOF
 
+gpend
 
-${GEMEXE}/gpend
-
-if (-e MWmesonet.gif) then
+if [ -e MWmesonet.gif ]; then
   pqinsert -p "plot ac $timestamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif >& /dev/null
   rm MWmesonet.gif
-endif
+fi
 
