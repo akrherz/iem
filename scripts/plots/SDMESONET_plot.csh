@@ -10,6 +10,7 @@ set dd=`date -u +%d`
 set date=${yy}${mm}${dd}
 set hh=`date -u +%H`
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
+set yyyymmddhh_2h="`date -u --date '2 hour ago' +'%Y%m%d%H'`"
 set nicetime=`date +"%b %d %I %p"`
 
 rm mesonet.gif* >& /dev/null
@@ -21,8 +22,8 @@ set AREA="42.6;-104.5;46;-96"
 sfmap << EOF > /tmp/SDMESONET_sfmap.out
     AREA    = ${AREA}
     GAREA    = ${AREA}
-     SATFIL   =  
-    RADFIL   =  
+     SATFIL   =
+    RADFIL   =
     SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
     COLORS   =  32;2;32;0;4;32
      DATTIM   =  ${date}/${hh}
@@ -45,14 +46,16 @@ sfmap << EOF > /tmp/SDMESONET_sfmap.out
     exit
 EOF
 
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
+set fhour="F001"
 if (! -e ${gdfile}) then
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap130.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
+set fhour="F002"
 endif
 
 gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
     GAREA    = ${AREA}
-    GDATTIM  = F001
+    GDATTIM  = ${fhour}
     GLEVEL   = 0
     GVCORD   = NONE
     GFUNC    = SM9S(MUL(0.01,MSLMA))
@@ -62,24 +65,24 @@ GDFILE   = $gdfile
     MAP      = 0
     TEXT     = 1
     DEVICE   = ${DEVICE}
-    SATFIL   =  
-    RADFIL   =  
+    SATFIL   =
+    RADFIL   =
     PROJ     = LCC
     CLEAR    = no
     PANEL	= 0
     TITLE	= 32/-2/~ RUC2 MMSL
     SCALE    = 0
     LATLON   = 0
-    HILO     =  
-    HLSYM    =  
+    HILO     =
+    HLSYM    =
     CLRBAR   = 1
     CONTUR   = 3/3
     SKIP     = 0
     FINT     = 0
     FLINE    = 10-20
     CTYPE    = C
-    LUTFIL   =  
-    STNPLT   =  
+    LUTFIL   =
+    STNPLT   =
     list
     run
 

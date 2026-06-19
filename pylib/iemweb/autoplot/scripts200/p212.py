@@ -28,6 +28,7 @@ PDICT = {
     "18": "18 UTC",
     "afternoon": "18 + 00 UTC",
     "both": "00 + 12 UTC",
+    "all": "Any Hour",
 }
 PDICT3 = {
     "tmpc": "Air Temperature (°C)",
@@ -129,8 +130,11 @@ def get_data(ctx: dict):
         "stations": stations,
         "level": level,
     }
+    hlimiter = "and extract(hour from f.valid at time zone 'UTC') = any(:hrs)"
     hour = ctx["hour"]
-    if hour == "both":
+    if hour == "all":
+        hlimiter = ""
+    elif hour == "both":
         params["hrs"] = [0, 12]
     elif hour == "afternoon":
         params["hrs"] = [18, 0]
@@ -147,11 +151,11 @@ def get_data(ctx: dict):
     select extract(year from f.valid at time zone 'UTC')::int as year,
     f.valid at time zone 'UTC' as utc_valid, {varname}
     from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-    WHERE f.station = ANY(:stations)
-    and extract(hour from f.valid at time zone 'UTC') = any(:hrs)
+    WHERE f.station = ANY(:stations) {hlimiter}
     and p.pressure = :level  and {varname} is not null ORDER by valid ASC
                     """,
                     varname=varname,
+                    hlimiter=hlimiter,
                 ),
                 conn,
                 params=params,
@@ -166,10 +170,10 @@ def get_data(ctx: dict):
     select extract(year from valid at time zone 'UTC')::int as year,
     valid at time zone 'UTC' as utc_valid, {varname}
     from raob_flights f WHERE station = ANY(:stations) and
-    {varname} is not null
-    and extract(hour from f.valid at time zone 'UTC') = any(:hrs)
+    {varname} is not null {hlimiter}
     ORDER by valid ASC""",
                     varname=varname,
+                    hlimiter=hlimiter,
                 ),
                 conn,
                 params=params,
@@ -354,12 +358,20 @@ Highcharts.chart("{containername}", {{
 def plotter(ctx: dict):
     """Go"""
     get_data(ctx)
-    df = ctx["df"]
+    df: pd.DataFrame = ctx["df"]
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
     ax.set_position([0.1, 0.1, 0.88, 0.8])
     colname = f"{ctx['var']}_{ctx['year']}"
     x = df["utc_valid"].values
-    ax.plot(x, df[colname].values, label=str(ctx["year"]), zorder=4, color="r")
+    # Things could be too-irregular for a line plot
+    ax.scatter(
+        x,
+        df[colname].to_numpy(),
+        label=str(ctx["year"]),
+        zorder=4,
+        color="r",
+        s=50,
+    )
     ax.fill_between(
         x,
         df[ctx["var"], "min"].values,

@@ -113,12 +113,11 @@ from typing import Annotated
 from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, error_log, iemapp
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import TextClause
 
-from iemweb import error_log
 from iemweb.util import get_ct
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{3,6}$", re.IGNORECASE)

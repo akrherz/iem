@@ -1,6 +1,4 @@
 #!/bin/csh
-#		IAMESONET_plot.csh
-# Finally, the script that plots all of this good data
 
 source /mesonet/nawips/Gemenviron
 
@@ -14,6 +12,7 @@ set date=${yy}${mm}${dd}
 set hh=`date -u --date '1 minute' +%H`
 set timestamp="`date -u --date '1 minute' +'%Y%m%d%H00'`"
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
+set yyyymmddhh_2h="`date -u --date '2 hour ago' +'%Y%m%d%H'`"
 
 rm MWmesonet.gif* >& /dev/null
 
@@ -25,8 +24,8 @@ set AREA="37;-104;48.5;-86"
 sfmap << EOF > /tmp/MWmesonet_sfmap.out
     AREA    = ${AREA}
     GAREA	= ${AREA}
-     SATFIL   =  
-    RADFIL   =  
+     SATFIL   =
+    RADFIL   =
     SFPARM   =  skyc:.6;tmpf;wsym:1.2:2;alti;;dwpf;;;;brbk:0.8:1:231
     COLORS   =  32;2;32;0;(50;70/4;23;23/DWPF);32
      DATTIM   =  ${date}/${hh}
@@ -41,7 +40,7 @@ sfmap << EOF > /tmp/MWmesonet_sfmap.out
         TEXT     = 1
         LUTFIL   =
         STNPLT   =
-  CLRBAR = 
+  CLRBAR =
     MAP	= 25 + 25//2
     \$MAPFIL = HICNUS.NWS + hipowo.cia
     list
@@ -50,43 +49,45 @@ sfmap << EOF > /tmp/MWmesonet_sfmap.out
     exit
 EOF
 
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_1h}_hrrr.gem"
+set fhour="F001"
 if (! -e ${gdfile}) then
-set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap130.gem"
+set gdfile="/data/gempak/model/hrrr/${yyyymmddhh_2h}_hrrr.gem"
+set fhour="F002"
 endif
 
 
 gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
     AREA	= ${AREA}
     GAREA    = ${AREA}
-    GDATTIM  = F001
+    GDATTIM  = ${fhour}
     GLEVEL   = 0
     GVCORD   = NONE
-    GFUNC    = SM9S(MMSL)
+    GFUNC    = SM9S(PMSL)
 GDFILE   = $gdfile
     CINT     = 4
     LINE     = 4
     MAP      = 0
     TEXT     = 1
     DEVICE   = ${DEVICE}
-    SATFIL   =  
-    RADFIL   =  
+    SATFIL   =
+    RADFIL   =
     PROJ     = LCC
     CLEAR    = no
     PANEL	= 0
-    TITLE	= 32/-2/~ RAP MMSL
+    TITLE	= 32/-2/~ HRRR PMSL
     SCALE    = 0
     LATLON   = 0
-    HILO     =  
-    HLSYM    =  
+    HILO     =
+    HLSYM    =
     CLRBAR   = 1
     CONTUR   = 3/3
     SKIP     = 0
     FINT     = 0
     FLINE    = 10-20
     CTYPE    = C
-    LUTFIL   =  
-    STNPLT   =  
+    LUTFIL   =
+    STNPLT   =
     list
     run
 

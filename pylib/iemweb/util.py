@@ -6,10 +6,9 @@ from pathlib import Path
 
 from pyiem.reference import ISO8601
 from pyiem.util import utc
+from pyiem.webutil import error_log
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
-
-from iemweb import error_log
 
 MONTH_LOOKUP = {
     "jan": [1],

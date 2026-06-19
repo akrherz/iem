@@ -24,10 +24,15 @@ from pyiem.exceptions import (
 )
 from pyiem.reference import ISO8601
 from pyiem.util import utc
-from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
+from pyiem.webutil import (
+    TELEMETRY,
+    emit_to_sidedoor,
+    error_log,
+    iemapp,
+    write_telemetry,
+)
 from pymemcache.client import Client
 
-from iemweb import emit_to_sidedoor, error_log
 from iemweb.autoplot import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy

@@ -25,9 +25,7 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb import error_log
+from pyiem.webutil import CGIModel, error_log, iemapp
 
 SIMULTANEOUS_REQUESTS: int = 30
 

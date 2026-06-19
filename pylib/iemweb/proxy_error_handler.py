@@ -3,9 +3,7 @@
 from http.client import responses as HTTP_RESPONSES
 
 from pyiem.util import utc
-from pyiem.webutil import TELEMETRY, write_telemetry
-
-from iemweb import error_log
+from pyiem.webutil import TELEMETRY, error_log, write_telemetry
 
 
 def application(environ, start_response):
