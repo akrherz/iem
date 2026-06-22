@@ -15,7 +15,7 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
-if ($metadata["metasite"]) {
+if (($metadata["metasite"] ?? null) === "t") {
     $t->content = "<p>This site does not have observations.</p>";
     $t->render(TEMPLATE);
     exit();
