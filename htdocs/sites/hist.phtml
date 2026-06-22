@@ -2,6 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("THROTTLE_APP", "sites/obhistory");
 define("THROTTLE_LIMIT", 16);
+define("TEMPLATE", "sites.phtml");
 // sites calls throttle
 require_once "../../include/sites.php";
 require_once "../../include/forms.php";
@@ -14,6 +15,14 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->sites_current = "calendar";
+
+if ($metadata["metasite"]) {
+    $t->content = "<p>This site does not have observations.</p>";
+    $t->render(TEMPLATE);
+    exit();
+}
+
 $t->iemselect2 = true;
 
 /* Get vars */
@@ -316,7 +325,6 @@ EOM;
     } /* End of for loop */
     $htmlout .= "</table>\n";
 }
-$t->sites_current = "calendar";
 $htmlout .= <<< EOM
   <p>The data presented here provided by <a href="/api/">IEM API</a>
   webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
@@ -368,4 +376,4 @@ $t->jsextra = <<<EOM
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src="hist.module.js" type="module"></script>
 EOM;
-$t->render('sites.phtml');
+$t->render(TEMPLATE);

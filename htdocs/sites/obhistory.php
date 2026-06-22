@@ -3,6 +3,7 @@
 // downstream throttle to be more aggressive
 define("THROTTLE_APP", "sites/obhistory");
 define("THROTTLE_LIMIT", 16);
+define("TEMPLATE", "sites.phtml");
 // sites calls throttle
 require_once "../../include/sites.php";
 require_once "../../include/mlib.php";
@@ -13,6 +14,12 @@ $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
+
+if ($metadata["metasite"]) {
+    $t->content = "<p>This site does not have observations.</p>";
+    $t->render(TEMPLATE);
+    exit();
+}
 
 /*
  * Rip off weather bureau website, but do it better
@@ -594,4 +601,4 @@ $content .= <<<EOM
 </div>
 EOM;
 $t->content = $content;
-$t->render('sites.phtml');
+$t->render(TEMPLATE);
