@@ -1,6 +1,49 @@
 <?php
 
 /**
+ * Represent a precipitation value as a string.
+ *
+ * @param float|string|null $val The precipitation value, which can be a float, string, or null
+ * @param int $precision The number of decimal places to round to (default is 2)
+ * @return string A string representation of the precipitation value, with special handling for null and empty
+ */
+function precip2str($val, $precision=2) {
+    // null returns missing value
+    if (is_null($val) || $val === "") {
+        return "M";
+    }
+    // These are already in good shape
+    if ($val === "T") {
+        return $val;
+    }
+    // Ensure we can convert this value to float, if it is a string currently
+    if (is_string($val)) {
+        try {
+            $val = floatval($val);
+        } catch (Exception $e) {
+            return "M";
+        }
+    }
+    // Handle IEM nomeclature for 0.0001, which is a tough 32bit case, sigh
+    if ($val > 0 && $val < 0.005) {
+        return "T";
+    }
+
+    $fmt = "%.{$precision}f";
+    return sprintf($fmt, $val);
+}
+
+/**
+ * Helper for the case of snow, which should be 1 decimal
+ * @param float|string|null $val The snow value, which can be a float, string, or null
+ * @return string A string representation of the snow value, with special handling for null and empty
+ */
+function snow2str($val) {
+    return precip2str($val, 1);
+}
+
+
+/**
  * Common logic for converting a hacky 12 char time string in UTC
  *
  * @param string $dstr The date string in the format YYYYMMDDHHMM

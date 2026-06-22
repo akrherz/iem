@@ -10,12 +10,6 @@ define("IEM_APPID", 56);
 $network = get_str404('network', 'IA_COCORAHS');
 $sortcol = get_str404('sortcol', 'ts');
 
-function ffmt($val){
-    if (is_null($val)) return "M";
-    if ($val > 0 and $val < 0.005) return "T";
-    return sprintf("%.2f", $val);
-}
-
 $nselect = selectNetworkType("COCORAHS", $network);
 
 $t->title = "CoCoRaHS Last Observation";
@@ -57,7 +51,6 @@ while ($row = pg_fetch_assoc($rs)) {
         'snowd' => ($row["snowd"] >= 0) ? $row["snowd"] : " ",
         'ratio' => -1,
         'pday' => $row["precip"],
-        'pmonth' => $row["pmonth"],
         'pmiss' => $days_this_month - $row["count"],
     );
     if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001) {
@@ -136,13 +129,13 @@ EOM;
     if ($value["snow"] < 0) $value["snow"] = "M";
 
     $content .= "<td>" . $value["pday"] . "</td>";
-    $content .= "<td>" . ffmt($value["pmonth"]);
+    $content .= "<td>" . precip2str($value["pmonth"]);
     if ($value["pmiss"] > 0) $content .= " (" . $value["pmiss"] . ")";
     $content .= "</td>";
-    $content .= "<td>" . $value["snow"] . "</td>";
+    $content .= "<td>" . snow2str($value["snow"]) . "</td>";
     if ($value["ratio"] > 0) $content .= "<td>" . $value["ratio"] . "</td>";
     else $content .= "<td></td>";
-    $content .= "<td>" . $value["snowd"] . "</td>";
+    $content .= "<td>" . snow2str($value["snowd"]) . "</td>";
     $content .= "</tr>";
 }
 $content .= <<<EOM

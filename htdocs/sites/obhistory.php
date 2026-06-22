@@ -100,12 +100,6 @@ function vis_formatter($val)
     if (is_null($val)) return "";
     return round($val, 2);
 }
-function precip_formatter($val)
-{
-    if (is_null($val)) return "";
-    if ($val == 0.0001) return "T";
-    return round($val, 2);
-}
 function asos_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -139,9 +133,9 @@ function asos_formatter($i, $row, $windunits = "mph")
         $row["alti"],
         $row["mslp"],
         $row["snowdepth"],
-        precip_formatter($row["p01i"]),
-        precip_formatter($row["p03i"]),
-        precip_formatter($row["p06i"]),
+        precip2str($row["p01i"]),
+        precip2str($row["p03i"]),
+        precip2str($row["p06i"]),
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         $ismadis ? " hf" : "",
         $row["raw"]
@@ -200,7 +194,7 @@ function formatter($i, $row, $windunits = "mph")
         temp_formatter($row["dwpf"]),
         temp_formatter($row["feel"]),
         relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-        precip_formatter($row["phour"]),
+        precip2str($row["phour"]),
         $precip_extra,
     );
 }
@@ -224,7 +218,7 @@ function hads_formatter($i, $row, $shefcols, $windunits = "mph")
         temp_formatter($row["dwpf"]),
         temp_formatter($row["feel"]),
         relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-        precip_formatter($row["phour"]),
+        precip2str($row["phour"]),
         $html
     );
 }
@@ -244,7 +238,7 @@ function scan_formatter($i, $row, $windunits = "mph")
         temp_formatter($row["dwpf"]),
         $row["relh"],
         $row["srad"],
-        precip_formatter($row["phour"]),
+        precip2str($row["phour"]),
         $row["soilt2"],
         $row["soilm2"],
         $row["soilt4"],
