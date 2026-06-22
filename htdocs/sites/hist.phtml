@@ -2,6 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("THROTTLE_APP", "sites/obhistory");
 define("THROTTLE_LIMIT", 16);
+define("TEMPLATE", "sites.phtml");
 // sites calls throttle
 require_once "../../include/sites.php";
 require_once "../../include/forms.php";
@@ -14,6 +15,14 @@ $network = $ctx->network;
 $metadata = $ctx->metadata;
 
 $t = new MyView();
+$t->sites_current = "calendar";
+
+if (($metadata["metasite"] ?? null) === "t") {
+    $t->content = "<p>This site does not have observations.</p>";
+    $t->render(TEMPLATE);
+    exit();
+}
+
 $t->iemselect2 = true;
 
 /* Get vars */
@@ -35,13 +44,6 @@ $dateStr = $ts->format("Y-m-d");
 $nicedate = $ts->format("d M Y");
 $nicemonthdate = $ts->format("M Y");
 $htmlout = "";
-
-function snowprint($val)
-{
-    if (is_null($val)) return "";
-    if ($val > 0 && $val < 0.01) return "T";
-    return $val;
-}
 
 function printMonth($year, $month, $db, $thisApp, $dailyApp)
 {
@@ -168,11 +170,11 @@ else if ($mode == "monthly") {
         }
 
         if (!is_null($row["snow"]) && $row["snow"] >= 0) {
-            $str .= "<br>Snow: " . snowprint($row["snow"]);
+            $str .= "<br>Snow: " . snow2str($row["snow"]);
         }
 
         if (!is_null($row["snowd"]) && $row["snowd"] >= 0) {
-            $str .= "<br>Snow Depth: " . snowprint($row["snowd"]);
+            $str .= "<br>Snow Depth: " . snow2str($row["snowd"]);
         }
         if (isset($row["avg_sknt"])) {
             $str .= sprintf(
@@ -269,7 +271,7 @@ summary information.</p>
 <th>Peak Gust:</th>
 <th>Time of Gust:</th>
 <th>Snowfall:</th>
-<th>Snow Depth:</a></th>
+<th>Snow Depth:</th>
 </tr>
 </thead>
 EOM;
@@ -294,7 +296,7 @@ EOM;
         $htmlout .= "<td>" . $row["max_dwpf"] . "</td>";
 
         $pe = (array_key_exists("precip_est", $row) && $row["precip_est"] ) ? "(E)" : "";
-        $htmlout .= "<td>" . snowprint($row["precip"]) . " {$pe}</td>";
+        $htmlout .= "<td>" . precip2str($row["precip"]) . " {$pe}</td>";
 
         if (array_key_exists("max_gust", $row) && !is_null($row["max_gust"]) && $row["max_gust_localts"] != "") {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
@@ -310,13 +312,12 @@ EOM;
         } else {
             $htmlout .= "<td></td><td></td>";
         }
-        $htmlout .= "<td>" . snowprint($row["snow"]) . "</td><td>" . snowprint($row["snowd"]) . "</td>";
+        $htmlout .= "<td>" . snow2str($row["snow"]) . "</td><td>" . snow2str($row["snowd"]) . "</td>";
 
         $htmlout .= "</tr>";
     } /* End of for loop */
     $htmlout .= "</table>\n";
 }
-$t->sites_current = "calendar";
 $htmlout .= <<< EOM
   <p>The data presented here provided by <a href="/api/">IEM API</a>
   webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
@@ -368,4 +369,4 @@ $t->jsextra = <<<EOM
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src="hist.module.js" type="module"></script>
 EOM;
-$t->render('sites.phtml');
+$t->render(TEMPLATE);

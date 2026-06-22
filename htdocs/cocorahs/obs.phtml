@@ -4,6 +4,7 @@ define("IEM_APPID", 57);
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
 $access = iemdb("coop");
 
@@ -72,22 +73,12 @@ EOM
 $hirow = 1;
 $table = "";
 
-function fmt($val){
-    if (is_null($val)){
-        return "M";
-    }
-    if ($val > 0 && $val < 0.005){
-        return "T";
-    }
-    return $val;
-}
-
 while ($row = pg_fetch_assoc($rs)) {
     $nwsli = $row["station"];
 
-    $rain = fmt($row["precip"]);
-    $snow = fmt($row["snow"]);
-    $snowd = fmt($row["snowd"]);
+    $rain = precip2str($row["precip"]);
+    $snow = snow2str($row["snow"]);
+    $snowd = snow2str($row["snowd"]);
 
     $table .= sprintf(
         '<tr><td><a href="obs.phtml?station=%s&network=%s&year=%s">%s</a></td>'.
