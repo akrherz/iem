@@ -100,7 +100,7 @@ foreach ($stations as $key => $value) {
 }
 
 if (!empty($reqstations)) {
-    $jobj = require_json_response("/api/1/currents.json", array("station" => $reqstations));
+    $jobj = require_json_response("/api/1/currents.json", array("station" => implode(",", $reqstations)));
 } else {
     $jobj = array("data" => array());
 }
