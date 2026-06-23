@@ -1,6 +1,5 @@
 #!/bin/bash
 # Ensure this is actually being run at 12z, since crontab is in CST/CDT
-DOW=$(date +%w)
 HH=$(date -u +%H)
 if [ "$HH" -ne "12" ]
 then
@@ -9,13 +8,6 @@ fi
 
 cd asos || exit 1
 python cf6_to_iemaccess.py
-
-# On Tuedays, fetch the Sunday update
-if [ "$DOW" -eq "2" ]
-then
-    cd ../nass || exit 1
-    python ingest_iowa_pdf.py --sunday="$(date --date '2 days ago' +'%Y-%m-%d')"
-fi
 
 cd ../hads || exit 1
 python compute_hads_pday.py --date="$(date -u --date '1 days ago' +'%Y-%m-%d')"

@@ -1,6 +1,6 @@
 """Sucks that the raw data is only found in the PDFs.
 
-Run from RUN_12Z.sh on Tuesdays
+No longer run as Iowa NASS is kaput during 2026
 """
 
 import os
@@ -274,11 +274,13 @@ def workflow(sunday, engine, remotefn):
 
 
 @click.command()
-@click.option("--sunday", help="NASS Analysis Date", type=click.DateTime())
+@click.option(
+    "--sunday", help="NASS Analysis Date", type=click.DateTime(), required=True
+)
 @click.option("--weeks", help="Number of weeks to run", type=int, default=1)
 @click.option("--engine", help="PDF Engine", default="pytesseract")
 @click.option("--remotefn", help="Remote Filename", default=None)
-def main(sunday, weeks, engine, remotefn):
+def main(sunday: datetime, weeks: int, engine: str, remotefn: str):
     """Go Main Go."""
     for _ in range(weeks):
         workflow(sunday, engine, remotefn)
