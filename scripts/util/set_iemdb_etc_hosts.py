@@ -14,6 +14,7 @@ LOOKUP = {
     "-asos1min": IPS[DB1],
     "-awos": IPS[DB3],
     "-coop": IPS[DB2],
+    "-dep": IPS[DB3],
     "-dep_china": IPS[DB1],
     "-dep_europe": IPS[DB1],
     "-dep_sa": IPS[DB1],
