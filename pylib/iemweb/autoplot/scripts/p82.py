@@ -312,7 +312,7 @@ def plotter(ctx: dict):
     data = {}
     cmap = get_cmap(ctx["cmap"])
     if ctx.get("interval", "") != "":
-        tokens = ctx["interval"].split(",")
+        tokens = ctx["interval"].replace("T", f"{TRACE_VALUE}").split(",")
         if len(tokens) != 3:
             raise NoDataFound("Invalid interval specified.")
         minv, maxv, interval = map(float, tokens)
