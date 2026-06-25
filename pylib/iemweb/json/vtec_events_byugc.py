@@ -10,8 +10,10 @@ This metadata service returns VTEC events for the given UGC.
 Changelog
 ---------
 
+- 2026-06-25: Added `phenomena` and `significance` parameter to allow
+  result filtering by a single VTEC event type.
 - 2025-01-20: Added explicit `sts` and `ets` parameters for a more explicit
-    datetime range.
+  datetime range.
 - 2024-07-18: Initial documentation release and migration to pydantic.
 
 Example Requests
@@ -37,6 +39,11 @@ Same request, but in Excel format
 https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
 ?ugc=IAC169&sdate=2024-01-01&edate=2024-12-31&fmt=xlsx
 
+Provide all Tornado Warnings for IAC169 during 2024
+
+https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
+?ugc=IAC169&sdate=2024-01-01&edate=2024-12-31&phenomena=TO&significance=W
+
 """
 
 import json
@@ -45,14 +52,18 @@ from io import BytesIO, StringIO
 from typing import Annotated
 
 import pandas as pd
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
+from iemweb.fields import (
+    CALLBACK_FIELD,
+    VTEC_PH_FIELD_OPTIONAL,
+    VTEC_SIG_FIELD_OPTIONAL,
+)
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 
@@ -92,9 +103,20 @@ class Schema(CGIModel):
         default="IAC001",
         description="6-character NWS Universal Geographic Code",
         pattern=r"^[A-Z][A-Z][CZ]\d\d\d$",
-        max_length=6,
-        min_length=6,
     )
+    phenomena: VTEC_PH_FIELD_OPTIONAL = None
+    significance: VTEC_SIG_FIELD_OPTIONAL = None
+
+    @model_validator(mode="after")
+    def ensure_both_ph_and_sig(self):
+        """Ensure both phenomena and significance are provided if one is."""
+        if (self.phenomena is not None and self.significance is None) or (
+            self.phenomena is None and self.significance is not None
+        ):
+            raise ValueError(
+                "Both phenomena and significance must be provided together"
+            )
+        return self
 
 
 def make_url(row):
@@ -106,11 +128,17 @@ def make_url(row):
     )
 
 
-def get_df(ugc, sts: datetime, ets: datetime):
+def get_df(query: Schema, sts: datetime, ets: datetime):
     """Answer the request!"""
+    phsig_filter = ""
+    if query.phenomena is not None and query.significance is not None:
+        phsig_filter = (
+            " and phenomena = :phenomena and significance = :significance "
+        )
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            sql_helper("""
+            sql_helper(
+                """
             SELECT vtec_year,
             to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
@@ -123,10 +151,18 @@ def get_df(ugc, sts: datetime, ets: datetime):
             eventid, phenomena, significance, hvtec_nwsli, wfo, ugc,
             product_ids[1] as product_id
             from warnings WHERE ugc = :ugc and issue >= :sts
-            and issue < :ets ORDER by issue ASC
-            """),
+            and issue < :ets {phsig_filter} ORDER by issue ASC
+            """,
+                phsig_filter=phsig_filter,
+            ),
             conn,
-            params={"ugc": ugc, "sts": sts, "ets": ets},
+            params={
+                "ugc": query.ugc,
+                "sts": sts,
+                "ets": ets,
+                "phenomena": query.phenomena,
+                "significance": query.significance,
+            },
         )
     if df.empty:
         return df
@@ -181,49 +217,48 @@ def get_mckey(environ):
         return None
     return (
         f"/json/vtec_events_byugc.json|{environ['ugc']}|"
-        f"{environ['sdate']}|{environ['edate']}"
+        f"{environ['sdate']}|{environ['edate']}|{environ['phenomena']}|"
+        f"{environ['significance']}"
     ).replace(" ", "_")  # memcache key cannot have spaces
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=600)
 def application(environ, start_response):
     """Answer request."""
-    ugc = environ["ugc"]
+    query: Schema = environ["_cgimodel_schema"]
     try:
-        sts = parse_date(environ["sdate"])
-        ets = parse_date(environ["edate"])
+        sts = parse_date(query.sdate)
+        ets = parse_date(query.edate)
     except Exception as exp:
         raise IncompleteWebRequest(str(exp)) from exp
-    if environ["sts"]:
-        sts = environ["sts"]
-    if environ["ets"]:
-        ets = environ["ets"]
-    fmt = environ["fmt"]
+    if query.sts:
+        sts = query.sts
+    if query.ets:
+        ets = query.ets
+    fmt = query.fmt
 
-    df = get_df(ugc, sts, ets)
+    df = get_df(query, sts, ets)
     if fmt in ["xlsx", "excel"]:
-        fn = f"vtec_{ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.xlsx"
+        fn = f"vtec_{query.ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = f"vtec_{ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.csv"
+        fn = f"vtec_{query.ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        start_response("200 OK", headers)
         bio = StringIO()
         df.to_csv(bio, index=False)
+        start_response("200 OK", headers)
         return [bio.getvalue().encode("utf-8")]
 
-    res = as_json(df)
-
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-    return res.encode("ascii")
+    res = as_json(df).encode()
+    start_response("200 OK", [("Content-type", "application/json")])
+    return res
