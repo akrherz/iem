@@ -123,7 +123,7 @@ def main():
         dtype={"huc12": str},
     )
     # Load up HUC12 geometries
-    with get_sqlalchemy_conn("idep") as conn:
+    with get_sqlalchemy_conn("dep") as conn:
         huc12s = read_postgis(
             "SELECT simple_geom, huc12 from wbd_huc12 "
             "where umrb_realtime_swat",

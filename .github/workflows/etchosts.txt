@@ -2,7 +2,7 @@
 127.0.0.1 iemdb.local
 127.0.0.1 iemdb-hads.local
 127.0.0.1 iemdb-mos.local
-127.0.0.1 iemdb-idep.local
+127.0.0.1 iemdb-dep.local
 127.0.0.1 iemdb-dep_china.local
 127.0.0.1 iemdb-dep_europe.local
 127.0.0.1 iemdb-dep_sa.local
