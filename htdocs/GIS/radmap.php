@@ -18,6 +18,13 @@ $plotmeta = array(
     "subtitle" => ""
 );
 
+/**
+ * Draw a black bar at the top of the image
+ * @param mapObj $map
+ * @param imageObj $img
+ * @param int $width
+ * @param int $height
+ */
 function draw_header($map, $img, $width, $height)
 {
     /*
@@ -78,6 +85,15 @@ function get_goes_fn_and_time($ts, $product)
     return array(NULL, NULL);
 }
 
+/**
+ * Get a filename and timestamp for the given inbound timestamp and prod
+ *
+ * @param DateTime $ts
+ * @param string $radar
+ * @param string $product
+ *
+ * @return array (filename, timestamp)
+ */
 function get_ridge_fn_and_time($ts, $radar, $product)
 {
     /*
@@ -166,7 +182,7 @@ $lsrbuffer = get_int404("lsrbuffer", 15);
 // Now, maybe we set a VTEC string, lets do all sorts of fun
 $vtec_limiter = "";
 if (array_key_exists("vtec", $_GET)) {
-    $cvtec = xssafe($_GET["vtec"]);
+    $cvtec = get_str404("vtec", null);
     // cull errand _
     $pos = strpos($cvtec, "_");
     if ($pos !== false) {
@@ -189,7 +205,7 @@ if (array_key_exists("vtec", $_GET)) {
     $eventid = intval($eventid);
     $year = intval($year);
     if ($year < 1980 || $year > 2030){
-        xssafe("<tag>");
+        die405();
     }
     $wfo = substr($wfo, 1, 3);
     // Try to find this warning as a polygon first, then look at warnings table
@@ -286,7 +302,7 @@ if (array_key_exists("bbox", $_GET)) {
     $sector = "custom";
     $bbox = explode(",", $_GET["bbox"]);
     if (sizeof($bbox) != 4){
-        xssafe("</script>");
+        die405();
     }
     $sectors["custom"] = array("epsg" => 4326, "ext" => $bbox);
 }
@@ -312,15 +328,18 @@ if ($sector == "wfo") {
     }
 }
 
-/* Lets determine our timestamp.  Our options include
-   1.  Specified by URI, $ts
-   2.  They specified a VTEC string, use that
-   3.  Nothing specified, realtime!
-*/
+/**
+ * Lets determine our timestamp.  Our options include
+ *  1.  Specified by URI, $ts
+ *  2.  They specified a VTEC string, use that
+ *  3.  Nothing specified, realtime!
+ */
 
 $utcnow = new DateTime('now', new DateTimeZone("UTC"));
 $ts = array_key_exists("ts", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts"], new DateTimeZone("UTC")) : $utcnow;
-if (is_bool($ts)) xssafe("<tag>");
+if (is_bool($ts)) {
+    die405();
+}
 $ts1 = array_key_exists("ts1", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts1"], new DateTimeZone("UTC")) : null;
 $ts2 = array_key_exists("ts2", $_GET) ? DateTime::createFromFormat("YmdHi", $_GET["ts2"], new DateTimeZone("UTC")) : null;
 if (isset($dts) && !array_key_exists("ts", $_GET)) {

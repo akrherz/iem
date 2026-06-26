@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 66);
 
@@ -14,7 +14,7 @@ into GIS applications.  We have no magic bullets for getting this information
 into GIS systems, but have a number of things for you to try out!
 
 <div class="alert alert-info">These services are provided with-out
-warranty and with 
+warranty and with
 program interfaces that may change or go away!</div>
 
 <h3>Quick links to specific products</h3>
@@ -45,27 +45,27 @@ program interfaces that may change or go away!</div>
  <li><b>26 Apr 2004:</b> Add in links for the nationwide mosaics of NTP (storm total precip) and N1P (1 hour precip)!
  <li><b>13 Jan 2004:</b> Release the nationwide mosiac WMS!
  <li><b>16 Sep 2003:</b> Add US base reflectivity, remove Iowa NTP product.
- <li><b>04 Jul 2003:</b> The mosaic base reflectivity plot has been 
+ <li><b>04 Jul 2003:</b> The mosaic base reflectivity plot has been
 greatly improved.  The geo-referencing is nearly perfect!
  <li><b>01 Jul 2003:</b> Initial release to the public.</li>
 </ul>
 
 <h3>NEXRAD + Mapserver Howto:</h3>
 
-<br>Here is a <a href="/docs/radmapserver/">HOWTO</a> on generating NEXRAD 
+<br>Here is a <a href="/docs/radmapserver/">HOWTO</a> on generating NEXRAD
 mosiacs with GEMPAK and then displaying them in Mapserver.  Feedback
 is certainly welcome.<p>
 
 <h3>Geo-referenced Images:</h3>
 
-<br>Using geo-referenced images is probably the simpliest way of getting data 
+<br>Using geo-referenced images is probably the simpliest way of getting data
 into your GIS.  Displaying timestamps and color bars are tricky business. The
-following URLs contain pure RASTER data layers. 
+following URLs contain pure RASTER data layers.
 
 <table class="table table-striped">
 <tr>
   <th>RADAR</th>
-  <td><a href="http://www.epsg.org">EPSG Proj Code</a></td>
+  <td><a href="https://epsg.org">EPSG Proj Code</a></td>
   <td>Data Files</td>
   <td>World File</td>
 </tr>
@@ -122,9 +122,9 @@ following URLs contain pure RASTER data layers.
 
 <h3 class="subtitle">Web Map Service (WMS):</h3>
 
-<br><a href="http://www.opengis.org/techno/specs/01-068r3.pdf">WMS</a> is a neat way to pull in images into your GIS, if your GIS can act
+<br><a href="https://www.ogc.org/standards/wms/">WMS</a> is a neat way to pull in images into your GIS, if your GIS can act
 as a WMS client.  Describing WMS is beyond the scope of this page, but we have
-set up a WMS on our webserver.  Point your WMS aware client at 
+set up a WMS on our webserver.  Point your WMS aware client at
 <br><br><code>{$EXTERNAL_BASEURL}/wms/radar.php?</code><br><br>
 for Iowa imagery in EPSG: 26915 (<i>NAD83 / UTM Zone 15N</i>)
 
@@ -139,14 +139,18 @@ for Iowa imagery in EPSG: 26915 (<i>NAD83 / UTM Zone 15N</i>)
 <p><b>Note:</b> The WMS service should be able to send back an image in the
 projection of your choice.  This has worked during the limited testing done in house.
 
-<p>There are many free web WMS clients available on the Internet.  Recently,
-ESRI has released an <a href="http://www.opengis.org">OGC</a> extension 
-supporting WMS for their free client called <a href="http://www.esri.com/software/arcexplorer/">ArcExplorer</a>.  After downloading ArcExplorer, you will want to also download the <a href="http://gis.esri.com/download/index.cfm?downloadid=321">Interoperability Extension</a>.  ESRI has also released an extension for 
-ArcIMS! 
+<p>
+There are many free web WMS clients available on the Internet.  Recently,
+ESRI has released an <a href="https://ogc.org">OGC</a> extension
+supporting WMS for their free client called ArcExplorer.
+After downloading ArcExplorer, you will want to also download
+the Interoperability Extension.  ESRI has also released an extension for
+ArcIMS!
+</p>
 
 <h3>Notes and Caveats:</h3>
 <ol>
-<li>The storm total precipitation (NTP) product does not directly mosiac.  Each 
+<li>The storm total precipitation (NTP) product does not directly mosiac.  Each
 NEXRAD site reports the value for a different timespan.  Basically, once the
 radar detects rain, it will begin to accumulate the rainfall in the NTP product.
 Once it stops raining for an hour, the value is reset to zero.  Since all sites

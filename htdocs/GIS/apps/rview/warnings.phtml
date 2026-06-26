@@ -42,7 +42,7 @@ if (!is_array($layers)) {
 $cu = get_int404("cu", 0);
 $loop = get_int404("loop", 0);
 if ($loop == 2) $loop = 1;
-$tz = isset($_GET["tz"]) ? strtoupper(xssafe($_GET["tz"])) : "CDT";
+$tz = strtoupper(get_str404("tz", "CDT"));
 $tzdict = array(
     "UTC" => 0,
     "EDT" => 14400,
@@ -55,35 +55,34 @@ $tzdict = array(
     "PST" => 28800
 );
 if (!array_key_exists($tz, $tzdict)) {
-    xssafe("<tag>");
+    die405();
 }
 
 $tzoff = $tzdict[$tz];
 $filter = get_int404("filter", 0);
 $lsrwindow = get_int404("lsrwindow", "0");
-$lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
+$lsrlook = get_str404("lsrlook", "+");
 // careful here as we can have PXXX sites
-$site = isset($_GET["site"]) ? strtoupper(substr(xssafe($_GET["site"]), 0, 4)) : "DMX";
-$osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
-$sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issue";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "DESC";
-$lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
-$lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
+$site = get_str404("site", "DMX");
+$osite = get_str404("osite", "DMX");
+$sortcol = get_str404("sortcol", "issue");
+$sortdir = get_str404("sortdir", "DESC");
+$lon0 = get_float404("lon0", 0);
+$lat0 = get_float404("lat0", 0);
 $zoom = get_int404("zoom", 250);
-$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "640x480";
+$imgsize = get_str404("imgsize", "640x480");
 $interval = get_int404("interval", 5);
 $frames = get_int404("frames", 10);
-$warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]) : "both";
+$warngeo = get_str404("warngeo", "both");
 $ar = explode("x", $imgsize);
 if (count($ar) != 2) {
-    xssafe("<tag>");
+    die405();
 }
 $width = $ar[0];
 $height = $ar[1];
 
 $isarchive = (isset($_GET["archive"]) && $_GET["archive"] == "yes") ? 1 : 0;
-$archive = isset($_GET["archive"]) ? xssafe($_GET["archive"]) : "";
-//if ($isarchive) { $loop = 0; }
+$archive = get_str404("archive", "");
 $a = time();
 if ($isarchive) {
     $year = get_int404("year", date("Y", $a - $tzoff));

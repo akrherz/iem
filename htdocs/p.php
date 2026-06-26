@@ -4,7 +4,7 @@ $pid = get_str404('pid', "", 35);
 if ($pid != ""){
     // Ensure it is in the proper format
     if (!preg_match("/^[0-9]{12}-[A-Z0-9]{4}-[A-Z0-9]{4,6}-[A-Z\-0-9]{4,10}$/", $pid)){
-        xssafe("</script>");
+        die405();
     }
 }
 

@@ -15,12 +15,12 @@ $stname = iem_pg_prepare(
 );
 
 /** Import our variables */
-$prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]) : "comprad";
-$java = isset($_GET["java"]) ? xssafe($_GET["java"]) : "script";
-$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "realtime";
+$prod = get_str404("prod", "comprad");
+$java = get_str404("java", "script");
+$mode = get_str404("mode", "realtime");
 $frames = get_int404("frames", 13);
 $interval = get_int404("interval", 5);
-$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : "no";
+$autopilot = get_str404("autopilot", "no");
 
 /* Lets see what the form is set to */
 $year = get_int404("year", date("Y"));
@@ -58,8 +58,7 @@ $astart = array(
     "lotrad" => mktime(0, 0, 0, 1, 1, 1995)
 );
 if (!array_key_exists($prod, $astart)) {
-    // Naughty request
-    xssafe("<tag>");
+    die405();
 }
 
 $now = time() - 60;

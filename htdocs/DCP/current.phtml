@@ -8,17 +8,17 @@ require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb('iem');
 
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : "valid";
+$sortcol = get_str404("sortcol", "valid");
 $network = get_str404("network", 'IA_DCP', 9);
-$shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
+$shef = get_str404("shef", "no") === 'yes';
 
 $t->title = "DCP/GOES Current Conditions";
 $t->refresh = 600;
 
 $t->breadcrumbs = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/DCP/">DCP Network</a></li>
-<li class="active">Sortable Currents</li>
+<ol class="breadcrumb mb-0">
+<li class="breadcrumb-item"><a href="/DCP/">DCP Network</a></li>
+<li class="breadcrumb-item active" aria-current="page">Sortable Currents</li>
 </ol>
 EOM;
 $cols = array(
@@ -33,7 +33,7 @@ $cols = array(
     'TWIZ' => 'Water Temperature',
 );
 if (!array_key_exists($sortcol, $cols)) {
-    xssafe("</script>");
+    die405();
 }
 
 $stname = iem_pg_prepare(
@@ -67,26 +67,55 @@ while ($row = pg_fetch_assoc($rs)) {
 $final = aSortBySecondIndex($obs, $sortcol, "desc");
 
 $nselect = selectNetworkType("DCP", $network);
+$nselect = str_replace('class="iemselect2"', 'class="iemselect2 form-select"', $nselect);
+$nselect = str_replace('<select ', '<select id="network-select" ', $nselect);
 
 $ar = array("no" => "No", "yes" => "Yes");
-$sselect = make_select("shef", $shef, $ar);
+$sselect = make_select(
+    "shef",
+    $shef ? "yes" : "no",
+    $ar,
+    "",
+    "form-select",
+    FALSE,
+    FALSE,
+    TRUE,
+    array("id" => "shef-select")
+);
 
 $t->current_network = "DCP";
-$baseurl2 = "current.phtml?network=$network&sortcol=";
+$shefqs = $shef ? "&shef=yes" : "";
+$baseurl2 = "current.phtml?network=$network{$shefqs}&sortcol=";
 
 $content = <<<EOM
-<form method="GET" action="current.phtml" name="myselector">
-<input type="hidden" name="sortcol" value="{$sortcol}">
-<strong>Select Network:</strong> {$nselect}
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <form method="GET" action="current.phtml" name="myselector" class="row g-3 align-items-end">
+            <input type="hidden" name="sortcol" value="{$sortcol}">
+            <div class="col-12 col-lg-6">
+                <label for="network-select" class="form-label mb-1">Select Network</label>
+                {$nselect}
+            </div>
+            <div class="col-12 col-md-4 col-lg-3">
+                <label for="shef-select" class="form-label mb-1">Show SHEF Codes</label>
+                {$sselect}
+            </div>
+            <div class="col-12 col-md-4 col-lg-3">
+                <button type="submit" class="btn btn-primary w-100">Update View</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<strong>Show SHEF Codes:</strong> {$sselect}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+    <p class="mb-0">Sorted by: <span class="badge text-bg-light">{$cols[$sortcol]}</span></p>
+    <p class="text-body-secondary small mb-0">Rows with stale observations are highlighted.</p>
+</div>
 
-<input type="submit" value="Go!">
-</form>
-
-<p>Sorted by: {$cols[$sortcol]}
-<table class="table table-sm table-striped table-bordered">
-<thead>
+<div class="table-responsive">
+<table class="table table-sm table-striped table-bordered table-hover align-middle mb-0">
+<caption class="caption-top">Latest DCP/GOES observations for selected state.</caption>
+<thead class="table-light">
 <tr>
   <th><a href="{$baseurl2}station">SiteID:</a></th>
   <th><a href="{$baseurl2}name">Station Name:</a></th>
@@ -104,15 +133,15 @@ $now = time();
 foreach ($final as $site => $value) {
     $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
     $content .= "<tr><td><a href=\"$url\">$site</a></td>
-    <td>" . $value["name"] . "</font></td>";
-    $content .= "<td ";
+    <td>" . $value["name"] . "</td>";
+    $content .= "<td class=\"text-nowrap";
     $tdiff = $now - $value["valid"];
     $dtfmt = "d M h:i A";
     if ($tdiff > (6 * 3600)) {
         $dtfmt = "d M Y h:i A";
-        $content .= 'bgcolor="red"';
+        $content .= ' table-danger fw-semibold';
     }
-    $content .= ">" . date($dtfmt, $value["valid"]) . "</td>";
+    $content .= "\">" . date($dtfmt, $value["valid"]) . "</td>";
 
     if (array_key_exists('HGIZ', $value)) {
         $content .= sprintf("<td>%s</td>", $value["HGIZ"]);
@@ -153,7 +182,7 @@ foreach ($final as $site => $value) {
 
     $content .= "</tr>";
     if ($shef) {
-        $content .= "<tr><td colspan=\"9\">";
+        $content .= "<tr class=\"table-secondary\"><td colspan=\"9\" class=\"small font-monospace\">";
         foreach ($value as $k => $v) {
             if ($k == 'name' || $k == 'valid') continue;
             $content .= sprintf("/%s %s ", $k, $v);
@@ -165,6 +194,7 @@ $content .= <<<EOM
 </tbody><tfoot>
 <tr><td colspan="9">&nbsp;</td></tr>
 </tfoot></table>
+</div>
 EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

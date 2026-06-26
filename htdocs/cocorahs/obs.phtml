@@ -11,23 +11,22 @@ $access = iemdb("coop");
 $t = new MyView();
 $t->title = "CoCoRaHS Observations";
 
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : null;
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_COCORAHS";
-$datestr = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : date("Y-m-d");
-$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "precip";
+$station = get_str404("station", null);
+$network = get_str404("network", "IA_COCORAHS");
+$datestr = get_str404("date", date("Y-m-d"));
+$sortvar = get_str404("sortvar", "precip");
 $year = get_int404("year", date("Y"));
 
 $single_station_mode = !is_null($station);
 
 if ($year < 2000 || $year > (intval(date("Y")) + 1)) {
-    // naughty request
-    xssafe("<tag>");
+    die405();
 }
 
 try {
     $dt = new DateTime($datestr);
 } catch (Exception $e) {
-    xssafe("<tag>");
+    die405();
 }
 if ($sortvar == "pday") {
     $sortvar = "precip";

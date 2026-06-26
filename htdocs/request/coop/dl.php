@@ -32,11 +32,12 @@ if (!is_array($stations)) {
 }
 $selectAll = false;
 foreach ($stations as $key => $value) {
-    if ($value == "_ALL") {
+    if ($value === "_ALL") {
         $selectAll = true;
+        continue;
     }
     if (strlen($value) > 6 && !array_key_exists($value, $cities)) {
-        xssafe("<tag>");
+        die405();
     }
 }
 

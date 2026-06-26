@@ -18,14 +18,12 @@ $e = null;
 if (array_key_exists("e", $_GET)) {
     $e = get_str404("e");
     if ((strlen($e) != 12) || !ctype_digit($e)) {
-        // Naughty
-        xssafe("<tag>");
+        die405();
     }
     // convert to a DateTime instance
     $e = DateTimeImmutable::createFromFormat("YmdHi", $e, new DateTimeZone("UTC"));
     if ($e === false) {
-        // Naughty
-        xssafe("<tag>");
+        die405();
     }
 }
 $pil = get_str404("pil", null, $maxlength=6);

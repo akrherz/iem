@@ -5,9 +5,9 @@ require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 
 $t = new MyView();
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "peak";
-$metar = isset($_GET["metar"]) ? xssafe($_GET['metar']) : "no";
-$sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
+$sortcol = get_str404("sortcol", "peak");
+$metar = get_str404("metar", "no");
+$sorder = get_str404("sorder", "desc");
 $state = get_str404("state", "IA", 2);
 
 $t->refresh = 60;
@@ -28,8 +28,7 @@ $vals = array(
     "pday" => "Today Rainfall [inch]"
 );
 if (! array_key_exists($sortcol, $vals)) {
-    // Bad user!
-    xssafe("<tag>");
+    die405();
 }
 
 $t->current_network = 'By State';

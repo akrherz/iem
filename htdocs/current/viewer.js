@@ -94,7 +94,7 @@ const cameraStyle2 = new ol.style.Style({
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -408,7 +408,7 @@ function buildUI() {
         });
     });
 
-    // Thanks to http://jsfiddle.net/hmgyu371/
+    // Thanks to https://jsfiddle.net/hmgyu371/
     document.querySelectorAll('#toggle_event_mode button').forEach((button, idx, btns) => {
         button.addEventListener('click', function () {
             if (this.classList.contains('locked_active') || this.classList.contains('unlocked_inactive')) {
@@ -441,7 +441,7 @@ function buildUI() {
     if (dtpicker) {
         // Set default value to current date/time
         dtpicker.value = formatDateTimeLocal(new Date());
-        
+
         // Add change event listener
         dtpicker.addEventListener('change', () => {
             if (!realtimeMode) {
@@ -457,24 +457,63 @@ function buildUI() {
  * @param feature {ol.Feature}
  */
 function popupSBW(feature) {
-    const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
-    + `<a target="_new" href="${feature.get('href')}">`
-    + `${feature.get('ps')} ${feature.get('eventid')}</a>`
-    + '<button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" onclick="closeSBWPopover()"></button>';
+    const buildPopoverContent = () => {
+        const wrapper = document.createElement('div');
+        const label = document.createElement('strong');
+        const wfo = String(feature.get('wfo') ?? '');
+        const ps = String(feature.get('ps') ?? '');
+        const eventid = String(feature.get('eventid') ?? '');
+        const rawHref = String(feature.get('href') ?? '');
+
+        label.textContent = 'You clicked:';
+        wrapper.append(label, document.createTextNode(` ${wfo} `));
+
+        let safeHref = null;
+        try {
+            const parsedHref = new URL(rawHref, window.location.origin);
+            if (parsedHref.protocol === 'http:' ||
+                parsedHref.protocol === 'https:') {
+                safeHref = parsedHref.href;
+            }
+        } catch {
+            safeHref = null;
+        }
+
+        const detailsText = [ps, eventid].filter(Boolean).join(' ');
+        if (safeHref) {
+            const link = document.createElement('a');
+            link.href = safeHref;
+            link.target = '_new';
+            link.rel = 'noopener noreferrer';
+            link.textContent = detailsText;
+            wrapper.append(link);
+        } else {
+            const details = document.createElement('span');
+            details.textContent = detailsText;
+            wrapper.append(details);
+        }
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close btn-close-white ms-2';
+        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.addEventListener('click', closeSBWPopover);
+        wrapper.append(closeButton);
+
+        return wrapper;
+    };
     const geometry = feature.getGeometry();
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);
-    
-    // Update popover content
-    const popoverContent = document.getElementById('popover-content');
-    popoverContent.innerHTML = content;
-    
+
+    const content = buildPopoverContent();
+
     // Show Bootstrap 5 popover
     if (bootstrapPopover) {
         bootstrapPopover.dispose();
     }
     bootstrapPopover = new bootstrap.Popover(element, {
-        content: popoverContent.innerHTML,
+        content,
         html: true,
         placement: 'top'
     });
@@ -484,7 +523,6 @@ function popupSBW(feature) {
 /**
  * Close the SBW popover
  */
-// eslint-disable-next-line no-unused-vars
 function closeSBWPopover() {
     if (bootstrapPopover) {
         bootstrapPopover.hide();
@@ -598,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             popupSBW(feature);
             return;
         }
-        
+
         // Hide existing popover when clicking on camera features
         if (bootstrapPopover) {
             bootstrapPopover.hide();

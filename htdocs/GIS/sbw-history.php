@@ -18,7 +18,7 @@ $utcnow = new DateTime('now', new DateTimeZone("UTC"));
 $eventid = intval(xssafe($eventid));
 $year = intval(xssafe($year));
 if (($year > (intval($utcnow->format("Y")) + 1)) || ($year < 1980)) {
-    xssafe("<tag>");
+    die405();
 }
 $wfo = substr(xssafe($wfo), 1, 3);
 $phenomena = substr(xssafe($phenomena), 0, 2);

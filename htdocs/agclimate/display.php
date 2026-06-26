@@ -96,9 +96,7 @@ often too low."
     ),
 );
 if (!array_key_exists($prod, $data)){
-    // trigger 422 handler
-    xssafe("<invalid>");
-    die();
+    die405();
 }
 
 $extra = "";
