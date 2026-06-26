@@ -49,7 +49,7 @@ def apps():
                 yield app
 
 
-@pytest.mark.parametrize("app", apps())
+@pytest.mark.parametrize("app", list(apps()))
 def test_php(app):
     """Test the app."""
     resp = requests.get(
@@ -67,7 +67,7 @@ def test_php(app):
         assert soup.find("title") is not None
 
 
-@pytest.mark.parametrize("url", get_urls(""))
+@pytest.mark.parametrize("url", list(get_urls("")))
 def test_php_urls(url):
     """Test the app."""
     resp = requests.get(
@@ -80,7 +80,7 @@ def test_php_urls(url):
     assert resp.status_code in [503, 422, 301, 302, 200]
 
 
-@pytest.mark.parametrize("url", get_urls("405"))
+@pytest.mark.parametrize("url", list(get_urls("405")))
 def test_php_urls405(url):
     """Test the app."""
     resp = requests.get(

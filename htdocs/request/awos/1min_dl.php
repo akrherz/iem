@@ -22,7 +22,7 @@ $skycover = array(
 );
 
 $gis = get_str404("gis", 'no');
-$delim = get_str404("delim", ",");
+$delim = get_str404("delim", "comma");
 $sample = get_str404("sample", "1min");
 $what = get_str404("what", 'dl');
 $tz = get_str404("tz", 'UTC');
@@ -41,17 +41,20 @@ $vars = array_key_exists("vars", $_GET) ? $_GET["vars"] : ["tmpf"];
 
 $stations = array_key_exists("station", $_GET) ? $_GET["station"] : ["BNW"];
 $selectAll = false;
+$cleaned = [];
 foreach ($stations as $key => $value) {
     if ($value === "_ALL") {
         $selectAll = true;
-        continue;
+        break;
     }
-    if (!array_key_exists($value, $nt->table)) {
-        die405();
+    if (array_key_exists($value, $nt->table)) {
+        $cleaned[] = $value;
     }
 }
 if ($selectAll) {
     $stations = array_keys($nt->table);
+} else {
+    $stations = $cleaned;
 }
 
 
@@ -82,6 +85,9 @@ $sampleStr = array(
 );
 
 $d = array("space" => " ", "comma" => ",", "tab" => "\t");
+if (!array_key_exists($delim, $d)) {
+    $delim = "comma";
+}
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata ";
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";

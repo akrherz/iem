@@ -506,10 +506,7 @@ function popupSBW(feature) {
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);
 
-    // Update popover content
-    const popoverContent = document.getElementById('popover-content');
     const content = buildPopoverContent();
-    popoverContent.replaceChildren(content.cloneNode(true));
 
     // Show Bootstrap 5 popover
     if (bootstrapPopover) {
