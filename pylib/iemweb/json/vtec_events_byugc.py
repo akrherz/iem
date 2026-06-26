@@ -50,11 +50,11 @@ import json
 from datetime import datetime
 from io import BytesIO, StringIO
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
@@ -81,16 +81,20 @@ class Schema(CGIModel):
             pattern="^(csv|json|excel|xlsx)$",
         ),
     ] = "json"
-    edate: str = Field(
-        default=f"{utc().year}-12-31",
-        description="End Date (midnight US Central) to end query for issuance",
-    )
-    sdate: str = Field(
-        default="1986-01-01",
-        description=(
-            "Start Date (midnight US Central) to start query for issuance"
+    edate: Annotated[
+        str,
+        Field(
+            description="Inclusive End Date (US Central) for issuance",
         ),
-    )
+    ] = f"{utc().year}-12-31"
+    sdate: Annotated[
+        str,
+        Field(
+            description=(
+                "Start Date (midnight US Central) to start query for issuance"
+            ),
+        ),
+    ] = "1980-01-01"
     sts: AwareDatetime = Field(
         default=None,
         description="Start timestamp (overrides sdate) for event issuance",
@@ -118,6 +122,24 @@ class Schema(CGIModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def ensure_sts_ets(self):
+        """Rectify the parameter mess of what could be provided."""
+
+        if self.sts is not None and self.ets is not None:
+            return self
+        for col in ["sdate", "edate"]:
+            try:
+                val = parse_date(getattr(self, col))
+                if col == "edate":
+                    val = val.replace(hour=23, minute=59, second=59)
+                setattr(self, col, val)
+            except Exception as exp:
+                raise ValueError(
+                    f"Invalid {col} provided: {getattr(self, col)}"
+                ) from exp
+        return self
+
 
 def make_url(row):
     """Build URL."""
@@ -128,7 +150,7 @@ def make_url(row):
     )
 
 
-def get_df(query: Schema, sts: datetime, ets: datetime):
+def get_df(query: Schema):
     """Answer the request!"""
     phsig_filter = ""
     if query.phenomena is not None and query.significance is not None:
@@ -158,8 +180,8 @@ def get_df(query: Schema, sts: datetime, ets: datetime):
             conn,
             params={
                 "ugc": query.ugc,
-                "sts": sts,
-                "ets": ets,
+                "sts": query.sts,
+                "ets": query.ets,
                 "phenomena": query.phenomena,
                 "significance": query.significance,
             },
@@ -205,20 +227,25 @@ def as_json(df):
     return json.dumps(res).replace(" NaN", " null")
 
 
-def parse_date(val):
+def parse_date(val: str) -> datetime:
     """convert string to date."""
     fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
-    return datetime.strptime(val, fmt)
+    return (
+        datetime.strptime(val, fmt)
+        .replace(tzinfo=ZoneInfo("America/Chicago"))
+        .astimezone(ZoneInfo("UTC"))
+    )
 
 
 def get_mckey(environ):
     """Compute the key."""
-    if environ["fmt"] != "json":
+    query: Schema = environ["_cgimodel_schema"]
+    if query.fmt != "json":
         return None
     return (
-        f"/json/vtec_events_byugc.json|{environ['ugc']}|"
-        f"{environ['sdate']}|{environ['edate']}|{environ['phenomena']}|"
-        f"{environ['significance']}"
+        f"/json/vtec_events_byugc.json|{query.ugc}|"
+        f"{query.sts}|{query.ets}|{query.phenomena}|"
+        f"{query.significance}"
     ).replace(" ", "_")  # memcache key cannot have spaces
 
 
@@ -226,20 +253,10 @@ def get_mckey(environ):
 def application(environ, start_response):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
-    try:
-        sts = parse_date(query.sdate)
-        ets = parse_date(query.edate)
-    except Exception as exp:
-        raise IncompleteWebRequest(str(exp)) from exp
-    if query.sts:
-        sts = query.sts
-    if query.ets:
-        ets = query.ets
-    fmt = query.fmt
 
-    df = get_df(query, sts, ets)
-    if fmt in ["xlsx", "excel"]:
-        fn = f"vtec_{query.ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.xlsx"
+    df = get_df(query)
+    if query.fmt in ["xlsx", "excel"]:
+        fn = f"vtec_{query.ugc}_{query.sts:%Y%m%d}_{query.ets:%Y%m%d}.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
@@ -247,17 +264,17 @@ def application(environ, start_response):
         bio = BytesIO()
         df.to_excel(bio, index=False)
         start_response("200 OK", headers)
-        return [bio.getvalue()]
-    if fmt == "csv":
-        fn = f"vtec_{query.ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.csv"
+        return bio.getvalue()
+    if query.fmt == "csv":
+        fn = f"vtec_{query.ugc}_{query.sts:%Y%m%d}_{query.ets:%Y%m%d}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),
         ]
-        bio = StringIO()
-        df.to_csv(bio, index=False)
+        sio = StringIO()
+        df.to_csv(sio, index=False)
         start_response("200 OK", headers)
-        return [bio.getvalue().encode("utf-8")]
+        return sio.getvalue().encode()
 
     res = as_json(df).encode()
     start_response("200 OK", [("Content-type", "application/json")])
