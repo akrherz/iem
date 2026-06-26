@@ -16,10 +16,7 @@ $smonth = get_int404("smonth", 5);
 $sday = get_int404("sday", 1);
 $emonth = get_int404("emonth", date("m", time() - 86400));
 $eday = get_int404("eday", date("d", time() - 86400));
-$network = get_str404("network", "IACLIMATE");
-if (strlen($network) > 9){
-    die405();
-}
+$network = get_str404("network", "IACLIMATE", 9);
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;

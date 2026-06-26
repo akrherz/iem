@@ -46,7 +46,7 @@ foreach ($stations as $key => $value) {
         $selectAll = true;
         continue;
     }
-    if (strlen($value) > 4 && !array_key_exists($value, $nt->table)) {
+    if (!array_key_exists($value, $nt->table)) {
         die405();
     }
 }

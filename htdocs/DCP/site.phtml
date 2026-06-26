@@ -120,9 +120,10 @@ EOM;
 } else {
     if (!$alone) {
         $extra = <<<EOM
-<div class="warning">This site is listed within the IEM database as both a
-    "COOP" and "DCP" site. This printout below will only include a days
-    worth of data.</div>
+<div class="warning">
+    Since this station identifier is dual listed as both a "COOP" and "DCP"
+    type station, the page will only list one day worth of data.
+</div>
 EOM;
     }
     $extra .= "<br /><br />

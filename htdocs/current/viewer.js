@@ -457,24 +457,66 @@ function buildUI() {
  * @param feature {ol.Feature}
  */
 function popupSBW(feature) {
-    const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
-    + `<a target="_new" href="${feature.get('href')}">`
-    + `${feature.get('ps')} ${feature.get('eventid')}</a>`
-    + '<button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" onclick="closeSBWPopover()"></button>';
+    const buildPopoverContent = () => {
+        const wrapper = document.createElement('div');
+        const label = document.createElement('strong');
+        const wfo = String(feature.get('wfo') ?? '');
+        const ps = String(feature.get('ps') ?? '');
+        const eventid = String(feature.get('eventid') ?? '');
+        const rawHref = String(feature.get('href') ?? '');
+
+        label.textContent = 'You clicked:';
+        wrapper.append(label, document.createTextNode(` ${wfo} `));
+
+        let safeHref = null;
+        try {
+            const parsedHref = new URL(rawHref, window.location.origin);
+            if (parsedHref.protocol === 'http:' ||
+                parsedHref.protocol === 'https:') {
+                safeHref = parsedHref.href;
+            }
+        } catch {
+            safeHref = null;
+        }
+
+        const detailsText = [ps, eventid].filter(Boolean).join(' ');
+        if (safeHref) {
+            const link = document.createElement('a');
+            link.href = safeHref;
+            link.target = '_new';
+            link.rel = 'noopener noreferrer';
+            link.textContent = detailsText;
+            wrapper.append(link);
+        } else {
+            const details = document.createElement('span');
+            details.textContent = detailsText;
+            wrapper.append(details);
+        }
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close btn-close-white ms-2';
+        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.addEventListener('click', closeSBWPopover);
+        wrapper.append(closeButton);
+
+        return wrapper;
+    };
     const geometry = feature.getGeometry();
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);
 
     // Update popover content
     const popoverContent = document.getElementById('popover-content');
-    popoverContent.innerHTML = content;
+    const content = buildPopoverContent();
+    popoverContent.replaceChildren(content.cloneNode(true));
 
     // Show Bootstrap 5 popover
     if (bootstrapPopover) {
         bootstrapPopover.dispose();
     }
     bootstrapPopover = new bootstrap.Popover(element, {
-        content: popoverContent.innerHTML,
+        content,
         html: true,
         placement: 'top'
     });
@@ -484,7 +526,6 @@ function popupSBW(feature) {
 /**
  * Close the SBW popover
  */
-// eslint-disable-next-line no-unused-vars
 function closeSBWPopover() {
     if (bootstrapPopover) {
         bootstrapPopover.hide();

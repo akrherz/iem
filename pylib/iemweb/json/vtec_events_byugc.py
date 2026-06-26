@@ -128,12 +128,12 @@ class Schema(CGIModel):
 
         if self.sts is not None and self.ets is not None:
             return self
-        for col in ["sdate", "edate"]:
+        for col, scol in zip(["sdate", "edate"], ["sts", "ets"], strict=True):
             try:
                 val = parse_date(getattr(self, col))
                 if col == "edate":
                     val = val.replace(hour=23, minute=59, second=59)
-                setattr(self, col, val)
+                setattr(self, scol, val)
             except Exception as exp:
                 raise ValueError(
                     f"Invalid {col} provided: {getattr(self, col)}"

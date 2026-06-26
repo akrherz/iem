@@ -42,7 +42,7 @@ if (!is_array($layers)) {
 $cu = get_int404("cu", 0);
 $loop = get_int404("loop", 0);
 if ($loop == 2) $loop = 1;
-$tz = get_str404("tz", "CDT");
+$tz = strtoupper(get_str404("tz", "CDT"));
 $tzdict = array(
     "UTC" => 0,
     "EDT" => 14400,
