@@ -12,10 +12,10 @@ $t->content = <<<EOM
   <li class="breadcrumb-item active" aria-current="page">IEM Ag Weather/Climate Information</li>
 </ol>
 
-<p>The IEM website contains data from many <a href="/sites/locate.php">different observation networks</a>. While 
-you may know what you are looking for, figuring out which network has this data 
+<p>The IEM website contains data from many <a href="/sites/locate.php">different observation networks</a>. While
+you may know what you are looking for, figuring out which network has this data
 is tricky.  This table is an attempt to help you locate the data / product you
-need.  Please do <a href="/info/contacts.php">contact us</a> with your 
+need.  Please do <a href="/info/contacts.php">contact us</a> with your
 questions!</p>
 
 <p>IEM's most popular applications:
@@ -51,7 +51,7 @@ at one minute intervals.  <a href="/ASOS/">ASOS</a> also provides data at
 such frequency, but it is delayed by ~24 hours.
 </td>
 <td><a href="/ASOS/">ASOS/AWOS</a> are stations located at airports and are
-the baseline weather observation network. The 
+the baseline weather observation network. The
 <a href="/agclimate">ISU Soil Moisture</a> network has data for Iowa.</td>
 
 <td>
@@ -83,7 +83,7 @@ for various pests of interest.</p>
 
 <tr><td>Growing Degree Days</td>
 <td colspan="2">Not applicable</td>
-<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality 
+<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality
 information for daily temperatures, but they are not always on a calendar date.
 </td>
 <td colspan="3">
@@ -123,17 +123,17 @@ for various pests of interest.</p>
   <li><a href="/COOP/extremes.php">Daily Climatology</a></li>
   <li><a href="/data/summary/today_prec.png">Today's total</a></li>
  </ul>
- 
+
  <br />The IEM processes gridded analyses of precipitation
  <ul>
    <li><a href="/plotting/auto/?q=86&var=p01d">IEM Reanalysis</a></li>
    <li><a href="/timemachine/?product=45">MRMS ~1km Product</a></li>
    <li><a href="/timemachine/?product=41">NCEP Stage IV</a></li>
  </ul>
- 
+
  <br />There are daily <a href="/request/daily.phtml">ASOS precip reports</a>
  available for download.
- 
+
  </td>
  <td colspan="3" rowspan="2">
  <ul>
@@ -151,7 +151,7 @@ for various pests of interest.</p>
 </tr>
 
 <tr><td>Rainfall (liquid only)</td>
- <td>The <a href="/schoolnet/">SchoolNet</a> sensors do report minute rainfall, 
+ <td>The <a href="/schoolnet/">SchoolNet</a> sensors do report minute rainfall,
  but the data is not of great quality.</td>
  <td>The <a href="/ASOS/">ASOS/AWOS</a> sites report hourly rainfall as well as
  the <a href="/agclimate/">ISU Soil Moisture</a> network.</td>
@@ -159,9 +159,9 @@ for various pests of interest.</p>
 
 
 <tr><td>Solar Radiation</td>
-<td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects solar 
+<td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects solar
 radiation at minute and hourly intervals.</td>
-<td>The <a href="/agclimate/">ISU Soil Moisture</a> network makes daily 
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network makes daily
 summaries available. The IEM also provides estimated radiation data for download
 for <a href="/request/coop/fe.phtml">NWS COOP</a> sites based on model analyses.</td>
 <td colspan="3">
@@ -180,7 +180,7 @@ over time here:
 soil moisture data.</td>
 <td>The <a href="https://dailyerosion.org">Daily Erosion Project</a>
 produces soil moisture analyses based on a model called WEPP.</td>
-<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+<td colspan="3">Summarized data for this timescale does not exist on the IEM
 at this time.</td>
 </tr>
 
@@ -194,7 +194,7 @@ summaries of high and low temperature.
  <li><a href="/timemachine/?product=57">Archived County Estimates</a></li>
 </ul>
 </td>
-<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+<td colspan="3">Summarized data for this timescale does not exist on the IEM
 at this time.</td>
 </tr>
 
@@ -210,13 +210,13 @@ at this time.</td>
    <li><a href="/data/coopSnowDepth.gif">COOP Snow Depth</a></li>
  </ul>
  </td>
-<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+<td colspan="3">Summarized data for this timescale does not exist on the IEM
 at this time.</td>
 </tr>
 
 <tr><td>Stress Degree Days</td>
 <td colspan="2">Not applicable</td>
-<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality 
+<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality
 information for daily temperatures, but they are not always on a calendar date.
 </td>
 <td colspan="3">The <a href="/climodat/">Climodat</a> reports present
@@ -257,7 +257,7 @@ same for other locations.</p>
 <a name="nass"></a>
 <h4>USDA NASS Products</h4>
 
-<p>The IEM attempts to sync much of the <a href="http://www.nass.usda.gov/">USDA NASS</a>
+<p>The IEM attempts to sync much of the <a href="https://www.nass.usda.gov/">USDA NASS</a>
 data into our database.  A number of <a href="/plotting/auto/">automated plots</a>
 are available for this data (search for NASS in the dropdown menu).</p>
 
@@ -268,8 +268,8 @@ PDF reports.  You can download the IEM's entire database as this
 
 <h4>Historical Freeze Risk</h4>
 
-<blockquote>An air temperature less than 27 is generally considered to be the Hard Freeze, 
-that is a crop killing event, although plant damage and yield loss is often observed at 
+<blockquote>An air temperature less than 27 is generally considered to be the Hard Freeze,
+that is a crop killing event, although plant damage and yield loss is often observed at
 less extreme low temperatures. Crop threshold temperatures for plant damage in Fall differ
 from Spring thresholds (mainly because of plant size/height).</blockquote>
 

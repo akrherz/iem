@@ -13,8 +13,7 @@ try {
     $dayParam = get_str404("day", null);
     $day = !is_null($dayParam) ? new DateTime($dayParam) : null;
 } catch (Exception $exp){
-    xssafe("<tag>");
-    die();
+    die405();
 }
 $offset = get_int404("offset", 0);
 if (is_null($day)) {

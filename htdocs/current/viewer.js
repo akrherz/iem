@@ -94,7 +94,7 @@ const cameraStyle2 = new ol.style.Style({
 
 /**
  * Replace HTML special characters with their entity equivalents
- * @param string val 
+ * @param string val
  * @returns string converted string
  */
 function escapeHTML(val) {
@@ -408,7 +408,7 @@ function buildUI() {
         });
     });
 
-    // Thanks to http://jsfiddle.net/hmgyu371/
+    // Thanks to https://jsfiddle.net/hmgyu371/
     document.querySelectorAll('#toggle_event_mode button').forEach((button, idx, btns) => {
         button.addEventListener('click', function () {
             if (this.classList.contains('locked_active') || this.classList.contains('unlocked_inactive')) {
@@ -441,7 +441,7 @@ function buildUI() {
     if (dtpicker) {
         // Set default value to current date/time
         dtpicker.value = formatDateTimeLocal(new Date());
-        
+
         // Add change event listener
         dtpicker.addEventListener('change', () => {
             if (!realtimeMode) {
@@ -464,11 +464,11 @@ function popupSBW(feature) {
     const geometry = feature.getGeometry();
     const coord = geometry.getFirstCoordinate();
     popup.setPosition(coord);
-    
+
     // Update popover content
     const popoverContent = document.getElementById('popover-content');
     popoverContent.innerHTML = content;
-    
+
     // Show Bootstrap 5 popover
     if (bootstrapPopover) {
         bootstrapPopover.dispose();
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
             popupSBW(feature);
             return;
         }
-        
+
         // Hide existing popover when clicking on camera features
         if (bootstrapPopover) {
             bootstrapPopover.hide();

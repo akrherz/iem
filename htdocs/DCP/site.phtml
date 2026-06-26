@@ -1,5 +1,5 @@
 <?php
-$OL = "10.6.1";
+$OL = "10.9.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 110);
 require_once "../../include/mlib.php";
@@ -12,8 +12,8 @@ require_once "../../include/forms.php";
 $day = get_int404("day", date("d"));
 $month = get_int404("month", date("m"));
 $year = get_int404("year", date("Y"));
-$station = isset($_GET['station']) ? xssafe($_GET['station']) : null;
-$shefvar = isset($_GET['shefvar']) ? xssafe($_GET['shefvar']) : null;
+$station = get_str404("station", null);
+$shefvar = get_str404("shefvar", null);
 $network = get_str404("network", 'IA_DCP', 9);
 
 $ts = mktime(1, 0, 0, $month, $day, $year);
@@ -120,8 +120,8 @@ EOM;
 } else {
     if (!$alone) {
         $extra = <<<EOM
-<div class="warning">This site is listed within the IEM database as both a 
-    "COOP" and "DCP" site. This printout below will only include a days 
+<div class="warning">This site is listed within the IEM database as both a
+    "COOP" and "DCP" site. This printout below will only include a days
     worth of data.</div>
 EOM;
     }

@@ -275,6 +275,16 @@ function networkSelectAuto($network, $selected, $extra = array())
 }
 
 /**
+ * Our opinionated exit with status 405, which gets processed by iemwebfarm
+ *
+ */
+function die405()
+{
+    http_response_code(405);
+    die();
+}
+
+/**
  * xss mitigation functions
  * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
  * @param string $data The input string to be sanitized
@@ -289,8 +299,7 @@ function xssafe($data, $encoding = 'UTF-8')
     $res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
     if ($res !== $data) {
         // 405, which ends up hitting some iemwebfarm code
-        http_response_code(405);
-        die();
+        die405();
     }
 
     return $res;
@@ -310,8 +319,7 @@ function get_str404($name, $default = null, $maxlength = null)
     $val = xssafe($_REQUEST[$name]);
     if ($maxlength !== null && strlen($val) > $maxlength) {
         // passed up to iemwebfarm handler
-        http_response_code(405);
-        die();
+        die405();
     }
     return $val;
 }
@@ -334,17 +342,14 @@ function get_int404($name, $default = null, $minval = null, $maxval = null)
     }
     if (! is_numeric($val)) {
         // passed up to iemwebfarm handler
-        http_response_code(405);
-        die();
+        die405();
     }
     $ival = (int)$val;
     if ($minval !== null && $ival < $minval) {
-        http_response_code(405);
-        die();
+        die405();
     }
     if ($maxval !== null && $ival > $maxval) {
-        http_response_code(405);
-        die();
+        die405();
     }
     return $ival;
 }
@@ -364,8 +369,7 @@ function get_float404($name, $default = null)
     if ($val != "0" && empty($val)) return $default;
     if (!is_numeric($val)) {
         // passed up to iemwebfarm handler
-        http_response_code(405);
-        die();
+        die405();
     }
     return floatval($val);
 }

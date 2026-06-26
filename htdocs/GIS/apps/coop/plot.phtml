@@ -9,15 +9,15 @@ require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/vendor/mapscript.php";
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
+$var = get_str404("var", "high");
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$source = isset($_GET["source"]) ? xssafe($_GET["source"]) : "prelim";
-$size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "1024x768";
-$showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
-$timing = isset($_GET["timing"]) ? xssafe($_GET["timing"]) : "1";
-$state = isset($_GET["state"]) ? xssafe(substr($_GET["state"], 0, 2)) : "IA";
+$source = get_str404("source", "prelim");
+$size = get_str404("size", "1024x768");
+$showlabels = (get_str404("labels", "off") == "on");
+$timing = get_str404("timing", "1");
+$state = get_str404("state", "IA");
 $tokens = explode("x", $size);
 $width = $tokens[0];
 $height = $tokens[1];
@@ -38,6 +38,12 @@ if ($source == "qc") $nt = new NetworkTable("{$state}CLIMATE");
 else $nt = new NetworkTable("{$state}_COOP");
 $cities = $nt->table;
 
+/**
+ * plot no data on the map
+ *
+ * @param mapObj $map
+ * @param imageObj $img
+ */
 function plotNoData($map, $img)
 {
     $layer = $map->getLayerByName("credits");

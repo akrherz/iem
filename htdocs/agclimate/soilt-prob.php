@@ -24,8 +24,7 @@ $tblrows = array();
 $row1 = '<tr><th scope="col">Date</th>';
 foreach ($thresholds as $k => $thres) {
     if (!is_numeric($thres)){
-        // Bad user!
-        xssafe("<tag>");
+        die405();
     }
     $row1 .= sprintf('<th scope="col">%s</th>', $thres);
     $rs = pg_execute($conn, $stname1, array($station, $thres));

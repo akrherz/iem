@@ -12,8 +12,7 @@ $wfo = get_str404("wfo", 'DMX', 4);
 $wfo3 = unrectify_wfo($wfo);
 $year = get_int404("year", date("Y"));
 if ($year < 1986) {
-    // 1986 is the first year we have data for
-    xssafe("<tag>");
+    die405();
 }
 $sid = get_int404("sid", 1);
 $eid = get_int404("eid", 999);
@@ -82,6 +81,11 @@ while ($row = pg_fetch_assoc($rs)) {
     $station2ugc[$row["id"]] = $row["ugc_zone"];
 }
 
+/**
+ * Colorize relative humidity based on threshold
+ * @param float $relh relative humidity
+ * @return string HTML formatted relative humidity
+ */
 function c1($relh)
 {
     global $rhthres;
@@ -91,6 +95,12 @@ function c1($relh)
     return sprintf("<span style='color:#f00;'>%.0f%%</span>", $relh);
 }
 
+/**
+ * Colorize wind speed based on threshold
+ * @param float $sknt wind speed in knots
+ * @param float $gust gust speed in knots
+ * @return string HTML formatted wind speed
+ */
 function c2($sknt, $gust)
 {
     global $skntthres;
@@ -117,6 +127,11 @@ function c2($sknt, $gust)
     }
 }
 
+/**
+ * Colorize visibility based on threshold
+ * @param float $vsby visibility in statute miles
+ * @return string HTML formatted visibility
+ */
 function c3($vsby)
 {
     if (is_null($vsby)) return "MMSM";
@@ -126,6 +141,12 @@ function c3($vsby)
     }
     return sprintf("%.1fSM", $vsby);
 }
+
+/**
+ * Colorize temperature based on thresholds
+ * @param float $tmpf temperature in Fahrenheit
+ * @return string HTML formatted temperature
+ */
 function c4($tmpf)
 {
     if (is_null($tmpf)) return "M";
@@ -139,6 +160,13 @@ function c4($tmpf)
     }
     return sprintf("%.0f", $tmpf);
 }
+
+
+/**
+ * Colorize wind chill based on threshold
+ * @param float $wcht wind chill temperature in Fahrenheit
+ * @return string HTML formatted wind chill
+ */
 function c5($wcht)
 {
     if (is_null($wcht))  return "";
@@ -152,6 +180,14 @@ function c5($wcht)
         return sprintf(" WC %.0f", $wcht);
     return "";
 }
+
+
+/**
+ * Colorize heat index based on threshold
+ * @param float $hidx heat index temperature in Fahrenheit
+ * @param float $thres threshold for heat index
+ * @return string HTML formatted heat index
+ */
 function c6($hidx, $thres)
 {
     if (is_null($hidx))  return "";
@@ -171,7 +207,9 @@ $rs = pg_execute($postgis, $find_stname, array(
     $wfo3, $sid, $eid, $phenomena,
     $significance
 ));
-if ($rs === FALSE) xssafe("<tag>");
+if ($rs === FALSE) {
+    die405();
+}
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ar = explode(",", $row["a"]);
     $issue = $row["issue"];

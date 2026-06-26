@@ -36,7 +36,7 @@ foreach ($stations as $key => $value) {
         $selectAll = true;
     }
     if (strlen($value) > 6 && !array_key_exists($value, $cities)) {
-        xssafe("<tag>");
+        die405();
     }
 }
 

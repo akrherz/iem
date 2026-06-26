@@ -173,7 +173,7 @@ $cols = array(
     "phour" => "Rainfall One Hour", "snoww" => "Snow Water Equivalent"
 );
 if (!array_key_exists($sortcol, $cols)) {
-    xssafe("</script>");
+    die405();
 }
 $t->current_network = "COOP";
 

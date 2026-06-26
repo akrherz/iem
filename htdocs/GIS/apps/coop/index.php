@@ -17,8 +17,8 @@ $coopdb = iemdb("coop");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
-$plot = isset($_GET["plot"]) ? xssafe($_GET["plot"]) : "high";
-$area = isset($_GET["area"]) ? xssafe($_GET["area"]) : "all";
+$plot = get_str404("plot", "high");
+$area = get_str404("area", "all");
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 
@@ -43,7 +43,7 @@ $ex = array(
     "nw" => array($lx,           $ly + ($dy / 2), $ux - ($dx / 2), $uy)
 );
 if (!array_key_exists($area, $ex)) {
-    xssafe("<tag>");
+    die405();
 }
 
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
@@ -100,7 +100,7 @@ $var = array(
     "high" => "Average High Temp [F]"
 );
 if (!array_key_exists($plot, $var)) {
-    xssafe("<tag>");
+    die405();
 }
 
 $dbdate = new DateTime("2000-{$month}-{$day}");
@@ -199,11 +199,11 @@ $t->content = <<<EOM
 
 <img src="{$url}" class="img img-fluid" />
    <br><i>You can right-click on the image to save it.</i>
-  <br><li>Only one year with the record value is shown, there may have been 
+  <br><li>Only one year with the record value is shown, there may have been
     more.</li>
 
    </div><div class="col-md-5">
-    
+
     <form name="f" method="GET" action="index.php">
 
 <table width="100%">
@@ -213,7 +213,7 @@ $t->content = <<<EOM
 
 <tr><td colspan=2>
   {$aselect}
-   <br><i>If you select a sub-region, the year of a record event will appear 
+   <br><i>If you select a sub-region, the year of a record event will appear
    as well.</i><br><br>
 
 </td></tr>
@@ -265,7 +265,7 @@ $t->content = <<<EOM
 
 <tr>
   <td colspan="2">
-  The black and red dots signify the climate record for the station.  Sites in 
+  The black and red dots signify the climate record for the station.  Sites in
   black date back till 1893 and sites in red to 1951.
 
 </td></tr>

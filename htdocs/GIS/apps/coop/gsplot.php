@@ -7,49 +7,13 @@ require_once "../../../../include/vendor/mapscript.php";
 
 $coopdb = iemdb("coop");
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
+$var = get_str404("var", "gdd50");
 $year = get_int404("year", date("Y"));
 $smonth = get_int404("smonth", 5);
 $sday = get_int404("sday", 1);
 $emonth = get_int404("emonth", date("m"));
 $eday = get_int404("eday", date("d"));
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
-if (strlen($network) > 9){
-    xssafe("<tag>");
-}
-
-$nt = new NetworkTable($network);
-$cities = $nt->table;
-
-$sts = new DateTime("{$year}-{$smonth}-{$sday}");
-$ets = new DateTime("{$year}-{$emonth}-{$eday}");
-
-
-function mktitlelocal($map, $imgObj, $titlet)
-{
-
-    $layer = $map->getLayerByName("credits26915");
-
-    // point feature with text for location
-    $point = new pointobj();
-    $point->setXY(0, 10);
-    $point->draw($map, $layer, $imgObj, 0, $titlet);
-}
-
-function plotNoData($map, $img)
-{
-    $layer = $map->getLayerByName("credits");
-
-    $point = new pointobj();
-    $point->setXY(100, 200);
-    $point->draw(
-        $map,
-        $layer,
-        $img,
-        1,
-        "  No data found for this date! "
-    );
-}
+$network = get_str404("network", "IACLIMATE", 9);
 
 $varDef = array(
     "gdd32" => "Growing Degree Days (base=32)",
@@ -68,6 +32,55 @@ $varDef = array(
     "mintemp" => "Minimum Temperature [F]",
     "maxtemp" => "Maximum Temperature [F]",
 );
+if (!array_key_exists($var, $varDef)) {
+    die405();
+}
+
+
+$nt = new NetworkTable($network);
+$cities = $nt->table;
+
+$sts = new DateTime("{$year}-{$smonth}-{$sday}");
+$ets = new DateTime("{$year}-{$emonth}-{$eday}");
+
+
+/**
+ * Generate the page title
+ * @param MapObj $map
+ * @param imageObj $imgObj
+ * @param string $titlet
+ */
+function mktitlelocal($map, $imgObj, $titlet)
+{
+
+    $layer = $map->getLayerByName("credits26915");
+
+    // point feature with text for location
+    $point = new pointobj();
+    $point->setXY(0, 10);
+    $point->draw($map, $layer, $imgObj, 0, $titlet);
+}
+
+/**
+ * Generate a "No Data" message on the map
+ * @param MapObj $map
+ * @param imageObj $img
+ */
+function plotNoData($map, $img)
+{
+    $layer = $map->getLayerByName("credits");
+
+    $point = new pointobj();
+    $point->setXY(100, 200);
+    $point->draw(
+        $map,
+        $layer,
+        $img,
+        1,
+        "  No data found for this date! "
+    );
+}
+
 
 $rnd = array(
     "gdd32" => 0,

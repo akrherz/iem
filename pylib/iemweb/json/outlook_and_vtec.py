@@ -232,9 +232,8 @@ warns2 as (
 
 @iemapp(help=__doc__, schema=Schema)
 def application(environ: dict, start_response: callable):
-    """Answer request."""
+    """Answer request, iemapp decorator normalizes the response"""
     query: Schema = environ["_cgimodel_schema"]
     res = json.dumps(do_query(query))
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
+    start_response("200 OK", [("Content-type", "application/json")])
     return res

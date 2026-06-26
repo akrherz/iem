@@ -47,7 +47,7 @@ foreach ($stations as $key => $value) {
         continue;
     }
     if (strlen($value) > 4 && !array_key_exists($value, $nt->table)) {
-        xssafe("<tag>");
+        die405();
     }
 }
 if ($selectAll) {

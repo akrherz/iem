@@ -78,10 +78,8 @@ $t->content = <<<EOM
             </div>
             <div class="card-body">
                 <ul>
-                 <li><a href="http://www.class.noaa.gov/">NOAA Satellite and Information Service</a>
+                 <li><a href="https://www.aev.class.noaa.gov/">NOAA Satellite and Information Service</a>
                  <br />A wonderful site to download historical satellite data.</li>
-                 <li><a href="http://stormtrack.nssl.noaa.gov/">NSSL Storm Tracker</a>
-                 <br />Current and archived satellite imagery along with some derived products.</li>
                 </ul>
             </div>
         </div>
@@ -123,18 +121,13 @@ $t->content = <<<EOM
                   <br />Archive of gempak products taken from the UNIDATA NOAAPORT feed. This
                    archive dates back to 2001 and for some dates even further.</li>
 
-                 <li><a href="http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html">HRRR Model Archive</a>
+                 <li><a href="https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html">HRRR Model Archive</a>
                  <br />Archive maintained by University of Utah of the HRRR model.</li>
 
                  <li><a href="/archive/raw/">IEM Network Data</a>
                   <br />IEM data in its original unprocessed form. ASOS/AWOS METAR observation,
                    RWIS comma-deliminated data, schoolnet csv data, SCAN site format and COOP
                    observations</li>
-
-                 <li><a href="http://lead.unidata.ucar.edu:8080/thredds/catalog.html">Unidata IDD 6 month archive</a>
-                  <br />Archive of raw data provided by Unidata for the past 6 months!</li>
-                 <li><a href="http://nomads.ncdc.noaa.gov/data/">NCDC NOMADS Big Archive!!</a>
-                  <br />Lots of raw model data and other goodies, a definite must-visit.</li>
                 </ul>
             </div>
         </div>
@@ -148,13 +141,13 @@ $t->content = <<<EOM
                     <li><a href="/timemachine/">Archived IEM Product Browser</a>
                       <br />This "time machine" interface allows for quick browsing of IEM Products.</li>
 
-                    <li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
+                    <li><a href="https://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
                      <br />Excellent archive of the NWS DIFAX products.</li>
 
                     <li><a href="https://www.weather.gov/unr/uac">Precipitable Water Climatologies</a>
                      <br />Fascinating month-by-month plots of PWAT climatologies for the RAOB sites in the CONUS</li>
 
-                    <li><a href="http://www2.mmm.ucar.edu/imagearchive/">UCAR plot archive</a>
+                    <li><a href="https://www2.mmm.ucar.edu/imagearchive/">UCAR plot archive</a>
                       <br />Assorted RADAR, satellite, and model plots back to 1998.</li>
 
                     <li><a href="/archive/data/">IEM Generated Plots</a>
@@ -166,28 +159,17 @@ $t->content = <<<EOM
                       <br />IEM surface data in GEMPAK format. Data files exist with different
                     combinations of IEM networks.</li>
 
-                    <li><a href="http://www.mdl.nws.noaa.gov/~mos/archives/">Model MOS Archive</a>
+                    <li><a href="https://vlab.noaa.gov/web/mdl/mos-stations-archive">Model MOS Archive</a>
                     <br>NWS archive of model output statistics (MOS)</li>
 
                     <li><a href="/mos/">IEM's Model MOS Archive</a>
                     <br>IEM's archive of model output statistics (MOS)</li>
 
-                    <li><a href="http://www.ncdc.noaa.gov/swdi">NCDC Severe Weather Data Inventory</a>
+                    <li><a href="https://www.ncei.noaa.gov/maps/swdi/">NCEI Severe Weather Data Inventory</a>
                     <br />Extremely fancy archive of various datasets dealing with severe
                     weather.</li>
 
-                    <li><a href="http://www.ncdc.noaa.gov/ussc/USSCAppController?action=map">NCDC Snow Climatologies</a>
-                    <br />Lots of great statistics on snowfall and snow depth.</li>
-
-                    <li><a href="http://www.pals.iastate.edu/archivewx/data/">PALS WX Image Archive</a><br />The PALS website generates hourly plots of US weather. Of interest are
-                    archives of RUC, ETA, and AVN model plots. National radar summaries,
-                    surface plots and other plots.</li>
-
-                    <li><a href="ftp://ftp.wcc.nrcs.usda.gov/support/climate/wind_daily">NRCS wind climatologies (1961-1990)</a></li>
-
-                    <li><a href="http://climate.engin.umich.edu/tornadopaths/">Historical Tornado Tracks</a></li>
-
-                    <li><a href="http://ida.water.usgs.gov/ida/">USGS Instantaneous Data Archive</a>
+                    <li><a href="https://waterdata.usgs.gov/">USGS Instantaneous Data Archive</a>
                     <br />Goldmine of historical USGS river gauge data.</li>
                 </ul>
             </div>
@@ -200,9 +182,7 @@ $t->content = <<<EOM
             <div class="card-body">
                 <ul>
                  <li><a href="https://www.wpc.ncep.noaa.gov/dailywxmap/pdffiles.html">Recent maps from NCEP</a></li>
-                 <li><a href="https://www.wpc.ncep.noaa.gov/dailywxmap/index.html">Daily maps</a></li>
-                 <li><a href="http://docs.lib.noaa.gov/rescue/dwm/data_rescue_daily_weather_maps.html">Maps from 1872 to 2002</a></li>
-                 <li><a href="http://www7.ncdc.noaa.gov/IPS/">NCDC Image and Publications System</a></li>
+                 <li><a href="https://www.wpc.ncep.noaa.gov/dailywxmap/">Daily maps</a></li>
                 </ul>
             </div>
         </div>

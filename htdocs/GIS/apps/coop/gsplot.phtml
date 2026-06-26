@@ -10,15 +10,15 @@ $coopdb = iemdb("coop");
 
 $t = new MyView();
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
+$var = get_str404("var", "gdd50");
 $year = get_int404("year", date("Y", time() - 86400));
 $smonth = get_int404("smonth", 5);
 $sday = get_int404("sday", 1);
 $emonth = get_int404("emonth", date("m", time() - 86400));
 $eday = get_int404("eday", date("d", time() - 86400));
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
+$network = get_str404("network", "IACLIMATE");
 if (strlen($network) > 9){
-    xssafe("<tag>");
+    die405();
 }
 
 $nt = new NetworkTable($network);

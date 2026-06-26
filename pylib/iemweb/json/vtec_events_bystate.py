@@ -155,7 +155,7 @@ def get_res(state, year, phenomena, significance):
 
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
-    """Answer request."""
+    """Answer request, the iemapp wrapper rectifies the return value."""
     state = environ["state"]
     year = environ["year"]
     phenomena = environ["phenomena"]
@@ -172,7 +172,7 @@ def application(environ, start_response):
         bio = BytesIO()
         pd.DataFrame(res["events"]).to_excel(bio, index=False)
         start_response("200 OK", headers)
-        return [bio.getvalue()]
+        return bio.getvalue()
     if fmt == "csv":
         fn = f"vtec_{state}_{year}_{phenomena}_{significance}.csv"
         headers = [
@@ -182,7 +182,7 @@ def application(environ, start_response):
         bio = StringIO()
         pd.DataFrame(res["events"]).to_csv(bio, index=False)
         start_response("200 OK", headers)
-        return [bio.getvalue().encode("utf-8")]
+        return bio.getvalue().encode("utf-8")
 
     payload = json.dumps(res)
     start_response("200 OK", [("Content-type", "application/json")])

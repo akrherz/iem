@@ -63,8 +63,7 @@ if ($id > 0) {
     $id = intval($row["id"]);
 }
 if ($result === false) {
-    xssafe("<invalid>");
-    die();
+    die405();
 }
 
 if (pg_num_rows($result) == 1 && $id > 0) {
@@ -79,6 +78,11 @@ if (pg_num_rows($result) == 1 && $id > 0) {
     $content .= '</div></nav>';
 }
 
+/**
+ * Print tags as links to the news.phtml page with the tag as a query parameter.
+ * @param string $str Comma-separated list of tags in the format "{tag1,tag2,...}"
+ * @return string HTML string with tags as links or "none" if no tags are present
+ */
 function print_tags($str)
 {
     if ($str == "" || is_null($str)) return "none";
