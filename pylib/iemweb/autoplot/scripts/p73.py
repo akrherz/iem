@@ -39,6 +39,10 @@ PDICT2 = {
     "ugc": "NWS County/Forecast Zone",
     "fema": "FEMA Zone",
 }
+PDICT3 = {
+    "strict": "Use phenomena/significance exactly as selected",
+    "magic": "Merge together some combinations (ie XH, EH)",
+}
 
 
 def get_description():
@@ -86,6 +90,13 @@ def get_description():
             "name": "eday",
             "default": "1231",
             "label": "End Date (if User Defined Period) [inclusive]:",
+        },
+        {
+            "type": "select",
+            "name": "merge",
+            "default": "strict",
+            "label": "Apply special combination logic due to NWS changes:",
+            "options": PDICT3,
         },
         dict(
             type="phenomena",
@@ -194,15 +205,31 @@ def plotter(ctx: dict):
     params["sig"] = significance
     params["ph"] = phenomena
     params["tzname"] = tzname
+    phsig_limiter = "phenomena = :ph and significance = :sig"
+    subtitle = (
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) Count"
+    )
+    if ctx["merge"] == "magic":
+        phsig_limiter = "phenomena = ANY(:ph) and significance = :sig"
+        if phenomena in ["XH", "EH"]:
+            params["ph"] = ["XH", "EH"]
+            subtitle = (
+                f"{vtec.get_ps_string('XH', significance)} "
+                f"(EH.{significance}) + "
+                f"{vtec.get_ps_string('EH', significance)} "
+                f"(EH.{significance}) Count"
+            )
+
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             sql_helper(
                 """
             with data as (
                 SELECT distinct
-                {year_field} as yr,
+                {year_field} as yr, phenomena, significance,
                 {desc} eventid
-                from warnings where phenomena = :ph and significance = :sig
+                from warnings where {phsig_limiter}
                 {wfo_limiter} {doy_limiter})
 
             SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
@@ -211,6 +238,7 @@ def plotter(ctx: dict):
                 desc=desc,
                 wfo_limiter=wfo_limiter,
                 doy_limiter=doy_limiter,
+                phsig_limiter=phsig_limiter,
             ),
             conn,
             params=params,
@@ -231,10 +259,6 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No data found after filtering, adjust years")
     title = f"{title1} [{title}]"
-    subtitle = (
-        f"{vtec.get_ps_string(phenomena, significance)} "
-        f"({phenomena}.{significance}) Count"
-    )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
