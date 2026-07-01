@@ -210,16 +210,15 @@ def plotter(ctx: dict):
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance}) Count"
     )
-    if ctx["merge"] == "magic":
+    if ctx["merge"] == "magic" and phenomena in ["XH", "EH"]:
         phsig_limiter = "phenomena = ANY(:ph) and significance = :sig"
-        if phenomena in ["XH", "EH"]:
-            params["ph"] = ["XH", "EH"]
-            subtitle = (
-                f"{vtec.get_ps_string('XH', significance)} "
-                f"(EH.{significance}) + "
-                f"{vtec.get_ps_string('EH', significance)} "
-                f"(EH.{significance}) Count"
-            )
+        params["ph"] = ["XH", "EH"]
+        subtitle = (
+            f"{vtec.get_ps_string('XH', significance)} "
+            f"(EH.{significance}) + "
+            f"{vtec.get_ps_string('EH', significance)} "
+            f"(EH.{significance}) Count"
+        )
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
