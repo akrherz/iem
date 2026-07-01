@@ -46,7 +46,7 @@ def get_file(tmpdir, now, routes):
             resp.raise_for_status()
         except Exception as exp:
             # Cut back on emails
-            loglvl = LOG.warning if utc().minute < 6 else LOG.info
+            loglvl = LOG.warning if (utc().minute < 6 and i == 4) else LOG.info
             loglvl("uri %s failed with exception %s", uri, exp)
             continue
         data = resp.text
