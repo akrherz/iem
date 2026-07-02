@@ -30,7 +30,7 @@ jobs:
       WITH_TEST_DATA: ${{ matrix.WITH_TEST_DATA }}
       TEST_WEB: ${{ matrix.TEST_WEB }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     # Lots of daryl's codes use aliases defined in /etc/hosts
     - name: Add /etc/hosts entries
@@ -158,7 +158,7 @@ jobs:
 
     - name: Upload to Codecov
       if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
       with:
         files: coverage.xml
         fail_ci_if_error: true
