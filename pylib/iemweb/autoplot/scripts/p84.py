@@ -353,7 +353,7 @@ def set_data(ctx):
         p01d = np.where(p01d < 0.001, np.nan, p01d)
         cmap.set_under("white")
         # Dynamic Range based on min/max grid value, since we restrict plot
-        maxval = np.ceil(np.nanpercentile(p01d, [99])[0])
+        maxval = np.ceil(np.nanpercentile(p01d, [99.95])[0])
         if np.isnan(maxval) or maxval < 1:
             clevs = np.arange(0, 1.01, 0.1)
         else:
