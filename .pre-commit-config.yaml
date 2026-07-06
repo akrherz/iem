@@ -6,7 +6,7 @@ repos:
     hooks:
       - id: beautysh
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v10.5.0'
+    rev: 'v10.6.0'
     hooks:
       - id: eslint
         additional_dependencies:
