@@ -1,22 +1,28 @@
+#!/bin/bash
 # This process copies data around to longer term locations on a monthly basis
 # run from RUN_2AM.sh on the 2nd each month
-export MM="${2}"
 export YY="${1}"
+export MM="${2}"
 export YYYY="20${YY}"
 
 cd /mesonet/data/text/sao/ || exit 1
+# shellcheck disable=SC2086
 gzip ${YY}${MM}????.sao
-mkdir -p /mesonet/ARCHIVE/raw/sao/${YYYY}_${MM}
-mv ${YY}${MM}????.sao.gz /mesonet/ARCHIVE/raw/sao/${YYYY}_${MM}/
+mkdir -p "/mesonet/ARCHIVE/raw/sao/${YYYY}_${MM}"
+# shellcheck disable=SC2086
+mv ${YY}${MM}????.sao.gz "/mesonet/ARCHIVE/raw/sao/${YYYY}_${MM}/"
 
 cd /mesonet/data/gempak/asos || exit 1
-mkdir -p /mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}
-mv ${YY}${MM}??_asos.gem /mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}/
+mkdir -p "/mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}"
+# shellcheck disable=SC2086
+mv ${YY}${MM}??_asos.gem "/mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}/"
 
 cd /mesonet/data/gempak/meso || exit 1
-mkdir -p /mesonet/ARCHIVE/gempak/surface/mesonet/${YYYY}_${MM}
-mv ${YY}${MM}??_meso.gem /mesonet/ARCHIVE/gempak/surface/mesonet/${YYYY}_${MM}/
+mkdir -p "/mesonet/ARCHIVE/gempak/surface/mesonet/${YYYY}_${MM}"
+# shellcheck disable=SC2086
+mv ${YY}${MM}??_meso.gem "/mesonet/ARCHIVE/gempak/surface/mesonet/${YYYY}_${MM}/"
 
 cd /mesonet/data/gempak/sao || exit 1
-mkdir -p /mesonet/ARCHIVE/gempak/surface/sao/${YYYY}_${MM}
-mv ${YY}${MM}??_sao.gem /mesonet/ARCHIVE/gempak/surface/sao/${YYYY}_${MM}/
+mkdir -p "/mesonet/ARCHIVE/gempak/surface/sao/${YYYY}_${MM}"
+# shellcheck disable=SC2086
+mv ${YY}${MM}??_sao.gem "/mesonet/ARCHIVE/gempak/surface/sao/${YYYY}_${MM}/"

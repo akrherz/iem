@@ -70,6 +70,9 @@ def run(tmpdir, valid, routes):
             pstep = max(step, 1)
             for typ in ["rain", "snow", "frzr", "icep"]:
                 cmap = mpcolors.ListedColormap(colors[typ])
+                if f"c{typ}" not in ds.variables:
+                    LOG.warning("Missing %s in %s, aborting", f"c{typ}", fn)
+                    return
                 ref = np.ma.masked_where(ds[f"c{typ}"][pstep] < 0.01, refd)
                 mp.panels[0].pcolormesh(
                     lons,
