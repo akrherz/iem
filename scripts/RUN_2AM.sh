@@ -47,7 +47,7 @@ fi
 cd ../util || exit 1
 if [ "$DD" -eq "02" ]
 then
-    bash monthly.sh "$(date --date '3 days ago' +'%y %m')"
+    bash monthly.sh "$(date --date '3 days ago' +'%y')" "$(date --date '3 days ago' +'%m')"
 fi
 
 cd ../dl || exit 1
