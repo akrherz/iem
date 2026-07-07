@@ -17,7 +17,7 @@ $metadata = $ctx->metadata;
 $t = new MyView();
 $t->sites_current = "calendar";
 
-if (($metadata["metasite"] ?? null) === "t") {
+if ((($metadata["metasite"] ?? null) === "t") && (strpos($network, "CLIMATE") === false)) {
     $t->content = "<p>This site does not have observations.</p>";
     $t->render(TEMPLATE);
     exit();
