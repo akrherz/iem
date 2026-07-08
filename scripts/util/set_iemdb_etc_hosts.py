@@ -22,7 +22,6 @@ LOOKUP = {
     "-hads": IPS[DB2],
     "-hml": IPS[DB3],
     "-id3b": IPS[DB1],
-    "-idep": IPS[DB1],
     "-iem": IPS[DB3],
     "-iembot": IPS[DB4],
     "-iemre": IPS[DB2],
