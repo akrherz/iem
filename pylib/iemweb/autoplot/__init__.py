@@ -21,6 +21,7 @@ Not listed due to having no PNG output
 import importlib
 
 from pyiem.exceptions import BadWebRequest
+from pyiem.reference import prodDefinitions
 
 ARG_IEMRE_DOMAIN = {
     "type": "select",
@@ -69,6 +70,20 @@ FEMA_REGIONS = {
     "9": "Region 9 {NV,AZ,CA,FSM,GU,HI,RMI,CNMI,AS}",
     "10": "Region 10 {AK,WA,OR,ID}",
 }
+
+
+def ensure_prodDefinitions_key_in_label() -> dict[str, str]:
+    """
+    Ensure each prodDefinitions label includes its key for clarity in UI.
+    If the label does not already start with '[', prepend '[key] ' to it.
+    This helps users distinguish similar product names in dropdowns.
+    """
+    # Create a copy so that we don't mutate state
+    prodDefinitions_copy = prodDefinitions.copy()
+    for key, val in prodDefinitions_copy.items():
+        if not val.startswith("["):
+            prodDefinitions_copy[key] = f"[{key}] {val}"
+    return prodDefinitions_copy
 
 
 def fema_region2states(region: str) -> tuple:

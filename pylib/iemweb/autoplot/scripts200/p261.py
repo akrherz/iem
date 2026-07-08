@@ -20,6 +20,7 @@ from pyiem.plot import figure_axes
 from pyiem.reference import prodDefinitions
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot import ensure_prodDefinitions_key_in_label
 from iemweb.mlib import rectify_wfo
 
 PDICT = {
@@ -39,21 +40,9 @@ LOOKUP = {
 }
 
 
-def ensure_prodDefinitions_keys_in_labels():
-    """
-    Ensure each prodDefinitions label includes its key for clarity in UI.
-    If the label does not already start with '[', prepend '[key] ' to it.
-    This helps users distinguish similar product names in dropdowns.
-    """
-    for key, val in prodDefinitions.items():
-        if not val.startswith("["):
-            prodDefinitions[key] = f"[{key}] {val}"
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    ensure_prodDefinitions_keys_in_labels()
     desc["arguments"] = [
         dict(
             type="select",
@@ -81,7 +70,7 @@ def get_description():
             "name": "pil",
             "default": "SVR",
             "label": "Select 3 Character Product Identifier (PIL):",
-            "options": prodDefinitions,
+            "options": ensure_prodDefinitions_key_in_label(),
         },
         {
             "type": "year",

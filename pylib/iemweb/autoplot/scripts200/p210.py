@@ -27,8 +27,9 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import prodDefinitions
 from pyiem.util import utc
+
+from iemweb.autoplot import ensure_prodDefinitions_key_in_label
 
 PDICT = {
     "count": "Issuance Count",
@@ -42,17 +43,8 @@ PDICT2 = {
 }
 
 
-def fix():
-    """muck with the prodDefinitions to get the key included"""
-    for key, val in prodDefinitions.items():
-        if val.startswith("["):
-            continue
-        prodDefinitions[key] = f"[{key}] {prodDefinitions[key]}"
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
-    fix()
     desc = {"description": __doc__, "cache": 300, "data": True}
     now = utc() + timedelta(days=1)
     desc["arguments"] = [
@@ -61,7 +53,7 @@ def get_description():
             name="pil",
             default="AFD",
             label="Select 3 Character Product ID (AWIPS ID / AFOS)",
-            options=prodDefinitions,
+            options=ensure_prodDefinitions_key_in_label(),
         ),
         dict(
             type="select",
@@ -101,7 +93,7 @@ def plotter(ctx: dict):
     """Go"""
     ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
     ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
-    fix()
+    prod_defs = ensure_prodDefinitions_key_in_label()
     pil = ctx["pil"][:3]
     ctx["ets"] = min(ctx["ets"], utc())
 
@@ -148,7 +140,7 @@ def plotter(ctx: dict):
 
     mp = MapPlot(
         apctx=ctx,
-        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions.get(pil, pil)}",
+        title=f"NWS {PDICT[ctx['var']]} of {prod_defs.get(pil, pil)}",
         subtitle=(
             f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
