@@ -13,8 +13,8 @@ import time
 from datetime import datetime, timezone
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 AWS = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
@@ -56,6 +56,7 @@ def is_archive_complete(valid: datetime):
 def wait_for_upstream(valid: datetime) -> None:
     """Wait for upstream availability."""
     lasthour = HOURS[valid.hour]
+    # Figure out what the last available file should be for this given HRRR run
     if lasthour == 18:
         uri = valid.strftime(
             f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{lasthour}.grib2.idx"
@@ -64,16 +65,17 @@ def wait_for_upstream(valid: datetime) -> None:
         uri = valid.strftime(
             f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{lasthour}.grib2.idx"
         )
-    # Wait for at most 45 minutes for the upstream to be available
-    for _ in range(45):
+    # Wait for at most ~45 minutes for the upstream to be available, mostly
+    # to keep from colliding with the next hour run.
+    for _ in range(15):
         try:
-            resp = httpx.get(uri, timeout=30)
-            resp.raise_for_status()
+            resp = requests.get(uri, timeout=30)
             if resp.status_code == 200:
                 return
+            LOG.info("Fetch %s got status %s, sleeping", uri, resp.status_code)
         except Exception as exp:
-            LOG.info("Failed to fetch %s: %s, waiting 60s", uri, exp)
-        time.sleep(60)
+            LOG.warning("Fetching %s hit exception %s", uri, exp)
+        time.sleep(300)
     # Cloud availability is noisy, so reduce some emails by not complaining
     # about near realtime failures
     archived = (utc() - valid).total_seconds() > 43200
@@ -95,7 +97,7 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
                 f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
             )
         LOG.info(uri)
-        req = exponential_backoff(httpx.get, uri, timeout=30)
+        req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
             LOG.info("failed to fetch %s", uri)
             if hr > 18:
@@ -132,7 +134,7 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
         for pr in offsets:
             headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
             req = exponential_backoff(
-                httpx.get,
+                requests.get,
                 uri[:-4],
                 headers=headers,
                 timeout=30,
