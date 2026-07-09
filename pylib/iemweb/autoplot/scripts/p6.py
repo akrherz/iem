@@ -2,7 +2,9 @@
 This application plots out the distribution of
 some monthly metric for single month for all tracked sites within one
 state.  The plot presents the distribution and normalized frequency
-for a specific year and for all years combined for the given month.
+for a specific year and for all years combined for the given month.  The side
+panel presents some basic statistics with the <strong>P</strong> values
+representing the given percentile.
 """
 
 import calendar
@@ -10,12 +12,13 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.table import table
 from pyiem import reference
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from scipy.stats import norm
-from sqlalchemy.engine import Connection
 
 PDICT = {
     "sum-precip": "Total Precipitation [inch]",
@@ -23,6 +26,9 @@ PDICT = {
     "avg-low": "Average Daily Low [°F]",
     "avg-t": "Average Daily Temp [°F]",
     "avg-era5land_srad": "Average Daily Solar Radiation (ERA5Land) [MJ m-2]",
+    "avg-era5land_soilt4_avg": (
+        "Average Daily ~4 inch Soil Temperature (ERA5Land) [°F]"
+    ),
 }
 
 
@@ -33,8 +39,25 @@ def get_description():
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
-            type="year", name="year", default=today.year, label="Select Year"
+            type="year",
+            name="year",
+            default=today.year,
+            label="Year to highlight:",
         ),
+        {
+            "type": "year",
+            "name": "syear",
+            "label": "Inclusive start year (if data exists) to use in plot",
+            "min": 1850,
+            "default": 1850,
+        },
+        {
+            "type": "year",
+            "name": "eyear",
+            "label": "Inclusive end year (if data exists) to use in plot",
+            "min": 1850,
+            "default": today.year,
+        },
         dict(
             type="month",
             name="month",
@@ -52,111 +75,139 @@ def get_description():
     return desc
 
 
-@with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection) -> tuple:
+def add_percentile_table(
+    ax: Axes, alldata: pd.Series, thisyear: pd.Series, year: int
+):
+    """Print a table of the percentiles for this year and climatology."""
+    ptiles = [0.01, 0.05, 0.2, 0.25, 0.4, 0.5, 0.6, 0.75, 0.8, 0.95, 0.99]
+    allstats = alldata.describe(percentiles=ptiles)
+    yearstats = thisyear.describe(percentiles=ptiles)
+    cell_text = [
+        [
+            "Min",
+            f"{allstats['min']:.2f}",
+            f"{yearstats['min']:.2f}",
+        ]
+    ]
+    for p in ptiles:
+        idx = f"{int(p * 100)}%"
+        cell_text.append(
+            [
+                f"P{int(p * 100)}",
+                f"{allstats[idx]:.2f}",
+                f"{yearstats[idx]:.2f}",
+            ]
+        )
+    cell_text.append(
+        [
+            "Max",
+            f"{allstats['max']:.2f}",
+            f"{yearstats['max']:.2f}",
+        ]
+    )
+    table(
+        ax,
+        cellText=cell_text,
+        edges="horizontal",
+        colLabels=["Stat", "All years", f"{year}"],
+        loc="center",
+        bbox=[0, 0, 1, 1],
+    )
+    ax.axis("off")
+
+
+def plotter(ctx: dict) -> tuple:
     """Go"""
     state = ctx["state"]
     year = ctx["year"]
     month = ctx["month"]
-    ptype = ctx["type"]
-    ptype_climo = ptype.split("-")[1]
+    plotvar: str = ctx["type"]
 
-    # Compute the bulk statistics for climatology
-    df = pd.read_sql(
-        sql_helper(
-            """
-    WITH yearly as (
-        SELECT station, year, sum(precip) as sum_precip,
-        avg(high) as avg_high, avg(low) as avg_low,
-        avg(era5land_srad) as avg_era5land_srad,
-        avg((high+low)/2.) as avg_temp from {table}
-        WHERE month = :month GROUP by station, year)
-
-    SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
-    avg(avg_high) as avg_high, stddev(avg_high) as std_high,
-    avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
-    avg(avg_low) as avg_low, stddev(avg_low) as std_low,
-    avg(avg_era5land_srad) as avg_era5land_srad,
-    stddev(avg_era5land_srad) as std_era5land_srad
-    from yearly
-    """,
-            table=f"alldata_{state.lower()}",
-        ),
-        conn,
-        params={"month": month},
-        index_col=None,
-    )
-    if df.empty:
+    with get_sqlalchemy_conn("coop") as conn:
+        # Generate dataframe of yearly observed values for the given month
+        # Exclude spatial averages other than statewide
+        monthlyobs = pd.read_sql(
+            sql_helper(
+                """
+            SELECT station, year,
+            sum(precip) as "sum-precip",
+            avg(high) as "avg-high",
+            avg(low) as "avg-low",
+            avg(era5land_srad) as "avg-era5land_srad",
+            avg(era5land_soilt4_avg) as "avg-era5land_soilt4_avg",
+            avg((high+low)/2.) as "avg-t",
+            count(*) as obs
+            from {table}
+            WHERE month = :month and
+            substr(station, 3, 1) not in ('C', 'D') and
+            year >= :syear and year <= :eyear
+            GROUP by station, year
+        """,
+                table=f"alldata_{state.lower()}",
+            ),
+            conn,
+            params={
+                "month": month,
+                "syear": ctx["syear"],
+                "eyear": ctx["eyear"],
+            },
+            index_col=None,
+        )
+        # Remove missing data
+        monthlyobs = monthlyobs[monthlyobs[plotvar].notna()]
+    if monthlyobs.empty:
         raise NoDataFound("No Data Found")
-    climo_avg = df.at[0, f"avg_{ptype_climo}"]
-    climo_std = df.at[0, f"std_{ptype_climo}"]
-    df = pd.read_sql(
-        sql_helper(
-            """
-    WITH yearly as (
-        SELECT station, year, sum(precip) as sum_precip,
-        avg(high) as avg_high, avg(low) as avg_low,
-        avg(era5land_srad) as avg_era5land_srad,
-        avg((high+low)/2.) as avg_temp from {table}
-        WHERE month = :month GROUP by station, year),
-    agg1 as (
-        SELECT station, avg(sum_precip) as precip,
-        avg(avg_high) as high, avg(avg_low) as low,
-        avg(avg_era5land_srad) as era5land_srad,
-        avg(avg_temp) as temp from yearly GROUP by station),
-    thisyear as (
-        SELECT station, sum_precip, avg_high, avg_low, avg_temp,
-        avg_era5land_srad from yearly WHERE year = :year)
+    stateavg = None
+    if f"{state}0000" in monthlyobs["station"].values:
+        stateavg = monthlyobs.loc[
+            monthlyobs["station"] == f"{state}0000", plotvar
+        ].mean()
 
-    SELECT a.station, a.precip as climo_precip, a.high as climo_high,
-    a.low as climo_low, a.temp as climo_t,
-    t.sum_precip as "sum-precip", t.avg_high as "avg-high",
-    t.avg_low as "avg-low", t.avg_temp as "avg-t",
-    t.avg_era5land_srad as "avg-era5land_srad",
-    a.era5land_srad as "climo_era5land_srad"
-    FROM agg1 a JOIN thisyear t on (a.station = t.station)
-    """,
-            table=f"alldata_{state.lower()}",
-        ),
-        conn,
-        params={"year": year, "month": month},
-        index_col="station",
-    )
-    if (
-        f"{state}0000" not in df.index
-        or pd.isna(climo_avg)
-        or pd.isna(climo_std)
-    ):
-        raise NoDataFound("No Data Found")
-    stateavg = df.at[f"{state}0000", ptype]
-
+    num_stations = len(monthlyobs["station"].unique())
+    thisyeardf = monthlyobs[monthlyobs["year"] == year]
     title = (
         f"{reference.state_names[state]} {year} {calendar.month_name[month]} "
-        f"{PDICT[ptype]} Distribution\nNumber of stations: {len(df.index)}"
+        f"{PDICT[plotvar]} Distribution"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
-    _, bins, _ = ax.hist(
-        df[ptype].dropna(), 20, fc="lightblue", ec="lightblue", density=1
+    subtitle = (
+        "Stations with some data between "
+        f"{monthlyobs['year'].min()}-{monthlyobs['year'].max()}: "
+        f"{num_stations}. Stations with {year} data: {len(thisyeardf)}"
     )
-    y = norm.pdf(bins, df[ptype].mean(), df[ptype].std())
-    ax.plot(
-        bins,
-        y,
-        "b--",
-        lw=2,
-        label=(
-            f"{year} Normal Dist. "
-            r"$\sigma$="
-            f"{df[ptype].std():.2f} "
-            r"$\mu$="
-            f"{df[ptype].mean():.2f}"
-        ),
-    )
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
+    ax = fig.add_axes((0.1, 0.1, 0.5, 0.8))
+    tableax = fig.add_axes((0.65, 0.3, 0.28, 0.5))
+    if not thisyeardf.empty:
+        _, bins, _ = ax.hist(
+            thisyeardf[plotvar].to_numpy(),
+            20,
+            fc="lightblue",
+            ec="lightblue",
+            density=1,
+        )
+        mean = thisyeardf[plotvar].mean()
+        std = thisyeardf[plotvar].std()
+        y = norm.pdf(bins, mean, std)
+        ax.plot(
+            bins,
+            y,
+            "b--",
+            lw=2,
+            label=(
+                f"{year} Normal Dist. "
+                r"$\sigma$="
+                f"{std:.2f} "
+                r"$\mu$="
+                f"{mean:.2f}"
+            ),
+        )
 
+    climo_mean = monthlyobs[plotvar].mean()
+    climo_std = monthlyobs[plotvar].std()
     bins = np.linspace(
-        climo_avg - (climo_std * 3.0), climo_avg + (climo_std * 3.0), 30
+        climo_mean - (climo_std * 3.0), climo_mean + (climo_std * 3.0), 30
     )
-    y = norm.pdf(bins, climo_avg, climo_std)
+    y = norm.pdf(bins, climo_mean, climo_std)
     ax.plot(
         bins,
         y,
@@ -166,32 +217,42 @@ def plotter(ctx: dict, conn: Connection) -> tuple:
             r"Climo Normal Dist. $\sigma$="
             f"{climo_std:.2f} "
             r"$\mu$="
-            f"{climo_avg:.2f}"
+            f"{climo_mean:.2f}"
         ),
     )
 
     if stateavg is not None:
-        ax.axvline(
-            stateavg,
-            label=f"{year} Statewide Avg {stateavg:.2f}",
-            color="b",
-            lw=2,
-        )
-    stateavg = df.at[f"{state}0000", "climo_" + ptype_climo]
-    if stateavg is not None:
+        filtered = monthlyobs[
+            (monthlyobs["station"] == f"{state}0000")
+            & (monthlyobs["year"] == year)
+        ]
+        if not filtered.empty:
+            ax.axvline(
+                filtered[plotvar].values[0],
+                label=f"{year} State Avg {filtered[plotvar].values[0]:.2f}",
+                color="r",
+                lw=2,
+            )
         ax.axvline(
             stateavg,
             label=f"Climo Statewide Avg {stateavg:.2f}",
             color="g",
             lw=2,
         )
-    ax.set_xlabel(PDICT[ptype])
+    ax.set_xlabel(PDICT[plotvar])
     ax.set_ylabel("Normalized Frequency")
     ax.grid(True)
     box = ax.get_position()
     ax.set_position([box.x0, 0.26, box.width, 0.65])
     ax.legend(ncol=2, fontsize=12, loc=(-0.05, -0.35))
-    if ptype == "sum-precip":
+    if plotvar == "sum-precip":
         ax.set_xlim(left=0)
 
-    return fig, df
+    add_percentile_table(
+        tableax,
+        monthlyobs[plotvar],
+        thisyeardf[plotvar],
+        year,
+    )
+
+    return fig, monthlyobs
