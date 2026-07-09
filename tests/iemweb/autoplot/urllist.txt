@@ -7,6 +7,7 @@
 4/year:2024::threshold:1.0::period:7::state:IA::_r:t::dpi:100.png
 5/network:IACLIMATE::station:IATAME::var:max_snow::_r:43::dpi:100.png
 6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
+6/state:IA::eyear:2023::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 7/network:IACLIMATE::station:IATAME::year:2024::gdd1:1135::gdd2:1660::gddbase:50::gddceil:86::cmap:jet::_r:t::dpi:100.png
 10/network:IACLIMATE::station:IATAME::direction:above2::varname:low::threshold:32::year:1893::_r:t::dpi:100.png
 10/network:IACLIMATE::station:IATAME::direction:above::varname:low::threshold:32::year:2019::_r:t::dpi:100.png

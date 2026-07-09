@@ -186,7 +186,7 @@ def plotter(ctx: dict) -> tuple:
             density=1,
         )
         mean = thisyeardf[plotvar].mean()
-        std = monthlyobs[plotvar].std()
+        std = thisyeardf[plotvar].std()
         y = norm.pdf(bins, mean, std)
         ax.plot(
             bins,
