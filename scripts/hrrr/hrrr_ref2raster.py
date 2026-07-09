@@ -84,8 +84,6 @@ def do_step(
         colors = ["#000000"]
         color_index_start = 1
         for typ in ["rain", "snow", "frzr", "icep"]:
-            colors.extend(color_ramps[typ])
-            # Each ramp colors from 0 to 55 by 2.5 dbz
             if f"c{typ}" not in ds:
                 LOG.warning(
                     "Missing c%s in dataset at %s %s, skipping",
@@ -94,6 +92,8 @@ def do_step(
                     fxvalid,
                 )
                 continue
+            # Each ramp colors from 0 to 55 by 2.5 dbz
+            colors.extend(color_ramps[typ])
             refidx = np.ma.where(
                 ds[f"c{typ}"][pstep] > 0.01,
                 raw / 2.5 + color_index_start,
