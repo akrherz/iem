@@ -4,9 +4,13 @@ RUN from RUN_HRRR_REF.sh for previous hour and six hours ago
 """
 
 import subprocess
+import sys
 from datetime import datetime
 
 import click
+from pyiem.util import logger
+
+LOG = logger()
 
 
 @click.command()
@@ -19,7 +23,11 @@ def main(valid: datetime, rt: bool):
         cmd = ["python", py, tstring]
         if rt:
             cmd.append("--is-realtime")
-        subprocess.call(cmd)
+        # Abort processing if any of the subprocesses fail
+        result = subprocess.run(cmd, check=False)
+        if result.returncode != 0:
+            LOG.warning("Aborting as %s exited %s", py, result.returncode)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,6 @@ END
 WEB
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  # LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS IDEP Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/idep.cgi?"
@@ -363,9 +362,9 @@ LAYER
 
   LAYER
     VALIDATION
-    	date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-    	scenario "^[0-9]+$"
-  	END
+        date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        scenario "^[0-9]+$"
+      END
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=dep host=iemdb-dep.local"
     CONNECTIONTYPE POSTGIS
@@ -502,9 +501,9 @@ END # LAYER
 
 LAYER
     VALIDATION
-    	date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-    	scenario "^[0-9]+$"
-  	END
+        date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        scenario "^[0-9]+$"
+      END
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=dep host=iemdb-dep.local"
     CONNECTIONTYPE POSTGIS

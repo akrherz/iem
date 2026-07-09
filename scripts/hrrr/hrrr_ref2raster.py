@@ -84,8 +84,16 @@ def do_step(
         colors = ["#000000"]
         color_index_start = 1
         for typ in ["rain", "snow", "frzr", "icep"]:
-            colors.extend(color_ramps[typ])
+            if f"c{typ}" not in ds:
+                LOG.warning(
+                    "Missing c%s in dataset at %s %s, skipping",
+                    typ,
+                    valid,
+                    fxvalid,
+                )
+                continue
             # Each ramp colors from 0 to 55 by 2.5 dbz
+            colors.extend(color_ramps[typ])
             refidx = np.ma.where(
                 ds[f"c{typ}"][pstep] > 0.01,
                 raw / 2.5 + color_index_start,
@@ -202,6 +210,7 @@ def main(valid: datetime, rt: bool, force: bool):
     ppath = valid.strftime("%Y/%m/%d/GIS/hrrr/%H/refd_0000.png")
     with archive_fetch(ppath) as fn:
         if fn is not None and not force:
+            LOG.info("Exiting with nothing to do... %s exists", ppath)
             return
     workflow(valid, routes)
 

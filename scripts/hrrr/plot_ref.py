@@ -134,6 +134,8 @@ def main(valid, is_realtime, force: bool):
             LOG.info("archive GIF missing %s, running", fn)
             with tempfile.TemporaryDirectory() as tmpdir:
                 run(tmpdir, valid, routes)
+        else:
+            LOG.info("Exiting as nothing to do... %s exists", fn)
 
 
 if __name__ == "__main__":

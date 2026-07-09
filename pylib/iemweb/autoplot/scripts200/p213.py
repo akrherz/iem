@@ -189,7 +189,7 @@ def plotter(ctx: dict):
     fig = figure(apctx=ctx, title=title)
     tp = fig.add_axes((0.1, 0.57, 0.5, 0.33))
     bp = fig.add_axes((0.1, 0.13, 0.5, 0.35))
-    sidep = fig.add_axes((0.61, 0.13, 0.1, 0.35))
+    sd = fig.add_axes((0.61, 0.13, 0.1, 0.35))
     # Plot total percentiles on the figure
     print_table(fig, obsdf, varname)
     cmap = get_cmap(ctx["cmap"])
@@ -232,16 +232,16 @@ def plotter(ctx: dict):
             thisyear["quantile"].values * 100.0,
             bins=np.arange(0, 101, 10),
         )
-        sidep.barh(
+        sd.barh(
             hist[1][:-1],
             hist[0],
             height=10,
             align="edge",
         )
-        sidep.set_xlabel("Hours")
-        sidep.set_yticks([])
-        sidep.set_ylim(-1, 101)
-        sidep.grid(True)
-        sidep.text(0.1, 1.01, "Histogram", transform=sidep.transAxes)
+        sd.set_xlabel("Hours")
+        sd.set_yticks([])
+        sd.set_ylim(-1, 101)
+        sd.grid(True)
+        sd.text(0.1, 1.01, "Histogram", transform=sd.transAxes)
 
     return fig, qtile
