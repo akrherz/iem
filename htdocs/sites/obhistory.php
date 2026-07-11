@@ -15,14 +15,19 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
+$t = new MyView();
 if (($metadata["metasite"] ?? null) === "t") {
     $t->content = "<p>This site does not have observations.</p>";
     $t->render(TEMPLATE);
     exit();
 }
 
-/*
+/**
  * Rip off weather bureau website, but do it better
+ *
+ * @param array $row associative array of data for a single observation
+ * @param string $units wind units, either "mph" or "knots"
+ * @return string formatted wind information
  */
 function wind_formatter($row, $units = "mph")
 {
@@ -70,6 +75,13 @@ function wind_formatter($row, $units = "mph")
         $peak_text,
     );
 }
+
+/**
+ * Format sky condition and cloud height for display
+ * @param string $skyc sky condition code
+ * @param int $skyl cloud height in feet
+ * @return string formatted sky condition and cloud height
+ */
 function indy_sky_formatter($skyc, $skyl)
 {
     if (intval($skyl) > 0) {
@@ -80,6 +92,12 @@ function indy_sky_formatter($skyc, $skyl)
     if (is_null($skyc) || trim($skyc) == "") return "";
     return sprintf("%s%s<br />", $skyc, $skyl);
 }
+
+/**
+ * Format sky conditions for multiple layers
+ * @param array $row associative array of data for a single observation
+ * @return string formatted sky conditions for all layers
+ */
 function sky_formatter($row)
 {
     return sprintf(
@@ -90,16 +108,36 @@ function sky_formatter($row)
         indy_sky_formatter($row["skyc4"], $row["skyl4"])
     );
 }
+
+/**
+ * Format temperature values for display, returning an empty string for null values
+ * @param float|null $val temperature value in Fahrenheit
+ * @return string formatted temperature value or empty string if null
+ */
 function temp_formatter($val)
 {
     if (is_null($val)) return "";
     return sprintf("%.0f", $val);
 }
+
+/**
+ * Format visibility values for display, returning an empty string for null values
+ * @param float|null $val visibility value in miles
+ * @return float|string formatted visibility value rounded to 2 decimal places or empty string if null
+ */
 function vis_formatter($val)
 {
     if (is_null($val)) return "";
     return round($val, 2);
 }
+
+/**
+ * Format precipitation values for display, returning an empty string for null values
+ * @param int $i row number
+ * @param array $row associative array of data for a single observation
+ * @param string $windunits wind units, either "mph" or "knots"
+ * @return string formatted ob
+ */
 function asos_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -141,6 +179,13 @@ function asos_formatter($i, $row, $windunits = "mph")
         $row["raw"]
     );
 }
+
+/**
+ * Format pavement sensor data for display, returning an empty string for null values
+ * @param array $row associative array of data for a single observation
+ * @param int $sensor sensor number (0-3)
+ * @return string formatted pavement sensor data or empty string if null
+ */
 function pavement_formatter($row, $sensor)
 {
     $tmp = $row["tfs{$sensor}"];
@@ -151,6 +196,14 @@ function pavement_formatter($row, $sensor)
         is_null($text) ? "" : "($text)"
     );
 }
+
+/**
+ * Format RWIS observation data for display in a table row
+ * @param int $i row number
+ * @param array $row associative array of data for a single observation
+ * @param string $windunits wind units, either "mph" or "knots"
+ * @return string formatted HTML table row for RWIS observation
+ */
 function rwis_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -171,6 +224,14 @@ function rwis_formatter($i, $row, $windunits = "mph")
         pavement_formatter($row, 3)
     );
 }
+
+/**
+ * Format observation data for display in a table row
+ * @param int $i row number
+ * @param array $row associative array of data for a single observation
+ * @param string $windunits wind units, either "mph" or "knots"
+ * @return string formatted HTML table row for observation
+ */
 function formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -198,6 +259,15 @@ function formatter($i, $row, $windunits = "mph")
         $precip_extra,
     );
 }
+
+/**
+ * Format HADS observation data for display in a table row, including additional SHEF columns
+ * @param int $i row number
+ * @param array $row associative array of data for a single observation
+ * @param array $shefcols array of SHEF column names to include in the output
+ * @param string $windunits wind units, either "mph" or "knots"
+ * @return string formatted HTML table row for HADS observation
+ */
 function hads_formatter($i, $row, $shefcols, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -222,6 +292,14 @@ function hads_formatter($i, $row, $shefcols, $windunits = "mph")
         $html
     );
 }
+
+/**
+ * Format SCAN observation data for display in a table row
+ * @param int $i row number
+ * @param array $row associative array of data for a single observation
+ * @param string $windunits wind units, either "mph" or "knots"
+ * @return string formatted HTML table row for SCAN observation
+ */
 function scan_formatter($i, $row, $windunits = "mph")
 {
     $ts = strtotime(substr($row["local_valid"], 0, 16));
@@ -296,7 +374,6 @@ if (!is_null($metadata["archive_begin"])) {
     $startyear = 2010;
 }
 
-$t = new MyView();
 $t->iemselect2 = true;
 $t->title = "Observation History";
 $t->sites_current = 'obhistory';
