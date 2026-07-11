@@ -123,7 +123,7 @@ function temp_formatter($val)
 /**
  * Format visibility values for display, returning an empty string for null values
  * @param float|null $val visibility value in miles
- * @return string formatted visibility value or empty string if null
+ * @return float|string formatted visibility value rounded to 2 decimal places or empty string if null
  */
 function vis_formatter($val)
 {
