@@ -149,6 +149,16 @@ def get_description():
             "label": "Clip Data to CONUS?",
             "options": PDICT5,
         },
+        {
+            "type": "text",
+            "name": "rng",
+            "optional": True,
+            "label": (
+                "Optionally specify a plot minimum and maximum for colorbar, "
+                "the two values should be space separated."
+            ),
+            "default": "0 10",
+        },
         dict(type="cmap", name="cmap", default="YlGnBu", label="Color Ramp:"),
     ]
     return desc
@@ -319,7 +329,7 @@ def set_gridinfo(ctx):
     ctx["y1"] = y1
 
 
-def set_data(ctx):
+def set_data(ctx: dict):
     """Do the data work."""
     if 0 in ctx["p01d"].shape:
         raise NoDataFound("No data found for this period")
@@ -359,6 +369,14 @@ def set_data(ctx):
         else:
             clevs = pretty_bins(0, maxval)
         clevs[0] = 0.01
+
+    if ctx.get("rng") is not None:
+        try:
+            rng = [float(x) for x in ctx["rng"].split()]
+            if len(rng) == 2:
+                clevs = pretty_bins(rng[0], rng[1])
+        except Exception:
+            pass
 
     ctx["clevs"] = clevs
     ctx["p01d"] = p01d
