@@ -396,9 +396,7 @@ def dl_realtime(df, dt, mdt, page):
             if not tarinfo.name.startswith("asos-1min-pg"):
                 LOG.info("Unknown filename %s", tarinfo.name)
                 continue
-            station = tarinfo.name.split("-")[3]
-            if station[0] == "K":
-                station = station[1:]
+            station = tarinfo.name.split("-")[3].removeprefix("K")
             if station not in df.index:
                 LOG.warning("Unknown station %s, FIXME!", station)
                 continue

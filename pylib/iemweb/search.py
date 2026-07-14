@@ -120,14 +120,14 @@ def station_handler(sid: str) -> str:
         sid = sid[1:]
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            "SELECT id, network from stations where id = %s",
+            sql_helper("SELECT id, network from stations where id = :sid"),
             conn,
-            params=(sid,),
+            params={"sid": sid},
         )
     return station_df_handler(df)
 
 
-def has_station(sid):
+def has_station(sid: str):
     """Le Sigh."""
     # convert KXXX to XXX
     if sid.startswith("K") and len(sid) == 4:
@@ -201,8 +201,9 @@ def application(environ, start_response):
     )
     handler, qclean = find_handler(q, environ.get("HTTP_REFERER"))
     if handler is None:
+        payload = default_form()
         start_response("200 OK", [("Content-type", "text/html")])
-        return default_form()
+        return payload
     redirect_to = handler(qclean)
     start_response("302 Found", [("Location", redirect_to)])
     return []

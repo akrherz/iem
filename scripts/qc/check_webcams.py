@@ -62,7 +62,7 @@ def workflow(netname, pname):
 
 def main():
     """Do something"""
-    for network in ["KCCI", "KCRG", "KELO", "KCWI"]:
+    for network in ["KCCI", "KCRG"]:
         workflow(network, f"{network.lower()}snet")
 
 
