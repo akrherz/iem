@@ -190,7 +190,7 @@ def plotter(ctx: dict):
         f"({tt}) for {PDICT3[varname]} at {uu}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes((0.1, 0.1, 0.75, 0.78))
+    ax = fig.add_axes((0.1, 0.1, 0.65, 0.78))
     bars = ax.barh(
         range(len(df.index)), df[varname + "_percentile"], align="center"
     )

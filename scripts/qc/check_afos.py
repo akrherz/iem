@@ -14,16 +14,12 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 
 LOG = logger()
-pgconn = get_dbconn("afos")
-cursor = pgconn.cursor()
-cursor2 = pgconn.cursor()
 
 KNOWN = ["PANC", "PHBK"]
-nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
 BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
 
 
-def check_vtec_dups(ts):
+def check_vtec_dups(cursor, ts):
     """Ensure the database doesn't have duplicated product_id."""
     cursor.execute(
         """
@@ -42,7 +38,7 @@ def check_vtec_dups(ts):
         print(f"DUP: {row[0]} {row[1]} {row[2]} {row[3]} {row[4]}")
 
 
-def sample(source, ts):
+def sample(cursor2, source, ts):
     """Print out something to look at"""
     cursor2.execute(
         "SELECT pil, entered, wmo from products where entered >= %s "
@@ -58,7 +54,7 @@ def sample(source, ts):
         print(f" {BASE}={valid:%Y%m%d%H%M}-{source}-{row[2]}-{row[0]}")
 
 
-def look4(ts: datetime):
+def look4(cursor, cursor2, ts: datetime, nt: NetworkTable):
     """Let us investigate"""
     cursor.execute(
         "SELECT source, count(*) from products WHERE entered >= %s "
@@ -75,7 +71,7 @@ def look4(ts: datetime):
             LOG.info("Skipping known %s", lookup)
             continue
         print(f"{row[0]} {row[1]}")
-        sample(source, ts)
+        sample(cursor2, source, ts)
 
 
 @click.command()
@@ -84,9 +80,15 @@ def look4(ts: datetime):
 )
 def main(dt: datetime):
     """Go Main Go"""
+    nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
+
+    pgconn = get_dbconn("afos")
+    cursor = pgconn.cursor()
+    cursor2 = pgconn.cursor()
     dt = dt.replace(tzinfo=timezone.utc)
     LOG.info("running for %s", dt)
-    look4(dt)
+    look4(cursor, cursor2, dt, nt)
+    check_vtec_dups(cursor, dt)
 
 
 if __name__ == "__main__":
