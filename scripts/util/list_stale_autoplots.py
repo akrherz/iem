@@ -5,7 +5,7 @@ import re
 import pandas as pd
 from pyiem.database import get_dbconnc
 
-QRE = re.compile("q=([0-9]+)")
+QRE = re.compile(r"q=([0-9]+)")
 NO_FEATURES = [
     31,  # not useful
     33,  # too pidgeon-holed

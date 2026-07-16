@@ -10,6 +10,7 @@ Requires: Python 3
 
 import json
 import os
+import pathlib
 import sys
 import time
 from datetime import datetime, timedelta
@@ -104,8 +105,7 @@ def download_alldata():
         print(f"Downloading: {now}")
         data = download_data(thisurl)
         outfn = f"{now:%Y%m%d}.txt"
-        with open(outfn, "w", encoding="ascii") as fh:
-            fh.write(data)
+        pathlib.Path(outfn).write_text(data, encoding="ascii")
         now += interval
 
 
@@ -126,8 +126,7 @@ def main():
         print(f"Downloading: {station}")
         data = download_data(uri)
         outfn = f"{station}_{startts:%Y%m%d%H%M}_{endts:%Y%m%d%H%M}.txt"
-        with open(outfn, "w", encoding="ascii") as fh:
-            fh.write(data)
+        pathlib.Path(outfn).write_text(data, encoding="ascii")
 
 
 if __name__ == "__main__":

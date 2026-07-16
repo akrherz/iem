@@ -15,6 +15,7 @@ https://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
 https://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
 
+import pathlib
 import subprocess
 import tempfile
 from datetime import timedelta
@@ -57,8 +58,7 @@ def get_file(tmpdir, now, routes):
             LOG.info("missing data for %s", now)
         return None
     fn = f"{tmpdir}/{fn}.out"
-    with open(fn, "w", encoding="ascii") as fh:
-        fh.write(data)
+    pathlib.Path(fn).write_text(data, encoding="ascii")
     return fn
 
 

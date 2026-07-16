@@ -9,6 +9,7 @@ NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
 
 import os
+import pathlib
 import re
 import subprocess
 import sys
@@ -214,8 +215,7 @@ def dl_archive(df, dt):
                         resp = None
                         continue
                 if resp is not None:
-                    with open(f"{datadir}/{fn}", "wb") as fh:
-                        fh.write(resp.content)
+                    pathlib.Path(f"{datadir}/{fn}").write_bytes(resp.content)
                     df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
             else:
                 df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
@@ -401,8 +401,7 @@ def dl_realtime(df, dt, mdt, page):
                 LOG.warning("Unknown station %s, FIXME!", station)
                 continue
             f = tar.extractfile(tarinfo.name)
-            with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
-                fh.write(f.read())
+            pathlib.Path(f"{TMPDIR}/{tarinfo.name}").write_bytes(f.read())
             # sick
             df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
 

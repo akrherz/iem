@@ -41,6 +41,7 @@ sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=shp
 
 """
 
+import pathlib
 import tempfile
 import zipfile
 from io import BytesIO
@@ -153,8 +154,7 @@ def run(environ, start_response):
     if environ["format"] == "geojson":
         with tempfile.NamedTemporaryFile("w", delete=True) as tmp:
             df.to_file(tmp.name, driver="GeoJSON")
-            with open(tmp.name, encoding="utf8") as fh:
-                res = fh.read()
+            res = pathlib.Path(tmp.name).read_text(encoding="utf8")
         return res.encode("utf-8")
     if environ["format"] == "kml":
         df["NAME"] = (

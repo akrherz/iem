@@ -1,6 +1,7 @@
 """Onewire ingest."""
 
 import os
+import pathlib
 import subprocess
 import time
 from datetime import datetime
@@ -10,8 +11,7 @@ os.environ["TZ"] = "CST6CDT"
 
 def main():
     """Go Main Go"""
-    with open("runner.pid", "w") as fh:
-        fh.write("%s" % (os.getpid(),))
+    pathlib.Path("runner.pid").write_text("%s" % (os.getpid(),))
 
     while 1:
         _si, so = os.popen4('./digitemp -q -a -s /dev/ttyS0 -o"%s %.2F"')
@@ -26,17 +26,16 @@ def main():
         if len(data) > 3:
             now = datetime.now()
             fp = "ot0003_%s.dat" % (now.strftime("%Y%m%d%H%M"),)
-            with open(fp, "w") as fh:
-                fh.write(
-                    "104,%s,%s, %s, %s, %s,11.34\n"
-                    % (
-                        now.strftime("%Y,%j,%H%M"),
-                        data[0],
-                        data[1],
-                        data[2],
-                        data[3],
-                    )
+            pathlib.Path(fp).write_text(
+                "104,%s,%s, %s, %s, %s,11.34\n"
+                % (
+                    now.strftime("%Y,%j,%H%M"),
+                    data[0],
+                    data[1],
+                    data[2],
+                    data[3],
                 )
+            )
             subprocess.call(["pqinsert", fp])
             os.remove(fp)
         time.sleep(56)

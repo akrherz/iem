@@ -4,6 +4,7 @@ Called from RUN_10_AFTER.sh
 """
 
 import os
+import pathlib
 import subprocess
 import tempfile
 
@@ -29,8 +30,7 @@ def main():
         os.chdir(tmpdir)
         resp = client.get(REAL_EARTH, timeout=60)
         resp.raise_for_status()
-        with open("temp.geojson", "w") as fp:
-            fp.write(resp.text)
+        pathlib.Path("temp.geojson").write_text(resp.text)
         name = "midwest_winter_roads"
         subprocess.call(
             [

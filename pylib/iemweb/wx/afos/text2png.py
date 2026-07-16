@@ -18,6 +18,7 @@ https://mesonet.agron.iastate.edu/wx/afos/text2png.py\
 
 """
 
+import string
 from datetime import datetime, timezone
 from io import BytesIO
 from typing import Annotated
@@ -70,7 +71,7 @@ def text_image(content):
     # make the background image based on the combination of font and lines
     max_width_line = max(lines, key=font.getlength)
     # max height is adjusted down because it's too large visually for spacing
-    test_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    test_string = string.ascii_uppercase
     bbox = font.getbbox(test_string)
     max_height = bbox[3] - bbox[1]
     max_width = font.getlength(max_width_line)

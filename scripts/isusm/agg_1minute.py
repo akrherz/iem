@@ -82,7 +82,7 @@ def daily_process(cursor, station, dt, df: pd.DataFrame, ddf):
     for depth in [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]:
         for col in ["t", "vwc", "ec"]:
             row[f"sv_{col}{depth}"] = float(avgdf[f"sv_{col}{depth}_qc"])
-    current = ddf.loc[(station, dt)]
+    current = ddf.loc[station, dt]
     if current["obs_count"] == row["obs_count"]:
         LOG.info("%s %s obs_count %s matches", dt, station, row["obs_count"])
         return

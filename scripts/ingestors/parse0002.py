@@ -23,7 +23,7 @@ def main():
     lastline = lines[-1]
     tokens = re.split(r"[\s+]+", lastline)
 
-    tparts = re.split(":", tokens[4])
+    tparts = tokens[4].split(":")
     valid = valid.replace(
         hour=int(tparts[0]), minute=int(tparts[1]), second=int(tparts[2])
     )

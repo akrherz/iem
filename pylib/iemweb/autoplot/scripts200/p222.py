@@ -203,8 +203,8 @@ def plotter(ctx: dict):
     for val in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10]:
         if (val, True) in gdf.columns:
             x.append(val)
-            hit = gdf[(val, True)].iloc[0]
-            miss = gdf[(val, False)].iloc[0]
+            hit = gdf[val, True].iloc[0]
+            miss = gdf[val, False].iloc[0]
             freq = hit / float(hit + miss) * 100.0
             y.append(freq)
             ax.text(
