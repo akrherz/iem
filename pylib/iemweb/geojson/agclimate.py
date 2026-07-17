@@ -8,6 +8,8 @@ format.
 Changelog
 ---------
 
+- 2026-07-17: The Comprehensive Climate Index (`cci` and `cci_shade`)
+  return value was updated to use units of `degF`.
 - 2026-02-21: A bug was corrected with the `inversion` parameter.  It is now
   required to be set to something truthy or not set at all.
 
@@ -39,7 +41,7 @@ from pyiem.meteorology import (
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.tracker import loadqc
-from pyiem.util import convert_value, drct2text, mm2inch, utc
+from pyiem.util import c2f, convert_value, drct2text, mm2inch, utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.util import json_response_dict
@@ -78,12 +80,14 @@ def cci(row, shade_effect):
     ):
         return "M"
     return safe(
-        comprehensive_climate_index(
-            units("degC") * row["tair_c_avg"],
-            units("percent") * row["rh"],
-            units("miles per hour") * row["ws_mph"],
-            units("W m^-2") * row["srad_wm2"],
-            shade_effect=shade_effect,
+        c2f(
+            comprehensive_climate_index(
+                units("degC") * row["tair_c_avg"],
+                units("percent") * row["rh"],
+                units("miles per hour") * row["ws_mph"],
+                units("W m^-2") * row["srad_wm2"],
+                shade_effect=shade_effect,
+            )
         ),
         2,
     )

@@ -51,8 +51,8 @@ $ar = array(
     "soil12vwc" => "12 inch Soil Moisture [%]",
     "soil24vwc" => "24 inch Soil Moisture [%]",
     "soil50vwc" => "50 inch Soil Moisture [%]",
-    "cci" => "Comprehensive Climate Index (CCI) No-Shade Effect [unitless]",
-    "cci_shade" => "Comprehensive Climate Index (CCI) Shade Effect [unitless]",
+    "cci" => "Comprehensive Climate Index (CCI) No-Shade Effect [°F]",
+    "cci_shade" => "Comprehensive Climate Index (CCI) Shade Effect [°F]",
     "bp_mb" => "Atmospheric Pressure [mb] (only Ames ISU Hort Farm at 15 minute interval)",
 );
 $vselect = make_checkboxes("vars", "", $ar);

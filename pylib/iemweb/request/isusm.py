@@ -5,6 +5,8 @@ This service emits data from the ISU Soil Moisture Network.
 Changelog
 ---------
 
+- 2026-07-17: The return units of `cci` and `cci_shade` where updated to be
+  in degF.
 - 2026-03-06: Added comprehensive climate index (CCI) as a download option.
   Either `cci` which does not include a shade effect or `cci_shade` which
   does.
@@ -445,21 +447,32 @@ def fetch_hourly(environ: dict, cols: list):
         "soil50_f": "soil50vwc_f",
     }
     df = df.rename(columns=xref, errors="ignore")
+    # Convert solar radiation from kilojoules to Watts (Joules/second)
+    interval_secs = 60.0 if environ["timeres"] == "minute" else 3600.0
+    srad_wm2 = df["slrkj_tot_qc"].to_numpy() * 1000.0 / interval_secs
     if "cci" in cols:
-        df["cci"] = comprehensive_climate_index(
-            units.degC * df["tair_c_avg_qc"].to_numpy(),
-            units.percent * df["relh"].to_numpy(),
-            units.mps * df["ws_mph_qc"].to_numpy(),
-            units.watts / units.meter**2 * df["slrkj_tot_qc"].to_numpy(),
-            shade_effect=False,
+        df["cci"] = (
+            comprehensive_climate_index(
+                units.degC * df["tair_c_avg_qc"].to_numpy(),
+                units.percent * df["relh"].to_numpy(),
+                units("miles per hour") * df["ws_mph_qc"].to_numpy(),
+                units.watts / units.meter**2 * srad_wm2,
+                shade_effect=False,
+            )
+            .to(units.degF)
+            .m
         )
     if "cci_shade" in cols:
-        df["cci_shade"] = comprehensive_climate_index(
-            units.degC * df["tair_c_avg_qc"].to_numpy(),
-            units.percent * df["relh"].to_numpy(),
-            units.mps * df["ws_mph_qc"].to_numpy(),
-            units.watts / units.meter**2 * df["slrkj_tot_qc"].to_numpy(),
-            shade_effect=True,
+        df["cci_shade"] = (
+            comprehensive_climate_index(
+                units.degC * df["tair_c_avg_qc"].to_numpy(),
+                units.percent * df["relh"].to_numpy(),
+                units.mps * df["ws_mph_qc"].to_numpy(),
+                units.watts / units.meter**2 * srad_wm2,
+                shade_effect=True,
+            )
+            .to(units.degF)
+            .m
         )
     # Mul by 100 for %
     for depth in [12, 24, 50]:
