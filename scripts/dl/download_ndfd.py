@@ -8,6 +8,7 @@ Run from RUN_50_AFTER and RUN_10_AFTER
 """
 
 import os
+import pathlib
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -64,8 +65,7 @@ def process_grib(grb):
                             str(grb),
                         )
                         return
-    with open("sendme.grb", "wb") as fh:
-        fh.write(grb.tostring())
+    pathlib.Path("sendme.grb").write_bytes(grb.tostring())
     pqstr = f"data u {runtime:%Y%m%d%H%M} bogus {ppath[11:]} grib2"
     cmd = [
         "pqinsert",

@@ -1,6 +1,7 @@
 """Frontend for Feature Content, such that we can make some magic happen"""
 
 import os
+import pathlib
 import re
 from datetime import date
 from io import BytesIO
@@ -12,9 +13,9 @@ from pyiem.webutil import iemapp
 from sqlalchemy.engine import Connection
 
 PATTERN = re.compile(
-    "^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
-    "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
-    "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"
+    r"^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
+    r"(?P<yymmdd>[0-9]{6})(?P<extra>.*)\."
+    r"(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"
 )
 
 
@@ -89,8 +90,7 @@ def application(environ: dict, start_response: callable):
     headers.append(get_content_type(data["suffix"]))
     rng = environ.get("HTTP_RANGE", "bytes=0-")
     tokens = rng.replace("bytes=", "").split("-", 1)
-    with open(fn, "rb") as fh:
-        resdata = fh.read()
+    resdata = pathlib.Path(fn).read_bytes()
     totalsize = len(resdata)
     stripe = slice(
         int(tokens[0]),

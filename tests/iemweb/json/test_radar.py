@@ -23,8 +23,7 @@ def test_ridge_available(tmp_path, monkeypatch):
         / f"ARX_N0Q_{utcnow:%Y%m%d0000}.png"
     )
     Path(n0qfn).parent.mkdir(parents=True, exist_ok=True)
-    with open(n0qfn, "w") as fh:
-        fh.write("foo")
+    Path(n0qfn).write_text("foo")
     c = Client(radar.application)
     # 1. List RADARs
     resp = c.get("?operation=available&start=2010-01-01T00:00Z")

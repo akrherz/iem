@@ -3,6 +3,7 @@
 Run from RUN_0Z.sh, RUN_10_AFTER.sh (6z)
 """
 
+import pathlib
 import subprocess
 import tempfile
 import time
@@ -167,8 +168,7 @@ def run(tmpdir, prod, sts):
     if resp.status_code != 200:
         LOG.warning("Got status_code %s for %s", resp.status_code, url)
     else:
-        with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
-            fh.write(resp.content)
+        pathlib.Path(f"{tmpdir}/{sts:%Y%m%d%H}.png").write_bytes(resp.content)
         cmd = [
             "pqinsert",
             "-p",

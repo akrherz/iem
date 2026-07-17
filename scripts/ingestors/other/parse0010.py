@@ -32,7 +32,7 @@ def main():
     if len(tokens) != 19:
         return
 
-    tparts = re.split(":", tokens[3])
+    tparts = tokens[3].split(":")
     valid = valid.replace(
         hour=int(tparts[0]), minute=int(tparts[1]), second=0, microsecond=0
     )

@@ -3,6 +3,7 @@ Generate the dailyb spam, run from RUN_12Z.sh
 """
 
 import os
+import pathlib
 import re
 import smtplib
 import subprocess
@@ -412,8 +413,7 @@ def main(dryrun: bool):
         exponential_backoff(send_email, msg)
 
     # Send forth LDM
-    with open("tmp.txt", "w", encoding="utf-8") as fh:
-        fh.write(text)
+    pathlib.Path("tmp.txt").write_text(text, encoding="utf-8")
     subprocess.call(
         [
             "pqinsert",
@@ -422,8 +422,7 @@ def main(dryrun: bool):
             "tmp.txt",
         ]
     )
-    with open("tmp.html", "w", encoding="utf-8") as fh:
-        fh.write(html)
+    pathlib.Path("tmp.html").write_text(html, encoding="utf-8")
     subprocess.call(
         [
             "pqinsert",

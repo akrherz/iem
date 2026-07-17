@@ -4,6 +4,7 @@ Stop gap ingest from SPC since rucsoundings is down
 called from RUN_10_AFTER.sh for 00, 12, and 18 UTC
 """
 
+import pathlib
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -224,8 +225,7 @@ def main(valid, station):
         except Exception as exp:
             fn = f"/tmp/{sid}_{valid:%Y%m%d%H%M}_fail"
             LOG.warning("FAIL %s %s %s, content at %s", sid, valid, exp, fn)
-            with open(fn, "wb") as fh:
-                fh.write(resp.content)
+            pathlib.Path(fn).write_bytes(resp.content)
         finally:
             cursor.close()
             dbconn.commit()

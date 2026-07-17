@@ -251,7 +251,7 @@ $map->drawLabelCache($img);
 $url = saveWebImage($img);
 
 $ar = array(
-    "qc" => "QC'd (1893-)",
+    "qc" => "Quality Controlled / climodat (1893-)",
     "prelim" => "Preliminary (2004+)"
 );
 $sourceselect = make_select("source", $source, $ar);
@@ -305,13 +305,14 @@ $plusone = sprintf(
 
 $t->content = <<<EOM
 
-<div class="alert alert-info" role="alert">
-  A new <a href="/COOP/map/">interactive map</a> application is available and
-  will replace this application someday, unless feedback says otherwise!
-</div>
-
-<p>With this application, you can plot COOP observations for a date of your
-choice.
+<p>
+This application plots the once daily long term climate sites for a given
+date.  The IEM maintains two datasets in this space.  The first being the
+preliminary NWS COOP observations, which dates back to 2004 or so. For this
+dataset, an <a href="/COOP/map/">interactive map</a> exists. The second
+being a more quality controlled and gap-filled dataset called "climodat". This
+data goes back much further.
+</p>
 
 <form method="GET" name="myform">
 <table class="table table-bordered">

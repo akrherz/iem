@@ -4,6 +4,7 @@ Called from RUN_2AM.sh for 3 days ago.
 """
 
 import os
+import pathlib
 import subprocess
 import tempfile
 from datetime import datetime, timezone
@@ -79,8 +80,7 @@ def workflow(now: datetime):
                     continue
                 if grbs.messages > 1:
                     LOG.info("Found %s messages, trimming", grbs.messages)
-                    with open(fh.name, "wb") as fh2:
-                        fh2.write(msgs[0].tostring())
+                    pathlib.Path(fh.name).write_bytes(msgs[0].tostring())
                 # Caution, we don't use -i here as this name is not unique
                 cmd = [
                     "pqinsert",

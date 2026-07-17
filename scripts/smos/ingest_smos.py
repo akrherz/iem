@@ -11,7 +11,7 @@ from pyiem.database import get_dbconn
 from pyiem.util import logger, ncopen
 
 LOG = logger()
-TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
+TSTAMP = re.compile(r"([0-9]{8}T[0-9]{6})")
 warnings.simplefilter("ignore", category=DeprecationWarning)
 
 

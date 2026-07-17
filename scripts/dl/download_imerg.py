@@ -17,6 +17,7 @@ RUN from RUN_20_AFTER.sh for 5 hours ago.
 
 import json
 import os
+import pathlib
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -52,8 +53,7 @@ def get_geotiff(valid: datetime, source: str) -> np.ndarray | None:
         except Exception as exp:
             LOG.info("Error fetching %s: %s", url, exp)
             return None
-        with open("pps.tif", "wb") as f:
-            f.write(resp.content)
+        pathlib.Path("pps.tif").write_bytes(resp.content)
         with rasterio.open("pps.tif") as src:
             pmm = src.read(1) / 10.0
             # Life choice, set anything above 300mm to zero
@@ -90,8 +90,7 @@ def get_netcdf(valid, source) -> np.ndarray | None:
     if not ct.startswith("application/x-netcdf"):
         LOG.warning("Unexpected content-type for %s: %s", url, ct)
         return None
-    with open("imerg.nc", "wb") as tmp:
-        tmp.write(resp.content)
+    pathlib.Path("imerg.nc").write_bytes(resp.content)
     with ncopen("imerg.nc") as nc:
         # x, y
         pmm = nc.variables["precipitation"][0, :, :] / 2.0  # mmhr to 30min
@@ -155,8 +154,8 @@ def main(valid: datetime, realtime: bool):
     ]
     subprocess.call(cmd)
 
-    with open("imerg.wld", "w", encoding="utf8") as fp:
-        fp.write("0.1\n0.0\n0.0\n-0.1\n-179.95\n89.95")
+    wldtxt = "0.1\n0.0\n0.0\n-0.1\n-179.95\n89.95"
+    pathlib.Path("imerg.wld").write_text(wldtxt, encoding="utf8")
     cmd = [
         "pqinsert",
         "-i",

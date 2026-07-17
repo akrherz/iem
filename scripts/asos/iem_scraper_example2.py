@@ -13,6 +13,7 @@ Author: daryl herzmann akrherz@iastate.edu
 """
 
 import os
+import pathlib
 from datetime import date, datetime, timedelta
 
 import httpx
@@ -34,8 +35,7 @@ def fetch(station_id):
         "direct=yes&report_type=3"
     )
     resp = httpx.get(uri, timeout=300)
-    with open(localfn, "w", encoding="utf-8") as fh:
-        fh.write(resp.text)
+    pathlib.Path(localfn).write_text(resp.text, encoding="utf-8")
 
 
 def main():

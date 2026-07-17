@@ -7,6 +7,7 @@ called from RUN_1MIN.sh
 import gzip
 import json
 import os
+import pathlib
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -61,8 +62,7 @@ def do(now, realtime=False):
 
     fp = gzip.GzipFile(gribfn, "rb")
     (_, tmpfn) = tempfile.mkstemp()
-    with open(tmpfn, "wb") as fh:
-        fh.write(fp.read())
+    pathlib.Path(tmpfn).write_bytes(fp.read())
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
     os.unlink(tmpfn)

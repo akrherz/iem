@@ -188,8 +188,8 @@ def merge(atmos, surface):
         }
         for sid in range(4):
             try:
-                data[nwsli][f"scond{sid}"] = row[("SURFACE_CONDITION", sid)]
-                data[nwsli][f"tsf{sid}"] = row[("SURFACE_TEMP", sid)]
+                data[nwsli][f"scond{sid}"] = row["SURFACE_CONDITION", sid]
+                data[nwsli][f"tsf{sid}"] = row["SURFACE_TEMP", sid]
             except KeyError as exp:
                 LOG.info("KeyError raised for nwsli: '%s' %s", nwsli, exp)
     for sid in NT.sts:

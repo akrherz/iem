@@ -36,8 +36,7 @@ def process(tarfn):
         ts = datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
         for prefix, grb in zip(["rad", "apcp"], [radgrb, pcpgrb], strict=True):
             fn = f"{prefix}_{ts:%Y%m%d%H%M}.grib"
-            with open(fn, "wb") as fh:
-                fh.write(grb.tostring())
+            Path(fn).write_bytes(grb.tostring())
             pqstr = (
                 f"data a {ts:%Y%m%d%H%M} bogus "
                 f"model/NARR/{prefix}_{ts:%Y%m%d%H%M}.grib grib"

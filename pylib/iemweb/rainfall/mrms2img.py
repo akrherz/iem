@@ -17,6 +17,7 @@ year=2016&month=4&day=13&hour=18&minute=0&period=1
 
 """
 
+import pathlib
 import tempfile
 import zipfile
 from typing import Annotated
@@ -120,8 +121,7 @@ def workflow(tmpdir, valid, period, start_response):
         ("Content-Disposition", f"attachment; filename={basefn}.zip"),
     ]
     start_response("200 OK", headers)
-    with open(zipfn, "rb") as fh:
-        payload = fh.read()
+    payload = pathlib.Path(zipfn).read_bytes()
     return payload
 
 

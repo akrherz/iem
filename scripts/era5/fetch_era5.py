@@ -4,6 +4,7 @@ Run from RUN_0Z_ERA5LAND.sh for 5 days ago.
 """
 
 import os
+import pathlib
 import subprocess
 import sys
 import tempfile
@@ -184,8 +185,7 @@ def fetch(valid: datetime, checkcache: bool):
             if resp.headers.get("Content-Length", "0") != "0":
                 LOG.info("Using cached %s", url)
                 resp = httpx.get(url, follow_redirects=True, timeout=30)
-                with open("data_0.nc", "wb") as fh:
-                    fh.write(resp.content)
+                pathlib.Path("data_0.nc").write_bytes(resp.content)
                 return
         except Exception as exp:
             LOG.info("Failed webfetch %s: %s", url, exp)

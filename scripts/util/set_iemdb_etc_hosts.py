@@ -1,6 +1,7 @@
 """A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
 
 import os
+import pathlib
 import tempfile
 
 import click
@@ -62,8 +63,7 @@ LOOKUP = {
 )
 def main(host):
     """Go Main Go"""
-    with open("/etc/hosts", encoding="utf-8") as fh:
-        data = fh.read()
+    data = pathlib.Path("/etc/hosts").read_text(encoding="utf-8")
     result = []
     for line in data.split("\n"):
         result.append(line)

@@ -4,6 +4,7 @@ https://mesonet.agron.iastate.edu/timemachine/?product=59.0
 """
 
 import os
+import pathlib
 import subprocess
 import tempfile
 
@@ -30,8 +31,7 @@ def main():
         )
         return
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    with open(tmpfd.name, "wb") as fh:
-        fh.write(resp.content)
+    pathlib.Path(tmpfd.name).write_bytes(resp.content)
     dstamp = utcnow.strftime("%Y%m%d%H%M")
     pqstr = f"plot a {dstamp} bogus wwa/wwa_{dstamp}.png png"
     LOG.info(pqstr)

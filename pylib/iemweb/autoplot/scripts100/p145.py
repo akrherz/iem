@@ -121,8 +121,8 @@ def plotter(ctx: dict):
     # vertical bars for range
     ax.bar(
         gdf["doy"].values,
-        gdf[(varname, "max")] - gdf[(varname, "min")],
-        bottom=gdf[(varname, "min")],
+        gdf[varname, "max"] - gdf[varname, "min"],
+        bottom=gdf[varname, "min"],
         color="tan",
         label="Range",
         width=1.05,
@@ -130,8 +130,8 @@ def plotter(ctx: dict):
     # bands for 25-75% ptile
     ax.bar(
         gdf["doy"].values,
-        gdf[(varname, "75%")] - gdf[(varname, "25%")],
-        bottom=gdf[(varname, "25%")],
+        gdf[varname, "75%"] - gdf[varname, "25%"],
+        bottom=gdf[varname, "25%"],
         color="lightgreen",
         label="25-75 Percentile",
         width=1.05,
@@ -139,7 +139,7 @@ def plotter(ctx: dict):
     # Mean
     ax.plot(
         gdf["doy"].values,
-        gdf[(varname, "mean")].values,
+        gdf[varname, "mean"].values,
         color="k",
         label="Average",
     )

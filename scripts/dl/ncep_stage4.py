@@ -6,6 +6,7 @@ run from RUN_STAGE4.sh
 """
 
 import os
+import pathlib
 import subprocess
 import tempfile
 import time
@@ -53,8 +54,7 @@ def download(now: datetime, offset: int):
             LOG.warning("Full fail for %s", url)
             continue
         # Same temp file
-        with open("tmp.grib", "wb") as fh:
-            fh.write(response.content)
+        pathlib.Path("tmp.grib").write_bytes(response.content)
         # Inject into LDM
         cmd = [
             "pqinsert",

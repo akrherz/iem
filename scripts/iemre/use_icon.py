@@ -9,6 +9,7 @@ Orphaned for now, use_ifs.py instead.
 """
 
 import os
+import pathlib
 import subprocess
 import sys
 import tempfile
@@ -111,8 +112,7 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
                 LOG.warning("Aborting")
                 sys.exit(3)
 
-        with open(filename, "wb") as f:
-            f.write(response.content)
+        pathlib.Path(filename).write_bytes(response.content)
         subprocess.run(["bzip2", "-d", filename], check=True)
         # Use cdo to convert grid to lat/lon
         with subprocess.Popen(

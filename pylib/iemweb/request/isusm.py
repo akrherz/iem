@@ -72,7 +72,7 @@ from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-LEGACY_STS = re.compile("sts=[A-Z]")
+LEGACY_STS = re.compile(r"sts=[A-Z]")
 MISSING = {"", "M", "-99"}
 SV_DEPTHS = [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]
 DELIMITERS = {"comma": ",", "tab": "\t"}

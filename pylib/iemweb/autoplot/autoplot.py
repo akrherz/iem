@@ -2,6 +2,7 @@
 
 import json
 import os
+import pathlib
 import sys
 import tempfile
 import traceback
@@ -359,8 +360,7 @@ def workflow(mc, environ: dict, fmt: str):
             # Need to set engine as xlsx/xls can't be inferred
             with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
                 df.to_excel(writer, sheet_name="Sheet1")
-            with open(tmpfn, "rb") as fh:
-                content = fh.read()
+            content = pathlib.Path(tmpfn).read_bytes()
             os.unlink(tmpfn)
     else:
         error_log(

@@ -139,9 +139,7 @@ def plotter(ctx: dict):
     dyear = df[df["year"] == year]
     df3 = dyear[["doy", varname]].groupby("doy").describe()
     # tricky
-    df3[(varname, "diff")] = (
-        df3[(varname, ctx["agg"])] - df2[(varname, "mean")]
-    )
+    df3[varname, "diff"] = df3[varname, ctx["agg"]] - df2[varname, "mean"]
 
     title = (
         f"{ctx['_sname']}]:: Daily {PDICT2[ctx['agg']]} "
@@ -152,20 +150,20 @@ def plotter(ctx: dict):
     multiplier = 1000.0 if varname == "mixing_ratio" else 10.0
 
     ax[0].fill_between(
-        df2[(varname, "min")].index.values,
-        df2[(varname, "min")].values * multiplier,
-        df2[(varname, "max")].values * multiplier,
+        df2[varname, "min"].index.values,
+        df2[varname, "min"].values * multiplier,
+        df2[varname, "max"].values * multiplier,
         color="gray",
     )
 
     ax[0].plot(
-        df2[(varname, "mean")].index.values,
-        df2[(varname, "mean")].values * multiplier,
+        df2[varname, "mean"].index.values,
+        df2[varname, "mean"].values * multiplier,
         label="Climatology",
     )
     ax[0].plot(
-        df3[(varname, ctx["agg"])].index.values,
-        df3[(varname, ctx["agg"])].values * multiplier,
+        df3[varname, ctx["agg"]].index.values,
+        df3[varname, ctx["agg"]].values * multiplier,
         color="r",
         label=f"{year}",
     )
@@ -186,8 +184,8 @@ def plotter(ctx: dict):
     cabove = "b" if varname == "mixing_ratio" else "r"
     cbelow = "r" if cabove == "b" else "b"
     rects = ax[1].bar(
-        df3[(varname, "diff")].index.values,
-        df3[(varname, "diff")].values * multiplier,
+        df3[varname, "diff"].index.values,
+        df3[varname, "diff"].values * multiplier,
         facecolor=cabove,
         edgecolor=cabove,
     )

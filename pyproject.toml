@@ -69,6 +69,7 @@ ignore = [
     "PLR2004",  # magic numbers
     "UP031",  # format specifiers
 ]
+# preview = true
 
 # complains about iemweb.json
 [tool.ruff.lint.flake8-builtins]

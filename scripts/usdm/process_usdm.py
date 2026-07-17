@@ -5,6 +5,7 @@ Called from dedicated crontab
 
 import glob
 import os
+import pathlib
 import subprocess
 import tempfile
 import zipfile
@@ -60,8 +61,7 @@ def workflow(dt: date, routes):
     zipfp = zipfile.ZipFile(tmp.name, "r")
     shpfn = None
     for name in zipfp.namelist():
-        with open(f"/tmp/{name}", "wb") as fp:
-            fp.write(zipfp.read(name))
+        pathlib.Path(f"/tmp/{name}").write_bytes(zipfp.read(name))
         if name[-3:] == "shp":
             shpfn = f"/tmp/{name}"
     # 2. Save it to the database

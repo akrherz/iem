@@ -32,6 +32,7 @@ Run every five minutes from RUN_5MIN.sh
 
 import json
 import os
+import pathlib
 import subprocess
 import sys
 import zipfile
@@ -138,8 +139,7 @@ def export_shapefile(txn, valid):
         )
 
     shp.close()
-    with open("iaroad_cond.prj", "w", encoding="ascii") as fp:
-        fp.write(EPSG26915)
+    pathlib.Path("iaroad_cond.prj").write_text(EPSG26915, encoding="ascii")
     with zipfile.ZipFile("iaroad_cond.zip", "w") as zfp:
         for suffix in ["shp", "shx", "dbf", "prj"]:
             zfp.write(f"iaroad_cond.{suffix}")

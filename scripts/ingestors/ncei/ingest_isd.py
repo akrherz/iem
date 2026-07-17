@@ -4,6 +4,7 @@ https://www.ncei.noaa.gov/pub/data/noaa/isd-history.txt
 """
 
 import os
+import pathlib
 import subprocess
 import sys
 from unittest import mock
@@ -71,8 +72,7 @@ def main(airforce, wban, faa, year1, year2):
                 LOG.info("Failed to fetch %s", uri)
                 failedyears.append(year)
                 continue
-            with open(f"{TMPDIR}/{lfn}.gz", "wb") as fh:
-                fh.write(req.content)
+            pathlib.Path(f"{TMPDIR}/{lfn}.gz").write_bytes(req.content)
             subprocess.call(
                 ["gunzip", f"{TMPDIR}/{lfn}.gz"],
                 stderr=subprocess.PIPE,

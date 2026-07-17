@@ -5,6 +5,7 @@ IEM_APPID 92
 
 import calendar
 import os
+import pathlib
 import re
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -207,7 +208,7 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
         netlim = "WHERE id ~* 'ASOS'"
     elif typ == "station":
         netlim = "WHERE id ~* 'CLIMATE'"
-    elif typ == "sid" and not arg.get("include_climodat", False):
+    elif typ == "sid" and not arg.get("include_climodat"):
         netlim = "WHERE id !~* 'CLIMATE'"
     with get_sqlalchemy_conn("mesosite") as conn:
         dbres = conn.execute(
@@ -992,8 +993,7 @@ def generate_overview(apid):
     if not os.path.isfile(fn):
         LOG.warning(f"{fn} is missing")
         return ""
-    with open(fn, encoding="utf8") as fh:
-        content = fh.read()
+    content = pathlib.Path(fn).read_text(encoding="utf8")
     return f"""
 <div class="row">
     <div class="col-md-6">
