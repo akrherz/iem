@@ -92,7 +92,7 @@ def do_processing(ctx: dict):
         wind_speed(units("m/s") * u, units("m/s") * v),
         units("W/m^2") * srad,
         shade_effect=ctx["shade"] == "yes",
-    )
+    ).m
 
 
 def get_raster(ctx: dict):
