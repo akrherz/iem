@@ -14,7 +14,7 @@ from sqlalchemy.engine import Connection
 
 PATTERN = re.compile(
     r"^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
-    r"(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
+    r"(?P<yymmdd>[0-9]{6})(?P<extra>.*)\."
     r"(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"
 )
 

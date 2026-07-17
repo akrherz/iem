@@ -461,7 +461,7 @@ def plotter(ctx: dict):
         ctx["date"],
     )
     row = df.iloc[0]
-    has_snow = row["snow"] is not None or row["snow_month"] is not None
+    has_snow = pd.notna(row["snow"]) or pd.notna(row["snow_month"])
     title = (
         f"{ctx['date'].strftime('%-d %b %Y')} CLImate Report for "
         f"{ctx['_sname']}"
