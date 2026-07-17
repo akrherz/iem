@@ -3,7 +3,8 @@
 Called from RUN_1MIN.sh
 """
 
-import httpx
+import pandas as pd
+import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.observation import Observation
 from pyiem.util import logger, utc
@@ -34,6 +35,9 @@ def save_other(data):
             if col not in data:
                 LOG.info("Missing %s", col)
                 data[col] = None
+            elif pd.isna(data[col]):
+                LOG.info("NaN %s", col)
+                data[col] = None
         # do a bulk insert
         vals = [f":{x}" for x in columns]
         conn.execute(
@@ -48,18 +52,17 @@ def save_other(data):
 
 def main():
     """Go Main Go."""
-    with httpx.Client() as client:
-        try:
-            resp = client.get(
-                "http://airqual.geol.iastate.edu/json?live=false", timeout=30
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as exp:
-            # System is flakey, this turns down the email noise some
-            lvl = LOG.warning if utc().minute > 50 else LOG.info
-            lvl(exp)
-            return
+    try:
+        resp = requests.get(
+            "http://airqual.geol.iastate.edu/json?live=false", timeout=30
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exp:
+        # System is flakey, this turns down the email noise some
+        lvl = LOG.warning if utc().minute > 50 else LOG.info
+        lvl(exp)
+        return
 
     save_other(data)
 
