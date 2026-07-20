@@ -5,6 +5,7 @@ RUN from RUN_HRRR_REF.sh for previous hour and six hours ago
 
 import subprocess
 import sys
+import time
 from datetime import datetime
 
 import click
@@ -18,6 +19,10 @@ LOG = logger()
 @click.option("--is-realtime", "rt", is_flag=True)
 def main(valid: datetime, rt: bool):
     """Stuff"""
+    # The extended HRRR jobs take more time to finish, so pre-emptively sleep
+    if rt and valid.hour % 6 == 0:
+        LOG.info("Pre-emptively sleeping 20 minutes for RT HR%6")
+        time.sleep(20 * 60)
     tstring = f"--valid={valid:%Y-%m-%dT%H:%M:%S}"
     for py in ["dl_hrrrref.py", "plot_ref.py", "hrrr_ref2raster.py"]:
         cmd = ["python", py, tstring]
