@@ -12,8 +12,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import logger
 
 LOG = logger()
@@ -47,7 +47,7 @@ def process(tarfn):
         os.remove(grbfn)
 
 
-def fetch_gdex(year, month):
+def fetch_gdex(year: int, month: int):
     """Get data please from GDEX"""
     days = ["0109", "1019"]
     lastday = (date(year, month, 1) + timedelta(days=35)).replace(
@@ -56,12 +56,12 @@ def fetch_gdex(year, month):
     days.append(f"20{lastday.day}")
     for day in days:
         uri = (
-            "https://data.gdex.ucar.edu/ds608.0/3HRLY/"
+            "https://osdf-director.osg-htc.org/ncar/gdex/d608000/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
         tmpfn = f"{TMP}/narr.tar"
         with (
-            httpx.stream("GET", uri, timeout=30) as resp,
+            requests.get(uri, stream=True, timeout=30) as resp,
             open(tmpfn, "wb") as fh,
         ):
             if resp.status_code != 200:
@@ -69,7 +69,7 @@ def fetch_gdex(year, month):
                     "Fetching %s returned %s, aborting", uri, resp.status_code
                 )
                 return
-            for chunk in resp.iter_bytes(chunk_size=1024):
+            for chunk in resp.iter_content(chunk_size=1024 * 1024):
                 if chunk:
                     fh.write(chunk)
         process(tmpfn)
