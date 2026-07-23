@@ -13,7 +13,6 @@ observations.
 from datetime import datetime, timedelta
 
 import pandas as pd
-from matplotlib import dates as mdates
 from matplotlib.axes import Axes
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -31,88 +30,34 @@ PDICT2 = {
     "min_feel": "Daily Min Feels Like",
 }
 
-
-DOY_ORIGIN = datetime(2000, 1, 1)
 OBS_STYLES = (
     {"color": "#111111", "marker": "o"},
     {"color": "#8B1E3F", "marker": "D"},
 )
 
 
-def _doy_to_date(doy):
-    """Convert 1-366 day-of-year values into a leap-year datetime axis."""
-    return pd.to_datetime(doy - 1, unit="D", origin=DOY_ORIGIN)
-
-
-def _apply_doy_axis(ax: Axes, start_doy: int, end_doy: int) -> None:
-    """Use matplotlib's built-in auto date locator and concise labels."""
-    locator = mdates.AutoDateLocator(minticks=4, maxticks=9)
-    formatter = mdates.ConciseDateFormatter(locator)
-    formatter.formats = ["", "%b", "%-d", "%H:%M", "%H:%M", "%S.%f"]
-    formatter.zero_formats = [
-        "",
-        "%b",
-        "%b %-d",
-        "%H:%M",
-        "%H:%M",
-        "%S.%f",
+def xlabel_magic(ax: Axes, sday, eday):
+    """Figure out how to nicely label the faked dates on the axis."""
+    number_of_days = (eday - sday).total_seconds() / (24 * 60 * 60)
+    # Life choices
+    days = [
+        1,
     ]
-    formatter.offset_formats = ["", "", "", "", "", ""]
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(formatter)
-    ax.set_xlim(
-        _doy_to_date(start_doy) - timedelta(hours=12),
-        _doy_to_date(end_doy) + timedelta(hours=12),
-    )
-
-
-def _apply_visible_ylim(
-    ax: Axes,
-    bydoy: pd.DataFrame,
-    obsdf: pd.DataFrame,
-    varname: str,
-    years: list,
-    start_doy: int,
-    end_doy: int,
-) -> None:
-    """Scale y-limits to data visible in the selected day-of-year window."""
-    low_doy = min(start_doy, end_doy)
-    high_doy = max(start_doy, end_doy)
-    window = bydoy.loc[low_doy:high_doy]
-    yvals = [window["min"], window["max"], window["mean"]]
-
-    for year in years:
-        if year is None:
-            continue
-        thisyear = obsdf.loc[f"{year}-01-01" : f"{year}-12-31"]
-        if thisyear.empty:
-            continue
-        yvals.append(
-            thisyear[
-                (thisyear["doy"] >= low_doy) & (thisyear["doy"] <= high_doy)
-            ][varname]
-        )
-
-    valid = pd.concat(yvals).dropna()
-    if valid.empty:
-        return
-
-    ymin = valid.min()
-    ymax = valid.max()
-    if ymin == ymax:
-        pad = max(1.0, abs(ymin) * 0.05)
-    else:
-        pad = (ymax - ymin) * 0.05
-    ax.set_ylim(ymin - pad, ymax + pad)
-
-
-def _obs_marker_size(start_doy: int, end_doy: int) -> float:
-    """Increase marker size for short windows, keep long windows unchanged."""
-    span = max(1, abs(end_doy - start_doy) + 1)
-    if span >= 180:
-        return 28.0
-    # Linearly ramp up from 28 at 180 days to 62 at 1 day.
-    return min(62.0, 28.0 + (180 - span) * (34.0 / 179.0))
+    if number_of_days < 60:
+        days = [1, 8, 15, 22, 29]
+    elif number_of_days < 190:
+        days = [1, 15]
+    xticks = []
+    xticklabels = []
+    for dt in pd.date_range(sday, eday):
+        if dt.day in days:
+            xticks.append(dt)
+            xticklabels.append(dt.strftime("%-d %b"))
+    if not xticks:
+        xticks = [sday, eday]
+        xticklabels = [sday.strftime("%-d %b"), eday.strftime("%-d %b")]
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
 
 
 def get_description():
@@ -158,7 +103,7 @@ def get_description():
             type="int",
             name="thres",
             default=95,
-            label="Threshold [%] for Frequency",
+            label="Threshold [%,°F] for Frequency",
         ),
         {
             "type": "int",
@@ -189,6 +134,10 @@ def plotter(ctx: dict):
     mydir = ctx["dir"]
     varname = ctx["var"]
     smooth = ctx["smooth"]
+    sday = pd.to_datetime(ctx["sday"])
+    eday = pd.to_datetime(ctx["eday"])
+    if sday >= eday:
+        raise ValueError("Plots crossing 1 Jan are not supported, yet")
     if smooth < 1 or smooth > 60:
         raise ValueError("Invalid smoothing window size, must be 1-60")
 
@@ -197,7 +146,7 @@ def plotter(ctx: dict):
         obsdf = pd.read_sql(
             sql_helper(
                 """
-            SELECT day, extract(doy from day) as doy, {varname},
+            SELECT day, {varname},
             case when {varname} {op} :threshold then 1 else 0 end
             as threshold_exceed from summary s WHERE iemid = :iemid
             and {varname} is not null ORDER by day ASC
@@ -216,15 +165,18 @@ def plotter(ctx: dict):
     if obsdf.empty:
         raise NoDataFound("No Data Found.")
 
-    bydoy = (
-        obsdf[["doy", varname]]
-        .groupby("doy")
+    # Since doy is a poor choice for multi-year plotting, we create a faked
+    # year 2000 date for each entry
+    obsdf["plotdate"] = obsdf.index.map(lambda ts: ts.replace(year=2000))
+    bydate = (
+        obsdf[["plotdate", varname]]
+        .groupby("plotdate")
         .describe()
         .rolling(window=smooth, center=True)
         .mean()
     )
-    bydoy.columns = bydoy.columns.droplevel(0)
-    bydoy.index.name = "day_of_year"
+    # Drop the multi-index column
+    bydate.columns = bydate.columns.droplevel(0)
     ttitle = ""
     if smooth > 1:
         ttitle = f" {smooth} Day Centered Smooth Applied"
@@ -232,29 +184,29 @@ def plotter(ctx: dict):
         f"{ctx['_sname']} ({obsdf.index[0].year}-{obsdf.index[-1].year})\n"
         f"{PDICT2[varname]} Climatology {ttitle}"
     )
-    start_doy = int(f"{ctx['sday']:%j}")
-    end_doy = int(f"{ctx['eday']:%j}")
-    marker_size = _obs_marker_size(start_doy, end_doy)
+    # Apply sday and eday filter to both dataframes
+    bydate = bydate.loc[sday:eday]
+    obsdf = obsdf[(obsdf["plotdate"] >= sday) & (obsdf["plotdate"] <= eday)]
+
     fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes((0.1, 0.55, 0.8, 0.35))
-    bydoy_dates = _doy_to_date(bydoy.index.values)
     ax.fill_between(
-        bydoy_dates,
-        bydoy["min"],
-        bydoy["max"],
+        bydate.index,
+        bydate["min"],
+        bydate["max"],
         color="tan",
         alpha=0.5,
         label="Range",
     )
     ax.fill_between(
-        bydoy_dates,
-        bydoy["25%"],
-        bydoy["75%"],
+        bydate.index,
+        bydate["25%"],
+        bydate["75%"],
         color="lightblue",
         alpha=0.55,
         label="25-75 Percentile",
     )
-    ax.plot(bydoy_dates, bydoy["mean"], color="k", lw=2, label="Mean")
+    ax.plot(bydate.index, bydate["mean"], color="k", lw=2, label="Mean")
     years = [ctx["year"], ctx.get("y2")]
     for idx, year in enumerate(years):
         if year is None:
@@ -263,36 +215,35 @@ def plotter(ctx: dict):
         if not thisyear.empty:
             style = OBS_STYLES[idx % len(OBS_STYLES)]
             ax.scatter(
-                _doy_to_date(thisyear["doy"].values),
+                thisyear["plotdate"].values,
                 thisyear[varname].values,
                 label=f"{year} Obs",
                 color=style["color"],
                 marker=style["marker"],
                 edgecolors="white",
                 linewidths=0.7,
-                s=marker_size,
                 alpha=0.95,
                 zorder=6,
             )
     ax.legend(ncol=5, loc=(0.05, -0.24), fontsize=12)
-    _apply_doy_axis(ax, start_doy, end_doy)
-    _apply_visible_ylim(ax, bydoy, obsdf, varname, years, start_doy, end_doy)
     ax.grid(True)
     units = "%" if varname.find("rh") > 0 else "F"
     ax.set_ylabel(f"{PDICT2[varname]} [{units}]")
+    xlabel_magic(ax, sday, eday)
+    ax.set_xlim(sday - timedelta(hours=12), eday + timedelta(hours=12))
 
     # Frequency
     ax2 = fig.add_axes((0.1, 0.1, 0.8, 0.35))
     probs = (
-        obsdf[["doy", "threshold_exceed"]]
-        .groupby("doy")
+        obsdf[["plotdate", "threshold_exceed"]]
+        .groupby("plotdate")
         .mean()
         .rolling(window=smooth, center=True)
         .mean()
     )
-    bydoy["threshold_exceed_freq"] = probs["threshold_exceed"]
+    bydate["threshold_exceed_freq"] = probs["threshold_exceed"]
     ax2.plot(
-        _doy_to_date(probs.index.values),
+        probs.index,
         probs["threshold_exceed"].values * 100.0,
         lw=2,
     )
@@ -301,6 +252,8 @@ def plotter(ctx: dict):
     )
     ax2.set_ylim(0, 100)
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
-    _apply_doy_axis(ax2, start_doy, end_doy)
     ax2.grid(True)
-    return fig, bydoy
+    xlabel_magic(ax2, sday, eday)
+    ax2.set_xlim(sday - timedelta(hours=12), eday + timedelta(hours=12))
+
+    return fig, bydate
