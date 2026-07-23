@@ -53,6 +53,9 @@ def xlabel_magic(ax: Axes, sday, eday):
         if dt.day in days:
             xticks.append(dt)
             xticklabels.append(dt.strftime("%-d %b"))
+    if not xticks:
+        xticks = [sday, eday]
+        xticklabels = [sday.strftime("%-d %b"), eday.strftime("%-d %b")]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
 
