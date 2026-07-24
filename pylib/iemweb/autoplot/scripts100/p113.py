@@ -118,8 +118,10 @@ def do_year_overlay(
         alpha=0.8,
     )
     for _, row in obs.iterrows():
-        ts = row["day"]
-        dfrow = df.loc[pd.Timestamp(ts)]
+        ts = pd.Timestamp(row["day"])
+        if ts not in df.index:
+            continue
+        dfrow = df.loc[ts]
         if row["high"] >= dfrow["max_high"]:
             ax.scatter(
                 [ts],
