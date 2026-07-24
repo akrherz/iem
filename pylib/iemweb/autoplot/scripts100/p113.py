@@ -2,12 +2,15 @@
 Presents the simple daily climatology as computed by period of record data. If
 you select a start date that is later than the end date, the plot will wrap
 over 1 January.  In such a case, if you select certain years to plot, the year
-will be from the start of the two year period that crosses 1 January.
+will be from the start of the two year period that crosses 1 January.  Please
+note that the variable controls only work for the text output product. The
+generated plot is always just the daily high and low temperatures.
 """
 
 from datetime import date, datetime, timedelta
 
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter, DayLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -35,7 +38,7 @@ def get_description():
             name="var",
             default="maxmin",
             options=PDICT,
-            label="Which variable? (only Daily Max/Min is plottable attm)",
+            label="Which variable? (only works for text output option)",
         ),
         {
             "type": "year",
@@ -67,7 +70,14 @@ def get_description():
     return desc
 
 
-def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
+def do_year_overlay(
+    df: pd.DataFrame,
+    ctx: dict,
+    ax: Axes,
+    pname: str,
+    color: str,
+    crosses_jan1: bool,
+):
     """Overlay the observed data for the given years."""
     year = ctx.get(pname)
     if year is None:
@@ -91,8 +101,7 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
         )
     if obs.empty:
         return
-    obs["day"] = obs["day"].dt.date
-    obs["day"] = obs["day"].map(lambda x: x.replace(year=2000))
+    obs["day"] = obs["day"].dt.date.map(lambda x: x.replace(year=2000))
     if crosses_jan1:
         obs.loc[obs["day"] >= ctx["eday"], "day"] = obs.loc[
             obs["day"] >= ctx["eday"], "day"
@@ -108,6 +117,31 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
         width=0.8,
         alpha=0.8,
     )
+    for _, row in obs.iterrows():
+        ts = pd.Timestamp(row["day"])
+        if ts not in df.index:
+            continue
+        dfrow = df.loc[ts]
+        if row["high"] >= dfrow["max_high"]:
+            ax.scatter(
+                [ts],
+                [row["high"]],
+                facecolor=color,
+                edgecolor="yellow",
+                alpha=0.8,
+                s=50,
+                zorder=5,
+            )
+        if row["low"] <= dfrow["min_low"]:
+            ax.scatter(
+                [ts],
+                [row["low"]],
+                edgecolor="yellow",
+                facecolor=color,
+                alpha=0.8,
+                s=50,
+                zorder=5,
+            )
 
 
 def plotter(ctx: dict):
@@ -260,12 +294,12 @@ def plotter(ctx: dict):
         drawstyle="steps-mid",
     )
 
-    do_year_overlay(ctx, ax, "year1", "#593700", crosses_jan1)
-    do_year_overlay(ctx, ax, "year2", "#49aaf0", crosses_jan1)
+    do_year_overlay(df, ctx, ax, "year1", "#593700", crosses_jan1)
+    do_year_overlay(df, ctx, ax, "year2", "#49aaf0", crosses_jan1)
 
     ax.grid(True)
     ax.legend(ncol=5)
-    ax.set_ylabel("Temperature °F")
+    ax.set_ylabel("Temperature °F")  # Plot only works for temperature
     ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
     days = 1
     if ctx["eday"] - ctx["sday"] < timedelta(days=71):
