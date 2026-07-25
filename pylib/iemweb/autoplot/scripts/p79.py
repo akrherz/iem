@@ -201,8 +201,10 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     titles = [
         f"{ctx['_sname']}:: ",
-        f"Average Dew Point by Wind Direction (month={month.upper()}) "
-        f"({max([1973, ab.year])}-{datetime.now().year})",
+        (
+            f"Average Dew Point by Wind Direction (month={month.upper()}) "
+            f"({max([1973, ab.year])}-{datetime.now().year})"
+        ),
         "(must have 3+ hourly obs >= 3 knots at given direction)",
     ]
     ax.set_title("\n".join(titles), size=10)

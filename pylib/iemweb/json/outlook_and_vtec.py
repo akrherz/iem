@@ -93,7 +93,7 @@ class Schema(CGIModel):
         Field(
             description=(
                 "Outlook type. E for Excessive Rainfall, C for Convective, "
-                "F for Fire Weather",
+                "F for Fire Weather"
             ),
             pattern=r"^(E|C|F)$",
         ),

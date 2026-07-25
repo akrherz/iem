@@ -70,9 +70,11 @@ def dl(now, varname, scenario):
         cmd = [
             "pqinsert",
             "-p",
-            f"data a {now:%Y%m%d%H%M} blah "
-            f"model/cfs/{now:%H}/{varname}.{s2}.{now:%Y%m%d%H}.daily.grib2 "
-            "grib",
+            (
+                f"data a {now:%Y%m%d%H%M} blah "
+                f"model/cfs/{now:%H}/{varname}.{s2}.{now:%Y%m%d%H}"
+                ".daily.grib2 grib"
+            ),
             tmpfd.name,
         ]
         LOG.info("Running: %s", " ".join(cmd))

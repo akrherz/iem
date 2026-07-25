@@ -85,8 +85,10 @@ def workflow(now: datetime):
                 cmd = [
                     "pqinsert",
                     "-p",
-                    f"data u {now:%Y%m%d%H%M} unused model/rtma/{now:%H}/"
-                    f"rtma.t{now:%H}z.awp2p5f000.grib2 grib2",
+                    (
+                        f"data u {now:%Y%m%d%H%M} unused model/rtma/{now:%H}/"
+                        f"rtma.t{now:%H}z.awp2p5f000.grib2 grib2"
+                    ),
                     fh.name,
                 ]
                 subprocess.call(cmd)

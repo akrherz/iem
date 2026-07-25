@@ -73,9 +73,11 @@ def workflow(dt: date, routes):
             "pqinsert",
             "-i",
             "-p",
-            f"data {routes} {dt:%Y%m%d}0000 "
-            f"gis/shape/4326/us/dm_current.{suffix} "
-            f"GIS/usdm/{fn.split('/')[-1]} bogus",
+            (
+                f"data {routes} {dt:%Y%m%d}0000 "
+                f"gis/shape/4326/us/dm_current.{suffix} "
+                f"GIS/usdm/{fn.split('/')[-1]} bogus"
+            ),
             fn,
         ]
         LOG.info(" ".join(cmd))

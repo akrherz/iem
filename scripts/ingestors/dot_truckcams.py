@@ -118,8 +118,10 @@ def process_features(features):
         cmd = [
             "pqinsert",
             "-p",
-            f"plot ac {valid:%Y%m%d%H%M} {get_current_fn(label)} "
-            f"{get_archive_fn(label, valid)} jpg",
+            (
+                f"plot ac {valid:%Y%m%d%H%M} {get_current_fn(label)} "
+                f"{get_archive_fn(label, valid)} jpg"
+            ),
             tmp.name,
         ]
         with subprocess.Popen(cmd, stderr=subprocess.PIPE) as proc:

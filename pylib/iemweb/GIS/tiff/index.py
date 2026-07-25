@@ -171,8 +171,10 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             (
                 "Content-Disposition",
-                f"attachment; filename={service}_"
-                f"{'latest' if ts is None else ts}.tiff",
+                (
+                    f"attachment; filename={service}_"
+                    f"{'latest' if ts is None else ts}.tiff"
+                ),
             ),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:

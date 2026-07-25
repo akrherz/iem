@@ -86,9 +86,11 @@ def workflow(now, realtime):
         "pqinsert",
         "-i",
         "-p",
-        f"plot a{routes} {now:%Y%m%d%H%M} "
-        f"gis/images/4326/mrms/{prefix}.wld GIS/mrms/{prefix}_"
-        f"{now:%Y%m%d%H%M}.wld wld",
+        (
+            f"plot a{routes} {now:%Y%m%d%H%M} "
+            f"gis/images/4326/mrms/{prefix}.wld GIS/mrms/{prefix}_"
+            f"{now:%Y%m%d%H%M}.wld wld"
+        ),
         f"{tmpfn}.wld",
     ]
     subprocess.call(cmd)
@@ -97,9 +99,11 @@ def workflow(now, realtime):
         "pqinsert",
         "-i",
         "-p",
-        f"plot a{routes} {now:%Y%m%d%H%M} "
-        f"gis/images/4326/mrms/{prefix}.png GIS/mrms/{prefix}_"
-        f"{now:%Y%m%d%H%M}.png png",
+        (
+            f"plot a{routes} {now:%Y%m%d%H%M} "
+            f"gis/images/4326/mrms/{prefix}.png GIS/mrms/{prefix}_"
+            f"{now:%Y%m%d%H%M}.png png"
+        ),
         f"{tmpfn}.png",
     ]
     subprocess.call(cmd)
@@ -127,8 +131,10 @@ def workflow(now, realtime):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {now:%Y%m%d%H%M} gis/images/3857/mrms/{prefix}.tif "
-            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.tif tif",
+            (
+                f"plot c {now:%Y%m%d%H%M} gis/images/3857/mrms/{prefix}.tif "
+                f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.tif tif"
+            ),
             f"{tmpfn}.tif",
         ]
         subprocess.call(cmd)
@@ -140,8 +146,10 @@ def workflow(now, realtime):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.json "
-            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.json json",
+            (
+                f"plot c {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.json "
+                f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.json json"
+            ),
             f"{tmpfn}.json",
         ]
         subprocess.call(cmd)

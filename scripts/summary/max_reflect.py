@@ -106,8 +106,10 @@ def run(tmpdir, prod, sts):
     cmd = [
         "pqinsert",
         "-p",
-        f"plot a {sts:%Y%m%d%H}00 bogus "
-        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png",
+        (
+            f"plot a {sts:%Y%m%d%H}00 bogus "
+            f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png"
+        ),
         f"{tmpdir}/{sts:%Y%m%d%H}.png",
     ]
     LOG.info(" ".join(cmd))

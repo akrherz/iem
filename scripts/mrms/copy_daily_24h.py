@@ -27,9 +27,11 @@ def workflow(dt: datetime):
                 "pqinsert",
                 "-i",
                 "-p",
-                f"gis a {yest:%Y%m%d%H%M} "
-                f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} "
-                f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} {suffix}",
+                (
+                    f"gis a {yest:%Y%m%d%H%M} "
+                    f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} "
+                    f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} {suffix}"
+                ),
                 target,
             ]
             subprocess.call(cmd)

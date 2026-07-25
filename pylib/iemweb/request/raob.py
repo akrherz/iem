@@ -115,8 +115,10 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             (
                 "Content-Disposition",
-                "attachment; "
-                f"filename={station}_{sts:%Y%m%d%H}_{ets:%Y%m%d%H}.txt",
+                (
+                    "attachment; "
+                    f"filename={station}_{sts:%Y%m%d%H}_{ets:%Y%m%d%H}.txt"
+                ),
             ),
         ]
     else:
