@@ -44,8 +44,10 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
         "pqinsert",
         *extra,  # avoid duplicated sectors causing md5 collisions
         "-p",
-        f"plot {routes} {tstamp} {file_name} "
-        f"{dir_name}/n0r_{tstamp[:8]}_{tstamp[8:]}.png png",
+        (
+            f"plot {routes} {tstamp} {file_name} "
+            f"{dir_name}/n0r_{tstamp[:8]}_{tstamp[8:]}.png png"
+        ),
         tmpfd.name,
     ]
     subprocess.call(cmd)

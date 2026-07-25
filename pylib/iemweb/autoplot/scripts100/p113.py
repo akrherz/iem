@@ -2,16 +2,16 @@
 Presents the simple daily climatology as computed by period of record data. If
 you select a start date that is later than the end date, the plot will wrap
 over 1 January.  In such a case, if you select certain years to plot, the year
-will be from the start of the two year period that crosses 1 January.  Please
-note that the variable controls only work for the text output product. The
-generated plot is always just the daily high and low temperatures.
+will be from the start of the two year period that crosses 1 January.
 """
 
+import operator
 from datetime import date, datetime, timedelta
 
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter, DayLocator
+from matplotlib.figure import Figure
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
@@ -22,8 +22,8 @@ from iemweb.json.climodat_stclimo import run as climodat_stclimo_run
 
 PDICT = {
     "maxmin": "Daily Maximum / Minimums",
-    "precip": "Daily Maximum Precipitation",
-    "range": "Daily Maximum Range between High and Low",
+    "precip": "Daily Precipitation",
+    "range": "Daily Range between High and Low",
     "means": "Daily Average High and Lows",
 }
 
@@ -38,7 +38,7 @@ def get_description():
             name="var",
             default="maxmin",
             options=PDICT,
-            label="Which variable? (only works for text output option)",
+            label="Which variable?",
         ),
         {
             "type": "year",
@@ -79,6 +79,7 @@ def do_year_overlay(
     crosses_jan1: bool,
 ):
     """Overlay the observed data for the given years."""
+    plotvar: str = ctx["var"]
     year = ctx.get(pname)
     if year is None:
         return
@@ -90,9 +91,9 @@ def do_year_overlay(
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             sql_helper(
-                """select day, year, high, low from alldata
+                """select day, year, high, low, precip, high - low as rng
+            from alldata
             WHERE station = :station and day >= :sts and day <= :ets
-            and high is not null and low is not null
             order by day ASC"""
             ),
             conn,
@@ -107,41 +108,187 @@ def do_year_overlay(
             obs["day"] >= ctx["eday"], "day"
         ].map(lambda x: x.replace(year=1999))
     lbl = f"{year}-{year + 1}" if crosses_jan1 else f"{year}"
-    ax.bar(
-        obs["day"].values,
-        obs["high"] - obs["low"],
-        bottom=obs["low"],
-        color=color,
-        align="center",
-        label=f"Observed {lbl}",
-        width=0.8,
-        alpha=0.8,
+    if plotvar == "precip":
+        ax.bar(
+            obs["day"].to_numpy(),
+            obs["precip"].to_numpy(),
+            color=color,
+            align="center",
+            label=f"Observed {lbl}",
+            width=0.8,
+            alpha=0.8,
+        )
+    elif plotvar == "range":
+        ax.scatter(
+            obs["day"].values,
+            obs["high"] - obs["low"],
+            color=color,
+            alpha=1,
+            label=f"Observed {lbl}",
+            s=50,
+            zorder=5,
+        )
+    elif plotvar in ["maxmin", "means"]:
+        ax.bar(
+            obs["day"].values,
+            obs["high"] - obs["low"],
+            bottom=obs["low"],
+            color=color,
+            align="center",
+            label=f"Observed {lbl}",
+            width=0.8,
+            alpha=0.8,
+        )
+    combos = (
+        ("high", "max_high", operator.ge),
+        ("low", "min_low", operator.le),
     )
+    if plotvar == "range":
+        combos = (
+            ("rng", "max_range", operator.ge),
+            ("rng", "min_range", operator.le),
+        )
+    elif plotvar == "precip":
+        combos = (("precip", "max_precip", operator.ge),)
     for _, row in obs.iterrows():
         ts = pd.Timestamp(row["day"])
         if ts not in df.index:
             continue
         dfrow = df.loc[ts]
-        if row["high"] >= dfrow["max_high"]:
-            ax.scatter(
-                [ts],
-                [row["high"]],
-                facecolor=color,
-                edgecolor="yellow",
-                alpha=0.8,
-                s=50,
-                zorder=5,
-            )
-        if row["low"] <= dfrow["min_low"]:
-            ax.scatter(
-                [ts],
-                [row["low"]],
-                edgecolor="yellow",
-                facecolor=color,
-                alpha=0.8,
-                s=50,
-                zorder=5,
-            )
+        for col, dfcol, op in combos:
+            if op(row[col], dfrow[dfcol]):
+                ax.scatter(
+                    [ts],
+                    [row[col]],
+                    facecolor=color,
+                    edgecolor="yellow",
+                    alpha=0.8,
+                    s=50,
+                    zorder=5,
+                )
+
+
+def generate_plot(ctx: dict, df: pd.DataFrame, bs: date, be: date) -> Figure:
+    """Do the plotting work."""
+    plotvar: str = ctx["var"]
+
+    title = f"{ctx['_sname']}:: {PDICT[plotvar]} Climatology"
+    subtitle = f"Simple climatology over {bs.year}-{be.year}."
+    if ctx.get("year1") is not None:
+        subtitle += f" Observed {PDICT[plotvar]} for {ctx['year1']}"
+        if ctx.get("year2") is not None:
+            subtitle += f" and {ctx['year2']}"
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
+    ax = fig.add_axes((0.08, 0.15, 0.9, 0.75))
+    # Wants to cross 1 Jan on x-axis
+    crosses_jan1 = ctx["sday"] > ctx["eday"]
+    if crosses_jan1:
+        if ctx["eday"].month == 2 and ctx["eday"].day == 29:
+            ctx["eday"] = date(ctx["eday"].year, 2, 28)
+        dfnew = df.loc[pd.Timestamp(ctx["sday"]) :].copy()
+        dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
+        df = pd.concat([dfnew, df.loc[: pd.Timestamp(ctx["sday"])]])
+        ctx["sday"] = ctx["sday"].replace(year=1999)
+
+    x = df.index.date
+    if plotvar == "range":
+        ax.fill_between(
+            x,
+            df["min_range"].values,
+            df["max_range"].values,
+            color="#b4dab3",
+            step="mid",
+            label="Record Range",
+        )
+        ax.plot(
+            x,
+            df["max_range"].values,
+            color="#dc300b",
+            lw=1,
+            drawstyle="steps-mid",
+        )
+        ax.plot(
+            x,
+            df["min_range"].values,
+            color="#444e9f",
+            lw=1,
+            drawstyle="steps-mid",
+        )
+    elif plotvar == "precip":
+        ax.bar(
+            x,
+            df["max_precip"].values,
+            color="tan",
+            align="center",
+            label="Record Precipitation",
+            width=1,
+            alpha=1,
+        )
+        ax.scatter(
+            x,
+            df["avg_precip"].to_numpy(),
+            color="#009900",
+            label="Avg Precipitation",
+            s=50,
+            alpha=1,
+        )
+    elif plotvar in ["maxmin", "means"]:  # close enough
+        ax.fill_between(
+            x,
+            df["avg_high"].values,
+            df["max_high"].values,
+            color="#f2c2a7",
+            step="mid",
+        )
+        ax.fill_between(
+            x,
+            df["avg_low"].values,
+            df["min_low"].values,
+            color="#bbbbe2",
+            step="mid",
+        )
+        ax.fill_between(
+            x,
+            df["avg_low"].values,
+            df["avg_high"].values,
+            color="#b4dab3",
+            step="mid",
+            label="Range of Ave High/Low",
+        )
+        ax.plot(
+            x,
+            df["max_high"].values,
+            color="#dc300b",
+            label="Record High",
+            lw=1,
+            drawstyle="steps-mid",
+        )
+        ax.plot(
+            x,
+            df["min_low"].values,
+            color="#444e9f",
+            label="Record Low",
+            lw=1,
+            drawstyle="steps-mid",
+        )
+
+    do_year_overlay(df, ctx, ax, "year1", "#593700", crosses_jan1)
+    do_year_overlay(df, ctx, ax, "year2", "#49aaf0", crosses_jan1)
+
+    ax.grid(True)
+    ax.legend(loc=(0.1, -0.1), ncol=5)
+    ax.set_ylabel(
+        "Precipitation [inch]" if plotvar == "precip" else "Temperature °F"
+    )
+    ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
+    days = 1
+    if ctx["eday"] - ctx["sday"] < timedelta(days=71):
+        days = [1, 8, 15, 22, 29]
+    elif ctx["eday"] - ctx["sday"] < timedelta(days=121):
+        days = [1, 15]
+    ax.xaxis.set_major_locator(DayLocator(bymonthday=days))
+    ax.xaxis.set_major_formatter(DateFormatter("%b %-d"))
+    return fig
 
 
 def plotter(ctx: dict):
@@ -236,77 +383,6 @@ def plotter(ctx: dict):
                 res += f"{row['max_precip']:6.2f}"
         res += "\n"
 
-    title = f"{ctx['_sname']}:: Daily High/Low Temperature Climatology"
-    subtitle = f"Simple climatology over {bs.year}-{be.year}."
-    if ctx.get("year1") is not None:
-        subtitle += f" Observed High/Low for {ctx['year1']}"
-        if ctx.get("year2") is not None:
-            subtitle += f" and {ctx['year2']}"
-    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes((0.08, 0.1, 0.9, 0.8))
-    # Wants to cross 1 Jan on x-axis
-    crosses_jan1 = ctx["sday"] > ctx["eday"]
-    if crosses_jan1:
-        if ctx["eday"].month == 2 and ctx["eday"].day == 29:
-            ctx["eday"] = date(ctx["eday"].year, 2, 28)
-        dfnew = df.loc[pd.Timestamp(ctx["sday"]) :].copy()
-        dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
-        df = pd.concat([dfnew, df.loc[: pd.Timestamp(ctx["sday"])]])
-        ctx["sday"] = ctx["sday"].replace(year=1999)
-
-    x = df.index.date
-    ax.fill_between(
-        x,
-        df["avg_high"].values,
-        df["max_high"].values,
-        color="#f2c2a7",
-        step="mid",
-    )
-    ax.fill_between(
-        x,
-        df["avg_low"].values,
-        df["min_low"].values,
-        color="#bbbbe2",
-        step="mid",
-    )
-    ax.fill_between(
-        x,
-        df["avg_low"].values,
-        df["avg_high"].values,
-        color="#b4dab3",
-        step="mid",
-        label="Range of Ave High/Low",
-    )
-    ax.plot(
-        x,
-        df["max_high"].values,
-        color="#dc300b",
-        label="Record High",
-        lw=1,
-        drawstyle="steps-mid",
-    )
-    ax.plot(
-        x,
-        df["min_low"].values,
-        color="#444e9f",
-        label="Record Low",
-        lw=1,
-        drawstyle="steps-mid",
-    )
-
-    do_year_overlay(df, ctx, ax, "year1", "#593700", crosses_jan1)
-    do_year_overlay(df, ctx, ax, "year2", "#49aaf0", crosses_jan1)
-
-    ax.grid(True)
-    ax.legend(ncol=5)
-    ax.set_ylabel("Temperature °F")  # Plot only works for temperature
-    ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
-    days = 1
-    if ctx["eday"] - ctx["sday"] < timedelta(days=71):
-        days = [1, 8, 15, 22, 29]
-    elif ctx["eday"] - ctx["sday"] < timedelta(days=121):
-        days = [1, 15]
-    ax.xaxis.set_major_locator(DayLocator(bymonthday=days))
-    ax.xaxis.set_major_formatter(DateFormatter("%b %-d"))
+    fig = generate_plot(ctx, df, bs, be)
 
     return fig, df, res

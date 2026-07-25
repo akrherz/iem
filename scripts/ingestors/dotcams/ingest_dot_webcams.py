@@ -127,8 +127,10 @@ def process_feature(cursor, domain, feat: dict):
         cmd = [
             "pqinsert",
             "-p",
-            f"webcam {routes} {valid:%Y%m%d%H%M} camera/stills/{cam}.jpg "
-            f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg",
+            (
+                f"webcam {routes} {valid:%Y%m%d%H%M} camera/stills/{cam}.jpg "
+                f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg"
+            ),
             tmpfd.name,
         ]
         with subprocess.Popen(

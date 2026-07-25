@@ -148,8 +148,11 @@ def main(valid: datetime, realtime: bool):
         "pqinsert",
         "-i",
         "-p",
-        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.json "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json",
+        (
+            f"plot {routes} {valid:%Y%m%d%H%M} "
+            "gis/images/4326/imerg/p30m.json "
+            f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json"
+        ),
         "imerg.json",
     ]
     subprocess.call(cmd)
@@ -160,8 +163,10 @@ def main(valid: datetime, realtime: bool):
         "pqinsert",
         "-i",
         "-p",
-        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.wld "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld",
+        (
+            f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.wld "
+            f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld"
+        ),
         "imerg.wld",
     ]
     subprocess.call(cmd)
@@ -170,8 +175,10 @@ def main(valid: datetime, realtime: bool):
         "pqinsert",
         "-i",
         "-p",
-        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.png "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png",
+        (
+            f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.png "
+            f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png"
+        ),
         "imerg.png",
     ]
     subprocess.call(cmd)

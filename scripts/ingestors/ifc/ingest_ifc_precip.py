@@ -92,9 +92,11 @@ def ldm(tmpfn, now, routes):
             "pqinsert",
             "-i",
             "-p",
-            f"plot {routes} {now:%Y%m%d%H%M} "
-            f"gis/images/4326/ifc/p05m.{suffix} "
-            f"GIS/ifc/p05m_{now:%Y%m%d%H%M}.{suffix} {suffix}",
+            (
+                f"plot {routes} {now:%Y%m%d%H%M} "
+                f"gis/images/4326/ifc/p05m.{suffix} "
+                f"GIS/ifc/p05m_{now:%Y%m%d%H%M}.{suffix} {suffix}"
+            ),
             f"{tmpfn}.{suffix}",
         ]
         LOG.info(" ".join(cmd))

@@ -303,12 +303,16 @@ def plotter(ctx: dict):
     ax.legend(
         (pr0, pr1),
         (
-            f"{MDICT[month1]} ({y1}-{y2}),"
-            r" $\mu$"
-            f"={np.mean(m1data):.1f}",
-            f"{MDICT[month2]} ({y3}-{y4}),"
-            r" $\mu$"
-            f"={np.mean(m2data):.1f}",
+            (
+                f"{MDICT[month1]} ({y1}-{y2}),"
+                r" $\mu$"
+                f"={np.mean(m1data):.1f}"
+            ),
+            (
+                f"{MDICT[month2]} ({y3}-{y4}),"
+                r" $\mu$"
+                f"={np.mean(m2data):.1f}"
+            ),
         ),
         ncol=1,
         loc=(0.1, -0.2),

@@ -246,8 +246,10 @@ def main(job):
     cmd = [
         "pqinsert",
         "-p",
-        f"plot ac {job['ets']:%Y%m%d}0000 {job['filename']} "
-        f"{job['filename']} shef",
+        (
+            f"plot ac {job['ets']:%Y%m%d}0000 {job['filename']} "
+            f"{job['filename']} shef"
+        ),
         fh.name,
     ]
     LOG.info(" ".join(cmd))

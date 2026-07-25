@@ -29,9 +29,11 @@ def process(valid: datetime):
         "--keep-session-cookies",
         "-O",
         fn,
-        "https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/"
-        f"NLDAS_NOAH0125_H.2.0/{valid:%Y}/{valid:%03j}/NLDAS_NOAH0125_H."
-        f"A{valid:%Y%m%d}.{valid:%H}00.020.nc",
+        (
+            "https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/"
+            f"NLDAS_NOAH0125_H.2.0/{valid:%Y}/{valid:%03j}/NLDAS_NOAH0125_H."
+            f"A{valid:%Y%m%d}.{valid:%H}00.020.nc"
+        ),
     ]
     if not os.path.isfile(fn):
         subprocess.call(cmd)

@@ -171,8 +171,10 @@ def doit(gts: datetime, hr: int):
         "pqinsert",
         "-i",
         "-p",
-        f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.wld "
-        f"GIS/mrms/p{hr}h_{tstr}.wld wld",
+        (
+            f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.wld "
+            f"GIS/mrms/p{hr}h_{tstr}.wld wld"
+        ),
         f"{tmpfn}.wld",
     ]
     subprocess.call(cmd)
@@ -182,8 +184,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.wld "
-            f"GIS/mrms/p{hr}h_{tstr}.wld wld",
+            (
+                f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.wld "
+                f"GIS/mrms/p{hr}h_{tstr}.wld wld"
+            ),
             f"{tmpfn}_nn.wld",
         ]
         subprocess.call(cmd)
@@ -193,8 +197,10 @@ def doit(gts: datetime, hr: int):
         "pqinsert",
         "-i",
         "-p",
-        f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.png "
-        f"GIS/mrms/p{hr}h_{tstr}.png png",
+        (
+            f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.png "
+            f"GIS/mrms/p{hr}h_{tstr}.png png"
+        ),
         f"{tmpfn}.png",
     ]
     subprocess.call(cmd)
@@ -205,8 +211,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.png "
-            f"GIS/mrms/p{hr}h_{tstr}.png png",
+            (
+                f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.png "
+                f"GIS/mrms/p{hr}h_{tstr}.png png"
+            ),
             f"{tmpfn}_nn.png",
         ]
         subprocess.call(cmd)
@@ -251,8 +259,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/3857/mrms/p{hr}h.tif "
-            f"GIS/mrms/p{hr}h_{tstr}.tif tif",
+            (
+                f"plot c {tstr} gis/images/3857/mrms/p{hr}h.tif "
+                f"GIS/mrms/p{hr}h_{tstr}.tif tif"
+            ),
             f"{tmpfn}.tif",
         ]
         subprocess.call(cmd)
@@ -261,8 +271,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/3857/mrms/p{hr}h_nn.tif "
-            f"GIS/mrms/p{hr}h_{tstr}.tif tif",
+            (
+                f"plot c {tstr} gis/images/3857/mrms/p{hr}h_nn.tif "
+                f"GIS/mrms/p{hr}h_{tstr}.tif tif"
+            ),
             f"{tmpfn}_nn.tif",
         ]
         subprocess.call(cmd)
@@ -275,8 +287,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/4326/mrms/p{hr}h.json "
-            f"GIS/mrms/p{hr}h_{tstr}.json json",
+            (
+                f"plot c {tstr} gis/images/4326/mrms/p{hr}h.json "
+                f"GIS/mrms/p{hr}h_{tstr}.json json"
+            ),
             f"{tmpfn}.json",
         ]
         subprocess.call(cmd)
@@ -285,8 +299,10 @@ def doit(gts: datetime, hr: int):
             "pqinsert",
             "-i",
             "-p",
-            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.json "
-            f"GIS/mrms/p{hr}h_{tstr}.json json",
+            (
+                f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.json "
+                f"GIS/mrms/p{hr}h_{tstr}.json json"
+            ),
             f"{tmpfn}.json",
         ]
         subprocess.call(cmd)
