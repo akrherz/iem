@@ -54,9 +54,13 @@ def compute_wind_gusts_asos(gdf, currentrow, newdata):
         )
 
 
-def is_new(colname, newval, currentrow, newdata):
+def is_new(colname: str, newval, currentrow, newdata):
     """Comp and set."""
     if pd.isnull(newval):
+        return
+    # Special case for tmpf account
+    if colname in ["max_tmpf", "min_tmpf"] and pd.isnull(currentrow[colname]):
+        newdata[colname] = newval
         return
     if (
         pd.isnull(currentrow[colname])
@@ -70,7 +74,7 @@ def get_rwis_obs(dt: date) -> pd.DataFrame:
     with get_sqlalchemy_conn("rwis") as conn:
         obsdf = pd.read_sql(
             sql_helper("""
-        select t.id as station, network, d.iemid, drct, sknt, gust, dwpf,
+        select t.id as station, network, d.iemid, drct, sknt, gust, dwpf, tmpf,
         valid at time zone tzname as localvalid, valid, relh, feel from
         alldata d JOIN stations t on (t.iemid = d.iemid)
         where network ~* 'RWIS'
@@ -94,7 +98,7 @@ def get_asos_obs(dt: date) -> pd.DataFrame:
     with get_sqlalchemy_conn("asos") as conn:
         obsdf = pd.read_sql(
             sql_helper("""
-        select station, network, iemid, drct, sknt, gust, dwpf,
+        select station, network, iemid, drct, sknt, gust, dwpf, tmpf,
         valid at time zone tzname as localvalid, valid, relh, feel,
         peak_wind_gust, peak_wind_drct, peak_wind_time,
         peak_wind_time at time zone tzname as local_peak_wind_time from
@@ -251,6 +255,21 @@ def do(dt: date, netclass: str, meta: dict):
             newdata,
         )
 
+        # Careful here to not overwrite what ACIS may provide, so we
+        # constrain this elsewhere to be currently null
+        is_new(
+            "max_tmpf",
+            clean(ldf["tmpf"].max(), -150, 140),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "min_tmpf",
+            clean(ldf["tmpf"].min(), -150, 140),
+            currentrow,
+            newdata,
+        )
+
         if not newdata:
             continue
         cols = []
@@ -297,9 +316,8 @@ def main(dt: datetime):
     for netclass, meta in settings.items():
         try:
             do(dt, netclass, meta)
-        except Exception as exp:
-            LOG.warning("compute_daily %s %s failed", netclass, dt)
-            LOG.exception(exp)
+        except Exception:
+            LOG.exception("compute_daily %s %s failed", netclass, dt)
 
 
 if __name__ == "__main__":

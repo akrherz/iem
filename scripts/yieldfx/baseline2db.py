@@ -1,4 +1,7 @@
-"""Copy the provided baseline data to the database"""
+"""Copy the provided baseline data to the database.
+
+Not run from cron, a manual run when QC files are updated.
+"""
 
 import glob
 import os

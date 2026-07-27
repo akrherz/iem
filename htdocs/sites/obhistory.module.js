@@ -37,42 +37,6 @@ function updateURI() {
     window.history.pushState({}, "", url);
 }
 
-function handleDatePickerChange(event) {
-    // Only submit when user finishes interaction (blur or calendar selection)
-    // The change event fires on every keystroke when typing, which is annoying
-    const datePicker = event.target;
-
-    // If change happened due to calendar picker (not manual typing),
-    // the input will be blurred shortly after
-    if (datePicker.value && datePicker.validity.valid) {
-        // Check if we're still focused (typing) or not (picker/blur)
-        if (document.activeElement !== datePicker) {
-            // User clicked calendar or tabbed away - submit
-            document.getElementById("theform").submit();
-        }
-        // If still focused, wait for blur event to submit
-    }
-}
-
-function handleDatePickerBlur(event) {
-    // Submit when user leaves the field with a valid date
-    const datePicker = event.target;
-    if (datePicker.value && datePicker.validity.valid) {
-        document.getElementById("theform").submit();
-    }
-}
-
-function handleDatePickerKeydown(event) {
-    // Submit on Enter key only
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        const datePicker = event.target;
-        if (datePicker.value && datePicker.validity.valid) {
-            document.getElementById("theform").submit();
-        }
-    }
-}
-
 function handlePrevButtonClick() {
     const prevButton = document.getElementById("prevbutton");
     const targetDate = prevButton.dataset.date;
@@ -201,10 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (madis_toggle) {
         madis_toggle.addEventListener('click', toggleMADIS);
     }
-    const datePicker = requireElement("date_picker");
-    datePicker.addEventListener('change', handleDatePickerChange);
-    datePicker.addEventListener('blur', handleDatePickerBlur);
-    datePicker.addEventListener('keydown', handleDatePickerKeydown);
     requireElement("prevbutton").addEventListener('click', handlePrevButtonClick);
     requireElement("nextbutton").addEventListener('click', handleNextButtonClick);
 

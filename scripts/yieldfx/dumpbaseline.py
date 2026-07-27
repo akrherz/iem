@@ -1,4 +1,7 @@
-"""Dump baseline file as CSV, with GDD computed"""
+"""Dump baseline file as CSV, with GDD computed.
+
+This is manual run only.
+"""
 
 import glob
 import os
