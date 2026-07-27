@@ -176,6 +176,7 @@ def main():
             index_col="idot_id",
         )
     LOG.info("Found %s current entries", len(current))
+    jobj = {}
     for attempt in range(2):
         LOG.info("Attempt %s/1 fetching", attempt)
         try:

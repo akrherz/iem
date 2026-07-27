@@ -176,7 +176,7 @@ def get_description():
             "ge": 1,
             "le": 10,
             "label": (
-                "If attempting to insert zeros, how many grid cells away"
+                "If attempting to insert zeros, how many grid cells away "
                 "should they be from an observed point? (integer)"
             ),
         },
