@@ -18,5 +18,5 @@ register_shutdown_function(function () use ($memcache, $key) {
 });
 if ($memcache->increment($key, 1, 0, 300) > $concurrency_limit) {
     http_response_code(429);
-    die('429: Too Many Requests');
+    die('429: Too many AI bots/requests. Please try reloading the page.');
 }
