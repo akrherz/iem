@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 import click
 import numpy as np
 from metpy.units import units
+from netCDF4 import Dataset
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_daily_ncname
 from pyiem.meteorology import gdd
@@ -76,7 +77,28 @@ def make_netcdf(ncfn, valid, west, south):
         srad.long_name = "daylight average incident shortwave radiation"
 
 
-def copy_iemre(nc, ncdate0: date, ncdate1: date, islice, jslice):
+def use_power(nc: Dataset, renc: Dataset, re_slice, yfx_slice, islice, jslice):
+    """Use NASA POWER for solar radiation source, if exists."""
+    # Special care needed for solar radiation filling
+    for rt, nt in zip(
+        list(range(re_slice.start, re_slice.stop)),
+        list(range(yfx_slice.start, yfx_slice.stop)),
+        strict=False,
+    ):
+        # IEMRE power_swdn is MJ, test to see if data exists
+        srad = renc.variables["power_swdn"][rt, jslice, islice]
+        if srad.mask.any():
+            LOG.info("POWER missing, failback to IEMRE rsds for tidx:%s", rt)
+            # IEMRE rsds uses W m-2, we want MJ
+            srad = (
+                renc.variables["rsds"][rt, jslice, islice]
+                * 86400.0
+                / 1000000.0
+            )
+        nc.variables["srad"][nt, :, :] = srad
+
+
+def copy_iemre(nc: Dataset, ncdate0: date, ncdate1: date, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
     rencfn = get_daily_ncname(ncdate0.year)
     if not os.path.isfile(rencfn):
@@ -110,25 +132,12 @@ def copy_iemre(nc, ncdate0: date, ncdate1: date, islice, jslice):
         nc.variables["prcp"][yfx_slice, :, :] = renc.variables["p01d"][
             re_slice, jslice, islice
         ]
-        # Special care needed for solar radiation filling
-        for rt, nt in zip(
-            list(range(re_slice.start, re_slice.stop)),
-            list(range(yfx_slice.start, yfx_slice.stop)),
-            strict=False,
-        ):
-            # IEMRE power_swdn is MJ, test to see if data exists
-            srad = renc.variables["power_swdn"][rt, jslice, islice]
-            if srad.mask.any():
-                # IEMRE rsds uses W m-2, we want MJ
-                srad = (
-                    renc.variables["rsds"][rt, jslice, islice]
-                    * 86400.0
-                    / 1000000.0
-                )
-            nc.variables["srad"][nt, :, :] = srad
+        use_power(nc, renc, re_slice, yfx_slice, islice, jslice)
 
 
-def tile_extraction(nc, valid, west: float, south: float, fullmode):
+def tile_extraction(
+    nc: Dataset, valid: datetime, west: float, south: float, fullmode: bool
+):
     """Do our tile extraction"""
     # update model metadata
     i, j = get_nav("IEMRE", "conus").find_ij(west, south)
@@ -161,11 +170,10 @@ def qc(nc):
     print("done...")
 
 
-def workflow(valid, ncfn, west, south, fullmode):
+def workflow(valid, ncfn, west, south, fullmode: bool):
     """Make the magic happen"""
     basedir = "/mesonet/share/pickup/yieldfx/baseline"
-    if not os.path.isdir(basedir):
-        os.makedirs(basedir)
+    os.makedirs(basedir, exist_ok=True)
     fullpath = f"{basedir}/{ncfn}"
     if fullmode:
         make_netcdf(fullpath, valid, west, south)
@@ -181,7 +189,7 @@ def workflow(valid, ncfn, west, south, fullmode):
 def main(dt: datetime | None, full: bool):
     """Go Main Go"""
     if dt is not None:
-        dt: date = dt.date()
+        dt = dt.date()
     # Create tiles to cover 12 states
     progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
     for west in progress:

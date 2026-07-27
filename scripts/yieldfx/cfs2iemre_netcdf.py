@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 import click
 import numpy as np
 import pygrib
+from netCDF4 import Dataset
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
@@ -26,7 +27,7 @@ AGGFUNC = {
 }
 
 
-def merge(nc, valid, gribname, vname):
+def merge(nc: Dataset, valid, gribname, vname):
     """Merge in the grib data"""
     fn = valid.strftime(
         f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{gribname}"
@@ -67,11 +68,11 @@ def merge(nc, valid, gribname, vname):
         nc.variables[vname][tstep] = nc.variables[vname][tstep] / 4.0
 
 
-def create_netcdf(valid):
+def create_netcdf(valid: datetime) -> str:
     """Create and return the netcdf file"""
-    ncfn = "/mesonet/data/iemre/temp_cfs_%s.nc" % (valid.strftime("%Y%m%d%H"),)
+    ncfn = f"/mesonet/data/iemre/temp_cfs_{valid:%Y%m%d%H}.nc"
     nc = ncopen(ncfn, "w")
-    nc.title = "IEM Regridded CFS Member 1 Forecast %s" % (valid.year,)
+    nc.title = f"IEM Regridded CFS Member 1 Forecast {valid:%Y}"
     nc.platform = "Grided Forecast"
     nc.description = "IEM Regridded CFS on 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -151,19 +152,15 @@ def create_netcdf(valid):
     rsds.description = "Global Shortwave Irradiance"
 
     nc.close()
-    nc = ncopen(ncfn, "a")
-    return nc
+    return ncfn
 
 
-def finalize(nc):
+def finalize(ncfn: str):
     """Cleanup after our work."""
-    filename = nc.filepath()
-    # Close the netcdf file
-    nc.close()
     # Rename it
-    newfilename = filename.replace("temp_", "")
-    LOG.info("Renaming %s to %s", filename, newfilename)
-    os.rename(filename, newfilename)
+    newfilename = ncfn.replace("temp_", "")
+    LOG.info("Renaming %s to %s", ncfn, newfilename)
+    os.rename(ncfn, newfilename)
 
 
 @click.command()
@@ -179,16 +176,17 @@ def main(dt: datetime | None):
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create netcdf file
-        nc = create_netcdf(valid)
-        # merge in the data
-        for gribname, vname in zip(
-            ["dswsfc", "tmax", "tmin", "prate"],
-            ["srad", "high_tmpk", "low_tmpk", "p01d"],
-            strict=False,
-        ):
-            merge(nc, valid, gribname, vname)
+        ncfn = create_netcdf(valid)
+        with ncopen(ncfn, "a") as nc:
+            # merge in the data
+            for gribname, vname in zip(
+                ["dswsfc", "tmax", "tmin", "prate"],
+                ["srad", "high_tmpk", "low_tmpk", "p01d"],
+                strict=False,
+            ):
+                merge(nc, valid, gribname, vname)
         # profit
-        finalize(nc)
+        finalize(ncfn)
 
 
 if __name__ == "__main__":
