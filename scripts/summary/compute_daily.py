@@ -295,11 +295,9 @@ def do(dt: date, netclass: str, meta: dict):
         currentrow = current.loc[iemid]
         if netclass == "ASOS":
             compute_wind_gusts_asos(gdf, currentrow, newdata)
-        # take the nearest value
-        ldf = gdf.copy().bfill().ffill()
-        do_rh(ldf, currentrow, newdata)
-        do_wind(ldf, currentrow, newdata)
-        do_temp(ldf, currentrow, newdata)
+        do_rh(gdf, currentrow, newdata)
+        do_wind(gdf, currentrow, newdata)
+        do_temp(gdf, currentrow, newdata)
 
         if not newdata:
             continue
