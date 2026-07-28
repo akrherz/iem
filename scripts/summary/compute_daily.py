@@ -135,6 +135,114 @@ def compute_things(df):
     df["timedelta"] = df["timedelta"] / np.timedelta64(1, "s")
 
 
+def do_rh(ldf: pd.DataFrame, currentrow: dict, newdata: dict):
+    """Process RH fields."""
+    hasdf = ldf[pd.notna(ldf["relh"])]
+    # Basic requirements
+    if len(hasdf.index) < 2:
+        return
+    totsecs = hasdf["timedelta"].sum()
+    is_new(
+        "avg_rh",
+        clean((hasdf["relh"] * hasdf["timedelta"]).sum() / totsecs, 1, 100),
+        currentrow,
+        newdata,
+    )
+    is_new("min_rh", clean(hasdf["relh"].min(), 1, 100), currentrow, newdata)
+    is_new("max_rh", clean(hasdf["relh"].max(), 1, 100), currentrow, newdata)
+
+
+def do_wind(ldf: pd.DataFrame, currentrow: dict, newdata: dict):
+    """Process wind fields."""
+    hasdf = ldf[pd.notna(ldf["sknt"]) & pd.notna(ldf["drct"])]
+    if len(hasdf.index) < 2:
+        return
+    totsecs = hasdf["timedelta"].sum()
+    uavg = (hasdf["u"] * hasdf["timedelta"]).sum() / totsecs
+    vavg = (hasdf["v"] * hasdf["timedelta"]).sum() / totsecs
+    is_new(
+        "vector_avg_drct",
+        clean(
+            mcalc.wind_direction(uavg * munits.knots, vavg * munits.knots),
+            0,
+            360,
+        ),
+        currentrow,
+        newdata,
+    )
+    is_new(
+        "avg_sknt",
+        clean((hasdf["sknt"] * hasdf["timedelta"]).sum() / totsecs, 0, 150),
+        currentrow,
+        newdata,
+    )
+    is_new(
+        "max_sknt",
+        clean(hasdf["sknt"].max(), 0, 150),
+        currentrow,
+        newdata,
+    )
+
+
+def do_temp(ldf: pd.DataFrame, currentrow: dict, newdata: dict):
+    """Process temperature fields."""
+    hasdf = ldf[pd.notna(ldf["feel"])]
+    if len(hasdf.index) > 1:
+        totsecs = hasdf["timedelta"].sum()
+        is_new(
+            "max_feel",
+            clean(hasdf["feel"].max(), -150, 200),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "avg_feel",
+            clean(
+                (hasdf["feel"] * hasdf["timedelta"]).sum() / totsecs, -150, 200
+            ),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "min_feel",
+            clean(hasdf["feel"].min(), -150, 200),
+            currentrow,
+            newdata,
+        )
+
+    hasdf = ldf[pd.notna(ldf["dwpf"])]
+    if len(hasdf.index) > 1:
+        is_new(
+            "max_dwpf",
+            clean(hasdf["dwpf"].max(), -150, 100),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "min_dwpf",
+            clean(hasdf["dwpf"].min(), -150, 100),
+            currentrow,
+            newdata,
+        )
+
+    hasdf = ldf[pd.notna(ldf["tmpf"])]
+    if len(hasdf.index) > 1:
+        # Careful here to not overwrite what ACIS may provide, so we
+        # constrain this elsewhere to be currently null
+        is_new(
+            "max_tmpf",
+            clean(hasdf["tmpf"].max(), -150, 140),
+            currentrow,
+            newdata,
+        )
+        is_new(
+            "min_tmpf",
+            clean(hasdf["tmpf"].min(), -150, 140),
+            currentrow,
+            newdata,
+        )
+
+
 def do(dt: date, netclass: str, meta: dict):
     """Process this date timestamp"""
     iemaccess = get_dbconn("iem")
@@ -145,7 +253,7 @@ def do(dt: date, netclass: str, meta: dict):
         current = pd.read_sql(
             sql_helper(
                 """
-    SELECT s.* from {table} s JOIN stations t on (s.iemid = t.iemid)
+    SELECT s.*, t.id from {table} s JOIN stations t on (s.iemid = t.iemid)
     WHERE day = :dt and network ~* :netclass
             """,
                 table=table,
@@ -187,96 +295,20 @@ def do(dt: date, netclass: str, meta: dict):
         currentrow = current.loc[iemid]
         if netclass == "ASOS":
             compute_wind_gusts_asos(gdf, currentrow, newdata)
-        # take the nearest value
-        ldf = gdf.copy().bfill().ffill()
-        totsecs = ldf["timedelta"].sum()
-        is_new(
-            "avg_rh",
-            clean((ldf["relh"] * ldf["timedelta"]).sum() / totsecs, 1, 100),
-            currentrow,
-            newdata,
-        )
-        is_new("min_rh", clean(ldf["relh"].min(), 1, 100), currentrow, newdata)
-        is_new("max_rh", clean(ldf["relh"].max(), 1, 100), currentrow, newdata)
-
-        uavg = (ldf["u"] * ldf["timedelta"]).sum() / totsecs
-        vavg = (ldf["v"] * ldf["timedelta"]).sum() / totsecs
-        is_new(
-            "vector_avg_drct",
-            clean(
-                mcalc.wind_direction(uavg * munits.knots, vavg * munits.knots),
-                0,
-                360,
-            ),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "avg_sknt",
-            clean((ldf["sknt"] * ldf["timedelta"]).sum() / totsecs, 0, 150),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "max_sknt",
-            clean(ldf["sknt"].max(), 0, 150),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "max_feel",
-            clean(ldf["feel"].max(), -150, 200),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "avg_feel",
-            clean((ldf["feel"] * ldf["timedelta"]).sum() / totsecs, -150, 200),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "min_feel",
-            clean(ldf["feel"].min(), -150, 200),
-            currentrow,
-            newdata,
-        )
-
-        is_new(
-            "max_dwpf",
-            clean(ldf["dwpf"].max(), -150, 100),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "min_dwpf",
-            clean(ldf["dwpf"].min(), -150, 100),
-            currentrow,
-            newdata,
-        )
-
-        # Careful here to not overwrite what ACIS may provide, so we
-        # constrain this elsewhere to be currently null
-        is_new(
-            "max_tmpf",
-            clean(ldf["tmpf"].max(), -150, 140),
-            currentrow,
-            newdata,
-        )
-        is_new(
-            "min_tmpf",
-            clean(ldf["tmpf"].min(), -150, 140),
-            currentrow,
-            newdata,
-        )
+        do_rh(gdf, currentrow, newdata)
+        do_wind(gdf, currentrow, newdata)
+        do_temp(gdf, currentrow, newdata)
 
         if not newdata:
             continue
         cols = []
         args = []
+        logmsg = []
         for key, val in newdata.items():
+            logmsg.append(f"{key} {currentrow[key]}->{val}")
             cols.append(f"{key} = %s")
             args.append(val)
+        LOG.debug("%s %s", currentrow["id"], ", ".join(logmsg))
         args.extend([iemid, dt])
 
         sql = ", ".join(cols)
