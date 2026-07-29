@@ -285,7 +285,9 @@ def get_data(conn, ts):
                         if not q.get("tmpf", False)
                         else "M"
                     ),
-                    "dwpf": safe_t(
+                    "dwpf": "M"
+                    if row["tair_c_avg"] is None or row["rh"] is None
+                    else safe_t(
                         dewpoint_from_relative_humidity(
                             units("degC") * row["tair_c_avg"],
                             units("percent") * row["rh"],
