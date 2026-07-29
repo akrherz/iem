@@ -8,6 +8,7 @@ format.
 Changelog
 ---------
 
+- 2026-07-28: Added `dwpf` (Dew Point Temperature °F) to output.
 - 2026-07-17: The Comprehensive Climate Index (`cci` and `cci_shade`)
   return value was updated to use units of `degF`.
 - 2026-02-21: A bug was corrected with the `inversion` parameter.  It is now
@@ -31,6 +32,7 @@ import json
 from datetime import timedelta
 from typing import Annotated
 
+from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -89,7 +91,7 @@ def cci(row, shade_effect):
                 shade_effect=shade_effect,
             )
         ),
-        2,
+        1,
     )
 
 
@@ -282,6 +284,12 @@ def get_data(conn, ts):
                         safe_t(row["tair_c_avg"])
                         if not q.get("tmpf", False)
                         else "M"
+                    ),
+                    "dwpf": safe_t(
+                        dewpoint_from_relative_humidity(
+                            units("degC") * row["tair_c_avg"],
+                            units("percent") * row["rh"],
+                        ).magnitude
                     ),
                     "high": safe_t(row["max_tmpc"], "degC"),
                     "low": safe_t(row["min_tmpc"], "degC"),
