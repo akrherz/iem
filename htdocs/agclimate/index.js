@@ -208,7 +208,7 @@ function setupMap() {
             let content = [
                 `<p>Site ID: <code>${feature.getId()}</code>`,
                 `Name: ${feature.get('name')}`,
-                `Air Temp: ${feature.get('tmpf')}`,
+                `Temp/Dewp: ${feature.get('tmpf')}/${feature.get('dwpf')}°F`,
                 '</p>'
             ].join('<br/>');
             if (feature.get("tmpf_15")) {
