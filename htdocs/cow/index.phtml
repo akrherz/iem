@@ -94,8 +94,10 @@ $ar = array(
 $tselect = "";
 foreach ($ar as $k => $v) {
     $tselect .= sprintf(
-        '<input name="wtype[]" type="checkbox" id="%s" value="%s"%s> ' .
-            '<label for="%s">%s</label> ',
+        '<div class="form-check form-check-inline">'.
+        '<input class="form-check-input" name="wtype[]" type="checkbox" id="%s" value="%s"%s> ' .
+            '<label class="form-check-label" for="%s">%s</label>'.
+        '</div>',
         $k,
         $k,
         (in_array($k, $wtype) ? " CHECKED" : ""),
@@ -118,8 +120,10 @@ $ltselect = "";
 foreach ($ar as $k => $v) {
     if ($k == "MA2") $ltselect .= "<br />";
     $ltselect .= sprintf(
-        '<input name="ltype[]" type="checkbox" id="%s%s" value="%s"%s> ' .
-            '<label for="%s%s">%s</label> ',
+        '<div class="form-check form-check-inline">'.
+        '<input class="form-check-input" name="ltype[]" type="checkbox" id="%s%s" value="%s"%s> ' .
+            '<label class="form-check-label" for="%s%s">%s</label>'.
+        '</div>',
         $k,
         (strlen($k) == 2) ? "2" : "",
         $k,
