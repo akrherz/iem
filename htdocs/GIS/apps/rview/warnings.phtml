@@ -146,7 +146,7 @@ $uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;" .
   + case4: Nothing happens. lat0 lon0 are defined
 */
 
-if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
+if (isset($_REQUEST["lat0"]) && isset($_REQUEST["lon0"]) && $osite == $site) {
     $uri .= "&lat0=$lat0&lon0=$lon0";
 } else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site) {
     $osite = $site;
@@ -168,7 +168,7 @@ $content = <<<EOM
 <input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
 EOM;
-if (isset($_GET["lat0"])) {
+if (isset($_REQUEST["lat0"])) {
     $content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
     <input type=\"hidden\" value=\"{$lon0}\" name=\"lon0\">";
 }
