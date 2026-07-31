@@ -14,7 +14,7 @@ from pyiem.grid.nav import get_nav
 from pyiem.iemre import grb2iemre
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import LOG, archive_fetch, utc
+from pyiem.util import archive_fetch, utc
 
 PDICT = {
     "no": "No Shade Effect",
@@ -69,22 +69,30 @@ def do_processing(ctx: dict):
         f"hrrr.t{valid:%H}z.3kmf01.grib2"
     )
     # Get solar radiation
-    with archive_fetch(ppath_f01) as testfn, pygrib.open(testfn) as grbs:
-        # Eh
-        srad = grb2iemre(
-            grbs.select(
-                name="Time-mean surface downward short-wave radiation flux"
-            )[0]
-        )
+    with archive_fetch(ppath_f01) as testfn:
+        if testfn is None:
+            raise NoDataFound(f"HRRR file {ppath_f01} is missing.")
+        with pygrib.open(testfn) as grbs:
+            # Eh
+            srad = grb2iemre(
+                grbs.select(
+                    name="Time-mean surface downward short-wave radiation flux"
+                )[0]
+            )
 
-    with archive_fetch(ppath_f00) as testfn, pygrib.open(testfn) as grbs:
-        u = grb2iemre(grbs.select(name="10 metre U wind component")[0])
-        v = grb2iemre(grbs.select(name="10 metre V wind component")[0])
-        tmpk = grb2iemre(grbs.select(name="2 metre temperature")[0])
-        dwpk = grb2iemre(grbs.select(name="2 metre dewpoint temperature")[0])
-        rh = relative_humidity_from_dewpoint(
-            units.degK * tmpk, units.degK * dwpk
-        )
+    with archive_fetch(ppath_f00) as testfn:
+        if testfn is None:
+            raise NoDataFound(f"HRRR file {ppath_f00} is missing.")
+        with pygrib.open(testfn) as grbs:
+            u = grb2iemre(grbs.select(name="10 metre U wind component")[0])
+            v = grb2iemre(grbs.select(name="10 metre V wind component")[0])
+            tmpk = grb2iemre(grbs.select(name="2 metre temperature")[0])
+            dwpk = grb2iemre(
+                grbs.select(name="2 metre dewpoint temperature")[0]
+            )
+            rh = relative_humidity_from_dewpoint(
+                units.degK * tmpk, units.degK * dwpk
+            )
 
     return comprehensive_climate_index(
         units.degK * tmpk,
@@ -99,11 +107,7 @@ def get_raster(ctx: dict):
     """Do the computation!"""
     if ctx["csector"] in ["AK", "HI"]:
         raise NoDataFound("Sector not available for this plot.")
-    try:
-        cci = do_processing(ctx)
-    except Exception as exp:
-        LOG.exception(exp)
-        raise NoDataFound("No HRRR Data Found.") from exp
+    cci = do_processing(ctx)
     return cci, get_nav("IEMRE", "conus").affine, get_nav("IEMRE", "conus").crs
 
 
@@ -111,11 +115,7 @@ def plotter(ctx: dict):
     """Go"""
     ctx["valid"] = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
     lvalid = ctx["valid"].astimezone(ZoneInfo("America/Chicago"))
-    try:
-        cci, aff, crs = get_raster(ctx)
-    except Exception as exp:
-        LOG.exception(exp)
-        raise NoDataFound("No HRRR Data Found.") from exp
+    cci, aff, crs = get_raster(ctx)
 
     sse = "With Shade" if ctx["shade"] == "yes" else "No Shade"
     mp = MapPlot(

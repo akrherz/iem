@@ -1,3 +1,4 @@
+#!/bin/bash
 # Ensure we error out
 set -x -e
 # Paths are setup in setuppaths.sh
