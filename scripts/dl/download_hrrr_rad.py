@@ -41,10 +41,11 @@ def find_dswrf(idxcontent: str, second_pass: bool = False) -> list[list[int]]:
     neednext = False
     for line in idxcontent.split("\n"):
         tokens = line.split(":")
-        if len(tokens) < 3:
+        if len(tokens) < 6:
             continue
         if neednext:
-            offsets[-1].append(int(tokens[1]))
+            # HTTP range is inclusive, so we need to subtract 1 from the end
+            offsets[-1].append(int(tokens[1]) - 1)
             neednext = False
         # Older HRRR only had the instantaneous values, newer ones have both
         # instant and averaged.  The averaged is better as it can be accurately

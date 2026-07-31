@@ -107,7 +107,11 @@ def get_raster(ctx: dict):
     """Do the computation!"""
     if ctx["csector"] in ["AK", "HI"]:
         raise NoDataFound("Sector not available for this plot.")
-    cci = do_processing(ctx)
+    # Need to handle incomplete grib files
+    try:
+        cci = do_processing(ctx)
+    except (ValueError, RuntimeError) as exp:  # raised when grb.select fails
+        raise NoDataFound("HRRR file is missing some variables.") from exp
     return cci, get_nav("IEMRE", "conus").affine, get_nav("IEMRE", "conus").crs
 
 
