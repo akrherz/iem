@@ -24,9 +24,8 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
     $dy = ($ur_y - $ll_y) / floatval(480);
     $dx = ($ur_x - $ll_x) / floatval(640);
 
-    $_GET["lon0"] = (get_int404("img_x", 0) * $dx) + $ll_x;
-    $_GET["lat0"] = $ur_y - (get_int404("img_y", 0) * $dy);
-    /* $_GET["site"] = "user"; */
+    $_REQUEST["lon0"] = (get_int404("img_x", 0) * $dx) + $ll_x;
+    $_REQUEST["lat0"] = $ur_y - (get_int404("img_y", 0) * $dy);
 }
 
 $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
