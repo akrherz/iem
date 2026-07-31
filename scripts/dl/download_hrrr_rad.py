@@ -12,8 +12,8 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
@@ -35,6 +35,34 @@ def need_to_run(valid) -> bool:
     return hits != 4
 
 
+def find_dswrf(idxcontent: str, second_pass: bool = False) -> list[list[int]]:
+    """Figure out where the DSWRF data is in the idx file"""
+    offsets = []
+    neednext = False
+    for line in idxcontent.split("\n"):
+        tokens = line.split(":")
+        if len(tokens) < 6:
+            continue
+        if neednext:
+            # HTTP range is inclusive, so we need to subtract 1 from the end
+            offsets[-1].append(int(tokens[1]) - 1)
+            neednext = False
+        # Older HRRR only had the instantaneous values, newer ones have both
+        # instant and averaged.  The averaged is better as it can be accurately
+        # integrated over time, but if we have only one option!
+        if tokens[3] == "DSWRF" and (
+            tokens[5].find("ave fcst") > -1 or second_pass
+        ):
+            offsets.append([int(tokens[1])])
+            neednext = True
+
+    # DSWRF could be the last field, so
+    if offsets and len(offsets[-1]) == 1:
+        offsets[-1].append(offsets[-1][0] + 4_000_000)  # guess at size
+
+    return offsets
+
+
 def fetch(valid):
     """Fetch the radiation data for this timestamp
     22:23684154:d=2023041000:DSWRF:surface:0-15 min ave fcst:
@@ -45,26 +73,22 @@ def fetch(valid):
     uri = valid.strftime(
         f"{baseuri}/hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf01.grib2.idx"
     )
-    req = exponential_backoff(httpx.get, uri, timeout=30)
+    LOG.info("Fetching %s", uri)
+    req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.warning("failed to get idx %s", uri)
         return
 
-    offsets = []
-    neednext = False
-    for line in req.content.decode("utf-8").split("\n"):
-        tokens = line.split(":")
-        if len(tokens) < 3:
-            continue
-        if neednext:
-            offsets[-1].append(int(tokens[1]))
-            neednext = False
-        if tokens[3] == "DSWRF" and tokens[5].find("ave fcst") > -1:
-            offsets.append([int(tokens[1])])
-            neednext = True
+    idxcontent = req.content.decode("utf-8", errors="ignore")
+    offsets = find_dswrf(idxcontent)
+    if len(offsets) != 4:
+        LOG.info("Found %s DSWRF fields, trying second pass", len(offsets))
+        offsets = find_dswrf(idxcontent, second_pass=True)
 
     if len(offsets) != 4:
-        LOG.warning("warning, found %s gribs for %s", len(offsets), valid)
+        LOG.warning(
+            "warning, found %s gribs for %s in %s", len(offsets), valid, uri
+        )
     # Force overwrite first
     routes = "a"
     for pr in offsets:
@@ -75,7 +99,7 @@ def fetch(valid):
         routes = "u"
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
-            httpx.get, uri[:-4], headers=headers, timeout=30
+            requests.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
             LOG.info("failure for uri: %s", uri)

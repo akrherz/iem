@@ -90,12 +90,12 @@ jobs:
 
     # All jobs need to have directories laid out
     - name: Setup Directory Paths
-      run: sh .github/setuppaths.sh
+      run: bash .github/setuppaths.sh
 
     # Only one job needs to load the test data
     - name: Setup IEM Data
       if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
-      run: sh .github/setupdata.sh
+      run: bash .github/setupdata.sh
 
     - name: IEM TileCache Backend
       if: ${{ matrix.TEST_WEB == 'YES' }}
