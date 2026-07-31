@@ -24,9 +24,8 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
     $dy = ($ur_y - $ll_y) / floatval(480);
     $dx = ($ur_x - $ll_x) / floatval(640);
 
-    $_GET["lon0"] = (get_int404("img_x", 0) * $dx) + $ll_x;
-    $_GET["lat0"] = $ur_y - (get_int404("img_y", 0) * $dy);
-    /* $_GET["site"] = "user"; */
+    $_REQUEST["lon0"] = (get_int404("img_x", 0) * $dx) + $ll_x;
+    $_REQUEST["lat0"] = $ur_y - (get_int404("img_y", 0) * $dy);
 }
 
 $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
@@ -147,7 +146,7 @@ $uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;" .
   + case4: Nothing happens. lat0 lon0 are defined
 */
 
-if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
+if (isset($_REQUEST["lat0"]) && isset($_REQUEST["lon0"]) && $osite == $site) {
     $uri .= "&lat0=$lat0&lon0=$lon0";
 } else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site) {
     $osite = $site;
@@ -169,7 +168,7 @@ $content = <<<EOM
 <input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
 EOM;
-if (isset($_GET["lat0"])) {
+if (isset($_REQUEST["lat0"])) {
     $content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
     <input type=\"hidden\" value=\"{$lon0}\" name=\"lon0\">";
 }

@@ -30,12 +30,12 @@ def save_other(data):
                 "WHERE table_name = 'purpleair' and table_schema = 'public'"
             )
         )
-        columns = [row[0] for row in res]
+        columns = [row["column_name"] for row in res.mappings()]
         for col in columns:
             if col not in data:
                 LOG.info("Missing %s", col)
                 data[col] = None
-            elif pd.isna(data[col]):
+            elif pd.isna(data[col]) or data[col] == "nan":
                 LOG.info("NaN %s", col)
                 data[col] = None
         # do a bulk insert
