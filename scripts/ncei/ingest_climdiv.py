@@ -3,8 +3,8 @@
 Run from RUN_0Z.sh
 """
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn
 from pyiem.reference import ncei_state_codes
 from pyiem.util import get_properties, logger, set_property
@@ -15,6 +15,10 @@ ELEMENT2IEM = {
     "tmin": "low",
     "tmax": "high",
 }
+NCEIBASE = (
+    "https://www.ncei.noaa.gov/monitoring-content/data/us/climdiv/monthly/"
+    "current/"
+)
 
 
 def process(procdate, region):
@@ -31,8 +35,7 @@ def process(procdate, region):
         LOG.info("Fetching %s[%s]", element, region)
         df = (
             pd.read_csv(
-                "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/"
-                f"climdiv-{element}{region}-v1.0.0-{procdate}",
+                f"{NCEIBASE}climdiv-{element}{region}-v1.0.0-{procdate}",
                 names="stcode 1 2 3 4 5 6 7 8 9 10 11 12".split(),
                 dtype={"stcode": str},
                 sep=r"\s+",
@@ -113,10 +116,7 @@ def dbsave(df):
 def main():
     """Go Main Go."""
     try:
-        resp = httpx.get(
-            "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/procdate.txt",
-            timeout=60,
-        )
+        resp = requests.get(f"{NCEIBASE}/procdate.txt", timeout=60)
         resp.raise_for_status()
         procdate = resp.text.strip()
     except Exception as exp:
