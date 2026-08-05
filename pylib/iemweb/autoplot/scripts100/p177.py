@@ -89,6 +89,16 @@ def get_description():
     return desc
 
 
+def make_valid_subtitle(df: pd.DataFrame):
+    """Make something nice for the plot subtitles."""
+    dt1 = df.index[0].to_pydatetime().astimezone(CENTRAL)
+    dt2 = df.index[-1].to_pydatetime().astimezone(CENTRAL)
+    return (
+        f"Data between {dt1:%-d %b %Y %-I:%M %p} and "
+        f"{dt2:%-d %b %Y %-I:%M %p} Central Time"
+    )
+
+
 def make_inversion_timing(ctx):
     """Generate an inversion plot"""
     # Rectify the start date to midnight
@@ -718,11 +728,8 @@ def plot_sm(ctx: dict):
 
     (fig, ax) = figure_axes(
         apctx=ctx,
-        title=(
-            f"Soil Moisture Time Series, {ctx['sts']:%-d %b %Y} - "
-            f"{ctx['ets']:%-d %b %Y}"
-        ),
-        subtitle=f"ISU Station: {ctx['_sname']}",
+        title=f"{ctx['_sname']} Soil Moisture Time Series",
+        subtitle=make_valid_subtitle(df),
     )
 
     # Adjust main axis and make lhs and rhs sliver plots for a first/last plot
@@ -929,13 +936,13 @@ def plot2(ctx):
     return fig, df
 
 
-def plot_at(ctx):
+def plot_at(ctx: dict):
     """One minute temperatures."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             sql_helper("""
             SELECT valid, tair_c_avg_qc, rh_avg_qc, slrkj_tot_qc,
-            ws_mph_qc, ws_mph_max_qc from sm_minute WHERE
+            ws_mph_qc, ws_mph_max_qc, rain_in_tot_qc from sm_minute WHERE
             station = :station and valid BETWEEN :sts and :ets
             ORDER by valid ASC
             """),
@@ -949,40 +956,44 @@ def plot_at(ctx):
         )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
+    # Fill out the missing minutes with NaN so the plot looks better
+    df = (
+        df.reindex(pd.date_range(df.index[0], df.index[-1], freq="1min"))
+        .reset_index()
+        .rename(columns={"index": "valid"})
+        .set_index("valid")
+    )
 
     fig = figure(
         apctx=ctx,
         title=f"{ctx['_sname']}:: One Minute Interval Plot",
-        subtitle=(
-            f"Valid between {ctx['sts']:%-d %b %Y %-I:%M %p} and "
-            f"{ctx['ets']:%-d %b %Y %-I:%M %p} Central Time"
-        ),
+        subtitle=make_valid_subtitle(df),
     )
-    if df["ws_mph_max_qc"].max() > 0.1:
-        ax = fig.subplots(2, 1, sharex=True)
-    else:
-        ax = [fig.add_axes((0.1, 0.1, 0.8, 0.8))]
-    ax[0].plot(df.index, c2f(df["tair_c_avg_qc"]), color="r", label="Air Temp")
-    ax[0].set_ylabel("Temperature [°F]")
+    axes: list[Axes] = fig.subplots(3, 1, sharex=True)
+    [ax1, ax2, ax3] = axes
+    ax1.plot(df.index, c2f(df["tair_c_avg_qc"]), color="r", label="Air Temp")
+    ax1.set_ylabel("Temperature [°F]")
     dwpf = dewpoint_from_relative_humidity(
         units("degC") * df["tair_c_avg_qc"].values,
         units("percent") * df["rh_avg_qc"].values,
     )
-    ax[0].plot(df.index, dwpf.to(units("degF")), color="g", label="Dew Point")
+    ax1.plot(df.index, dwpf.to(units("degF")), color="g", label="Dew Point")
 
-    ax[0].grid(True)
-    if ax[0].get_ylim()[0] < 40:
-        ax[0].axhline(32, linestyle="--", lw=2, color="tan")
-    ax[0].legend(loc="best")
+    ax1.grid(True)
+    if ax1.get_ylim()[0] < 40:
+        ax1.axhline(32, linestyle="--", lw=2, color="tan")
+    ax1.legend(loc="best")
 
-    ax2 = ax[0].twinx()
+    ax1_2 = ax1.twinx()
     if not pd.isna(df["slrkj_tot_qc"]).all():
-        ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
-        ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
-    apply_xaxis_formatting(ax[0], ctx)
+        ax1_2.plot(
+            df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k"
+        )
+        ax1_2.set_ylabel("Solar Radiation [$W m^{-2}$]")
+    apply_xaxis_formatting(ax1, ctx)
 
     if df["ws_mph_max_qc"].max() > 0.1:
-        ax[1].bar(
+        ax2.bar(
             df.index,
             df["ws_mph_max_qc"],
             width=1 / 1440.0,
@@ -990,7 +1001,7 @@ def plot_at(ctx):
             color="r",
             label="Gust",
         )
-        ax[1].bar(
+        ax2.bar(
             df.index,
             df["ws_mph_qc"],
             width=1 / 1440.0,
@@ -998,9 +1009,37 @@ def plot_at(ctx):
             color="b",
             label="Avg",
         )
-        ax[1].grid(True)
-        ax[1].set_ylabel("Wind Speed [MPH]")
-        ax[1].legend(loc="best", ncol=2)
+        ax2.grid(True)
+        ax2.set_ylabel("Wind Speed [MPH]")
+        ax2.legend(loc="best", ncol=2)
+
+    # Precipitation
+    ax3.bar(
+        df.index,
+        df["rain_in_tot_qc"],
+        width=1 / 1440.0,
+        zorder=3,
+        color="b",
+    )
+    ax3.grid(True)
+    ax3.set_ylim(0, max(0.1, df["rain_in_tot_qc"].max() + 0.02))
+    ax3.set_ylabel("Rainfall [inch]")
+
+    def fmt_r(value):
+        """Prevent ugly NaN."""
+        return f"{value:.2f}" if pd.notna(value) else "N/A"
+
+    ax3.annotate(
+        (
+            f'Max Rainfall Rate: 1min {fmt_r(df["rain_in_tot_qc"].max())}", '
+            f'15min {fmt_r(df["rain_in_tot_qc"].rolling(15).sum().max())}", '
+            f'60min {fmt_r(df["rain_in_tot_qc"].rolling(60).sum().max())}", '
+            f"Total Plotted: {fmt_r(df['rain_in_tot_qc'].sum())} inch"
+        ),
+        xy=(0.01, 1.01),
+        xycoords="axes fraction",
+        ha="left",
+    )
 
     return fig, df
 
