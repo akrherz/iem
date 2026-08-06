@@ -188,7 +188,7 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def add_ctx(ctx):
+def add_ctx(ctx: dict):
     """Get the context"""
     ctx["decadal"] = ctx.get("decadal") == "yes"
     # Lower the start year if decadal
