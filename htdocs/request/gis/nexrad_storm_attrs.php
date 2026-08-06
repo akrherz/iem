@@ -20,7 +20,7 @@ shapefile format. <strong>Holes do exist in this archive!</strong>  If you find
 a data hole and would like it filled, please let us know.
 </p>
 
-<div class="alert alert-warning">
+<div class="alert alert-warning" role="alert">
 The <a href="https://www.ncei.noaa.gov">National Centers for Environmental Information</a> now
 has a very impressive archive and interface to download these attributes.
 You can find it on their <a href="https://www.ncei.noaa.gov/maps/swdi/">Severe

@@ -66,7 +66,7 @@ def get_description():
             "default": today.strftime("%Y/%m/%d 0000"),
             "label": "UTC Timestamp:",
             "min": "1950/01/01 0000",
-            "max": (utc() + timedelta(hours=100)).strftime("%Y/%m/%d 0000"),
+            "max": (utc() + timedelta(hours=100)).strftime("%Y/%m/%d %H00"),
         },
         {
             "type": "select",

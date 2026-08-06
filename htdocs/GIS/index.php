@@ -79,8 +79,9 @@ $t->content = <<<EOM
  <div class="small text-muted">A tremendous website with lots of hard to find data.</div></li>
  <li class="list-group-item px-0"><a href="https://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <div class="small text-muted">Archive of NCEI provided storm reports (1950-).</div></li>
- <li class="list-group-item px-0"><a href="https://www.ncei.noaa.gov/maps-and-geospatial-products">NCEI GIS Portal</a>
- <div class="small text-muted">National Climate Data Center GIS goodies.</div></li>
+ <li class="list-group-item px-0">
+ <a href="https://www.ncei.noaa.gov/maps-and-geospatial-products">NCEI GIS Portal</a>
+ <div class="small text-muted">National Centers for Environmental Information GIS goodies.</div></li>
 
  <li class="list-group-item px-0">NCEI's <a href="https://www.ncei.noaa.gov/products/radar/radar-display-conversion-tools">Display and Conversion Tools</a>.</li>
 
