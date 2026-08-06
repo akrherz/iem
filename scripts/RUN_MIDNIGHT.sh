@@ -15,6 +15,11 @@ python update_daily_srad.py --date="$(date --date '1 day ago' +'%Y-%m-%d')"
 cd ../iemre || exit 1
 python daily_analysis.py --date="$(date --date '1 day ago' +'%Y-%m-%d')"
 python daily_analysis.py --date="$(date --date '1 day ago' +'%Y-%m-%d')" --domain=sa
+# Update some forecasts, also runs from RUN_0Z.sh is doing
+python daily_analysis.py --date="$(date --date '2 days' +'%Y-%m-%d')" --forecast --domain=conus
+python daily_analysis.py --date="$(date --date '2 days' +'%Y-%m-%d')" --forecast --domain=sa
+python daily_analysis.py --date="$(date --date '2 days' +'%Y-%m-%d')" --forecast --domain=europe
+python daily_analysis.py --date="$(date --date '3 days' +'%Y-%m-%d')" --forecast --domain=china
 
 cd ../asos || exit 1
 python adjust_report_type.py --date="$(date -u --date '1 day ago' +'%Y-%m-%d')"

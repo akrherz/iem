@@ -24,6 +24,11 @@ cd ../iemre || exit 1
 # need to run daily analysis for climodat estimator to then work
 python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
 python daily_analysis.py --date="$(date --date='1 day ago' +'%Y-%m-%d')" --domain=europe
+# Run forecast mode summaries
+python daily_analysis.py --date="$(date --date="1 day" +'%Y-%m-%d')" --domain=conus --forecast
+python daily_analysis.py --date="$(date --date="1 day" +'%Y-%m-%d')" --domain=sa --forecast
+python daily_analysis.py --date="$(date --date="1 day" +'%Y-%m-%d')" --domain=europe --forecast
+python daily_analysis.py --date="$(date --date="2 days" +'%Y-%m-%d')" --domain=china --forecast
 
 cd ../climodat || exit 1
 python sync_coop_updates.py

@@ -424,7 +424,7 @@ def use_climodat_daily(ts: date, ds):
         ds["p01d"].values = convert_value(res, "inch", "mm")
 
 
-def workflow(ts: date, domain: str):
+def workflow(ts: date, domain: str, forecast: bool):
     """Do Work"""
     # load up our current data
     ds = get_grids(ts, domain=domain)
@@ -445,7 +445,7 @@ def workflow(ts: date, domain: str):
         if domain == "conus":
             use_climodat_daily(ts, ds)
 
-    if domain == "conus":
+    if domain == "conus" and not forecast:
         # snow_12z snowd_12z
         use_climodat_12z(ts, ds)
 
@@ -477,11 +477,16 @@ def workflow(ts: date, domain: str):
     "--date", "valid", type=click.DateTime(), help="Date", required=True
 )
 @click.option("--domain", default="conus", help="Domain to process", type=str)
-def main(valid: datetime, domain: str):
+@click.option(
+    "--forecast",
+    is_flag=True,
+    help="This is a forecast run, so we only use IEMRE hourly.",
+)
+def main(valid: datetime, domain: str, forecast: bool):
     """Go Main Go"""
     dt = valid.date()
-    LOG.info("Run %s for domain: '%s'", dt, domain)
-    workflow(dt, domain)
+    LOG.info("Run %s for domain: '%s' forecast: %s", dt, domain, forecast)
+    workflow(dt, domain, forecast)
     LOG.info("Done.")
 
 
