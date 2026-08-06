@@ -65,7 +65,7 @@ access this data in the following locations:</p>
  Weather/Climate/Environment Sub-Committee</a></li>
  <li><a href="http://www.uni.edu/storm/">UNI Storm Project</a></li>
  <li><a href="http://hpcc.unl.edu/">High Plains Regional Climate Center</a></li>
- <li><a href="http://has.ncdc.noaa.gov/">NCDC Level II/III RADAR Archive</a></li>
+ <li><a href="https://www.ncei.noaa.gov/has/HAS.DsSelect">NCEI Level II/III RADAR Archive</a></li>
 </ul>
 
 <p><h3>Publicity</h3>

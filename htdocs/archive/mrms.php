@@ -123,7 +123,7 @@ which helps with knowing what is available and grib file units.</p>
       </div>
       <div class="card-body">
         <p class="card-text">The IEM also has a cache of near realtime grib files on
-        <a href="http://metfs1.agron.iastate.edu/data/mrms/">metfs1 service</a>,
+        <a href="https://metfs1.agron.iastate.edu/data/mrms/">metfs1 service</a>,
         but its utility is not as useful as what you can find at the
         official <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website</a>.</p>
       </div>

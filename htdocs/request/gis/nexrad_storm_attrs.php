@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 109);
 require_once "../../../include/myview.php";
@@ -12,18 +12,22 @@ $t->title = "Download NEXRAD Storm Attributes Shapefile";
 $content = <<<EOM
 <h3>Archived NEXRAD Storm Attributes Shapefiles</h3>
 
-<p>The IEM attempts to process and archive the Storm Attribute Table that is
- produced by the RADARs that are a part of the NEXRAD network.  This page allows
- you to selectively download these attributes from the IEM database in 
- shapefile format. <strong>Holes do exist in this archive!</strong>  If you find
- a data hole and would like it filled, please let us know.
+<p>
+The IEM attempts to process and archive the Storm Attribute Table that is
+produced by the RADARs that are a part of the NEXRAD network.  This page allows
+you to selectively download these attributes from the IEM database in
+shapefile format. <strong>Holes do exist in this archive!</strong>  If you find
+a data hole and would like it filled, please let us know.
+</p>
 
-<div class="alert alert-warning">The <a href="https://www.ncdc.noaa.gov">National Climatic Data Center</a> now
-        has a very impressive archive and interface to download these attributes.
-        You can find it on their <a href="https://www.ncdc.noaa.gov/swdi/">Severe
-        Weather Data Inventory</a>.  For programic access, check out their 
-        <a href="https://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
-        
+<div class="alert alert-warning">
+The <a href="https://www.ncei.noaa.gov">National Centers for Environmental Information</a> now
+has a very impressive archive and interface to download these attributes.
+You can find it on their <a href="https://www.ncei.noaa.gov/maps/swdi/">Severe
+Weather Data Inventory</a>.  For programic access, check out their
+<a href="https://www.ncei.noaa.gov/swdiws/">web services</a>.
+</div>
+
 <p>The archive behind this application is large, so please be patient after clicking
  the Givme button below.  Requests are limited to a "score" of 1500, which is a
  combination of selected RADARs and day interval.  If you select ALL RADARs,
@@ -34,7 +38,7 @@ $content = <<<EOM
 
 <p><a class="btn btn-secondary" href="#histograms" role="button">
         <i class="bi bi-bar-chart" aria-hidden="true"></i> View Histograms</a>
- 
+
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
@@ -55,7 +59,7 @@ $content = <<<EOM
 <tr>
   <td rowspan='2'>
 EOM;
-$content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
+$content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL',
           Array("ALL"=>"ALL"), "radar") ."</td>
     <th>Start:</th>
     <td>
@@ -118,7 +122,7 @@ Field 13: Type=N/Double, Title='TOP', Storm Top in thousands of feet
 Field 14: Type=N/Integer, Title='DRCT', Motion Direction degrees from North
 Field 15: Type=N/Integer, Title='SKNT', Speed in knots
 Field 16: Type=N/Double, Title='LAT', Latitude
-Field 17: Type=N/Double, Title='LON', Longitude 
+Field 17: Type=N/Double, Title='LON', Longitude
 </pre>
 
 <h4>Archive notes:</h4>
@@ -129,15 +133,15 @@ Field 17: Type=N/Double, Title='LON', Longitude
 
 <p><a name="histograms"></a><h3>Attribute Speed &amp; Direction Histograms</h3>
 
-<p>Based on the archive built by the IEM, the following are 2-D Histograms 
+<p>Based on the archive built by the IEM, the following are 2-D Histograms
 comparing RADAR storm attribute speed, direction of travel, and day of the year.
 A direction of "west" would represent a storm moving from west to east.
 
 <form id='dyno' name='dyno'>
 
-<p><strong>Select RADAR:</strong> 
+<p><strong>Select RADAR:</strong>
 EOM;
-$content .= networkSelect(Array("NEXRAD", "TWDR"), 
+$content .= networkSelect(Array("NEXRAD", "TWDR"),
         'DMX') ."
 <br />
 <img id='histimage' src='/pickup/nexrad_attrs/DMX_histogram.png' alt='Histogram' />

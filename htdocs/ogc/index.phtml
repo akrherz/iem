@@ -8,10 +8,12 @@ $t->content = <<<EOM
 
 <h3>OGC Web Services</h3>
 
-<p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC)
-        is a standards organization leading the development of geospatial and
-        location based services.  The OGC has adopted a number of specifications,
-        some of which are used by the IEM.  This page lists these services.</p>
+<p>
+The <a href="https://ogc.org">Open Geospatial Consortium, Inc</a> (OGC)
+is a standards organization leading the development of geospatial and
+location based services.  The OGC has adopted a number of specifications,
+some of which are used by the IEM.  This page lists these services.
+</p>
 
 <h4>Some items of note:</h4>
 <ol>
@@ -42,9 +44,12 @@ by their cache header settings.</p>
 </tbody>
 </table>
 
-<p>The IEM also runs a customized version of <a href="https://github.com/akrherz/TileCache">TileCache</a>
+<p>
+The IEM also runs a customized version of
+<a href="https://github.com/akrherz/TileCache">TileCache</a>
 that allows some argument loading into the service layer name.  For example,
-including timestamp information in the layer name.</p>
+including timestamp information in the layer name.
+</p>
 
 <p>Here are working examples using IEM TMS services within various Javascript
 libraries.</p>
@@ -90,6 +95,8 @@ was contributed by Derek Swingley.
 
 </div><!-- ./row -->
 
+<br />
+
 <div class="card border-primary">
 <div class="card-header">Tile Map Services at both <code>/c/tile.py/1.0.0/</code>
 and <code>/cache/tile.py/1.0.0/</code></div>
@@ -106,16 +113,35 @@ have better client side caching.</p>
 
 <tbody>
 
-<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
-<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
+<tr>
+<td>Template: ridge::XXX-XXX-0</td>
+<td>Latest individual/mosaic RADAR XXX data for product XXX. For example,
+<code>ridge::BMX-N0B-0</code> (latest BMX N0B) and
+<code>ridge::USCOMP-N0Q-0</code> (latest mosaic N0Q (downscaled N0B)).
+ <a href="/GIS/ridge.phtml">more info</a>
+ </td>
+ <td><a href="/GIS/ridge.phtml">more info</a></td>
+ </tr>
+<tr>
+<td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td>
+<td>Archived (UTC Timestamp) individual/mosaic RADAR XXX data for product XXX.
+For the single site imagery, this must be an exact UTC timestamp that the
+archive has data. For mosaic, this is a constant availability at minute
+modulo 5. For example, <code>ridge::BMX-N0B-202501270002</code> (BMX N0B at
+27 Jan 2025 at 00:02 UTC) and
+<code>ridge::USCOMP-N0Q-202501272305</code> (mosaic N0Q (downscaled N0B) at 27 Jan 2025 at 23:05 UTC).
+<a href="/GIS/ridge.phtml">more info</a>
+</td>
+<td><a href="/GIS/ridge.phtml">more info</a></td>
+</tr>
 
 </tbody>
 </table>
 
 </div><!-- ./card-body -->
 </div><!-- ./card -->
+
+<br />
 
 <div class="card border-primary">
 <div class="card-header">Tile Map Services only at <code>/c/tile.py/1.0.0/</code></div>
@@ -136,6 +162,8 @@ for HUC12s that are not modelled.</td><td></td></tr>
 
 </div><!-- ./card-body -->
 </div><!-- ./card -->
+
+<br />
 
 <div class="card border-primary">
 <div class="card-header">Tile Map Services only at <code>/cache/tile.py/1.0.0/</code></div>

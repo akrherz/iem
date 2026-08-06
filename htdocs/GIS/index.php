@@ -75,14 +75,14 @@ $t->content = <<<EOM
 <ul class="list-group list-group-flush">
  <li class="list-group-item px-0"><a href="https://droughtmonitor.unl.edu/MapsAndData.aspx">US Drought Monitor GIS data</a>
   <div class="small text-muted">Download current and historical drought monitor products in GIS formats.</div></li>
- <li class="list-group-item px-0"><a href="https://www.ncdc.noaa.gov/swdi/">NCDC Severe Weather Data Inventory</a>
+ <li class="list-group-item px-0"><a href="https://www.ncei.noaa.gov/maps/swdi/">NCEI Severe Weather Data Inventory</a>
  <div class="small text-muted">A tremendous website with lots of hard to find data.</div></li>
  <li class="list-group-item px-0"><a href="https://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
- <div class="small text-muted">Archive of NCDC provided storm reports (1950-).</div></li>
- <li class="list-group-item px-0"><a href="https://gis.ncdc.noaa.gov/map/viewer/#app=cdo">NCDC GIS Portal</a>
+ <div class="small text-muted">Archive of NCEI provided storm reports (1950-).</div></li>
+ <li class="list-group-item px-0"><a href="https://www.ncei.noaa.gov/maps-and-geospatial-products">NCEI GIS Portal</a>
  <div class="small text-muted">National Climate Data Center GIS goodies.</div></li>
 
- <li class="list-group-item px-0">NCEI's <a href="https://www.ncdc.noaa.gov/data-access/radar-data/radar-display-tools">Display and Conversion Tools</a>.</li>
+ <li class="list-group-item px-0">NCEI's <a href="https://www.ncei.noaa.gov/products/radar/radar-display-conversion-tools">Display and Conversion Tools</a>.</li>
 
  <li class="list-group-item px-0"><a href="https://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <div class="small text-muted">Weather data integrated into Google Earth.</div></li>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 define("IEM_APPID", 115);
@@ -6,7 +6,7 @@ $year = get_int404("year", intval(date("Y")));
 
 require_once "../../include/myview.php";
 
-$uri = sprintf("%s/json/vtec_max_etn.py?year=%s&format=html", 
+$uri = sprintf("%s/json/vtec_max_etn.py?year=%s&format=html",
     $INTERNAL_BASEURL,
     $year);
 $wsuri = sprintf("%s/json/vtec_max_etn.py?year=%s",
@@ -40,12 +40,12 @@ $t->content = <<<EOM
         <div class="alert alert-info" role="alert">
             <h4 class="alert-heading"><i class="bi bi-info-circle"></i> About VTEC Event Tracking</h4>
             <p>The National Weather Service uses a system called
-            <a href="http://www.nws.noaa.gov/om/vtec/" class="alert-link">Valid Time Event Code (VTEC)</a> to provide
+            <a href="https://www.weather.gov/vtec/Valid-Time-Event-Code" class="alert-link">Valid Time Event Code (VTEC)</a> to provide
             more accurate tracking of its watch, warning, and advisories. The IEM attempts to provide a
             high fidelity database of these products.</p>
             <hr>
-            <p class="mb-0">The following table shows the largest VTEC eventids (ETN) for each NWS Forecast Office, 
-            each phenomena, and significance for the given year. <strong>Pro-tip</strong>: Use the search functionality 
+            <p class="mb-0">The following table shows the largest VTEC eventids (ETN) for each NWS Forecast Office,
+            each phenomena, and significance for the given year. <strong>Pro-tip</strong>: Use the search functionality
             to filter by a specific WFO.</p>
         </div>
     </div>
