@@ -73,13 +73,14 @@ def get_description():
             label="Select Plot Type:",
             options=PDICT2,
         ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
-            label="Date:",
-            min="1893/01/01",
-        ),
+        {
+            "type": "date",
+            "name": "date",
+            "default": today.strftime("%Y/%m/%d"),
+            "label": "Date:",
+            "min": "1893/01/01",
+            "max": (today + timedelta(days=4)).strftime("%Y/%m/%d"),
+        },
         {
             "type": "select",
             "name": "clip",
