@@ -3,7 +3,7 @@
 
 DT6="$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00"
 DT="$(date -u --date '1 hour' +'%Y-%m-%dT%H'):00:00"
-DT12="$(date -u --date '12 hours ago' +'%Y-%m-%dT%H'):00:00"
+IFSHR="$(date -u --date '1 hour' +'%H')"
 
 cd dl || exit 1
 python download_ffg.py &
@@ -14,8 +14,10 @@ cd ../rtma || exit 1
 python wind_power.py &
 
 cd ../iemre || exit 1
-python use_ifs.py --valid="$DT"
-python use_ifs.py --valid="$DT12" &
+# Hopefully, the 6 hour ago IFS run is available at these times.
+if [ "$IFSHR" -eq "02" ] || [ "$IFSHR" -eq "08" ] || [ "$IFSHR" -eq "14" ] || [ "$IFSHR" -eq "20" ]; then
+    python use_ifs.py --valid="$DT" &
+fi
 
 cd ../qc || exit 1
 python check_webcams.py
