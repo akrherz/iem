@@ -27,7 +27,7 @@ $d2select = daySelect(1, "day2");
 $t->content = <<<EOM
 <h3>Soil Moisture &amp; Ocean Salinity (SMOS) Satellite Data</h3>
 
-<p>The <a href="http://www.esa.int/SPECIALS/smos/">SMOS</a> satellite is a polar
+<p>The <a href="https://www.esa.int/Applications/Observing_the_Earth/FutureEO/SMOS">SMOS</a> satellite is a polar
 orbiting satellite operated by the European Space Agency.  The satellite provides
 estimates of soil moisture in the approximate top 5 centimeters of soil and the
 amount of vegetation on the land surface.

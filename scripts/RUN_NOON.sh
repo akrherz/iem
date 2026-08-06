@@ -13,6 +13,12 @@ python ingest_nohrsc.py --date="$(date +'%Y-%m-%d')"
 python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
 # Already tomorrow and need ready for DEP china to run
 python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=china
+# Throw in some forecast runs
+python daily_analysis.py --date="$(date --date '1 day' +'%Y-%m-%d')" --forecast --domain=conus
+python daily_analysis.py --date="$(date --date '1 day' +'%Y-%m-%d')" --forecast --domain=sa
+python daily_analysis.py --date="$(date --date '1 day' +'%Y-%m-%d')" --forecast --domain=europe
+# china
+python daily_analysis.py --date="$(date --date '2 day' +'%Y-%m-%d')" --forecast --domain=china
 
 cd ../prism || exit 1
 # 1 Dec 2025, we used to have data for yesterday by now, but not anymore

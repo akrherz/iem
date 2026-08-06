@@ -1,11 +1,12 @@
 """
 This map presents an hourly <a href="/iemre/">IEM ReAnalysis</a> variable
 of your choice. <a href="/plotting/auto/?q=86">Autoplot 86</a> is the daily
-variant of this plot.
+variant of this plot.  IEMRE contains ECMWF IFS forecast information, so plots
+are available for about 90 hours into the future.
 """
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -13,7 +14,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_hourly_ncname, hourly_offset
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import ncopen
+from pyiem.util import ncopen, utc
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
 
@@ -59,13 +60,14 @@ def get_description():
             label="Select Plot Type:",
             options=PDICT2,
         ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=today.strftime("%Y/%m/%d 0000"),
-            label="UTC Timestamp:",
-            min="1950/01/01 0000",
-        ),
+        {
+            "type": "datetime",
+            "name": "valid",
+            "default": today.strftime("%Y/%m/%d 0000"),
+            "label": "UTC Timestamp:",
+            "min": "1950/01/01 0000",
+            "max": (utc() + timedelta(hours=100)).strftime("%Y/%m/%d %H00"),
+        },
         {
             "type": "select",
             "name": "clip",

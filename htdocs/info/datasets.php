@@ -21,9 +21,18 @@ if (!is_null($myid)) {
 }
 $t->title = "Datasets :: {$myid}";
 
+/**
+ * Get the HTML content for a dataset page.
+ *
+ * @param string $pageid The ID of the dataset page.
+ * @return string The HTML content of the dataset page.
+ */
 function get_text($pageid)
 {
     $fn = "../../docs/datasets/{$pageid}.md";
+    if (!file_exists($fn)) {
+        return "<div class=\"alert alert-danger\">Dataset page not found: {$pageid}</div>";
+    }
     $Parsedown = new Parsedown();
     $c = $Parsedown->text(file_get_contents($fn));
     $ts = date("F d, Y", filemtime($fn));
