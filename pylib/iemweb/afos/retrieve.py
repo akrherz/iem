@@ -13,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-08-07: Added `key_messages_afd`, which operates like the `aviation_afd`
+  parameter, but returns the Key Messages section of an AFD product.
 - 2026-06-09: The `pil` needs to be alphanumeric characters (A-Z 0-9).
 - 2026-05-07: The `center` parameter needs to be uppercase and four chars.
 - 2026-04-30: An internal service rewrite was done attempting to remove some
@@ -81,6 +83,11 @@ Return a zip file of AFDDMX products during 2024
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=zip&\
 sdate=2024-01-01T00:00Z&edate=2024-12-31T23:59Z
 
+Return the Key Messages section of the latest AFD from NWS Des Moines
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&\
+key_messages_afd=1
+
 Return the aviation section of the latest AFD from NWS Des Moines
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&\
@@ -123,6 +130,9 @@ from iemweb.util import get_ct
 AFOS_RE = re.compile(r"^[A-Z0-9]{3,6}$", re.IGNORECASE)
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
+KEY_MESSAGES_AFD = re.compile(
+    r"^\.KEY\sMESSAGES[\s\.]", re.IGNORECASE | re.MULTILINE
+)
 STATEMENT_TIMEOUT: str = "60s"
 
 
@@ -134,6 +144,16 @@ class Schema(CGIModel):
         Field(
             description=(
                 "If set to 1, the returned data will be the 'Aviation' "
+                "section of an Area Forecast Discussion. This requires the "
+                "PIL to be an AFD product and a limit of 1 set."
+            ),
+        ),
+    ] = False
+    key_messages_afd: Annotated[
+        bool,
+        Field(
+            description=(
+                "If set to 1, the returned data will be the 'Key Messages' "
                 "section of an Area Forecast Discussion. This requires the "
                 "PIL to be an AFD product and a limit of 1 set."
             ),
@@ -406,7 +426,7 @@ def do_query_work(
     return rows
 
 
-def html_handler(rows: list[tuple], afd_logic: bool) -> str:
+def html_handler(rows: list[tuple], afd_logic: re.Pattern | None) -> str:
     """Handle conversion to HTML."""
     sio = StringIO()
     for row in rows:
@@ -417,12 +437,11 @@ def html_handler(rows: list[tuple], afd_logic: bool) -> str:
         sio.write("<br /><pre>\n")
         payload = row[0]
         if afd_logic:
-            # Special case for AFD products, we only want the Aviation
-            # section
-            parts = payload.split("&&")
-            for part in parts:
-                if AVIATION_AFD.search(part):
-                    payload = part
+            # Special case for AFD products
+            for part in payload.split("&&"):
+                m = afd_logic.search(part)
+                if m:
+                    payload = part[m.start() :]
                     break
         # Remove control characters from the product as we are including
         # them manually here...
@@ -436,19 +455,18 @@ def html_handler(rows: list[tuple], afd_logic: bool) -> str:
     return sio.getvalue()
 
 
-def text_handler(rows: list[tuple], afd_logic: bool) -> str:
+def text_handler(rows: list[tuple], afd_logic: re.Pattern | None) -> str:
     """Handle text output."""
     sio = StringIO()
     for row in rows:
         sio.write("\001\n")
         payload = row[0]
         if afd_logic:
-            # Special case for AFD products, we only want the Aviation
-            # section
-            parts = payload.split("&&")
-            for part in parts:
-                if AVIATION_AFD.search(part):
-                    payload = part
+            # Special case for AFD products
+            for part in payload.split("&&"):
+                m = afd_logic.search(part)
+                if m:
+                    payload = part[m.start() :]
                     break
         sio.write(
             payload.replace("\003", "").replace("\001", "").replace("\r", "")
@@ -554,11 +572,13 @@ def application(environ: dict, start_response: callable):
     if not rows:
         return f"ERROR: Could not Find: {','.join(request.pil)}"
 
-    afd_logic = (
+    afd_logic = None
+    if (
         len(request.pil) == 1
         and request.pil[0].startswith("AFD")
-        and request.aviation_afd
-    )
+        and (request.aviation_afd or request.key_messages_afd)
+    ):
+        afd_logic = AVIATION_AFD if request.aviation_afd else KEY_MESSAGES_AFD
 
     if request.fmt == "html":
         return html_handler(rows, afd_logic)
