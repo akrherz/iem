@@ -11,6 +11,7 @@ Reanalysis project.
 Changelog
 ---------
 
+- 2026-08-07: Correct a bug with an assumed date availability.
 - 2025-09-26: Added ``forecast`` option to include an IEM calculated daily
   forecast from the GFS and NWS NDFD models.
 - 2025-09-26: Multi-year responses are supported with the caveat that MRMS
@@ -45,13 +46,13 @@ from pyiem.iemre import (
     get_domain,
     get_gid,
 )
-from pyiem.reference import ISO8601
 from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
 from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.json.climodat_dd import compute_taxis
+from iemweb.util import json_response_dict
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -162,7 +163,11 @@ def get_iemre(
     where gid = :gid and valid >= :sdate and valid <= :edate ORDER by valid asc
         """),
         conn,
-        params={"gid": model.gid, "sdate": ts1, "edate": ts2},
+        params={
+            "gid": model.gid,
+            "sdate": ts1,
+            "edate": min(date.today() - timedelta(days=1), ts2),
+        },
         index_col="valid",
     )
 
@@ -250,14 +255,15 @@ def application(environ: dict, start_response):
 
     is_single_year = ts1.year == ts2.year
 
-    res = {
-        "generated_at": utc().strftime(ISO8601),
-        "iemre_domain": model.domain,
-        "iemre_i": model.i,
-        "iemre_j": model.j,
-        "data": [],
-        "timing_seconds": 0,
-    }
+    res = json_response_dict(
+        {
+            "iemre_domain": model.domain,
+            "iemre_i": model.i,
+            "iemre_j": model.j,
+            "data": [],
+            "timing_seconds": 0,
+        }
+    )
 
     extra = "" if model.domain == "conus" else f"_{model.domain}"
     with get_sqlalchemy_conn(f"iemre{extra}") as conn:
@@ -265,8 +271,9 @@ def application(environ: dict, start_response):
 
     if iemredf.empty:
         res["timing_seconds"] = (utc() - begin_ts).total_seconds()
+        payload = json.dumps(res, cls=NumpyEncoder).encode("ascii")
         start_response("200 OK", [("Content-type", "application/json")])
-        return [json.dumps(res, cls=NumpyEncoder).encode("ascii")]
+        return [payload]
 
     # Ensure our arrays align, I hope
     tslice = None
