@@ -22,6 +22,14 @@ from pyiem.util import exponential_backoff, logger, ncopen, utc
 from tqdm import tqdm
 
 LOG = logger()
+# This is the hour of the day that we consider "midnight" for each domain
+# not an exact science
+MIDNIGHT_LOCAL = {
+    "conus": 6,
+    "europe": 0,
+    "sa": 6,
+    "china": 18,
+}
 
 
 def process2iemre(nc: Dataset, valid: datetime, domain: str):
@@ -70,10 +78,10 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
             .magnitude
         )
         quorum += 1
-        if ftime.hour == 6:
+        if ftime.hour == MIDNIGHT_LOCAL[domain]:
             if quorum == 4:
-                # This is off by one
-                days = (ftime.date() - date(valid.year, 1, 1)).days - 1
+                day_off = 0 if domain == "china" else 1
+                days = (ftime.date() - date(valid.year, 1, 1)).days - day_off
                 tidx = time_index.index(days)
                 progress.write(f"Writing.... {ftime} tidx:{tidx}")
                 nc.variables["high_tmpk"][tidx, :, :] = tmax_running
