@@ -79,7 +79,7 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
                 nc.variables["high_tmpk"][tidx, :, :] = tmax_running
                 nc.variables["low_tmpk"][tidx, :, :] = tmin_running
                 nc.variables["p01d"][tidx, :, :] = prate_running
-                nc.variables["srad"][tidx, :, :] = dswsfc_running
+                nc.variables["srad"][tidx, :, :] = dswsfc_running / quorum
                 nc.variables["avg_rh"][tidx, :, :] = rh_running / quorum
 
             # Reset
@@ -89,6 +89,13 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
             dswsfc_running[:] = 0.0
             rh_running[:] = 0.0
             quorum = 0
+
+    t2_grbs.close()
+    tmax_grbs.close()
+    tmin_grbs.close()
+    prate_grbs.close()
+    dswsfc_grbs.close()
+    q2m_grbs.close()
 
 
 def create_netcdf(valid: datetime, domain: str) -> str:
@@ -202,7 +209,7 @@ def dl(valid: datetime):
         resp = exponential_backoff(requests.get, uri, timeout=60)
         if resp is None or resp.status_code != 200:
             LOG.warning("Aborting as dl %s failed", uri)
-            sys.exit()
+            sys.exit(1)
         with open(localfn, "wb") as f:
             f.write(resp.content)
 
@@ -224,6 +231,10 @@ def main(valid: datetime):
             process2iemre(nc, now, domain)
         mydir = "iemre" if domain == "conus" else f"iemre_{domain}"
         shutil.move("iemre.nc", f"/mesonet/data/{mydir}/cfs_current.nc")
+
+    # If we made it this far, we can blow out the tmp directory!
+    os.chdir("/")
+    shutil.rmtree(workdir)
 
 
 if __name__ == "__main__":

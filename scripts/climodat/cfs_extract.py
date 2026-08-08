@@ -48,11 +48,11 @@ def process(nc: Dataset) -> pd.DataFrame:
         )
         srad = nc.variables["srad"][:, j, i] * 86400.0 / 1e6  # W/m^2 -> MJ/m^2
 
-        for i, valid in enumerate(taxis):
-            high = bnds(highs[i], -70, 140)
-            low = bnds(lows[i], -90, 120)
-            thisprecip = bnds(precip[i], 0, 30)
-            thissrad = bnds(srad[i], 0, 50)
+        for idx, valid in enumerate(taxis):
+            high = bnds(highs[idx], -70, 140)
+            low = bnds(lows[idx], -90, 120)
+            thisprecip = bnds(precip[idx], 0, 30)
+            thissrad = bnds(srad[idx], 0, 50)
             if (
                 high is None
                 or low is None
@@ -64,8 +64,8 @@ def process(nc: Dataset) -> pd.DataFrame:
                 {
                     "sid": sid,
                     "valid": valid,
-                    "high": int(high),
-                    "low": int(low),
+                    "high": round(high, 0),
+                    "low": round(low, 0),
                     "precip": round(float(thisprecip), 2),
                     "srad": round(float(thissrad), 2),
                 }
@@ -138,7 +138,8 @@ def main():
             nc.getncattr("model_init"), "%Y-%m-%d %H:%M UTC"
         ).replace(tzinfo=timezone.utc)
         df = process(nc)
-    dbsave(ts, df)
+    if not df.empty:
+        dbsave(ts, df)
 
 
 if __name__ == "__main__":
