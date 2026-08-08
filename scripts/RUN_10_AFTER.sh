@@ -66,12 +66,6 @@ then
     python grid_rsds.py	--date="$(date +'%Y-%m-%d')"
 fi
 
-if [ "$LHH" -eq "05" ]
-then
-    cd ../coop || exit 1
-    python cfs_extract.py &
-fi
-
 cd ../plots || exit 1
 bash RUN_PLOTS.sh
 
