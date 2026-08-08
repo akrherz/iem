@@ -52,7 +52,9 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
 
     time_index = nc.variables["time"][:].tolist()
 
-    progress = tqdm(list(range(1, tmax_grbs.messages + 1)))
+    progress = tqdm(
+        list(range(1, tmax_grbs.messages + 1)), disable=not sys.stdout.isatty()
+    )
     for msgnum in progress:
         # Figure out the forecast itme
         ftime = valid + timedelta(hours=tmax_grbs[msgnum].forecastTime)
