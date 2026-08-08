@@ -64,9 +64,9 @@ python compute4regions.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
 cd ../cache || exit 1
 bash download_cpc.sh
 
-cd ../dl || exit 1
-# NB used for drydown
-python download_cfs.py --date="$(date --date '3 days ago' +'%Y-%m-%d')"
-python download_cfs.py --date="$(date --date '4 days ago' +'%Y-%m-%d')"
-cd ../yieldfx || exit 1
-python cfs2iemre_netcdf.py
+cd ../iemre || exit 1
+# NB used for drydown and COOP extraction for yieldfx
+python cfs2iemre.py --date="$(date --date '2 days ago' +'%Y-%m-%d')"
+
+cd ../climodat || exit 1
+python cfs_extract.py
