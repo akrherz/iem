@@ -22,6 +22,14 @@ from pyiem.util import exponential_backoff, logger, ncopen, utc
 from tqdm import tqdm
 
 LOG = logger()
+# This is the hour of the day that we consider "midnight" for each domain
+# not an exact science
+MIDNIGHT_LOCAL = {
+    "conus": 6,
+    "europe": 0,
+    "sa": 6,
+    "china": 18,
+}
 
 
 def process2iemre(nc: Dataset, valid: datetime, domain: str):
@@ -43,8 +51,10 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
     rh_running = np.zeros(shp)
 
     time_index = nc.variables["time"][:].tolist()
-
-    progress = tqdm(list(range(1, tmax_grbs.messages + 1)))
+    interactive = sys.stdout.isatty()
+    progress = tqdm(
+        list(range(1, tmax_grbs.messages + 1)), disable=not interactive
+    )
     for msgnum in progress:
         # Figure out the forecast itme
         ftime = valid + timedelta(hours=tmax_grbs[msgnum].forecastTime)
@@ -70,12 +80,13 @@ def process2iemre(nc: Dataset, valid: datetime, domain: str):
             .magnitude
         )
         quorum += 1
-        if ftime.hour == 6:
+        if ftime.hour == MIDNIGHT_LOCAL[domain]:
             if quorum == 4:
-                # This is off by one
-                days = (ftime.date() - date(valid.year, 1, 1)).days - 1
+                day_off = 0 if domain == "china" else 1
+                days = (ftime.date() - date(valid.year, 1, 1)).days - day_off
                 tidx = time_index.index(days)
-                progress.write(f"Writing.... {ftime} tidx:{tidx}")
+                if interactive:
+                    progress.write(f"Writing.... {ftime} tidx:{tidx}")
                 nc.variables["high_tmpk"][tidx, :, :] = tmax_running
                 nc.variables["low_tmpk"][tidx, :, :] = tmin_running
                 nc.variables["p01d"][tidx, :, :] = prate_running
