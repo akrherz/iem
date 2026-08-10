@@ -17,7 +17,7 @@ from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
-from pyiem.reference import SECTORS_NAME, state_names
+from pyiem.reference import SECTORS_NAME, state_names, ugc_state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, html_escape, utc
 from pyiem.webutil import ensure_list, iemapp
@@ -259,14 +259,14 @@ def ugc_select(state: str, ugc: str) -> str:
     return make_select("ugc", ugc, ar, cssclass="iemselect2")
 
 
-def ugc_handler(name, value, fdict):
+def ugc_handler(name: str, value: str, fdict: dict):
     """Handle selection of UGCs."""
     privfield = f"_{name}_state"
     state = fdict.get(privfield, "IA")[:2]
     state_select = make_select(
-        privfield, state, state_names, jscallback="onNetworkChange"
+        privfield, state, ugc_state_names, jscallback="onNetworkChange"
     )
-    return state_select + " " + ugc_select(state, value)
+    return f"{state_select} {ugc_select(state, value)}"
 
 
 def vtec_ps_handler(fdict, arg):

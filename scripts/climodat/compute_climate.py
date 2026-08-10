@@ -3,226 +3,265 @@
 Run for a previous date from RUN_2AM.sh
 """
 
+import sys
+from collections.abc import Callable
 from datetime import date, datetime
-from typing import NamedTuple
+from typing import Any
 
 import click
 import pandas as pd
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
-from pyiem.reference import state_names
+from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
+from tqdm import tqdm
 
 LOG = logger()
 
 THISYEAR = date.today().year
 META = {
     "climate51": {
-        "sts": datetime(1951, 1, 1),
-        "ets": datetime(THISYEAR, 1, 1),
+        "sts": date(1951, 1, 1),
+        "ets": date(THISYEAR, 1, 1),
     },
     "climate71": {
-        "sts": datetime(1971, 1, 1),
-        "ets": datetime(2001, 1, 1),
+        "sts": date(1971, 1, 1),
+        "ets": date(2001, 1, 1),
     },
     "climate": {
-        "sts": datetime(1893, 1, 1),
-        "ets": datetime(THISYEAR, 1, 1),
+        "sts": date(1893, 1, 1),
+        "ets": date(THISYEAR + 1, 1, 1),
     },
     "climate81": {
-        "sts": datetime(1981, 1, 1),
-        "ets": datetime(2011, 1, 1),
+        "sts": date(1981, 1, 1),
+        "ets": date(2011, 1, 1),
     },
 }
 
 
-@with_sqlalchemy_conn("coop")
-def daily_averages(
-    table: str, ts: datetime | None, conn: Connection | None = None
-):
-    """
-    Compute and Save the simple daily averages
-    """
-    params = {
-        "sts": META[table]["sts"].strftime("%Y-%m-%d"),
-        "ets": META[table]["ets"].strftime("%Y-%m-%d"),
-    }
-    sday_limiter = ""
-    day_limiter = ""
-    if ts is not None:
-        params["sday"] = f"{ts:%m%d}"
-        params["valid"] = f"2000-{ts:%m-%d}"
-        sday_limiter = " and sday = :sday "
-        day_limiter = " and valid = :valid "
-    for st in state_names:
-        nt = NetworkTable(f"{st}CLIMATE")
-        if not nt.sts:
-            LOG.info("Skipping %s as it has no stations", st)
-            continue
-        LOG.info("Computing Daily Averages for state: %s", st)
-        params["state"] = st
-        res = conn.execute(
-            sql_helper(
-                "DELETE from {table} WHERE substr(station, 1, 2) = :state "
-                "{day_limiter}",
-                day_limiter=day_limiter,
-                table=table,
-            ),
-            params,
-        )
-        LOG.info("    removed %s rows from %s", res.rowcount, table)
-        params["sids"] = list(nt.sts.keys())
+def r0(val: Any):
+    """Round this to an int."""
+    if pd.isna(val):
+        return None
+    return int(round(val, 0))
 
-        res = conn.execute(
-            sql_helper(
-                """
-    INSERT into {table} (station, valid, high, low,
-        max_high, min_high,
-        max_low, min_low,
-        max_precip, precip,
-        snow, years,
-        gdd32, gdd41, gdd46, gdd48, gdd50, gdd51, gdd52,
-        sdd86, hdd65, cdd65, max_range,
-        min_range, srad, sgdd32, sgdd50, sgdd52)
-    (SELECT station, ('2000-'|| to_char(day, 'MM-DD'))::date as d,
-    avg(high) as avg_high, avg(low) as avg_low,
-    max(high) as max_high, min(high) as min_high,
-    max(low) as max_low, min(low) as min_low,
-    max(precip) as max_precip, avg(precip) as precip,
-    avg(snow) as snow, count(*) as years,
-    avg(gddxx(32, 86, high, low)) as gdd32,
-    avg(gddxx(41, 86, high, low)) as gdd41,
-    avg(gddxx(46, 86, high, low)) as gdd46,
-    avg(gddxx(48, 86, high, low)) as gdd48,
-    avg(gddxx(50, 86, high, low)) as gdd50,
-    avg(gddxx(51, 86, high, low)) as gdd51,
-    avg(gddxx(52, 86, high, low)) as gdd52,
-    avg( sdd86(high,low) ) as sdd86,
-    avg( hdd65(high,low) ) as hdd65,
-    avg(cdd65(high,low)) as cdd65,
-    max( high - low) as max_range, min(high - low) as min_range,
-    avg(merra_srad) as srad,
-    avg(gddxx(32, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd32,
-    avg(gddxx(50, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd50,
-    avg(gddxx(52, 86, era5land_soilt4_max, era5land_soilt4_min)) as sgdd52
-    from {table_alldata} WHERE day >= :sts and day < :ets and
-    precip is not null and high is not null and low is not null
-    and station = ANY(:sids) {sday_limiter}
-    GROUP by d, station)""",
-                table=table,
-                sday_limiter=sday_limiter,
-                table_alldata=f"alldata_{st}",
-            ),
-            params,
-        )
-        LOG.info("    added %s rows to %s", res.rowcount, table)
+
+def r2(val: Any):
+    """Round this to 2 decimal places."""
+    if pd.isna(val):
+        return None
+    # Special hack here for Trace values
+    if abs(val - TRACE_VALUE) < 0.00001:
+        return TRACE_VALUE
+    return round(val, 2)
+
+
+def get_stat(
+    statsdf: pd.DataFrame, varname: str, aggstat: str, func: Callable
+):
+    """The data may not exist, so alas."""
+    try:
+        val = func(statsdf[varname][aggstat])
+        return val
+    except KeyError:
+        return None
+
+
+def process_station(
+    station: str,
+    obsdf: pd.DataFrame,
+    dt: date,
+    table: str,
+    conn: Connection,
+):
+    """Process a single station's data"""
+    # Most things will get computed with this. This is a performance hotspot
+    stats = obsdf[
+        [
+            "high",
+            "low",
+            "precip",
+            "snow",
+            "gdd50",
+            "sdd86",
+            "range",
+            "hdd65",
+            "gdd32",
+            "gdd41",
+            "gdd46",
+            "gdd48",
+            "gdd51",
+            "gdd52",
+            "cdd65",
+            "era5land_srad",
+            "sgdd32",
+            "sgdd50",
+            "sgdd52",
+        ]
+    ].describe(percentiles=[])
+    params = {
+        "station": station,
+        "valid": dt,
+        "high": get_stat(stats, "high", "mean", r0),
+        "low": get_stat(stats, "low", "mean", r0),
+        "precip": get_stat(stats, "precip", "mean", r2),
+        "snow": get_stat(stats, "snow", "mean", r2),
+        "max_high": get_stat(stats, "high", "max", r0),
+        "max_low": get_stat(stats, "low", "max", r0),
+        "min_high": get_stat(stats, "high", "min", r0),
+        "min_low": get_stat(stats, "low", "min", r0),
+        "max_precip": get_stat(stats, "precip", "max", r2),
+        # One of these better work or we'll error below
+        "years": (
+            get_stat(stats, "high", "count", r0)
+            or get_stat(stats, "precip", "count", r0)
+            or get_stat(stats, "low", "count", r0)
+        ),
+        "gdd50": get_stat(stats, "gdd50", "mean", r2),
+        "sdd86": get_stat(stats, "sdd86", "mean", r2),
+        "max_range": get_stat(stats, "range", "max", r0),
+        "min_range": get_stat(stats, "range", "min", r0),
+        "hdd65": get_stat(stats, "hdd65", "mean", r2),
+        "gdd32": get_stat(stats, "gdd32", "mean", r2),
+        "gdd41": get_stat(stats, "gdd41", "mean", r2),
+        "gdd46": get_stat(stats, "gdd46", "mean", r2),
+        "gdd48": get_stat(stats, "gdd48", "mean", r2),
+        "gdd51": get_stat(stats, "gdd51", "mean", r2),
+        "gdd52": get_stat(stats, "gdd52", "mean", r2),
+        "cdd65": get_stat(stats, "cdd65", "mean", r2),
+        "srad": get_stat(stats, "era5land_srad", "mean", r2),
+        "sgdd32": get_stat(stats, "sgdd32", "mean", r2),
+        "sgdd50": get_stat(stats, "sgdd50", "mean", r2),
+        "sgdd52": get_stat(stats, "sgdd52", "mean", r2),
+        "max_high_yr": [],
+        "max_low_yr": [],
+        "min_high_yr": [],
+        "min_low_yr": [],
+        "max_precip_yr": [],
+    }
+    if not params["years"]:  # Ensure both not None and > 0
+        LOG.warning("Station: %s has no data for %s, skipping", station, dt)
+        return
+    for col in ["max_high", "max_low", "min_low", "min_high", "max_precip"]:
+        if params[col] is not None:
+            paramcol = f"{col}_yr"
+            params[paramcol] = obsdf[obsdf[col.split("_")[1]] == params[col]][
+                "year"
+            ].to_list()
+
+    # Remove the current datbase entry
+    conn.execute(
+        sql_helper(
+            """
+            delete from {table} where station = :station and valid = :valid
+            """,
+            table=table,
+        ),
+        {"station": station, "valid": dt},
+    )
+
+    # Here we go
+    conn.execute(
+        sql_helper(
+            """
+    insert into {table} (station, valid, high, low, precip, snow, max_high,
+    max_low, min_high, min_low, max_precip, years, gdd50, sdd86, max_range,
+    min_range, hdd65, gdd32, gdd41, gdd46, gdd48, gdd51, gdd52, cdd65, srad,
+    max_high_yr, max_low_yr, min_high_yr, min_low_yr, max_precip_yr,
+    sgdd32, sgdd50, sgdd52) values (
+    :station, :valid, :high, :low, :precip, :snow, :max_high,
+    :max_low, :min_high, :min_low, :max_precip, :years, :gdd50, :sdd86,
+    :max_range, :min_range, :hdd65, :gdd32, :gdd41, :gdd46, :gdd48, :gdd51,
+    :gdd52, :cdd65, :srad, :max_high_yr, :max_low_yr, :min_high_yr,
+    :min_low_yr, :max_precip_yr, :sgdd32, :sgdd50, :sgdd52)
+            """,
+            table=table,
+        ),
+        params,
+    )
+
+
+def process(
+    progress: tqdm,
+    table: str,
+    dt: date,
+    obsdf: pd.DataFrame,
+):
+    """Do the processing work for this table and date,"""
+    # Load up our climatology dataset.
+    with get_sqlalchemy_conn("coop") as conn:
+        for station, gdf in obsdf.groupby("station"):
+            progress.set_description(f"{table} {station}")
+            process_station(station, gdf, dt, table, conn)
         conn.commit()
 
 
-def do_date(
-    conn: Connection, table: str, row: NamedTuple, col: str, lookfor: float
-):
-    """Process date"""
-    res = conn.execute(
-        sql_helper(
-            """
-        SELECT year from {table} where station = :station and
-        abs({col} - cast(:lookfor as real)) < 0.001 and
-        sday = :sday and day >= :sts and day <= :ets
-        ORDER by year ASC
-    """,
-            table=f"alldata_{row.station[:2].lower()}",
-            col=col,
-        ),
-        {
-            "station": row.station,
-            "sday": row.valid.strftime("%m%d"),
-            "sts": META[table]["sts"],
-            "ets": META[table]["ets"],
-            "lookfor": lookfor,
-        },
-    )
-    years = [row2[0] for row2 in res]
-    if not years:
-        LOG.info(
-            "None %s %s %s %s",
-            row.station,
-            row.valid,
-            lookfor,
-            col,
-        )
-    return years
-
-
-@with_sqlalchemy_conn("coop")
-def set_daily_extremes(table, ts, conn: Connection | None = None):
-    """Set the extremes on a given table"""
-    params = {}
-    sday_limiter = ""
-    if ts is not None:
-        params["valid"] = f"2000-{ts:%m-%d}"
-        sday_limiter = " and valid = :valid "
-    climodf = pd.read_sql(
-        sql_helper(
-            """
-        SELECT * from {table} WHERE max_high_yr is null and
-        max_high is not null
-        and min_high_yr is null and min_high is not null
-        and max_low_yr is null and max_low is not null
-        and min_low_yr is null and min_low is not null {sday_limiter}
-        """,
-            table=table,
-            sday_limiter=sday_limiter,
-        ),
-        conn,
-        params=params,
-    )
-    cnt = 0
-    for row in climodf.itertuples():
-        data = {}
-        data["max_high_yr"] = do_date(conn, table, row, "high", row.max_high)
-        data["min_high_yr"] = do_date(conn, table, row, "high", row.min_high)
-        data["max_low_yr"] = do_date(conn, table, row, "low", row.max_low)
-        data["min_low_yr"] = do_date(conn, table, row, "low", row.min_low)
-        data["max_precip_yr"] = do_date(
-            conn, table, row, "precip", row.max_precip
-        )
-        conn.execute(
-            sql_helper(
-                """
-    UPDATE {table} SET max_high_yr = :max_high_yr, min_high_yr = :min_high_yr,
-    max_low_yr = :max_low_yr, min_low_yr = :min_low_yr,
-    max_precip_yr = :max_precip_yr
-    WHERE station = :station and valid = :valid
-        """,
-                table=table,
-            ),
-            {
-                "max_high_yr": data["max_high_yr"],
-                "min_high_yr": data["min_high_yr"],
-                "max_low_yr": data["max_low_yr"],
-                "min_low_yr": data["min_low_yr"],
-                "max_precip_yr": data["max_precip_yr"],
-                "station": row.station,
-                "valid": row.valid,
-            },
-        )
-        cnt += 1
-        if cnt % 1000 == 0:
-            conn.commit()
-    conn.commit()
-
-
 @click.command()
-@click.option("--date", "dt", help="Date to process", type=click.DateTime())
-def main(dt: datetime | None):
+@click.option(
+    "--date",
+    "dt",
+    help="Date to process",
+    type=click.DateTime(),
+    required=True,
+)
+@click.option(
+    "--state",
+    "state_in",
+    help="Run for just the given state abbreviation.",
+    type=str,
+    required=False,
+)
+def main(dt: datetime, state_in: str | None):
     """Go Main Go"""
-    if dt is not None:
-        dt = dt.date()
-    for table in META:
-        daily_averages(table, dt)
-        set_daily_extremes(table, dt)
+    # Climate tables use dates during 2000, since it has a leap day
+    dt = dt.date().replace(year=2000)
+    is_interactive = sys.stdout.isatty()
+    if state_in is not None:
+        states = [state_in]
+    else:
+        states = state_names.keys()
+    progress = tqdm(states, disable=not is_interactive)
+    for state in progress:
+        nt = NetworkTable(f"{state}CLIMATE")
+        if not nt.sts:
+            if is_interactive:
+                progress.write(f"Skipping state: {state} as no stations")
+            continue
+        with get_sqlalchemy_conn("coop") as conn:
+            obsdf = pd.read_sql(
+                sql_helper(
+                    """
+    select *,
+    gddxx(32, 86, high, low) as gdd32,
+    gddxx(41, 86, high, low) as gdd41,
+    gddxx(46, 86, high, low) as gdd46,
+    gddxx(48, 86, high, low) as gdd48,
+    gddxx(50, 86, high, low) as gdd50,
+    gddxx(51, 86, high, low) as gdd51,
+    gddxx(52, 86, high, low) as gdd52,
+    sdd86(high, low) as sdd86,
+    hdd65(high, low) as hdd65,
+    cdd65(high, low) as cdd65,
+    high - low as range,
+    gddxx(32, 86, era5land_soilt4_max, era5land_soilt4_min) as sgdd32,
+    gddxx(50, 86, era5land_soilt4_max, era5land_soilt4_min) as sgdd50,
+    gddxx(52, 86, era5land_soilt4_max, era5land_soilt4_min) as sgdd52
+    from {table} where sday = :sday order by station
+        """,
+                    table=f"alldata_{state.lower()}",
+                ),
+                conn,
+                params={"sday": dt.strftime("%m%d")},
+            )
+
+        for table in META:
+            obsdf_filtered = obsdf[
+                (obsdf["day"] >= META[table]["sts"])
+                & (obsdf["day"] < META[table]["ets"])
+            ]
+            if not obsdf_filtered.empty:
+                process(progress, table, dt, obsdf_filtered)
 
 
 if __name__ == "__main__":

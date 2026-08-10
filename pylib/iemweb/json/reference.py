@@ -12,6 +12,8 @@ from the `pyiem.reference` namespace are exposed at the moment.
 Changelog
 ---------
 
+- 2026-08-10: Added `ugc_state_names`, which provides a name used by the
+  two-character prefix found within NWS UGC codes.
 - 2025-02-28: Added VTEC Action, Phenomena, Significance reference data
 - 2024-07-24: Initial documentation release
 
@@ -41,7 +43,7 @@ class Schema(CGIModel):
 
 
 @iemapp(
-    memcachekey="/json/reference/v3",
+    memcachekey="/json/reference/v4",
     help=__doc__,
     schema=Schema,
     memcacheexpire=86_400,
@@ -53,6 +55,7 @@ def application(_environ, start_response):
         json_response_dict(
             {
                 "prodDefinitions": reference.prodDefinitions,
+                "ugc_state_names": reference.ugc_state_names,
                 "vtec_action": VTEC_ACTION,  # should have been status, sigh
                 "vtec_phenomena": VTEC_PHENOMENA,
                 "vtec_significance": VTEC_SIGNIFICANCE,
