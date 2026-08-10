@@ -9,7 +9,7 @@ require_once "../../include/mlib.php";
 
 $nt = new NetworkTable("NWSCLI");
 
-$station = get_str404("station", 'KDSM');
+$station = strtoupper(get_str404("station", 'KDSM'));
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", null);
 $day = get_int404("day", null);
@@ -79,13 +79,26 @@ $table = <<<EOM
 </thead>
 <tbody>
 EOM;
+
+/**
+ * Calculate the departure from normal. Returns "M" if missing.
+ * @param mixed $actual The actual observed value.
+ * @param mixed $normal The normal value.
+ * @return mixed The departure from normal, or "M" if missing.
+ */
 function departure($actual, $normal)
 {
     // JSON upstream hacky returns M instead of null
     if ($actual == "M" || $normal == "M") return "M";
     return $actual - $normal;
 }
-// JSON upstream hacky returns M instead of null
+
+/**
+ * Calculate the background color for a departure value. Returns white if missing or zero, pink shades for positive departures, and blue shades for negative departures.
+ * @param mixed $actual The actual observed value.
+ * @param mixed $normal The normal value.
+ * @return string The background color in hex format.
+ */
 function departcolor($actual, $normal)
 {
     if ($actual == "M" || $normal == "M") return "#FFF";
@@ -97,6 +110,13 @@ function departcolor($actual, $normal)
     if ($diff <= -10) return "#00BFFF";
     return "#fff";
 }
+
+/**
+ * Determine if a new record has been set or tied. Returns an empty string if no record, a star icon if tied, and a filled star icon if a new record is set. Returns an empty string if either actual or record is "M".
+ * @param mixed $actual The actual observed value.
+ * @param mixed $record The record value.
+ * @return string The HTML for the record indicator.
+ */
 function new_record($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
@@ -104,12 +124,26 @@ function new_record($actual, $record)
     if ($actual > $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
     return "";
 }
+
+/**
+ * Determine if a new record has been set or tied for low temperatures. Returns an empty string if no record, a star icon if tied, and a filled star icon if a new record is set. Returns an empty string if either actual or record is "M".
+ * @param mixed $actual The actual observed value.
+ * @param mixed $record The record value.
+ * @return string The HTML for the record indicator.
+ */
 function new_record2($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
     if ($actual == $record) return '<i class="bi bi-star" aria-hidden="true"></i>';
     if ($actual < $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
 }
+
+/**
+ * Determine if a new record has been set or tied for precipitation or snow. Returns an empty string if no record, a star icon if tied, and a filled star icon if a new record is set. Returns an empty string if either actual or record is "M". For trace amounts, it only considers it a record if the record is greater than 0.001.
+ * @param mixed $actual The actual observed value.
+ * @param mixed $record The record value.
+ * @return string The HTML for the record indicator.
+ */
 function new_record3($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";

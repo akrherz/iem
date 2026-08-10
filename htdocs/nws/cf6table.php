@@ -9,7 +9,7 @@ require_once "../../include/mlib.php";
 
 $nt = new NetworkTable("NWSCLI");
 
-$station = get_str404("station", 'KDSM');
+$station = strtoupper(get_str404("station", 'KDSM'));
 $year = get_int404("year", date("Y"));
 $month = get_int404("month");
 $day = get_int404("day");
