@@ -16,6 +16,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import convert_value
 
+from iemweb.util import month2months
+
 PDICT = {
     "TO": "Tornado Warning",
     "SV": "Severe Thunderstorm Warning",
@@ -29,6 +31,27 @@ PDICT = {
 PDICT2 = {
     "NEW": "at Issuance",
     "ANY": "at Issuance or Update",
+}
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "mjj": "May/June/July",
+    "gs": "May thru Sep",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
 }
 
 
@@ -46,6 +69,13 @@ def get_description():
             max=today.strftime("%Y/%m/%d"),
             optional=True,
         ),
+        {
+            "type": "select",
+            "name": "month",
+            "default": "all",
+            "label": "Month/Season Limit:",
+            "options": MDICT,
+        },
         dict(
             type="networkselect",
             name="wfo",
@@ -83,6 +113,13 @@ def get_data(ctx):
     ps = [phenomena]
     if phenomena == "_A":
         ps = ["TO", "SV"]
+    month_limiter = ""
+    months = []  # Unused in the all case
+    month_title = ""
+    if ctx["month"] != "all":
+        month_limiter = "and extract(month from polygon_begin) = Any(:months)"
+        months = month2months(ctx["month"])
+        month_title = f" [Limited to: {MDICT[ctx['month']]}]"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -93,12 +130,14 @@ def get_data(ctx):
                 phenomena as ph, significance as s, tml_direction, tml_sknt
                 from sbw WHERE phenomena = ANY(:phenomena) and wfo = :wfo and
                 {statuslimit} and tml_direction is not null and
-                tml_sknt is not null ORDER by issue
+                tml_sknt is not null {month_limiter} and status != 'CAN'
+                ORDER by issue
                 """,
                 statuslimit=statuslimit,
+                month_limiter=month_limiter,
             ),
             conn,
-            params={"phenomena": ps, "wfo": wfo},
+            params={"phenomena": ps, "wfo": wfo, "months": months},
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -108,7 +147,7 @@ def get_data(ctx):
         f"{PDICT[phenomena]} Storm Motion {title}\n"
         f"{len(df.index)} events ploted between "
         f"{df['issue'].min().date():%b %-d, %Y} and "
-        f"{df['issue'].max().date():%b %-d, %Y}"
+        f"{df['issue'].max().date():%b %-d, %Y} {month_title}"
     )
     return df
 
