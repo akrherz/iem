@@ -136,6 +136,7 @@ function new_record2($actual, $record)
     if ($actual == "M" || $record == "M") return "";
     if ($actual == $record) return '<i class="bi bi-star" aria-hidden="true"></i>';
     if ($actual < $record) return "<i class=\"bi bi-star-fill\" aria-hidden=\"true\"></i>";
+    return "";
 }
 
 /**

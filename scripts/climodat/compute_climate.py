@@ -4,6 +4,7 @@ Run for a previous date from RUN_2AM.sh
 """
 
 import sys
+from collections.abc import Callable
 from datetime import date, datetime
 from typing import Any
 
@@ -11,7 +12,7 @@ import click
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
-from pyiem.reference import state_names
+from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
 from tqdm import tqdm
@@ -50,11 +51,14 @@ def r2(val: Any):
     """Round this to 2 decimal places."""
     if pd.isna(val):
         return None
+    # Special hack here for Trace values
+    if abs(val - TRACE_VALUE) < 0.00001:
+        return TRACE_VALUE
     return round(val, 2)
 
 
 def get_stat(
-    statsdf: pd.DataFrame, varname: str, aggstat: str, func: callable
+    statsdf: pd.DataFrame, varname: str, aggstat: str, func: Callable
 ):
     """The data may not exist, so alas."""
     try:
@@ -95,7 +99,7 @@ def process_station(
             "sgdd50",
             "sgdd52",
         ]
-    ].describe(percentiles=None)
+    ].describe(percentiles=[])
     params = {
         "station": station,
         "valid": dt,
@@ -136,7 +140,7 @@ def process_station(
         "min_low_yr": [],
         "max_precip_yr": [],
     }
-    if params["years"] is None:
+    if not params["years"]:  # Ensure both not None and > 0
         LOG.warning("Station: %s has no data for %s, skipping", station, dt)
         return
     for col in ["max_high", "max_low", "min_low", "min_high", "max_precip"]:
@@ -154,7 +158,7 @@ def process_station(
             """,
             table=table,
         ),
-        {"station": station, "valid": dt.replace(year=2000)},
+        {"station": station, "valid": dt},
     )
 
     # Here we go
