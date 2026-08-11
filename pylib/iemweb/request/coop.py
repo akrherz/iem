@@ -584,7 +584,8 @@ def do_simple(cursor, ctx):
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         era5land_srad, temp_estimated, precip_estimated, power_srad,
-        era5land_soilt4_avg, era5land_soilt4_min, era5land_soilt4_max,
+        (era5land_soilt4_max + era5land_soilt4_min)/2.0 as era5land_soilt4_avg,
+        era5land_soilt4_min, era5land_soilt4_max,
         era5land_soilm4_avg, era5land_soilm1m_avg,
         nldas_soilt4_avg, nldas_soilt4_min, nldas_soilt4_max,
         nldas_soilm4_avg, nldas_soilm1m_avg,
@@ -603,7 +604,8 @@ def do_simple(cursor, ctx):
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         era5land_srad, temp_estimated, precip_estimated, power_srad,
-        era5land_soilt4_avg, era5land_soilt4_min, era5land_soilt4_max,
+        (era5land_soilt4_max + era5land_soilt4_min)/2.0 as era5land_soilt4_avg,
+        era5land_soilt4_min, era5land_soilt4_max,
         era5land_soilm4_avg, era5land_soilm1m_avg,
         nldas_soilt4_avg, nldas_soilt4_min, nldas_soilt4_max,
         nldas_soilm4_avg, nldas_soilm1m_avg,
