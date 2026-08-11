@@ -20,7 +20,9 @@ from pyiem.util import convert_value, logger, ncopen, utc
 LOG = logger()
 
 
-def compute_regions(data: np.ndarray, varname: str, df: pd.DataFrame):
+def compute_regions(
+    data: np.ndarray, varname: str, df: pd.DataFrame, use_iemre: bool
+):
     """Do the spatial averaging work."""
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
@@ -32,7 +34,9 @@ def compute_regions(data: np.ndarray, varname: str, df: pd.DataFrame):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(get_nav("ERA5LAND", "CONUS").affine_image)
+    czs = CachingZonalStats(
+        get_nav("IEMRE" if use_iemre else "ERA5LAND", "CONUS").affine_image
+    )
     data = czs.gen_stats(np.flipud(data), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
         if np.ma.is_masked(data[i]):
@@ -149,13 +153,13 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
             df.at[sid, "era5land_soilm1m_avg"] = soilm1m[j, i]
 
     if do_regions:
-        compute_regions(rsds, "era5land_srad", df)
-        compute_regions(soiltavg, "era5land_soilt4_avg", df)
-        compute_regions(soiltmin, "era5land_soilt4_min", df)
-        compute_regions(soiltmax, "era5land_soilt4_max", df)
+        compute_regions(rsds, "era5land_srad", df, use_iemre)
+        compute_regions(soiltavg, "era5land_soilt4_avg", df, use_iemre)
+        compute_regions(soiltmin, "era5land_soilt4_min", df, use_iemre)
+        compute_regions(soiltmax, "era5land_soilt4_max", df, use_iemre)
         if soilm is not None:
-            compute_regions(soilm, "era5land_soilm4_avg", df)
-            compute_regions(soilm1m, "era5land_soilm1m_avg", df)
+            compute_regions(soilm, "era5land_soilm4_avg", df, use_iemre)
+            compute_regions(soilm1m, "era5land_soilm1m_avg", df, use_iemre)
 
     if "IA0200" in df.index:
         LOG.info("IA0200 %s", df.loc["IA0200"])
