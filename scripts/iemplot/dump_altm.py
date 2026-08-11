@@ -23,7 +23,7 @@ def main():
         )
     df["altm"] = (df["alti"].values * units("inHg")).to(units("hPa")).m
 
-    with open("/mesonet/data/iemplot/altm.txt", "w") as fh:
+    with open("/mesonet/data/iemplot/altm.txt", "w", encoding="ascii") as fh:
         fh.write(" PARM = ALTM\n\n    STN    YYMMDD/HHMM      ALTM\n")
 
         fh.writelines(

@@ -10,7 +10,7 @@ from werkzeug.test import Client
 def get_test_urls():
     """yield a list of URLs to test."""
     listfn = pathlib.Path(__file__).parent / "urllist.txt"
-    with open(listfn) as fh:
+    with open(listfn, encoding="ascii") as fh:
         for line_in in fh:
             line = line_in.strip()
             if line == "" or line.startswith("#"):
@@ -22,9 +22,15 @@ def get_test_urls():
             yield f"/?p={num}&q={qstr}&fmt={fmt}"
 
 
-@pytest.mark.parametrize("url", get_test_urls())
-def test_urls(url):
+@pytest.mark.parametrize("url", list(get_test_urls()))
+def test_urls(url: str):
     """Run the test."""
     c = Client(application)
     res = c.get(url)
     assert res.status_code in [200, 400]
+
+    # Fuzzing
+    if "IATAME" in url:
+        # Replace with Postville, which has no test data provision
+        resp = c.get(url.replace("IATAME", "IA6766"))
+        assert resp.status_code in [200, 400], "Fuzzing for IA6766 failed"

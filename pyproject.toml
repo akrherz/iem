@@ -71,6 +71,9 @@ ignore = [
 ]
 # preview = true
 
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
+"geopandas" = "gpd"
+
 # complains about iemweb.json
 [tool.ruff.lint.flake8-builtins]
 builtins-strict-checking = false

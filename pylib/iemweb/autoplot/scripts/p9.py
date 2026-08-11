@@ -70,13 +70,13 @@ def get_description():
             type="int",
             name="base",
             default="50",
-            label="Enter CDD/GDD/HDD Base (F):",
+            label="Enter CDD/GDD/HDD Base (°F):",
         ),
         dict(
             type="int",
             name="ceiling",
             default="86",
-            label="Enter GDD Ceiling / SDD Base (F):",
+            label="Enter GDD Ceiling / SDD Base (°F):",
         ),
     ]
     return desc
@@ -100,7 +100,7 @@ def get_df(ctx: dict, conn: Connection | None = None) -> pd.DataFrame:
     obsdf = pd.read_sql(
         sql_helper(
             """SELECT year, sday, {gfunc} as {glabel} from alldata WHERE
-        station = :sid and year > 1892 and sday != '0229'
+        station = :sid and sday != '0229'
         and sday >= :sday and sday <= :eday ORDER by day ASC
         """,
             gfunc=gfunc,

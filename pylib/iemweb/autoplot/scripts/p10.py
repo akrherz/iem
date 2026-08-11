@@ -212,9 +212,9 @@ def plotter(ctx: dict, conn: Connection | None = None):
         f"        {ets.month:4.0f}{ets.day:6.0f}{df['fall'].mean():4.0f}"
         f"          {df['season'].mean():.0f}\n"
     )
-    years = np.array(df["year"], dtype=int)
-    spring = np.array(df["spring"], dtype=int)
-    fall = np.array(df["fall"], dtype=int)
+    years = np.array(df["year"].to_numpy(), dtype=int)
+    spring = np.array(df["spring"].to_numpy(), dtype=int)
+    fall = np.array(df["fall"].to_numpy(), dtype=int)
 
     title = PDICT.get(direction, "").replace(
         "Temperature", PDICT2.get(varname)

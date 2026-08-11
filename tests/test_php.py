@@ -30,7 +30,7 @@ PUNTING = [
 def get_urls(extra):
     """yield up things we can run."""
     fn = Path(__file__).parent / f"urls{extra}.txt"
-    with open(fn) as fh:
+    with open(fn, encoding="ascii") as fh:
         for line in fh:
             if line.startswith("#") or line.strip() == "":
                 continue
@@ -39,9 +39,9 @@ def get_urls(extra):
 
 def apps():
     """yield apps found in this repo."""
-    for _rt, _dirs, files in os.walk("htdocs"):
+    for rt, _dirs, files in os.walk("htdocs"):
         for file in files:
-            fullpath = os.path.join(_rt, file)
+            fullpath = os.path.join(rt, file)
             if fullpath.endswith((".php", ".phtml")):
                 app = fullpath.replace("htdocs", "")
                 if app in PUNTING:

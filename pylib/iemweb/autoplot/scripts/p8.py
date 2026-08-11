@@ -78,14 +78,14 @@ def plotter(ctx: dict):
         raise NoDataFound("Failed to find any data.")
     df["freq"] = df["hits"] / df["total"] * 100.0
 
-    title = (
-        f"{ctx['_sname']} :: Monthly Precipitation Reliability\n"
+    title = f"{ctx['_sname']} :: Monthly Precipitation Reliability"
+    subtitle = (
         f"Period: {syear}-{eyear}, % of Months above {threshold}% "
         "of Long Term Avg"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
-    ax.bar(df.index.values, df["freq"].values, align="center")
+    ax.bar(df.index.values, df["freq"].to_numpy(), align="center")
     for month, row in df.iterrows():
         ax.text(
             month,

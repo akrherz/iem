@@ -19,7 +19,7 @@ TIME_FORMAT = "%Y-%m-%d %H:%M-06"
 def hourly_process(cursor, station, hour, mdf, hdf):
     """Merge this row information into the database."""
     # The totals for this hour are stored for the next hour
-    row = pd.Series({"station": station, "valid": hour + timedelta(hours=1)})
+    row = {"station": station, "valid": hour + timedelta(hours=1)}
     if row["valid"] not in hdf.index or mdf.empty:
         return
     lastob = mdf.iloc[-1]
@@ -45,7 +45,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
                     sv_lastob[f"sv_{col}{depth}_qc"]
                 )
     tokens = []
-    for colname in row.index:
+    for colname in row:
         if colname in ["station", "valid"]:
             continue
         if colname == "obs_count":
@@ -57,7 +57,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     cursor.execute(
         f"UPDATE sm_hourly SET {','.join(tokens)} "
         "WHERE station = %(station)s and valid = %(valid)s",
-        row.to_dict(),
+        row,
     )
 
 
@@ -66,7 +66,7 @@ def daily_process(cursor, station, dt, df: pd.DataFrame, ddf):
     mindf = df.min(numeric_only=True)
     maxdf = df.max(numeric_only=True)
     avgdf = df.mean(numeric_only=True)
-    row = pd.Series({"station": station, "date": dt})
+    row = {"station": station, "date": dt}
     row["obs_count"] = df["tair_c_avg_qc"].size
     row["tair_c_max"] = maxdf["tair_c_avg_qc"]
     row["tair_c_min"] = mindf["tair_c_avg_qc"]
@@ -86,23 +86,24 @@ def daily_process(cursor, station, dt, df: pd.DataFrame, ddf):
     if current["obs_count"] == row["obs_count"]:
         LOG.info("%s %s obs_count %s matches", dt, station, row["obs_count"])
         return
-    # Ensure database gets nulls and not nan
-    row = row.replace({np.nan: None})
     # build up SQL statement
     tokens = []
-    for colname in row.index:
+    for colname in row:
         if colname in ["station", "date"]:
             continue
         if colname == "obs_count":
             tokens.append(f"{colname} = {row[colname]}")
             continue
+        # Ensure database gets nulls and not nan
+        if pd.isna(row[colname]):
+            row[colname] = None
         tokens.append(f"{colname} = coalesce({colname}, %({colname})s)")
         tokens.append(f"{colname}_qc = coalesce({colname}_qc, %({colname})s)")
     LOG.info("updating sm_daily %s %s", station, dt)
     cursor.execute(
         f"UPDATE sm_daily SET {','.join(tokens)} "
         "WHERE station = %(station)s and valid = %(date)s",
-        row.to_dict(),
+        row,
     )
 
 
@@ -170,11 +171,11 @@ def main(dt: datetime | None):
 
     # Daily work
     cursor = pgconn.cursor()
-    for (station, _dt), gdf in mdf.groupby(["station", "date"]):
-        if (station, _dt) not in ddf.index:
-            LOG.info("%s %s not in daily, skipping", station, _dt)
+    for (station, dt_), gdf in mdf.groupby(["station", "date"]):
+        if (station, dt_) not in ddf.index:
+            LOG.info("%s %s not in daily, skipping", station, dt_)
             continue
-        daily_process(cursor, station, _dt, gdf, ddf)
+        daily_process(cursor, station, dt_, gdf, ddf)
     cursor.close()
     pgconn.commit()
 

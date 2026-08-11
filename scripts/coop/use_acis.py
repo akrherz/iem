@@ -5,8 +5,8 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
@@ -15,7 +15,7 @@ from pyiem.util import logger
 from tqdm import tqdm
 
 LOG = logger()
-SERVICE = "http://data.rcc-acis.org/StnData"
+SERVICE = "https://data.rcc-acis.org/StnData"
 
 
 def safe(val):
@@ -32,9 +32,7 @@ def safe(val):
     try:
         return float(val)
     except Exception as exp:
-        LOG.warning(
-            "%s failed to convert %s to float, using None", exp, repr(val)
-        )
+        LOG.warning("%s failed to convert %r to float, using None", exp, val)
     return None
 
 
@@ -93,7 +91,7 @@ def main(state, station):
             ],
         }
         try:
-            resp = httpx.post(SERVICE, json=payload, timeout=30)
+            resp = requests.post(SERVICE, json=payload, timeout=30)
             resp.raise_for_status()
             j = resp.json()
         except Exception as exp:

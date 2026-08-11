@@ -6,6 +6,8 @@
 - Replace today to day + 3 with forecast data
 - For this year, replace day + 4 to Dec 31 with CFS :)
 - Upload the resulting file <site>_YYYYmmdd.met
+
+Run from RUN_12Z.sh
 """
 
 import os
@@ -420,10 +422,11 @@ def replace_obs(df, location):
         )
 
 
-def compute_gdd(df):
+def compute_gdd(df: pd.DataFrame):
     """Compute GDDs Please"""
     df["gdd"] = gdd(
-        units("degC") * df["maxt"].values, units("degC") * df["mint"].values
+        units("degC") * df["maxt"].to_numpy(),
+        units("degC") * df["mint"].to_numpy(),
     )
 
 

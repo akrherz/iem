@@ -184,8 +184,8 @@ def main(dt: datetime | None, year: int | None, month: int | None):
         while now < ets:
             queue.append(now)
             now += timedelta(days=1)
-    for _dt in queue:
-        do(_dt)
+    for dt_ in queue:
+        do(dt_)
 
 
 if __name__ == "__main__":
