@@ -116,6 +116,8 @@ def plotter(ctx: dict):
             },
             index_col="season",
         )
+    if df.empty:
+        raise NoDataFound("No data found.")
     # We need to do some magic to julian dates straight
     if season == "winter":
         # drop the first row
