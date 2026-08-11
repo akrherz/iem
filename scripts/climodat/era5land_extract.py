@@ -1,10 +1,11 @@
 """
-Gridcell sample the ERA5Land NetCDF files to save srad to climodat database.
+Do ERA5Land grid cell sampling to populate climodat station estimates.
 
 Run from RUN_0Z.sh for seven UTC days ago.
+Run from RUN_NOON.sh for today and yesterday using iemre.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import click
 import geopandas as gpd
@@ -19,7 +20,7 @@ from pyiem.util import convert_value, logger, ncopen, utc
 LOG = logger()
 
 
-def compute_regions(data, varname, df):
+def compute_regions(data: np.ndarray, varname: str, df: pd.DataFrame):
     """Do the spatial averaging work."""
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
@@ -40,7 +41,7 @@ def compute_regions(data, varname, df):
         df.at[sid, varname] = data[i]
 
 
-def build_stations(dt) -> pd.DataFrame:
+def build_stations(dt: date) -> pd.DataFrame:
     """Figure out what we need data for."""
     with get_sqlalchemy_conn("coop") as conn:
         # There's a lone VICLIMATE site at -65 :/
@@ -69,87 +70,109 @@ def build_stations(dt) -> pd.DataFrame:
     return df
 
 
-def compute(df, sids, dt, do_regions=False):
+def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
     """Do the magic."""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
     ets = sts + timedelta(hours=24)
 
     ncfn = f"/mesonet/data/era5/{sts.year}_era5land_hourly.nc"
+    if use_iemre:
+        ncfn = f"/mesonet/data/iemre/{sts.year}_iemre_hourly.nc"
     idx0 = hourly_offset(sts)
     idx1 = hourly_offset(ets)
     # Wm-2 to MJ
     factor = 3600.0 / 1_000_000.0
+    soilm = None
+    soilm1m = None
     with ncopen(ncfn) as nc:
         if f"{dt:%m%d}" == "1231":
             rsds = np.sum(nc.variables["rsds"][idx0:], 0) * factor
-            # Close enough
-            soilm = np.mean(nc.variables["soilm"][idx0:, 0], 0)
-            soilm1m = (
-                np.mean(nc.variables["soilm"][idx0:, 0], 0) * 7.0
-                + np.mean(nc.variables["soilm"][idx0:, 1], 0) * 21.0
-                + np.mean(nc.variables["soilm"][idx0:, 2], 0) * 72.0
-            ) / 100.0
-            soiltavg = np.mean(nc.variables["soilt"][idx0:, 0], 0)
-            soiltmin = np.min(nc.variables["soilt"][idx0:, 0], 0)
-            soiltmax = np.max(nc.variables["soilt"][idx0:, 0], 0)
+            if "soilm" in nc.variables:
+                # Close enough
+                soilm = np.mean(nc.variables["soilm"][idx0:, 0], 0)
+                soilm1m = (
+                    np.mean(nc.variables["soilm"][idx0:, 0], 0) * 7.0
+                    + np.mean(nc.variables["soilm"][idx0:, 1], 0) * 21.0
+                    + np.mean(nc.variables["soilm"][idx0:, 2], 0) * 72.0
+                ) / 100.0
+                soiltavg = np.mean(nc.variables["soilt"][idx0:, 0], 0)
+                soiltmin = np.min(nc.variables["soilt"][idx0:, 0], 0)
+                soiltmax = np.max(nc.variables["soilt"][idx0:, 0], 0)
+            else:
+                soiltavg = np.mean(nc.variables["soil4t"][idx0:], 0)
+                soiltmin = np.min(nc.variables["soil4t"][idx0:], 0)
+                soiltmax = np.max(nc.variables["soil4t"][idx0:], 0)
+
             ncfn2 = f"/mesonet/data/era5/{ets.year}_era5land_hourly.nc"
+            if use_iemre:
+                ncfn2 = f"/mesonet/data/iemre/{ets.year}_iemre_hourly.nc"
             with ncopen(ncfn2) as nc2:
                 rsds += np.sum(nc2.variables["rsds"][:idx1], 0) * factor
         else:
             rsds = np.sum(nc.variables["rsds"][idx0:idx1], 0) * factor
-            soilm = np.mean(nc.variables["soilm"][idx0:idx1, 0], 0)
-            soilm1m = (
-                np.mean(nc.variables["soilm"][idx0:idx1, 0], 0) * 7.0
-                + np.mean(nc.variables["soilm"][idx0:idx1, 1], 0) * 21.0
-                + np.mean(nc.variables["soilm"][idx0:idx1, 2], 0) * 72.0
-            ) / 100.0
-            soiltavg = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
-            soiltmin = np.min(nc.variables["soilt"][idx0:idx1, 0], 0)
-            soiltmax = np.max(nc.variables["soilt"][idx0:idx1, 0], 0)
+            if "soilm" in nc.variables:
+                soilm = np.mean(nc.variables["soilm"][idx0:idx1, 0], 0)
+                soilm1m = (
+                    np.mean(nc.variables["soilm"][idx0:idx1, 0], 0) * 7.0
+                    + np.mean(nc.variables["soilm"][idx0:idx1, 1], 0) * 21.0
+                    + np.mean(nc.variables["soilm"][idx0:idx1, 2], 0) * 72.0
+                ) / 100.0
+                soiltavg = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
+                soiltmin = np.min(nc.variables["soilt"][idx0:idx1, 0], 0)
+                soiltmax = np.max(nc.variables["soilt"][idx0:idx1, 0], 0)
+            else:
+                soiltavg = np.mean(nc.variables["soil4t"][idx0:idx1], 0)
+                soiltmin = np.min(nc.variables["soil4t"][idx0:idx1], 0)
+                soiltmax = np.max(nc.variables["soil4t"][idx0:idx1], 0)
 
     rsds = rsds.filled(np.nan)
-    soilm = soilm.filled(np.nan)
-    soilm1m = soilm1m.filled(np.nan)
+    if soilm is not None:
+        soilm = soilm.filled(np.nan)
+        soilm1m = soilm1m.filled(np.nan)
     soiltavg = soiltavg.filled(np.nan)
     soiltmin = soiltmin.filled(np.nan)
     soiltmax = soiltmax.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        i, j = get_nav("ERA5LAND", "CONUS").find_ij(row["lon"], row["lat"])
+        i, j = get_nav("IEMRE" if use_iemre else "ERA5LAND", "CONUS").find_ij(
+            row["lon"], row["lat"]
+        )
         if i is None:
             continue
         df.at[sid, "era5land_srad"] = rsds[j, i]
         df.at[sid, "era5land_soilt4_avg"] = soiltavg[j, i]
         df.at[sid, "era5land_soilt4_min"] = soiltmin[j, i]
         df.at[sid, "era5land_soilt4_max"] = soiltmax[j, i]
-        df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
-        df.at[sid, "era5land_soilm1m_avg"] = soilm1m[j, i]
+        if soilm is not None:
+            df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
+            df.at[sid, "era5land_soilm1m_avg"] = soilm1m[j, i]
 
     if do_regions:
         compute_regions(rsds, "era5land_srad", df)
         compute_regions(soiltavg, "era5land_soilt4_avg", df)
         compute_regions(soiltmin, "era5land_soilt4_min", df)
         compute_regions(soiltmax, "era5land_soilt4_max", df)
-        compute_regions(soilm, "era5land_soilm4_avg", df)
-        compute_regions(soilm1m, "era5land_soilm1m_avg", df)
+        if soilm is not None:
+            compute_regions(soilm, "era5land_soilm4_avg", df)
+            compute_regions(soilm1m, "era5land_soilm1m_avg", df)
 
     if "IA0200" in df.index:
         LOG.info("IA0200 %s", df.loc["IA0200"])
 
 
-def do(dt):
+def do(dt: date, use_iemre: bool):
     """Process for a given date."""
-    LOG.info("do(%s)", dt)
+    LOG.info("do(%s) using iemre: %s", dt, use_iemre)
     df = build_stations(dt)
     df["day"] = dt
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's values
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True, use_iemre)
     # 2. All other sites get today
     sids = df[df["era5land_srad"].isna()].index.values
-    compute(df, sids, dt)
+    compute(df, sids, dt, False, use_iemre)
 
     df["station"] = df.index.values
     df["era5land_soilt4_avg"] = convert_value(
@@ -184,9 +207,14 @@ def do(dt):
 
 @click.command()
 @click.option("--date", "valid", type=click.DateTime(), required=True)
-def main(valid: datetime):
+@click.option(
+    "--use-iemre",
+    is_flag=True,
+    help="Use IEMRE as the sampling source, which is IFS, so ERA5Land.",
+)
+def main(valid: datetime, use_iemre: bool):
     """Go Main Go"""
-    do(valid.date())
+    do(valid.date(), use_iemre)
 
 
 if __name__ == "__main__":

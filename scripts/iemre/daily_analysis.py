@@ -211,9 +211,6 @@ def copy_iemre_hourly(ts: date, ds: xr.Dataset, domain: str):
         "high_tmpk low_tmpk p01d high_soil4t avg_dwpk rsds "
         "low_soil4t high_tmpk_12z low_tmpk_12z p01d_12z"
     ).split():
-        if vname == "rsds" and domain == "conus":
-            # Done via other means
-            continue
         res = None
         aggfunc = aggfuncs[vname]
         ncvarname = (
@@ -430,7 +427,6 @@ def workflow(ts: date, domain: str, forecast: bool):
     ds = get_grids(ts, domain=domain)
     LOG.info("loaded %s variables from IEMRE database", len(ds))
 
-    # rsds -> grid_rsds.py
     # power_swdn -> ../dl/fetch_power.py
 
     # high_tmpk, low_tmpk, p01d, wind_speed, min_rh, max_rh, high_soil4t,

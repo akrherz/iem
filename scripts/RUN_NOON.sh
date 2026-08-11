@@ -38,6 +38,9 @@ python daily_estimator.py --date="$(date --date '2 days ago'  +'%Y-%m-%d')"
 # Perhaps some more QC happened, that we now need to pick up
 python daily_estimator.py --date="$(date --date '7 days ago'  +'%Y-%m-%d')"
 python compute4regions.py --date="$(date +'%Y-%m-%d')"
+# Populate era5land fields using IEMRE, which is IFS until ERA5Land arrives
+python era5land_extract.py --date="$(date +'%Y-%m-%d')" --use-iemre
+python era5land_extract.py --date="$(date --date '2 days ago'  +'%Y-%m-%d')" --use-iemre
 python hrrr_solarrad.py --date="$(date --date '2 days ago'  +'%Y-%m-%d')"
 # Sync any coop data that may have updated over the past 24 hours
 python sync_coop_updates.py
