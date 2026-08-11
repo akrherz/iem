@@ -10,7 +10,7 @@ from werkzeug.test import Client
 def get_mods_and_urls(extra=""):
     """yield up things we can run."""
     fn = f"{os.path.dirname(__file__)}/urls{extra}.txt"
-    with open(fn, encoding="ascii") as fh:
+    with open(fn, encoding="utf-8") as fh:
         for line in fh:
             if line.startswith("#") or line.strip() == "":
                 continue
