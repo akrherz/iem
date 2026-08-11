@@ -185,6 +185,7 @@ def fetch(valid: datetime, checkcache: bool):
             if resp.headers.get("Content-Length", "0") != "0":
                 LOG.info("Using cached %s", url)
                 resp = httpx.get(url, follow_redirects=True, timeout=30)
+                resp.raise_for_status()
                 pathlib.Path("data_0.nc").write_bytes(resp.content)
                 return
         except Exception as exp:

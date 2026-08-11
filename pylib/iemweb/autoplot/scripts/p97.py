@@ -475,7 +475,7 @@ def get_data(ctx: dict):
                 avg_temp_depart,
                 gdd_depart,
                 gdd_sum,
-                gdd_percent,
+                gdd_percent, cgdd_sum,
                 sgdd_depart, sgdd_sum, sgdd_percent, csgdd_sum,
                 sdd86_depart,
                 sdd86_sum,
