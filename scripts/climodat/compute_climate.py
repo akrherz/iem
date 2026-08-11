@@ -141,7 +141,9 @@ def process_station(
         "max_precip_yr": [],
     }
     if not params["years"]:  # Ensure both not None and > 0
-        LOG.warning("Station: %s has no data for %s, skipping", station, dt)
+        LOG.info(
+            "Station: %s has no data for %s[%s], skipping", station, dt, table
+        )
         return
     for col in ["max_high", "max_low", "min_low", "min_high", "max_precip"]:
         if params[col] is not None:

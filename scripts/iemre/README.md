@@ -34,4 +34,5 @@ If the year is greater than 1927, `daily_analysis.py` looks at the IEM Access da
 
 ### rsds
 
-`grid_rsds.py` uses HRRR for 2014+ dates and grids out sampled COOP data points that can from a script in `../coop/narr_solarrad.py` and `../coop/merra_solarrad.py`.  The COOP database storage never uses this variable to drive its "daily" values, but uses the grid sampling done by the above scripts.
+IFS forecast processing writes into IEMRE hourly netcdf files, which are then totaled up
+within `daily_analysis.py`.

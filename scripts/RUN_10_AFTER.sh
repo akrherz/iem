@@ -63,7 +63,6 @@ fi
 if [ "$LHH" -eq "23" ]
 then
     python daily_analysis.py --date="$(date +'%Y-%m-%d')" --domain=conus
-    python grid_rsds.py	--date="$(date +'%Y-%m-%d')"
 fi
 
 cd ../plots || exit 1

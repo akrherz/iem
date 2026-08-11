@@ -80,32 +80,6 @@ def use_era5land(ts, kind, domain: str):
     return None
 
 
-def use_hrrr_soilt(ts):
-    """Verbatim copy HRRR, if it exists."""
-    # We may be running close to real-time, so it makes some sense to take
-    # files from the recent past.
-    for offset in range(5):
-        fn = (ts - timedelta(hours=offset)).strftime(
-            "%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2"
-        )
-        with archive_fetch(fn) as fn:
-            if fn is None:
-                continue
-            try:
-                grbs = pygrib.open(fn)
-                for grb in grbs:
-                    if (
-                        grb.shortName != "st"
-                        or str(grb).find("level 0.1 m") == -1
-                    ):
-                        continue
-                    return grb2iemre(grb)
-                grbs.close()
-            except Exception as exp:
-                LOG.info("%s exp:%s", fn, exp)
-    return None
-
-
 def use_rtma(ts, kind):
     """Verbatim copy RTMA, if it exists."""
     if ts.year < 2011:
@@ -242,11 +216,12 @@ def grid_hour(ts: datetime, domain: str):
     if res is not None:
         write_grid(ts, "rsds", res, domain)
 
-    # Soil Temperature, try ERA5Land
+    # Soil Temperature
+    # IFS is writing forecast data into IEMRE hourly netcdf files, so we
+    # do not need to process
     res = use_era5land(ts, "soilt", domain)
-    if res is None and domain == "conus":
-        # Use HRRR
-        res = use_hrrr_soilt(ts)
+    if res is None:
+        LOG.info("Note, no soilt for ERA5Land.  NO-OP hoping IFS worked...")
     if res is not None:
         write_grid(ts, "soil4t", res, domain)
 

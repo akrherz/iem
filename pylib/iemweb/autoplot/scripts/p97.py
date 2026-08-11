@@ -25,8 +25,12 @@ PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
 }
-NCEI_BAD = (
-    "cgdd_sum gdd_depart gdd_percent cdd65_depart hdd65_depart "
+# These have no climatology, so we need to alert the user to this
+NCEI_MISSING = (
+    "cgdd_sum gdd_depart gdd_percent "
+    "csgdd_sum csgdd_depart csgdd_percent "
+    "cdd65_depart "
+    "hdd65_depart "
     "csdd86_sum sdd86_depart sdd86_percent"
 ).split()
 PDICT2 = {
@@ -42,6 +46,10 @@ PDICT2 = {
     "cgdd_sum": "Growing Degree Days ($base/$ceil) Climatology",
     "gdd_depart": "Growing Degree Days ($base/$ceil) Departure",
     "gdd_percent": "Growing Degree Days ($base/$ceil) Percent of Average",
+    "sgdd_sum": "4in Soil Growing Degree Days ($base/$ceil) Total",
+    "csgdd_sum": "4in Soil Growing Degree Days ($base/$ceil) Climatology",
+    "sgdd_depart": "4in Soil Growing Degree Days ($base/$ceil) Departure",
+    "sgdd_percent": "4in Soil Growing Degree Days ($base/$ceil) % of Ave",
     "cdd65_sum": "Cooling Degree Days (base 65)",
     "cdd65_depart": "Cooling Degree Days Departure (base 65)",
     "hdd65_sum": "Heating Degree Days (base 65)",
@@ -72,6 +80,10 @@ UNITS = {
     "gdd_depart": "F",
     "gdd_percent": "%",
     "gdd_sum": "F",
+    "csgdd_sum": "F",
+    "sgdd_depart": "F",
+    "sgdd_percent": "%",
+    "sgdd_sum": "F",
     "csdd86_sum": "F",
     "sdd86_depart": "F",
     "sdd86_percent": "%",
@@ -103,6 +115,7 @@ PDICT6 = {
     "ncei_climate91": "NCEI Climatology 1991-2020",
 }
 GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
+SGDD_KNOWN_BASES = [32, 50, 52]
 
 
 def get_description():
@@ -249,10 +262,12 @@ def compute_tables_wfo(wfo):
     return tables, [xmin, ymin, xmax, ymax]
 
 
-def replace_gdd_climo(ctx, df, table, date1, date2):
+def replace_gdd_climo(
+    ctx: dict, df: pd.DataFrame, table: str, date1: date, date2: date
+) -> pd.DataFrame:
     """Here we are, incredible pain."""
     # Short circuit if we are not doing departures
-    if ctx["var"] in ["gdd_sum", "sdd_sum"]:
+    if ctx["var"] in ["gdd_sum", "sdd_sum", "sgdd_sum"]:
         return df
     params = {
         "d1": date1.strftime("%m%d"),
@@ -265,33 +280,50 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
         daylimit = "WHERE sday >= :d2 or sday <= :d1"
     if (date2 - date1) > timedelta(days=365):
         daylimit = ""
+    highcol = "high"
+    lowcol = "low"
+    gddprefix = "gdd"
+    if "sgdd" in ctx["var"]:
+        gddprefix = "sgdd"
+        highcol = "era5land_soilt4_max"
+        lowcol = "era5land_soilt4_min"
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
             sql_helper(
                 """WITH obs as (
                 SELECT station, sday,
-                avg(gddxx(:gddbase, :gddceil, high, low)) as datum
+                avg(gddxx(:gddbase, :gddceil, {highcol}, {lowcol})) as datum
                 from {table} GROUP by station, sday)
-            select station, sum(datum) as gdd from obs
+            select station, sum(datum) as {gddprefix} from obs
             {daylimit} GROUP by station ORDER by station
             """,
                 table=table,
                 daylimit=daylimit,
+                highcol=highcol,
+                lowcol=lowcol,
+                gddprefix=gddprefix,
             ),
             conn,
             params=params,
             index_col="station",
         )
-    climo.loc[climo["gdd"] == 0, "gdd"] = 1
-    df["cgdd_sum"] = climo["gdd"]
-    df["gdd_percent"] = df["gdd_sum"] / df["cgdd_sum"] * 100.0
-    df["gdd_depart"] = df["gdd_sum"] - df["cgdd_sum"]
+    climo.loc[climo[gddprefix] == 0, gddprefix] = 1
+    df[f"c{gddprefix}_sum"] = climo[gddprefix]
+    df[f"{gddprefix}_percent"] = (
+        df[f"{gddprefix}_sum"] / df[f"c{gddprefix}_sum"] * 100.0
+    )
+    df[f"{gddprefix}_depart"] = (
+        df[f"{gddprefix}_sum"] - df[f"c{gddprefix}_sum"]
+    )
     return df
 
 
-def build_climate_sql(ctx, table):
+def build_climate_sql(ctx: dict, table: str):
     """figure out how to get climatology..."""
     gddclimocol = "0"
+    sgddclimocol = "0"
+    if ctx["gddbase"] in SGDD_KNOWN_BASES:
+        sgddclimocol = f"sgdd{ctx['gddbase']}"
     if ctx["gddbase"] in GDD_KNOWN_BASES:
         gddclimocol = f"gdd{ctx['gddbase']}"
     stjoin = "id"
@@ -303,8 +335,8 @@ def build_climate_sql(ctx, table):
 
     sql = f"""
     SELECT t.id as station, to_char(valid, 'mmdd') as sday, precip, high,
-    low, {gddclimocol} as gdd, cdd65, hdd65, snow, sdd86
-    from {ctx["ct"]} c, stations t WHERE c.station = t.{stjoin} and
+    low, {gddclimocol} as gdd, {sgddclimocol} as sgdd, cdd65, hdd65, snow,
+    sdd86 from {ctx["ct"]} c, stations t WHERE c.station = t.{stjoin} and
     {netlimiter} """
 
     return sql
@@ -357,6 +389,8 @@ def get_data(ctx: dict):
                 WITH obs as (
                     SELECT station,
                     gddxx(:gddbase, :gddceil, high, low) as gdd,
+                    gddxx(:gddbase, :gddceil,
+                          era5land_soilt4_max, era5land_soilt4_min) as sgdd,
                     cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
                     case when high > 86 then high - 86 else 0 end as sdd86,
                     sday, high, low, precip, snow,
@@ -373,9 +407,11 @@ def get_data(ctx: dict):
                     o.avg_temp, o.cdd65, o.hdd65,
                     o.high - c.high as high_diff,
                     o.low - c.low as low_diff,
-                    o.high, o.low, o.gdd, c.gdd as cgdd,
+                    o.high, o.low, o.gdd, o.sgdd, c.gdd as cgdd,
+                    c.sgdd as csgdd,
                     o.sdd86, c.sdd86 as csdd86,
                     o.gdd - c.gdd as gdd_diff,
+                    o.sgdd - c.sgdd as sgdd_diff,
                     o.cdd65 - c.cdd65 as cdd65_diff,
                     o.hdd65 - c.hdd65 as hdd65_diff,
                     o.sdd86 - c.sdd86 as sdd86_diff,
@@ -401,12 +437,16 @@ def get_data(ctx: dict):
                     avg(low_diff) as avg_low_depart,
                     avg(low) as avg_low_temp,
                     max(high) as max_high_temp,
-                    min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+                    min(low) as min_low_temp,
+                    sum(gdd_diff) as gdd_depart,
                     sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
+                    sum(sgdd_diff) as sgdd_depart,
+                    sum(sgdd) / greatest(1, sum(csgdd)) * 100. as sgdd_percent,
                     sum(sdd86_diff) as sdd86_depart,
                     sum(sdd86) / greatest(1, sum(csdd86)) * 100.
                         as sdd86_percent,
                     avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
+                    sum(sgdd) as sgdd_sum, sum(csgdd) as csgdd_sum,
                     sum(cgdd) as cgdd_sum,
                     sum(sdd86) as sdd86_sum,
                     sum(csdd86) as csdd86_sum,
@@ -435,8 +475,8 @@ def get_data(ctx: dict):
                 avg_temp_depart,
                 gdd_depart,
                 gdd_sum,
-                gdd_percent,
-                cgdd_sum,
+                gdd_percent, cgdd_sum,
+                sgdd_depart, sgdd_sum, sgdd_percent, csgdd_sum,
                 sdd86_depart,
                 sdd86_sum,
                 sdd86_percent,
@@ -490,8 +530,10 @@ def geojson(ctx: dict):
 
 def plotter(ctx: dict):
     """Go"""
-    if ctx["var"] in NCEI_BAD and ctx["ct"].startswith("ncei"):
-        raise NoDataFound("Combo of NCEI Climatology + GDDs does not work!")
+    if ctx["var"] in NCEI_MISSING and ctx["ct"].startswith("ncei"):
+        raise NoDataFound(
+            "NCEI Climatology for GDDs does not exist, use IEM Climatology"
+        )
     df = get_data(ctx)
     sector = ctx["sector"]
     date1 = ctx["date1"]
@@ -503,7 +545,7 @@ def plotter(ctx: dict):
     if (
         varname.find("gdd") > -1
         and (ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86)
-        and varname != "gdd_sum"
+        and varname not in ["gdd_sum", "sgdd_sum"]
     ):
         subtitle = "Period of Record Climatology is used for custom GDD"
     elif varname.find("depart") > -1:
@@ -521,6 +563,8 @@ def plotter(ctx: dict):
             "Climatology is based on data from "
             f"19{ctx['ct'][-2:]}-{date.today().year - 1}"
         )
+    if "sgdd" in ctx["var"]:
+        subtitle += " 4in Soil Temp Estimated by ERA5Land"
     if ctx["d"] == "sector":
         state = sector
         sector = "state" if len(sector) == 2 else sector
@@ -556,12 +600,13 @@ def plotter(ctx: dict):
         "precip_depart",
         "avg_temp_depart",
         "gdd_depart",
+        "sgdd_depart",
         "snow_depart",
     ]:
         # encapsulte most of the data
         rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
         clevels = centered_bins(rng)
-        if varname == "gdd_depart":
+        if varname in ["gdd_depart", "sgdd_depart"]:
             fmt = "%.0f"
     elif varname in ["precip_max", "precip_sum", "snow_sum"]:
         ptiles = df[varname].abs().describe(percentiles=[0.05, 0.95])

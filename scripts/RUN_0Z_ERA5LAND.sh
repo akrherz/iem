@@ -9,7 +9,7 @@ D6="$(date -u --date '6 days ago' +'%Y-%m-%d')"
 D7="$(date -u --date '7 days ago' +'%Y-%m-%d')"
 
 cd era5 || exit 1
-python fetch_era5.py --date="$D6"
+python fetch_era5land.py --date="$D6"
 
 cd ../climodat || exit 1
 python era5land_extract.py --date="$D7"
