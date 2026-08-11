@@ -20,14 +20,16 @@ def apps():
         if rt.startswith(("./htdocs", "./cgi-bin")):
             for file in files:
                 fullpath = os.path.join(rt, file)
-                if fullpath.endswith(".py") and fullpath != "__init__.py":
+                if fullpath.endswith(".py") and file != "__init__.py":
                     yield fullpath.replace("/htdocs", "")[1:]  # drop the .
 
 
 @pytest.mark.parametrize("app", list(apps()))
 def test_app(app):
     """Test the app."""
-    resp = requests.get(f"http://iem.local{app}", timeout=30)
+    resp = requests.get(
+        f"http://iem.local{app}", timeout=30, allow_redirects=False
+    )
     # 422 IncompleteWebRequest when there's missing CGI params
     # 301 The app could be upset about being approached via http
     # 503 some of apps are now proxied, so alas
