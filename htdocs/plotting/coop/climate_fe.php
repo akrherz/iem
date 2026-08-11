@@ -1,11 +1,11 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "COOP Climate Plots";
 
-$station1 = isset($_GET["station1"]) ? xssafe($_GET["station1"]): "IA0000";
+$station1 = get_str404("station1", "IA0000", 6);
 $station2 = isset($_GET["station2"]) ? xssafe($_GET["station2"]): null;
 $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 

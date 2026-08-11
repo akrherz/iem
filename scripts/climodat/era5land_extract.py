@@ -65,7 +65,6 @@ def build_stations(dt: date) -> pd.DataFrame:
         "era5land_srad",
         "era5land_soilt4_min",
         "era5land_soilt4_max",
-        "era5land_soilt4_avg",
         "era5land_soilm4_avg",
         "era5land_soilm1m_avg",
     ]:
@@ -100,11 +99,9 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
                     + np.mean(nc.variables["soilm"][idx0:, 1], 0) * 21.0
                     + np.mean(nc.variables["soilm"][idx0:, 2], 0) * 72.0
                 ) / 100.0
-                soiltavg = np.mean(nc.variables["soilt"][idx0:, 0], 0)
                 soiltmin = np.min(nc.variables["soilt"][idx0:, 0], 0)
                 soiltmax = np.max(nc.variables["soilt"][idx0:, 0], 0)
             else:
-                soiltavg = np.mean(nc.variables["soil4t"][idx0:], 0)
                 soiltmin = np.min(nc.variables["soil4t"][idx0:], 0)
                 soiltmax = np.max(nc.variables["soil4t"][idx0:], 0)
 
@@ -122,11 +119,9 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
                     + np.mean(nc.variables["soilm"][idx0:idx1, 1], 0) * 21.0
                     + np.mean(nc.variables["soilm"][idx0:idx1, 2], 0) * 72.0
                 ) / 100.0
-                soiltavg = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
                 soiltmin = np.min(nc.variables["soilt"][idx0:idx1, 0], 0)
                 soiltmax = np.max(nc.variables["soilt"][idx0:idx1, 0], 0)
             else:
-                soiltavg = np.mean(nc.variables["soil4t"][idx0:idx1], 0)
                 soiltmin = np.min(nc.variables["soil4t"][idx0:idx1], 0)
                 soiltmax = np.max(nc.variables["soil4t"][idx0:idx1], 0)
 
@@ -134,7 +129,6 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
     if soilm is not None:
         soilm = soilm.filled(np.nan)
         soilm1m = soilm1m.filled(np.nan)
-    soiltavg = soiltavg.filled(np.nan)
     soiltmin = soiltmin.filled(np.nan)
     soiltmax = soiltmax.filled(np.nan)
 
@@ -145,7 +139,6 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
         if i is None:
             continue
         df.at[sid, "era5land_srad"] = rsds[j, i]
-        df.at[sid, "era5land_soilt4_avg"] = soiltavg[j, i]
         df.at[sid, "era5land_soilt4_min"] = soiltmin[j, i]
         df.at[sid, "era5land_soilt4_max"] = soiltmax[j, i]
         if soilm is not None:
@@ -154,7 +147,6 @@ def compute(df, sids, dt, do_regions: bool, use_iemre: bool):
 
     if do_regions:
         compute_regions(rsds, "era5land_srad", df, use_iemre)
-        compute_regions(soiltavg, "era5land_soilt4_avg", df, use_iemre)
         compute_regions(soiltmin, "era5land_soilt4_min", df, use_iemre)
         compute_regions(soiltmax, "era5land_soilt4_max", df, use_iemre)
         if soilm is not None:
@@ -179,9 +171,6 @@ def do(dt: date, use_iemre: bool):
     compute(df, sids, dt, False, use_iemre)
 
     df["station"] = df.index.values
-    df["era5land_soilt4_avg"] = convert_value(
-        df["era5land_soilt4_avg"].values, "degK", "degF"
-    )
     df["era5land_soilt4_min"] = convert_value(
         df["era5land_soilt4_min"].values, "degK", "degF"
     )
@@ -196,7 +185,6 @@ def do(dt: date, use_iemre: bool):
     cursor.executemany(
         """
         UPDATE alldata set era5land_srad = %(era5land_srad)s,
-        era5land_soilt4_avg = %(era5land_soilt4_avg)s,
         era5land_soilt4_min = %(era5land_soilt4_min)s,
         era5land_soilt4_max = %(era5land_soilt4_max)s,
         era5land_soilm4_avg = %(era5land_soilm4_avg)s,

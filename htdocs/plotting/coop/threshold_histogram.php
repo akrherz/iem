@@ -7,8 +7,8 @@ require_once "../../../include/jpgraph/jpgraph_plotline.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 $conn = iemdb("coop");
-$station1 = isset($_GET["station1"]) ? substr(xssafe($_GET["station1"]), 0, 6) : 'IA0200';
-$station2 = isset($_GET["station2"]) ? substr(xssafe($_GET["station2"]), 0, 6) : '';
+$station1 = get_str404("station1", 'IATAME', 6);
+$station2 = get_str404("station2", '', 6);
 
 $slimiter = "and station = '$station1'";
 if ($station1 == "iowa") {
@@ -27,11 +27,11 @@ if ($station2 != '' && !array_key_exists($station2, $nt->table)) {
 
 $xdata = array();
 $ydata = array();
-$stname = iem_pg_prepare($conn, "SELECT y1, count(*) from 
-          ((SELECT year as y1, low from alldata_ia 
-           WHERE month IN (12) $slimiter) UNION 
-          (SELECT year - 1 as y1, low from alldata_ia 
-           WHERE month IN (1,2) $slimiter)) as foo 
+$stname = iem_pg_prepare($conn, "SELECT y1, count(*) from
+          ((SELECT year as y1, low from alldata_ia
+           WHERE month IN (12) $slimiter) UNION
+          (SELECT year - 1 as y1, low from alldata_ia
+           WHERE month IN (1,2) $slimiter)) as foo
          WHERE low < $1 GROUP by y1");
 for ($thres = -40; $thres < 11; $thres++) {
     $rs = pg_execute($conn, $stname, array($thres));
@@ -52,11 +52,11 @@ foreach ($ydata as $k => $v) {
 if ($station2 != "") {
     $slimiter = "and station = '$station2'";
     $ydata = array();
-    $stname = iem_pg_prepare($conn, "SELECT y1, count(*) from 
-          ((SELECT year as y1, low from alldata_ia 
-           WHERE month IN (12) $slimiter) UNION 
-          (SELECT year - 1 as y1, low from alldata_ia 
-           WHERE month IN (1,2) $slimiter)) as foo 
+    $stname = iem_pg_prepare($conn, "SELECT y1, count(*) from
+          ((SELECT year as y1, low from alldata_ia
+           WHERE month IN (12) $slimiter) UNION
+          (SELECT year - 1 as y1, low from alldata_ia
+           WHERE month IN (1,2) $slimiter)) as foo
          WHERE low < $1 GROUP by y1");
     for ($thres = -40; $thres < 11; $thres++) {
         $rs = pg_execute($conn, $stname, array($thres));

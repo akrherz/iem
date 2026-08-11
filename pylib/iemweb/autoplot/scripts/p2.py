@@ -33,7 +33,7 @@ REQ_VAR = {
     "avg_low": "low",
     "avg_temp": "high",
     "avg_merra_srad": "merra_srad",
-    "avg_era5land_soilt4": "era5land_soilt4_avg",
+    "avg_era5land_soilt4": "era5land_soilt4_max",
 }
 PDICT2 = {
     "value": "Value",
@@ -126,7 +126,7 @@ def plotter(ctx: dict):
     SELECT year, sum(precip) as total_precip, sum(snow) as total_snow,
     sum(gddxx(:gddbase, :gddceil, high::numeric,low::numeric)) as gdd,
     avg(high) as avg_high, avg(low) as avg_low,
-    avg(era5land_soilt4_avg) as avg_era5land_soilt4,
+    avg((era5land_soilt4_max+era5land_soilt4_min)/2.) as avg_era5land_soilt4,
     avg(merra_srad) as avg_merra_srad,
     sum(sdd86(high, low)) as sdd86, avg((high+low)/2.) as avg_temp,
     count(*) as days

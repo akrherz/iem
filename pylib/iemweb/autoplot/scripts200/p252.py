@@ -116,13 +116,16 @@ def plotter(ctx: dict):
     if ctx["sday"] > ctx["eday"]:
         sday_limiter = "(sday >= :sday or sday <= :eday)"
     table = f"alldata_{sector.lower()}"
+    sqlvarname = varname
+    if varname == "era5land_soilt4_avg":
+        sqlvarname = "(era5land_soilt4_max + era5land_soilt4_min) / 2.0"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
                 """
             WITH events as (
                 SELECT station, year,
-                max(case when {varname} {comp} :t then 1 else 0 end) as hit
+                max(case when {sqlvarname} {comp} :t then 1 else 0 end) as hit
                 from {table} WHERE {sday_limiter} and
                 year >= :syear and year <= :eyear and
                 substr(station, 3, 4) != '0000'
@@ -134,7 +137,10 @@ def plotter(ctx: dict):
             from events GROUP by station ORDER by station ASC
             """,
                 table=table,
-                varname=varname,
+                varname="era5land_soilt4_min"
+                if varname == "era5land_soilt4_avg"
+                else varname,
+                sqlvarname=sqlvarname,
                 comp=comp,
                 sday_limiter=sday_limiter,
             ),

@@ -185,7 +185,7 @@ def plotter(ctx: dict):
     elif varname.find("era5land_srad") > -1:
         culler = " and era5land_srad is not null"
     elif varname.find("era5land_soilt4") > -1:
-        culler = " and era5land_soilt4_avg is not null"
+        culler = " and era5land_soilt4_min is not null"
     elif varname.find("era5land_soilm1m") > -1:
         culler = " and era5land_soilm1m_avg is not null"
     elif varname.find("merra") > -1:
@@ -203,7 +203,9 @@ def plotter(ctx: dict):
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
         high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
-        era5land_soilt4_avg, era5land_soilm1m_avg,
+        (era5land_soilt4_max + era5land_soilt4_min) / 2.
+            as era5land_soilt4_avg,
+        era5land_soilm1m_avg,
         merra_srad, narr_srad, power_srad
         from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC

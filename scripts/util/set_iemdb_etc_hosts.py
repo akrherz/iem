@@ -21,7 +21,7 @@ LOOKUP = {
     "-dep_sa": IPS[DB1],
     "-frost": IPS[DB1],
     "-hads": IPS[DB2],
-    "-hml": IPS[DB3],
+    "-hml": IPS[DB4],
     "-id3b": IPS[DB1],
     "-iem": IPS[DB3],
     "-iembot": IPS[DB4],

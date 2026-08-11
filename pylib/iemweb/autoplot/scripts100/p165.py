@@ -173,7 +173,7 @@ def plotter(ctx: dict):
             -- create virtual table with winter_year included
             WITH events as (
                 SELECT station, day, year, high, low,
-                era5land_soilt4_avg as soil,
+                ((era5land_soilt4_max + era5land_soilt4_min) / 2.) as soil,
                 case when month < 7 then year - 1 else year end as winter_year,
                 extract(doy from day) as doy
                 from {table} WHERE month = ANY(:months) and

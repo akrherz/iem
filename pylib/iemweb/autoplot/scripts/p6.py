@@ -134,7 +134,8 @@ def plotter(ctx: dict) -> tuple:
             avg(high) as "avg-high",
             avg(low) as "avg-low",
             avg(era5land_srad) as "avg-era5land_srad",
-            avg(era5land_soilt4_avg) as "avg-era5land_soilt4_avg",
+            avg((era5land_soilt4_max + era5land_soilt4_min) / 2.)
+                as "avg-era5land_soilt4_avg",
             avg((high+low)/2.) as "avg-t",
             count(*) as obs
             from {table}
