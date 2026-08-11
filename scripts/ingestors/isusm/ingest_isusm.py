@@ -441,11 +441,11 @@ def main():
             storefn = os.path.join(STOREPATH, fn)
             # check that we not over-write data
             if os.path.isfile(storefn):
-                _i = 0
-                while _i < 100 and os.path.isfile(storefn):
+                i_ = 0
+                while i_ < 100 and os.path.isfile(storefn):
                     LOG.info("Destination %s file exists", storefn)
-                    storefn = os.path.join(STOREPATH, f"{fn}.{_i}")
-                    _i += 1
+                    storefn = os.path.join(STOREPATH, f"{fn}.{i_}")
+                    i_ += 1
             subprocess.call(["mv", fullfn, storefn])
 
 

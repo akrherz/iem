@@ -63,7 +63,7 @@ def get_description():
     return desc
 
 
-def compute_compare_month(ctx, cursor):
+def compute_compare_month(ctx: dict, cursor):
     """Figure out what the user wants."""
     year = ctx["year"]
     month = ctx["month"]
@@ -89,7 +89,10 @@ def compute_compare_month(ctx, cursor):
             "year": effective_date.year,
         },
     )
-    return res.fetchone()[0], effective_date.month
+    row = res.fetchone()
+    if row is None:
+        raise NoDataFound("Failed to dynamically compute comparison year")
+    return row[0], effective_date.month
 
 
 @with_sqlalchemy_conn("coop")

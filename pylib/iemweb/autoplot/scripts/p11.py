@@ -115,7 +115,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.1, 0.15, 0.8, 0.75))
     bars = ax.bar(
         df.index.values,
-        df["range"].values,
+        df["range"].to_numpy(),
         ec="g",
         fc="g",
         bottom=df[f"min_{varname}"].values,

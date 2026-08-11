@@ -9,7 +9,8 @@ from werkzeug.test import Client
 
 def get_mods_and_urls(extra=""):
     """yield up things we can run."""
-    with open(f"{os.path.dirname(__file__)}/urls{extra}.txt") as fh:
+    fn = f"{os.path.dirname(__file__)}/urls{extra}.txt"
+    with open(fn, encoding="ascii") as fh:
         for line in fh:
             if line.startswith("#") or line.strip() == "":
                 continue
@@ -26,7 +27,7 @@ def get_mods_and_urls(extra=""):
             yield mod.application, f"?{cgi}"
 
 
-@pytest.mark.parametrize("arg", get_mods_and_urls())
+@pytest.mark.parametrize("arg", list(get_mods_and_urls()))
 def test_urls(arg):
     """Test what urls.txt tells us to."""
     c = Client(arg[0])
@@ -35,7 +36,7 @@ def test_urls(arg):
     assert res.status_code in [200, 301, 302]
 
 
-@pytest.mark.parametrize("arg", get_mods_and_urls("422"))
+@pytest.mark.parametrize("arg", list(get_mods_and_urls("422")))
 def test_urls422(arg):
     """Test what urls422.txt tells us to."""
     c = Client(arg[0])

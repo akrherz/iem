@@ -62,7 +62,7 @@ def process_grib(grb):
                     if grb2.parameterName == grb.parameterName:
                         LOG.info(
                             "Skipping %s as we have it in archive already",
-                            str(grb),
+                            grb,
                         )
                         return
     pathlib.Path("sendme.grb").write_bytes(grb.tostring())

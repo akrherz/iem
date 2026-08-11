@@ -123,7 +123,7 @@ def plotter(ctx: dict):
         df.loc[df["nday_doy"] < 183, "nday_doy"] += 365.0
         df.loc[df["xday_doy"] < 183, "xday_doy"] += 365.0
     # Set NaN where we did not meet conditions
-    zeros = df[df["count"] == 0].index.values
+    zeros = df[df["count"] == 0].index.to_numpy()
     col = "xday_doy" if extrenum == "last" else "nday_doy"
     df2 = df[df["count"] > 0]
     if df2.empty:
@@ -303,7 +303,7 @@ def plotter(ctx: dict):
     )
 
     # Add the CDF plot in lower subplot
-    sortvals = np.sort(np.array(df2[col].values))
+    sortvals = np.sort(df2[col].to_numpy())
     yvals = np.arange(len(sortvals)) / float(len(sortvals))
     ax3.plot(sortvals, yvals * 100.0, color="r")
     ax3.set_ylabel("Accum. Freq [%]", color="r")

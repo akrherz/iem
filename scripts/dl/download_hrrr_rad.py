@@ -118,9 +118,13 @@ def main(valid: datetime | None):
     if valid is not None:
         times.append(valid.replace(tzinfo=timezone.utc))
     else:
-        times.append(utc() - timedelta(hours=1))
-        times.append(utc() - timedelta(hours=6))
-        times.append(utc() - timedelta(hours=24))
+        times.extend(
+            [
+                utc() - timedelta(hours=1),
+                utc() - timedelta(hours=6),
+                utc() - timedelta(hours=24),
+            ]
+        )
     for ts in times:
         if not need_to_run(ts):
             continue

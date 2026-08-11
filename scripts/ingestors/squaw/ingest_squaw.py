@@ -26,7 +26,7 @@ def main(conn: Connection = None) -> None:
     data = resp.text
 
     tokens = re.findall(
-        "USGS\t([0-9]*)\t(....-..-.. ..:..)\t([CSDT]+)\t([0-9]*)", data
+        r"USGS\t([0-9]*)\t(....-..-.. ..:..)\t([CSDT]+)\t([0-9]*)", data
     )
 
     inserts = 0
