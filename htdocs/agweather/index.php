@@ -275,7 +275,7 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
 
 <ul>
  <li><a href="/COOP/freezing.php">Fall Freezing Dates</a></li>
- <li><a href="/climodat/index.phtml?station=IA0200&report=22">First Fall Freeze Probabilities</a></li>
+ <li><a href="/climodat/index.phtml?station=IATAME&report=22">First Fall Freeze Probabilities</a></li>
  <li><a href="/plotting/coop/threshold_histogram_fe.phtml">Winter Minimum Temperature Frequencies</a></li>
 </ul>
 

@@ -1,4 +1,4 @@
-<?php  
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
@@ -7,7 +7,7 @@ require_once "../../../include/forms.php";
 
 $startYear = get_int404('startYear', 1951);
 
-$cselect = networkSelect("IACLIMATE", "IA0200", Array(), "city");
+$cselect = networkSelect("IACLIMATE", "IATAME", Array(), "city");
 $mselect = monthSelect("1", "month");
 $dselect = daySelect("1", "day");
 
