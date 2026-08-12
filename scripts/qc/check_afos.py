@@ -21,12 +21,14 @@ BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
 
 def check_vtec_dups(cursor, ts):
     """Ensure the database doesn't have duplicated product_id."""
+    # Exclude Canada from this QC
     cursor.execute(
         """
         with data as (
             select entered, source, pil, bbb, count(*) from products
             where entered > %s and entered < %s and
             substr(pil, 1, 3) in ('SVR', 'FFW', 'TOR', 'SVS', 'FLW', 'FFS')
+            and substr(center, 1, 1) != 'C'
             group by entered, source, pil, bbb)
         select * from data where count > 1
         """,

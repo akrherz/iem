@@ -54,6 +54,7 @@ PDICT = {
     "max_low": "Maximum Low Temperature",
     "min_low": "Minimum Low Temperature",
     "max_feel": "Maximum Feels Like Temperature",
+    "avg_feel": "Average Feels Like Temperature",
     "min_feel": "Minimum Feels Like Temperature",
     "max_rh": "Maximum Daily Average Relative Humidity",
     "avg_rh": "Average Daily Average Relative Humidity",
@@ -200,7 +201,9 @@ def plotter(ctx: dict):
         max(max_dwpf) as max_dwpf,
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
         min(min_dwpf) as min_dwpf,
-        max(max_feel) as max_feel, min(min_feel) as min_feel,
+        max(max_feel) as max_feel,
+        avg(avg_feel) as avg_feel,
+        min(min_feel) as min_feel,
         sum(case when {aggcol} {mydir} :threshold then 1 else 0 end) as
             count_days
         from summary s JOIN stations t on (s.iemid = t.iemid)
