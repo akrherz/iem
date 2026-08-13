@@ -28,7 +28,7 @@ def check_vtec_dups(cursor, ts):
             select entered, source, pil, bbb, count(*) from products
             where entered > %s and entered < %s and
             substr(pil, 1, 3) in ('SVR', 'FFW', 'TOR', 'SVS', 'FLW', 'FFS')
-            and substr(center, 1, 1) != 'C'
+            and substr(source, 1, 1) != 'C'
             group by entered, source, pil, bbb)
         select * from data where count > 1
         """,
