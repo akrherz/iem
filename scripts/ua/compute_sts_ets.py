@@ -35,14 +35,14 @@ def main():
         sts = row[0]
         ets = row[1]
         if (sts is not None and current_sts is None) or current_sts != sts:
-            LOG.info("%s sts %s->%s", station, current_sts, sts)
+            progress.write(f"{station} sts {current_sts}->{sts}")
             mcursor.execute(
                 "UPDATE stations SET archive_begin = %s where id = %s and "
                 "network = 'RAOB'",
                 (sts, station),
             )
         if ets is not None and current_ets is None and ets.year < OFFLINE_YR:
-            LOG.info("%s ets %s->%s", station, current_ets, ets)
+            progress.write(f"{station} ets {current_ets}->{ets}")
             mcursor.execute(
                 "UPDATE stations SET archive_end = %s where id = %s and "
                 "network = 'RAOB'",
@@ -51,6 +51,7 @@ def main():
 
     mcursor.close()
     pgconn2.commit()
+    LOG.info("Completed.")
 
 
 if __name__ == "__main__":
