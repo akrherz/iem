@@ -7,9 +7,10 @@ run once per week from RUN_2AM.sh on Mondays.
 import os
 import subprocess
 import tempfile
+from datetime import date
 
 import click
-import httpx
+import requests
 from pyiem.database import get_dbconnc
 from pyiem.ncei.igra import process_ytd
 from pyiem.reference import igra2icao
@@ -21,7 +22,8 @@ LOG = logger()
 @click.command()
 @click.option("--overwrite", is_flag=True, help="Overwrite existing data")
 @click.option("--icao", help="Specific ICAO to ingest")
-def main(overwrite: bool, icao: str | None):
+@click.option("--por", is_flag=True, help="Ingest the Period of Record.")
+def main(overwrite: bool, icao: str | None, por: bool):
     """Go Main."""
     pgconn, cursor = get_dbconnc("raob")
     # meh
@@ -29,13 +31,15 @@ def main(overwrite: bool, icao: str | None):
     for ncei_id, _icao in igra2icao.items():
         if icao and icao != _icao:
             continue
+        beg = f"-beg{date.today().year}" if not por else ""
         url = (
             "https://www.ncei.noaa.gov/data/"
-            "integrated-global-radiosonde-archive/access/data-y2d/"
-            f"{ncei_id}-data-beg2021.txt.zip"
+            "integrated-global-radiosonde-archive/access/"
+            f"data-{'por' if por else 'y2d'}/"
+            f"{ncei_id}-data{beg}.txt.zip"
         )
         try:
-            resp = httpx.get(url, timeout=30)
+            resp = requests.get(url, timeout=30)
             resp.raise_for_status()
         except Exception as exp:
             LOG.info("Failed to fetch %s: %s", url, exp)
