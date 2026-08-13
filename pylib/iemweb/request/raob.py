@@ -10,6 +10,8 @@ Emits RAOB data in CSV format.
 Changelog
 ---------
 
+- 2026-08-13: A bug was corrected with the `sts` and `ets` timestamps not
+  being assumed to be in UTC.
 - 2025-04-08: Migration to pydantic validation.
 
 Example Requests
@@ -22,11 +24,11 @@ sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 from typing import Annotated
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
 from pyiem.network import Table as NetworkTable
@@ -49,6 +51,16 @@ class Schema(CGIModel):
         str, Field(description="IEM Station Identifier", max_length=4)
     ] = "KOAX"
 
+    @model_validator(mode="after")
+    def check(self):
+        """Check the model."""
+        if self.sts >= self.ets:
+            raise ValueError("Start time must be before end time")
+        # Assign both to UTC timezone
+        self.sts = self.sts.replace(tzinfo=timezone.utc)
+        self.ets = self.ets.replace(tzinfo=timezone.utc)
+        return self
+
 
 def m(val):
     """Helper"""
@@ -58,16 +70,18 @@ def m(val):
 
 
 @with_sqlalchemy_conn("raob")
-def fetcher(station, sts, ets, conn: Connection = None):
+def fetcher(query: Schema, conn: Connection = None):
     """Do fetching"""
     sio = StringIO()
-    stations = [station]
-    if station.startswith("_"):
+    stations = [query.station]
+    if query.station.startswith("_"):
         nt = NetworkTable("RAOB", only_online=False)
-        if station not in nt.sts:
-            msg = f"Unknown RAOB network station: {station}"
+        if query.station not in nt.sts:
+            msg = f"Unknown RAOB network station: {query.station}"
             raise BadWebRequest(msg)
-        stations = nt.sts[station]["name"].split("--")[1].strip().split(",")
+        stations = (
+            nt.sts[query.station]["name"].split("--")[1].strip().split(",")
+        )
 
     res = conn.execute(
         sql_helper("""
@@ -78,7 +92,7 @@ def fetcher(station, sts, ets, conn: Connection = None):
     (f.fid = p.fid) WHERE f.station = ANY(:stations)
     and valid >= :sts and valid < :ets
     """),
-        {"stations": stations, "sts": sts, "ets": ets},
+        {"stations": stations, "sts": query.sts, "ets": query.ets},
     )
     sio.write(
         "station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
@@ -107,21 +121,21 @@ def fetcher(station, sts, ets, conn: Connection = None):
 @iemapp(help=__doc__, schema=Schema, default_tz="UTC")
 def application(environ, start_response):
     """Go Main Go"""
-    station = environ["station"]
-    sts = environ["sts"]
-    ets = environ["ets"]
-    if environ["dl"]:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.dl:
         headers = [
             ("Content-type", "application/octet-stream"),
             (
                 "Content-Disposition",
                 (
                     "attachment; "
-                    f"filename={station}_{sts:%Y%m%d%H}_{ets:%Y%m%d%H}.txt"
+                    f"filename={query.station}_{query.sts:%Y%m%d%H}_"
+                    f"{query.ets:%Y%m%d%H}.txt"
                 ),
             ),
         ]
     else:
         headers = [("Content-type", "text/plain")]
+    payload = fetcher(query)
     start_response("200 OK", headers)
-    return [fetcher(station, sts, ets)]
+    return [payload]
