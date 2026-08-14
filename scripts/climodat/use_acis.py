@@ -7,16 +7,17 @@
 """
 
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
 SERVICE = "https://data.rcc-acis.org/StnData"
@@ -34,10 +35,9 @@ def compute_por(acis_station) -> tuple[date, date]:
         "meta": "valid_daterange",
         "elems": "maxt,mint,pcpn",
     }
-    with httpx.Client() as client:
-        meta = client.post(
-            f"{METASERVICE}?sid={acis_station}", json=payload, timeout=60
-        ).json()
+    meta = requests.post(
+        f"{METASERVICE}?sid={acis_station}", json=payload, timeout=60
+    ).json()
     dates = []
     for pair in meta["meta"][0]["valid_daterange"]:
         for stamp in pair:
@@ -47,20 +47,14 @@ def compute_por(acis_station) -> tuple[date, date]:
     return min(dates), max(dates)
 
 
-def do(meta, station, acis_station) -> int:
-    """Do the query and work
-
-    Args:
-      station (str): IEM Station identifier ie IA0200
-      acis_station (str): the ACIS identifier ie 130197
-    """
-    table = f"alldata_{station[:2]}"
+def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
+    """Download and compute the acis dataframe."""
     fmt = "%Y-%m-%d"
     try:
         meta_mindt, meta_maxdt = compute_por(acis_station)
     except Exception as exp:
         LOG.exception(exp)
-        return 0
+        return pd.DataFrame()
     # If this station is offline, we don't want to ask for data past the
     # archive_end date.  The station could be a precip-only site...
     edate = meta["attributes"].get("CEILING")
@@ -71,6 +65,7 @@ def do(meta, station, acis_station) -> int:
             edate = meta["archive_end"].strftime(fmt)
     payload = {
         "sid": acis_station,
+        "meta": "tzo",
         "sdate": meta["attributes"].get("FLOOR", f"{meta_mindt:%Y-%m-%d}"),
         "edate": meta["attributes"].get("CEIL", edate),
         "elems": [
@@ -81,17 +76,10 @@ def do(meta, station, acis_station) -> int:
             {"name": "snwd"},
         ],
     }
-    LOG.info(
-        "Call ACIS for: %s[%s %s] to update: %s",
-        acis_station,
-        payload["sdate"],
-        payload["edate"],
-        station,
-    )
     j = {}
     for attempt in range(3):
         try:
-            resp = httpx.post(SERVICE, json=payload, timeout=30)
+            resp = requests.post(SERVICE, json=payload, timeout=30)
             resp.raise_for_status()
             j = resp.json()
             break
@@ -107,14 +95,32 @@ def do(meta, station, acis_station) -> int:
                 "Failed to query ACIS for %s after 3 attempts, giving up",
                 acis_station,
             )
-            return 0
+            return pd.DataFrame()
     if "data" not in j:
         LOG.info("No Data!, content=%s", resp.content)
-        return 0
+        return pd.DataFrame()
+
     acis = pd.DataFrame(
         j["data"],
         columns="day ahigh alow aprecip asnow asnowd".split(),
     )
+    acis["day"] = pd.to_datetime(acis["day"])
+    # Figure out the offset so that we can compute the proper timestamp
+    timezone_offset_hours = j["meta"]["tzo"] * -1
+    tzinfo = ZoneInfo(meta["tzname"])
+
+    def _compute_hour(row: np.ndarray) -> int:
+        """Rectify this standard time hour back to DST aware."""
+        day, hour = row
+        # This is a special case.
+        if hour == 24:
+            return 24
+        dt = utc(day.year, day.month, day.day, int(hour)) + timedelta(
+            hours=timezone_offset_hours
+        )
+        dsthr = dt.astimezone(tzinfo).hour
+        return dsthr
+
     for col in "ahigh aprecip".split():
         acis[[col, f"{col}_hour"]] = pd.DataFrame(
             acis[col].tolist(),
@@ -122,6 +128,23 @@ def do(meta, station, acis_station) -> int:
         )
         # hour values of -1 are missing
         acis.loc[acis[f"{col}_hour"] < 0, f"{col}_hour"] = np.nan
+        # This is ugly, we need to convert the value back to the DST aware
+        # value used by the IEM
+        goodrows = acis[f"{col}_hour"].notna()
+        acis.loc[goodrows, f"{col}_hour"] = acis.loc[
+            goodrows, ["day", f"{col}_hour"]
+        ].apply(_compute_hour, raw=True, axis=1)
+
+    return acis
+
+
+def do(meta: dict, station: str, acis_station: str) -> int:
+    """Do the query and work."""
+    table = f"alldata_{station[:2]}"
+    acis = build_acis_dataframe(acis_station, meta)
+    if acis.empty:
+        LOG.warning("ACIS returned no data for %s", acis_station)
+        return 0
     # If either ahigh or alow is missing, set both to missing
     acis.loc[
         (acis["ahigh"] == "M") | (acis["alow"] == "M"),
@@ -139,7 +162,6 @@ def do(meta, station, acis_station) -> int:
     acis["aprecip_estimated"] = acis["aprecip"].isna()
 
     LOG.info("Loaded %s rows from ACIS", len(acis.index))
-    acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
@@ -242,25 +264,22 @@ def do(meta, station, acis_station) -> int:
         "WHERE station = %(station)s and day = %(day)s",
         df[df["dirty"]].reset_index().to_dict("records"),
     )
-    uu = [
-        updates["high"],
-        updates["temp_hour"],
-        updates["low"],
-        updates["precip"],
-        updates["precip_hour"],
-        updates["snow"],
-        updates["snowd"],
-    ]
     if df["dirty"].any() or inserts > 0:
         LOG.warning(
             "%s New:%s Updates H:%s HH:%s L:%s P:%s PH:%s S:%s D:%s",
             station,
             inserts,
-            *uu,
+            updates["high"],
+            updates["temp_hour"],
+            updates["low"],
+            updates["precip"],
+            updates["precip_hour"],
+            updates["snow"],
+            updates["snowd"],
         )
     cursor.close()
     pgconn.commit()
-    return max(uu)
+    return max(updates.values())
 
 
 @click.command()
