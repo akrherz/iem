@@ -172,8 +172,8 @@ def ingest(ncin: Dataset, nc: Dataset, valid: datetime, domain: str):
         p01m[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
 
 
-def fetch(valid: datetime, checkcache: bool):
-    """Get the data from the CDS."""
+def fetch(valid: datetime, checkcache: bool) -> bool:
+    """Get the data from the CDS, returns true if cache was used."""
     if checkcache:
         url = (
             f"https://mtarchive.geol.iastate.edu/era5land/{valid:%Y/%m}/"
@@ -187,7 +187,7 @@ def fetch(valid: datetime, checkcache: bool):
                 resp = requests.get(url, allow_redirects=True, timeout=30)
                 resp.raise_for_status()
                 pathlib.Path("data_0.nc").write_bytes(resp.content)
-                return
+                return True
         except Exception as exp:
             LOG.info("Failed webfetch %s: %s", url, exp)
 
@@ -218,6 +218,7 @@ def fetch(valid: datetime, checkcache: bool):
     # unzip
     subprocess.call(["unzip", "-q", zipfn])
     os.unlink(zipfn)
+    return False
 
 
 def archive(fn: str, valid: datetime):
@@ -238,14 +239,15 @@ def archive(fn: str, valid: datetime):
 
 def run(valid: datetime, justdomain: str | None, checkcache: bool):
     """Run for the given valid time."""
-    fetch(valid, checkcache)
+    used_cache = fetch(valid, checkcache)
     for domain in DOMAINS if justdomain is None else [justdomain]:
         dd = "" if domain == "conus" else f"_{domain}"
         ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
         LOG.info("Running for %s[domain=%s] %s", valid, domain, ncoutfn)
         with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
             ingest(ncin, nc, valid, domain)
-    archive("data_0.nc", valid)
+    if not used_cache:
+        archive("data_0.nc", valid)
     os.unlink("data_0.nc")
 
 
