@@ -47,15 +47,14 @@ def compute_por(acis_station) -> tuple[date, date]:
     return min(dates), max(dates)
 
 
-def do(meta: dict, station: str, acis_station: str) -> int:
-    """Do the query and work."""
-    table = f"alldata_{station[:2]}"
+def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
+    """Download and compute the acis dataframe."""
     fmt = "%Y-%m-%d"
     try:
         meta_mindt, meta_maxdt = compute_por(acis_station)
     except Exception as exp:
         LOG.exception(exp)
-        return 0
+        return pd.DataFrame()
     # If this station is offline, we don't want to ask for data past the
     # archive_end date.  The station could be a precip-only site...
     edate = meta["attributes"].get("CEILING")
@@ -77,13 +76,6 @@ def do(meta: dict, station: str, acis_station: str) -> int:
             {"name": "snwd"},
         ],
     }
-    LOG.info(
-        "Call ACIS for: %s[%s %s] to update: %s",
-        acis_station,
-        payload["sdate"],
-        payload["edate"],
-        station,
-    )
     j = {}
     for attempt in range(3):
         try:
@@ -103,10 +95,16 @@ def do(meta: dict, station: str, acis_station: str) -> int:
                 "Failed to query ACIS for %s after 3 attempts, giving up",
                 acis_station,
             )
-            return 0
+            return pd.DataFrame()
     if "data" not in j:
         LOG.info("No Data!, content=%s", resp.content)
-        return 0
+        return pd.DataFrame()
+
+    acis = pd.DataFrame(
+        j["data"],
+        columns="day ahigh alow aprecip asnow asnowd".split(),
+    )
+    acis["day"] = pd.to_datetime(acis["day"])
     # Figure out the offset so that we can compute the proper timestamp
     timezone_offset_hours = j["meta"]["tzo"] * -1
     tzinfo = ZoneInfo(meta["tzname"])
@@ -114,17 +112,14 @@ def do(meta: dict, station: str, acis_station: str) -> int:
     def _compute_hour(row: np.ndarray) -> int:
         """Rectify this standard time hour back to DST aware."""
         day, hour = row
+        # This is a special case.
+        if hour == 24:
+            return 24
         dt = utc(day.year, day.month, day.day, int(hour)) + timedelta(
             hours=timezone_offset_hours
         )
         dsthr = dt.astimezone(tzinfo).hour
         return dsthr
-
-    acis = pd.DataFrame(
-        j["data"],
-        columns="day ahigh alow aprecip asnow asnowd".split(),
-    )
-    acis["day"] = pd.to_datetime(acis["day"])
 
     for col in "ahigh aprecip".split():
         acis[[col, f"{col}_hour"]] = pd.DataFrame(
@@ -139,6 +134,17 @@ def do(meta: dict, station: str, acis_station: str) -> int:
         acis.loc[goodrows, f"{col}_hour"] = acis.loc[
             goodrows, ["day", f"{col}_hour"]
         ].apply(_compute_hour, raw=True, axis=1)
+
+    return acis
+
+
+def do(meta: dict, station: str, acis_station: str) -> int:
+    """Do the query and work."""
+    table = f"alldata_{station[:2]}"
+    acis = build_acis_dataframe(acis_station, meta)
+    if acis.empty:
+        LOG.warning("ACIS returned no data for %s", acis_station)
+        return 0
     # If either ahigh or alow is missing, set both to missing
     acis.loc[
         (acis["ahigh"] == "M") | (acis["alow"] == "M"),
@@ -259,7 +265,6 @@ def do(meta: dict, station: str, acis_station: str) -> int:
         df[df["dirty"]].reset_index().to_dict("records"),
     )
     if df["dirty"].any() or inserts > 0:
-        df[df["dirty"]].to_csv("debug.csv")
         LOG.warning(
             "%s New:%s Updates H:%s HH:%s L:%s P:%s PH:%s S:%s D:%s",
             station,
