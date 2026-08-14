@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 
 import cdsapi
 import click
-import httpx
 import numpy as np
+import requests
 from netCDF4 import Dataset
 from pyiem.iemre import DOMAINS, hourly_offset
 from pyiem.util import logger, ncopen, utc
@@ -180,11 +180,11 @@ def fetch(valid: datetime, checkcache: bool):
             f"era5land_{valid:%Y%m%d%H}.nc"
         )
         try:
-            resp = httpx.head(url, follow_redirects=True, timeout=30)
+            resp = requests.head(url, allow_redirects=True, timeout=30)
             resp.raise_for_status()
             if resp.headers.get("Content-Length", "0") != "0":
                 LOG.info("Using cached %s", url)
-                resp = httpx.get(url, follow_redirects=True, timeout=30)
+                resp = requests.get(url, allow_redirects=True, timeout=30)
                 resp.raise_for_status()
                 pathlib.Path("data_0.nc").write_bytes(resp.content)
                 return
@@ -193,19 +193,28 @@ def fetch(valid: datetime, checkcache: bool):
 
     zipfn = "data_0.nc.zip"
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
-    cds.retrieve(
-        "reanalysis-era5-land",
-        {
-            "variable": CDSVARS,
-            "year": f"{valid.year}",
-            "month": f"{valid:%m}",
-            "day": [f"{valid:%d}"],
-            "time": [f"{valid:%H}:00"],
-            "data_format": "netcdf",
-            "download_format": "zip",
-        },
-        zipfn,
-    )
+    for attempt in range(3):
+        try:
+            cds.retrieve(
+                "reanalysis-era5-land",
+                {
+                    "variable": CDSVARS,
+                    "year": f"{valid.year}",
+                    "month": f"{valid:%m}",
+                    "day": [f"{valid:%d}"],
+                    "time": [f"{valid:%H}:00"],
+                    "data_format": "netcdf",
+                    "download_format": "zip",
+                },
+                zipfn,
+            )
+            break
+        except requests.exceptions.HTTPError:
+            LOG.exception("Attempt %s failed", attempt)
+        if attempt == 2:
+            LOG.warning("Aborting as we failed to fetch %s", valid)
+            sys.exit(1)
+
     # unzip
     subprocess.call(["unzip", "-q", zipfn])
     os.unlink(zipfn)
