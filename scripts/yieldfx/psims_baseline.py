@@ -20,12 +20,9 @@ from tqdm import tqdm
 LOG = logger()
 
 
-def make_netcdf(ncfn, valid, west, south):
+def make_netcdf(ncfn, dt: date, west, south):
     """Make our netcdf"""
-    totaldays = (
-        valid.replace(month=12, day=31)
-        - valid.replace(year=1980, month=1, day=1)
-    ).days + 1
+    totaldays = (dt.replace(month=12, day=31) - date(1980, 1, 1)).days + 1
     with ncopen(ncfn, "w") as nc:
         # Dimensions
         nc.createDimension("time", totaldays)
@@ -136,7 +133,7 @@ def copy_iemre(nc: Dataset, ncdate0: date, ncdate1: date, islice, jslice):
 
 
 def tile_extraction(
-    nc: Dataset, valid: datetime, west: float, south: float, fullmode: bool
+    nc: Dataset, dt: date, west: float, south: float, fullmode: bool
 ):
     """Do our tile extraction"""
     # update model metadata
@@ -147,7 +144,7 @@ def tile_extraction(
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     if fullmode:
-        for year in range(1980, valid.year + 1):
+        for year in range(1980, dt.year + 1):
             copy_iemre(
                 nc,
                 date(year, 1, 1),
@@ -156,7 +153,7 @@ def tile_extraction(
                 jslice,
             )
     else:
-        copy_iemre(nc, valid, valid, islice, jslice)
+        copy_iemre(nc, dt, dt, islice, jslice)
 
 
 def qc(nc):
@@ -170,26 +167,30 @@ def qc(nc):
     print("done...")
 
 
-def workflow(valid, ncfn, west, south, fullmode: bool):
+def workflow(dt: date, ncfn, west, south, fullmode: bool):
     """Make the magic happen"""
     basedir = "/mesonet/share/pickup/yieldfx/baseline"
     os.makedirs(basedir, exist_ok=True)
     fullpath = f"{basedir}/{ncfn}"
     if fullmode:
-        make_netcdf(fullpath, valid, west, south)
+        make_netcdf(fullpath, dt, west, south)
     with ncopen(fullpath, "a") as nc:
-        tile_extraction(nc, valid, west, south, fullmode)
+        tile_extraction(nc, dt, west, south, fullmode)
         if fullmode:
             qc(nc)
 
 
 @click.command()
-@click.option("--date", "dt", type=click.DateTime(), help="Date to process")
+@click.option(
+    "--date",
+    "dt",
+    required=True,
+    type=click.DateTime(),
+    help="Date to process, likely today if you are running in full mode.",
+)
 @click.option("--full", is_flag=True, help="Full replacement mode")
-def main(dt: datetime | None, full: bool):
+def main(dt: datetime, full: bool):
     """Go Main Go"""
-    if dt is not None:
-        dt = dt.date()
     # Create tiles to cover 12 states
     progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
     for west in progress:
@@ -202,7 +203,7 @@ def main(dt: datetime | None, full: bool):
             yt = (90 - south) / 2
             xt = (180 - (0 - west)) / 2 + 1
             ncfn = f"clim_{yt:04.0f}_{xt:04.0f}.tile.nc4"
-            workflow(dt, ncfn, west, south, full)
+            workflow(dt.date(), ncfn, west, south, full)
 
 
 if __name__ == "__main__":

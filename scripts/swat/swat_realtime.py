@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from geopandas import read_postgis
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.grid import nav
+from pyiem.grid.nav import get_nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_mrms_ncname, get_daily_ncname
 from pyiem.util import convert_value, logger, ncopen
@@ -62,8 +62,8 @@ def workflow(page, huc12s):
     ets = date.today() - timedelta(days=1)
     LOG.info("Running for time domain %s to %s", now, ets)
     # This is N to S
-    mrms_czs = CachingZonalStats(nav.MRMS_IEMRE.affine_image)
-    iemre_czs = CachingZonalStats(nav.IEMRE.affine_image)
+    mrms_czs = CachingZonalStats(get_nav("MRMS", "iemre").affine_image)
+    iemre_czs = CachingZonalStats(get_nav("IEMRE").affine_image)
 
     mrms_nchandles = {}
     iemre_nchandles = {}

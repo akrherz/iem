@@ -9,7 +9,7 @@ Called from RUN_10_AFTER.sh
 from datetime import datetime, timedelta, timezone
 
 import click
-from pyiem.database import get_dbconnc
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 
 
@@ -31,24 +31,26 @@ def archive(ts):
 
     Currently, we only support the METAR database :(
     """
-    asos, acursor = get_dbconnc("asos")
-    acursor = asos.cursor()
     iem, icursor = get_dbconnc("iem")
 
-    acursor.execute(
-        f"""WITH data as (
-        SELECT station, max(p01i) from t{ts.year}
-        WHERE valid > %s and valid <= %s and p01i is not null
-        GROUP by station)
+    with get_sqlalchemy_conn("asos") as asos:
+        res = asos.execute(
+            sql_helper(
+                """WITH data as (
+            SELECT station, max(p01i) from {table}
+            WHERE valid > :sts and valid <= :ets and p01i is not null
+            GROUP by station)
 
-    SELECT max, iemid from data d JOIN stations s on
-    (d.station = s.id) WHERE s.network ~* 'ASOS'
-    """,
-        (ts, ts + timedelta(minutes=60)),
-    )
+        SELECT max, iemid from data d JOIN stations s on
+        (d.station = s.id) WHERE s.network ~* 'ASOS'
+        """,
+                table=f"t{ts:%Y}",
+            ),
+            {"sts": ts, "ets": ts + timedelta(minutes=60)},
+        )
 
-    for row in acursor:
-        update(icursor, row[1], ts, row[0])
+        for row in res.mappings():
+            update(icursor, row["iemid"], ts, row["max"])
 
     icursor.close()
     iem.commit()

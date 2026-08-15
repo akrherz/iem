@@ -31,7 +31,8 @@ def main(year: int):
         """
         SELECT station,
         sum(case when precip > 0.009 then 1 else 0 end) as days, max(day)
-        from alldata_ia WHERE year = %s and substr(station,3,1) != 'C'
+        from alldata_ia WHERE year = %s and
+        substr(station,3,1) not in ('C', 'D')
         and station != 'IA0000' GROUP by station
     """,
         (year,),
@@ -47,8 +48,8 @@ def main(year: int):
         maxday = row["max"]
     pgconn.close()
     mp = MapPlot(
-        title="Days with Measurable Precipitation (%s)" % (year,),
-        subtitle="Map valid January 1 - %s" % (maxday.strftime("%b %d")),
+        title=f"Days with Measurable Precipitation ({year})",
+        subtitle=f"Map valid January 1 - {maxday:%b %-d}",
         axisbg="white",
     )
     mp.plot_values(
@@ -61,10 +62,7 @@ def main(year: int):
         labelcolor="tan",
     )
     mp.drawcounties()
-    pqstr = "plot m %s bogus %s/summary/precip_days.png png" % (
-        now.strftime("%Y%m%d%H%M"),
-        year,
-    )
+    pqstr = f"plot m {now:%Y%m%d%H%M} bogus {year}/summary/precip_days.png png"
     mp.postprocess(pqstr=pqstr)
 
 
