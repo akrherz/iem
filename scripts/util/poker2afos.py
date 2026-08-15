@@ -463,6 +463,8 @@ def process(order):
             try:
                 bulletin = noaaport_text(bulletin_in)
                 prod = TextProduct(bulletin, utcnow=ts, parse_segments=False)
+                assert prod.source is not None
+                assert prod.valid is not None
                 prod.source = XREF_SOURCE.get(prod.source, prod.source)
             except Exception:
                 bad += 1
@@ -472,7 +474,7 @@ def process(order):
                 continue
 
             tt = "0712" if prod.valid.month > 6 else "0106"
-            table = f"products_{prod.valid.year}_{tt}"
+            table = f"products_{prod.valid:%Y}_{tt}"
             cursor.execute(
                 f"""
                 DELETE from {table} WHERE pil = %s and

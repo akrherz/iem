@@ -8,13 +8,14 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 import warnings
 from datetime import datetime, timedelta
 
 import cdsapi
 import click
-import httpx
 import numpy as np
+import requests
 from netCDF4 import Dataset
 from pyiem.iemre import DOMAINS, hourly_offset
 from pyiem.util import logger, ncopen, utc
@@ -172,43 +173,54 @@ def ingest(ncin: Dataset, nc: Dataset, valid: datetime, domain: str):
         p01m[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
 
 
-def fetch(valid: datetime, checkcache: bool):
-    """Get the data from the CDS."""
+def fetch(valid: datetime, checkcache: bool) -> bool:
+    """Get the data from the CDS, returns true if cache was used."""
     if checkcache:
         url = (
             f"https://mtarchive.geol.iastate.edu/era5land/{valid:%Y/%m}/"
             f"era5land_{valid:%Y%m%d%H}.nc"
         )
         try:
-            resp = httpx.head(url, follow_redirects=True, timeout=30)
+            resp = requests.head(url, allow_redirects=True, timeout=30)
             resp.raise_for_status()
             if resp.headers.get("Content-Length", "0") != "0":
                 LOG.info("Using cached %s", url)
-                resp = httpx.get(url, follow_redirects=True, timeout=30)
+                resp = requests.get(url, allow_redirects=True, timeout=30)
                 resp.raise_for_status()
                 pathlib.Path("data_0.nc").write_bytes(resp.content)
-                return
+                return True
         except Exception as exp:
             LOG.info("Failed webfetch %s: %s", url, exp)
 
     zipfn = "data_0.nc.zip"
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
-    cds.retrieve(
-        "reanalysis-era5-land",
-        {
-            "variable": CDSVARS,
-            "year": f"{valid.year}",
-            "month": f"{valid:%m}",
-            "day": [f"{valid:%d}"],
-            "time": [f"{valid:%H}:00"],
-            "data_format": "netcdf",
-            "download_format": "zip",
-        },
-        zipfn,
-    )
+    for attempt in range(3):
+        try:
+            cds.retrieve(
+                "reanalysis-era5-land",
+                {
+                    "variable": CDSVARS,
+                    "year": f"{valid.year}",
+                    "month": f"{valid:%m}",
+                    "day": [f"{valid:%d}"],
+                    "time": [f"{valid:%H}:00"],
+                    "data_format": "netcdf",
+                    "download_format": "zip",
+                },
+                zipfn,
+            )
+            break
+        except requests.exceptions.HTTPError:
+            LOG.exception("Attempt %s failed", attempt)
+            time.sleep(30)
+        if attempt == 2:
+            LOG.warning("Aborting as we failed to fetch %s", valid)
+            sys.exit(1)
+
     # unzip
     subprocess.call(["unzip", "-q", zipfn])
     os.unlink(zipfn)
+    return False
 
 
 def archive(fn: str, valid: datetime):
@@ -229,14 +241,15 @@ def archive(fn: str, valid: datetime):
 
 def run(valid: datetime, justdomain: str | None, checkcache: bool):
     """Run for the given valid time."""
-    fetch(valid, checkcache)
+    used_cache = fetch(valid, checkcache)
     for domain in DOMAINS if justdomain is None else [justdomain]:
         dd = "" if domain == "conus" else f"_{domain}"
         ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
         LOG.info("Running for %s[domain=%s] %s", valid, domain, ncoutfn)
         with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
             ingest(ncin, nc, valid, domain)
-    archive("data_0.nc", valid)
+    if not used_cache:
+        archive("data_0.nc", valid)
     os.unlink("data_0.nc")
 
 

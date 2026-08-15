@@ -173,7 +173,7 @@ def load_baseline(location: str):
             )
     # Fill out the time domain
     dec31 = today.replace(month=12, day=31)
-    df = df.reindex(index=pd.date_range(date(1980, 1, 1), dec31).date)
+    df = df.reindex(index=pd.date_range(date(1980, 1, 1), dec31).date)  # type: ignore
     return df
 
 

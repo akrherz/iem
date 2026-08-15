@@ -162,7 +162,7 @@ def k2f(val):
     return (val * units.degK).to(units.degF).m
 
 
-def estimate_hilo(df, ds: xr.Dataset):
+def estimate_hilo(df: pd.DataFrame, ds: xr.Dataset):
     """Estimate the High and Low Temperature based on gridded data"""
     # Ensure that the grid is not all nan or masked
     if ds["high_tmpk_12z"].isnull().all():
@@ -184,14 +184,14 @@ def estimate_hilo(df, ds: xr.Dataset):
         else:
             val = highgrid12[row["gridj"], row["gridi"]]
             temp_hour = 7  # Not precise
-        if not np.ma.is_masked(val):
+        if not pd.isna(val):
             df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "high"] = int(round(val, 0))
         if row["temp_hour"] in [0, 22, 23, 24]:
             val = lowgrid00[row["gridj"], row["gridi"]]
         else:
             val = lowgrid12[row["gridj"], row["gridi"]]
-        if not np.ma.is_masked(val):
+        if not pd.isna(val):
             df.at[sid, "low"] = int(round(val, 0))
     return df
 

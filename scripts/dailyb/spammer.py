@@ -306,7 +306,7 @@ def send_email(msg):
     smtp.quit()
 
 
-@with_sqlalchemy_conn("iembot")
+@with_sqlalchemy_conn("iembot", user="nobody")
 def iembot_report(conn: Connection | None = None) -> list[str, str]:
     """Return on IEMBot stats."""
     txt = """

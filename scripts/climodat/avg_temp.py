@@ -27,7 +27,8 @@ def main(year: int):
             SELECT station, avg(high) as avg_high, avg(low) as avg_low,
             avg( (high+low)/2 ) as avg_tmp, max(day)
             from alldata_ia WHERE year = :year and station != 'IA0000' and
-            high is not Null and low is not Null and substr(station,3,1) != 'C'
+            high is not Null and low is not Null and
+            substr(station,3,1) not in ('C', 'D')
             GROUP by station
             """),
             conn,

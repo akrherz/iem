@@ -24,18 +24,18 @@ class RAOB:
 
     def __init__(self):
         """constructor"""
-        self.station = None
-        self.valid = None
-        self.release_time = None
+        self.station: str | None = None
+        self.valid: datetime | None = None
+        self.release_time: datetime | None = None
         self.profile = []
         self.wind_units = None
         self.hydro_level = None
         self.maxwd_level = None
         self.tropo_level = None
 
-    def conv_hhmm(self, raw):
+    def conv_hhmm(self, raw: str) -> datetime | None:
         """Convert string to timestamp"""
-        if raw == "99999":
+        if raw == "99999" or self.valid is None:
             return None
         if int(raw) < 100:
             return self.valid.replace(hour=0, minute=0) + timedelta(
@@ -68,6 +68,8 @@ class RAOB:
 
     def database_save(self, txn):
         """Save this to the provided database cursor"""
+        if self.valid is None:
+            raise ValueError("valid is None")
         txn.execute(
             "SELECT fid from raob_flights where station = %s and valid = %s",
             (self.station, self.valid),
@@ -98,9 +100,9 @@ class RAOB:
                 "RAOB del %s rows for sid: %s valid: %s",
                 txn.rowcount,
                 self.station,
-                self.valid.strftime("%Y-%m-%d %H"),
+                f"{self.valid:%Y-%m-%d %H}",
             )
-        table = f"raob_profile_{self.valid.year}"
+        table = f"raob_profile_{self.valid:%Y}"
         for d in self.profile:
             txn.execute(
                 f"INSERT into {table} (fid, ts, levelcode, pressure, height, "

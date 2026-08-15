@@ -8,7 +8,7 @@ messages come and overwrite the trouble. Run from RUN_10MIN.sh
 import time
 from datetime import datetime
 
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
@@ -16,8 +16,7 @@ from sqlalchemy.engine import Connection
 LOG = logger()
 
 
-@with_sqlalchemy_conn("iem")
-def main(conn: Connection | None = None) -> None:
+def main(conn: Connection) -> None:
     """Go!"""
     now = datetime.now()
     yyyy = now.year
@@ -65,7 +64,8 @@ def frontend() -> None:
     """Proxy."""
     for _ in range(2):
         try:
-            main()
+            with get_sqlalchemy_conn("iem") as conn:
+                main(conn)
             return
         except Exception as exp:
             LOG.info("Failed to update summary: %s", exp)
