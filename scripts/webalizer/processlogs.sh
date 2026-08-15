@@ -3,7 +3,6 @@
 # iemssl
 # datateam
 # sustainablecorn
-# weatherim
 #
 # RPM requirements for this workflow
 # yum -y install libdb-cxx libmaxminddb gd lftp tmpwatch
@@ -16,7 +15,7 @@ export dd=$(date --date '12 hours ago' +'%d')
 export yyyymm=$(date --date '12 hours ago' +'%Y%m')
 
 # IMPORTANT: iemapps needs to go first for wildcard matching life choices
-PREFIXES="iemapps iem datateam sustainablecorn weatherim depbackend"
+PREFIXES="iemapps iem datateam sustainablecorn depbackend"
 MACHINES="anticyclone iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
 iemvs39-dc iemvs40-dc iemvs41-dc iemvs42-dc iemvs43-dc iemvs44-dc"
 CONFBASE="/opt/iem/scripts/webalizer"
@@ -51,7 +50,6 @@ done
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
-/home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/depbackend.conf combined-depbackend.log
 
