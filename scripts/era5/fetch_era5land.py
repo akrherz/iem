@@ -8,6 +8,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 import warnings
 from datetime import datetime, timedelta
 
@@ -211,6 +212,7 @@ def fetch(valid: datetime, checkcache: bool) -> bool:
             break
         except requests.exceptions.HTTPError:
             LOG.exception("Attempt %s failed", attempt)
+            time.sleep(30)
         if attempt == 2:
             LOG.warning("Aborting as we failed to fetch %s", valid)
             sys.exit(1)
