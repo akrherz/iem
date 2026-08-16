@@ -528,7 +528,8 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     acursor = pgconn.cursor(cursor_name, scrollable=False)
-    acursor.itersize = 20_000
+    # Belief is that this number is more optimal for the server side
+    acursor.itersize = 1_000
 
     report_types = [int(x) for x in environ["report_type"]]
     sts, ets = get_time_bounds(environ, tzinfo)

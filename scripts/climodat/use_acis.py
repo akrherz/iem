@@ -96,9 +96,15 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
                 acis_station,
             )
             return pd.DataFrame()
-    if "data" not in j:
-        LOG.info("No Data!, content=%s", resp.content)
-        return pd.DataFrame()
+    for required_key in ("data", "meta"):
+        if required_key not in j:
+            LOG.info(
+                "Response missing %s key for %s content[:100]=%s",
+                required_key,
+                acis_station,
+                resp.content[:100],
+            )
+            return pd.DataFrame()
 
     acis = pd.DataFrame(
         j["data"],

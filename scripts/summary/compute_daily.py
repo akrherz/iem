@@ -340,16 +340,16 @@ def do(dt: date, netclass: str, meta: dict):
 )
 def main(dt: datetime):
     """Go Main Go"""
-    dt = dt.date()
+    dt_ = dt.date()
     settings = {
         "ASOS": {"database": "asos", "getobs": get_asos_obs},
         "RWIS": {"database": "rwis", "getobs": get_rwis_obs},
     }
     for netclass, meta in settings.items():
         try:
-            do(dt, netclass, meta)
+            do(dt_, netclass, meta)
         except Exception:
-            LOG.exception("compute_daily %s %s failed", netclass, dt)
+            LOG.exception("compute_daily %s %s failed", netclass, dt_)
 
 
 if __name__ == "__main__":
