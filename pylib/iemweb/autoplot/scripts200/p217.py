@@ -4,6 +4,7 @@ approachable frontend is to visit the <a href="/wx/afos/list.phtml">NWS Text
 by WFO</a> page and click on the SPS product you are interested in.
 """
 
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -15,6 +16,9 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
 from pyiem.util import LOG, utc
 from sqlalchemy.engine import Connection
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 UNITS = {
@@ -71,7 +75,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
 
     # Compute a population estimate
     popyear = min(max([prodyear - prodyear % 5, 2000]), 2020)
-    df = gpd.read_postgis(
+    df: pd.DataFrame = gpd.read_postgis(
         sql_helper(
             """
             with geopop as (
@@ -109,7 +113,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
         for source in ["z", "fz", "mz"]:
-            ugcdf = gpd.read_postgis(
+            ugcdf: pd.DataFrame = gpd.read_postgis(
                 sql_helper(
                     """
                     SELECT simple_geom, ugc, {gpwcol}
@@ -139,15 +143,18 @@ def plotter(ctx: dict, conn: Connection | None = None):
     else:
         bounds = row["geom"].bounds
         population = row["pop"]
-    pp = "Missing" if population <= 0 else f"{population:,}"
-    stextra = " for Polygon" if not row["geom"].is_empty else ""
+    subtitle = None
+    # Unsure of this edge case when population is negative
+    if population >= 0:
+        stextra = " for Polygon" if not row["geom"].is_empty else ""
+        subtitle = f"Estimated {popyear} Population{stextra}: {population:,}"
     mp = MapPlot(
         apctx=ctx,
         title=(
             f"{wfo} Special Weather Statement (SPS) "
             f"till {expire.strftime(TFORMAT)}"
         ),
-        subtitle=(f"Estimated {popyear} Population{stextra}: {pp}"),
+        subtitle=subtitle,
         sector="spherical_mercator",
         west=bounds[0] - 0.02,
         south=bounds[1] - 0.3,
