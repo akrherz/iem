@@ -12,6 +12,7 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2026-08-17: HTTP `OPTIONS` requests should be properly handled now.
 - 2026-03-19: A `magge` parameter was added, representing a filter for reports
   with a magnitude greater than or equal to the given value.
 - 2024-10-24: Added bounding box parameters of ``north``, ``south``, ``east``,
@@ -22,8 +23,6 @@ Changelog
 - 2024-07-18: Instead of returning a `No results found for query` when no
   database entries are found, we return an empty result.
 - 2024-04-05: Initial documentation release and migration to pydantic.
-- 2024-04-05: The legacy usage of ``wfo[]`` for CGI arguments is still
-  supported, but migration to ``wfo`` is encouraged.
 
 Example Requests
 ----------------
@@ -301,10 +300,6 @@ def do_excel_kml(fmt, params, sql_filters):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ: dict, start_response: callable):
     """Go Main Go"""
-    if environ["REQUEST_METHOD"] == "OPTIONS":
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        return [b"Allow: GET,POST,OPTIONS"]
-
     params = {
         "wfos": [],
         "magge": environ["magge"],

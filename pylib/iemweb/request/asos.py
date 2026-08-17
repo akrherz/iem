@@ -12,6 +12,7 @@ returned if the server is under heavy load.
 
 Changelog:
 
+- 2026-08-17: HTTP `OPTIONS` requests should be properly handled now.
 - 2026-04-21: Due to incessant requests against this service a 1 second
   per-IP throttle is now in place.  There is literally no reason to hit this
   service at a higher rate.  Just make an hourly request for all stations and
@@ -22,8 +23,6 @@ Changelog:
 - 2024-04-01: Fix recently introduced bug with time sort order.
 - 2024-03-29: This service had an intermediate bug whereby if the `tz` value
   was not provided, it would default to `America/Chicago` instead of `UTC`.
-- 2024-03-29: Migrated to pydantic based request validation.  Will be
-  monitoring for any issues.
 
 Example Usage
 -------------
@@ -44,6 +43,7 @@ ets=2020-05-21T00:00:00Z
 """
 
 import re
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from io import StringIO
 from typing import Annotated
@@ -492,6 +492,21 @@ def toobusy(pgconn, environ, name):
     return over
 
 
+def preflight_checks(environ: dict, start_response: Callable) -> str | None:
+    """Things checked before we do any work for the request.
+
+    Returns:
+      (str or None): The response to send the client or None if checks pass.
+    """
+    if overloaded(environ):
+        start_response(
+            "503 Service Unavailable", [("Content-type", "text/plain")]
+        )
+        return "ERROR: server over capacity, please try later"
+
+    return None
+
+
 # NOTE This app can't be cached via iemapp since it is a generator
 @iemapp(
     help=__doc__,
@@ -499,19 +514,11 @@ def toobusy(pgconn, environ, name):
     schema=MyModel,
     ip_throttle_secs=1,
 )
-def application(environ, start_response):
+def application(environ: dict, start_response: Callable):
     """Go main"""
-    if environ["REQUEST_METHOD"] == "OPTIONS":
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        yield b"Allow: GET,POST,OPTIONS"
+    if (resp := preflight_checks(environ, start_response)) is not None:
+        yield resp.encode()
         return
-    if overloaded(environ):
-        start_response(
-            "503 Service Unavailable", [("Content-type", "text/plain")]
-        )
-        yield b"ERROR: server over capacity, please try later"
-        return
-    tzinfo = ZoneInfo(environ["tz"])
     pgconn = get_dbconn("asos")
     ip = environ.get("HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR"))
     if ip is not None:
@@ -532,6 +539,7 @@ def application(environ, start_response):
     acursor.itersize = 1_000
 
     report_types = [int(x) for x in environ["report_type"]]
+    tzinfo = ZoneInfo(environ["tz"])
     sts, ets = get_time_bounds(environ, tzinfo)
     if sts is None:
         pgconn.close()
