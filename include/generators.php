@@ -112,15 +112,15 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
 
         $bandwidth = $jobj->stats->bandwidth / 1000000.0;
         // grading of the bandwidth (MB/s)
-        if ($bandwidth > 35) $bcolor = "warning";
-        if ($bandwidth > 70) $bcolor = "danger";
+        if ($bandwidth > 120) $bcolor = "warning";
+        if ($bandwidth > 240) $bcolor = "danger";
 
         $req = $jobj->stats->apache_req_per_sec;
         if ($req > 5000) $rcolor = "warning";
         if ($req > 7500) $rcolor = "danger";
     }
     $label = sprintf("%.1f MB/s", $bandwidth);
-    $bpercent = intval($bandwidth / 124.0  * 100.0);
+    $bpercent = intval($bandwidth / 240.0  * 100.0);
     $rlabel = sprintf("%s req/s", number_format($req));
     $rpercent = intval($req / 15000.0 * 100.0);
     $olabel = sprintf("%.0f%%", $ok);
