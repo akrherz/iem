@@ -37,6 +37,7 @@ import subprocess
 import sys
 import zipfile
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import requests
@@ -46,6 +47,8 @@ from pyiem.util import logger, utc
 from shapely.wkb import loads
 from tqdm import tqdm
 
+if TYPE_CHECKING:
+    from shapely.geometry import MultiLineString
 LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
@@ -103,26 +106,26 @@ def export_shapefile(txn, valid):
     LOG.info("Exporting for %s", valid)
     os.chdir("/tmp")
     shp = shapefile.Writer("iaroad_cond")
-    shp.field("SEGID", "N", 6, 0)
-    shp.field("MAJOR", "C", 10, 0)
-    shp.field("MINOR", "C", 128, 0)
-    shp.field("US1", "N", 4, 0)
-    shp.field("ST1", "N", 4, 0)
-    shp.field("INT1", "N", 4, 0)
-    shp.field("TYPE", "N", 4, 0)
-    shp.field("VALID", "C", 12, 0)
-    shp.field("COND_CODE", "N", 4, 0)
-    shp.field("COND_TXT", "C", 120, 0)
-    shp.field("BAN_TOW", "C", 1, 0)
-    shp.field("LIM_VIS", "C", 1, 0)
+    shp.field("SEGID", "N", 6, 0)  # type: ignore
+    shp.field("MAJOR", "C", 10, 0)  # type: ignore
+    shp.field("MINOR", "C", 128, 0)  # type: ignore
+    shp.field("US1", "N", 4, 0)  # type: ignore
+    shp.field("ST1", "N", 4, 0)  # type: ignore
+    shp.field("INT1", "N", 4, 0)  # type: ignore
+    shp.field("TYPE", "N", 4, 0)  # type: ignore
+    shp.field("VALID", "C", 12, 0)  # type: ignore
+    shp.field("COND_CODE", "N", 4, 0)  # type: ignore
+    shp.field("COND_TXT", "C", 120, 0)  # type: ignore
+    shp.field("BAN_TOW", "C", 1, 0)  # type: ignore
+    shp.field("LIM_VIS", "C", 1, 0)  # type: ignore
 
     txn.execute(
         "select b.*, c.*, b.geom from roads_base b, roads_current c "
         "WHERE b.segid = c.segid and valid is not null and b.geom is not null"
     )
     for row in txn:
-        multiline = loads(row["geom"], hex=True)
-        shp.line([zip(*multiline.geoms[0].xy, strict=False)])
+        multiline: MultiLineString = loads(row["geom"], hex=True)
+        shp.line(list(multiline.geoms[0].coords))
         shp.record(
             row["segid"],
             row["major"],

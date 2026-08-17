@@ -21,7 +21,7 @@ def init_year(ts):
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = "%s Generated" % (datetime.now().strftime("%d %B %Y"),)
 
-    grbs = pygrib.open(
+    grbs = pygrib.open(  # type: ignore
         "/mesonet/ARCHIVE/data/2019/05/06/model/ndfd/"
         "00/ndfd.t00z.awp2p5f001.grib2"
     )

@@ -116,8 +116,8 @@ def do_checks(
 def passes_bulk_check(qcdf: pd.DataFrame) -> bool:
     """Can we rely on the model analysis?"""
     # Require at least 10 stations to do this check
-    if len(qcdf.index) < 10:
-        LOG.info("Quorum check failed, only %s stations", len(qcdf.index))
+    if (has_data_cnt := qcdf["ob_t4_c_avg"].notna().sum()) < 10:
+        LOG.info("Quorum check failed, only %s obs with data", has_data_cnt)
         return False
     # Here lies dragons.  We want to check for the situation when the model
     # based analysis is wildly off and we don't want that polluting the

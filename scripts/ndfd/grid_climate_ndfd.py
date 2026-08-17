@@ -53,10 +53,10 @@ def grid_day(nc, ts):
     if ts.day == 29 and ts.month == 2:
         ts = datetime(2000, 3, 1)
 
-    sql = """SELECT * from climate51 WHERE valid = '%s' and
+    sql = """SELECT * from climate51 WHERE valid = %s and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
-             """ % (ts.strftime("%Y-%m-%d"),)
-    cursor.execute(sql)
+             """
+    cursor.execute(sql, (ts.strftime("%Y-%m-%d"),))
     res = generic_gridder(nc, cursor, "high")
     nc.variables["high_tmpk"][offset] = convert_value(res, "degF", "degK")
 

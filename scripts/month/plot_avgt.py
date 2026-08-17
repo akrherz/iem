@@ -3,14 +3,13 @@
 from datetime import date, datetime, timedelta
 
 import numpy as np
-from pyiem.database import get_dbconnc
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
 
 
 def main():
     """Go Main Go"""
     now = datetime.now()
-    pgconn, icursor = get_dbconnc("iem")
 
     day1 = date.today().replace(day=1)
     day2 = (day1 + timedelta(days=35)).replace(day=1)
@@ -20,33 +19,36 @@ def main():
     vals = []
     valmask = []
     table = f"summary_{day1:%Y}"
-    icursor.execute(
-        f"""
-        SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
-        avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt
-        from {table} c JOIN stations s ON (s.iemid = c.iemid)
-        WHERE s.network = 'IA_ASOS' and
-        day >= %s and day < %s
-        and max_tmpf > -30 and min_tmpf < 90 GROUP by id, s.network, lon, lat
-    """,
-        (day1, day2),
-    )
-    for row in icursor:
-        if row["cnt"] != now.day:
-            continue
-        lats.append(row["lat"])
-        lons.append(row["lon"])
-        vals.append(row["avgt"])
-        valmask.append(row["network"] == "IA_ASOS")
-    pgconn.close()
+    with get_sqlalchemy_conn("iem") as conn:
+        res = conn.execute(
+            sql_helper(
+                """
+            SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+            avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt
+            from {table} c JOIN stations s ON (s.iemid = c.iemid)
+            WHERE s.network = 'IA_ASOS' and
+            day >= :day1 and day < :day2
+            and max_tmpf > -30 and min_tmpf < 90
+            GROUP by id, s.network, lon, lat
+        """,
+                table=table,
+            ),
+            {"day1": day1, "day2": day2},
+        )
+        for row in res.mappings():
+            if row["cnt"] != now.day:
+                continue
+            lats.append(row["lat"])
+            lons.append(row["lon"])
+            vals.append(row["avgt"])
+            valmask.append(row["network"] == "IA_ASOS")
     if len(vals) < 3:
         return
 
     mp = MapPlot(
         axisbg="white",
         title="Iowa %s Average Temperature" % (now.strftime("%Y %B"),),
-        subtitle=("Average of the High + Low ending: %s")
-        % (now.strftime("%d %B"),),
+        subtitle=f"Average of the High + Low ending: {now:%d %B}",
     )
     minval = int(min(vals))
     maxval = max([int(max(vals)) + 3, minval + 11])

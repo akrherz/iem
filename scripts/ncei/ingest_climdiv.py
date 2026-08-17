@@ -76,6 +76,10 @@ def process(procdate, region):
             alldf = df
         else:
             alldf[iemvar] = df[iemvar]
+    if alldf is None:
+        raise ValueError(
+            "No data fetched for procdate %s and region %s", procdate, region
+        )
     return alldf.reset_index()
 
 

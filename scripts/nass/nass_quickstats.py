@@ -63,6 +63,8 @@ def get_df(year, sts, topic):
 @with_sqlalchemy_conn("coop")
 def process(df: pd.DataFrame, conn: Connection | None = None):
     """Do some work"""
+    if conn is None:
+        raise RuntimeError("No database connection available")
     # Try to get a number
     df["num_value"] = pd.to_numeric(df["Value"], errors="coerce")
     # Get load_time in proper order
@@ -101,8 +103,9 @@ def process(df: pd.DataFrame, conn: Connection | None = None):
                 "ca": row["county_ansi"],
             },
         )
-        if res.rowcount > 0:
-            lt = res.mappings().fetchone()["load_time"]
+        testrow = res.mappings().fetchone()
+        if testrow is not None:
+            lt = testrow["load_time"]
             if lt == row["load_time"].to_pydatetime():
                 dups += 1
                 continue

@@ -44,7 +44,7 @@ def main():
     newmissing = []
     for (wfo, phenomena, significance), gdf in eventsdf.groupby(
         ["wfo", "phenomena", "significance"]
-    ):
+    ):  # type: ignore
         # These are national ETNs
         if phenomena in ("TO", "SV") and significance == "A":
             continue

@@ -95,7 +95,7 @@ def do_target(nc, now, target, day, vname):
             if fn is None:
                 hour += 1
                 continue
-            with pygrib.open(fn) as grbs:
+            with pygrib.open(fn) as grbs:  # type: ignore
                 for grb in grbs:
                     if (
                         grb.valid_key("parameterName")

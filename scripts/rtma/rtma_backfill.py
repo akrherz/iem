@@ -40,7 +40,7 @@ def workflow(now: datetime):
             jobs = list(WMO_XREF.keys())
         else:
             jobs = []
-            with pygrib.open(fn) as grbs:
+            with pygrib.open(fn) as grbs:  # type: ignore
                 for key, sn in GRIB_XREF.items():
                     try:
                         _ = grbs.select(
@@ -69,7 +69,7 @@ def workflow(now: datetime):
         with tempfile.NamedTemporaryFile(delete=False) as fh:
             fh.write(resp.content)
         try:
-            with pygrib.open(fh.name) as grbs:
+            with pygrib.open(fh.name) as grbs:  # type: ignore
                 msgs = grbs.select(
                     shortName=GRIB_XREF[key],
                     typeOfGeneratingProcess=0,

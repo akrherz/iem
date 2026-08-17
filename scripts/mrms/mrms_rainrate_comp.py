@@ -58,7 +58,7 @@ def workflow(now, realtime):
             LOG.info("caught EOFError on %s, likely corrupt, deleting", gribfn)
             os.unlink(gribfn)
             return
-    grbs = pygrib.open(tmpfn)
+    grbs = pygrib.open(tmpfn)  # type: ignore
     grb = grbs[1]
     os.unlink(tmpfn)
     os.unlink(gribfn)
