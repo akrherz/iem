@@ -20,7 +20,7 @@ def create_netcdf(ts):
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = "%s Generated" % (utc().strftime("%Y-%m-%dT%H:%MZ"),)
 
-    grbs = pygrib.open(
+    grbs = pygrib.open(  # type: ignore
         "/mesonet/ARCHIVE/data/2019/05/06/model/"
         "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
     )
@@ -97,7 +97,7 @@ def merge_grib(ts, nc):
         if not os.path.isfile(gribfn):
             print("ndfd2netcdf missing %s" % (gribfn,))
             continue
-        grbs = pygrib.open(gribfn)
+        grbs = pygrib.open(gribfn)  # type: ignore
         for grb in grbs:
             if (
                 grb.valid_key("parameterName")

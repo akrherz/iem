@@ -130,7 +130,7 @@ def doit(gts: datetime, hr: int):
             tempfile.NamedTemporaryFile(delete=False) as tmpfp,
         ):
             tmpfp.write(fp.read())
-        grbs = pygrib.open(tmpfp.name)
+        grbs = pygrib.open(tmpfp.name)  # type: ignore
         grb = grbs[1]
         grbs.close()
         os.unlink(tmpfp.name)

@@ -65,7 +65,7 @@ def run(nc: netCDF4.Dataset, dt: date, for_dep: bool):
             if utcdt < utcnow:
                 LOG.info("MISSING %s", utcdt)
             continue
-        with pygrib.open(gribfn) as grbs:
+        with pygrib.open(gribfn) as grbs:  # type: ignore
             grb = grbs[1]
             val: np.ndarray = grb["values"]
         os.unlink(gribfn)

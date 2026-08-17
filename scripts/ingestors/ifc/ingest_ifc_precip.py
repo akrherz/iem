@@ -77,7 +77,7 @@ def to_raster(tmpfn, now):
     png = Image.fromarray(np.uint8(imgdata))
     png.putpalette(make_colorramp())
     meta = PngImagePlugin.PngInfo()
-    meta.add_text("title", now.strftime("%Y%m%d%H%M"), 0)
+    meta.add_text("title", now.strftime("%Y%m%d%H%M"), False)
     png.save(f"{tmpfn}.png", pnginfo=meta)
     png.close()
     # Make worldfile

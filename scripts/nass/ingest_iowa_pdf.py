@@ -103,7 +103,7 @@ def glean_labels(label) -> list:
     return res
 
 
-def process_lines_pdfminer(valid, lines) -> int:
+def process_lines_pdfminer(valid, lines) -> None:
     """Special magic here."""
     labels = ""
     numbers = []

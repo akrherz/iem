@@ -63,7 +63,7 @@ def do(now, realtime=False):
     fp = gzip.GzipFile(gribfn, "rb")
     (_, tmpfn) = tempfile.mkstemp()
     pathlib.Path(tmpfn).write_bytes(fp.read())
-    grbs = pygrib.open(tmpfn)
+    grbs = pygrib.open(tmpfn)  # type: ignore
     grb = grbs[1]
     os.unlink(tmpfn)
     os.unlink(gribfn)

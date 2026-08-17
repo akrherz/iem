@@ -5,13 +5,13 @@ https://data.cocorahs.org/cocorahs/Export/ExportManager.aspx
 Called from RUN_20MIN.sh
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import logger, utc
@@ -29,7 +29,7 @@ def safeP(v):
     return float(v)
 
 
-def main(conn, dt: date | None) -> None:
+def main(conn, dt: datetime | None) -> None:
     """Go Main Go"""
     stations = pd.read_sql(
         sql_helper(
@@ -59,7 +59,7 @@ def main(conn, dt: date | None) -> None:
         )
     with StringIO() as sio:
         try:
-            resp = httpx.get(url, timeout=30)
+            resp = requests.get(url, timeout=30)
             resp.raise_for_status()
             sio.write(resp.text.replace(", ", ","))
         except Exception as exp:
@@ -134,8 +134,6 @@ def main(conn, dt: date | None) -> None:
 @click.option("--date", "dt", type=click.DateTime())
 def frontend(dt: datetime | None):
     """Do Logic."""
-    if dt is not None:
-        dt = dt.date()
     with get_sqlalchemy_conn("coop") as conn:
         main(conn, dt)
         conn.commit()

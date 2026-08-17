@@ -54,7 +54,7 @@ def run(ts, routes):
             LOG.info("File Not Found: %s", fn)
             return
 
-        with pygrib.open(fn) as grbs:
+        with pygrib.open(fn) as grbs:  # type: ignore
             try:
                 u = grbs.select(name="10 metre U wind component")[0]
                 v = grbs.select(name="10 metre V wind component")[0]

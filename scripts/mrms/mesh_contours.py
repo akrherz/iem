@@ -109,7 +109,7 @@ def agg(sts, ets):
     while now <= ets:
         fn = now.strftime("/mnt/mrms/MESH/%d%H%M.grib")
         if os.path.isfile(fn):
-            with pygrib.open(fn) as grb:
+            with pygrib.open(fn) as grb:  # type: ignore
                 if maxval is None:
                     maxval = grb[1].values
                 else:
