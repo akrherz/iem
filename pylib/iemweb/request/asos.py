@@ -349,7 +349,7 @@ class MyModel(CGIModel):
         return value
 
 
-def fmt_time(val, missing, _trace, tzinfo):
+def fmt_time(val: datetime | None, missing: str, _trace, tzinfo):
     """Format timestamp."""
     if val is None:
         return missing
@@ -406,9 +406,9 @@ def overloaded(environ: dict):
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 40:  # Cut back on logging
+    if val > 70:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/asos.py over cpu thres: {val}")
-    return val > 30
+    return val > 60
 
 
 def get_stations(form):
@@ -512,7 +512,7 @@ def preflight_checks(environ: dict, start_response: Callable) -> str | None:
     help=__doc__,
     parse_times=False,
     schema=MyModel,
-    ip_throttle_secs=1,
+    ip_throttle_secs=0.5,
 )
 def application(environ: dict, start_response: Callable):
     """Go main"""
