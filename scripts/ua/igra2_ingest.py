@@ -61,6 +61,8 @@ def main(overwrite: bool, icao: str | None, por: bool):
         )
         fn = f"/tmp/{ncei_id}-data.txt"
         for sounding in process_ytd(fn):
+            if sounding.model.header.valid.year < 1946:
+                continue
             cursor = pgconn.cursor()
             sounding.sql(cursor, overwrite=overwrite)
             cursor.close()

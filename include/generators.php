@@ -120,13 +120,13 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
         if ($req > 7500) $rcolor = "danger";
     }
     $label = sprintf("%.1f MB/s", $bandwidth);
-    $bpercent = intval($bandwidth / 240.0  * 100.0);
+    $bpercent = min(intval($bandwidth / 240.0  * 100.0), 100);
     $rlabel = sprintf("%s req/s", number_format($req));
-    $rpercent = intval($req / 15000.0 * 100.0);
+    $rpercent = min(intval($req / 15000.0 * 100.0), 100);
     $olabel = sprintf("%.0f%%", $ok);
     $opercent = intval($ok);
     $alabel = sprintf("%.1f req/s", $apirate);
-    $apercent = intval($apirate / 500.0 * 100.0);
+    $apercent = min(intval($apirate / 500.0 * 100.0), 100);
 
     $s = <<<EOF
 <div class="card mb-3">
