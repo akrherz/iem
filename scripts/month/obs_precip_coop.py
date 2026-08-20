@@ -29,7 +29,7 @@ def main():
         WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and
         day >= :day1 and day < :day2
         GROUP by id, lat, lon""",
-                table=f"summary_{now:Y}",
+                table=f"summary_{now:%Y}",
             ),
             {"day1": day1, "day2": day2},
         )

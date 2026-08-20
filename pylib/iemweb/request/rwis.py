@@ -176,6 +176,7 @@ class Schema(CGIModel):
             self.sts = self.sts.replace(tzinfo=ZoneInfo("America/Chicago"))
         if self.ets.tzinfo is None:
             self.ets = self.ets.replace(tzinfo=ZoneInfo("America/Chicago"))
+        return self
 
 
 def compute_output_columns(
