@@ -975,7 +975,7 @@ function setupDropdownPopulation() {
     iemdata.vtec_phenomena.forEach(obj => {
         const option = document.createElement('option');
         option.value = obj[0];
-        option.textContent = obj[1];
+        option.textContent = `[${obj[0]}] ${obj[1]}`;
         phSelect.appendChild(option);
     });
 
@@ -984,7 +984,7 @@ function setupDropdownPopulation() {
     iemdata.vtec_significance.forEach(obj => {
         const option = document.createElement('option');
         option.value = obj[0];
-        option.textContent = obj[1];
+        option.textContent = `[${obj[0]}] ${obj[1]}`;
         sigSelect.appendChild(option);
     });
     // populate year3 select with values from 1986 to current year
