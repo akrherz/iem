@@ -8,7 +8,7 @@ define("IEM_APPID", 145);
 
 $t->title = "RWIS Archived Webcam Imagery";
 $t->jsextra = <<<EOM
- <script src="camera.module.js" type="module"></script>
+<script src="camera.module.js" type="module"></script>
 EOM;
 
 $conn = iemdb("mesosite");
@@ -30,7 +30,7 @@ $t->content = <<<EOM
 
 <p>The IEM archives imagery provided by the Iowa DOT RWIS network.  Each site
 with a webcam has a number of preset views that are each queried about once
-per 10 minutes.  Please select the webcam view you wish to see and then 
+per 10 minutes.  Please select the webcam view you wish to see and then
 select a date of interest.  The left hand menu will automatically populate with
 a listing of images available for that date.</p>
 
@@ -56,7 +56,7 @@ is another tool that allows viewing the RWIS webcam archive.</p>
   <br>{$sform}
   </div>
   <div class="col-md-4 col-sm-12">
-  <span style="font-weight: bold;">2. Date:</span> 
+  <span style="font-weight: bold;">2. Date:</span>
   <br><input type="text" id="datepicker" class="form-control" style="max-width: 200px;" />
   </div>
 </div>
@@ -67,7 +67,7 @@ is another tool that allows viewing the RWIS webcam archive.</p>
   <br />
   <select size="25" name="times" class="form-control" style="font-family: monospace; font-size: 12px;">
     <option value='-1'>Select a camera first...</option>
-  </select> 
+  </select>
   </div>
   <div class="col-md-9 col-sm-12">
   <div style="text-align: center; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">

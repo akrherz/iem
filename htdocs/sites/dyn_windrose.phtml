@@ -50,14 +50,20 @@ $hour1 = get_int404("hour1", 0);
 $hour2 = get_int404("hour2", 0);
 $minute1 = get_int404("minute1", 0);
 $minute2 = get_int404("minute2", 0);
-$units = isset($_GET["units"]) ? xssafe($_GET["units"]) : "mph";
+$units = get_str404("units", "mph");
 $nsector = get_int404('nsector', 36);
 $staticrange = get_int404('staticrange', 0);
-$level = isset($_GET["level"]) ? floatval($_GET['level']) : 1000;
-$fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]) : 'png';
-$conv = isset($_GET["conv"]) ? xssafe($_GET["conv"]) : "from";
+$level = get_float404("level", 1000);
+$fmt = get_str404("fmt", "png");
+$conv = get_str404("conv", "from");
 $dpi = get_int404("dpi", 100);
 $bins = array(2, 5, 7, 10, 15, 20);
+
+/**
+ * Safe conversion to float
+ * @param string $val The value to convert
+ * @return float|string The converted float or an empty string if input is empty
+ */
 function conv($val){
     if (trim($val) == ""){
         return "";
@@ -221,10 +227,12 @@ EOM;
 
 // Allow setting of wind speed bins
 $missive = <<<EOM
-<p>Since calm winds have no direction, the first bin lumps all the calm
-reports together. A value of 2 knots is likely the most appropriate here. The
+<p>
+Since calm winds have no direction, the first bin will include these calm reports
+as well as any reports with a wind speed less than your provided threshold. The
 bin ranges are inclusive on the lower end and exclusive on the upper end. If you
-want to plot less than six bins, leave the right most boxes blank.</p>
+want to plot less than six bins, leave the right most boxes blank.
+</p>
 EOM;
 $content .= sprintf(
     '<br /><input type="checkbox" name="setbins" ' .
@@ -273,7 +281,6 @@ foreach ($opts as $k => $v) {
         $v
     );
 }
-
 
 $content .= '
 </select>

@@ -25,8 +25,10 @@
 }
 
 .btn {
-    z-index: 10; /* Ensure buttons are above other elements */
-    position: relative; /* Prevent unintended overlap */
+    z-index: 10;
+    /* Ensure buttons are above other elements */
+    position: relative;
+    /* Prevent unintended overlap */
 }
 
 /* Flexbox layout for sliders and buttons */
@@ -39,7 +41,8 @@
 }
 
 .slider-item {
-    flex: 1 1 calc(25% - 15px); /* Adjust width for responsiveness */
+    flex: 1 1 calc(25% - 15px);
+    /* Adjust width for responsiveness */
     min-width: 150px;
 }
 
@@ -48,7 +51,8 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    margin-top: 30px; /* Add more spacing above the buttons */
+    margin-top: 30px;
+    /* Add more spacing above the buttons */
 }
 
 label[for="year_slider"],
@@ -68,7 +72,8 @@ label[for="minute_slider"] .btn {
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .slider-item {
-        flex: 1 1 100%; /* Full width on smaller screens */
+        flex: 1 1 100%;
+        /* Full width on smaller screens */
     }
 
     .button-container {
@@ -77,7 +82,8 @@ label[for="minute_slider"] .btn {
     }
 
     .noUi-pips {
-        display: none; /* Hide pip labels on mobile devices */
+        display: none;
+        /* Hide pip labels on mobile devices */
     }
 }
 

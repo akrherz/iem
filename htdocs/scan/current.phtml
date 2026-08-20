@@ -12,6 +12,11 @@ $t = new MyView();
 $t->title = "SCAN Sortable Currents";
 $t->refresh = 3600;
 
+/**
+ * Create a link to the site page for a given station ID
+ * @param string $sid Station ID
+ * @return string URL to the site page
+ */
 function make_link($sid)
 {
     return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
@@ -68,7 +73,7 @@ foreach ($finalA as $key => $val) {
         $t1 .= "G" . round($parts["gust"], 1);
     }
     $t1 .= "</td><td>" . myround($parts["drct"], 0) . "</td>";
-    $t1 .= "<td>". myround($parts["peak"], 0);
+    $t1 .= "<td>" . myround($parts["peak"], 0);
     $t1 .= "</td><td>" . myround($parts["srad"], 0) . "</td></tr>";
 }
 
@@ -92,14 +97,21 @@ foreach ($n as $key => $parts) {
 }
 
 $vals = array(
-    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-    "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
-    "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
-    "ts" => "Observation Time [local]", "feel" => "Feels Like",
-    "min_tmpf" => "Today's Low Temperature", "srad" => "Solar Radiation",
-    "max_tmpf" => "Today's High Temperature", "gtim" => "Time of Gust",
+    "tmpf" => "Air Temperature [°F]",
+    "dwpf" => "Dew Point Temp [°F]",
+    "sknt" => "Wind Speed [knots]",
+    "wdir" => "Wind Direction [deg]",
+    "pday" => "Precip Accum [inches]",
+    "max_sknt" => "Wind Gust [knots]",
+    "ts" => "Observation Time [local]",
+    "feel" => "Feels Like [°F]",
+    "min_tmpf" => "Today's Low Temperature [°F]",
+    "srad" => "Solar Radiation",
+    "max_tmpf" => "Today's High Temperature [°F]",
+    "gtim" => "Time of Gust",
     "drct" => "Wind Direction",
-    "station" => "Station ID", "relh" => "Relative Humidity"
+    "station" => "Station ID",
+    "relh" => "Relative Humidity"
 );
 
 $t->current_network = 'SCAN';
@@ -121,7 +133,7 @@ a column to sort it. Timestamps are in the local station's timezone.<br>
   <th colspan="3">Wind [knots]</th>
   <th>&nbsp;</th>
 <tr>
-  
+
   <th>
    <a href="current.phtml?sortcol=tmpf">Air</a>
    (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /

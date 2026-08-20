@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
@@ -18,10 +18,10 @@ vice-versa.</p>
 of degrees Fahrenhit.</p>
 
 <p><h3>Wind Direction [drct]</h3>
-<p>Wind Direction can sometimes be a hard concept to interpret.  The 
-values are in integer degrees for where the wind is blowing from.  0&deg; 
+<p>Wind Direction can sometimes be a hard concept to interpret.  The
+values are in integer degrees for where the wind is blowing from.  0&deg;
 is a wind from the North.  90&deg; is a wind from the East.  180&deg; in
-a wind from the South.  &270&deg; is a wind from the West. 
+a wind from the South.  &270&deg; is a wind from the West.
 <br>For example.  If the value is 90, this is an easterly wind.  Meaning,
 if you were facing east, the wind would be in your face.</p>
 
@@ -42,8 +42,8 @@ the site for the current month. Values are in inches.</p>
 </p>
 
 <p><h3>Relative Humidity [relh]</h3>
-<p>Relative humidity is expressed as a percentage.  It is a 
-measure of the amount of water vapor currently in the air versus the 
+<p>Relative humidity is expressed as a percentage.  It is a
+measure of the amount of water vapor currently in the air versus the
 capacity of the air.</p>
 
 <p><h3>Altimeter [alti]</h3>

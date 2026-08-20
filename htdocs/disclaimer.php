@@ -4,19 +4,31 @@ require_once "../include/myview.php";
 $t = new MyView();
 $t->title = "Disclaimer";
 $t->content = <<< EOM
-<h3><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Disclaimer</h3>
+<h3><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Disclaimer / Privacy Policy</h3>
 
-<p>While we use care to provide accurate weather/climatic information,
+<p>
+While we use care to provide accurate weather/climatic information,
 errors may occur because of equipment or other failure. We therefore provide this
 information without any warranty of accuracy. Users of this weather/climate data
-do so at their own risk, and are advised to use independent judgement as to 
-whether to verify the data presented.</p>
+do so at their own risk, and are advised to use independent judgement as to
+whether to verify the data presented.
+</p>
 
 <h3>Usage of IEM Products</h3>
 
-<p>The materials found on this website are in the public domain and may be used
+<p>
+The materials found on this website are in the public domain and may be used
 freely by anyone for any lawful purpose.  Attributing the Iowa Environmental
-Mesonet of Iowa State University would be appreciated.</p>
+Mesonet of Iowa State University would be appreciated.
+</p>
+
+<h3>Privacy Policy</h3>
+
+<p>
+The Iowa Environmental Mesonet (IEM) does not collect any personal information about
+users of this website.  The IEM lighty uses cookies to provide a better user
+experience.  The IEM does not use cookies to track users or collect personal information.
+</p>
 
 EOM;
 $t->render('single.phtml');

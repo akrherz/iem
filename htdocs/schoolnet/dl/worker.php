@@ -45,13 +45,13 @@ $d = array(
     "space" => " ",
     "tab" => "\t"
 );
-if (!array_key_exists($delim, $d)){
+if (!array_key_exists($delim, $d)) {
     http_response_code(422);
     die("Invalid delimiter specified!");
 }
 
 $stations = array_key_exists("station", $_GET) ? $_GET["station"] : ["SAMI4"];
-$stationSQL = "{". implode(",", $stations) . "}";
+$stationSQL = "{" . implode(",", $stations) . "}";
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata";
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";

@@ -15,17 +15,17 @@ $t->title = "RWIS Surface Currents";
 $t->refresh = 600;
 
 $vals = array(
-    "tsf0" => "Sensor 1 - Temp [F]",
-    "tmpf" => "Air Temp [F]",
-    "dwpf" => "Dew Point [F]",
-    "tsf1" => "Sensor 2 - Temp [F]",
-    "tsf2" => "Sensor 3 - Temp [F]",
-    "tsf3" => "Sensor 4 - Temp [F]",
-    "pave_avg" => "Ave Surf Temp",
-    "dry0" => "Sensor 1 - Cond [F]",
-    "dry1" => "Sensor 2 - Cond [F]",
-    "dry2" => "Sensor 3 - Cond [F]",
-    "dry3" => "Sensor 4 - Cond [F]",
+    "tsf0" => "Sensor 1 - Temp [°F]",
+    "tmpf" => "Air Temp [°F]",
+    "dwpf" => "Dew Point [°F]",
+    "tsf1" => "Sensor 2 - Temp [°F]",
+    "tsf2" => "Sensor 3 - Temp [°F]",
+    "tsf3" => "Sensor 4 - Temp [°F]",
+    "pave_avg" => "Ave Surf Temp [°F]",
+    "dry0" => "Sensor 1 - Cond [°F]",
+    "dry1" => "Sensor 2 - Cond [°F]",
+    "dry2" => "Sensor 3 - Cond [°F]",
+    "dry3" => "Sensor 4 - Cond [°F]",
     "ts" => "Observation Time",
     "name" => "Site Name",
 );
@@ -61,8 +61,10 @@ foreach ($jobj["data"] as $bogus => $ob) {
     }
 
     $t2 = array(
-        $mydata[$key]['tsf0'], $mydata[$key]['tsf1'],
-        $mydata[$key]['tsf2'], $mydata[$key]['tsf3']
+        $mydata[$key]['tsf0'],
+        $mydata[$key]['tsf1'],
+        $mydata[$key]['tsf2'],
+        $mydata[$key]['tsf3']
     );
     arsort($t2);
 

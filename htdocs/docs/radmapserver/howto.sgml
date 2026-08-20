@@ -8,7 +8,7 @@
 
 <abstract>
 This HOWTO explains how to create "unprojected" geo-referenced NEXRAD
-imagery ready for use within GIS.  As an example,  <url url="http://mapserver.gis.umn.edu" name="Mapserver"> is used to illustrate web mapping with this 
+imagery ready for use within GIS.  As an example,  <url url="http://mapserver.gis.umn.edu" name="Mapserver"> is used to illustrate web mapping with this
 raster file.
 
 Updated on 28 Jul 2004 with various fixes to make the document current.
@@ -24,14 +24,14 @@ Almost every weather website on the Internet has some sort of <url url="http://w
 
 <p>
 This HOWTO covers a mechanism to produce geo-referenced NEXRAD imagery from <url url="http://my.unidata.ucar.edu/content/software/gempak/index.html" name="GEMPAK">. As a GIS web mapping example, we use <url url="http://mapserver.gis.umn.edu" name="Mapserver"> to create a simple, but
-powerfull web application. This HOWTO assumes that you are running a 
-modern version of Linux.  Other UNIXs with <url url="http://www.gnu.org" name="GNU software"> installed 
+powerfull web application. This HOWTO assumes that you are running a
+modern version of Linux.  Other UNIXs with <url url="http://www.gnu.org" name="GNU software"> installed
 should work as well.
 </p>
 
 <p>
-This HOWTO is geared for those in the <url url="http://my.unidata.ucar.edu" name="UNIDATA community"> with an active <url url="http://my.unidata.ucar.edu/content/software/idd/index.html" name="Internet
-Data Distribution"> feed and already have GEMPAK installed.  If you don't have 
+This HOWTO is geared for those in the <url url="http://my.unidata.ucar.edu" name="UNIDATA community"> with an active <url url="https://www.unidata.ucar.edu/data/internet-data-distribution-idd" name="Internet
+Data Distribution"> feed and already have GEMPAK installed.  If you don't have
 either of these, you will probably just be interested in the Mapserver sections.
 The <it>radmapserver-files.tar.gz</it> contains an example RADAR image ready
 for use with Mapserver or any other raster supporting GIS.
@@ -55,8 +55,8 @@ GEMPAK|General Meteorological Application Package.  Useful for dealing with NWS 
 
 <sect1>Reading this HOWTO
 <p>
-Some of you reading this may have no interest in generating the composites, 
-but wish to use the composites.  Currently, I am not aware of a group 
+Some of you reading this may have no interest in generating the composites,
+but wish to use the composites.  Currently, I am not aware of a group
 generating this data source for free.  I have started generating a national
 base composite reflectivity as a proof of concept.
 </p>
@@ -97,7 +97,7 @@ webserver's CGI-BIN directory.
 <sect1>Software and Data Access
 <p>
 The following items must be installed and configured before any of this HOWTO
-could potentially work for you.  Describing the installation of any of these 
+could potentially work for you.  Describing the installation of any of these
 packages is beyond the scope of this document.
 <itemize>
  <item> You should be using the Linux operating system, but there is no reason
@@ -117,7 +117,7 @@ packages is beyond the scope of this document.
 <p>
 The following items will be installed during this howto.  The installation of
 Proj.4 will require privileged access to your system.  The Mapserver components
-will require access to your webserver's CGI-BIN directory. 
+will require access to your webserver's CGI-BIN directory.
 <itemize>
  <item>Proj.4
  <item>Mapserver
@@ -127,19 +127,19 @@ will require access to your webserver's CGI-BIN directory.
 
 <sect1>Hardware
 <p>
-Hardware requirements is a tricky topic.  I have seen 300 MHz machines outperform 1 GHz machines when properly configured.  Common sense applies here.  If you want to generate nationwide composites every 5 minutes, you will need a healthy machine.  If you are supporting a small intranet, a modest machine will do. 
+Hardware requirements is a tricky topic.  I have seen 300 MHz machines outperform 1 GHz machines when properly configured.  Common sense applies here.  If you want to generate nationwide composites every 5 minutes, you will need a healthy machine.  If you are supporting a small intranet, a modest machine will do.
 </p>
 
 <p>
 For our purposes, Mapserver will not introduce a performance bottleneck
 on your system.  It is extremely fast and robust!  Any slowness typically comes
-when you start reprojecting massive raster layers, but we aren't going to 
+when you start reprojecting massive raster layers, but we aren't going to
 do that!
 </p>
 
 <sect1>System Environment
 <p>
-You are going to need root privileges on your system.  So either know your 
+You are going to need root privileges on your system.  So either know your
 root password or be very kind to the system administrator! We will be installing
 Proj.4 into /usr/local, which is a standard place to put 3rd party software.
 Mapserver will be installed into the cgi-bin directory of your webserver.
@@ -151,21 +151,21 @@ Mapserver will be installed into the cgi-bin directory of your webserver.
 <sect>
  <heading>Building the composites with GEMPAK</heading>
 <p>
-Probably the easiest component of this HOWTO is building the composite 
+Probably the easiest component of this HOWTO is building the composite
 image within GEMPAK!  If you are running a version of GEMPAK before 5.6.j, you
 will need to download and install the nex2img program.  If you already have
 nex2img, then you can skip the next subsection.
 </p>
 
 <p>
-GEMPAK is publicly available from the <url url="http://my.unidata.ucar.edu/content/software/gempak/index.html" name="UNIDATA website">.  Installing GEMPAK 
+GEMPAK is publicly available from the <url url="http://my.unidata.ucar.edu/content/software/gempak/index.html" name="UNIDATA website">.  Installing GEMPAK
 is way outside the scope of this HOWTO.
 </p>
 
 <p>
-Nex2img was written by Steve Chiswell at the UNIDATA Program Center.  His 
+Nex2img was written by Steve Chiswell at the UNIDATA Program Center.  His
 program is the key to making this whole system work.  Before nex2img, it was
-extremely tricky to get the geo-referencing of RASTERs, produced in GEMPAK, correct for use 
+extremely tricky to get the geo-referencing of RASTERs, produced in GEMPAK, correct for use
 within GIS.
 </p>
 
@@ -194,8 +194,8 @@ With the nex2img program built, you are now ready to generate the composites.
 <p>
 This simple script will crank out an image.  I am specifying a GRDAREA for
 Iowa and extended. You will want to modify for your own needs.  Keep in mind
-that this application composites individual site NEXRADs,  you can't build a nationwide 
-composite without having all the individual sites. 
+that this application composites individual site NEXRADs,  you can't build a nationwide
+composite without having all the individual sites.
 <tscreen><code>
 #!/bin/csh
 
@@ -210,11 +210,11 @@ nex2img << EOF > nex2img.log
  GRDAREA  = 37.00;-104.00;48.99;-87.01
  PROJ     = CED
  KXKY     = 1700;1200
- CPYFIL   =  
+ CPYFIL   =
  GFUNC    = n0r
  RADTIM   = ${gtime}
  RADDUR   = 15
- RADFRQ   = 
+ RADFRQ   =
  STNFIL   = nexrad.tbl
  RADMODE  = P
  RADFIL   = radar.gif
@@ -234,27 +234,27 @@ endif
 </p>
 
 <p>
-The nex2img program will generate an image called "radar.gif".  In order to 
+The nex2img program will generate an image called "radar.gif".  In order to
 work with most GIS systems, you will probably want to convert this file
 to another format namely TIFF, but you can choose JPG or PNG.  We then place
 the radar.tif file in the webserver directory for later use by mapserver.
 </p>
 
 <p>
-Without getting too long winded, lets discuss image formats.  The easiest 
+Without getting too long winded, lets discuss image formats.  The easiest
 format for use within GIS is probably TIFF.  Although very large, uncompressed
-tiff files are extremely fast within GIS.  The reason is that the application 
+tiff files are extremely fast within GIS.  The reason is that the application
 can "seek" the file to only pull needed data.  With compressed formats, an
-entire set of data needs to be uncompressed and then processed.  Also, most 
+entire set of data needs to be uncompressed and then processed.  Also, most
 people will probably try loading the image in ESRI's ArcView.  ArcView likes
 TIFF files and has built in support for them.
 </p>
 
 <sect1>Geo-referencing the composite image
 <p>
-Now that we have an image, we need to georeference it.  Georeferencing of 
+Now that we have an image, we need to georeference it.  Georeferencing of
 images is done with a world file.  A world file is simply a file with 6 lines
-of meta data describing the navigation of an image.  The format is for 
+of meta data describing the navigation of an image.  The format is for
 example:
 <tscreen><code>
 0.010 (size of pixel in x direction)
@@ -262,12 +262,12 @@ example:
 0.000000000000 (rotation term for column) *Typically zero
 -0.010 (size of pixel in y direction)
 -95.0000 (x coordinate of centre of upper left pixel in map units)
-42.300 (y coordinate of centre of upper left pixel in map units) 
+42.300 (y coordinate of centre of upper left pixel in map units)
 </code></tscreen>
 Note that the units of the geo-referencing are in the same units of the
 projection.  Since we are in lat-lon space, the units are decimal degrees.
 If you were in UTM space, it would probably be meters.
-For the image generated from my example of nex2img, my world file 
+For the image generated from my example of nex2img, my world file
 would look like
 <tscreen><code>
    0.01000
@@ -281,8 +281,8 @@ would look like
 
 <sect2>Naming the world file
 <p>
-Depending on your GIS, the naming convention of your world file may be 
-different.  Many systems use a generic <it>.wld</it> to describe any world 
+Depending on your GIS, the naming convention of your world file may be
+different.  Many systems use a generic <it>.wld</it> to describe any world
 file.  Others use variants on the image format nomenclature, for instance, the world file
 for TIF formated files is <it>.tfw</it> and for PNG is <it>.pngw</it>. For our
 purposes, we will use <it>.wld</it>.
@@ -296,7 +296,7 @@ purposes, we will use <it>.wld</it>.
 If you have made it this far, you are probably wondering what to do with the
 RASTER image with no political borders or other denotations and this silly
 6 line world file.  The next section shows an example of taking this image
-and using the powerful Mapserver to produce a Web Map application.  Trust me, 
+and using the powerful Mapserver to produce a Web Map application.  Trust me,
 this is not the only application of this data.
 </p>
 
@@ -310,7 +310,7 @@ this is not the only application of this data.
 
 <p>
 Like many Open Source packages, Mapserver relies on external libraries to handle
-much of the heavy lifting.  This is both a good thing and a bad thing.  The good thing is that the Mapserver folks don't have to program all the needed functionality, the bad thing is that you can reach dependency-hell with this setup.  For our purposes, we will only build with Proj.4 support, but you can rebuild mapserver later 
+much of the heavy lifting.  This is both a good thing and a bad thing.  The good thing is that the Mapserver folks don't have to program all the needed functionality, the bad thing is that you can reach dependency-hell with this setup.  For our purposes, we will only build with Proj.4 support, but you can rebuild mapserver later
 to link with other libraries for more functionality.
 </p>
 
@@ -334,7 +334,7 @@ $ make clean
 </p>
 
 <p>
-If everything went well, you should notice a libproj in /usr/local/lib that 
+If everything went well, you should notice a libproj in /usr/local/lib that
 mapserver can link to.
 </sect1>
 
@@ -343,12 +343,12 @@ mapserver can link to.
 As I write this (28 Jul 2004), Mapserver is at version 4.2.1 .  It is preferable that you be running this version for this HOWTO, but it is not required.
 For our purposes, the
 only difference between the current version 4.2.1 and the old 3.6.x versions
-is the 'OFFSITE' keyword in the .map file.  In Mapserver 4.x, this is a RGB value and in Mapserver 3.x, this is a color map index value. 
+is the 'OFFSITE' keyword in the .map file.  In Mapserver 4.x, this is a RGB value and in Mapserver 3.x, this is a color map index value.
 <tscreen><code>
 $ wget http://cvs.gis.umn.edu/dist/mapserver-4.2.1.tar.gz
 $ tar -zxvf mapserver-4.2.1.tar.gz
 $ cd mapserver-4.2.1
-$ ./configure --with-proj --with-png 
+$ ./configure --with-proj --with-png
 $ make
 $ cp -i mapserv /var/www/cgi-bin/mapserv
 </code></tscreen>
@@ -356,12 +356,12 @@ $ cp -i mapserv /var/www/cgi-bin/mapserv
 
 <p>
 Now, if the build process worked, you should have a binary called 'mapserv'
-if your current working directory.  Verify that the mapserv binary is okay 
+if your current working directory.  Verify that the mapserv binary is okay
 by executing
 <tscreen><code>
 $ ./mapserv -v
 </code></tscreen>
-This command will spit out the capabilities of Mapserver.  For this demo, 
+This command will spit out the capabilities of Mapserver.  For this demo,
 we need support for SHAPEFILES and the TIFF file format.  The output from the
 above command should contain <it>OUTPUT=PNG INPUT=TIFF INPUT=SHAPEFILE</it>.
 </p>
@@ -369,9 +369,9 @@ above command should contain <it>OUTPUT=PNG INPUT=TIFF INPUT=SHAPEFILE</it>.
 
 <sect1>Lets pause again!
 <p>
-If you got this far with these instructions, you are much smarter than I am. 
+If you got this far with these instructions, you are much smarter than I am.
 Since I couldn't even get this to work following my own instructions.  Anyway,
-we now have a CGI application that we can install on our webserver and begin 
+we now have a CGI application that we can install on our webserver and begin
 building a web mapping application!  Yeah!
 </p>
 </sect1>
@@ -381,7 +381,7 @@ building a web mapping application!  Yeah!
 <sect1>Getting Started
 <p>
 It is somewhat hard to keep this generic, when everyone does things differently.
-I will assume a base RPM install of apache on Red Hat Linux.  If your 
+I will assume a base RPM install of apache on Red Hat Linux.  If your
 environment is different, you should know how it is different!
 </p>
 
@@ -395,7 +395,7 @@ $ wget https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.ta
 $ cd /var/www/htdocs
 $ mkdir mstmp
 $ chown apache mstmp
-$ tar -xzvf /tmp/radmapserver-files.tar.gz 
+$ tar -xzvf /tmp/radmapserver-files.tar.gz
 </code></tscreen>
 The mstmp directory is needed by mapserver to write temporary files to.  The
 radmapserver directory is where we will build our application interface at.
@@ -405,7 +405,7 @@ radmapserver directory is where we will build our application interface at.
 
 <sect1>The Mapserver .map file
 <p>
-Fundamental to the Mapserver application, is a .map configuration file.  For 
+Fundamental to the Mapserver application, is a .map configuration file.  For
 our demo, we will build a simple map file called radmapserver.map in our
 <it>/var/www/htdocs/radmapserver</it> directory.  The file is as follows.
 <tscreen><code>
@@ -487,20 +487,20 @@ example radmapserver.html file is as follows.
 
 &lt;/td&gt;&lt;td&gt;
 
-&lt;p&gt; &lt;b&gt; Select layers to display &lt;/b&gt; 
+&lt;p&gt; &lt;b&gt; Select layers to display &lt;/b&gt;
 &lt;br&gt;&lt;input type="checkbox" value="radar" name="layer" [radar_check] &gt; RADAR layer
 &lt;br&gt;&lt;input type="checkbox" value="states" name="layer" [states_check] &gt; States layer
 
 &lt;p&gt;  Set your zoom option:
-&lt;br&gt;  
-&lt;select name="zoom" size="1"&gt;  
-  &lt;option value="4" [zoom_4_select]&gt; Zoom in 4 times 
-  &lt;option value="3" [zoom_3_select]&gt; Zoom in 3 times 
-  &lt;option value="2" [zoom_2_select]&gt; Zoom in 2 times 
-  &lt;option value="1" [zoom_1_select]&gt; Recenter Map 
-  &lt;option value="-2" [zoom_-2_select]&gt; Zoom out 2 times 
-  &lt;option value="-3" [zoom_-3_select]&gt; Zoom out 3 times 
-  &lt;option value="-4" [zoom_-4_select]&gt; Zoom out 4 times 
+&lt;br&gt;
+&lt;select name="zoom" size="1"&gt;
+  &lt;option value="4" [zoom_4_select]&gt; Zoom in 4 times
+  &lt;option value="3" [zoom_3_select]&gt; Zoom in 3 times
+  &lt;option value="2" [zoom_2_select]&gt; Zoom in 2 times
+  &lt;option value="1" [zoom_1_select]&gt; Recenter Map
+  &lt;option value="-2" [zoom_-2_select]&gt; Zoom out 2 times
+  &lt;option value="-3" [zoom_-3_select]&gt; Zoom out 3 times
+  &lt;option value="-4" [zoom_-4_select]&gt; Zoom out 4 times
 &lt;/select&gt;
 
 &lt;p&gt;
@@ -521,7 +521,7 @@ web browser loaded up and point it at your website with the following URL
 
 <sect>GIS-Ready! NEXRAD information
 <p>
-This section contains links to folks already generating GIS-Ready products 
+This section contains links to folks already generating GIS-Ready products
 from NEXRAD data.
 </p>
 
@@ -531,7 +531,7 @@ The IEM is generating a nationwide composite of base reflectivity every 5
 minutes.  This product is available in this directory:
 <code>https://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/
 </code>
-The IEM is generating a PNG and TIFF formatted image.  There is also a 
+The IEM is generating a PNG and TIFF formatted image.  There is also a
 compressed TIFF image available in that directory as well.  The file prefix
 <it>n0r_0</it> contains the current data.
 </p>
@@ -567,11 +567,11 @@ exit
 
 </sect>
 
-<sect>Conclusions 
+<sect>Conclusions
 <p>
 This HOWTO demonstrated a very primitive component of GIS, web mapping.  There
-is just so much more that can be done.  For those of you familiar with PHP, 
-Mapserver has an outstanding PHP interface to the Mapserver API.  You can 
+is just so much more that can be done.  For those of you familiar with PHP,
+Mapserver has an outstanding PHP interface to the Mapserver API.  You can
 create some of the neatest applications using the Mapserver API and the power
 of PHP.  The Iowa Environmental Mesonet has implemented most of its Mapserver
 interfaces using the PHP mapscript module.  The source code for these applications is licensed under the GPL, but I just don't place the code on the website to download.  Just
@@ -580,19 +580,19 @@ email me if you would like a copy...
 
 <sect1>Future Work
 <p>
-I would suspect that most people will not have the ability to generate nationwide NEXRAD composites.  One of the neat things Mapserver can do is act as a 
+I would suspect that most people will not have the ability to generate nationwide NEXRAD composites.  One of the neat things Mapserver can do is act as a
 Web Map Service (WMS) server and client.  Potentially a WMS server could be
 set up somewhere on the Internet and then your mapserver could make a remote
 WMS call to it get the image.
 </p>
 <p>
 Another option, will be for either UNIDATA, the IEM, or somebody else to generate the nationwide composite (in 'unprojected' coordinates) and make that available on the IDD.  This is probably
-the easiest way to get this data to the community. 
+the easiest way to get this data to the community.
 </p>
 <p>
-Although never covered in this HOWTO, timestamps are a big issue with this 
-system.  I have built hacks using DBF files in order to get timestamps on the 
-generated images.  Here is an example of output using this 'hack'.  At some 
+Although never covered in this HOWTO, timestamps are a big issue with this
+system.  I have built hacks using DBF files in order to get timestamps on the
+generated images.  Here is an example of output using this 'hack'.  At some
 point, I will add this hack to the HOWTO.
 <tscreen>
 <url url="https://mesonet.agron.iastate.edu/data/mwcomp.png">

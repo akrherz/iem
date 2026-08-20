@@ -24,7 +24,7 @@ $t->content = <<<EOM
  <td>4 bit Base Reflectivity 5dbz</td>
  <td>8 bit Base Reflectivity 0.5dbz</td>
  </tr>
- 
+
 <tr>
  <th>Format:</th>
  <td colspan="2">PNG image (GeoTiff available)</td></tr>
@@ -34,7 +34,7 @@ $t->content = <<<EOM
  <td>6000x2600 pixels</td>
  <td>12000x5200 pixels<br />12200x5400 after 8 Aug 2014</td>
  </tr>
- 
+
 <tr>
  <th>Time:</th>
  <td>Every 5 minutes since 1 Jan 1995</td>
@@ -42,7 +42,7 @@ $t->content = <<<EOM
  </tr>
 
 <tr><th>Download:</th>
-<td colspan="2"><a href="/data/gis/images/4326/USCOMP/">Current</a> 
+<td colspan="2"><a href="/data/gis/images/4326/USCOMP/">Current</a>
 and <a href="/archive/data/{$d}/GIS/uscomp/">Archive for today</a></td></tr>
 </tbody>
 </table>
@@ -158,12 +158,12 @@ NODATA
  <li><a href="/GIS/rad-by-year-fe.phtml">NEXRAD Mosiacs by Year</a></li>
 </ul>
 
-<p>Since 2003, the IEM has been generating and archiving nationwide mosaics 
-of NEXRAD base reflectivity every 5 minutes.  These mosaics are generated 
+<p>Since 2003, the IEM has been generating and archiving nationwide mosaics
+of NEXRAD base reflectivity every 5 minutes.  These mosaics are generated
 by combining the 130+ individual RADARs that comprise the NEXRAD network. This
 page provides background information on this dataset and highlights various
 ways this dataset can be and is used.  <b>Please note:</b>  Errors can and do
-occur during the automated generation of these images, please use them with 
+occur during the automated generation of these images, please use them with
 care.
 
 <h3>Important changes to this product.</h3>
@@ -172,14 +172,14 @@ care.
   pixel resolution is roughly ~2 km.</li>
  <li><b>14 November 2005:</b> The pixel resolution is increased to ~1 km
   thanks to the support of a <a href="/docs/unidata2006/">Unidata Equipment grant</a>.</li>
- <li><b>10 May 2007:</b> Implemented a clutter suppression algorithm to 
+ <li><b>10 May 2007:</b> Implemented a clutter suppression algorithm to
   remove most anomalous propogation during the summertime.</li>
  <li><b>11 Nov 2008:</b> Implemented a crude check against RUC model
 surface temperature analysis for near freezing areas to stop the clutter
 suppression algorithm from removing areas of winter precipitation.</li>
  <li><b>14 May 2009:</b> Completed a 7 month process of backfilling the
 mosaics back to 1 Jan 1995. Also regenerated mosaics prior to 2006 to
-produce them on a ~1 km grid as well.  Big thanks to Steve Ansari at NCEI 
+produce them on a ~1 km grid as well.  Big thanks to Steve Ansari at NCEI
 for providing the level3 archive.</li>
  <li><b>25 Aug 2010:</b> Reprocessed 2005 + 2006 data to improve product
 quality and to backfill the archive with clutter suppression enabled during
@@ -216,10 +216,10 @@ composites of DAA and DTA instead with no plans of creating a psuedo composite.<
 <a href="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png"><img src="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png" width="480"></a>
 <br />Composite of mosaics for 18 Oct 2007. Click image for regular size.
 </div>
-<p>The IEM receives a feed of NEXRAD Level III products from the <a href="http://www.unidata.ucar.edu/software/idd/">Unidata Internet Data Distribution</a>. 
+<p>The IEM receives a feed of NEXRAD Level III products from the <a href="https://www.unidata.ucar.edu/data/internet-data-distribution-idd">Unidata Internet Data Distribution</a>.
 This feed includes the Base Reflectivity (N0R) and Net Echo Top (NET) products
 which are saved to disk for later processing.  Every 5 minutes, a script runs
-a <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program 
+a <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program
 called <a href="http://www.unidata.ucar.edu/cgi-bin/gempak/manual/programs_index?nex2img">nex2img</a>.  nex2img searches the on-disk data for current (within
 15 minutes of runtime) products and then mosaics them into a large image.</p>
 
@@ -231,8 +231,8 @@ wintertime, this comparison is skipped for most of the country. The final result
 is a PNG formatted image looking much like the example image shown above.
 
 <p>The final image is shipped to the IEM webfarm for archival and use. You can
-always find the 10 most recently generated rasters <a href="https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">here</a> (n0r_0* is the newest). 
-You can also find current and historical images in the archive.  The format 
+always find the 10 most recently generated rasters <a href="https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">here</a> (n0r_0* is the newest).
+You can also find current and historical images in the archive.  The format
 for the URL is:
 <br /><code style="margin: 20px;">
 https://mesonet.agron.iastate.edu/archive/data/YYYY/mm/dd/GIS/uscomp/
@@ -246,13 +246,13 @@ https://mesonet.agron.iastate.edu/archive/data/{$d}/GIS/uscomp/
 <h3>Product Format:</h3>
 
 <p>The images are stored in PNG format.  They have a 4-bit colormap and are
-non-interlaced.  Images for the past 50 minutes are also available in TIFF, 
+non-interlaced.  Images for the past 50 minutes are also available in TIFF,
 GeoTIFF, and gzipped GeoTIFF format.  Most people want to use these images
 in a GIS, so world files (.wld or .tfw) are available in the same current and
 archive folders.  The projection of these images is in EPSG:4326 (WGS84 longlat).
 
-<p>For some people, the PNG format is not readable by their GIS, so the 
-IEM provides a server-side conversion of the PNG files for delivery of a 
+<p>For some people, the PNG format is not readable by their GIS, so the
+IEM provides a server-side conversion of the PNG files for delivery of a
 GeoTIFF.  This application is called like so:
 <br /><code style="margin: 20px;">
 https://mesonet.agron.iastate.edu/request/gis/n0r2gtiff.php?dstr=200711010025
@@ -264,7 +264,7 @@ of the requested raster.  Rasters are only available at minutes modulo 5.
 
 <img src="color_ramp.gif" style="float: left; margin: 10px; border: 1px;">
 
-<p>The raster image has a colormap associated with it. The raw pixel values 
+<p>The raster image has a colormap associated with it. The raw pixel values
 increase monotonically from -30 dbz to 75 dbz every 5 dbz.  All values below
 0 dbz are assigned black (rgb 0 0 0).  We have tried to match the commonly
 used NEXRAD display as what you see on <a href="http://radar.weather.gov">National Weather Service</a> page. <b>Please note:</b> We do not include a concept
@@ -273,7 +273,7 @@ or out away from the CONUS are just "black".
 
 <h3>Web Map Service (WMS)</h3>
 
-<p>A special way you can interface with this data archive is via the Web 
+<p>A special way you can interface with this data archive is via the Web
 Map Service that also supports time based retrieval (<a href="http://www.opengeospatial.org/standards/wms">WMS-T</a>).  Point your WMS-T aware app at:
 <br /><code style="margin: 20px;">
 https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
@@ -282,9 +282,9 @@ https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
 
 <h3>Example WMS-T Application</h3>
 
-<p>Here is an <a href="wmst.html">example interface</a> utilizing the WMS-T NEXRAD service. 
-        The interface code is a part of the 
-        <a href="http://www.openlayers.org/">OpenLayers toolkit</a>. 
+<p>Here is an <a href="wmst.html">example interface</a> utilizing the WMS-T NEXRAD service.
+        The interface code is a part of the
+        <a href="http://www.openlayers.org/">OpenLayers toolkit</a>.
         The default time display shows Hurricane Katrina making landfall.
 <br />
 <iframe src="wmst.html" style="width: 550px; height: 450px;"></iframe>
