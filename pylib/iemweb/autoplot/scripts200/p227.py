@@ -74,6 +74,7 @@ def plotter(ctx: dict):
                 SELECT geom, issue, expire,
                 coalesce(pop, 0) as pop
                 from text_products, geopop where product_id = :pid
+                and st_area(geom) > 0
                 """,
                 table=f"gpw{popyear}",
             ),

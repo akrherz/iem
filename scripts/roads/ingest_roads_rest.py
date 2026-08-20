@@ -101,7 +101,7 @@ ROADCOND = {
 }
 
 
-def export_shapefile(txn, valid):
+def export_shapefile(txn, valid: datetime):
     """Export a Shapefile of Road Conditions"""
     LOG.info("Exporting for %s", valid)
     os.chdir("/tmp")
@@ -125,7 +125,7 @@ def export_shapefile(txn, valid):
     )
     for row in txn:
         multiline: MultiLineString = loads(row["geom"], hex=True)
-        shp.line(list(multiline.geoms[0].coords))
+        shp.line([list(zip(*multiline.geoms[0].xy, strict=True))])
         shp.record(
             row["segid"],
             row["major"],
