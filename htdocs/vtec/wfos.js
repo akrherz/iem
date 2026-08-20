@@ -51,6 +51,7 @@ iemdata.vtec_phenomena = [
 ['SI','Small Craft for Winds'],
 ['SM','Dense Smoke'],
 ['SN','Snow'],
+['SQ','Snow Squall'],
 ['SR','Storm'],
 ['SU','High Surf'],
 ['TI','Inland Tropical Storm Wind'],
