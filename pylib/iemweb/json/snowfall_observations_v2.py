@@ -27,11 +27,11 @@ https://mesonet.agron.iastate.edu/json/snowfall_observations_v2.py?wfo=MFL
 from datetime import timedelta
 from zoneinfo import ZoneInfo
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.fields import CALLBACK_FIELD, WFO3_FIELD
@@ -65,7 +65,7 @@ def dowork(wfo: str) -> list:
                 f"&wfo={wfo}"
             )
             try:
-                resp = httpx.get(service, timeout=15)
+                resp = requests.get(service, timeout=15)
                 resp.raise_for_status()
                 jdata = resp.json()
                 if not jdata["data"] and now.hour == 6:
@@ -77,10 +77,11 @@ def dowork(wfo: str) -> list:
                         "api/1/nws/snowfall_6hour.json?"
                         f"valid={m1:%Y-%m-%dT%H}:00&wfo={wfo}"
                     )
-                    resp = httpx.get(service, timeout=15)
+                    resp = requests.get(service, timeout=15)
                     resp.raise_for_status()
                     jdata = resp.json()
-            except Exception:
+            except requests.exceptions.RequestException:
+                LOG.info("Failed to get %s", service, exc_info=True)
                 continue
             rows.extend(
                 {

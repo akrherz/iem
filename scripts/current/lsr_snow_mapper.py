@@ -4,7 +4,7 @@ import os
 import subprocess
 import tempfile
 
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.util import (
     get_properties,
@@ -39,7 +39,7 @@ def website_enable_check():
 def do(url, fn):
     """Do the work."""
     try:
-        resp = httpx.get(url, timeout=30)
+        resp = requests.get(url, timeout=30)
         resp.raise_for_status()
     except Exception as exp:
         LOG.info("failure %s for %s", exp, url)

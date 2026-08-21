@@ -118,7 +118,7 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
     def _compute_hour(row: np.ndarray) -> int:
         """Rectify this standard time hour back to DST aware."""
         day, hour = row
-        # This is a special case.
+        # Edge case of 24 represents a local date.
         if hour == 24:
             return 24
         dt = utc(day.year, day.month, day.day, int(hour)) + timedelta(
@@ -134,6 +134,9 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
         )
         # hour values of -1 are missing
         acis.loc[acis[f"{col}_hour"] < 0, f"{col}_hour"] = np.nan
+        # treat anything greater than 24 as missing as well, found 77, 99
+        # 24 is an edge case handled above in _compute_hour
+        acis.loc[acis[f"{col}_hour"] > 24, f"{col}_hour"] = np.nan
         # This is ugly, we need to convert the value back to the DST aware
         # value used by the IEM
         goodrows = acis[f"{col}_hour"].notna()

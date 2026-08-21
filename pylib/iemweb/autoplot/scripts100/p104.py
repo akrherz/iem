@@ -77,6 +77,8 @@ def plotter(ctx: dict):
     days2 = ctx["days2"]
     date1 = ctx["date1"]
     date2 = ctx["date2"]
+    if date1 >= date2:
+        raise NoDataFound("Start date must be before end date.")
 
     title = (
         f"{ctx['_sname']} ({date1:%d %b %Y} - {date2:%d %b %Y})\n"

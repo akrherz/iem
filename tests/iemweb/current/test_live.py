@@ -2,9 +2,9 @@
 
 from io import BytesIO
 
+import responses
 from iemweb.current import live
 from PIL import Image
-from pytest_httpx import HTTPXMock
 from werkzeug.test import Client
 
 
@@ -15,24 +15,32 @@ def test_offline():
     assert response.status_code == 200
 
 
-def test_workflow(httpx_mock: HTTPXMock):
+@responses.activate
+def test_workflow():
     """Test we can fetch an image."""
     image = Image.new("RGB", (320, 240), (73, 109, 137))
     buf = BytesIO()
     image.save(buf, format="JPEG")
     image_bytes = buf.getvalue()
-    httpx_mock.add_response(
-        status_code=200,
-        content=image_bytes,
+    responses.add(
+        responses.GET,
+        "http://example.com",
+        body=image_bytes,
+        status=200,
     )
     client = Client(live.application)
     response = client.get("/current/live.py?id=KCRG-032")  # is_vapix
     assert response.status_code == 200
 
 
-def test_badauth(httpx_mock: HTTPXMock):
+@responses.activate
+def test_badauth():
     """Test that we handle bad auth."""
-    httpx_mock.add_response(status_code=401)
+    responses.add(
+        responses.GET,
+        "http://example.com",
+        status=401,
+    )
     client = Client(live.application)
     response = client.get("/current/live.py?id=KCRG-003")
     assert response.status_code == 200
