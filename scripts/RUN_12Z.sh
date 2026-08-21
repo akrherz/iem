@@ -11,6 +11,8 @@ python cf6_to_iemaccess.py
 
 cd ../hads || exit 1
 python compute_hads_pday.py --date="$(date -u --date '1 days ago' +'%Y-%m-%d')"
+python compute_hads_pday.py --date="$(date -u --date '3 days ago' +'%Y-%m-%d')"
+python compute_hads_pday.py --date="$(date -u --date '31 days ago' +'%Y-%m-%d')"
 
 # Run this twice as to account for some timezones west of Hawaii
 cd ../summary || exit 1
