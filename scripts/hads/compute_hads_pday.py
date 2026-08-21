@@ -1,6 +1,6 @@
 """Attempt at totalling up DCP data
 
-Run from `RUN_12Z.sh` for previous day
+Run from `RUN_12Z.sh` for previous day, 3 days and 31 days ago
 Run from `RUN_20_AFTER.sh` for current day
 """
 
