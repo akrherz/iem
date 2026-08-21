@@ -12,6 +12,7 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2026-08-21: Fix a CSV output bug when ugcname contained a comma.
 - 2026-08-17: HTTP `OPTIONS` requests should be properly handled now.
 - 2026-03-19: A `magge` parameter was added, representing a filter for reports
   with a magnitude greater than or equal to the given value.
@@ -22,7 +23,6 @@ Changelog
 - 2024-08-14: Correct bug with reports for Puerto Rico were not included.
 - 2024-07-18: Instead of returning a `No results found for query` when no
   database entries are found, we return an empty result.
-- 2024-04-05: Initial documentation release and migration to pydantic.
 
 Example Requests
 ----------------
@@ -363,7 +363,7 @@ def application(environ: dict, start_response: callable):
             substr(coalesce(remark, ''),0,200) as tremark,
             ST_y(l.geom) as lat, ST_x(l.geom) as lon,
             to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
-            u.ugc, u.name as ugcname, qualifier
+            u.ugc, coalesce(u.name, '') as ugcname, qualifier
             from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
             valid >= :sts and valid < :ets {sql_filters}
             ORDER by dvalid ASC
@@ -434,7 +434,8 @@ def application(environ: dict, start_response: callable):
                     f"{row['lon']:.2f},{row['magnitude']},"
                     f"{row['wfo']},{row['type']},{row['typetext']},{city},"
                     f"{row['county']},{row['state']},"
-                    f"{row['source']},{tremark},{row['ugc']},{row['ugcname']},"
+                    f"{row['source']},{tremark},{row['ugc']},"
+                    f"{row['ugcname'].replace(',', ' ')},"
                     f"{qualify}\n"
                 )
 
