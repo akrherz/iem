@@ -90,7 +90,7 @@ import pandas as pd
 import requests
 from pydantic import Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -762,7 +762,7 @@ def do_ahps(nwsli):
     return res
 
 
-def do_uvi():
+def do_uvi() -> pd.DataFrame:
     """UVI index."""
     PATTERN = re.compile(
         r"(?P<c1>[A-Z\s]+)\s+(?P<s1>[A-Z][A-Z])\s+(?P<u1>\d+)\s+"
@@ -772,7 +772,18 @@ def do_uvi():
         "https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py"
         "?pil=UVICAC&fmt=text"
     )
-    resp = requests.get(URL, timeout=20)
+    try:
+        resp = requests.get(URL, timeout=20)
+        resp.raise_for_status()
+    except requests.exceptions.RequestException:
+        LOG.info("Failed to retrieve UVI data", exc_info=True)
+        return pd.DataFrame(
+            {
+                "City": ["N/A"],
+                "State": ["N/A"],
+                "UVI": ["N/A"],
+            }
+        )
     rows = []
     for line in resp.content.decode("ascii").split("\n"):
         m = PATTERN.match(line)

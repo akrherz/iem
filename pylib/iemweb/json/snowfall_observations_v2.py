@@ -80,7 +80,7 @@ def dowork(wfo: str) -> list:
                     resp = requests.get(service, timeout=15)
                     resp.raise_for_status()
                     jdata = resp.json()
-            except Exception:
+            except requests.exceptions.RequestException:
                 LOG.info("Failed to get %s", service, exc_info=True)
                 continue
             rows.extend(

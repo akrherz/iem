@@ -125,7 +125,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     for i, rng in enumerate([r1, r2, r3, r4, r5]):
-        if len(rng) != 2:
+        if len(rng) != 2 or rng[0] > rng[1]:
             raise NoDataFound("Invalid Range Provided")
         df[f"cnt{i + 1}"] = 0
         df.loc[

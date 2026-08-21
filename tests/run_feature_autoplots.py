@@ -24,8 +24,8 @@ def run_plot(uri):
             return True
         uri = "http://iem.local{}".format(img[0]["src"])
         resp = requests.get(uri, timeout=600)
-    except requests.exceptions.Timeout:
-        print(f"{uri[16:]} -> Read Timeout")
+    except requests.exceptions.RequestException:
+        print(f"{uri[16:]} -> request exception")
         return False
     # Known failures likely due to missing data
     if resp.status_code == 400:
