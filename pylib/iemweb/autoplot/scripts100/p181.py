@@ -28,11 +28,13 @@ PDICT = {
 }
 
 
-def parse_range(rng: str):
+def parse_range(rng: str) -> list[float]:
     """Convert this into bins"""
     if rng.find(" ") == -1:
         raise NoDataFound("Invalid Range Provided")
-    return [float(f) for f in rng.replace("to", "").split()]
+    return [
+        float(f) for f in rng.replace("to", "").replace("T", "0.0001").split()
+    ]
 
 
 def get_description():
@@ -97,11 +99,14 @@ def get_description():
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
-    r1 = parse_range(ctx["r1"])
-    r2 = parse_range(ctx["r2"])
-    r3 = parse_range(ctx["r3"])
-    r4 = parse_range(ctx["r4"])
-    r5 = parse_range(ctx["r5"])
+    try:
+        r1 = parse_range(ctx["r1"])
+        r2 = parse_range(ctx["r2"])
+        r3 = parse_range(ctx["r3"])
+        r4 = parse_range(ctx["r4"])
+        r5 = parse_range(ctx["r5"])
+    except ValueError as exp:
+        raise NoDataFound("Invalid Range Provided") from exp
     dt = ctx["date"]
     year = ctx["year"]
     varname = ctx["var"]
@@ -120,6 +125,8 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     for i, rng in enumerate([r1, r2, r3, r4, r5]):
+        if len(rng) != 2:
+            raise NoDataFound("Invalid Range Provided")
         df[f"cnt{i + 1}"] = 0
         df.loc[
             ((df[varname] >= rng[0]) & (df[varname] <= rng[1])),
