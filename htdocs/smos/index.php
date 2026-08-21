@@ -4,7 +4,7 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
-$OL = "10.9.0";
+$OL = "10.10.0";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->headextra = <<<EOM
@@ -20,7 +20,7 @@ $y1select = yearSelect(2010, 2010, "year1");
 $m1select = monthSelect(1, "month1");
 $d1select = daySelect(1, "day1");
 
-$y2select = yearSelect(date("Y"), 2010, "year2");
+$y2select = yearSelect(2010, date("Y"), "year2");
 $m2select = monthSelect(1, "month2");
 $d2select = daySelect(1, "day2");
 

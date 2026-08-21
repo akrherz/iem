@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 78);
 require_once "../../../include/myview.php";
@@ -9,12 +9,12 @@ require_once "../../../include/forms.php";
 $nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
     'station[]');
 
-$y1 = yearSelect(2002, date("Y"), "year1");
+$y1 = yearSelect(2002, 2019, "year1", '', 2019);
 $m1 = monthSelect(date("m"), "month1");
 $d1 = daySelect(date("d"), "day1");
 $h1 = hourSelect(0, "hour1");
 
-$y2 = yearSelect(2002, date("Y"), "year2");
+$y2 = yearSelect(2002, 2019, "year2", '', 2019);
 $m2 = monthSelect(date("m"), "month2");
 $d2 = daySelect(date("d"), "day2");
 $h2 = hourSelect(0, "hour2");
@@ -22,9 +22,9 @@ $h2 = hourSelect(0, "hour2");
 $t->content = <<<EOM
 <h3>SchoolNet Data Download</h3>
 
-<p>With this form, you can download schoolnet data.  The 
+<p>With this form, you can download schoolnet data.  The
 archive starts on <b>12 Feb 2002</b> for stations that were online at that
-time.  You may want to consult a 
+time.  You may want to consult a
 <a href="/sites/networks.php?network=KCCI&format=html">listing</a>
 of when the IEM started to archive data from a site.  Data from the current
 day is not dumped into this archive until Midnight.  This means that the most
@@ -140,7 +140,7 @@ recent data is from yesterday.</p>
 
 </form>
 
-<p><b>1. </b> For this archive, data is saved every minute.  In most cases, 
+<p><b>1. </b> For this archive, data is saved every minute.  In most cases,
 you will not be interested in data at that temporal frequency.  You can adjust
 the sampling to cut down on the amount of data.
 <br><b>2. </b> Precipitation is measured by a non-heated tipping bucket.  Thus

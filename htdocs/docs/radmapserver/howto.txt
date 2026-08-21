@@ -72,7 +72,7 @@
 
   This HOWTO is geared for those in the UNIDATA community
   <http://my.unidata.ucar.edu> with an active Internet Data Distribution
-  <http://my.unidata.ucar.edu/content/software/idd/index.html> feed and
+  <https://www.unidata.ucar.edu/data/internet-data-distribution-idd> feed and
   already have GEMPAK installed.  If you don't have either of these, you
   will probably just be interested in the Mapserver sections.  The
   [4mradmapserver-files.tar.gz[24m contains an example RADAR image ready for

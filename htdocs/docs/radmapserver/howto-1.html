@@ -14,18 +14,18 @@ Previous
 <HR>
 <H2><A NAME="s1">1.</A> <A HREF="howto.html#toc1">Introduction</A></H2>
 
-<P>Almost every weather website on the Internet has some sort of 
+<P>Almost every weather website on the Internet has some sort of
 <A HREF="http://www.nws.noaa.gov/radar_tab.html">NEXRAD data display</A>. Unfortunately almost all of these sites are only fulfilling a single purpose, allowing the user to view an image.  Geographical Information Systems (GIS) goes beyond this single purpose model to allow the user to view the image, but then also process it within a GIS system.  Processing could involve working with the RASTER data, reprojecting the image, querying the image, or many other things.</P>
-<P>This HOWTO covers a mechanism to produce geo-referenced NEXRAD imagery from 
-<A HREF="http://my.unidata.ucar.edu/content/software/gempak/index.html">GEMPAK</A>. As a GIS web mapping example, we use 
+<P>This HOWTO covers a mechanism to produce geo-referenced NEXRAD imagery from
+<A HREF="http://my.unidata.ucar.edu/content/software/gempak/index.html">GEMPAK</A>. As a GIS web mapping example, we use
 <A HREF="http://mapserver.gis.umn.edu">Mapserver</A> to create a simple, but
-powerfull web application. This HOWTO assumes that you are running a 
-modern version of Linux.  Other UNIXs with 
-<A HREF="http://www.gnu.org">GNU software</A> installed 
+powerfull web application. This HOWTO assumes that you are running a
+modern version of Linux.  Other UNIXs with
+<A HREF="http://www.gnu.org">GNU software</A> installed
 should work as well.</P>
-<P>This HOWTO is geared for those in the 
-<A HREF="http://my.unidata.ucar.edu">UNIDATA community</A> with an active 
-<A HREF="http://my.unidata.ucar.edu/content/software/idd/index.html">Internet Data Distribution</A> feed and already have GEMPAK installed.  If you don't have 
+<P>This HOWTO is geared for those in the
+<A HREF="http://my.unidata.ucar.edu">UNIDATA community</A> with an active
+<A HREF="https://www.unidata.ucar.edu/data/internet-data-distribution-idd">Internet Data Distribution</A> feed and already have GEMPAK installed.  If you don't have
 either of these, you will probably just be interested in the Mapserver sections.
 The <I>radmapserver-files.tar.gz</I> contains an example RADAR image ready
 for use with Mapserver or any other raster supporting GIS.</P>
@@ -47,24 +47,24 @@ GEMPAK</TD><TD>General Meteorological Application Package. Useful for dealing wi
 <H2><A NAME="ss1.2">1.2</A> <A HREF="howto.html#toc1.2">Reading this HOWTO</A>
 </H2>
 
-<P>Some of you reading this may have no interest in generating the composites, 
-but wish to use the composites.  Currently, I am not aware of a group 
+<P>Some of you reading this may have no interest in generating the composites,
+but wish to use the composites.  Currently, I am not aware of a group
 generating this data source for free.  I have started generating a national
 base composite reflectivity as a proof of concept.</P>
 <H2><A NAME="ss1.3">1.3</A> <A HREF="howto.html#toc1.3">The Quick and Dirty version</A>
 </H2>
 
-<P>The files used in this howto are available here: 
+<P>The files used in this howto are available here:
 <A HREF="https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz">https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz</A>.</P>
 <P>
 <UL>
-<LI>Download and install Proj.4 from 
+<LI>Download and install Proj.4 from
 <A HREF="http://www.remotesensing.org/proj/">http://www.remotesensing.org/proj/</A> .</LI>
-<LI>Download and compile Mapserver with proj, TIFF and PNG support from 
+<LI>Download and compile Mapserver with proj, TIFF and PNG support from
 <A HREF="http://mapserver.gis.umn.edu">http://mapserver.gis.umn.edu</A>  . Place the resulting 'mapserv' binary in your
 webserver's CGI-BIN directory.</LI>
 <LI> Extract the <I>radmapserver-files.tar.gz</I> archive into your web root.</LI>
-<LI> Point your browser at 
+<LI> Point your browser at
 <A HREF="http://your.host.name/cgi-bin/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map&amp;layers=states">http://your.host.name/cgi-bin/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map&amp;layers=states</A> .</LI>
 </UL>
 </P>

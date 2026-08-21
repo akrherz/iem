@@ -2,7 +2,7 @@
 
 ### Summary
 
-The primary format that worldwide airport weather station data is reported in is called METAR. This format is somewhat archaic, but well known and utilized in the community.   The data is sourced from a number of places including: [Unidata IDD](https://www.unidata.ucar.edu/projects/#idd), [NCEI ISD](https://www.ncdc.noaa.gov/isd), [MADIS One Minute ASOS](https://madis.ncep.noaa.gov/madis_OMO.shtml), and [NCEI GHCHh](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly). The weather stations included are typically called "Automated Surface Observation System (ASOS)".  The term "Automated Weather Observation System (AWOS)" is often used inter-changably.
+The primary format that worldwide airport weather station data is reported in is called METAR. This format is somewhat archaic, but well known and utilized in the community.   The data is sourced from a number of places including: [Unidata IDD](https://www.unidata.ucar.edu/projects/#idd), [NCEI ISD](https://www.ncei.noaa.gov/isd), [MADIS One Minute ASOS](https://madis.ncep.noaa.gov/madis_OMO.shtml), and [NCEI GHCHh](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly). The weather stations included are typically called "Automated Surface Observation System (ASOS)".  The term "Automated Weather Observation System (AWOS)" is often used inter-changably.
 
 * __Download Interface__: [IEM On-Demand](https://mesonet.agron.iastate.edu/request/download.phtml)
 * __Spatial Domain__: Worldwide
@@ -14,7 +14,7 @@ The highest quality weather information comes from the ASOS sites.  These statio
 
 ### Other Sources of Information
 
-[NCEI Integrated Surface Database (ISD)](https://www.ncdc.noaa.gov/isd) is likely the most authoritative source of this information.
+[NCEI Integrated Surface Database (ISD)](https://www.ncei.noaa.gov/isd) is likely the most authoritative source of this information.
 
 ### Processing and Quality Control
 
@@ -44,4 +44,4 @@ The IEM's archive of ASOS/METAR data comes from 3 main sources and some minor au
 
 The next main source is from the MADIS 5-minute ASOS dataset, previously called High Frequency METAR.  This data feed has a significant issue whereby the transmitted data from the FAA to the NWS is only in whole degree Celsius.  Such data can not be reliably converted back to whole degree Fahrenheit.  For this reason, the IEM database stores these values as missing and they are not included in the data download.  BUT, for those that really want this information, these values are included in the IEM-encoded raw METAR string that you can download with the data.  You can find further discussion on this [IEM News Item](https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290).
 
-The third main source is from the [NCEI ISD](https://www.ncdc.noaa.gov/isd).  At this time, there are no known issues with the temperature data in this feed being reliable for whole degree Fahrenheit.
+The third main source is from the [NCEI ISD](https://www.ncei.noaa.gov/isd).  At this time, there are no known issues with the temperature data in this feed being reliable for whole degree Fahrenheit.

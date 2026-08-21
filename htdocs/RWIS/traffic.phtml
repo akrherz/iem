@@ -6,10 +6,12 @@ $t = new MyView();
 $t->current_network = "RWIS Traffic";
 require_once "../../include/database.inc.php";
 $dbconn = iemdb("iem");
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'valid';
 
 /* Query out the data */
-$stname = iem_pg_prepare($dbconn, <<<EOM
+$stname = iem_pg_prepare(
+    $dbconn,
+    <<<EOM
     WITH data as (
         SELECT t.location_id, avg_speed, normal_vol, long_vol, occupancy,
         valid, s.name from
@@ -19,33 +21,49 @@ $stname = iem_pg_prepare($dbconn, <<<EOM
     (d.location_id = t.remote_id) WHERE t.network = 'IA_RWIS'
 EOM
 );
-$rs = pg_execute($dbconn, $stname, Array() );
+$rs = pg_execute($dbconn, $stname, array());
 
- $t->title = "RWIS Current Traffic Data";
- $t->refresh = 600;
+$t->title = "RWIS Current Traffic Data";
+$t->refresh = 600;
 
- function fancytime($strtime){
+/**
+ * Format a timestamp into a human-readable string.
+ * @param string $strtime The timestamp string to format.
+ * @return string The formatted timestamp.
+ */
+function fancytime($strtime)
+{
     if (is_null($strtime)) return "";
-     $now = time();
-     $ts = strtotime($strtime);
-     if (($now - $ts) < 600){ return date("h:i A", $ts); }
-     else { return date("M d h:i A", $ts); }
- }
- $vals = Array(
-         "name" => "Station Name",
-         "valid" => "Observation Time",
-         "avg_speed" => "Average Speed [mph]",
-         "normal_vol" => "2 Axel Volume",
-         "long_vol" => "3+ Axel Volume",
-         "occupancy" => "Occupancy",
- );
+    $now = time();
+    $ts = strtotime($strtime);
+    if (($now - $ts) < 600) {
+        return date("h:i A", $ts);
+    } else {
+        return date("M d h:i A", $ts);
+    }
+}
+$vals = array(
+    "name" => "Station Name",
+    "valid" => "Observation Time",
+    "avg_speed" => "Average Speed [mph]",
+    "normal_vol" => "2 Axel Volume",
+    "long_vol" => "3+ Axel Volume",
+    "occupancy" => "Occupancy",
+);
 
- $table = "";
- for($i=0;$row=pg_fetch_assoc($rs);$i++){
-     $table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-             $row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
-             $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
- }
+$table = "";
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $table .= sprintf(
+        "<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+        $row["station_name"],
+        $row["name"],
+        fancytime($row["valid"]),
+        $row["avg_speed"],
+        $row["normal_vol"],
+        $row["long_vol"],
+        $row["occupancy"]
+    );
+}
 
 $t->content = <<<EOM
 <h3>Iowa RWIS Traffic Data</h3>
