@@ -26,7 +26,7 @@ Mesonet of Iowa State University would be appreciated.
 
 <p>
 The Iowa Environmental Mesonet (IEM) does not collect any personal information about
-users of this website.  The IEM lighty uses cookies to provide a better user
+users of this website.  The IEM lightly uses cookies to provide a better user
 experience.  The IEM does not use cookies to track users or collect personal information.
 </p>
 
