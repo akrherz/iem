@@ -4,8 +4,8 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool
 
-import httpx
 import pandas as pd
+import requests
 from bs4 import BeautifulSoup
 from pyiem.database import get_dbconn
 from pyiem.util import logger
@@ -17,14 +17,14 @@ def run_plot(uri):
     """Run this plot"""
     uri = f"http://iem.local/{uri}"
     try:
-        resp = httpx.get(uri, timeout=600)
+        resp = requests.get(uri, timeout=600)
         soup = BeautifulSoup(resp.content, "html.parser")
         img = soup.find_all(id="theimage")
         if not img:
             return True
         uri = "http://iem.local{}".format(img[0]["src"])
-        resp = httpx.get(uri, timeout=600)
-    except httpx.TimeoutException:
+        resp = requests.get(uri, timeout=600)
+    except requests.exceptions.Timeout:
         print(f"{uri[16:]} -> Read Timeout")
         return False
     # Known failures likely due to missing data
@@ -36,7 +36,7 @@ def run_plot(uri):
     if resp.status_code != 200 or resp.content == "":
         print(
             f"{uri[16:]} -> HTTP: {resp.status_code} "
-            "len(content): {len(res.content)}"
+            f"len(content): {len(resp.content)}"
         )
 
         return False

@@ -1,12 +1,15 @@
-"""yearly precip"""
+"""yearly precip.
+
+Called from RUN_SUMMARY.sh
+"""
 
 import os
 import subprocess
 import tempfile
 from datetime import datetime, timedelta
 
-import httpx
 import numpy as np
+import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
@@ -42,9 +45,8 @@ def main():
 
     mp = MapPlot(
         axisbg="white",
-        title=("Iowa %s Normal Precipitation Accumulation")
-        % (ts.strftime("%Y"),),
-        subtitle="1 Jan - %s" % (ts.strftime("%d %b %Y"),),
+        title=f"Iowa {ts:%Y} Normal Precipitation Accumulation",
+        subtitle=f"1 Jan - {ts:%-d %b %Y}",
     )
     rng = np.arange(int(min(nrain)) - 1, int(max(nrain)) + 1)
     if max(nrain) < 10:
@@ -63,9 +65,10 @@ def main():
         "ct:ncei_climate91::_r:43::_cb:1.png"
     )
 
-    req = httpx.get(service, timeout=120)
+    resp = requests.get(service, timeout=120)
+    resp.raise_for_status()
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(req.content)
+    tmpfd.write(resp.content)
     tmpfd.close()
 
     pqstr = f"plot c {ts:%Y%m%d%H%M} summary/year/diff.png bogus png"

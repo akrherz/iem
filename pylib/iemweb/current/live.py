@@ -14,7 +14,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import Annotated
 
-import httpx
+import requests
 from PIL import Image, ImageDraw
 from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -62,16 +62,16 @@ def fetch(cid: str, conn: Connection | None = None):
         meta["port"],
     )
     ham = (
-        httpx.BasicAuth
+        requests.auth.HTTPBasicAuth
         if cid
         in [
             "KCRG-010",
             "KCCI-027",
         ]
-        else httpx.DigestAuth
+        else requests.auth.HTTPDigestAuth
     )
     try:
-        resp = httpx.get(uri, auth=ham(user, passwd), timeout=15)
+        resp = requests.get(uri, auth=ham(user, passwd), timeout=15)
         resp.raise_for_status()
     except Exception as exp:
         LOG.info("fetch failed: %s %s", uri, exp)

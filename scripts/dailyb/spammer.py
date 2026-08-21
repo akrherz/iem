@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
+import requests
 import wwa
 from pyiem.database import get_dbconnc, sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
@@ -72,7 +72,7 @@ IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
     for repo in REPOS:
         uri = f"{GITHUB_API_BASE}/{repo}/commits?since={iso}&sha=main"
         try:
-            resp = httpx.get(uri, timeout=30)
+            resp = requests.get(uri, timeout=30)
             resp.raise_for_status()
             commits = resp.json()[::-1]
         except Exception as exp:
@@ -139,7 +139,7 @@ IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
     return f"{txt}\n\n", f"{html}<br /><br />"
 
 
-def cowreport():
+def cowreport() -> tuple[str, str]:
     """Generate something from the Cow, moooo!"""
     central = ZoneInfo("America/Chicago")
     yesterday = (utc() - timedelta(days=1)).astimezone(central)
@@ -151,8 +151,17 @@ def cowreport():
         f"http://iem.local/api/1/cow.json?begints={begints}&endts={endts}&"
         "phenomena=SV&phenomena=TO&lsrtype=SV&lsrtype=TO"
     )
-    data = httpx.get(api, timeout=60).json()
-    st = data["stats"]
+    try:
+        resp = requests.get(api, timeout=60)
+        resp.raise_for_status()
+        data = resp.json()
+        st = data["stats"]
+    except Exception:
+        LOG.exception("Got exception from cow API")
+        return (
+            "> IEM Cow Report\n    Cow API Failure, no report\n",
+            "<h3>IEM Cow Report</h3><pre>Cow API Failure, no report</pre>",
+        )
     if st["events_total"] == 0:
         text = "No SVR+TOR Warnings Issued."
         html = f"<h3>IEM Cow Report</h3><pre>{text}</pre>"

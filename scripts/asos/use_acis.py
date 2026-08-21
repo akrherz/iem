@@ -7,8 +7,8 @@ import time
 from datetime import date, timedelta
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE
@@ -71,7 +71,7 @@ def do(meta, acis_station, interactive):
         payload["sdate"],
         payload["edate"],
     )
-    req = exponential_backoff(httpx.post, SERVICE, json=payload, timeout=30)
+    req = exponential_backoff(requests.post, SERVICE, json=payload, timeout=30)
     if req is None:
         LOG.warning("Total download failure for %s", acis_station)
         return 0

@@ -85,9 +85,9 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import ephem
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from pydantic import Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
@@ -772,7 +772,7 @@ def do_uvi():
         "https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py"
         "?pil=UVICAC&fmt=text"
     )
-    resp = httpx.get(URL, timeout=20)
+    resp = requests.get(URL, timeout=20)
     rows = []
     for line in resp.content.decode("ascii").split("\n"):
         m = PATTERN.match(line)

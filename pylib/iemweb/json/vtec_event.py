@@ -41,8 +41,8 @@ import json
 from datetime import datetime
 from typing import Annotated
 
-import httpx
 import pandas as pd
+import requests
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
@@ -137,7 +137,7 @@ def run(environ: dict) -> str:
             try:
                 # This request is outside this repo, so no need for internal
                 # API routing
-                resp = httpx.get(
+                resp = requests.get(
                     (
                         "http://mesonet.agron.iastate.edu/"
                         f"api/1/nwstext/{product_ids[0]}"
@@ -161,7 +161,7 @@ def run(environ: dict) -> str:
             )
             report = ""
             if environ["include_text"]:
-                resp = httpx.get(
+                resp = requests.get(
                     f"http://iem.local/api/1/nwstext/{product_id}", timeout=5
                 )
                 resp.raise_for_status()
