@@ -4,6 +4,7 @@ Run from `RUN_12Z.sh` for previous day, 3 days and 31 days ago
 Run from `RUN_20_AFTER.sh` for current day
 """
 
+import sys
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -12,6 +13,7 @@ import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, utc
+from tqdm import tqdm
 
 LOG = logger()
 
@@ -30,7 +32,7 @@ def workflow(dt: date):
             and tzname is not null
         ), obs as (
             SELECT iemid, pday from {table} WHERE day = :dt)
-        SELECT d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
+        SELECT d.iemid, d.tzname, pday from
         dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
         """,
                 table=f"summary_{dt:%Y}",
@@ -70,7 +72,13 @@ def workflow(dt: date):
         "updates": 0,
         "inserts": 0,
     }
-    for iemid, gdf in obsdf.groupby("iemid"):
+    is_interactive = sys.stdout.isatty()
+    progress = tqdm(
+        obsdf.groupby("iemid"),
+        total=obsdf["iemid"].nunique(),
+        disable=not is_interactive,
+    )
+    for iemid, gdf in progress:
         if iemid not in accessdf.index:
             continue
         tz = accessdf.at[iemid, "tzname"]
@@ -81,7 +89,10 @@ def workflow(dt: date):
         phour_total = gdf[
             (gdf["utc_valid"] >= sts) & (gdf["utc_valid"] <= ets)
         ]["phour"].sum()
-        if phour_total > 50 or np.allclose([phour_total], [current_pday]):
+        if phour_total > 50 or (
+            pd.notna(current_pday)
+            and np.allclose([phour_total], [current_pday])
+        ):
             counts["skips"] += 1
             continue
         icursor.execute(
@@ -91,18 +102,14 @@ def workflow(dt: date):
         )
         counts["updates"] += 1
         if icursor.rowcount == 0:
-            LOG.info("Adding record %s for day %s", iemid, dt)
+            if is_interactive:
+                progress.write(f"Adding record {iemid} for day {dt}")
             icursor.execute(
-                f"INSERT into summary_{dt:%Y} (iemid, day) VALUES (%s, %s)",
-                (iemid, dt),
+                f"INSERT into summary_{dt:%Y} (iemid, day, pday) "
+                "VALUES (%s, %s, %s)",
+                (iemid, dt, phour_total),
             )
             counts["inserts"] += 1
-            icursor.execute(
-                f"UPDATE summary_{dt:%Y} "
-                "SET pday = %s WHERE iemid = %s and day = %s "
-                "and %s > coalesce(pday, 0)",
-                (phour_total, iemid, dt, phour_total),
-            )
     icursor.close()
     iem_pgconn.commit()
     LOG.info("Counts %s", counts)
