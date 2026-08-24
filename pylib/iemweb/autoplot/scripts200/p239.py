@@ -1,22 +1,35 @@
 """
 This autoplot combines the USDA NASS county yield estimates with
 summarized weather variables from a single weather station.  The
-county that the weather station resides in is used for the comparison.
+county that the weather station resides in is used for the comparison.</p>
 
 <p>If you select a statewide areal averaged weather station, you will get the
 statewide yield estimates and not an individual county.  Unfortunately, there
 is nothing analogous for the climate/crop district weather values as those
-values are mostly missing within USDA NASS.
+values are mostly missing within USDA NASS.</p>
+
+<p>
+The eight right hand side sub-plots will contain a simple linear fit and
+Pearson correlation coefficient between the weather variable and the yield
+departure from the selected trendline.  An info box appears above each plot
+denoting the correlation coefficient, p-value and number of samples
+(read years) plotted.
+If the p-value is less than 0.05, the box will be shaded in wheat color and
+likely implies a statistically significant relationship.
+</p>
 """
 
 import matplotlib.colors as mpcolors
+import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.reference import state_names
+from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 
 from iemweb.autoplot import ARG_STATION
@@ -73,7 +86,7 @@ def get_description():
     return desc
 
 
-def get_obsdf(ctx):
+def get_obsdf(ctx: dict):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -86,6 +99,7 @@ def get_obsdf(ctx):
                 sum(case when low >= 70 then 1 else 0 end) as days_low_a70,
                 sum(case when low < 60 then 1 else 0 end) as days_low_b60,
                 avg(merra_srad) as avg_merra_srad,
+                avg(era5land_srad) as avg_era5land_srad,
                 sum(case when precip > 0.005 then 1 else 0 end) as precip_days
                 from alldata
                 WHERE station = :station and sday >= :sts and
@@ -103,26 +117,29 @@ def get_obsdf(ctx):
     return df
 
 
-def get_countyname(ugc):
+def get_countyname(ugc: str) -> str:
     """Get name"""
-    conn = get_dbconn("postgis")
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT name from ugcs where ugc = %s and end_ts is null", (ugc,)
-    )
-    if cursor.rowcount == 0:
-        return f"(({ugc}))"
-    return cursor.fetchone()[0]
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            sql_helper("""
+            SELECT name from ugcs where ugc = :ugc and end_ts is null
+            """),
+            {"ugc": ugc},
+        )
+        row = res.mappings().fetchone()
+    return f"(({ugc}))" if row is None else row["name"]
 
 
-def bling(df, ax, col, dcol):
-    """Bling."""
-    for marker, gdf in df.groupby("symbol"):
+def bling(df: pd.DataFrame, ax: Axes, col: str, dcol: str):
+    """Common addition of data to the subplot."""
+    hasdf = df[[col, dcol, "symbol", "color"]].dropna()
+    for marker, gdf in hasdf.groupby("symbol"):
+        # This is used back in main plotting func
         label = f"{gdf.index.values[0]:.0f} [{gdf[dcol].values[0]:.1f}]"
         ax.scatter(
-            gdf[col].values,
-            gdf[dcol].values,
-            facecolor=gdf["color"].values,
+            gdf[col].to_numpy(),
+            gdf[dcol].to_numpy(),
+            facecolor=gdf["color"].to_list(),
             marker=marker,
             edgecolor="None" if len(gdf.index) > 1 else "k",
             zorder=5 if marker != "o" else 3,
@@ -130,8 +147,35 @@ def bling(df, ax, col, dcol):
         )
     ax.grid(True)
 
+    # Ensure the yaxis is consistent between all subplots, use inbound df
+    stats = df[dcol].describe()
+    rng = stats["max"] - stats["min"]
+    ax.set_ylim(stats["min"] - rng * 0.15, stats["max"] + rng * 0.15)
 
-def get_nass(ctx):
+    # Simple indication of linear relationship strength/significance
+    r, pvalue = pearsonr(hasdf[col].to_numpy(), hasdf[dcol].to_numpy())
+    slope, intercept = np.polyfit(
+        hasdf[col].to_numpy(), hasdf[dcol].to_numpy(), 1
+    )
+    xs = np.array(ax.get_xlim())
+    ax.plot(xs, slope * xs + intercept, color="k", lw=1, zorder=6)
+    ax.text(
+        0.02,
+        1.02,
+        f"r={r:.2f} p={pvalue:.2f} n={len(hasdf.index)}",
+        transform=ax.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=8,
+        bbox={
+            "boxstyle": "round",
+            "facecolor": "white" if pvalue > 0.05 else "wheat",
+            "alpha": 0.8,
+        },
+    )
+
+
+def get_nass(ctx: dict) -> pd.DataFrame:
     """Get NASS."""
     county = ctx["_nt"].sts[ctx["station"]]["ugc_county"]
     ccol = "state_alpha || 'C' || county_ansi"
@@ -254,50 +298,54 @@ def plotter(ctx: dict):
     ax.legend(ncol=3, loc=(-2.75, 0))
     fig.text(0.46, 0.06, "Legend for Top 3/Bottom 3 Years ->", ha="right")
 
-    ax = fig.add_axes((anchorx, anchory + height + 2 * pad, width, height))
-    bling(df, ax, "gdd5086", dcol)
-    ax.axvline(df["gdd5086"].mean())
-    ax.set_ylabel("Departure [bu/ac]")
-    ax.set_xlabel("GDD (50, 86) [F]")
+    ax2 = fig.add_axes((anchorx, anchory + height + 2 * pad, width, height))
+    bling(df, ax2, "gdd5086", dcol)
+    ax2.axvline(df["gdd5086"].mean())
+    ax2.set_ylabel("Departure [bu/ac]")
+    ax2.set_xlabel("GDD (50, 86) [F]")
 
-    ax = fig.add_axes((anchorx + width + xpad, anchory, width, height))
-    bling(df, ax, "sdd86", dcol)
-    ax.axvline(df["sdd86"].mean())
-    ax.set_xlabel("SDD (86) [F]")
+    ax3 = fig.add_axes((anchorx + width + xpad, anchory, width, height))
+    bling(df, ax3, "sdd86", dcol)
+    ax3.axvline(df["sdd86"].mean())
+    ax3.set_xlabel("SDD (86) [F]")
 
-    ax = fig.add_axes(
+    ax4 = fig.add_axes(
         (anchorx + width + xpad, anchory + height + 2 * pad, width, height)
     )
-    bling(df, ax, "avg_low", dcol)
-    ax.axvline(df["avg_low"].mean())
-    ax.set_xlabel("Avg Daily Low [F]")
+    bling(df, ax4, "avg_low", dcol)
+    ax4.axvline(df["avg_low"].mean())
+    ax4.set_xlabel("Avg Daily Low [F]")
 
-    ax = fig.add_axes((anchorx, anchory + 2 * height + 4 * pad, width, height))
-    bling(df, ax, "days_low_a70", dcol)
-    ax.axvline(df["days_low_a70"].mean())
-    ax.set_xlabel("Days Low >= 70°F")
-    ax.set_ylabel("Departure [bu/ac]")
+    ax5 = fig.add_axes(
+        (anchorx, anchory + 2 * height + 4 * pad, width, height)
+    )
+    bling(df, ax5, "days_low_a70", dcol)
+    ax5.axvline(df["days_low_a70"].mean())
+    ax5.set_xlabel("Days Low >= 70°F")
+    ax5.set_ylabel("Departure [bu/ac]")
 
-    ax = fig.add_axes(
+    ax6 = fig.add_axes(
         (anchorx + width + xpad, anchory + 2 * height + 4 * pad, width, height)
     )
-    bling(df, ax, "days_low_b60", dcol)
-    ax.axvline(df["days_low_b60"].mean())
-    ax.set_xlabel("Days Low < 60°F")
+    bling(df, ax6, "days_low_b60", dcol)
+    ax6.axvline(df["days_low_b60"].mean())
+    ax6.set_xlabel("Days Low < 60°F")
 
-    ax = fig.add_axes((anchorx, anchory + 3 * height + 6 * pad, width, height))
-    bling(df, ax, "avg_merra_srad", dcol)
-    ax.axvline(df["avg_merra_srad"].mean())
-    ax.set_xlabel(r"Merra Solar Rad MJ$d^{-1}$")
-    ax.set_ylabel("Departure [bu/ac]")
+    ax7 = fig.add_axes(
+        (anchorx, anchory + 3 * height + 6 * pad, width, height)
+    )
+    bling(df, ax7, "avg_era5land_srad", dcol)
+    ax7.axvline(df["avg_era5land_srad"].mean())
+    ax7.set_xlabel(r"ERA5-Land Solar Rad MJ$d^{-1}$")
+    ax7.set_ylabel("Departure [bu/ac]")
 
-    ax = fig.add_axes(
+    ax8 = fig.add_axes(
         (anchorx + width + xpad, anchory + 3 * height + 6 * pad, width, height)
     )
-    bling(df, ax, "precip_days", dcol)
-    ax.axvline(df["precip_days"].mean())
-    ax.set_xlabel(r"Days Measurable Precip")
-    ax.xaxis.set_major_locator(MaxNLocator(5, integer=True))
+    bling(df, ax8, "precip_days", dcol)
+    ax8.axvline(df["precip_days"].mean())
+    ax8.set_xlabel("Days Measurable Precip")
+    ax8.xaxis.set_major_locator(MaxNLocator(5, integer=True))
 
     cax = fig.add_axes(
         [0.93, 0.1, 0.01, 0.73], frameon=False, yticks=[], xticks=[]

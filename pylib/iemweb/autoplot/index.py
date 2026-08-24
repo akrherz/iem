@@ -380,7 +380,7 @@ def datetime_handler(value: str, arg: dict) -> str:
         # Accepts 'YYYY/MM/DD HHmm' or 'YYYY-MM-DD HHmm'
         if val is None or val == "":
             raise BadWebRequest("Invalid datetime value")
-        dt = val.replace("-", "/").split()
+        dt = val.replace("-", "/").replace(":", "").split()
         datepart = dt[0]
         timepart = dt[1] if len(dt) > 1 else "0000"
         if not DATETIME_RE.match(f"{datepart} {timepart}"):

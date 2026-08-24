@@ -2,6 +2,7 @@
 /afos/retrieve.py?sdate=2024-01-31&edate=2024-03-01&pil=DSMDSM&ttaaii=
 /afos/retrieve.py?pil=MTRZZZ
 /autoplot/index.py
+/autoplot/index.py?_wait=no&q=229&state=IN&sts=2026-08-24%2017%3A20&ets=2026-08-24%2018%3A20
 /cgi-bin/afos/retrieve.py?pil=AFDGRR&center=&limit=1&sdate=&edate=
 /cgi-bin/request/asos.py?station=AMW&hours=1&data=tmpf
 /cgi-bin/request/asos.py?station=AMW&hours=1&data=tmpf
