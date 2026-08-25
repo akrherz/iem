@@ -16,7 +16,7 @@ import os
 import pathlib
 from datetime import date, datetime, timedelta
 
-import httpx
+import requests
 
 
 def fetch(station_id):
@@ -34,7 +34,9 @@ def fetch(station_id):
         "tz=Etc%2FUTC&format=onlycomma&latlon=no&elev=no&missing=M&trace=T&"
         "direct=yes&report_type=3"
     )
-    resp = httpx.get(uri, timeout=300)
+    resp = requests.get(uri, timeout=300)
+    # You'll want to do some error handling...
+    resp.raise_for_status()
     pathlib.Path(localfn).write_text(resp.text, encoding="utf-8")
 
 
@@ -42,10 +44,12 @@ def main():
     """Main loop."""
     # Step 1: Fetch global METAR geojson metadata
     # https://mesonet.agron.iastate.edu/sites/networks.php
-    resp = httpx.get(
+    resp = requests.get(
         "http://mesonet.agron.iastate.edu/geojson/network/AZOS.geojson",
         timeout=60,
     )
+    # You'll want to do some error handling...
+    resp.raise_for_status()
     geojson = resp.json()
     for feature in geojson["features"]:
         station_id = feature["id"]

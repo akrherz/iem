@@ -687,7 +687,7 @@ def main(station: str | None):
         subprocess.call(["python", "../isusm/fix_solar.py"])
     if EVENTS["reprocess_temps"]:
         LOG.info("Calling fix_temps.py with no args")
-        subprocess.call(["python", "../isuag/fix_temps.py"])
+        subprocess.call(["python", "../isusm/fix_temps.py"])
     for day in EVENTS["days"]:
         LOG.info("Calling fix_{solar,precip,soil4t}.py for %s", day)
         for script in ["fix_solar", "fix_precip", "fix_soil4t"]:

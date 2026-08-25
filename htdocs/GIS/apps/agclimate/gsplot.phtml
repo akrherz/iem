@@ -4,14 +4,14 @@ define("IEM_APPID", 51);
 require_once "../../../../include/forms.php";
 require_once "../../../../include/myview.php";
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
+$var = get_str404("var", "gdd50");
 $year = get_int404("year", date("Y"));
 $smonth = get_int404("smonth", 5);
 $emonth = get_int404("emonth", 9);
 $sday = get_int404("sday", 1);
 $eday = get_int404("eday", 30);
 
-$OL = "10.5.0";
+$OL = "10.10.0";
 
 // Make sure our edate is not too late
 $today = time() - 86400;
@@ -85,14 +85,14 @@ $edselect = daySelect($eday, 'eday');
 $t->content = <<<EOM
 <h3>Growing Season Maps</h3>
 
-<p>This application will plot an accumulated variable for a time period of your 
+<p>This application will plot an accumulated variable for a time period of your
 selection.  Data is based on the automated sensors from the ISU AG Climate
-network.  A <a href="/GIS/apps/coop/gsplot.phtml">similar application</a> 
+network.  A <a href="/GIS/apps/coop/gsplot.phtml">similar application</a>
 exists based on the COOP network data, which
 is of higher quality for temperature and precipitation.
 
 <form method="GET" action="gsplot.phtml">
-<table class="table"> 
+<table class="table">
 <thead>
 <tr>
    <th>Plot Parameter</th>
@@ -122,11 +122,11 @@ is of higher quality for temperature and precipitation.
 <h3>Interactive Map</h3>
 {$h3}
 <p>Click on any station marker to view detailed information. Use mouse wheel to zoom, drag to pan.</p>
-<div id="map" 
-     data-wsuri="{$wsuri}" 
-     data-var="{$var}" 
-     data-datavar="{$datavar}" 
-     data-vardisplay="{$varDef[$var]}" 
+<div id="map"
+     data-wsuri="{$wsuri}"
+     data-var="{$var}"
+     data-datavar="{$datavar}"
+     data-vardisplay="{$varDef[$var]}"
      data-period="{$smonth}/{$sday} - {$emonth}/{$eday}"
      data-year="{$year}"
      role="application"
@@ -147,14 +147,14 @@ is of higher quality for temperature and precipitation.
 <h3>Station Data Table</h3>
 <p>This table contains the raw data for all weather stations shown on the map above.</p>
 <p>
-<button type="button" role="button" id="save" class="btn btn-primary" 
+<button type="button" role="button" id="save" class="btn btn-primary"
         aria-describedby="download-help">Download CSV Text</button>
 <span id="download-help" class="sr-only">Downloads the station data as a CSV file for use in spreadsheet applications</span>
 <br />
 <pre id="datatable" aria-live="polite" aria-label="Weather station data table">Loading data...</pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple
-text editor and save the data file on your machine.  Most GIS systems can 
+text editor and save the data file on your machine.  Most GIS systems can
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
 </div>

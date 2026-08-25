@@ -7,7 +7,7 @@ This is a cron job from RUN_2AM.sh
 """
 
 import click
-import httpx
+import requests
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -17,7 +17,7 @@ URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
 
 def get_uri(uri: str, localfn: str):
     """Fetch the remote resource to a local file"""
-    req = httpx.get(uri, timeout=1200)
+    req = requests.get(uri, timeout=1200)
     if req.status_code != 200:
         LOG.warning(
             "warn_cache[%s] failed with status: %s\n%s",

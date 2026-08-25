@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.database import get_dbconnc
@@ -147,7 +147,7 @@ def main(reprocess: bool, dt: datetime | None, station: str | None):
         remote_id = int(sid[1:])
         params["stationTriplets"] = f"{remote_id}:{meta['state']}:SCAN"
         try:
-            resp = httpx.get(SERVICE, params=params, timeout=30)
+            resp = requests.get(SERVICE, params=params, timeout=30)
             resp.raise_for_status()
             jdata = resp.json()
         except Exception as exp:

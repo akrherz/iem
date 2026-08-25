@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 
 import click
 import fiona
-import httpx
+import requests
 from pyiem.database import get_dbconnc
 from pyiem.util import exponential_backoff, logger
 from shapely.geometry import MultiPolygon, shape
@@ -48,7 +48,7 @@ def workflow(dt: date, routes):
     # 1. get file from USDM website
     url = f"{BASEURL}USDM_{dt:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)
-    req = exponential_backoff(httpx.get, url, timeout=30)
+    req = exponential_backoff(requests.get, url, timeout=30)
     if req is None:
         LOG.info("Download full fail: %s", url)
         return

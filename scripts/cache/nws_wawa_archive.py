@@ -8,7 +8,7 @@ import pathlib
 import subprocess
 import tempfile
 
-import httpx
+import requests
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
@@ -18,7 +18,7 @@ SRC = "https://forecast.weather.gov/wwamap/png/US.png"
 def main():
     """Go Main Go."""
     utcnow = utc()
-    resp = exponential_backoff(httpx.get, SRC, timeout=15)
+    resp = exponential_backoff(requests.get, SRC, timeout=15)
     if resp is None:
         LOG.info("Failed to fetch %s", SRC)
         return
