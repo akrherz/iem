@@ -43,12 +43,12 @@ def main():
                 )
 
             continue
-        print(f"Adding {station} {meta['name']}")
+        print(f"Adding {station} {meta['name']} tz:{data_time_zone}")
         mcursor.execute(
             "INSERT into stations(id, name, network, online, country, "
             "state, plot_name, elevation, metasite, geom) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, "
-            "ST_Point(%s, %s, 4326))",
+            "ST_Point(%s, %s, 4326)) returning iemid",
             (
                 station,
                 meta["name"],
@@ -63,6 +63,12 @@ def main():
                 meta["latitude"],
             ),
         )
+        mcursor.execute(
+            "INSERT into station_attributes(iemid, attr, value) "
+            "VALUES (%s, %s, %s)",
+            (mcursor.fetchone()[0], ATTRNAME, data_time_zone),
+        )
+
     mcursor.close()
     mesosite.commit()
     mesosite.close()
