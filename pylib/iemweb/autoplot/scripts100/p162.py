@@ -92,8 +92,7 @@ def plotter(ctx: dict):
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("#F9CCCC")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(under="#F9CCCC")
     # If the number of bounds is greater than the cmap colors, we need to
     # adjust
     if len(bounds) > cmap.N:

@@ -266,9 +266,9 @@ def plotter(ctx: dict):
         colors = (
             "#f46d43 #fdae61 #fee090 #e0f3f8 #abd9e9 #74add1 #4575b4"
         ).split()[::-1]
-        cmap = mpcolors.ListedColormap(colors[1:-1])
-        cmap.set_under(colors[0])
-        cmap.set_over(colors[-1])
+        cmap = mpcolors.ListedColormap(colors[1:-1]).with_extremes(
+            under=colors[0], over=colors[-1]
+        )
         bins = np.arange(26, 37, 2)
     else:
         # xmin, xmax, ymin, ymax

@@ -290,8 +290,7 @@ def plotter(ctx: dict):
         xticks.append(ts.timetuple().tm_yday / 7.0)
 
     (fig, ax) = figure_axes(title=ctx["title"], apctx=ctx)
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_bad("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(bad="white")
     if ctx["w"] != "freq" and ctx["var"] == "relh":
         bins = np.arange(0, 101, 5, dtype="f")
     elif df[ctx["w"]].min() < 5 and df[ctx["w"]].max() > 95:

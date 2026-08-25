@@ -222,8 +222,7 @@ def plotter(ctx: dict):
         nocaption=True,
     )
     levels = range(-40, 41, 10)
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_bad("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(bad="white")
     mp.fill_states(
         data,
         ilabel=True,

@@ -628,7 +628,7 @@ def plotter(ctx: dict):
         except ValueError as exp:
             msg = "Invalid bins provided, should be space separated"
             raise NoDataFound(msg) from exp
-    cmap.set_bad("white")
+    cmap = cmap.with_extremes(bad="white")
     if ctx["p"] == "contour" and len(clevels) > 1:
         mp.contourf(
             df["lon"].values,

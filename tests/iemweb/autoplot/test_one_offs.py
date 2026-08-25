@@ -2,10 +2,10 @@
 
 from datetime import timedelta
 
+import responses
 from iemweb.autoplot.scripts200.p221 import forecast2image
 from pyiem.plot import get_cmap
 from pyiem.util import utc
-from pytest_httpx import HTTPXMock
 
 
 def test_forecast2image():
@@ -28,9 +28,12 @@ def test_forecast2image_future():
     assert buf is None
 
 
-def test_failed_archive_fetch(httpx_mock: HTTPXMock):
+@responses.activate
+def test_failed_archive_fetch():
     """Test that we handle a failed archive fetch gracefully."""
-    httpx_mock.add_response(status_code=404)
+    responses.add(
+        responses.GET, r"https://mesonet\.agron\.iastate\.edu.*", status=404
+    )
     fhour, buf = forecast2image({}, utc(2025, 9, 12, 11), 1)
     assert fhour == 1
     assert buf is None

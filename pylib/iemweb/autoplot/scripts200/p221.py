@@ -179,7 +179,7 @@ def plotter(ctx: dict):
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,
     )
-    ctx["cmap"].set_under((0, 0, 0, 0))
+    ctx["cmap"] = ctx["cmap"].with_extremes(under=(0, 0, 0, 0))
 
     width = 512
     height = 386

@@ -408,8 +408,9 @@ def plotter(ctx: dict):
                 x = int(dt.strftime("%j"))
                 data[y, x - 1] = thresholds.index(row["threshold"])
 
-        cmap = mpcolors.ListedColormap(list(COLORS.values()))
-        cmap.set_under("#FFF")
+        cmap = mpcolors.ListedColormap(list(COLORS.values())).with_extremes(
+            under="#FFF"
+        )
         boundaries = np.arange(-0.5, len(COLORS), 1)
         norm = mpcolors.BoundaryNorm(boundaries, cmap.N)
         ax.imshow(

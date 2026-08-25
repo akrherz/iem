@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import click
 import pygrib
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot
 from pyiem.util import archive_fetch, logger, mm2inch, utc
 
 LOG = logger()
@@ -36,9 +36,6 @@ def doit(ts):
         lats, lons = grib.latlons()
         vals = mm2inch(grib.values)
 
-    cmap = get_cmap("jet")
-    cmap.set_under("white")
-    cmap.set_over("black")
     clevs = [
         0.01,
         0.05,

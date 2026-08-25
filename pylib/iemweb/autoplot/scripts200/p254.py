@@ -118,9 +118,7 @@ def plotter(ctx: dict):
         "lightgreen",
         "orange",
     ]
-    cmap = ListedColormap(colors)
-    cmap.set_under("white")
-    cmap.set_over("red")
+    cmap = ListedColormap(colors).with_extremes(under="white", over="red")
     levels = [0, 5, 15, 30, 60]
     if ctx["mode"] == "realtime":
         levels = [0, 10, 15, 20, 60]

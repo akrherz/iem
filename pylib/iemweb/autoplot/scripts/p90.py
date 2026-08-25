@@ -865,8 +865,7 @@ def plotter(ctx: dict):
         nocaption=True,
         titlefontsize=16,
     )
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
     if geo == "ugc":
         if ctx["v"] == "hour":
             cl = [

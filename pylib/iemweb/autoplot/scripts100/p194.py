@@ -185,9 +185,9 @@ def plotter(ctx: dict):
         # week in there
         raster = raster / ((edate - sdate).days / 7.0 + 1.0) * 100.0
     # plot
-    cmap = stretch_cmap(ctx["cmap"], ramp)
-    cmap.set_under("white")
-    cmap.set_bad("white")
+    cmap = stretch_cmap(ctx["cmap"], ramp).with_extremes(
+        under="white", bad="white"
+    )
     lon_edges = np.concatenate(
         [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
     )

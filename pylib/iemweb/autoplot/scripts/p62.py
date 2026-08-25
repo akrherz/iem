@@ -94,8 +94,7 @@ def plotter(ctx: dict):
 
     cmap = copy.copy(nwssnow())
     norm = mpcolors.BoundaryNorm(LEVELS, cmap.N)
-    cmap.set_bad("#EEEEEE")
-    cmap.set_under("white")
+    cmap = cmap.with_extremes(bad="#EEEEEE", under="white")
     res = ax.imshow(
         obs,
         aspect="auto",

@@ -465,8 +465,7 @@ def plotter(ctx: dict):
             bins = np.linspace(1, df["days"].max() + 11, 10, dtype="i")
         units = "Days"
         lformat = "%.0f"
-        cmap.set_under("white")
-        cmap.set_over("#EEEEEE")
+        cmap = cmap.with_extremes(under="white", over="#EEEEEE")
     else:
         total_minutes = (ets - sts).total_seconds() / 60.0
         with get_sqlalchemy_conn("postgis") as conn:
