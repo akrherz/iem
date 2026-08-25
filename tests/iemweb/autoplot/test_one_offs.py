@@ -31,7 +31,9 @@ def test_forecast2image_future():
 @responses.activate
 def test_failed_archive_fetch():
     """Test that we handle a failed archive fetch gracefully."""
-    responses.add(responses.GET, r".*", status=404)
+    responses.add(
+        responses.GET, r"https://mesonet\.agron\.iastate\.edu.*", status=404
+    )
     fhour, buf = forecast2image({}, utc(2025, 9, 12, 11), 1)
     assert fhour == 1
     assert buf is None
