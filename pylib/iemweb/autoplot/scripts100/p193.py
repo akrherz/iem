@@ -114,9 +114,7 @@ def plotter(ctx: dict):
         titlefontsize=16,
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("#EEEEEE")
-    cmap.set_over("black")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(under="#EEEEEE", over="k")
     if scale == "auto":
         levs = pretty_bins(0, np.max(precip))
         levs[0] = 0.01

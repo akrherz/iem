@@ -256,8 +256,7 @@ def plotter(ctx: dict):
             bins = np.linspace(1, df2.max() + 11, 10, dtype="i")
         units = "Days"
         lformat = "%.0f"
-        cmap.set_under("white")
-        cmap.set_over("#EEEEEE")
+        cmap = cmap.with_extremes(under="white", over="#EEEEEE")
     elif varname == "count":
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
@@ -307,8 +306,7 @@ def plotter(ctx: dict):
             bins = np.linspace(1, df2.max() + 11, 10, dtype="i")
         units = "Count"
         lformat = "%.0f"
-        cmap.set_under("white")
-        cmap.set_over("#EEEEEE")
+        cmap = cmap.with_extremes(under="white", over="#EEEEEE")
         extend = "max"
     else:
         params["sday"] = params["sts"].strftime("%m%d")

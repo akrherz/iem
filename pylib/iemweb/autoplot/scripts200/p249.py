@@ -137,9 +137,8 @@ def plotter(ctx: dict):
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
-        cmap = get_cmap(ctx["cmap"])
         # Set bad values to hallow
-        cmap.set_bad("#FFFFFF00")
+        cmap = get_cmap(ctx["cmap"]).with_extremes(bad="#FFFFFF00")
         data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
@@ -156,7 +155,7 @@ def plotter(ctx: dict):
             else:
                 clevs = pretty_bins(0, ptiles[2])
             clevs[0] = 0.01
-            cmap.set_under("white")
+            cmap = cmap.with_extremes(under="white")
         elif varname in [
             "tmpk",
             "dwpk",

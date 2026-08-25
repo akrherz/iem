@@ -138,8 +138,7 @@ def make_inversion_timing(ctx):
     subtitle = "10 Foot Air Temperature minus 1.5 Foot Air Temperature (F)"
     fig, ax = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     clevs = np.arange(-2, 2.1, 0.2)
-    cmap = get_cmap("bwr")
-    cmap.set_bad("tan")
+    cmap = get_cmap("bwr").with_extremes(bad="tan")
     norm = mpcolors.BoundaryNorm(clevs, cmap.N)
     res = ax.imshow(
         grid, aspect="auto", interpolation="none", cmap=cmap, norm=norm

@@ -144,9 +144,7 @@ def plotter(ctx: dict):
         ),
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_over("k")
-    cmap.set_under("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(over="k", under="white")
     mp.imshow(
         grid,
         affine,

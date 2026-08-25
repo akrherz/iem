@@ -337,8 +337,7 @@ def set_data(ctx: dict):
         raise NoDataFound("Data was found, but all missing")
     p01d = ctx["p01d"].filled(np.nan)
     plot_units = "inches"
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_bad("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(bad="white")
     tslice = slice(ctx["idx0"], ctx["idx1"])
     yslice = slice(ctx["y0"], ctx["y1"])
     xslice = slice(ctx["x0"], ctx["x1"])
@@ -361,7 +360,7 @@ def set_data(ctx: dict):
         plot_units = "percent"
     else:
         p01d = np.where(p01d < 0.001, np.nan, p01d)
-        cmap.set_under("white")
+        cmap = cmap.with_extremes(under="white")
         # Dynamic Range based on min/max grid value, since we restrict plot
         maxval = np.ceil(np.nanpercentile(p01d, [99.95])[0])
         if np.isnan(maxval) or maxval < 1:

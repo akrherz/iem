@@ -134,8 +134,7 @@ def plotter(ctx: dict):
         bins = pretty_bins(0, np.max(H))
         if bins[1] > 1:
             bins[0] = 1
-        cmap = get_cmap(ctx["cmap"])
-        cmap.set_under("white")
+        cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
         xx, yy = np.meshgrid(xedges, yedges)
         mp.panels[0].pcolormesh(

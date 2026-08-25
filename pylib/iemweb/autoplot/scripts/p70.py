@@ -183,9 +183,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.12, 0.1, 0.61, 0.8))
 
     # Create a color bar for the number of events per day
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("tan")
-    cmap.set_over("black")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(under="tan", over="k")
     bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
     if ctx["f"] == "accum":
         maxval = (

@@ -60,9 +60,7 @@ def makeplot(ts, routes="ac"):
         )
         if sector == "iowa":
             mp.drawcounties()
-        cmap = get_cmap("jet_r")
-        cmap.set_under("#EEEEEE")
-        cmap.set_over("k")
+        cmap = get_cmap("jet_r").with_extremes(under="#EEEEEE", over="k")
         mp.hexbin(
             df["lon"].values,
             df["lat"].values,
@@ -90,9 +88,7 @@ def makeplot(ts, routes="ac"):
         )
         if sector == "iowa":
             mp.drawcounties()
-        cmap = get_cmap("jet")
-        cmap.set_under("#EEEEEE")
-        cmap.set_over("k")
+        cmap = get_cmap("jet").with_extremes(under="#EEEEEE", over="k")
         mp.hexbin(
             df["lon"].values, df["lat"].values, df["od"], clevs, cmap=cmap
         )

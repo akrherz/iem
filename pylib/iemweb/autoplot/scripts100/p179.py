@@ -143,8 +143,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(1, 2, sharey=True)
 
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("white")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
     norm = mpcolors.BoundaryNorm(np.arange(0, 101, 5), cmap.N)
 
     ax[0].imshow(

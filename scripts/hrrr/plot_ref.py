@@ -31,8 +31,9 @@ def run(tmpdir, valid, routes):
     lons = None
     frame = 0
     rampdf = ramp2df("composite_n0q")
-    cmap = mpcolors.ListedColormap(rampdf[["r", "g", "b"]].to_numpy() / 256)
-    cmap.set_under("white")
+    cmap = mpcolors.ListedColormap(
+        rampdf[["r", "g", "b"]].to_numpy() / 256
+    ).with_extremes(under="white")
 
     colors = radar_ptype()
     norm = mpcolors.BoundaryNorm(np.arange(0, 56, 2.5), len(colors["rain"]))

@@ -65,8 +65,7 @@ def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
     ax.set_yticks([])
-    cmap = get_cmap("gray")
-    cmap.set_bad("white")
+    cmap = get_cmap("gray").with_extremes(bad="white")
     res = ax.imshow(
         vsby,
         aspect="auto",
@@ -94,9 +93,7 @@ def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
         fontsize=14,
     )
 
-    cmap = get_cmap("gray_r")
-    cmap.set_bad("white")
-    cmap.set_under("skyblue")
+    cmap = get_cmap("gray_r").with_extremes(bad="white", under="skyblue")
     if np.max(data) > 0:
         ax.imshow(
             np.flipud(data),
@@ -160,9 +157,7 @@ def plot_vsby(days, vsby, ctx, sts):
         fontsize=14,
     )
 
-    cmap = get_cmap("gray")
-    cmap.set_bad("white")
-    cmap.set_under("skyblue")
+    cmap = get_cmap("gray").with_extremes(bad="white", under="skyblue")
     res = ax.imshow(
         np.flipud(data),
         aspect="auto",

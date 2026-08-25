@@ -176,7 +176,7 @@ def plotter(ctx: dict):
             plot_units = "MJ d-1"
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
-            cmap.set_under("white")
+            cmap = cmap.with_extremes(under="white")
         elif varname == "wind_speed":
             plot_units = "mph"
             clevs = pretty_bins(0, ptiles[1])
@@ -191,7 +191,7 @@ def plotter(ctx: dict):
             else:
                 clevs = pretty_bins(0, ptiles[2])
             clevs[0] = 0.01
-            cmap.set_under("white")
+            cmap = cmap.with_extremes(under="white")
         elif varname in [
             "high_tmpk",
             "low_tmpk",

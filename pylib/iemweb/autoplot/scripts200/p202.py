@@ -209,8 +209,7 @@ def plotter(ctx: dict):
                 np.arange(-ymax - 0.5, ymax + 0.5, dy),
             ),
         )
-        cmap = get_cmap(ctx["cmap"])
-        cmap.set_under("tan")
+        cmap = get_cmap(ctx["cmap"]).with_extremes(under="tan")
         # Days per year / 7
         data = H.transpose() / 7.0 / total_years
         bins = pretty_bins(0, np.max(data))

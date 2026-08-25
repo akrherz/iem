@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 import click
 import pygrib
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot
 from pyiem.util import archive_fetch, logger, mm2inch
 
 LOG = logger()
@@ -45,9 +45,6 @@ def do(ts: datetime, hours: int, realtime: bool):
     if lts is None:
         return
 
-    cmap = get_cmap("jet")
-    cmap.set_under("white")
-    cmap.set_over("black")
     clevs = [0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]
     localtime = (ts - timedelta(minutes=1)).astimezone(
         ZoneInfo("America/Chicago")

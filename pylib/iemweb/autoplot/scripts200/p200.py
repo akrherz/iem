@@ -485,10 +485,9 @@ def plotter(ctx: dict):
         rng = pretty_bins(0, maxval)
         rng[0] = 0.01
 
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_bad("white")
-    cmap.set_under("white")
-    cmap.set_over("black")
+    cmap = get_cmap(ctx["cmap"]).with_extremes(
+        bad="white", under="white", over="black"
+    )
     mp.imshow(
         raster,
         affine,

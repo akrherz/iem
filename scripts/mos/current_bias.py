@@ -69,9 +69,7 @@ def doit(now, model):
         lons.append(row[3])
         vals.append(diff)
 
-    cmap = get_cmap("RdYlBu_r")
-    cmap.set_under("black")
-    cmap.set_over("black")
+    cmap = get_cmap("RdYlBu_r").with_extremes(under="black", over="black")
 
     localnow = now.astimezone(ZoneInfo("America/Chicago"))
     subtitle = (
