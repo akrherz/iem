@@ -269,7 +269,7 @@ def save_code(mapp, server, code, headers):
 
 def reload_bot():
     """Tell iembot to refresh."""
-    requests.get("http://iembot:9003/reload", timeout=5)
+    requests.get("http://weather.im:9003/reload", timeout=5)
 
 
 @iemapp()

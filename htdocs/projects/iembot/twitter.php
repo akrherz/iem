@@ -65,7 +65,7 @@ $st_deletesubs = iem_pg_prepare(
 
 function reloadbot()
 {
-    return file_get_contents("http://iembot:9003/reload");
+    return file_get_contents("http://weather.im:9003/reload");
 }
 
 $msg = array();
