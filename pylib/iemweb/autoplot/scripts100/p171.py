@@ -20,9 +20,17 @@ plotting of daily record totals.
 this one, but with Local Storm Report (LSR) totals.
 <a href="/plotting/auto/?q=109">Autoplot 109</a> produces maps in a similiar
 manner to this plot.</p>
+
+<p>
+Below the month labels on the x-axis resides a simple monthly average based
+on 2008 through present year.  2008 is generally a safe starting year for
+nearly all VTEC products, but may not be accurate for all.  Appologies for
+any confusion this causes.
+</p>
 """
 
 import calendar
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -35,6 +43,7 @@ from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
+AVG_YEAR1 = 2008
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
@@ -45,6 +54,7 @@ PDICT2 = {
     "single": "Total for Single Selected Phenomena / Significance",
     "svrtor": "Severe T'Storm + Tornado Warnings",
     "svrtorffw": "Severe T'Storm + Tornado + Flash Flood Warnings",
+    "heat": "Extreme + Excessive Heat Warnings",
 }
 
 
@@ -146,17 +156,15 @@ def plotter(ctx: dict):
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance}) Issued by Year, Month"
     )
-    if ctx["c"] == "svrtor":
-        params["ph"] = ["SV", "TO"]
+    if ctx["c"] != "single":
+        if ctx["c"] == "svrtor":
+            params["ph"] = ["SV", "TO"]
+        elif ctx["c"] == "svrtorffw":
+            params["ph"] = ["SV", "TO", "FF"]
+        elif ctx["c"] == "heat":
+            params["ph"] = ["EH", "XH"]
         params["sig"] = "W"
-        subtitle = "Severe T'Storm + Tornado Warnings Issued by Year, Month"
-    elif ctx["c"] == "svrtorffw":
-        params["ph"] = ["SV", "TO", "FF"]
-        params["sig"] = "W"
-        subtitle = (
-            "Svr T'Storm + Tornado + Flash Flood Warnings "
-            "Issued by Year, Month"
-        )
+        subtitle = f"{PDICT2[ctx['c']]} Issued by Year, Month"
 
     with get_sqlalchemy_conn("postgis") as conn:
         # NB quasi hack here as we have some redundant ETNs for a given year
@@ -200,7 +208,7 @@ def plotter(ctx: dict):
     )
 
     df2 = df.pivot(index="year", columns="mo", values="count").reindex(
-        index=range(df["year"].min(), df["year"].max() + 1),
+        index=range(min(df["year"].min(), AVG_YEAR1), date.today().year + 1),
         columns=range(1, 13),
     )
 
@@ -230,7 +238,7 @@ def plotter(ctx: dict):
     for dt, row in gdf.head(10).iterrows():
         ypos -= 0.04
         fig.text(0.82, ypos, f"{dt} {row['year']:3.0f}")
-    ax.set_position([0.1, 0.1, 0.75, 0.8])
+    ax.set_position([0.1, 0.13, 0.75, 0.77])
     sns.heatmap(
         df2,
         annot=True,
@@ -254,11 +262,23 @@ def plotter(ctx: dict):
             continue
         ax.axhline(i, zorder=3, lw=1, color="gray")
     ax.text(1.0, -0.02, "Total", transform=ax.transAxes)
+    ax.text(
+        0.0,
+        -0.07,
+        f"{AVG_YEAR1}-{df['year'].max()} Avg:",
+        ha="right",
+        transform=ax.transAxes,
+    )
     # Add some vertical lines
     for i in range(1, 12):
         ax.axvline(i, zorder=3, lw=1, color="gray")
     ax.set_xticks(np.arange(12) + 0.5)
-    ax.set_xticklabels(calendar.month_abbr[1:], rotation=0)
+    xlabels = []
+    years = df2.loc[AVG_YEAR1:].shape[0]
+    for i in range(1, 13):
+        avgval = df2.loc[AVG_YEAR1:][i].sum() / years
+        xlabels.append(f"{calendar.month_abbr[i]}\n{avgval:.1f}")
+    ax.set_xticklabels(xlabels, rotation=0)
     ax.set_ylabel("Year")
     ax.set_xlabel(f"Month (Timezone: {params['tzname']})")
 
