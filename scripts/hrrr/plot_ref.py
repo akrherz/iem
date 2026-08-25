@@ -14,7 +14,7 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 import xarray as xr
-from pyiem.plot import MapPlot, ramp2df
+from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import radar_ptype
 from pyiem.reference import Z_FILL
 from pyiem.util import archive_fetch, logger
@@ -30,10 +30,6 @@ def run(tmpdir, valid, routes):
     lats = None
     lons = None
     frame = 0
-    rampdf = ramp2df("composite_n0q")
-    cmap = mpcolors.ListedColormap(
-        rampdf[["r", "g", "b"]].to_numpy() / 256
-    ).with_extremes(under="white")
 
     colors = radar_ptype()
     norm = mpcolors.BoundaryNorm(np.arange(0, 56, 2.5), len(colors["rain"]))
@@ -70,7 +66,6 @@ def run(tmpdir, valid, routes):
             # ptype is all missing at step 0
             pstep = max(step, 1)
             for typ in ["rain", "snow", "frzr", "icep"]:
-                cmap = mpcolors.ListedColormap(colors[typ])
                 if f"c{typ}" not in ds.variables:
                     LOG.warning("Missing %s in %s, aborting", f"c{typ}", fn)
                     return
@@ -80,7 +75,7 @@ def run(tmpdir, valid, routes):
                     lats,
                     ref[:-1, :-1],  # hack around pcolormesh grid size demands
                     norm=norm,
-                    cmap=cmap,
+                    cmap=mpcolors.ListedColormap(colors[typ]),
                     zorder=Z_FILL,
                 )
             mp.draw_radar_ptype_legend()
