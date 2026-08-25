@@ -9,9 +9,9 @@ $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
-$day = get_int404("day", date("d"));
-$month = get_int404("month", date("m"));
-$year = get_int404("year", date("Y"));
+$day = get_int404("day", date("d"), 1, 31);
+$month = get_int404("month", date("m"), 1, 12);
+$year = get_int404("year", date("Y"), 2002, (int)gmdate("Y") + 2);
 $station = get_str404("station", null);
 $shefvar = get_str404("shefvar", null);
 $network = get_str404("network", 'IA_DCP', 9);

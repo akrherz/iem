@@ -11,9 +11,14 @@ $ISUAGcities = $nt->table;
 $year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)));
 $month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
 $day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
-$date = isset($_GET["date"]) ? xssafe($_GET["date"]) : $year . "-" . $month . "-" . $day;
+$date = get_str404("date", $year . "-" . $month . "-" . $day);
 
-$ts = strtotime($date);
+try {
+    $dt = new DateTimeImmutable($date);
+} catch (Exception $e) {
+    http_send_status(422);
+    die("Invalid date");
+}
 
 $myStations = $ISUAGcities;
 $height = 480;
@@ -51,13 +56,13 @@ $bar640t->draw($map, $img);
 $c = iemdb("isuag");
 // Figure out when we should start counting
 $doy1 = date("j", mktime(0, 0, 0, 9, 1, $year));
-$doy2 = date("j", $ts);
-$edate = date("Y-m-d", $ts);
+$doy2 = $dt->format("z") + 1;
+$edate = $dt->format("Y-m-d");
 if ($month >= 9) {
     $sdate = sprintf("%s-09-01", $year);
     $dateint = "extract(doy from valid) BETWEEN $doy1 and $doy2";
 } else {
-    $sdate = sprintf("%s-09-01", intval($year) - 1);
+    $sdate = sprintf("%s-09-01", $year - 1);
     $dateint = "(extract(doy from valid) < $doy1 or extract(doy from valid) > $doy2)";
 }
 
@@ -72,17 +77,17 @@ $stname = iem_pg_prepare($c, $sql);
 $rs =  pg_execute($c, $stname, $dbargs);
 
 $sql = <<< EOM
-    select count(distinct valid) as c from sm_hourly 
+    select count(distinct valid) as c from sm_hourly
     WHERE station = $1 and valid > $2 and valid < $3
     and tair_c_avg >= f2c(32.0) and tair_c_avg <= f2c(45.0)
 EOM;
 $sub_st1 = iem_pg_prepare($c, $sql);
 
 $sql = <<< EOM
-    select count(distinct valid) as c 
+    select count(distinct valid) as c
     from sm_hourly WHERE station = $1 and tair_c_avg >= f2c(32)
-    and tair_c_avg <= f2c(45) 
-    and extract(year from valid) >= $2 and 
+    and tair_c_avg <= f2c(45)
+    and extract(year from valid) >= $2 and
     extract(year from valid) < extract(year from now()) and
     $dateint
 EOM;
@@ -119,7 +124,7 @@ while ($row = pg_fetch_assoc($rs)) {
 
     $data[$key]['var2'] = round($avg, 0);
 
-    // Red Dot... 
+    // Red Dot...
     $pt = new pointObj();
     $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
     $pt->draw($map, $ponly, $img, 0, "");
@@ -142,7 +147,7 @@ while ($row = pg_fetch_assoc($rs)) {
 iemmap_title(
     $map,
     $img,
-    "Standard Chill Units [ $sdate thru " . date("Y-m-d", $ts) . " ]",
+    "Standard Chill Units [ $sdate thru " . $edate . " ]",
     (pg_num_rows($rs) == 0) ? 'No Data Found!' : null
 );
 $map->drawLabelCache($img);

@@ -6,7 +6,7 @@ Called from SYNC_STATIONS.sh
 import time
 
 import click
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.util import logger
 
@@ -15,7 +15,7 @@ LOG = logger()
 
 def get_elevation(lon: float, lat: float) -> float | None:
     """Use arcgisonline"""
-    resp = httpx.get(
+    resp = requests.get(
         f"https://api.opentopodata.org/v1/mapzen?locations={lat},{lon}",
         timeout=30,
     )

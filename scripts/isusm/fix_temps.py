@@ -1,8 +1,6 @@
 """Use IEMRE estimated high and low temps"""
 
-import json
-
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
@@ -32,8 +30,13 @@ def main():
             f"{date:%Y-%m-%d}/{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = httpx.get(uri, timeout=60)
-        j = json.loads(res.content)
+        try:
+            resp = requests.get(uri, timeout=60)
+            resp.raise_for_status()
+        except requests.exceptions.RequestException:
+            LOG.exception("Failure fetching %s", uri)
+            continue
+        j = resp.json()
         if not j["data"]:
             LOG.info(" %s %s IEMRE Failure", station, date)
             continue

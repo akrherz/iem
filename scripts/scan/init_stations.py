@@ -1,6 +1,6 @@
 """Pull in what NRCS has for stations."""
 
-import httpx
+import requests
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
@@ -13,12 +13,14 @@ def main():
     """Go Main Go."""
     mesosite, mcursor = get_dbconnc("mesosite")
     nt = NetworkTable("SCAN", only_online=False)
-    entries = httpx.get(
+    resp = requests.get(
         "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations?"
         "activeOnly=true&returnForecastPointMetadata=false&"
         "returnReservoirMetadata=false&returnStationElements=false",
         timeout=30,
-    ).json()
+    )
+    resp.raise_for_status()
+    entries = resp.json()
     for meta in entries:
         if meta["networkCode"] != "SCAN":
             continue
@@ -41,12 +43,12 @@ def main():
                 )
 
             continue
-        print(f"Adding {station} {meta['name']}")
+        print(f"Adding {station} {meta['name']} tz:{data_time_zone}")
         mcursor.execute(
             "INSERT into stations(id, name, network, online, country, "
             "state, plot_name, elevation, metasite, geom) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, "
-            "ST_Point(%s, %s, 4326))",
+            "ST_Point(%s, %s, 4326)) returning iemid",
             (
                 station,
                 meta["name"],
@@ -61,6 +63,12 @@ def main():
                 meta["latitude"],
             ),
         )
+        mcursor.execute(
+            "INSERT into station_attributes(iemid, attr, value) "
+            "VALUES (%s, %s, %s)",
+            (mcursor.fetchone()[0], ATTRNAME, data_time_zone),
+        )
+
     mcursor.close()
     mesosite.commit()
     mesosite.close()

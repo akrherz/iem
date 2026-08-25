@@ -9,8 +9,8 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
@@ -210,7 +210,7 @@ def main(valid, station):
             f"{valid:%y%m%d%H}_OBS/{sid3}.txt"
         )
         try:
-            resp = httpx.get(uri, timeout=30)
+            resp = requests.get(uri, timeout=30)
             resp.raise_for_status()
         except Exception as exp:
             LOG.info("dl failed %s for %s with %s", sid, valid, exp)
