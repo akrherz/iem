@@ -25,7 +25,7 @@ def get_p01m_status(valid):
     tidx = hourly_offset(valid)
     with ncopen(
         f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc",
-        timeout=300,
+        timeout=600,
     ) as nc:
         # 2 prism_adjust_stage4 ran
         # 1 copied hourly data in
@@ -55,7 +55,7 @@ def ingest_hourly_grib(valid):
     val = np.where(val > 250.0, 0, val)
 
     ncfn = f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc"
-    with ncopen(ncfn, "a", timeout=300) as nc:
+    with ncopen(ncfn, "a", timeout=600) as nc:
         p01m = nc.variables["p01m"]
         # account for legacy grid prior to 2002
         if val.shape == (880, 1160):
@@ -76,7 +76,7 @@ def copy_to_iemre(valid):
     """verbatim copy over to IEMRE."""
     tidx = hourly_offset(valid)
     ncfn = f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc"
-    with ncopen(ncfn, "a", timeout=300) as nc:
+    with ncopen(ncfn, "a", timeout=600) as nc:
         val = nc.variables["p01m"][tidx]
         LOG.info("stage4 mean: %.2f max: %.2f", np.mean(val), np.max(val))
 
@@ -96,7 +96,7 @@ def copy_to_iemre(valid):
 
     # Open up our RE file
     with ncopen(
-        get_hourly_ncname(valid.year, domain="conus"), "a", timeout=300
+        get_hourly_ncname(valid.year, domain="conus"), "a", timeout=600
     ) as nc:
         nc.variables["p01m"][tidx] = res
     LOG.info(
@@ -119,7 +119,7 @@ def era5workflow(valid: datetime, domain: str):
     affine_in = get_nav("ERA5LAND", domain).affine
     val = reproject2iemre(p01m, affine_in, "EPSG:4326", domain=domain)
     with ncopen(
-        get_hourly_ncname(valid.year, domain=domain), "a", timeout=300
+        get_hourly_ncname(valid.year, domain=domain), "a", timeout=600
     ) as nc:
         nc.variables["p01m"][idx] = val
 

@@ -52,7 +52,7 @@ def use_era5land(ts, kind, domain: str):
     tidx = hourly_offset(ts)
     aff = get_nav("era5land", domain).affine
     try:
-        with ncopen(ncfn) as nc:
+        with ncopen(ncfn, timeout=600) as nc:
             res = []
             for task in tasks.get(kind, [kind]):
                 if task == "soilt":
@@ -318,7 +318,7 @@ def write_grid(valid, vname, grid, domain: str):
     offset = hourly_offset(valid)
     meta = SAMPLES[domain]
     i, j = get_nav("iemre", domain).find_ij(meta["lon"], meta["lat"])
-    with ncopen(get_hourly_ncname(valid.year, domain), "a", timeout=300) as nc:
+    with ncopen(get_hourly_ncname(valid.year, domain), "a", timeout=600) as nc:
         LOG.info(
             "offset: %s writing %s with min: %s max: %s %s[%s,%s]: %s",
             offset,
