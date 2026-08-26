@@ -562,3 +562,7 @@
 260/geo:cbw::opt:wfo::sts:2024-05-01%200000::ets:2024-05-30%200000::network:WFO::wfo:DMX::csector:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
 261/tzwhich:utc::network:WFO::wfo:DMX::pil:AFD::syear:2024::eyear:2025::_r:86::dpi:100::_cb:1.png
 261/tzwhich:local::network:WFO::wfo:DMX::pil:AFD::syear:2024::eyear:2025::_r:86::dpi:100::_cb:1.png
+263/opt:state::how:per_ugc::network:WFO::station:ARX::state:IA::fema:7::ugc:WIC057::ugc2:WIZ043::_r:43::dpi:100.png
+263/opt:ugc::how:per_ugc::network:WFO::station:ARX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100.png
+263/opt:fema::how:per_ugc::network:WFO::station:ARX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100.png
+263/opt:wfo::how:per_ugc::network:WFO::station:DMX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100::_cb:1.png
