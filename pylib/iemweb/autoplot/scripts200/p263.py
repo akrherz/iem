@@ -246,7 +246,7 @@ def plotter(ctx: dict):
     elif opt == "ugc":
         title = "NWS Issued Warnings/Advisories by Month"
         parts = []
-        for suffix in ["", "1", "2"]:
+        for suffix in ["", "2", "3"]:
             if (ugc := ctx.get(f"ugc{suffix}")) is not None:
                 name, _wfo = get_ugc_name(ugc)
                 parts.append(f"[{ugc}] {name}")
