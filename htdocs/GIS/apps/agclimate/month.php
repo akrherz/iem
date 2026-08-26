@@ -7,7 +7,7 @@ require_once "../../../../include/forms.php";
 require_once "../../../../include/vendor/mapscript.php";
 
 $dbconn = iemdb("isuag");
-$dvar = isset($_GET["dvar"]) ? xssafe($_GET["dvar"]) : "rain_in_tot";
+$dvar = get_str404("dvar", "rain_in_tot");
 
 $title = array(
     "rain_in_tot" => "Rainfall (inches)",
@@ -16,16 +16,16 @@ $title = array(
 if (!array_key_exists($dvar, $title)) die();
 
 $stname = iem_pg_prepare($dbconn, "select station, sum({$dvar}_qc) as s,
-    min(valid) as min_valid, max(valid) as max_valid from sm_daily 
+    min(valid) as min_valid, max(valid) as max_valid from sm_daily
     WHERE extract(month from valid) = $1 and
     extract(year from valid) = $2 GROUP by station");
 
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
-$year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)));
-$month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
-$day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
+$year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)), 1980, (int)date("Y") + 1);
+$month = get_int404("month", date("m", time() - 86400 - (7 * 3600)), 1, 12);
+$day = get_int404("day", date("d", time() - 86400 - (7 * 3600)), 1, 31);
 
 $sts = mktime(0, 0, 0, $month, 1, $year);
 
@@ -83,7 +83,7 @@ while ($row = pg_fetch_assoc($rs)) {
         $val = round($row["s"] / 25.4, 2);
     }
 
-    // Red Dot... 
+    // Red Dot...
     $pt = new pointObj();
     $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
     $pt->draw($map, $ponly, $img, 0, "");
