@@ -236,7 +236,7 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
     return netselect + " " + select + map_select_widget(network, arg["name"])
 
 
-def ugc_select(state: str, ugc: str) -> str:
+def ugc_select(formname: str, state: str, ugc: str) -> str:
     """Generate a select for a given state."""
     sql = """
     with data as (
@@ -256,7 +256,7 @@ def ugc_select(state: str, ugc: str) -> str:
             if row[2] is not None:
                 name += f" {row[2]}"
             ar[row[0]] = name
-    return make_select("ugc", ugc, ar, cssclass="iemselect2")
+    return make_select(formname, ugc, ar, cssclass="iemselect2")
 
 
 def ugc_handler(name: str, value: str, fdict: dict):
@@ -266,7 +266,7 @@ def ugc_handler(name: str, value: str, fdict: dict):
     state_select = make_select(
         privfield, state, ugc_state_names, jscallback="onNetworkChange"
     )
-    return f"{state_select} {ugc_select(state, value)}"
+    return f"{state_select} {ugc_select(name, state, value)}"
 
 
 def vtec_ps_handler(fdict, arg):
