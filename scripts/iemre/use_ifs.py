@@ -104,7 +104,9 @@ def process_omfile(root: OmFileReader, valid: datetime, tidx: int) -> None:
         if domain in ("", "conus") and valid < utc():
             LOG.warning("Not allowing %s to overwrite IEMRE CONUS", valid)
             continue
-        with ncopen(get_hourly_ncname(valid.year, domain), "a") as nc:
+        with ncopen(
+            get_hourly_ncname(valid.year, domain), "a", timeout=600
+        ) as nc:
             # No unit conversions
             for ncvar, omvar in [
                 ("uwnd", ncvars["uwnd"]),

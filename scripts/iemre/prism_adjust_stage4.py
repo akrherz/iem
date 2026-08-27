@@ -32,7 +32,7 @@ def compute_s4total(valid: datetime):
     ncfn = f"/mesonet/data/stage4/{sts.year}_stage4_hourly.nc"
     stage4total = None
     if os.path.isfile(ncfn):
-        with ncopen(ncfn) as nc:
+        with ncopen(ncfn, timeout=600) as nc:
             p01m = nc.variables["p01m"]
             LOG.info("%s [%s thru %s]", ncfn, tidx0, tidx1)
             stage4total = np.sum(p01m[tidx0 : (tidx1 + 1), :, :], axis=0)
@@ -43,7 +43,7 @@ def compute_s4total(valid: datetime):
     # 11z today
     tidx1 = hourly_offset(valid)
     ncfn = f"/mesonet/data/stage4/{sts.year}_stage4_hourly.nc"
-    with ncopen(ncfn) as nc:
+    with ncopen(ncfn, timeout=600) as nc:
         p01m = nc.variables["p01m"]
         LOG.info("%s [%s thru %s]", ncfn, tidx0, tidx1)
         tt = np.sum(p01m[tidx0 : (tidx1 + 1), :, :], axis=0)
@@ -103,7 +103,7 @@ def workflow(valid: datetime):
         ncfn = f"/mesonet/data/stage4/{now.year}_stage4_hourly.nc"
         if not os.path.isfile(ncfn):
             continue
-        with ncopen(ncfn, "a") as nc:
+        with ncopen(ncfn, "a", timeout=600) as nc:
             oldval = nc.variables["p01m"][idx]
             # we threshold the s4total to at least 0.001,
             # so we divide by 24 here
