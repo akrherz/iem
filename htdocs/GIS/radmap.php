@@ -169,12 +169,7 @@ if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)){
     $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
-/* Straight CGI Butter */
 $sector = get_str404("sector", "iem");
-if (!array_key_exists($sector, $sectors)){
-    $opts = implode(", ", array_keys($sectors));
-    die("Invalid sector provided, available: {$opts}");
-}
 $width = get_int404("width", 640);
 $height = get_int404("height", 480);
 $lsrbuffer = get_int404("lsrbuffer", 15);
