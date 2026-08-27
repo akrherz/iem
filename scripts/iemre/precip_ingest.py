@@ -112,7 +112,9 @@ def era5workflow(valid: datetime, domain: str):
     # NOTE, this may be off-by-one
     idx = hourly_offset(valid)
     dd = "" if domain == "conus" else f"_{domain}"
-    with ncopen(f"/mesonet/data/era5{dd}/{valid:%Y}_era5land_hourly.nc") as nc:
+    with ncopen(
+        f"/mesonet/data/era5{dd}/{valid:%Y}_era5land_hourly.nc", timeout=600
+    ) as nc:
         p01m = nc.variables["p01m"][idx]
     # Convert trace/drizzle to 0, values < 0.01in or .254mm
     p01m[p01m < 0.254] = 0
