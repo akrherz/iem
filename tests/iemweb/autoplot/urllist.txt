@@ -566,3 +566,4 @@
 263/opt:ugc::how:per_ugc::network:WFO::station:ARX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100.png
 263/opt:fema::how:per_ugc::network:WFO::station:ARX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100.png
 263/opt:wfo::how:per_ugc::network:WFO::station:DMX::state:IA::fema:7::ugc:IAC169::ugc2:IAZ048::_r:43::dpi:100::_cb:1.png
+263/opt:ugc::how:per_ugc::network:WFO::station:DMX::state:AK::fema:7::ugc:AKZ324.png
