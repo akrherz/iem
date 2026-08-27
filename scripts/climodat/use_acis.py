@@ -6,6 +6,7 @@
   the database other than to ensure temp_estimated is set to True.
 """
 
+import sys
 import time
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -98,6 +99,10 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
             return pd.DataFrame()
     for required_key in ("data", "meta"):
         if required_key not in j:
+            # A current quirk with ACIS, reported upstream
+            if required_key == "meta" and "thr" in acis_station:
+                LOG.info("`meta` not provided for %s, ignoring", acis_station)
+                continue
             LOG.info(
                 "Response missing %s key for %s content[:100]=%s",
                 required_key,
@@ -111,16 +116,25 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
         columns="day ahigh alow aprecip asnow asnowd".split(),
     )
     acis["day"] = pd.to_datetime(acis["day"])
-    # Figure out the offset so that we can compute the proper timestamp
-    timezone_offset_hours = j["meta"]["tzo"] * -1
-    tzinfo = ZoneInfo(meta["tzname"])
+    timezone_offset_hours = None
+    tzinfo = None
+    if "meta" in j:
+        # Figure out the offset so that we can compute the proper timestamp
+        timezone_offset_hours = j["meta"]["tzo"] * -1
+        tzinfo = ZoneInfo(meta["tzname"])
 
     def _compute_hour(row: np.ndarray) -> int:
         """Rectify this standard time hour back to DST aware."""
         day, hour = row
         # Edge case of 24 represents a local date.
-        if hour == 24:
+        # 0 is a bug with ACIS, sigh
+        if hour in [24, 0]:
             return 24
+        if tzinfo is None:
+            LOG.warning(
+                "Should have been impossible edge case, abort: %s", row
+            )
+            sys.exit()
         dt = utc(day.year, day.month, day.day, int(hour)) + timedelta(
             hours=timezone_offset_hours
         )
