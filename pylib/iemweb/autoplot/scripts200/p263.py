@@ -54,7 +54,7 @@ PHENOM_CONFIG = {
         "phenoms": ["FZ", "FR"],
     },
     "Severe Thunderstorm": {
-        "color": "orange",
+        "color": "#ffcc00",
         "phenoms": ["SV"],
     },
     "Tornado": {
@@ -145,14 +145,14 @@ def get_description():
             "optional": True,
             "type": "ugc",
             "name": "ugc2",
-            "default": "IAC169",
+            "default": "IAZ048",
             "label": "Select Second Additional UGC Zone/County: (optional)",
         },
         {
             "optional": True,
             "type": "ugc",
             "name": "ugc3",
-            "default": "IAC169",
+            "default": "IAZ048",
             "label": "Select Third Additional UGC Zone/County: (optional)",
         },
     ]
@@ -195,10 +195,9 @@ def plotter(ctx: dict):
         params["ugcs"] = [
             ctx["ugc"],
         ]
-        if (ugc2 := ctx.get("ugc2")) is not None:
-            params["ugcs"].append(ugc2)
-        if (ugc3 := ctx.get("ugc3")) is not None:
-            params["ugcs"].append(ugc3)
+        for suffix in ["2", "3"]:
+            if (ugc_val := ctx.get(f"ugc{suffix}")) is not None:
+                params["ugcs"].append(ugc_val)
 
     with get_sqlalchemy_conn("postgis") as conn:
         # vtec_year is likely "good enough" for this, eventid is 99.99% of the
