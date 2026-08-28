@@ -20,55 +20,68 @@ $nselect = selectNetworkType("CLIMATE", $network);
 
 $conn = iemdb("coop");
 
-$query = "select station, valid, min_low, min_low_yr from climate
-     WHERE valid > '2000-08-01' and min_low <= $2
-     and substr(station,0,3) = $1 ORDER by valid";
+// Process everything after 1 August until 1 April
+$query = <<<EOM
+    select station,
+    case when extract(month from valid) > 7
+    then valid - interval '1 year' else valid end as winter_valid,
+    low, min_low, min_low_yr from climate
+    WHERE (valid >= '2000-08-01' or valid < '2000-04-01')
+    and substr(station, 1, 2) = $1 and low is not null
+    and min_low is not null ORDER by winter_valid ASC
+EOM;
 $stname = iem_pg_prepare($conn, $query);
-$rs = pg_execute($conn, $stname, array(substr($network, 0, 2), 32));
+$rs = pg_execute($conn, $stname, array(substr($network, 0, 2)));
 
 
-$query = "select station, valid, low from climate
-     WHERE valid > '2000-08-01' and low <= $2
-     and substr(station,0,3) = $1 ORDER by valid";
-$stname = iem_pg_prepare($conn, $query);
-$rs2 = pg_execute($conn, $stname, array(substr($network, 0, 2), 40));
 
 $data = array();
 while ($row = pg_fetch_assoc($rs)) {
     $st = $row["station"];
-    if (!isset($data[$st])) {
+    $low = (float)$row["low"];
+    $min_low = (int)$row["min_low"];
+    if (!array_key_exists($st, $data)) {
         $data[$st] = array(
+            "quorum" => 0,
             "min_low" => 100,
+            "avglow40day" => null,
             "avglow32day" => null,
             "avglow28day" => null,
-            "station" => $st);
-        $data[$st]["low"] = $row["min_low"];
-        $data[$st]["lowyr"] = $row["min_low_yr"] . "-" . substr($row["valid"], 5, 6);
+            "low" => null,
+            "lowyr" => null,
+            "low28" => null,
+            "low28yr" => null,
+            "station" => $st,  // allow for array sorting later.
+        );
     }
-    if (!isset($data[$st]["low28"])) {
-        if (intval($row["min_low"]) < 29) {
-            $data[$st]["low28"] = $row["min_low"];
-            $data[$st]["low28yr"] = $row["min_low_yr"] . "-" . substr($row["valid"], 5, 6);
-        }
+    $data[$st]["quorum"] += 1;
+    // Running min_low value
+    $data[$st]["min_low"] = min($min_low, $data[$st]["min_low"]);
+    // Do the minimum low work.
+    if ($min_low <= 32 && is_null($data[$st]["low"])) {
+        $data[$st]["low"] = $min_low;
+        $data[$st]["lowyr"] = $row["min_low_yr"] ."-". substr($row["winter_valid"], 5, 6);
+    }
+    if ($min_low <= 28 && is_null($data[$st]["low28"])) {
+        $data[$st]["low28"] = $min_low;
+        $data[$st]["low28yr"] = $row["min_low_yr"] ."-". substr($row["winter_valid"], 5, 6);
+    }
+    // Check the average low value.
+    if ($low < 40 && is_null($data[$st]["avglow40day"])) {
+        $data[$st]["avglow40day"] = substr($row["winter_valid"], 5, 6);
+    }
+    if ($low < 32 && is_null($data[$st]["avglow32day"])) {
+        $data[$st]["avglow32day"] = substr($row["winter_valid"], 5, 6);
+    }
+    if ($low < 28 && is_null($data[$st]["avglow28day"])) {
+        $data[$st]["avglow28day"] = substr($row["winter_valid"], 5, 6);
     }
 }
 
-while ($row = pg_fetch_assoc($rs2)) {
-    $st = $row["station"];
-    if (!isset($data[$st]["avelow40day"])) {
-        if (intval($row["low"]) < 41) {
-            $data[$st]["avelow40day"] = substr($row["valid"], 5, 6);
-        }
-    }
-    if (!isset($data[$st]["avelow32day"])) {
-        if (intval($row["low"]) < 33) {
-            $data[$st]["avelow32day"] = substr($row["valid"], 5, 6);
-        }
-    }
-    if (!isset($data[$st]["avelow28day"])) {
-        if (intval($row["low"]) < 28) {
-            $data[$st]["avelow28day"] = substr($row["valid"], 5, 6);
-        }
+// Remove any entries without a quorum of approximately 8 months of data
+foreach ($data as $key => $value) {
+    if ($value["quorum"] < (8 * 29)) {
+        unset($data[$key]);
     }
 }
 
@@ -78,14 +91,17 @@ $finalA = aSortBySecondIndex($data, $sortcol);
 $table = "";
 foreach ($finalA as $key => $value) {
     if (!array_key_exists($key, $cities)) continue;
-    $table .= "<tr><td>" . $cities[strtoupper($key)]["name"] . "</td>
+    $table .= "<tr>
+    <td>{$key}</td>
+    <td>" . $cities[strtoupper($key)]["name"] . "</td>
+    <td>" . $data[$key]["min_low"] . "</td>
     <td>" . $data[$key]["low"] . "</td>
     <td>" . $data[$key]["lowyr"] . "</td>
     <td>" . $data[$key]["low28"] . "</td>
     <td>" . $data[$key]["low28yr"] . "</td>
-    <td>" . $data[$key]["avelow40day"] . "</td>
-    <td>" . $data[$key]["avelow32day"] . "</td>
-    <td>" . $data[$key]["avelow28day"] . "</td>
+    <td>" . $data[$key]["avglow40day"] . "</td>
+    <td>" . $data[$key]["avglow32day"] . "</td>
+    <td>" . $data[$key]["avglow28day"] . "</td>
     </tr>\n";
 }
 
@@ -93,14 +109,17 @@ foreach ($finalA as $key => $value) {
 $t->content = <<<EOM
 <h3>Freezing Dates</h3>
 
-<p>Using the NWS COOP data archive, significant dates relating to fall are
-extracted and presented on this page.  The specific dates are the first
-occurance of that temperature and may have occured again in subsequent
-years.
+<p>
+The IEM processed "climodat" archive is used to list out the first dates after
+1 August that a given site first dipped below 32°F and 28°F.  The dates when
+those events occurred are shown.  The second set of columns print out the
+fall day of the year that the climatology dips below the given threshold.
+</p>
 
-<br>The "Record Lows" columns show the first fall occurance of a low
-temperature.  The "Average Lows" column shows when certain climatological
-thresholds are surpassed in the fall.
+<p>
+Only the August through March period is considered for this analysis.  There
+is currently a data processing bug whereby the year of the first dates are not
+shown for all sites.  This will be fixed over the coming days.
 </p>
 
 <form method="GET" action="freezing.php">
@@ -115,16 +134,18 @@ thresholds are surpassed in the fall.
 <table class="table table-sm table-striped">
 <thead class="sticky">
   <tr>
-    <th rowspan='3'><a href='freezing.php?sortcol=station'>COOP Site:</a></th>
-    <th colspan='4'>Record Lows:</th>
-    <th colspan='3'>Average Lows:</th>
+    <th rowspan="3">ID</th>
+    <th rowspan='3'><a href='freezing.php?sortcol=station'>Climodat Site:</a></th>
+    <th rowspan='3'><a href='freezing.php?sortcol=min_low'>Min Low:</a></th>
+    <th colspan='4'>First Date with Observed Below:</th>
+    <th colspan='3'>First Date with Average Below:</th>
   </tr>
   <tr>
     <th colspan='2'>Temp <= 32&deg;F</th>
     <th colspan='2'>Temp <= 28&deg;F</th>
-    <td rowspan='2'><a href='freezing.php?sortcol=avelow40day'>Below 40&deg;F</a></td>
-    <td rowspan='2'><a href='freezing.php?sortcol=avelow32day'>Below 32&deg;F</a></td>
-    <td rowspan='2'><a href='freezing.php?sortcol=avelow28day'>Below 28&deg;F</a></td>
+    <td rowspan='2'><a href='freezing.php?sortcol=avglow40day'>Below 40&deg;F</a></td>
+    <td rowspan='2'><a href='freezing.php?sortcol=avglow32day'>Below 32&deg;F</a></td>
+    <td rowspan='2'><a href='freezing.php?sortcol=avglow28day'>Below 28&deg;F</a></td>
   </tr>
     <td>Temp:</td>
     <td><a href='freezing.php?sortcol=lowyr'>Date:</a></td>
