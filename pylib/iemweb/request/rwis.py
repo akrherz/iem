@@ -81,8 +81,8 @@ from sqlalchemy.dialects.postgresql import ARRAY
 
 from iemweb.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
-    HOUR_FIELD_OPTIONAL,
-    MINUTE_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
     MONTH_FIELD_OPTIONAL,
     NETWORK_FIELD,
     STATION_LIST_FIELD,
@@ -159,13 +159,13 @@ class Schema(CGIModel):
     year1: YEAR_FIELD_OPTIONAL = None
     month1: MONTH_FIELD_OPTIONAL = None
     day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
-    hour1: HOUR_FIELD_OPTIONAL = None
-    minute1: MINUTE_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
     year2: YEAR_FIELD_OPTIONAL = None
     month2: MONTH_FIELD_OPTIONAL = None
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
-    hour2: HOUR_FIELD_OPTIONAL = None
-    minute2: MINUTE_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def compute_output_columns(

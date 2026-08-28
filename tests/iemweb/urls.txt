@@ -32,6 +32,7 @@
 /cgi-bin/request/isusm.py?station=AHDI4&mode=daily&sts=2000-07-01T00:00Z&ets=2000-08-01T00:00Z&format=tab
 /cgi-bin/request/isusm.py?station=AHDI4&mode=hourly&sts=2020-07-01T00:00Z&ets=2020-08-01T00:00Z&format=comma&tz=UTC
 /cgi-bin/request/metars.py?valid=2020070100
+/cgi-bin/request/rwis.py?stations=HKYI4&year1=2018&month1=5&day1=4&year2=2018&month2=5&day2=6&tz=Etc%2FUTC&format=onlytdf&latlon=yes&elev=no&missing=empty&trace=null&direct=no
 /cgi-bin/request/rwis.py?stations=HKYI4&sts=2018-05-04%2000%3A00&ets=2018-05-06T00%3A00%3A00Z
 /cgi-bin/request/rwis.py?stations=HKYI4&sts=2018-05-04%2000%3A00Z&ets=2018-05-06T00%3A00%3A00
 /cgi-bin/mywindrose.py?station=QQQ&network=IA_ASOS
