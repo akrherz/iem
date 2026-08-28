@@ -868,7 +868,7 @@ nopts = [
     },
     {
         "id": 263,
-        "label": "Monthly Frequency of Warning/Advisories",
+        "label": "Monthly Frequency of Watch/Warning/Advisories",
     },
     {
         "id": 44,
