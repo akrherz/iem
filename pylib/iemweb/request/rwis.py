@@ -71,7 +71,7 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pydantic import Field, model_validator
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
@@ -167,17 +167,6 @@ class Schema(CGIModel):
     hour2: HOUR_FIELD_OPTIONAL = None
     minute2: MINUTE_FIELD_OPTIONAL = None
 
-    @model_validator(mode="after")
-    def validate_timestamps(self):
-        """Ensure that our timestamps make sense."""
-        if self.sts is None or self.ets is None:
-            raise ValueError("Both start and end time should be defined")
-        if self.sts.tzinfo is None:
-            self.sts = self.sts.replace(tzinfo=ZoneInfo("America/Chicago"))
-        if self.ets.tzinfo is None:
-            self.ets = self.ets.replace(tzinfo=ZoneInfo("America/Chicago"))
-        return self
-
 
 def compute_output_columns(
     available_columns: list[str],
@@ -211,6 +200,16 @@ def compute_output_columns(
 @iemapp(default_tz="America/Chicago", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go do something"""
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Both start and end time need to be set.")
+    if environ["sts"].tzinfo is None:
+        environ["sts"] = environ["sts"].replace(
+            tzinfo=ZoneInfo("America/Chicago")
+        )
+    if environ["ets"].tzinfo is None:
+        environ["ets"] = environ["ets"].replace(
+            tzinfo=ZoneInfo("America/Chicago")
+        )
     include_latlon = environ["gis"]
     requested_columns = environ["vars"]
     delimiter = DELIMITERS[environ["delim"]]
