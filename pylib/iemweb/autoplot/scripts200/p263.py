@@ -1,6 +1,7 @@
 """
-This chart presents a monthly average number of VTEC advisory/warnings. Since
-these alerts can be issued for either counties, forecast zones, marine zones,
+This chart presents a monthly average number of VTEC watch/warning/advisories.
+Since these alerts can be issued for either counties, forecast zones,
+marine zones,
 or fire weather zones, the user can select one or up to three different NWS
 UGC codes to use for the computed statistics.  Note
 also that while some warnings are polygon based, this autoplot does bean
@@ -14,10 +15,6 @@ covers <strong>or</strong> count each UGC covered by a warning/advisory as a
 separate event.
 </p>
 
-<p>
-For the initial implementation of this chart, watches are excluded as it is not
-yet clear how best to handle these.
-</p>
 """
 
 import calendar
@@ -28,6 +25,7 @@ import pandas as pd
 from pyiem import reference
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
+from pyiem.nws.vtec import VTEC_PHENOMENA, get_ps_string
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
@@ -44,10 +42,26 @@ PDICT2 = {
     "per_eventid": "Count by Event ID",
     "per_ugc": "Count by UGCs Covered",
 }
+PDICT3 = {
+    "WY": "Warnings/Advisories",
+    "A": "Watches",
+    "WYA": "Watches, Warnings, and Advisories",
+}
 PHENOM_CONFIG = {
     "Winter Weather": {
         "color": "blue",
-        "phenoms": ["WW", "WS", "BZ"],
+        "phenoms": [
+            "WW",
+            "WS",
+            "BZ",
+            "IS",
+            "SQ",
+            "ZR",
+            "BS",
+            "SN",
+            "SB",
+            "ZF",
+        ],
     },
     "Frost/Freeze": {
         "color": "lightblue",
@@ -63,7 +77,7 @@ PHENOM_CONFIG = {
     },
     "Severe Cold": {
         "color": "cyan",
-        "phenoms": ["WC", "EC"],
+        "phenoms": ["WC", "EC", "CW"],
     },
     "Dense Fog": {
         "color": "#000000cc",
@@ -108,10 +122,20 @@ def get_description():
     for name, config in PHENOM_CONFIG.items():
         if name == "Other":
             continue
-        doc += f"<li>{name}: {', '.join(config['phenoms'])}</li>"
+        entries = [
+            f"{VTEC_PHENOMENA.get(p, p)} ({p})" for p in config["phenoms"]
+        ]
+        doc += f"<li>{name}: {', '.join(entries)}</li>"
     doc += "</ul>"
     desc = {"description": doc, "data": True, "cache": 86400}
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "which",
+            "default": "WY",
+            "label": "Select which VTEC significance to summarize",
+            "options": PDICT3,
+        },
         dict(
             type="select",
             name="opt",
@@ -181,6 +205,7 @@ def plotter(ctx: dict):
     params = {
         "tzname": ctx["_nt"].sts[station]["tzname"],
         "first_year": AVG_YEAR1,
+        "sigs": list(ctx["which"]),
     }
     wfo_limiter = " and wfo = :wfo "
     params["wfo"] = station if len(station) == 3 else station[1:]
@@ -209,7 +234,7 @@ def plotter(ctx: dict):
                 distinct vtec_year, wfo, {eagg}
                 phenomena, significance, eventid,
                 extract(month from issue at time zone :tzname) as month
-                from warnings where significance in ('W', 'Y') and
+                from warnings where significance = ANY(:sigs) and
                 vtec_year >= :first_year
                 {wfo_limiter}
                 ORDER by vtec_year asc, month asc
@@ -243,7 +268,7 @@ def plotter(ctx: dict):
             f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
-        title = "NWS Issued Warnings/Advisories by Month"
+        title = f"NWS Issued {PDICT3[ctx['which']]} by Month"
         parts = []
         for suffix in ["", "2", "3"]:
             if (ugc := ctx.get(f"ugc{suffix}")) is not None:
@@ -312,5 +337,32 @@ def plotter(ctx: dict):
             lum = 0.2126 * fc[0] + 0.7152 * fc[1] + 0.0722 * fc[2]
             if lum < 0.5:
                 cell.get_text().set_color("white")
+
+    # List out Other Phenomena
+    otherdf = eventsdf[eventsdf["category"] == "Other"]
+    if not otherdf.empty:
+        otherdf = (
+            otherdf.groupby(["phenomena", "significance"])
+            .count()[["vtec_year"]]
+            .rename(columns={"vtec_year": "count"})
+            .sort_values("count", ascending=False)
+        )
+        txt = "Other Counts: "
+        running = 0
+        for idx, row in otherdf.iterrows():
+            txt += (
+                f"{get_ps_string(idx[0], idx[1])} "
+                f"({idx[0]}.{idx[1]} {row['count']}), "
+            )
+            running += 1
+            if running % 4 == 0:
+                txt += "\n"
+        ax.text(
+            -0.15,
+            -table_height - 0.06,
+            txt[:-2],
+            transform=ax.transAxes,
+            ha="left",
+        )
 
     return fig, eventsdf
