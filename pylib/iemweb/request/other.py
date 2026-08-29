@@ -5,6 +5,7 @@ Return to `API Services </api/#cgi>`_
 Changelog
 ---------
 
+- 2026-08-28: User provided timestamps default to America/Chicago timezone.
 - 2025-01-03: Use pydantic for request validation
 
 Example Requests
@@ -26,7 +27,11 @@ from pyiem.database import get_dbconnc
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 
 
 class Schema(CGIModel):
@@ -36,13 +41,13 @@ class Schema(CGIModel):
         str,
         Field(description="Station Identifier", max_length=10, min_length=3),
     ]
-    ets: date = Field(None, description="End Time")
-    sts: date = Field(None, description="Start Time")
-    year1: int = Field(None, description="Year 1")
-    month1: int = Field(None, description="Month 1")
+    ets: Annotated[date | None, Field(description="End Time")] = None
+    sts: Annotated[date | None, Field(description="Start Time")] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
     day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
-    year2: int = Field(None, description="Year 2")
-    month2: int = Field(None, description="Month 2")
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
@@ -90,7 +95,7 @@ def fetcher(station: str, sts: date, ets: date):
     return sio.getvalue().encode("ascii")
 
 
-@iemapp(help=__doc__, schema=Schema)
+@iemapp(help=__doc__, schema=Schema, default_tz="America/Chicago")
 def application(environ, start_response):
     """
     Do something!
@@ -98,5 +103,6 @@ def application(environ, start_response):
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Missing start or end time")
     station = environ["station"]
+    payload = fetcher(station, environ["sts"], environ["ets"])
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [fetcher(station, environ["sts"], environ["ets"])]
+    return [payload]

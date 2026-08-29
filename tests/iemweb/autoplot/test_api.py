@@ -33,7 +33,7 @@ def test_threecolons():
     assert res["year"] == "2025"
 
 
-@pytest.mark.parametrize("apid", genmod())
+@pytest.mark.parametrize("apid", list(genmod()))
 def test_autoplot_calls_index(apid: str):
     """Test the HTML generation via the User frontdoor."""
     c = Client(index_app)
@@ -41,7 +41,7 @@ def test_autoplot_calls_index(apid: str):
     assert resp.status_code == 200
 
 
-@pytest.mark.parametrize("apid", genmod())
+@pytest.mark.parametrize("apid", list(genmod()))
 def test_autoplot_calls_via_frontend(apid: str):
     """Just import things."""
     c = Client(meta_app)

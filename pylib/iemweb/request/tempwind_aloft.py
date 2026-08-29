@@ -35,6 +35,7 @@ station=KDSM&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&format=excel
 """
 
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -49,24 +50,32 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    ets: AwareDatetime = Field(
-        None,
-        description="The end time of the data request",
-    )
-    format: str = Field(
-        "csv",
-        description="The format of the output (csv json or excel)",
-        pattern="^(comma|csv|json|excel)$",
-    )
-    na: str = Field(
-        "M",
-        description="The value to use for missing data",
-        pattern="^(M|None|blank)$",
-    )
-    sts: AwareDatetime = Field(
-        None,
-        description="The start time of the data request",
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The end time of the data request",
+        ),
+    ] = None
+    format: Annotated[
+        str,
+        Field(
+            description="The format of the output (csv json or excel)",
+            pattern="^(comma|csv|json|excel)$",
+        ),
+    ] = "csv"
+    na: Annotated[
+        str,
+        Field(
+            description="The value to use for missing data",
+            pattern="^(M|None|blank)$",
+        ),
+    ] = "M"
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The start time of the data request",
+        ),
+    ] = None
     station: STATION_LIST_FIELD
     tz: TZ_FIELD_OPTIONAL = "UTC"
     year1: int = Field(
@@ -146,16 +155,18 @@ def application(environ, start_response):
     stations = environ["station"]
     na = environ["na"]
     if fmt != "excel":
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [
+        payload = [
             get_data(
                 stations, environ["sts"], environ["ets"], tz, na, fmt
             ).encode("ascii")
         ]
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return payload
     lll = "stations" if len(stations) > 1 else stations[0]
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", f"attachment; Filename={lll}.xlsx"),
     ]
+    payload = [get_data(stations, environ["sts"], environ["ets"], tz, na, fmt)]
     start_response("200 OK", headers)
-    return [get_data(stations, environ["sts"], environ["ets"], tz, na, fmt)]
+    return payload

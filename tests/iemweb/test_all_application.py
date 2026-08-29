@@ -19,7 +19,9 @@ def get_services(package_name):
             yield mod.application, f"{package_name}.{name}"
 
 
-@pytest.mark.parametrize(("application", "appname"), get_services("iemweb"))
+@pytest.mark.parametrize(
+    ("application", "appname"), list(get_services("iemweb"))
+)
 def test_all(application, appname: str):
     """Test all apps."""
     c = Client(application)

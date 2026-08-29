@@ -24,7 +24,7 @@ sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from io import StringIO
 from typing import Annotated
 
@@ -56,9 +56,6 @@ class Schema(CGIModel):
         """Check the model."""
         if self.sts >= self.ets:
             raise ValueError("Start time must be before end time")
-        # Assign both to UTC timezone
-        self.sts = self.sts.replace(tzinfo=timezone.utc)
-        self.ets = self.ets.replace(tzinfo=timezone.utc)
         return self
 
 

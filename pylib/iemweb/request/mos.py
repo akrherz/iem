@@ -29,6 +29,7 @@ station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=json
 """
 
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -36,65 +37,56 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 class MyModel(CGIModel):
     """Our model"""
 
-    format: str = Field(
-        "csv",
-        description="The format of the data response. csv, json, or excel",
-        pattern=r"^(csv|json|excel)$",
-    )
-    model: str = Field(
-        ...,
-        description="The model to query",
-        pattern=r"^(AVN|ETA|GFS|LAV|MEX|NAM|NBE|NBS)$",
-    )
-    ets: AwareDatetime = Field(
-        None,
-        description="The end time for the data request",
-    )
-    station: str = Field(..., description="The 4 character station identifier")
-    sts: AwareDatetime = Field(
-        None,
-        description="The start time for the data request",
-    )
-    year1: int = Field(
-        None,
-        description="The start year for the data request, when sts is not set",
-    )
-    month1: int = Field(
-        None,
-        description=(
-            "The start month for the data request, when sts is not set"
+    format: Annotated[
+        str,
+        Field(
+            description="The format of the data response. csv, json, or excel",
+            pattern=r"^(csv|json|excel)$",
         ),
-    )
-    day1: int = Field(
-        None,
-        description="The start day for the data request, when sts is not set",
-    )
-    hour1: int = Field(
-        None,
-        description="The start hour for the data request, when sts is not set",
-    )
-    year2: int = Field(
-        None,
-        description="The end year for the data request, when ets is not set",
-    )
-    month2: int = Field(
-        None,
-        description="The end month for the data request, when ets is not set",
-    )
-    day2: int = Field(
-        None,
-        description="The end day for the data request, when ets is not set",
-    )
-    hour2: int = Field(
-        None,
-        description="The end hour for the data request, when ets is not set",
-    )
+    ] = "csv"
+    model: Annotated[
+        str,
+        Field(
+            description="The model to query",
+            pattern=r"^(AVN|ETA|GFS|LAV|MEX|NAM|NBE|NBS)$",
+        ),
+    ]
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The end time for the data request",
+        ),
+    ] = None
+    station: Annotated[
+        str, Field(description="The 4 character station identifier")
+    ]
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The start time for the data request",
+        ),
+    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 23
 
 
 def get_data(sts, ets, station, model, fmt):
@@ -148,15 +140,15 @@ def application(environ, start_response):
     station = environ["station"].upper()
     model = environ["model"]
     if fmt != "excel":
+        payload = get_data(
+            environ["sts"], environ["ets"], station, model, fmt
+        ).encode("ascii")
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [
-            get_data(
-                environ["sts"], environ["ets"], station, model, fmt
-            ).encode("ascii")
-        ]
+        return [payload]
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=mos.xlsx"),
     ]
+    payload = get_data(environ["sts"], environ["ets"], station, model, fmt)
     start_response("200 OK", headers)
-    return [get_data(environ["sts"], environ["ets"], station, model, fmt)]
+    return [payload]

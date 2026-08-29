@@ -68,7 +68,6 @@ sts=2024-07-31T00:00&ets=2024-08-01T00:00
 from datetime import datetime
 from io import BytesIO, StringIO
 from typing import Annotated
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import Field
@@ -202,14 +201,6 @@ def application(environ, start_response):
     """Go do something"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Both start and end time need to be set.")
-    if environ["sts"].tzinfo is None:
-        environ["sts"] = environ["sts"].replace(
-            tzinfo=ZoneInfo("America/Chicago")
-        )
-    if environ["ets"].tzinfo is None:
-        environ["ets"] = environ["ets"].replace(
-            tzinfo=ZoneInfo("America/Chicago")
-        )
     include_latlon = environ["gis"]
     requested_columns = environ["vars"]
     delimiter = DELIMITERS[environ["delim"]]

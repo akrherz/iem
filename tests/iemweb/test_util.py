@@ -4,7 +4,17 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+from iemweb.c.tile import application as tile_app
 from iemweb.util import acquire_slot, month2months, release_slot
+from werkzeug.test import Client
+
+
+def test_tms_handler_failure():
+    """Ensure we can handle when things go south."""
+    c = Client(tile_app)
+    resp = c.get("/1.0.0/uscounties/4.44/3.33/1.png")
+    assert resp.status_code == 200
+    assert resp.headers["X-IEM-Error"] == "InvalidTMSRequest"
 
 
 def test_slot_acquiring():

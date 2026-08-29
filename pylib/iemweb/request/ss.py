@@ -13,9 +13,15 @@ Provide data for all of 2012 and 2013 for a specific station
 https://mesonet.agron.iastate.edu/cgi-bin/request/ss.py\
 ?sts=2012-01-01T00:00Z&ets=2014-01-01T00:00Z&opt=bubbler
 
+Same request, but Excel output this time
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/ss.py\
+?sts=2012-01-01T00:00Z&ets=2014-01-01T00:00Z&opt=bubbler&excel=on
+
 """
 
 from io import BytesIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
@@ -35,11 +41,12 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    excel: bool = Field(description="Return Excel File", default=False)
-    opt: str = Field(description="bubbler or gage", default="gage")
-    station: ListOrCSVType = Field(
-        default_factory=list, description="Station ID to query"
-    )
+    excel: Annotated[bool, Field(description="Return Excel File")] = False
+    opt: Annotated[str, Field(description="bubbler or gage")] = "gage"
+    station: Annotated[
+        ListOrCSVType,
+        Field(default_factory=list, description="Station ID to query"),
+    ]
     sts: AwareDatetime = Field(description="Start Time", default=None)
     ets: AwareDatetime = Field(description="End Time", default=None)
     year1: int = Field(
@@ -144,7 +151,7 @@ def bubbler_run(sts, ets, excel, start_response):
 def application(environ, start_response):
     """Go Main Go"""
     if environ["sts"] is None or environ["ets"] is None:
-        raise IncompleteWebRequest("GET start time parameters missing")
+        raise IncompleteWebRequest("GET sts/ets parameters missing")
     opt = environ["opt"]
 
     stations = environ["station"]

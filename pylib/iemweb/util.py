@@ -117,7 +117,13 @@ def tms_handler(environ: dict, start_response: callable, service: dict):
             f"'{environ.get('PATH_INFO')}' "
             f"Ref: {environ.get('HTTP_REFERER')}",
         )
-        start_response("200 OK", [("Content-Type", "image/png")])
+        start_response(
+            "200 OK",
+            [
+                ("Content-Type", "image/png"),
+                ("X-IEM-Error", "InvalidTMSRequest"),
+            ],
+        )
         with open("/opt/iem/htdocs/images/tms_error.png", "rb") as fh:
             return [fh.read()]
 
