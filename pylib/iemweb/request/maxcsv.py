@@ -855,7 +855,9 @@ def application(environ, start_response):
     """Do Something"""
     appname = environ["q"]
     res = router(appname)
-    start_response("200 OK", [("Content-type", "text/plain")])
     if isinstance(res, pd.DataFrame):
-        return res.to_csv(None, index=False).encode("ascii")
-    return res.encode("ascii")
+        payload = res.to_csv(None, index=False).encode("ascii")
+    else:
+        payload = res.encode("ascii")
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return payload

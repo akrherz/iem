@@ -31,7 +31,7 @@ def get_mods_and_urls():
             yield mod, f"?{cgi}"
 
 
-@pytest.mark.parametrize(("mod", "cgi"), get_mods_and_urls())
+@pytest.mark.parametrize(("mod", "cgi"), list(get_mods_and_urls()))
 def test_docutils_publish_string(mod, cgi):
     """Test that docutils can render __doc__ without any warnings."""
     # mark cgi as used so linters don't complain; it's only relevant
@@ -44,7 +44,7 @@ def test_docutils_publish_string(mod, cgi):
     assert res.find("System Message") == -1
 
 
-@pytest.mark.parametrize(("mod", "cgi"), get_mods_and_urls())
+@pytest.mark.parametrize(("mod", "cgi"), list(get_mods_and_urls()))
 def test_urls(mod, cgi):
     """Test what is found via introspection."""
     if not hasattr(mod, "application"):

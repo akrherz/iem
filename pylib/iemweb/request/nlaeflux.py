@@ -62,5 +62,6 @@ def application(environ, start_response):
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", "attachment; filename=fluxdata.txt"),
     ]
+    payload = df.to_csv(index=False).encode("ascii")
     start_response("200 OK", headers)
-    return [df.to_csv(index=False).encode("ascii")]
+    return [payload]

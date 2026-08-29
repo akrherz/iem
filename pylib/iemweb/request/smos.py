@@ -16,28 +16,22 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    LATITUDE_FIELD,
+    LONGITUDE_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
+
 
 class Schema(CGIModel):
     """Our schema for this request"""
 
-    lat: Annotated[
-        float,
-        Field(
-            ...,
-            description="Latitude of point to request data for.",
-            le=90,
-            ge=-90,
-        ),
-    ]
-    lon: Annotated[
-        float,
-        Field(
-            ...,
-            description="West longitude of point to request data for.",
-            le=180,
-            ge=-180,
-        ),
-    ]
+    lat: LATITUDE_FIELD
+    lon: LONGITUDE_FIELD
     ets: Annotated[
         AwareDatetime | None,
         Field(
@@ -54,86 +48,16 @@ class Schema(CGIModel):
             ),
         ),
     ] = None
-    year1: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Year to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    year2: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Year to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    month1: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Month to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    month2: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Month to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    day1: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Day to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    day2: Annotated[
-        int | None,
-        Field(
-            description=(
-                "Day to request data for, this is an alternative to sts/ets."
-            ),
-        ),
-    ] = None
-    hour1: Annotated[
-        int,
-        Field(
-            description="Hour to request data for.",
-            ge=0,
-            le=23,
-        ),
-    ] = 0
-    hour2: Annotated[
-        int,
-        Field(
-            description="Hour to request data for.",
-            ge=0,
-            le=23,
-        ),
-    ] = 0
-    minute1: Annotated[
-        int,
-        Field(
-            description="Minute to request data for.",
-            ge=0,
-            le=59,
-        ),
-    ] = 0
-    minute2: Annotated[
-        int,
-        Field(
-            description="Minute to request data for.",
-            ge=0,
-            le=59,
-        ),
-    ] = 0
+    year1: YEAR_FIELD_OPTIONAL = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 @iemapp(schema=Schema, help=__doc__)

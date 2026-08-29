@@ -32,7 +32,6 @@ def application(_environ, start_response):
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=nass_iowa.xlsx"),
     ]
-    start_response("200 OK", headers)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             "SELECT * from nass_iowa ORDER by valid ASC",
@@ -42,4 +41,5 @@ def application(_environ, start_response):
     df["load_time"] = df["load_time"].dt.strftime("%Y-%m-%d")
     bio = BytesIO()
     df.to_excel(bio, index=False)
+    start_response("200 OK", headers)
     return [bio.getvalue()]

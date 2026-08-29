@@ -19,7 +19,7 @@ def get_test_urls():
             yield line
 
 
-@pytest.mark.parametrize("url", get_test_urls())
+@pytest.mark.parametrize("url", list(get_test_urls()))
 def test_urls(url):
     """Run the test."""
     c = Client(application)

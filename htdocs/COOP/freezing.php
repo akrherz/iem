@@ -8,6 +8,11 @@ require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 
 $sortcol = get_str404("sortcol", "station");
+$sortable_columns = ["station", "min_low", "low", "low28", "avglow40day", "avglow32day", "avglow28day"];
+if (!in_array($sortcol, $sortable_columns)) {
+    $sortcol = "station";
+}
+
 $network = get_str404("network", "IACLIMATE");
 
 $t = new MyView();
@@ -32,8 +37,6 @@ $query = <<<EOM
 EOM;
 $stname = iem_pg_prepare($conn, $query);
 $rs = pg_execute($conn, $stname, array(substr($network, 0, 2)));
-
-
 
 $data = array();
 while ($row = pg_fetch_assoc($rs)) {
