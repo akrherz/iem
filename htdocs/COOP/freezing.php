@@ -8,7 +8,7 @@ require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 
 $sortcol = get_str404("sortcol", "station");
-$sortable_columns = ["station", "min_low", "low", "low28", "avglow40day", "avglow32day", "avglow28day"];
+$sortable_columns = ["station", "min_low", "low", "low28", "lowyr", "low28yr", "avglow40day", "avglow32day", "avglow28day"];
 if (!in_array($sortcol, $sortable_columns)) {
     $sortcol = "station";
 }
