@@ -33,6 +33,7 @@ from pyiem.webutil import (
     write_telemetry,
 )
 from pymemcache.client import Client
+from pymemcache.exceptions import MemcacheIllegalInputError
 
 from iemweb.autoplot import import_script
 
@@ -264,8 +265,11 @@ def workflow(mc, environ: dict, fmt: str):
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
     if len(mckey) < 250:
-        # Don't fetch memcache when we have _cb set for an inbound CGI
-        res = mc.get(mckey) if fdict.get("_cb") is None else None
+        try:
+            # Don't fetch memcache when we have _cb set for an inbound CGI
+            res = mc.get(mckey) if fdict.get("_cb") is None else None
+        except MemcacheIllegalInputError as exp:
+            raise BadWebRequest("Memcache key is invalid") from exp
         if res:
             return HTTP200, res
     # memcache failed to save us work, so work we do!

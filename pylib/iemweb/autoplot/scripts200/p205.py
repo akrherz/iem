@@ -120,7 +120,9 @@ def plotter(ctx: dict):
         )
         labels[f"{ez}_hit"] = f"{col} {op} {val:.0f} {units}"
     if ctx.get("max_tmpf_range"):
-        tokens = [int(i) for i in ctx["max_tmpf_range"].split("to")]
+        tokens = [
+            int(i) for i in ctx["max_tmpf_range"].replace("+", " ").split("to")
+        ]
         params.append(
             f"case when max_tmpf::int >= {tokens[0]} and "
             f"max_tmpf::int <= {tokens[1]} then 1 else 0 end as tmpf_hit"

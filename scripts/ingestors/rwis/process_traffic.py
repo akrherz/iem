@@ -5,8 +5,8 @@ called from RUN_10_AFTER.sh
 
 from datetime import timedelta
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
@@ -104,11 +104,11 @@ def main():
             f"&endDate={edate}&units=us&precision=0"
         )
 
-        resp = httpx.get(URI, timeout=60, headers=headers)
-        if resp.status_code != 200:
-            # HACK
-            if idot_id < 73:
-                LOG.info("Fetch %s got status_code %s", URI, resp.status_code)
+        try:
+            resp = requests.get(URI, timeout=60, headers=headers)
+            resp.raise_for_status()
+        except requests.exceptions.RequestException as exp:
+            LOG.info("Got a bad response from DTN for %s: %s", nwsli, exp)
             continue
         res = resp.json()
         if not res:
