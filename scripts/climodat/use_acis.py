@@ -6,7 +6,6 @@
   the database other than to ensure temp_estimated is set to True.
 """
 
-import sys
 import time
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -127,14 +126,10 @@ def build_acis_dataframe(acis_station: str, meta: dict) -> pd.DataFrame:
         """Rectify this standard time hour back to DST aware."""
         day, hour = row
         # Edge case of 24 represents a local date.
-        # 0 is a bug with ACIS, sigh
-        if hour in [24, 0]:
+        # 0 is a bug with ACIS, reported upstream
+        # Reported the tzinfo case upstream, so we can only assume 24 attm
+        if hour in [24, 0] or tzinfo is None:
             return 24
-        if tzinfo is None:
-            LOG.warning(
-                "Should have been impossible edge case, abort: %s", row
-            )
-            sys.exit()
         dt = utc(day.year, day.month, day.day, int(hour)) + timedelta(
             hours=timezone_offset_hours
         )
