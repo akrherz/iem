@@ -61,6 +61,9 @@ PHENOM_CONFIG = {
             "SN",
             "SB",
             "ZF",
+            "LE",
+            "HS",
+            "LB",
         ],
     },
     "Frost/Freeze": {
@@ -81,15 +84,15 @@ PHENOM_CONFIG = {
     },
     "Dense Fog": {
         "color": "#000000cc",
-        "phenoms": ["FG"],
+        "phenoms": ["FG", "MF"],
     },
     "Flood": {
         "color": "lightgreen",
-        "phenoms": ["FF", "FA", "FL"],
+        "phenoms": ["FF", "FA", "FL", "LS"],
     },
     "Marine": {
         "color": "darkgreen",
-        "phenoms": ["MA", "SC", "GL", "CF"],
+        "phenoms": ["MA", "SC", "GL", "CF", "UP", "SR", "MS"],
     },
     "Tropical": {
         "color": "darkred",
@@ -355,7 +358,7 @@ def plotter(ctx: dict):
                 f"({idx[0]}.{idx[1]} {row['count']}), "
             )
             running += 1
-            if running % 4 == 0:
+            if running % 3 == 0:
                 txt += "\n"
         ax.text(
             -0.15,
@@ -363,6 +366,7 @@ def plotter(ctx: dict):
             txt[:-2],
             transform=ax.transAxes,
             ha="left",
+            va="top",
         )
 
     return fig, eventsdf

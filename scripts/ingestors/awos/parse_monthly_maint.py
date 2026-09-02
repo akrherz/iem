@@ -70,8 +70,17 @@ def main(filename: str, commit: bool) -> None:
             continue
         parts = re.findall(CALINFO, descr)
         if not parts:
-            print(FAIL + descr + ENDC)
-            continue
+            # See if we can find 4 or more numeric values
+            parts = re.findall(r"([0-9\-\.]+)", descr)
+            if len(parts) < 4:
+                print(FAIL + descr + ENDC)
+                continue
+            parts = [parts[:4]]  # Take only the first four numeric values
+            try:
+                [float(p) for p in parts[0]]
+            except Exception:
+                print(FAIL + descr + ENDC)
+                continue
         sql = """
         INSERT into iem_calibration(station, portfolio, valid, parameter,
         adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)
