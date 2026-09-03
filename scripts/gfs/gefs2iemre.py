@@ -62,6 +62,7 @@ def download_gribs(valid: datetime, workdir: Path):
             offsets = []
             start_byte = None
             resp = dl_helper(idxurl)
+            quorum = 0
             for line in resp.text.split("\n"):
                 # 3:292339:d=2026090100:RH:10 mb:390 hour fcst:ENS=low-res ctl
                 tokens = line.split(":")
@@ -71,6 +72,7 @@ def download_gribs(valid: datetime, workdir: Path):
                     tokens[3] in ["RH", "TMAX", "TMIN"]
                     and tokens[4] == "2 m above ground"
                 ):
+                    quorum += 1
                     # Opt: our grids of interest appear to be sequential, so
                     # attempt to consolidate http requests into one, hopefully
                     if start_byte is None:
@@ -84,9 +86,9 @@ def download_gribs(valid: datetime, workdir: Path):
             if start_byte is not None:
                 offsets.append((start_byte, start_byte + 1_000_000))
 
-            if not offsets:
+            if quorum != 3:
                 raise RuntimeError(
-                    f"Failed to find grib messages in {idxurl}. aborting"
+                    f"Found only {quorum}/3 messages in {idxurl}. aborting"
                 )
             griburl = idxurl.removesuffix(".idx")
             with open(localfn, "wb") as fh:
