@@ -363,7 +363,7 @@ def plotter(ctx: dict):
         ax.text(
             -0.15,
             -table_height - 0.06,
-            txt[:-2],
+            txt.removesuffix("\n").removesuffix(", "),
             transform=ax.transAxes,
             ha="left",
             va="top",

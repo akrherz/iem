@@ -14,6 +14,8 @@ dependencies:
   - cryptocode
   # ?help support
   - docutils
+  # Download NASA data
+  - earthaccess
   # one wxc script
   - ephem
   # various places
@@ -94,6 +96,8 @@ dependencies:
   - requests
   # Testing
   - responses
+  # Reprojecting
+  - rioxarray
   # important
   - scipy
   # autoplots

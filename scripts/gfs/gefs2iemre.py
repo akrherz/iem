@@ -15,19 +15,14 @@ import numpy as np
 import pygrib
 import requests
 from affine import Affine
-from pyiem.database import get_sqlalchemy_conn, sql_helper
+from psycopg2.extensions import connection
+from pyiem.database import get_dbconn
 from pyiem.iemre import DOMAINS as IEMRE_DOMAINS
 from pyiem.iemre import reproject2iemre
 from pyiem.util import logger, set_property
-from sqlalchemy.engine import Connection
 from tqdm import tqdm
 
 LOG = logger()
-SQL = sql_helper(
-    "insert into iemre_gefs (gid, ens_member, model_valid,"
-    "valid, high_tmpk, low_tmpk, avg_rh) values ("
-    ":gid, :member, :model_valid, :valid, :high_tmpk, :low_tmpk, :avg_rh)"
-)
 
 
 def dl_helper(url: str, headers: dict | None = None):
@@ -42,7 +37,7 @@ def dl_helper(url: str, headers: dict | None = None):
             return resp
         except Exception as exp:
             LOG.warning("dl_helper failed for %s: %s", url, exp)
-    raise RuntimeError(f"Failed to download {url} after 3 tries")
+    raise RuntimeError(f"Failed to download {url} after 3 tries, aborting")
 
 
 def download_gribs(valid: datetime, workdir: Path):
@@ -72,23 +67,28 @@ def download_gribs(valid: datetime, workdir: Path):
                 tokens = line.split(":")
                 if len(tokens) < 5:
                     continue
-                if start_byte is not None:
-                    offsets.append((start_byte, int(tokens[1]) - 1))
-                    start_byte = None
                 if (
                     tokens[3] in ["RH", "TMAX", "TMIN"]
                     and tokens[4] == "2 m above ground"
                 ):
-                    start_byte = int(tokens[1])
+                    # Opt: our grids of interest appear to be sequential, so
+                    # attempt to consolidate http requests into one, hopefully
+                    if start_byte is None:
+                        start_byte = int(tokens[1])
+                    continue
+                if start_byte is not None:
+                    offsets.append((start_byte, int(tokens[1]) - 1))
+                    start_byte = None
 
-            if len(offsets) != 3:
-                LOG.warning(
-                    "Failed to find 3 offsets for %s, got %s",
-                    idxurl,
-                    len(offsets),
+            # Just in case.
+            if start_byte is not None:
+                offsets.append((start_byte, start_byte + 1_000_000))
+
+            if not offsets:
+                raise RuntimeError(
+                    f"Failed to find grib messages in {idxurl}. aborting"
                 )
-                continue
-            griburl = idxurl.rstrip(".idx")
+            griburl = idxurl.removesuffix(".idx")
             with open(localfn, "wb") as fh:
                 for start, end in offsets:
                     headers = {"Range": f"bytes={start}-{end}"}
@@ -97,7 +97,7 @@ def download_gribs(valid: datetime, workdir: Path):
 
 
 def compute_daily(
-    conn: Connection, domain: str, valid: datetime, workdir: Path
+    conn: connection, domain: str, valid: datetime, workdir: Path
 ):
     """Chunk away, one domain at a time, sigh..."""
     # Tricky here for how to compute a valid date
@@ -175,36 +175,42 @@ def compute_daily(
                     "EPSG:4326",
                     domain=domain,
                 )
+                tmax_mask = np.ma.getmaskarray(tmax)
                 tmin = reproject2iemre(
                     tmingrid,
                     affine,
                     "EPSG:4326",
                     domain=domain,
                 )
+                tmin_mask = np.ma.getmaskarray(tmin)
                 rh = reproject2iemre(
                     rhgrid,
                     affine,
                     "EPSG:4326",
                     domain=domain,
                 )
+                rh_mask = np.ma.getmaskarray(rh)
                 # So the IEMRE grid gid winds from SW corner -> and then ^
-                rows = []
-                for gid, (i, j) in enumerate(np.ndindex(tmax.shape)):
-                    if tmax.mask[i, j] or tmin.mask[i, j] or rh.mask[i, j]:
-                        continue
-                    rows.append(
-                        {
-                            "gid": gid,
-                            "member": member,
-                            "model_valid": valid,
-                            "valid": approxlocal,
-                            "high_tmpk": float(tmax[i, j]),
-                            "low_tmpk": float(tmin[i, j]),
-                            "avg_rh": float(rh[i, j]),
-                        }
-                    )
-                if rows:
-                    conn.execute(SQL, rows)
+                cursor = conn.cursor()
+                with cursor.copy(
+                    "copy iemre_gefs(gid, ens_member, model_valid, valid, "
+                    "high_tmpk, low_tmpk, avg_rh) from STDIN"
+                ) as copy:
+                    for gid, (i, j) in enumerate(np.ndindex(tmax.shape)):
+                        if tmax_mask[i, j] or tmin_mask[i, j] or rh_mask[i, j]:
+                            continue
+                        copy.write_row(
+                            (
+                                gid,
+                                member,
+                                valid,
+                                approxlocal,
+                                float(tmax[i, j]),
+                                float(tmin[i, j]),
+                                float(rh[i, j]),
+                            )
+                        )
+                cursor.close()
                 conn.commit()
             quorum = 0
             rhgrid = None
@@ -230,16 +236,17 @@ def main(valid: datetime):
     workdir.mkdir(exist_ok=True, parents=True)
     download_gribs(valid, workdir)
     for domain in IEMRE_DOMAINS:
-        with get_sqlalchemy_conn(
-            "iemre" if domain == "conus" else f"iemre_{domain}"
-        ) as conn:
-            # Delete out existing data.
-            res = conn.execute(
-                sql_helper("DELETE from iemre_gefs where model_valid = :mv"),
-                {"mv": valid},
-            )
-            LOG.info("Removed %s rows for domain: %s", res.rowcount, domain)
-            compute_daily(conn, domain, valid, workdir)
+        conn = get_dbconn("iemre" if domain == "conus" else f"iemre_{domain}")
+        cursor = conn.cursor()
+        # Delete out existing data.
+        cursor.execute(
+            "DELETE from iemre_gefs where model_valid = %s",
+            (valid,),
+        )
+        LOG.info("Removed %s rows for domain: %s", cursor.rowcount, domain)
+        cursor.close()
+        conn.commit()
+        compute_daily(conn, domain, valid, workdir)
         set_property(f"iemre.gefs.{domain}", f"{valid:%Y-%m-%dT%H:%MZ}")
 
     # Blow out the work dir
