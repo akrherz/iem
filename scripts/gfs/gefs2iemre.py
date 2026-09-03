@@ -240,10 +240,11 @@ def main(valid: datetime):
     for domain in IEMRE_DOMAINS:
         conn = get_dbconn("iemre" if domain == "conus" else f"iemre_{domain}")
         cursor = conn.cursor()
-        # Delete out existing data.
+        # Delete out existing data or data older than 7 days to save space
         cursor.execute(
-            "DELETE from iemre_gefs where model_valid = %s",
-            (valid,),
+            "DELETE from iemre_gefs "
+            "where model_valid = %s or model_valid < %s",
+            (valid, valid - timedelta(days=7)),
         )
         LOG.info("Removed %s rows for domain: %s", cursor.rowcount, domain)
         cursor.close()
