@@ -64,7 +64,9 @@ def process(dt: date):
             LOG.info(
                 "%s min: %s max: %s", varname, np.nanmin(data), np.nanmax(data)
             )
-        with ncopen(f"/mesonet/data/prism/{dt:%Y}_daily.nc", "a") as nc:
+        with ncopen(
+            f"/mesonet/data/prism/{dt:%Y}_daily.nc", "a", timeout=600
+        ) as nc:
             nc.variables[varname][idx] = data
         for fn in glob.glob(f"prism_{varname}_us_30s_{dt:%Y%m%d}*"):
             os.remove(fn)

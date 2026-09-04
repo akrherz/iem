@@ -57,7 +57,9 @@ def workflow(valid: datetime):
     LOG.info("Processing %s", valid)
     # read prism
     tidx = daily_offset(valid)
-    with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r") as nc:
+    with ncopen(
+        f"/mesonet/data/prism/{valid.year}_daily.nc", "r", timeout=600
+    ) as nc:
         # rasterio freaks out if we have masked arrays
         ppt = nc.variables["ppt"][tidx].filled(0)
     (pi, pj) = get_nav("prism").find_ij(DEBUGLON, DEBUGLAT)
