@@ -19,7 +19,7 @@ spatially/temporally overlap each other.</p>
 
 <p>
 <strong>Updated 4 September 2026</strong>: The data download now includes
-a `max_sign` colum which denotes the maximum hatched,CIG[1-3] value found
+a `max_sign` column which denotes the maximum hatched,CIG[1-3] value found
 for the given day.
 </p>
 """
@@ -225,8 +225,8 @@ def plotter(ctx: dict):
                 outlook_date >= :sts and outlook_date <= :ets and
                 threshold not in ('IDRT', 'SDRT')),
             hatched as (
-                select distinct outlook_date, threshold from data
-                where threshold = ANY(:cigs)
+                select outlook_date, max(threshold) as max_threshold from data
+                where threshold = ANY(:cigs) GROUP by outlook_date
             ),
             agg as (
                 select outlook_date, d.threshold, priority,
@@ -236,7 +236,8 @@ def plotter(ctx: dict):
                 not (d.threshold = ANY(:cigs)) {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
-            case when h.threshold = ANY(:cigs) then true else false end as sign
+    case when h.max_threshold = ANY(:cigs) then true else false end as sign,
+    coalesce(h.max_threshold, 'NONE') as max_sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
             """,
