@@ -10,7 +10,6 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
-import netCDF4
 import numpy as np
 import pygrib
 from pyiem.iemre import daily_offset, get_daily_mrms_ncname
@@ -24,17 +23,11 @@ TMP = "/mesonet/tmp"
 PRODFLIP = utc(2020, 10, 13, 19)
 
 
-def run(nc: netCDF4.Dataset, dt: date, for_dep: bool):
-    """Update netcdf file with the MRMS data
-
-    Args:
-      dt (date): date to process
-      for_dep (bool): for Daily Erosion Project
-    """
+def run(ncfn: str, dt: date, for_dep: bool):
+    """Update netcdf file with the MRMS data."""
     offset = daily_offset(dt)
     if for_dep:
         offset = offset - daily_offset(date(dt.year, 4, 11))
-    ncprecip = nc.variables["p01d"]
 
     midnight = datetime(
         dt.year, dt.month, dt.day, tzinfo=ZoneInfo("America/Chicago")
@@ -79,7 +72,8 @@ def run(nc: netCDF4.Dataset, dt: date, for_dep: bool):
 
     if total is None:
         LOG.warning("nodata for %s, using zeros", dt)
-        ncprecip[offset] = 0
+        with ncopen(ncfn, "a", timeout=600) as nc:
+            nc.variables["p01d"][offset] = 0
         return
     # To save some space, we store a tigher CONUS domain
     # total.shape is 3500 x 7000, our 2700 x 6100
@@ -94,7 +88,8 @@ def run(nc: netCDF4.Dataset, dt: date, for_dep: bool):
     y0 = 500
     y1 = 500 + 2700
     LOG.info("Writing precip at offset: %s [for_dep:%s]", offset, for_dep)
-    ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
+    with ncopen(ncfn, "a", timeout=600) as nc:
+        nc.variables["p01d"][offset] = np.flipud(total[y0:y1, x0:x1])
 
 
 @click.command()
@@ -114,8 +109,7 @@ def main(dt: datetime, for_dep):
     ncfn = get_daily_mrms_ncname(dt.year)
     if for_dep:
         ncfn = ncfn.replace("daily", "dep")
-    with ncopen(ncfn, "a", timeout=300) as nc:
-        run(nc, dt.date(), for_dep)
+    run(ncfn, dt.date(), for_dep)
 
 
 if __name__ == "__main__":
