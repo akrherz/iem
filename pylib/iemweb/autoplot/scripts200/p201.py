@@ -17,11 +17,11 @@ for days with those conditional risks. Note that this isn't an exact
 science as the hatched and probability risk are not checked to see if they
 spatially/temporally overlap each other.</p>
 
-<p><strong>Updated 15 July 2025</strong>: An option was added to just plot
-a single threshold.  This logic gets a bit tricky as consider an example of
-Iowa being engulfed by a moderate risk, but you choose to only plot enhanced
-risk days.  The plot would show an enhanced risk for that day eventhough
-it was a moderate.</p>
+<p>
+<strong>Updated 4 September 2026</strong>: The data download now includes
+a `max_sign` column which denotes the maximum hatched,CIG[1-3] value found
+for the given day.
+</p>
 """
 
 import calendar
@@ -225,8 +225,8 @@ def plotter(ctx: dict):
                 outlook_date >= :sts and outlook_date <= :ets and
                 threshold not in ('IDRT', 'SDRT')),
             hatched as (
-                select distinct outlook_date, threshold from data
-                where threshold = ANY(:cigs)
+                select outlook_date, max(threshold) as max_threshold from data
+                where threshold = ANY(:cigs) GROUP by outlook_date
             ),
             agg as (
                 select outlook_date, d.threshold, priority,
@@ -236,7 +236,8 @@ def plotter(ctx: dict):
                 not (d.threshold = ANY(:cigs)) {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
-            case when h.threshold = ANY(:cigs) then true else false end as sign
+    case when h.max_threshold = ANY(:cigs) then true else false end as sign,
+    coalesce(h.max_threshold, 'NONE') as max_sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
             """,
@@ -309,8 +310,8 @@ def plotter(ctx: dict):
                 outlook_date >= :sts
                 and outlook_date <= :ets {sqllimiter}),
             hatched as (
-                select distinct outlook_date, threshold from data
-                where threshold = ANY(:cigs)
+                select outlook_date, max(threshold) as max_threshold from data
+                where threshold = ANY(:cigs) GROUP by outlook_date
             ),
             agg as (
                 select outlook_date, d.threshold, priority,
@@ -320,7 +321,8 @@ def plotter(ctx: dict):
                 not (d.threshold = ANY(:cigs)) {threshold_filter})
 
             SELECT distinct a.outlook_date as date, a.threshold,
-            case when h.threshold = ANY(:cigs) then true else false end as sign
+    case when h.max_threshold = ANY(:cigs) then true else false end as sign,
+        coalesce(h.max_threshold, 'NONE') as max_sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
             """,
@@ -370,7 +372,10 @@ def plotter(ctx: dict):
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
         data[dt.to_pydatetime().date()] = {
-            "val": f"{row['threshold']}{cigref.get(row['threshold'], '')}",
+            "val": (
+                f"{row['threshold']}{cigref.get(row['threshold'], '')}"
+                f"{cigref.get(row['max_sign'], '')}"
+            ),
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
     jj = f"Only {ctx['just']}" if ctx["just"] else "Highest"
