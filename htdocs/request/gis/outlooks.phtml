@@ -251,13 +251,42 @@ $content .= <<<EOM
           </tr>
         </thead>
         <tbody>
-          <tr><td>0</td><td><span class="badge bg-info">String</span></td><td><code>ISSUE</code></td><td>Outlook Beginning Valid Time UTC</td></tr>
-          <tr><td>1</td><td><span class="badge bg-info">String</span></td><td><code>EXPIRE</code></td><td>Outlook Ending Valid Time UTC</td></tr>
-          <tr><td>2</td><td><span class="badge bg-info">String</span></td><td><code>PRODISS</code></td><td>Timestamp of Product Issuance UTC</td></tr>
-          <tr><td>3</td><td><span class="badge bg-info">String</span></td><td><code>TYPE</code></td><td>Either C=Convective, F=Fire Weather</td></tr>
-          <tr><td>4</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>DAY</code></td><td>Day 1 through 8 for the outlook</td></tr>
+          <tr>
+          <td>0</td>
+          <td><span class="badge bg-info">String</span></td>
+          <td><code>ISSUE</code></td>
+          <td>Outlook Beginning Valid Time UTC</td>
+          </tr>
+          <tr>
+          <td>1</td>
+          <td><span class="badge bg-info">String</span></td>
+          <td><code>EXPIRE</code></td><td>Outlook Ending Valid Time UTC</td>
+          </tr>
+          <tr>
+          <td>2</td>
+          <td><span class="badge bg-info">String</span></td>
+          <td><code>PRODISS</code></td>
+          <td>Timestamp of Product Issuance UTC</td>
+          </tr>
+          <tr>
+          <td>3</td>
+          <td><span class="badge bg-info">String</span></td>
+          <td><code>TYPE</code></td>
+          <td>Either C=Convective, E=Excessive Rainfall, F=Fire Weather</td>
+          </tr>
+          <tr>
+          <td>4</td>
+          <td><span class="badge bg-warning text-dark">Double</span></td>
+          <td><code>DAY</code></td>
+          <td>Day 1 through 8 for the outlook</td>
+          </tr>
           <tr><td>5</td><td><span class="badge bg-info">String</span></td><td><code>THRESHOLD</code></td><td>Threshold Label</td></tr>
-          <tr><td>6</td><td><span class="badge bg-info">String</span></td><td><code>CATEGORY</code></td><td>Category of Threshold Label</td></tr>
+          <tr>
+          <td>6</td>
+          <td><span class="badge bg-info">String</span></td>
+          <td><code>CATEGORY</code></td>
+          <td>Category of Threshold Label, HAIL, CATEGORICAL, etc...</td>
+          </tr>
           <tr><td>7</td><td><span class="badge bg-warning text-dark">Double</span></td><td><code>CYCLE</code></td><td>The generalized forecast issuance hour</td></tr>
         </tbody>
       </table>
