@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 118);
 require_once "../../../include/myview.php";
@@ -8,7 +8,7 @@ $t = new MyView();
 $t->title = "NWS COOP Daily Normals";
 
 $year = date("Y");
-$network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : 'IACLIMATE';
+$network = get_str404('network', 'IACLIMATE');
 $nselect = networkSelect($network, "");
 $mselect = monthSelect("month");
 $dselect = daySelect("day");
@@ -20,7 +20,7 @@ $t->content = <<<EOM
 <p>With this interface, you can download daily climate normals for NWS COOP
 sites.  Please fill out the form below:</p>
 
-<p>Data is available from the following states: 
+<p>Data is available from the following states:
 <form name="sss" method="GET">
 {$sselect}
 <input type="submit" value="Select State">

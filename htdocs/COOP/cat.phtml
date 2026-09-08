@@ -8,7 +8,27 @@ require_once "../../include/network.php";
 $station = get_str404("station", "", 5);
 $network = get_str404("network", "IA_COOP", 7);
 $date = get_str404("date", "", 10);
+// Ensure $date is in decent form
+if ($date != "" && !preg_match("/^\d{4}-\d{2}-\d{2}$/", $date)) {
+    die405();
+}
 $sortvar = get_str404("sortvar", "", 10);
+$available_sorts = [
+    "station",
+    "sname",
+    "day",
+    "coop_tmpf",
+    "max_tmpf",
+    "min_tmpf",
+    "pday",
+    "snow",
+    "snowd",
+    "snoww"
+];
+if ($sortvar != "" && !in_array($sortvar, $available_sorts)) {
+    die405();
+}
+
 $year = get_int404("year", date("Y"));
 
 if ($date == "" && $station == "") $station = "AMSI4";
@@ -24,14 +44,14 @@ $content = <<<EOM
   </nav>
   <div class="card mb-4">
     <div class="card-body">
-      <p>This page presents the raw observations of daily high and low temperature 
-      along with precipitation and snow when available.  The dates shown are the 
-      date when the observation was reported.  For observations made at 7 AM, this 
+      <p>This page presents the raw observations of daily high and low temperature
+      along with precipitation and snow when available.  The dates shown are the
+      date when the observation was reported.  For observations made at 7 AM, this
       would be a for a 24 hour period up until that time and not for that local date.
       The timestamps shown are valid for the local timezone of that reporting station.</p>
-      <div class="alert alert-info mb-0"><strong>Hint:</strong> You should be able to 
-        highlight the values in the table and then copy + paste these values into a 
-        spreadsheet program like Excel. A 
+      <div class="alert alert-info mb-0"><strong>Hint:</strong> You should be able to
+        highlight the values in the table and then copy + paste these values into a
+        spreadsheet program like Excel. A
         <a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
         observations.</div>
     </div>
@@ -110,14 +130,14 @@ if (
 )
     $sortdir = "DESC";
 if (strlen($station) > 0) {
-    $stname = iem_pg_prepare($iemdb, "SELECT c.*, s.id as station, 
-     s.name as sname, c.coop_valid at time zone s.tzname as cts, c.report 
+    $stname = iem_pg_prepare($iemdb, "SELECT c.*, s.id as station,
+     s.name as sname, c.coop_valid at time zone s.tzname as cts, c.report
      from summary_$year c, stations s
-     WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
+     WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
     $rs = pg_execute($iemdb, $stname, array($station, $network));
 } else {
-    $stname = iem_pg_prepare($iemdb, "SELECT c2.*, s.id as station, 
+    $stname = iem_pg_prepare($iemdb, "SELECT c2.*, s.id as station,
      s.name as sname, c2.coop_valid at time zone s.tzname as cts, c2.report
      from summary_$year c2, stations s
      WHERE c2.day = $1

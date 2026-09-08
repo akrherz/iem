@@ -5,6 +5,7 @@ require_once "../../../include/myview.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
 force_https();
+$OL = '10.10.0';
 
 // Handle URL parameters for date and variable selection
 $date_param = get_str404("date", date("Y-m-d"));
@@ -34,7 +35,6 @@ $render_select = make_select("renderattr", $valid_var, $render_vars, "", "form-s
 
 $t = new MyView();
 $t->title = "Map of Daily NWS COOP Reports";
-$OL = '10.7.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />

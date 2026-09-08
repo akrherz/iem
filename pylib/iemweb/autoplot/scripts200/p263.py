@@ -23,7 +23,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import VTEC_PHENOMENA, get_ps_string
 from pyiem.plot import figure_axes
@@ -186,13 +186,25 @@ def get_description():
     return desc
 
 
-def get_ugc_name(ugc):
+def get_ugc_name(ugc: str) -> tuple[str, str]:
     """Return the WFO and county name."""
-    cursor = get_dbconn("postgis").cursor()
-    cursor.execute(
-        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
-    )
-    return cursor.fetchone()
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            sql_helper(
+                "SELECT name, wfo from ugcs where ugc = :ugc "
+                "and end_ts is null"
+            ),
+            {"ugc": ugc},
+        )
+    row = res.fetchone()
+    return ("", "") if row is None else row
+
+
+def cell_format(value: float) -> str:
+    """Format a cell value for display in the table."""
+    if value == 0:
+        return ""
+    return f"{value:0.1f}"
 
 
 def plotter(ctx: dict):
@@ -309,12 +321,14 @@ def plotter(ctx: dict):
             bottom=bar_bottom,
             color=PHENOM_CONFIG.get(category, {}).get("color", None),
         )
-        row_labels.append(category)
-        celltext.append([f"{x:0.1f}" for x in df2["count"].values.tolist()])
+        row_labels.insert(0, category)
+        celltext.insert(
+            0, [cell_format(x) for x in df2["count"].values.tolist()]
+        )
         bar_bottom = bar_bottom + df2["count"].values
 
     row_labels.append("Total")
-    celltext.append([f"{x:0.1f}" for x in bar_bottom])
+    celltext.append([cell_format(x) for x in bar_bottom])
 
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks([])
