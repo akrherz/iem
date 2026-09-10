@@ -8,6 +8,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb("postgis");
@@ -352,7 +353,6 @@ if ($mins > 0) {
     $radts->sub(new DateInterval("PT{$mins}M"));
 }
 
-/* Lets Plot stuff already! */
 $mapFile = "../../data/gis/base" . $sectors[$sector]['epsg'] . ".map";
 $map = new mapObj($mapFile);
 $map->setSize($width, $height);

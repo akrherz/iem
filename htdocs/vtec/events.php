@@ -4,6 +4,7 @@ define("IEM_APPID", 85);
 require_once "../../include/myview.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $wfo = substr(get_str404("wfo", 'DMX'), 0, 4);

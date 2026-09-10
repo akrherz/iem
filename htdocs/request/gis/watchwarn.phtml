@@ -13,6 +13,7 @@ $t = new MyView();
 $t->iem_resource = "VTEC";
 $t->title = "NWS Watches Warnings Advisories Download";
 
+$reference = get_reference();
 $nt = new NetworkTable("WFO");
 
 function entry($year, $suffix){

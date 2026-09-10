@@ -11,6 +11,7 @@ $t = new MyView();
 
 $nt = new NetworkTable("WFO");
 $nt->table["ALL"] = array("name" => " --- All ---- ", "id" => "ALL", "archive_begin" => null);
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb('postgis');

@@ -9,6 +9,7 @@ require_once "../../include/forms.php";
 require_once "../../include/memcache.php";
 require_once "../../include/mlib.php";
 $nt = new NetworkTable("WFO");
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 

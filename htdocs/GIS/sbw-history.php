@@ -8,6 +8,7 @@ require_once "../../include/mlib.php";
 
 $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
+$reference = get_reference();
 
 /* Figure out what our VTEC is! */
 $vtec = get_str404("vtec", "2008.KICT.SV.W.0345");

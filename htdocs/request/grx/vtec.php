@@ -4,6 +4,7 @@ require_once "../../../include/database.inc.php";
 require_once "../../../include/reference.php";
 require_once "../../../include/forms.php";
 $connect = iemdb("postgis");
+$reference = get_reference();
 
 $year = get_int404("year", 2006);
 if ($year < 2002) die("invalid year specified!");

@@ -6,6 +6,7 @@ require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
