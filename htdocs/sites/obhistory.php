@@ -339,9 +339,10 @@ if (!empty($date_param)) {
     $day = intval($date_parts[2]);
 } else {
     // Legacy parameters for backwards compatibility
-    $year = get_int404("year", date("Y"));
-    $month = get_int404("month", date("m"));
-    $day = get_int404("day", date("d"));
+    $dt = dt_from_cgi_ymd();
+    $year = intval($dt->format("Y"));
+    $month = intval($dt->format("m"));
+    $day = intval($dt->format("d"));
     $date_param = sprintf("%04d-%02d-%02d", $year, $month, $day);
 }
 

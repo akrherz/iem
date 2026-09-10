@@ -9,9 +9,14 @@ $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
-$day = get_int404("day", date("d"), 1, 31);
-$month = get_int404("month", date("m"), 1, 12);
-$year = get_int404("year", date("Y"), 2002, (int)gmdate("Y") + 2);
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+if ($year < 2002) {
+    $year = 2002;
+    $dt = new DateTimeImmutable("2002-01-01");
+}
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
 $station = get_str404("station", null);
 $shefvar = get_str404("shefvar", null);
 $network = get_str404("network", 'IA_DCP', 9);
@@ -164,7 +169,7 @@ EOM;
             date("Y-m-d H:i", $ts)
         );
         $colorme = !$colorme;
-        foreach ($mycols as $k => $v) {
+        foreach ($mycols as $k2 => $v) {
             $extra .= sprintf("<td>%s</td>", $data[$ts][$v] ?? '');
         }
         $extra .= "</tr>";

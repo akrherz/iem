@@ -7,7 +7,8 @@ require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 
 $network = get_str404("network", "IA_ASOS");
-$year = get_int404("year", (int)date("Y"));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
 
 $netselect = selectNetworkType("ASOS", $network);
 $yselect = yearSelect(2004, $year, "year");

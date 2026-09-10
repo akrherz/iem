@@ -26,25 +26,34 @@ if ((($metadata["metasite"] ?? null) === "t") && (strpos($network, "CLIMATE") ==
 $t->iemselect2 = true;
 
 /* Get vars */
-$year = get_int404('year', intval(date("Y", time() - 86400)));
-// Don't allow dates into the future
-if ($year > intval(gmdate("Y"))) {
-    $year = intval(gmdate("Y"));
-}
-$month = get_int404('month', date("m", time() - 86400));
-$day = get_int404('day', 1);
+$dt = dt_from_cgi_ymd();
 $mode = get_str404('mode', 'monthly');
 $sortvar = get_str404('sortvar', 'id');
+
+
+// Don't allow dates into the future
+if ($dt->format("Y") > gmdate("Y")) {
+    $dt = new DateTimeImmutable(gmdate("Y-m-d"));
+}
 if ($sortvar == 'station') {
     $sortvar = 'id';
 }
 
-$ts = new Datetime("$year-$month-$day");
-$dateStr = $ts->format("Y-m-d");
-$nicedate = $ts->format("d M Y");
-$nicemonthdate = $ts->format("M Y");
+$dateStr = $dt->format("Y-m-d");
+$nicedate = $dt->format("d M Y");
+$nicemonthdate = $dt->format("M Y");
 $htmlout = "";
 
+/**
+ * Print a monthly calendar with links to daily observations.
+ *
+ * @param int $year The year of the month to print.
+ * @param int $month The month to print.
+ * @param array $db The database of daily observations.
+ * @param string $thisApp The URL of the current application for navigation links.
+ * @param string $dailyApp The URL of the daily observations application.
+ * @return string The HTML of the monthly calendar.
+ */
 function printMonth($year, $month, $db, $thisApp, $dailyApp)
 {
 

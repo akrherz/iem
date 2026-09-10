@@ -948,4 +948,24 @@ function daySelect($selected, $name = 'day')
     );
 } // End of daySelect
 
-
+/**
+ * Safely process a common CGI GET provided year, month, day pattern
+ *
+ * @return DateTimeImmutable Date object representing the CGI-provided or current date
+ */
+function dt_from_cgi_ymd()
+{
+    $now = new DateTimeImmutable();
+    if (empty($_GET['year']) && empty($_GET['month']) && empty($_GET['day'])) {
+        return $now;
+    }
+    // Some basic bounds not exceeded within IEM
+    $year = get_int404('year', (int)$now->format("Y"), 1800, intval($now->format("Y")) + 5);
+    $month = get_int404('month', (int)$now->format("m"), 1, 12);
+    // Careful here as we don't want to end up with an invalid date by chance
+    $day = get_int404('day', 1, 1, 31);
+    if (!checkdate($month, $day, $year)) {
+        die("Invalid date");
+    }
+    return new DateTimeImmutable(sprintf("%04d-%02d-%02d", $year, $month, $day));
+}
