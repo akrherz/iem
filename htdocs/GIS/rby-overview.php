@@ -3,7 +3,6 @@
  * Draw a map of the CONUS with a simple box showing the area of interest
  */
 require_once "../../config/settings.inc.php";
-require_once "../../include/vendor/mapscript.php";
 
 $extents = array_key_exists("BBOX", $_GET) ? explode(",", $_GET["BBOX"]) :
     array(-105, 40, -97, 47);

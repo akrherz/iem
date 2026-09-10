@@ -478,6 +478,7 @@ if ($jobj === FALSE) {
     $jobj = array("data" => array(), "schema" => array("fields" => array()));
     $errmsg = "Failed to fetch history from web service. No data was found.";
 }
+$shefcols = [];
 
 if (preg_match("/ASOS/", $network)) {
     $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
@@ -516,7 +517,6 @@ EOM;
 } else if (preg_match("/DCP|COOP/", $network)) {
     $wind_label = ($windunits == "mph") ? "Wind<br>(mph)" : "Wind<br>(knots)";
     // Figure out what extra columns we have here.
-    $shefcols = array();
     $shefextra = "";
     foreach ($jobj["schema"]["fields"] as $bogus => $field) {
         $name = $field["name"];

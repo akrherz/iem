@@ -5,7 +5,6 @@ require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
-require_once "../../include/vendor/mapscript.php";
 
 $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");

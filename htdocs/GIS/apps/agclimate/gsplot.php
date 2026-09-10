@@ -4,7 +4,6 @@ require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/forms.php";
 require_once "../../../../include/mlib.php";
-require_once "../../../../include/vendor/mapscript.php";
 
 $var = get_str404("var", "gdd50");
 $year = get_int404("year", date("Y"));
