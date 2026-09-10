@@ -956,7 +956,7 @@ function daySelect($selected, $name = 'day')
 function dt_from_cgi_ymd()
 {
     $now = new DateTimeImmutable();
-    if (!isset($_GET['year']) && !isset($_GET['month']) && !isset($_GET['day'])) {
+    if (empty($_GET['year']) && empty($_GET['month']) && empty($_GET['day'])) {
         return $now;
     }
     // Some basic bounds not exceeded within IEM
