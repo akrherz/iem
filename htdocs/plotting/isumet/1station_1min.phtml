@@ -5,9 +5,10 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "ISU AMS Station on Agronomy";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 
 $dirRef = date("Y/m/d", $myTime);
@@ -21,7 +22,7 @@ $t->content = <<<EOM
 
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; ISU AMS Station
 
-<p>You can plot 1 minute data for this location.  Note that 
+<p>You can plot 1 minute data for this location.  Note that
 the archive <br> begins 15 Jan 2003.</p>
 
 <table>

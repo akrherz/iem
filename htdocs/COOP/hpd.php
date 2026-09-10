@@ -7,9 +7,10 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
 $station = get_str404("station", null);
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 
 $yselect = yearSelect(2008, $year, "year");
 $mselect = monthSelect($month, "month");

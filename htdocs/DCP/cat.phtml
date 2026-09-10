@@ -10,11 +10,17 @@ $mesosite = iemdb("mesosite");
 $t = new MyView();
 
 $network = get_str404("network", 'IA_DCP', 9);
+$dt = dt_from_cgi_ymd();
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
+$year = intval($dt->format("Y"));
+if ($year < 2002) {
+    $year = 2002;
+    $dt = new DateTimeImmutable("2002-01-01");
+}
 $minute = get_int404("minute", 0, 0, 59);
 $hour = get_int404("hour", date("H"), 0, 23);
-$day = get_int404("day", date("d"), 1, 31);
-$month = get_int404("month", date("m"), 1, 12);
-$year = get_int404("year", date("Y"), 2002, (int)date("Y") + 1);
+$dt = $dt->setTime($hour, $minute);
 
 $now = time() - 3600;
 $ts = mktime($hour, $minute, 0, $month, $day, $year);

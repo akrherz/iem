@@ -29,7 +29,8 @@ if ($sortvar != "" && !in_array($sortvar, $available_sorts)) {
     die405();
 }
 
-$year = get_int404("year", date("Y"));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
 
 if ($date == "" && $station == "") $station = "AMSI4";
 $t = new MyView();
