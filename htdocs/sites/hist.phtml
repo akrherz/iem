@@ -27,6 +27,9 @@ $t->iemselect2 = true;
 
 /* Get vars */
 $dt = dt_from_cgi_ymd();
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
+$year = intval($dt->format("Y"));
 $mode = get_str404('mode', 'monthly');
 $sortvar = get_str404('sortvar', 'id');
 
