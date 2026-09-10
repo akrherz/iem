@@ -27,7 +27,7 @@ LOG = logger()
 
 def dl_helper(url: str, headers: dict | None = None):
     """Helper with some retries."""
-    for _ in range(3):
+    for attempt in range(3):
         try:
             resp = requests.get(url, headers=headers, timeout=60)
             if resp.status_code == 503:  # Slow Down
@@ -36,7 +36,11 @@ def dl_helper(url: str, headers: dict | None = None):
             resp.raise_for_status()
             return resp
         except Exception as exp:
-            LOG.warning("dl_helper failed for %s: %s", url, exp)
+            loglvl = LOG.info if attempt < 2 else LOG.error
+            loglvl("dl_helper failed for %s: %s, sleep 15", url, exp)
+            if attempt == 2:
+                break
+            time.sleep(15)
     raise RuntimeError(f"Failed to download {url} after 3 tries, aborting")
 
 
