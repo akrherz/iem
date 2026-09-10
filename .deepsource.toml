@@ -5,6 +5,7 @@ test_patterns = ["**/tests/**"]
 exclude_patterns = [
     "include/vendor/**",
     "include/jpgraph/**",
+    ".stubs/**",
 ]
 
 [[analyzers]]

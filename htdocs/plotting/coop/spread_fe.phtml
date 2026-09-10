@@ -4,5 +4,5 @@ require_once "../../../include/forms.php";
 $month = get_int404('month', date("m"), 1, 12);
 $day = get_int404('day', date("d"), 1, 31);
 
-http_send_status(301);
+http_response_code(301);
 header("Location: /plotting/auto/?q=25&month=$month&day=$day");
