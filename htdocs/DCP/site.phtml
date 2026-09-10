@@ -10,13 +10,13 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
 $dt = dt_from_cgi_ymd();
-$day = intval($dt->format("d"));
-$month = intval($dt->format("m"));
 $year = intval($dt->format("Y"));
 if ($year < 2002) {
     $year = 2002;
     $dt = new DateTimeImmutable("2002-01-01");
 }
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
 $station = get_str404("station", null);
 $shefvar = get_str404("shefvar", null);
 $network = get_str404("network", 'IA_DCP', 9);

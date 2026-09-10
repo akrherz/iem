@@ -11,13 +11,13 @@ $t = new MyView();
 
 $network = get_str404("network", 'IA_DCP', 9);
 $dt = dt_from_cgi_ymd();
-$day = intval($dt->format("d"));
-$month = intval($dt->format("m"));
 $year = intval($dt->format("Y"));
 if ($year < 2002) {
     $year = 2002;
     $dt = new DateTimeImmutable("2002-01-01");
 }
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
 $minute = get_int404("minute", 0, 0, 59);
 $hour = get_int404("hour", date("H"), 0, 23);
 $dt = $dt->setTime($hour, $minute);
