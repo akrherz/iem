@@ -1,7 +1,6 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vendor/mapscript.php";
 require_once "../../include/forms.php";
 
 $con = iemdb("postgis");

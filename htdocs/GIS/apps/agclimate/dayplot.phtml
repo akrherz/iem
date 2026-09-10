@@ -1,4 +1,3 @@
 <?php
-require_once "../../../../config/settings.inc.php";
-
+http_response_code(301);
 header("Location: /plotting/auto/?q=199");

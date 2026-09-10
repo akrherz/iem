@@ -7,7 +7,6 @@ ignore_user_abort(true);
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
-require_once "../../../../include/vendor/mapscript.php";
 
 $month = get_int404("month", 1);
 $day = get_int404("day", 1);

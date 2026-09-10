@@ -1,7 +1,6 @@
 <?php
 /* Generate a plot of a locations RADAR by year */
 require_once "../../config/settings.inc.php";
-require_once "../../include/vendor/mapscript.php";
 require_once "../../include/forms.php";
 
 $mapFile = "../../data/gis/base4326.map";

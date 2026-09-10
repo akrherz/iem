@@ -4,7 +4,6 @@ require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
-require_once "../../../../include/vendor/mapscript.php";
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
@@ -16,7 +15,7 @@ $date = get_str404("date", $year . "-" . $month . "-" . $day);
 try {
     $dt = new DateTimeImmutable($date);
 } catch (Exception $e) {
-    http_send_status(422);
+    http_response_code(422);
     die("Invalid date");
 }
 

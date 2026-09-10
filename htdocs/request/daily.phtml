@@ -14,7 +14,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="daily.css">
 EOM;
 
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_ASOS";
+$network = get_str404("network", "IA_ASOS");
 
 $ar = Array();
 $rs = pg_query(

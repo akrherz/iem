@@ -27,7 +27,7 @@ $varDict = array(
     "dwpf" => "Dew Point [F]"
 );
 $table = "";
-if ($portfolio != null) {
+if (!is_null($portfolio)) {
     $conn = iemdb("portfolio");
     $stname = iem_pg_prepare(
         $conn,
