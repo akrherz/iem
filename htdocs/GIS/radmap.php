@@ -8,15 +8,18 @@ require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 
-$reference = get_reference();
-$vtec_phenomena = $reference["vtec_phenomena"];
-$vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb("postgis");
 
 $plotmeta = array(
     "title" => array(),
     "subtitle" => ""
 );
+$sector_wfo = null;
+$wfo = null;
+$phenomena = null;
+$significance = null;
+$eventid = null;
+$year = null;
 
 /**
  * Draw a black bar at the top of the image
@@ -353,6 +356,10 @@ if ($mins > 0) {
     $radts->sub(new DateInterval("PT{$mins}M"));
 }
 
+// Ensure sector is a valid key at this point.
+if (!array_key_exists($sector, $sectors)) {
+    die405();
+}
 $mapFile = "../../data/gis/base" . $sectors[$sector]['epsg'] . ".map";
 $map = new mapObj($mapFile);
 $map->setSize($width, $height);
@@ -508,7 +515,7 @@ $states = $map->getLayerByName("states");
 $states->status = MS_ON;
 $states->draw($map, $img);
 
-/* All SBWs for a WFO */
+// All SBWs for a WFO
 if (in_array("allsbw", $layers) && array_key_exists("sector_wfo", $_REQUEST)) {
     $sbwh = $map->getLayerByName("allsbw");
     $sbwh->status =  MS_ON;
@@ -603,8 +610,8 @@ $sql = sprintf(
 $watches->data = $sql;
 $watches->draw($map, $img);
 
-/* Plot the warning explicitly */
-if (isset($_REQEST["pid"])) {
+// Plot the warning explicitly
+if (!empty($_REQUEST["pid"])) {
     $wc = new LayerObj($map);
     $wc->setConnectionType(MS_POSTGIS, "");
     $wc->connection = get_dbconn_str("postgis");
@@ -617,7 +624,7 @@ if (isset($_REQEST["pid"])) {
 
     $wcc0 = new ClassObj($wc);
     $wcc0->name = "Product";
-    $wcc0s0 = new StyleObj($wcc0, 'circle');
+    $wcc0s0 = new StyleObj($wcc0);
     $wcc0s0->color->setRGB(255, 0, 0);
     $wcc0s0->size = 3;
     $wc->draw($map, $img);
@@ -639,6 +646,10 @@ if (array_key_exists("vtec", $_REQUEST) && in_array("cbw", $layers)) {
     $wc->data = $sql;
     $wc->type = MS_LAYER_LINE;
     $wc->setProjection("init=epsg:4326");
+
+    $reference = get_reference();
+    $vtec_phenomena = $reference["vtec_phenomena"];
+    $vtec_significance = $reference["vtec_significance"];
 
     $wcc0 = new ClassObj($wc);
     $wcc0->name = $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance];

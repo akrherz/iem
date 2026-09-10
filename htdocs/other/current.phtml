@@ -7,8 +7,8 @@ require_once "../../include/forms.php";
 
 $t = new MyView();
 $t->current_network = "Other";
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : 'OT';
+$sortcol = get_str404("sortcol", "station");
+$network = get_str404("network", "OT");
 
 $mesosite = iemdb('mesosite');
 $stname = iem_pg_prepare($mesosite, "SELECT tzname from networks where id = $1");

@@ -7,15 +7,21 @@ require_once "../../../include/forms.php";
 
 $t->title = "RWIS Traffic Data Download";
 
-$ys = yearSelect(2008, date("Y"), "year1");
-$ms = monthSelect("", "month1");
-$ds = daySelect("", "day1");
-$hs = gmtHourSelect("", "hour1");
+$addFormSelectClass = fn($select) => str_replace(
+  "<select ",
+  '<select class="form-select" ',
+  $select,
+);
 
-$ys2 = yearSelect(2008, date("Y"), "year2");
-$ms2 = monthSelect("", "month2");
-$ds2 = daySelect("", "day2");
-$hs2 = gmtHourSelect("", "hour2");
+$ys = $addFormSelectClass(yearSelect(2008, date("Y"), "year1"));
+$ms = $addFormSelectClass(monthSelect("", "month1"));
+$ds = $addFormSelectClass(daySelect("", "day1"));
+$hs = $addFormSelectClass(gmtHourSelect("", "hour1"));
+
+$ys2 = $addFormSelectClass(yearSelect(2008, date("Y"), "year2"));
+$ms2 = $addFormSelectClass(monthSelect("", "month2"));
+$ds2 = $addFormSelectClass(daySelect("", "day2"));
+$hs2 = $addFormSelectClass(gmtHourSelect("", "hour2"));
 
 $rselect = networkSelect(
     "IA_RWIS",
@@ -35,16 +41,20 @@ $ar = array(
     "America/Los_Angeles" => "America/Los_Angeles (PST/PDT)",
     "America/Anchorage" => "America/Anchorage (AKST/AKDT)",
 );
-$tzselect = make_select("tz", "Etc/UTC", $ar);
+$tzselect = make_select("tz", "Etc/UTC", $ar, "", "form-select");
 
 $t->content = <<<EOM
+<nav aria-label="breadcrumb">
 <ol class="breadcrumb">
- <li><a href="/RWIS/">RWIS Homepage</a></li>
- <li class="active">Traffic Download</li>
+ <li class="breadcrumb-item"><a href="/RWIS/">RWIS Homepage</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Traffic Download</li>
 </ol>
+</nav>
 
-<p>This page provides the IEM collected archive of Iowa RWIS Traffic Data.
-
+<header class="mb-4">
+<h1 class="h3">RWIS Traffic Data Download</h1>
+<p class="mb-0">This page provides the IEM collected archive of Iowa RWIS Traffic Data.</p>
+</header>
 
 <form method="GET" action="/cgi-bin/request/rwis.py">
 <input type="hidden" value="traffic" name="src">
@@ -56,75 +66,46 @@ $t->content = <<<EOM
 <input type="hidden" value="occupancy" name="vars">
 
 
-<table>
-<tr><td width="50%">
-
-<p><h3>1. Select Station:</h3><br>
-<i>Select One or More or All stations in the network.</i><br />
+<div class="row g-4">
+<div class="col-lg-7">
+<section class="card h-100" aria-labelledby="station-heading">
+<div class="card-body">
+<h2 id="station-heading" class="h5">1. Select Station</h2>
+<p class="text-muted small">Select one or more stations, or all stations in the network.</p>
 {$rselect}
 
-
-<p><h3>2. Select Start/End Time:</h3><br>
-<i>Times are in UTC. Archive starts in December 2008.</i>
-<table>
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th>
-  </tr>
-
-  <tr>
-    <th>Start:</th>
-    <td>{$ys}</td>
-    <td>{$ms}</td>
-    <td>{$ds}</td>
-    <td>{$hs}
-    <input type="hidden" name="minute1" value="0"></td>
-  </tr>
-
-  <tr>
-    <th>End:</th>
-    <td>{$ys2}</td>
-    <td>{$ms2}</td>
-    <td>{$ds2}</td>
-    <td>{$hs2}
-    <input type="hidden" name="minute2" value="0"></td>
-    </tr>
+<h2 class="h5 mt-4">2. Select Start/End Time</h2>
+<p class="text-muted small">Times are in UTC. Archive starts in December 2008.</p>
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+<thead><tr><th scope="col"></th><th scope="col">Year</th><th scope="col">Month</th><th scope="col">Day</th><th scope="col">Hour</th></tr></thead>
+<tbody>
+<tr><th scope="row">Start</th><td>{$ys}</td><td>{$ms}</td><td>{$ds}</td><td>{$hs}<input type="hidden" name="minute1" value="0"></td></tr>
+<tr><th scope="row">End</th><td>{$ys2}</td><td>{$ms2}</td><td>{$ds2}</td><td>{$hs2}<input type="hidden" name="minute2" value="0"></td></tr>
+</tbody>
 </table>
+</div>
+</div>
+</section>
+</div>
 
-</td><td valign="TOP">
+<div class="col-lg-5">
+<section class="card h-100" aria-labelledby="options-heading">
+<div class="card-body">
+<h2 id="options-heading" class="h5">3. Output Options</h2>
+<div class="mb-3"><label for="tz" class="form-label">Timezone of timestamps</label><div class="form-text mb-2">Controls the timezone used in the downloaded file.</div>{$tzselect}</div>
+<div class="mb-3"><label for="what" class="form-label">4. How to view?</label><select id="what" name="what" class="form-select"><option value="txt">Download to Disk</option><option value="view">View online</option></select></div>
+<div class="mb-3"><label for="delim" class="form-label">5. Data delimitation</label><div class="form-text mb-2">How should the output values be separated?</div><select id="delim" name="delim" class="form-select"><option value="comma">Comma</option><option value="space">Space</option><option value="tab">Tab</option></select></div>
+<div class="mb-3"><label for="gis" class="form-label">6. Include latitude / longitude?</label><img src="/images/gisready.png" alt="GIS data available" class="d-block mb-2"><select id="gis" name="gis" class="form-select"><option value="no">No</option><option value="yes">Yes</option></select></div>
+</div>
+</section>
+</div>
+</div>
 
-<p><h4>3. Timezone of Timestamps</h4>
-   <i>This controls the timezone used for presenting the timestamps in the
-    downloaded file.</i>
-   <br />{$tzselect}</p>
-
-<p><h3 class="subtitle">4. How to view?</h3><br>
-<select name="what">
-  <option value="txt">Download to Disk</option>
-  <option value="view">View on-line
-</select>
-
-<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
-How shall the output values be seperated?
-<br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
-   </select>
-
-<p>
-<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
- <select name="gis">
-   <option value="no">No
-   <option value="yes">Yes
- </select>
-
-</td></tr></table>
-
-<p><h3>Submit Form:</h3><br>
-<input type="submit" value="Process Data Request">
-<input type="reset">
+<div class="d-flex gap-2 mt-4">
+<button type="submit" class="btn btn-primary">Process Data Request</button>
+<button type="reset" class="btn btn-outline-secondary">Reset</button>
+</div>
 </form>
 EOM;
 $t->render('single.phtml');

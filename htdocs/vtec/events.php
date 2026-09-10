@@ -21,7 +21,7 @@ if ($which == 'wfo') {
     $service = "";
     $uri = sprintf(
         "%s/json/vtec_events.py?wfo=%s&year=%s",
-        $INTERNAL_BASEURL,
+        IEMConfig::INTERNAL_BASEURL,
         $wfo,
         $year
     );
@@ -29,7 +29,7 @@ if ($which == 'wfo') {
     $service = "_bystate";
     $uri = sprintf(
         "%s/json/vtec_events_bystate.py?state=%s&year=%s",
-        $INTERNAL_BASEURL,
+        IEMConfig::INTERNAL_BASEURL,
         $state,
         $year
     );
@@ -41,8 +41,8 @@ if ($phenomena != "" && $pon) {
     $uri .= sprintf("&phenomena=%s", $phenomena);
 }
 $public_uri = str_replace(
-    $INTERNAL_BASEURL,
-    $EXTERNAL_BASEURL,
+    IEMConfig::INTERNAL_BASEURL,
+    IEMConfig::EXTERNAL_BASEURL,
     $uri
 );
 

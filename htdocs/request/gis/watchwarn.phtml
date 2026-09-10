@@ -16,6 +16,12 @@ $t->title = "NWS Watches Warnings Advisories Download";
 $reference = get_reference();
 $nt = new NetworkTable("WFO");
 
+/**
+ * Generate a download link for the archived WWA metadata for a given year and suffix.
+ * @param int $year The year of the archived WWA metadata
+ * @param string $suffix The suffix indicating the type of archive (e.g., "all", "tsmf", "tsmf_sbw")
+ * @return string HTML link to the archived WWA metadata or "N/A" if the file does not exist
+ */
 function entry($year, $suffix){
     $fn = "/mesonet/share/pickup/wwa/{$year}_{$suffix}.zip";
     if (! is_file($fn)){
@@ -24,11 +30,23 @@ function entry($year, $suffix){
     $link = sprintf('<a href="/pickup/wwa/%s_%s.zip">Zip</a>', $year, $suffix);
     return sprintf("%s (%s, %s)", $link, get_file_size($fn), get_file_created_date($fn));
 }
+
+/**
+ * Get the creation date of a file.
+ * @param string $filename The path to the file
+ * @return string The creation date of the file in "d M Y" format
+ */
 function get_file_created_date($filename) {
     $ctime = filectime($filename);
     return date("d M Y", $ctime);
 }
 
+/**
+ * Get the size of a file in the specified unit (B, KB, MB, GB).
+ * @param string $filename The path to the file
+ * @param string $size_in The unit to return the file size in (B, KB, MB, GB)
+ * @return string The size of the file in the specified unit with the unit appended
+ */
 function get_file_size($filename, $size_in = 'MB') {
     $size_in_bytes = @filesize ( $filename );
 
@@ -43,7 +61,7 @@ function get_file_size($filename, $size_in = 'MB') {
     } elseif ($size_in == 'MB') {
         $size = (($size_in_bytes / 1024) / 1024);
         $precision = 2;
-    } elseif ($size_in == 'GB') {
+    } else { // GB
         $size = (($size_in_bytes / 1024) / 1024) / 1024;
         $precision = 2;
     }

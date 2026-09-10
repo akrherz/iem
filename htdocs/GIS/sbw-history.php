@@ -72,8 +72,8 @@ $buffer = 0.3;
 
 $xmax = 0;
 $ymax = 0;
+$ymin = 0;
 $xmin = 0;
-$xmax = 0;
 $gdimg_dest = null;
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($i > 8) {

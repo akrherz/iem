@@ -19,7 +19,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $entered = new DateTime(substr($row["entered"], 0, 16));
     $last = new DateTime(substr($row["last"], 0, 16));
     $s = "<tr>
-        <th>" . $row["id"] . "</th>
+        <th scope=\"row\">" . $row["id"] . "</th>
         <td>" . $row["status"] . "</td>
         <td>" . $entered->format("Y-m-d") . "</td>
         <td>" . $last->format("Y-m-d") . "</td>
@@ -35,7 +35,7 @@ while ($row = pg_fetch_assoc($rs)) {
 
 foreach ($ars as $key => $val) {
     if ($val == '')
-        $ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
+    $ars[$key] = "<tr><td colspan=\"6\" class=\"text-center text-muted\">No Open/Active Tickets Found</td></tr>";
 }
 
 $t->content = <<<EOM
@@ -46,20 +46,29 @@ $t->content = <<<EOM
 </ol>
 </nav>
 
-<p>The IEM developed a system called "IEM Tracker" to track meta-data
+<header class="mb-4">
+<h1 class="h3">Active Trouble Tickets</h1>
+<div class="alert alert-info mb-0" role="status">
+The IEM developed a system called "IEM Tracker" to track metadata
 of sites in our component networks.  This page presents a listing of
 'Trouble Tickets' that are currently active.  Currently, only the ticket
 header is presented, but in the future more info will be made publicly
 available.  If you have any questions or comments about a ticket listed,
-please feel free to <a href="/info/contacts.php">Contact Us</a>.</p>
+please feel free to <a href="/info/contacts.php">Contact Us</a>.
+</div>
+</header>
 
-<h3 class="mt-4">Iowa State Soil Moisture Network</h3>
+<section class="card mb-4" aria-labelledby="isusm-heading">
+<div class="card-header">
+<h2 id="isusm-heading" class="h5 mb-0">Iowa State Soil Moisture Network</h2>
+</div>
+<div class="card-body p-0">
 <div class="table-responsive">
-<table class="table table-striped table-bordered">
+<table class="table table-sm table-striped table-bordered align-middle mb-0">
 <thead class="table-light">
 <tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th>
+ <th scope="col">ID</th><th scope="col">Status</th><th scope="col">Opened</th><th scope="col">Updated</th><th scope="col">Site</th>
+ <th scope="col">Ticket Topic</th>
 </tr>
 </thead>
 <tbody>
@@ -67,14 +76,20 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.</p>
 </tbody>
 </table>
 </div>
+</div>
+</section>
 
-<h3 class="mt-4">Iowa AWOS network</h3>
+<section class="card mb-4" aria-labelledby="iaawos-heading">
+<div class="card-header">
+<h2 id="iaawos-heading" class="h5 mb-0">Iowa AWOS Network</h2>
+</div>
+<div class="card-body p-0">
 <div class="table-responsive">
-<table class="table table-striped table-bordered">
+<table class="table table-sm table-striped table-bordered align-middle mb-0">
 <thead class="table-light">
 <tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th>
+ <th scope="col">ID</th><th scope="col">Status</th><th scope="col">Opened</th><th scope="col">Updated</th><th scope="col">Site</th>
+ <th scope="col">Ticket Topic</th>
 </tr>
 </thead>
 <tbody>
@@ -82,14 +97,20 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.</p>
 </tbody>
 </table>
 </div>
+</div>
+</section>
 
-<h3 class="mt-4">Iowa RWIS network</h3>
+<section class="card mb-4" aria-labelledby="iarwis-heading">
+<div class="card-header">
+<h2 id="iarwis-heading" class="h5 mb-0">Iowa RWIS Network</h2>
+</div>
+<div class="card-body p-0">
 <div class="table-responsive">
-<table class="table table-striped table-bordered">
+<table class="table table-sm table-striped table-bordered align-middle mb-0">
 <thead class="table-light">
 <tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th>
+ <th scope="col">ID</th><th scope="col">Status</th><th scope="col">Opened</th><th scope="col">Updated</th><th scope="col">Site</th>
+ <th scope="col">Ticket Topic</th>
 </tr>
 </thead>
 <tbody>
@@ -97,5 +118,7 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.</p>
 </tbody>
 </table>
 </div>
+</div>
+</section>
 EOM;
 $t->render('single.phtml');
