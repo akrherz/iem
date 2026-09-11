@@ -5,6 +5,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php";
 
+$cameras = get_cameras();
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */

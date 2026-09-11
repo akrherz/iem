@@ -15,10 +15,10 @@ $t->iemselect2 = true;
 $t->title = "Satellite Cloud Product";
 $t->sites_current = "scp";
 $sortdir = get_str404("sortdir", "asc");
-$year = get_int404("year", gmdate("Y"));
-$month = get_int404("month", gmdate("m"));
-$day = get_int404("day", gmdate("d"));
-$date = mktime(0, 0, 0, $month, $day, $year);
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 
 $sortopts = array(
     "asc" => "Ascending",
@@ -36,14 +36,14 @@ if (!is_null($metadata["archive_begin"])) {
 
 $exturi = sprintf(
     "%s/api/1/scp.json?station=%s&amp;date=%s&amp;tz=%s",
-    $EXTERNAL_BASEURL,
+    IEMConfig::EXTERNAL_BASEURL,
     $station,
-    date("Y-m-d", $date),
+    $dt->format("Y-m-d"),
     $metadata["tzname"],
 );
 $arr = array(
     "station" => $station,
-    "date" => date("Y-m-d", $date),
+    "date" => $dt->format("Y-m-d"),
     "tz" => $metadata["tzname"],
 );
 $json = iemws_json("scp.json", $arr);
@@ -64,6 +64,13 @@ foreach ($possible as $value => $label) {
     }
 }
 
+/**
+ * Returns a formatted cloud top string given two values.
+ *
+ * @param mixed $val1 The first cloud top value.
+ * @param mixed $val2 The second cloud top value.
+ * @return string The formatted cloud top string.
+ */
 function cldtop($val1, $val2)
 {
     if ($val1 === null || $val2 === null) {
@@ -71,6 +78,14 @@ function cldtop($val1, $val2)
     }
     return sprintf("%s - %s", $val1, $val2);
 }
+
+/**
+ * Returns a formatted sky coverage string for a given row and index.
+ *
+ * @param array $row The data row containing sky coverage information.
+ * @param int $i The index of the sky coverage to retrieve.
+ * @return string The formatted sky coverage string.
+ */
 function skyc($row, $i)
 {
     if (!array_key_exists("skyc$i", $row)) {
@@ -136,9 +151,9 @@ foreach ($data as $key => $row) {
 }
 $table .= "</tbody></table>";
 
-$ys = yearSelect($startyear, date("Y", $date));
-$ms = monthSelect(date("m", $date));
-$ds = daySelect(date("d", $date));
+$ys = yearSelect($startyear, $year);
+$ms = monthSelect($month);
+$ds = daySelect($day);
 
 $t->content = <<<EOM
 <style>

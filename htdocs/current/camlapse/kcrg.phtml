@@ -1,7 +1,7 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/cameras.inc.php";
-
+$cameras = get_cameras();
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
 foreach ($cameras as $key => $dict) {
     if ($dict["removed"] || ($dict["network"] != "KCRG" && $key != 'KCCI-017')) {
@@ -27,10 +27,10 @@ echo <<<EOM
 {$camselect}
 <strong>Select Lapse:</strong>
 <select id="mylapse" name="mylapse" onchange="myloader()">
- <option value="sunrise">Sunrise 
- <option value="morning">Morning (8 AM - 11 AM) 
+ <option value="sunrise">Sunrise
+ <option value="morning">Morning (8 AM - 11 AM)
  <option value="afternoon">Afternoon (1 PM - 4 PM)
- <option value="eve">Sunset 
+ <option value="eve">Sunset
  <option value="day">Full day
 </select>
 </div>

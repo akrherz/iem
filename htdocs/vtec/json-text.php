@@ -26,6 +26,7 @@ $stname = iem_pg_prepare(
 );
 $rs = pg_execute($connect, $stname, Array($year, $wfo, $phenomena, $eventid, $significance));
 
+$iburl = IEMConfig::INTERNAL_BASEURL;
 $ar = array("data" => array());
 if (pg_num_rows($rs) > 0) {
     $row = pg_fetch_assoc($rs, 0);
@@ -33,13 +34,13 @@ if (pg_num_rows($rs) > 0) {
 
     $z = array();
     $z["id"] = 1;
-    $report = file_get_contents("{$INTERNAL_BASEURL}/api/1/nwstext/". $product_ids[0]);
+    $report = file_get_contents("{$iburl}/api/1/nwstext/". $product_ids[0]);
     $z["report"] = preg_replace("/\001/", "",
         preg_replace("/\r\r\n/", "\n", $report));
     $z["svs"] = array();
     $lsvs = "";
     for ($i=1; $i < sizeof($product_ids); $i++) {
-        $report = file_get_contents("{$INTERNAL_BASEURL}/api/1/nwstext/". $product_ids[$i]);
+        $report = file_get_contents("{$iburl}/api/1/nwstext/". $product_ids[$i]);
         $lsvs = preg_replace("/\001/", "", htmlspecialchars($report));
         $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
     }

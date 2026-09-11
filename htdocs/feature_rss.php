@@ -14,13 +14,14 @@ ob_start();
 
 require_once "../include/database.inc.php";
 $d = date('D, d M Y H:i:s O');
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 echo <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="{$EXTERNAL_BASEURL}/feature_rss.php" rel="self" type="application/rss+xml" />
+<atom:link href="{$eburl}/feature_rss.php" rel="self" type="application/rss+xml" />
 <title>Iowa Environmental Mesonet Daily Feature</title>
-<link>{$EXTERNAL_BASEURL}</link>
+<link>{$eburl}</link>
 <description>Iowa Environmental Mesonet Daily Feature</description>
 <lastBuildDate>{$d}</lastBuildDate>
 EOM;
@@ -33,10 +34,10 @@ $rs = pg_query(
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $appurl = "";
     if ($row["appurl"] != "") {
-        $appurl = "<p><a href=\"{$EXTERNAL_BASEURL}{$row['appurl']}\">Generate This Chart on IEM Website</a></p>";
+        $appurl = "<p><a href=\"{$eburl}{$row['appurl']}\">Generate This Chart on IEM Website</a></p>";
     }
     $mediaurl = sprintf(
-        "{$EXTERNAL_BASEURL}/onsite/features/%s.%s",
+        "{$eburl}/onsite/features/%s.%s",
         $row["imageref"],
         $row["mediasuffix"]
     );
@@ -63,8 +64,8 @@ EOM;
 <item>
 <title><![CDATA[{$t}]]></title>
 <author>akrherz@iastate.edu (Daryl Herzmann)</author>
-<link>{$EXTERNAL_BASEURL}/onsite/features/cat.php?day={$v}</link>
-<guid>{$EXTERNAL_BASEURL}/onsite/features/cat.php?day={$v}</guid>
+<link>{$eburl}/onsite/features/cat.php?day={$v}</link>
+<guid>{$eburl}/onsite/features/cat.php?day={$v}</guid>
 <description><![CDATA[{$cbody}]]></description>
 </item>
 EOM;

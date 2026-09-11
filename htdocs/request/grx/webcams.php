@@ -8,6 +8,7 @@ require_once "../../../include/forms.php";
 $camera_refresh = get_iemprop("webcam.interval");
 $network = get_str404("network", "KCRG");
 $overview = array_key_exists("overview", $_GET);
+$cameras = get_cameras();
 
 $thres = 999;
 $title = "IEM Webcam Overview";
@@ -56,7 +57,8 @@ while ($row = pg_fetch_assoc($rs)) {
     }
 
     if (!$overview)
-        echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"{$EXTERNAL_BASEURL}/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"], $key);
+        echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"%s/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"],
+    IEMConfig::EXTERNAL_BASEURL, $key);
     if ($overview)
         $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,7,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $drct, $key, $cameras[$key]["name"]);
     if (!$overview)

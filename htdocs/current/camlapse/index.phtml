@@ -2,7 +2,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/cameras.inc.php";
-
+$cameras = get_cameras();
 $t = new MyView();
 $t->title = "Webcam Lapse Player";
 $t->headextra = <<<EOM

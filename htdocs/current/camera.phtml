@@ -5,6 +5,7 @@ $camera_refresh = get_iemprop("webcam.interval");
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/cameras.inc.php";
+$cameras = get_cameras();
 $t = new MyView();
 /* CGI GET Requests */
 $year = get_int404("year", date("Y"));
