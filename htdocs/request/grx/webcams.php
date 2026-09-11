@@ -56,7 +56,8 @@ while ($row = pg_fetch_assoc($rs)) {
     }
 
     if (!$overview)
-        echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"{$EXTERNAL_BASEURL}/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"], $key);
+        echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"%s/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"],
+    IEMConfig::EXTERNAL_BASEURL, $key);
     if ($overview)
         $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,7,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $drct, $key, $cameras[$key]["name"]);
     if (!$overview)

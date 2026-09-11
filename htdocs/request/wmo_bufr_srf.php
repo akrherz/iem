@@ -20,88 +20,97 @@ $ds2 = daySelect(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/other/">Other Mainpage</a></li>
- <li class="active">WMO BUFR Surface Download</li>
-</ol>
-<h3>WMO BUFR Surface Data Download</h3>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/other/">Other Mainpage</a></li>
+    <li class="breadcrumb-item active" aria-current="page">WMO BUFR Surface Download</li>
+  </ol>
+</nav>
 
-<p><a class="btn btn-secondary" href="/cgi-bin/request/wmo_bufr_srf.py?help"><i class="bi bi-file-text" aria-hidden="true"></i> Backend Documentation</a> exists for those that
-wish to script against this service.</p>
+<header class="mb-4">
+  <h1 class="h3 mb-3">WMO BUFR Surface Data Download</h1>
+  <p class="mb-3">Use this form to retrieve archived surface observations from the WMO BUFR network.</p>
+  <a class="btn btn-outline-primary" href="/cgi-bin/request/wmo_bufr_srf.py?help"><i class="bi bi-file-text" aria-hidden="true"></i> Backend documentation</a>
+</header>
 
-<form target="_blank" method="GET" action="/cgi-bin/request/wmo_bufr_srf.py" name="iemss">
-<div class="form2url"></div>
-<input type='hidden' name='network' value="WMO_BUFR_SRF" />
+<form target="_blank" method="GET" action="/cgi-bin/request/wmo_bufr_srf.py" name="iemss" class="mb-4">
+  <div class="form2url mb-3"></div>
+  <input type="hidden" name="network" value="WMO_BUFR_SRF">
 
-<div class="row">
-<div class="col-sm-7">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <section class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 card-title">1. Select station(s)</h2>
+          <p class="form-text mt-0">Choose one or more stations for the download.</p>
+          <div id="iemss" data-network="WMO_BUFR_SRF"></div>
+        </div>
+      </section>
+    </div>
+    <div class="col-lg-5">
+      <section class="card h-100 shadow-sm">
+        <div class="card-body">
+          <fieldset class="mb-4">
+            <legend class="h5 mb-2">2. Select start and end time</legend>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Year</th><th scope="col">Month</th><th scope="col">Day</th>
+                    <th scope="col">Hour</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Start</th>
+                    <td>{$ys1}</td><td>{$ms1}</td><td>{$ds1}</td>
+                    <td>{$hs1}<input type="hidden" name="minute1" value="0"></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">End</th>
+                    <td>{$ys2}</td><td>{$ms2}</td><td>{$ds2}</td>
+                    <td>{$hs2}<input type="hidden" name="minute2" value="0"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </fieldset>
 
-<h3>1. Select Station(s):</h3>
+          <div class="mb-4">
+            <label for="what" class="form-label h5 d-block">3. How to download/view?</label>
+            <select name="what" id="what" class="form-select">
+              <option value="txt">Download as Delimited Text File</option>
+              <option value="excel">Download as Excel</option>
+              <option value="html">View as HTML webpage</option>
+            </select>
+          </div>
 
-<div id="iemss" data-network="WMO_BUFR_SRF"></div>
+          <div class="mb-4">
+            <label for="delim" class="form-label h5 d-block">3a. Data delimitation</label>
+            <p class="form-text mt-0">For delimited text files, choose how values are separated.</p>
+            <select name="delim" id="delim" class="form-select">
+              <option value="comma">Comma</option>
+              <option value="space">Space</option>
+              <option value="tab">Tab</option>
+            </select>
+          </div>
 
-</div>
-<div class="col-sm-5">
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-primary">Process Data Request</button>
+            <button type="reset" class="btn btn-outline-secondary">Reset</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
 
-<h3>2. Select Start/End Time:</h3>
+</form>
 
-<table class="table table-sm">
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th>
-  </tr>
-
-  <tr>
-    <th>Start:</th>
-    <td>{$ys1}</td>
-    <td>{$ms1}</td>
-    <td>{$ds1}</td>
-    <td>{$hs1}
-    <input type="hidden" name="minute1" value="0"></td>
-    </td>
-  </tr>
-
-  <tr>
-    <th>End:</th>
-    <td>{$ys2}</td>
-    <td>{$ms2}</td>
-    <td>{$ds2}</td>
-    <td>{$hs2}
-    <input type="hidden" name="minute2" value="0">
-    </td>
-  </tr>
-</table>
-
-<h3>3. How to download/view?</h3>
-
-<select name="what">
-  <option value="txt">Download as Delimited Text File</option>
-  <option value="excel">Download as Excel</option>
-  <option value="html">View as HTML webpage</option>
-</select>
-
-<h3>3a. Data Delimitation:</h3>
-
-<p>If you selected 'Delimited Text File' above, how do you want the values
-separated in the downloaded file?</p>
-
-<select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
-</select>
-
-<h3>6. Submit Form:</h3>
-
-<input type="submit" value="Process Data Request">
-<input type="reset">
-
-</div>
-</div>
-
-<h3>Returned data columns:</h3>
-<pre>
+<section class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h5 card-title">Returned data columns</h2>
+    <pre class="mb-0"><code>
 utc_valid - Observation timestamp in UTC
 station - Often WIGOS or guessed WIGOS identifier
 tmpf - Air temperature in F
@@ -132,10 +141,8 @@ skyl2 - Sky Level 2 (ft)
 skyl3 - Sky Level 3 (ft)
 skyl4 - Sky Level 4 (ft)
 srad_1h_j - Solar Radiation 1 hour sum (J/m^2)
-</pre>
-
-<h3>Frequently Asked Questions:</h3>
-
-</form>
+</code></pre>
+  </div>
+</section>
 EOM;
-$t->render('single.phtml');
+$t->render('full.phtml');
