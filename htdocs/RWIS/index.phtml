@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php";
+$cameras = get_cameras();
 $camid = isset($_GET["camid"]) ? xssafe($_GET["camid"]) : "IDOT-000";
 
 $cdict = array();

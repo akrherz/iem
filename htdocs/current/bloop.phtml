@@ -5,6 +5,7 @@ require_once '../../include/myview.php';
 require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php";
 define("IEM_APPID", 117);
+$cameras = get_cameras();
 $t = new MyView();
 
 $java = get_str404("java", 'script');
