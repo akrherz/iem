@@ -33,11 +33,11 @@ function processTemperatureRow(processedData, row) {
     if (!row || !row.date) {
         return; // Skip invalid rows
     }
-    
+
     const date = row.date;
     const entry = initializeDateEntry(processedData, date);
     const locationString = createLocationString(row);
-    
+
     if (row.n_x === 'N') {
         entry.min_temp = row.value || '';
         entry.min_locations.push(locationString);
@@ -66,10 +66,10 @@ function processTableData(rawData) {
     }
 
     const processedData = new Map();
-    
+
     // Group data by date
     rawData.data.forEach(row => processTemperatureRow(processedData, row));
-    
+
     // Convert Map to Array and format for display
     return convertToDisplayFormat(processedData);
 }
@@ -78,7 +78,7 @@ function processTableData(rawData) {
 function formatTemperature(cell, formatterParams) {
     const value = cell.getValue();
     if (!value) {return '<span class="text-muted">—</span>';}
-    
+
     const tempClass = formatterParams.type === 'max' ? 'temp-high' : 'temp-low';
     return `<span class="${tempClass}">${value}°F</span>`;
 }
@@ -87,7 +87,7 @@ function formatTemperature(cell, formatterParams) {
 function formatLocations(cell) {
     const value = cell.getValue();
     if (!value) {return '<span class="text-muted">No data</span>';}
-    
+
     return `<div class="location-list">${value}</div>`;
 }
 
@@ -99,8 +99,8 @@ function initializeTable() {
         height: "600px",
         columns: [
             {
-                title: "Date", 
-                field: "date", 
+                title: "Date",
+                field: "date",
                 sorter: "datetime",
                 sorterParams: {
                     format: "yyyy-MM-dd",
@@ -110,8 +110,8 @@ function initializeTable() {
                 headerSort: true
             },
             {
-                title: "Min °F", 
-                field: "min_temp", 
+                title: "Min °F",
+                field: "min_temp",
                 formatter: formatTemperature,
                 formatterParams: { type: 'min' },
                 width: 100,
@@ -119,15 +119,15 @@ function initializeTable() {
                 cssClass: "text-center"
             },
             {
-                title: "Minimum Temperature Location(s)", 
-                field: "min_locations", 
+                title: "Minimum Temperature Location(s)",
+                field: "min_locations",
                 formatter: formatLocations,
                 headerSort: false,
                 widthGrow: 2
             },
             {
-                title: "Max °F", 
-                field: "max_temp", 
+                title: "Max °F",
+                field: "max_temp",
                 formatter: formatTemperature,
                 formatterParams: { type: 'max' },
                 width: 100,
@@ -135,8 +135,8 @@ function initializeTable() {
                 cssClass: "text-center"
             },
             {
-                title: "Maximum Temperature Location(s)", 
-                field: "max_locations", 
+                title: "Maximum Temperature Location(s)",
+                field: "max_locations",
                 formatter: formatLocations,
                 headerSort: false,
                 widthGrow: 2
@@ -146,7 +146,7 @@ function initializeTable() {
             {column: "date", dir: "desc"}
         ]
     });
-    
+
     return table;
 }
 
@@ -171,7 +171,7 @@ function updatePageTitle(title) {
 function setLoadingState(isLoading) {
     const loadingIndicator = document.getElementById('loading-indicator');
     const submitButton = document.querySelector('#filter-form button[type="submit"]');
-    
+
     if (loadingIndicator) {
         if (isLoading) {
             loadingIndicator.classList.remove('d-none');
@@ -179,7 +179,7 @@ function setLoadingState(isLoading) {
             loadingIndicator.classList.add('d-none');
         }
     }
-    
+
     if (submitButton) {
         submitButton.disabled = isLoading;
         if (isLoading) {
@@ -193,26 +193,26 @@ function setLoadingState(isLoading) {
 // Fetch data from API
 async function fetchTableData(params) {
     setLoadingState(true);
-    
+
     try {
         const url = new URL(API_BASE_URL, window.location.origin);
-        
+
         // Add parameters to URL
         Object.keys(params).forEach(key => {
             if (params[key]) {
                 url.searchParams.append(key, params[key]);
             }
         });
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         return data;
-        
+
     } catch {
         updateResultCount(0);
         const badge = document.getElementById('result-count');
@@ -230,13 +230,13 @@ async function fetchTableData(params) {
 async function loadTableData(params) {
     const rawData = await fetchTableData(params);
     const tableData = processTableData(rawData);
-    
+
     // Load data into table
     table.setData(tableData);
-    
+
     // Update result count
     updateResultCount(tableData.length);
-    
+
     return tableData;
 }
 
@@ -245,7 +245,7 @@ function getFormParams() {
     const form = document.getElementById('filter-form');
     const formData = new FormData(form);
     const params = {};
-    
+
     const opt = formData.get('opt');
     if (opt === '1') {
         // By state
@@ -260,30 +260,30 @@ function getFormParams() {
             params.year = year;
         }
     }
-    
+
     return params;
 }
 
 // Update page title based on current filter
 function updateTitleFromParams(params) {
     let title = "WPC National High/Low Temperature Data";
-    
+
     if (params.state) {
         title = `Entries for state: ${params.state}`;
     } else if (params.year) {
         title = `Entries for year: ${params.year}`;
     }
-    
+
     updatePageTitle(title);
 }
 
 // Handle form submission
 async function handleFormSubmit(event) {
     event.preventDefault();
-    
+
     const params = getFormParams();
     updateTitleFromParams(params);
-    
+
     // Update URL parameters
     const url = new URL(window.location);
     url.search = ''; // Clear existing params
@@ -292,27 +292,27 @@ async function handleFormSubmit(event) {
             url.searchParams.set(key, params[key]);
         }
     });
-    
+
     // Add the opt parameter
     const opt = new FormData(document.getElementById('filter-form')).get('opt');
     url.searchParams.set('opt', opt);
-    
+
     window.history.pushState({}, '', url);
-    
+
     await loadTableData(params);
 }
 
-// Set up export functionality  
+// Set up export functionality
 function setupExportButtons() {
     const excelBtn = document.getElementById('export-excel');
     const csvBtn = document.getElementById('export-csv');
-    
+
     if (excelBtn) {
         excelBtn.addEventListener('click', () => {
             table.download("xlsx", "wpc_national_hilo.xlsx", {sheetName: "Temperature Data"});
         });
     }
-    
+
     if (csvBtn) {
         csvBtn.addEventListener('click', () => {
             table.download("csv", "wpc_national_hilo.csv");
@@ -324,25 +324,25 @@ function setupExportButtons() {
 async function initializeApp() {
     // Initialize table
     initializeTable();
-    
+
     // Setup form handler
     const form = document.getElementById('filter-form');
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
-    
+
     // Setup export buttons
     setupExportButtons();
-    
+
     // Load initial data
     const initialParamsScript = document.getElementById('initial-params');
     const titleScript = document.getElementById('page-title');
-    
+
     if (initialParamsScript && titleScript) {
         try {
             const initialParams = JSON.parse(initialParamsScript.textContent);
             const initialTitle = JSON.parse(titleScript.textContent);
-            
+
             updatePageTitle(initialTitle);
             await loadTableData(initialParams);
         } catch {

@@ -67,7 +67,7 @@ $render_select = make_select("renderattr", $valid_var, $render_vars, "", "form-s
 
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '10.7.0';
+$OL = '10.10.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />

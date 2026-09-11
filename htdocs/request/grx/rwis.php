@@ -10,17 +10,23 @@ header("Content-type: text/plain");
 // Generate placefiles, whatever
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 echo <<<EOM
 Title: {$network}
 Refresh: 5
 Color: 200 200 255
-IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png"
-IconFile: 2, 15, 15, 8, 8, "{$EXTERNAL_BASEURL}/request/grx/cloudcover.png"
-IconFile: 3, 25, 25, 12, 12, "{$EXTERNAL_BASEURL}/request/grx/rwis_cr.png"
+IconFile: 1, 18, 32, 2, 31, "{$eburl}/request/grx/windbarbs.png"
+IconFile: 2, 15, 15, 8, 8, "{$eburl}/request/grx/cloudcover.png"
+IconFile: 3, 25, 25, 12, 12, "{$eburl}/request/grx/rwis_cr.png"
 Font: 1, 11, 1, "Courier New"
 
 EOM;
 
+/**
+ * Determine the color code for a given pavement temperature.
+ * @param float|string $tmpf Pavement temperature in Fahrenheit or "M" for missing.
+ * @return string Color code as a string.
+ */
 function pcolor($tmpf)
 {
     if ($tmpf == "M") return "1";
@@ -34,7 +40,12 @@ function pcolor($tmpf)
     return "1";
 }
 
-function s2icon($s)  // skipcq
+/**
+ * Determine the icon code for a given wind speed.
+ * @param float $s Wind speed in knots.
+ * @return string Icon code as a string.
+ */
+function s2icon($s)
 {
     if ($s < 2.5) return "1,21";
     if ($s < 5) return "1,1";

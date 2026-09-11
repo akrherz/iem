@@ -10,21 +10,18 @@ $connection = iemdb("scan");
 $nt = new NetworkTable("SCAN");
 
 $station = get_str404("station", "S2031");
-$year = get_int404("year", date("Y", time() - 3 * 86400));
-$month = get_int404("month", date("m", time() - 3 * 86400));
-$day = get_int404("day", date("d", time() - 3 * 86400));
+$dt = dt_from_cgi_ymd();
 
-$date = "$year-$month-$day";
 $var = "phour";
 $accum = 1;
 
 $stname = iem_pg_prepare($connection, "SELECT sknt, drct, phour,
         to_char(valid, 'mmdd/HH24') as tvalid
         from alldata WHERE
-        station = $1 and date(valid) >= $2  and phour >= 0
+        station = $1 and valid >= $2 and valid < $2::date + '240 hours'::interval and phour >= 0
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, $stname, array($station, $date));
+$result = pg_execute($connection, $stname, array($station, $dt->format("Y-m-d")));
 
 $ydata1 = array();
 

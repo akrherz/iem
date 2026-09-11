@@ -30,14 +30,14 @@ $arr = array(
 $jobj = iemws_json("currents.json", $arr);
 
 $vals = array(
-    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "tmpf" => "Air Temperature [°F]", "dwpf" => "Dew Point Temp [°F]",
     "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
     "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
     "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
-    "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
+    "feel" => "Feels Like [°F]", "vsby" => "Visibility [miles]",
     "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
-    "min_tmpf" => "Today's Low Temperature",
-    "max_tmpf" => "Today's High Temperature",
+    "min_tmpf" => "Today's Low Temperature [°F]",
+    "max_tmpf" => "Today's High Temperature [°F]",
     "pday" => "Today Rainfall [inch]"
 );
 

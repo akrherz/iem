@@ -5,35 +5,77 @@ $t = new MyView();
 $t->title = "Other Network";
 require_once "../../include/forms.php";
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
-$myTime = mktime(0, 0, 0, $month, $day, $year);
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "OT0002";
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
+$myTime = intval($dt->format("U"));
+$station = get_str404("station", "OT0002");
 
 $nselect = networkSelect("OT", $station);
-$yselect = yearSelect(2007, $year);
-$mselect = monthSelect($month);
-$dselect = daySelect($day);
+$addSelectAttributes = fn($select, $id) => str_replace(
+    "<select ",
+    "<select id=\"{$id}\" ",
+    str_replace('class="iemselect2"', 'class="form-select iemselect2"', $select),
+);
+$nselect = $addSelectAttributes($nselect, "station");
+$yselect = $addSelectAttributes(yearSelect(2007, $year), "year");
+$mselect = $addSelectAttributes(monthSelect($month), "month");
+$dselect = $addSelectAttributes(daySelect($day), "day");
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/other/">Other Networks</a></li>
- <li class="active">Mesonet Northeast Ames</li>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
+ <li class="breadcrumb-item"><a href="/other/">Other Networks</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Mesonet Northeast Ames</li>
 </ol>
+</nav>
 
-  <form method="GET" name="control">
-  {$nselect}
-  {$yselect}
-  {$mselect}
-  {$dselect}
+<header class="mb-4">
+<h1 class="h3">Mesonet Northeast Ames</h1>
+<p class="mb-0">View daily temperature and wind traces from the Northeast Ames station.</p>
+</header>
 
-  <input type="submit" value="Make Plot"></form>
-
-<BR>
-<img src="plot_temps.php?station={$station}&year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<img src="plot_winds.php?station={$station}&year={$year}&month={$month}&day={$day}" ALT="Time Series">
-
+<form method="GET" name="control" class="card shadow-sm mb-4">
+<div class="card-body">
+<div class="row g-3 align-items-end">
+<div class="col-lg-5">
+<label for="station" class="form-label">Station</label>
+{$nselect}
 </div>
+<div class="col-sm-4 col-lg-2">
+<label for="year" class="form-label">Year</label>
+{$yselect}
+</div>
+<div class="col-sm-4 col-lg-2">
+<label for="month" class="form-label">Month</label>
+{$mselect}
+</div>
+<div class="col-sm-4 col-lg-2">
+<label for="day" class="form-label">Day</label>
+{$dselect}
+</div>
+<div class="col-lg-1">
+<button type="submit" class="btn btn-primary w-100">Plot</button>
+</div>
+</div>
+</div>
+</form>
+
+<div class="row g-4">
+<div class="col-lg-6">
+<figure class="card h-100 mb-0">
+<div class="card-header"><h2 class="h5 mb-0">Temperature</h2></div>
+<div class="card-body"><img src="plot_temps.php?station={$station}&year={$year}&month={$month}&day={$day}" alt="Temperature time series" class="img-fluid"></div>
+</figure>
+</div>
+<div class="col-lg-6">
+<figure class="card h-100 mb-0">
+<div class="card-header"><h2 class="h5 mb-0">Wind</h2></div>
+<div class="card-body"><img src="plot_winds.php?station={$station}&year={$year}&month={$month}&day={$day}" alt="Wind time series" class="img-fluid"></div>
+</figure>
+</div>
+</div>
+
 EOM;
 $t->render('single.phtml');

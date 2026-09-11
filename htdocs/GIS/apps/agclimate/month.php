@@ -16,17 +16,13 @@ if (!array_key_exists($dvar, $title)) die();
 
 $stname = iem_pg_prepare($dbconn, "select station, sum({$dvar}_qc) as s,
     min(valid) as min_valid, max(valid) as max_valid from sm_daily
-    WHERE extract(month from valid) = $1 and
-    extract(year from valid) = $2 GROUP by station");
+    WHERE valid >= $1 and valid < $2 GROUP by station");
 
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
-$year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)), 1980, (int)date("Y") + 1);
-$month = get_int404("month", date("m", time() - 86400 - (7 * 3600)), 1, 12);
-$day = get_int404("day", date("d", time() - 86400 - (7 * 3600)), 1, 31);
-
-$sts = mktime(0, 0, 0, $month, 1, $year);
+$dt = dt_from_cgi_ymd();
+$nextmonth = $dt->modify("+1 month");
 
 $myStations = $ISUAGcities;
 $height = 768;
@@ -61,7 +57,7 @@ $states->draw($map, $img);
 $iards->draw($map, $img);
 $bar640t->draw($map, $img);
 
-$rs = pg_execute($dbconn, $stname, array($month, $year));
+$rs = pg_execute($dbconn, $stname, array($dt->format("Y-m-01"),  $nextmonth->format("Y-m-01")));
 $minvalid = null;
 $maxvalid = null;
 while ($row = pg_fetch_assoc($rs)) {

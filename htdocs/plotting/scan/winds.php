@@ -11,27 +11,23 @@ $nt = new NetworkTable("SCAN");
 $connection = iemdb("scan");
 
 $station = get_str404("station", "S2031");
-$year = get_int404("year", date("Y", time() - 3 * 86400));
-$month = get_int404("month", date("m", time() - 3 * 86400));
-$day = get_int404("day", date("d", time() - 3 * 86400));
+$dt = dt_from_cgi_ymd();
 
-$date = "$year-$month-$day";
-
-$stname = iem_pg_prepare($connection, "SELECT sknt, drct, 
-        to_char(valid, 'mmdd/HH24') as tvalid 
-        from alldata WHERE 
-        station = $1 and date(valid) >= $2  
+$stname = iem_pg_prepare($connection, "SELECT sknt, drct,
+        to_char(valid, 'mmdd/HH24') as tvalid
+        from alldata WHERE
+        station = $1 and valid >= $2 and valid < $2::date + '240 hours'::interval
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, $stname, Array($station, $date));
+$result = pg_execute($connection, $stname, Array($station, $dt->format("Y-m-d")));
 
 $ydata1 = array();
 $ydata2 = array();
 
 $xlabel= array();
 
-for( $i=0; $row = pg_fetch_assoc($result); $i++) 
-{ 
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
+{
   $ydata1[$i]  = $row["drct"];
   $ydata2[$i]  = $row["sknt"];
   $xlabel[$i] = $row["tvalid"];

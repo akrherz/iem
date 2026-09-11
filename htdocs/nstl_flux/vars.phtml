@@ -12,28 +12,47 @@ $sql = "SELECT * from flux_vars ORDER by name ASC";
 $rs = pg_query($pg_conn, $sql);
 $rows = "";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
+    $rows .= sprintf(
+        "<tr><th scope=\"row\">%s</th><td>%s</td><td>%s</td></tr>",
+        $row["name"],
+        $row["units"],
+        $row["details"],
+    );
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nstl_flux/">NLAE Flux Sites</a></li>
- <li class="active">Data Variables and Units</li>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
+ <li class="breadcrumb-item"><a href="/nstl_flux/">NLAE Flux Sites</a></li>
+ <li class="breadcrumb-item active" aria-current="page">Data Variables and Units</li>
 </ol>
+</nav>
 
-<h3>Variables Collected from NLAE Flux Sites</h3>
+<header class="mb-4">
+<h1 class="h3">Variables Collected from NLAE Flux Sites</h1>
+<p class="mb-0">This page lists variables collected at the four sites in this network. Each variable is not collected at every site.</p>
+</header>
 
-<p>This page lists out variables collected on the 4 sites in this network.
-Each variable is not collected at every site.
-
-<table class="table table-striped table-sm table-bordered">
-<thead><tr><th colspan="3" align="left">Site Information:</th></tr></thead>
-<tr><th align="left">ID</th><th align="left">Units</th><th align="left">Details</th></tr>
+<section class="card shadow-sm" aria-labelledby="variables-heading">
+<div class="card-header">
+<h2 id="variables-heading" class="h5 mb-0">Data variables and units</h2>
+</div>
+<div class="table-responsive">
+<table class="table table-striped table-hover table-sm mb-0">
+<caption class="visually-hidden">Variables collected from NLAE flux sites, their units, and details.</caption>
+<thead>
+<tr>
+<th scope="col">ID</th>
+<th scope="col">Units</th>
+<th scope="col">Details</th>
+</tr>
 </thead>
 <tbody>
 {$rows}
 </tbody>
 </table>
+</div>
+</section>
 
 EOM;
 $t->render('single.phtml');

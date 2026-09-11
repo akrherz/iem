@@ -5,14 +5,10 @@ require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
 
-$myTime = mktime(0,0,0,$month,$day,$year);
-
-$titleDate = date("M d, Y", $myTime);
-$dirRef = date("Y/m/d", $myTime);
+$titleDate = $dt->format("M d, Y");
+$dirRef = $dt->format("Y/m/d");
 
 $filename = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
 if (!file_exists($filename))
@@ -23,7 +19,7 @@ if (!file_exists($filename))
 $fcontents = file($filename);
 
 $oldformat = 1;
-if ($myTime >= mktime(0,0,0,8,12,2005))
+if ($dt->format("U") >= mktime(0,0,0,8,12,2005))
 {
   $oldformat = 0;
 }
@@ -31,7 +27,7 @@ if ($myTime >= mktime(0,0,0,8,12,2005))
 $v1 = array();
 $times = array();
 
-$start = intval( $myTime );
+$start = intval( $dt->format("U") );
 $i = 0;
 
 $new_contents = array_slice($fcontents,2);
@@ -42,7 +38,7 @@ foreach($new_contents as $line_num => $line){
   $hh = substr($hhmm,0,2);
   if ($hh == 24){$hh = 00;}
   $mm = substr($hhmm,2,3);
-  $timestamp = mktime($hh,$mm,0,$month,$day,$year);
+  $timestamp = mktime($hh,$mm,0,$dt->format("m"),$dt->format("d"),$dt->format("Y"));
 
   if ($oldformat && $parts[11] > 1)
   {

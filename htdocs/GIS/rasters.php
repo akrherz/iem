@@ -17,13 +17,14 @@ $rs = pg_query($mesosite, "SELECT * from iemrasters ORDER by name ASC");
 $rname = "";
 $runits = "";
 $urltemplate = "";
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 while ($row = pg_fetch_assoc($rs)) {
     if ($rid == intval($row["id"])) {
         $rname = $row["name"];
         $runits = $row["units"];
         $urltemplate = str_replace(
             "/mesonet/ARCHIVE",
-            "{$EXTERNAL_BASEURL}/archive",
+            "{$eburl}/archive",
             is_null($row["filename_template"]) ? "": $row["filename_template"]
         );
         $t->title = sprintf("RASTER info for %s", $rname);
@@ -38,6 +39,14 @@ while ($row = pg_fetch_assoc($rs)) {
     );
 }
 
+/**
+ * Convert RGB values to an HTML hex color string.
+ *
+ * @param int|array $r The red component (0-255) or an array of RGB values.
+ * @param int $g The green component (0-255).
+ * @param int $b The blue component (0-255).
+ * @return string The HTML hex color string (e.g., "#ff0000").
+ */
 function rgb2html($r, $g, $b)
 {
     if (is_array($r) && sizeof($r) == 3)
@@ -113,7 +122,7 @@ are <a href="https://docs.python.org/2/library/time.html#time.strftime">pythonic
 <p>A general web service also exists to convert these RASTERs to netCDF "on-the-fly".
 The URL format is like so:</p>
 
-<pre class="p-2 bg-light border">{$EXTERNAL_BASEURL}/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
+<pre class="p-2 bg-light border">{$eburl}/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
 
 <h4>Try the netCDF conversion</h4>
 <form method="GET" name="try" action="/cgi-bin/request/raster2netcdf.py" class="row g-2 align-items-end">

@@ -26,11 +26,11 @@ if (array_key_exists("lat", $_GET) && array_key_exists("lon", $_GET)) {
 }
 
 $result = "id,valid,tmpf,dwpf,sknt,drct,phour,alti,gust,lon,lat\n";
-$prepared = null;
+$stname = null;
 foreach ($stations as $k => $id) {
     if (array_key_exists("date", $_REQUEST)) {
         $ts = strtotime(get_str404("date", null));
-        if (is_null($prepared)) {
+        if (is_null($stname)) {
             $stname = iem_pg_prepare($asos, sprintf("SELECT station as id, valid,
             max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
             max(p01i) as phour, max(alti) as alti, max(gust) as gust,

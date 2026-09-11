@@ -7,9 +7,10 @@ $t = new MyView();
 $t->title = "SCAN Plotting";
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
-$year = get_int404("year", date("Y", time() - 1 * 86400));
-$month = get_int404("month", date("m", time() - 1 * 86400));
-$day = get_int404("day", date("d", time() - 1 * 86400));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 $plot = get_int404("plot", 0);
 
 $u = array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
@@ -24,50 +25,78 @@ $myu = $u[$plot];
 
 $ploturl = "$myu?station=$station&amp;year=$year&amp;month=$month&amp;day=$day";
 
-$sselect = networkSelect("SCAN", $station);
+$sselect = networkSelect("SCAN", $station, array(), "station", FALSE, "form-select");
 $yselect = yearSelect(2004, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
-$pselect = "<select name=\"plot\">";
+$poptions = array();
 foreach ($u as $key => $val) {
-    $pselect .= sprintf(
-        "<option value=\"%s\"%s>%s</option>",
-        $key,
-        ($key == $plot) ? ' selected="selected"' : '',
-        $ulabel[$key]
-    );
+    $poptions[$key] = $val;
 }
-$pselect .= "</select>";
+$pselect = make_select("plot", $plot, $poptions, "", "form-select");
+$addFormSelectId = fn($select, $id) => str_replace(
+    "<select ",
+    "<select id=\"{$id}\" ",
+    $select,
+);
+$addFormSelectClass = fn($select) => str_replace(
+    "<select ",
+    '<select class="form-select" ',
+    $select,
+);
+$yselect = $addFormSelectId($addFormSelectClass($yselect), "year");
+$mselect = $addFormSelectId($addFormSelectClass($mselect), "month");
+$dselect = $addFormSelectId($addFormSelectClass($dselect), "day");
+$sselect = $addFormSelectId($sselect, "station");
+$pselect = $addFormSelectId($pselect, "plot");
 $t->content = <<<EOM
-<ol class="breadcrumb">
-<li><a href="/scan/">SCAN</a></li>
-<li class="active">Current/Historical Data Traces</li>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
+<li class="breadcrumb-item"><a href="/scan/">SCAN</a></li>
+<li class="breadcrumb-item active" aria-current="page">Current/Historical Data Traces</li>
 </ol>
+</nav>
 
-<p>This application generates a single day time series plot of SCAN data.</p>
+<header class="mb-4">
+<h1 class="h3">Current/Historical Data Traces</h1>
+<p class="mb-0">Generate a single-day time series plot of SCAN data.</p>
+</header>
 
-<form method="GET" action="index.phtml" name="control">
-<table class="table table-striped">
-<thead>
-<tr>
-  <th>SCAN Site:</th>
-  <th>Plot Type:</th>
-  <th>Year:</th>
-  <th>Month:</th>
-  <th>Day:</th></tr>
-</thead>
-<tbody>
-<tr>
-  <td>{$sselect}</td>
-  <td>{$pselect}</td>
-  <td>{$yselect}</td>
-  <td>{$mselect}</td>
-  <td>{$dselect}</td>
-  <td><input type="submit" value="Make Plot!"></td>
-</tr>
-</tbody>
-</table></form>
+<form method="GET" action="index.phtml" name="control" class="card shadow-sm mb-4">
+<div class="card-body">
+<div class="row g-3 align-items-end">
+<div class="col-lg-4 col-md-6">
+<label for="station" class="form-label">SCAN site</label>
+{$sselect}
+</div>
+<div class="col-lg-4 col-md-6">
+<label for="plot" class="form-label">Plot type</label>
+{$pselect}
+</div>
+<div class="col-sm-4 col-md-2">
+<label for="year" class="form-label">Year</label>
+{$yselect}
+</div>
+<div class="col-sm-4 col-md-2">
+<label for="month" class="form-label">Month</label>
+{$mselect}
+</div>
+<div class="col-sm-4 col-md-2">
+<label for="day" class="form-label">Day</label>
+{$dselect}
+</div>
+<div class="col-12">
+<button type="submit" class="btn btn-primary">Make plot</button>
+</div>
+</div>
+</div>
+</form>
 
-<img src="{$ploturl}">
+<section aria-labelledby="plot-heading">
+<h2 id="plot-heading" class="h5">{$ulabel[$plot]}</h2>
+<div class="table-responsive">
+<img src="{$ploturl}" alt="{$ulabel[$plot]} plot for SCAN site {$station} on {$year}-{$month}-{$day}" class="img-fluid">
+</div>
+</section>
 EOM;
 $t->render("single.phtml");

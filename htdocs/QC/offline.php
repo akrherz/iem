@@ -15,6 +15,11 @@ $stname = iem_pg_prepare(
     "WHERE network = $1 ORDER by valid ASC",
 );
 
+/**
+ * Returns HTML table rows for sites offline in the given network.
+ * @param string $network The network identifier.
+ * @return string HTML table rows for the offline sites in the network.
+ */
 function networkOffline($network)
 {
     global $pgconn, $stname;

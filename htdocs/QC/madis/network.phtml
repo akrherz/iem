@@ -18,8 +18,8 @@ $stname = iem_pg_prepare(
         "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on " .
         "(c.iemid = t.iemid) WHERE t.network = $1"
 );
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
-$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 10) : "IA_ASOS";
+$sortcol = get_str404("sortcol", "station");
+$network = get_str404("network", "IA_ASOS", 10);
 if ($network == "AWOS") {
     $network = "IA_ASOS";
 }
@@ -57,6 +57,12 @@ $sselect = make_select("network", $network, $ar);
 
 $i = false;
 
+/**
+ * Returns an HTML table cell with the value formatted according to its QC status.
+ * @param mixed $v The value to format.
+ * @param int $r The number of decimal places to round to.
+ * @return string HTML table cell with the formatted value.
+ */
 function vp($v, $r)
 {
     if (is_null($v)) return "<td>M</td>";
@@ -65,6 +71,13 @@ function vp($v, $r)
     else if ($v < 0) return '<td><font id="w">' . myround($v, $r) . '</font></td>';
     return '<td>' . myround($v, $r) . '</td>';
 }
+
+/**
+ * Returns a formatted value for precipitation.
+ * @param mixed $v The value to format.
+ * @param int $r The number of decimal places to round to.
+ * @return string Formatted precipitation value.
+ */
 function pp($v, $r)
 {
     if (is_null($v)) return "M";
