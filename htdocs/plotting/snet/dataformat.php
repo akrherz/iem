@@ -8,11 +8,11 @@ $t->content = <<<EOM
 <h3 class="heading">Data Format</h3><br /><br />
 <div class="text">
 
-If you download raw schoolnet data from the IEM server, 
+If you download raw schoolnet data from the IEM server,
 you are probably curious about the data format.  Well, here is the explaination.</p>
 
-<p>The data files are in a tab deliminated text format.  
-Each line is a different report.  
+<p>The data files are in a tab deliminated text format.
+Each line is a different report.
 Here is an example line with columns denoted for reference.<br>
 <pre>
 20:57,03/06/02,NE,06MPH,000K,460F,028F,077%,30.18R,00.00"D,00.00"M,00.00"R,
@@ -58,7 +58,7 @@ mm/dd/yy.  In this example, 06 March 2002.</td>
 <tr>
   <th>6</th>
   <th>460F</th>
-  <td>Indoor Temperature in degrees Fahrenhit.  The value of 460F means that 
+  <td>Indoor Temperature in degrees Fahrenhit.  The value of 460F means that
 this variable is not measured at this station or that the value is in error.</td>
 </tr>
 <tr>
@@ -74,7 +74,7 @@ this variable is not measured at this station or that the value is in error.</td
 <tr>
   <th>9</th>
   <th>30.18R</th>
-  <td>Barometric pressure expressed in inches of mercury.  The character at 
+  <td>Barometric pressure expressed in inches of mercury.  The character at
 the end represents the change in pressure. 'S' == Steady.  'R' == Raising.
 'F' == Falling.</td>
 </tr>
