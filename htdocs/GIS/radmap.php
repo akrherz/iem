@@ -57,7 +57,7 @@ function draw_header($map, $img, $width, $height)
  */
 function get_goes_fn_and_time($ts, $product)
 {
-    $domain = Array("WV", "IR", "VIS");
+    $domain = array("WV", "IR", "VIS");
     if (!in_array($product, $domain)) {
         return array(NULL, NULL);
     }
@@ -168,7 +168,7 @@ if (gettype($layers) == "string") {
 }
 
 // Alias for visual plot of VTEC
-if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)){
+if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)) {
     $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
@@ -191,18 +191,26 @@ if (array_key_exists("vtec", $_GET)) {
     $tokens = explode(".", $cvtec);
     if (sizeof($tokens) == 7) {
         list(
-            $year, $pclass, $status, $wfo, $phenomena, $significance,
+            $year,
+            $pclass,
+            $status,
+            $wfo,
+            $phenomena,
+            $significance,
             $eventid
         ) = explode(".", $cvtec);
     } else {
         list(
-            $year, $wfo, $phenomena, $significance,
+            $year,
+            $wfo,
+            $phenomena,
+            $significance,
             $eventid
         ) = explode(".", $cvtec);
     }
     $eventid = intval($eventid);
     $year = intval($year);
-    if ($year < 1980 || $year > 2030){
+    if ($year < 1980 || $year > 2030) {
         die405();
     }
     $wfo = substr($wfo, 1, 3);
@@ -229,8 +237,11 @@ if (array_key_exists("vtec", $_GET)) {
 EOM;
     $stname = iem_pg_prepare($postgis, $sql);
     $rs = pg_execute($postgis, $stname, array(
-        $wfo, $phenomena, $eventid,
-        $significance, $year,
+        $wfo,
+        $phenomena,
+        $eventid,
+        $significance,
+        $year,
     ));
     if ($rs === FALSE || pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
     $row = pg_fetch_assoc($rs, 0);
@@ -299,7 +310,7 @@ if (array_key_exists("pid", $_REQUEST)) {
 if (array_key_exists("bbox", $_GET)) {
     $sector = "custom";
     $bbox = explode(",", $_GET["bbox"]);
-    if (sizeof($bbox) != 4){
+    if (sizeof($bbox) != 4) {
         die405();
     }
     $sectors["custom"] = array("epsg" => 4326, "ext" => $bbox);
@@ -319,8 +330,10 @@ if ($sector == "wfo") {
         $sectors["wfo"] = array(
             "epsg" => 4326,
             "ext" => array(
-                $row["xmin"] - $buffer, $row["ymin"] - $buffer,
-                $row["xmax"] + $buffer, $row["ymax"] + $buffer
+                $row["xmin"] - $buffer,
+                $row["ymin"] - $buffer,
+                $row["xmax"] + $buffer,
+                $row["ymax"] + $buffer
             )
         );
     }
@@ -612,12 +625,16 @@ $watches->draw($map, $img);
 
 // Plot the warning explicitly
 if (!empty($_REQUEST["pid"])) {
+    $pid_literal = pg_escape_literal($postgis, $pid);
     $wc = new LayerObj($map);
     $wc->setConnectionType(MS_POSTGIS, "");
     $wc->connection = get_dbconn_str("postgis");
     $wc->status = MS_ON;
-    $sql = sprintf("geom from (select geom, product_id from sps "
-        . "WHERE product_id = '$pid') as foo using unique product_id using SRID=4326");
+    $sql = sprintf(
+        "geom from (select geom, product_id from sps "
+            . "WHERE product_id = %s) as foo using unique product_id using SRID=4326",
+        $pid_literal
+    );
     $wc->data = $sql;
     $wc->type = MS_LAYER_LINE;
     $wc->setProjection("init=epsg:4326");
