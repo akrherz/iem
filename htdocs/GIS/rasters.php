@@ -42,7 +42,7 @@ while ($row = pg_fetch_assoc($rs)) {
 /**
  * Convert RGB values to an HTML hex color string.
  *
- * @param int|array $r The red component (0-255) or an array of RGB values.
+ * @param int $r The red component (0-255) or an array of RGB values.
  * @param int $g The green component (0-255).
  * @param int $b The blue component (0-255).
  * @return string The HTML hex color string (e.g., "#ff0000").

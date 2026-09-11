@@ -92,7 +92,7 @@ if (strlen($station) > 0) {
     $ms = $addSelectAttributes($addFormSelectClass($ms), "smonth");
     $ds = $addSelectAttributes($addFormSelectClass($ds), "sday");
     $ds2 = $addSelectAttributes($addFormSelectClass($ds2), "days");
-    $nselect = networkSelect($network, $station, array(), "station", FALSE, "form-select");
+    $nselect = networkSelect($network, $station, array(), "station", FALSE, "form-select iemselect2");
     $nselect = $addSelectAttributes($nselect, "station");
 
     $c0 = iemdb('rwis');

@@ -16,7 +16,9 @@ $cities = $nt->table;
 
 $station = get_str404("station", "SKCI4");
 $dt = dt_from_cgi_ymd();
-
+if ($dt->format("Y") > 2019) {
+    $dt = new DateTimeImmutable("2019-12-01");
+}
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", $dt->format("Y_m"));
 $stname = iem_pg_prepare($dbconn, "SELECT * from $tbl

@@ -22,6 +22,8 @@ $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
 $dt = dt_from_cgi_ymd();
+// Ensure this is the first day of the month
+$dt = $dt->setDate($dt->format("Y"), $dt->format("m"), 1);
 $nextmonth = $dt->modify("+1 month");
 
 $myStations = $ISUAGcities;
