@@ -9,4 +9,5 @@ $year = get_int404('year', date("Y"));
 
 $uri = sprintf("/plotting/auto/plot/17/month:%s::year:%s::station:%s".
     "::network:%s::p:precip.png", $month, $year, $station, $network);
+http_response_code(301);
 header("Location: {$uri}");

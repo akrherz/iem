@@ -19,4 +19,5 @@ $url = sprintf(
     $year1, $year2, $month1, $month2, $day1, $day2, $hour1, $hour2,
     $model, $station,
 );
+http_response_code(301);
 header("Location: $url");

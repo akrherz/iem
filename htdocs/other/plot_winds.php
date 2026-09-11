@@ -6,15 +6,16 @@ require_once "../../include/jpgraph/jpgraph.php";
 require_once "../../include/jpgraph/jpgraph_line.php";
 require_once "../../include/jpgraph/jpgraph_date.php";
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 $station = substr(get_str404("station", "OT0002"), 0, 10);
 
-$myTime = mktime(0, 0, 0, $month, $day, $year);
+$myTime = intval($dt->format("U"));
 
-$dirRef = date("Y_m/d", $myTime);
-$titleDate = date("M d, Y", $myTime);
+$dirRef = $dt->format("Y_m/d");
+$titleDate = $dt->format("M d, Y");
 
 $db = iemdb("other");
 $stname = iem_pg_prepare(
@@ -24,7 +25,7 @@ $stname = iem_pg_prepare(
 $rs = pg_execute(
     $db,
     $stname,
-    array($station, date("Y-m-d", $myTime), date("Y-m-d", $myTime + 86400))
+    array($station, $dt->format("Y-m-d"), date("Y-m-d", $myTime + 86400))
 );
 
 $drct = array();

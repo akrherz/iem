@@ -9,19 +9,17 @@ require_once "../../include/jpgraph/jpgraph_date.php";
 $nt = new NetworkTable("OT");
 $cities = $nt->table;
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
 $station = substr(get_str404("station", "OT0002"), 0, 10);
 
-$myTime = mktime(0, 0, 0, $month, $day, $year);
-
-$dirRef = date("Y_m/d", $myTime);
-$titleDate = date("M d, Y", $myTime);
+$dirRef = $dt->format("Y_m/d");
+$titleDate = $dt->format("M d, Y");
 
 $db = iemdb("other");
-$stname = iem_pg_prepare($db, "SELECT * from t{$year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-$rs = pg_execute($db, $stname, array($station, date("Y-m-d", $myTime)));
+$stname = iem_pg_prepare($db, "SELECT * from t{$dt->format('Y')} "
+ ."WHERE station = $1 and valid >= $2 and "
+ ."valid < $2::date + '24 hours'::interval ORDER by valid ASC");
+$rs = pg_execute($db, $stname, array($station, $dt->format("Y-m-d")));
 
 $tmpf = array();
 $dwpf = array();
@@ -51,9 +49,7 @@ $graph->subtitle->Set($titleDate);
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.15, 0.11);
 
-//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-
-$graph->yaxis->SetTitle("Temperature [F]");
+$graph->yaxis->SetTitle("Temperature [°F]");
 
 $graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
 

@@ -1,13 +1,11 @@
 <?php
-$OL = "10.6.1";
+$OL = "10.10.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $network = get_str404("network", "KCCI");
 
-$year = get_int404("year", 2019);
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
 $station = get_str404('station', "");
 
 $t = new MyView();
@@ -26,16 +24,16 @@ EOM;
 $t->title = "SchoolNet One Minute Time Series";
 
 $nselect = networkSelect($network, $station);
-$ys = yearSelect(2002, $year, "year", '', 2019);
-$ms = monthSelect($month);
-$ds = daySelect($day);
+$ys = yearSelect(2002, $dt->format("Y"), "year", '', 2019);
+$ms = monthSelect($dt->format("m"));
+$ds = daySelect($dt->format("d"));
 
 $content = "";
 if (strlen($station) > 0) {
 
-    $content .= sprintf("<p><img src=\"1min_T.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
-    $content .= sprintf("<p><img src=\"1min_V.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
-    $content .= sprintf("<p><img src=\"1min_P.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+    $content .= sprintf("<p><img src=\"1min_T.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $dt->format("Y"), $dt->format("m"), $dt->format("d"));
+    $content .= sprintf("<p><img src=\"1min_V.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $dt->format("Y"), $dt->format("m"), $dt->format("d"));
+    $content .= sprintf("<p><img src=\"1min_P.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $dt->format("Y"), $dt->format("m"), $dt->format("d"));
 
     $content .= "<p><b>Note:</b> The wind speeds are indicated every minute by the red line.  The blue dots represent wind direction and are shown every 10 minutes.</p>";
 } else {

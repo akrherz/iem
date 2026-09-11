@@ -39,6 +39,12 @@ if ($opt == 1 && $state) {
     $title = "Entries for year: {$year}";
 }
 
+/**
+ * Write a table row for a given entry.
+ *
+ * @param array $entry The entry data containing date, N_val, N_names, X_val, and X_names.
+ * @return string The HTML table row for the entry.
+ */
 function write_entry($entry){
     return sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
         $entry["date"], $entry["N_val"],

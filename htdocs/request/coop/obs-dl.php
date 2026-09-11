@@ -8,4 +8,5 @@ $pos = strpos($uri, '?');
 if ($pos !== false) {
     $uri = substr($uri, $pos + 1);
 }
+http_response_code(301);
 header("Location: /cgi-bin/request/coopobs.py?$uri");

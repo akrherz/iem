@@ -6,7 +6,7 @@ require_once "../../include/forms.php";
 $iem = iemdb("iem");
 $mesosite = iemdb("mesosite");
 
-$network = substr(get_str404("network", "IA_ASOS"), 0, 20);
+$network = get_str404("network", "IA_ASOS", 20);
 $tstr = get_str404("ts", gmdate("YmdHi"));
 $ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 

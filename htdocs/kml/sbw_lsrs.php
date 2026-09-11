@@ -6,13 +6,13 @@ require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 
 $year = get_int404("year", 2006);
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,4) : "MPX";
+$wfo = get_str404("wfo", "MPX", 4);
 if (strlen($wfo) > 3){
     $wfo = substr($wfo, 1, 3);
 }
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
+$phenomena = get_str404("phenomena", "SV", 2);
+$significance = get_str404("significance", "W", 1);
 
 $stname = iem_pg_prepare($connect, "SELECT l.*, ST_askml(l.geom) as kml
            from sbw w, lsrs l
@@ -44,7 +44,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <color>$color</color>
       </PolyStyle>
     </Style>";
-for ($i=0;$row=pg_fetch_assoc($result);$i++)
+while ($row=pg_fetch_assoc($result))
 {
   $ts = strtotime( $row["valid"] );
   echo "<Placemark>

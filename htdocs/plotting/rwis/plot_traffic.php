@@ -80,7 +80,6 @@ $graph->img->SetMargin(40, 55, 105, 105);
 $graph->yaxis->SetTitle("Average Speed [mph]");
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 
-//$graph->xaxis->SetTitle("Time Period: " . date('Y-m-d h:i A', $times[0][0]) . " thru " . date('Y-m-d h:i A', max($times[0])));
 $graph->xaxis->SetTitleMargin(67);
 $graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");

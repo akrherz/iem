@@ -1,5 +1,5 @@
 <?php
-$OL = "10.6.1";
+$OL = "10.10.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
@@ -41,22 +41,39 @@ EOM;
 $t->title = "RWIS Timeseries Plots";
 
 $nselect = selectNetworkType("RWIS", $network);
+$addSelectAttributes = fn($select, $id) => str_replace(
+    "<select ",
+    "<select id=\"{$id}\" ",
+    str_replace('class="iemselect2"', 'class="form-select iemselect2"', $select),
+);
+$networkSelect = $addSelectAttributes($nselect, "network");
 
 $content = <<<EOM
-<ol class="breadcrumb">
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
     <li class="breadcrumb-item"><a href="/RWIS/">RWIS Homepage</a></li>
     <li class="breadcrumb-item active" aria-current="page">RWIS Temperature Time Series Plots</li>
 </ol>
+</nav>
 
-<form method="GET" action="sf_fe.php" name="sts">
-{$nselect}
-<input type="submit" value="Show State">
+<header class="mb-4">
+<h1 class="h3">RWIS Temperature Time Series Plots</h1>
+<p class="mb-0">Plot a time series from an Iowa RWIS site, with optional sensors and archive dates.</p>
+</header>
+
+<form method="GET" action="sf_fe.php" name="sts" class="card shadow-sm mb-4">
+<div class="card-body">
+<div class="row g-3 align-items-end">
+<div class="col-md-8">
+<label for="network" class="form-label">RWIS network</label>
+{$networkSelect}
+</div>
+<div class="col-md-4">
+<button type="submit" class="btn btn-primary">Show network</button>
+</div>
+</div>
+</div>
 </form>
-
-
-<p>This application plots a timeseries of data from an Iowa RWIS site 
-of your choice.  You can optionally select which variables to plot and
-for which time period in the archive.</p>
 
 <form method="GET" action="sf_fe.php" name="olselect">
 <input type="hidden" name="network" value="{$network}">
@@ -66,7 +83,17 @@ if (strlen($station) > 0) {
     $ms =  monthSelect($smonth, "smonth");
     $ds = daySelect($sday, "sday");
     $ds2 = daySelect($days, "days");
-    $nselect = networkSelect($network, $station);
+    $addFormSelectClass = fn($select) => str_replace(
+        "<select ",
+        '<select class="form-select" ',
+        $select,
+    );
+    $ys = $addSelectAttributes($addFormSelectClass($ys), "syear");
+    $ms = $addSelectAttributes($addFormSelectClass($ms), "smonth");
+    $ds = $addSelectAttributes($addFormSelectClass($ds), "sday");
+    $ds2 = $addSelectAttributes($addFormSelectClass($ds2), "days");
+    $nselect = networkSelect($network, $station, array(), "station", FALSE, "form-select iemselect2");
+    $nselect = $addSelectAttributes($nselect, "station");
 
     $c0 = iemdb('rwis');
     $stname = iem_pg_prepare($c0, "SELECT s.* from sensors s JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1");
@@ -84,72 +111,56 @@ if (strlen($station) > 0) {
     }
     $cgiStr = "&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
 
-    $table = "<table class=\"table table-bordered\">
-      <tr><th colspan=\"3\">Plot Options</th></tr>
-      <tr><td><b>Restrict Plot:</b>
-      <br><input type=\"checkbox\" name=\"limit\" value=\"yes\" ";
-    if (isset($_GET["limit"])) $table .= "CHECKED";
-    $table .= ">Temps between 25-35
-    </td><td><b>Pavement Sensors:</b><br>\n";
-    if (strlen($ns0) > 0) {
-        $table .= "<input type=\"checkbox\" name=\"s0\" ";
-        if (isset($_GET["s0"])) {
-            $table .= "CHECKED";
-            $cgiStr .= "&s0=yes";
+    foreach (array("s0", "s1", "s2", "s3", "tmpf", "dwpf", "subc", "pcpn") as $name) {
+        if (isset($_GET[$name])) {
+            $cgiStr .= "&{$name}=yes";
         }
-        $table .= ">" . $ns0 . "\n";
     }
-    if (strlen($ns1) > 0) {
-        $table .= "<br><input type=\"checkbox\" name=\"s1\" ";
-        if (isset($_GET["s1"])) {
-            $table .= "CHECKED";
-            $cgiStr .= "&s1=yes";
-        }
-        $table .= ">" . $ns1 . "\n";
-    }
-    if (strlen($ns2) > 0) {
-        $table .= "<br><input type=\"checkbox\" name=\"s2\" ";
-        if (isset($_GET["s2"])) {
-            $table .= "CHECKED";
-            $cgiStr .= "&s2=yes";
-        }
-        $table .= ">" . $ns2 . "\n";
-    }
-    if (strlen($ns3) > 0) {
-        $table .= "<br><input type=\"checkbox\" name=\"s3\" ";
-        if (isset($_GET["s3"])) {
-            $table .= "CHECKED";
-            $cgiStr .= "&s3=yes";
-        }
-        $table .= ">" . $ns3 . "\n";
-    }
-    $table .= "</td><td><b>Other Sensors:</b><br>\n";
-    $table .= "<input type=\"checkbox\" name=\"tmpf\" ";
-    if (isset($_GET["tmpf"])) {
-        $table .= "CHECKED";
-        $cgiStr .= "&tmpf=yes";
-    }
-    $table .= ">Air Temperature\n";
-    $table .= "<br><input type=\"checkbox\" name=\"dwpf\" ";
-    if (isset($_GET["dwpf"])) {
-        $table .= "CHECKED";
-        $cgiStr .= "&dwpf=yes";
-    }
-    $table .= ">Dew Point\n";
-    $table .= "<br><input type=\"checkbox\" name=\"subc\" ";
-    if (isset($_GET["subc"])) {
-        $table .= "CHECKED";
-        $cgiStr .= "&subc=yes";
-    }
-    $table .= ">Sub Surface\n";
-
-    $table .= "<br><input type=\"checkbox\" name=\"pcpn\" ";
-    if (isset($_GET["pcpn"])) {
-        $table .= "CHECKED";
-        $cgiStr .= "&pcpn=yes";
-    }
-    $table .= ">Precipitation\n";
-    $table .= "</td></tr></table>";
+    $addCheckbox = fn($name, $label) => sprintf(
+        '<div class="form-check"><input class="form-check-input" type="checkbox" name="%s" id="%s" value="yes"%s><label class="form-check-label" for="%s">%s</label></div>',
+        $name,
+        $name,
+        isset($_GET[$name]) ? " checked" : "",
+        $name,
+        $label,
+    );
+    $limitCheckbox = $addCheckbox("limit", "Temperatures between 25-35");
+    $s0Checkbox = strlen($ns0) > 0 ? $addCheckbox("s0", $ns0) : "";
+    $s1Checkbox = strlen($ns1) > 0 ? $addCheckbox("s1", $ns1) : "";
+    $s2Checkbox = strlen($ns2) > 0 ? $addCheckbox("s2", $ns2) : "";
+    $s3Checkbox = strlen($ns3) > 0 ? $addCheckbox("s3", $ns3) : "";
+    $tmpfCheckbox = $addCheckbox("tmpf", "Air Temperature");
+    $dwpfCheckbox = $addCheckbox("dwpf", "Dew Point");
+    $subcCheckbox = $addCheckbox("subc", "Sub Surface");
+    $pcpnCheckbox = $addCheckbox("pcpn", "Precipitation");
+    $table = <<<EOM
+<div class="row g-3">
+<div class="col-md-4">
+<fieldset>
+<legend class="h6">Plot range</legend>
+{$limitCheckbox}
+</fieldset>
+</div>
+<div class="col-md-4">
+<fieldset>
+<legend class="h6">Pavement sensors</legend>
+{$s0Checkbox}
+{$s1Checkbox}
+{$s2Checkbox}
+{$s3Checkbox}
+</fieldset>
+</div>
+<div class="col-md-4">
+<fieldset>
+<legend class="h6">Other sensors</legend>
+{$tmpfCheckbox}
+{$dwpfCheckbox}
+{$subcCheckbox}
+{$pcpnCheckbox}
+</fieldset>
+</div>
+</div>
+EOM;
 
     if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
     $plots = "<p>No Soil/Traffic data for non-Iowa RWIS sites</p>";
@@ -157,42 +168,55 @@ if (strlen($station) > 0) {
         $plots = <<<EOM
 <br><img src="plot_traffic.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
 <br><img src="plot_soil.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
-EOM; 
+EOM;
     }
 
     $content .= <<<EOM
-<table class="table table-bordered">
-<thead>
-<tr><th>Select Station</th><th colspan="4">Timespan</th></tr>
-</thead>
-<tbody>
-<tr><td rowspan="2">
-  {$nselect}
-  <br />Or from <a href="sf_fe.php">a map</a></td>
+<div class="row g-4 mb-4">
+<div class="col-lg-5">
+<section class="card h-100" aria-labelledby="station-heading">
+<div class="card-header"><h2 id="station-heading" class="h5 mb-0">Station</h2></div>
+<div class="card-body">
+<label for="station" class="form-label">RWIS station</label>
+{$nselect}
+<div class="form-text">Or choose a station from the <a href="sf_fe.php">map</a>.</div>
+</div>
+</section>
+</div>
+<div class="col-lg-7">
+<section class="card h-100" aria-labelledby="timespan-heading">
+<div class="card-header"><h2 id="timespan-heading" class="h5 mb-0">Timespan</h2></div>
+<div class="card-body">
+<div class="row g-3">
+<div class="col-sm-6 col-lg-3"><label for="syear" class="form-label">Start year</label>{$ys}</div>
+<div class="col-sm-6 col-lg-3"><label for="smonth" class="form-label">Start month</label>{$ms}</div>
+<div class="col-sm-6 col-lg-3"><label for="sday" class="form-label">Start day</label>{$ds}</div>
+<div class="col-sm-6 col-lg-3"><label for="days" class="form-label">Number of days</label>{$ds2}</div>
+</div>
+</div>
+</section>
+</div>
+</div>
 
-   <td colspan="4">Select Date</td></tr>
-
-<tr>
-  <td>Start Year:<br />{$ys}</td>
-  <td>Start Month:<br />{$ms}</td>
-  <td>Start Day:<br />{$ds}</td>
-  <td>Number of days:<br />{$ds2}
-   </td>
- </tr>
-</tbody>
-</table>
-
-
+<section class="card mb-4" aria-labelledby="options-heading">
+<div class="card-header"><h2 id="options-heading" class="h5 mb-0">Plot options</h2></div>
+<div class="card-body">
 {$table}
+</div>
+</section>
 
-  <input type="submit" value="Generate Plot">
-  </form>
+<button type="submit" class="btn btn-primary mb-4">Generate plot</button>
+</form>
 
- <br><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img-fluid"/>
- $plots
+<section aria-labelledby="plots-heading">
+<h2 id="plots-heading" class="h5 mb-3">Generated plots</h2>
+<div class="mb-4"><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="RWIS temperature time series" class="img-fluid"/></div>
+{$plots}
+</section>
 EOM;
 } else {
     $nselect = networkSelect($network, "");
+        $nselect = $addSelectAttributes($nselect, "station");
     $content .= <<<EOM
 <input type="hidden" name="s0" value="yes" />
 <input type="hidden" name="s1" value="yes" />
@@ -200,10 +224,24 @@ EOM;
 <input type="hidden" name="s3" value="yes" />
 <input type="hidden" name="tmpf" value="yes" />
 <input type="hidden" name="dwpf" value="yes" />
-<table><tr><th>Select Station</th>
-<td>{$nselect}</td>
-<td><input type="submit" value="Make Plot"></tr></table>
-<div id="map" data-network="{$network}"></div>
+<div class="row g-4 mb-4">
+<div class="col-lg-5">
+<section class="card" aria-labelledby="station-heading">
+<div class="card-header"><h2 id="station-heading" class="h5 mb-0">Select station</h2></div>
+<div class="card-body">
+<label for="station" class="form-label">RWIS station</label>
+{$nselect}
+<button type="submit" class="btn btn-primary mt-3">Make plot</button>
+</div>
+</section>
+</div>
+<div class="col-lg-7">
+<section class="card" aria-labelledby="map-heading">
+<div class="card-header"><h2 id="map-heading" class="h5 mb-0">Select from map</h2></div>
+<div class="card-body"><div id="map" data-network="{$network}" class="border rounded" style="min-height: 24rem;"></div></div>
+</section>
+</div>
+</div>
 </form>
 
 

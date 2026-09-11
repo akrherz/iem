@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * Generate KML of the county intersection of a SBW
  */
 require_once "../../config/settings.inc.php";
@@ -8,24 +8,24 @@ require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 
 $year = get_int404("year", 2006);
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : "MPX";
+$wfo = get_str404("wfo", "MPX", 4);
 if (strlen($wfo) > 3) {
     $wfo = substr($wfo, 1, 3);
 }
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
+$phenomena = get_str404("phenomena", "SV", 2);
+$significance = get_str404("significance", "W", 1);
 
 $sql = <<<EOM
     WITH stormbased as (SELECT geom from sbw where vtec_year = $1 and
-        wfo = $2 
-        and eventid = $3 and significance = $4 
-        and phenomena = $5 and status = 'NEW'), 
-    countybased as (SELECT ST_Union(u.geom) as geom from 
-        warnings w JOIN ugcs u on (u.gid = w.gid) 
-        WHERE w.vtec_year = $1 and w.wfo = $2 and eventid = $3 and 
-        significance = $4 and phenomena = $5) 
-                
+        wfo = $2
+        and eventid = $3 and significance = $4
+        and phenomena = $5 and status = 'NEW'),
+    countybased as (SELECT ST_Union(u.geom) as geom from
+        warnings w JOIN ugcs u on (u.gid = w.gid)
+        WHERE w.vtec_year = $1 and w.wfo = $2 and eventid = $3 and
+        significance = $4 and phenomena = $5)
+
     SELECT ST_askml(geo) as kml, ST_Length(ST_transform(geo,9311)) as sz from
         (SELECT ST_SetSRID(ST_intersection(
           ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),

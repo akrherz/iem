@@ -6,14 +6,15 @@ require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
+$day = intval($dt->format("d"));
 
-$myTime = mktime(0, 0, 0, $month, $day, $year);
+$myTime = intval($dt->format("U"));
 
-$titleDate = date("M d, Y", $myTime);
-$dirRef = date("Y/m/d", $myTime);
+$titleDate = $dt->format("M d, Y");
+$dirRef = $dt->format("Y/m/d");
 
 $fp = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
 if (!file_exists($fp)) {
@@ -47,7 +48,7 @@ foreach ($new_contents as $line_num => $line) {
         $hh = 00;
     }
     $mm = substr($hhmm, 2, 3);
-    $timestamp = mktime($hh, $mm, 0, $month, $day, $year);
+    $timestamp = mktime($hh, $mm, 0, $dt->format("m"), $dt->format("d"), $dt->format("Y"));
     if ($oldformat) {
         $thisTmpc = $parts[10];
         $t1[] = round((9.0 / 5.0 * $thisTmpc) + 32.0, 2);
@@ -86,9 +87,9 @@ $graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetPos("min");
 
 $sensors = array("Out of Subfloor", "Inbound Top", "Outbound Top", "Room");
-if ($myTime > mktime(0, 0, 0, 7, 9, 2006))
+if ($dt->format("U") > mktime(0, 0, 0, 7, 9, 2006))
     $sensors = array("In Air Handler", "Out Air Handler", "Out Floor", "Room");
-if ($myTime > mktime(0, 0, 0, 2, 29, 2012))
+if ($dt->format("U") > mktime(0, 0, 0, 2, 29, 2012))
     $sensors = array("In Air Handler", "Out Air Handler", "Out Rack", "In Rack");
 
 // Create the linear plot

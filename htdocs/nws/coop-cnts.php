@@ -12,9 +12,9 @@ $dbconn = iemdb("iem");
 $wfo = get_str404('wfo', 'DMX');
 $by = get_str404('by', 'station');
 $tby = get_str404('tby', 'month');
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-
+$dt = dt_from_cgi_ymd();
+$year = intval($dt->format("Y"));
+$month = intval($dt->format("m"));
 $tlabel = "month: {$month}, year: {$year}";
 
 $tstring = sprintf("%s-%02d-01", $year, intval($month));
@@ -72,17 +72,45 @@ if ($tby == "month") {
     $args = array($wfo);
 }
 
-$bselect = make_select("by", $by, array("station" => "Station", "day" => "Day"));
-$tselect = make_select("tby", $tby, array("month" => "Month", "year" => "Year"));
+$bselect = make_select(
+    "by",
+    $by,
+    array("station" => "Station", "day" => "Day"),
+    "",
+    "form-select",
+    FALSE,
+    FALSE,
+    TRUE,
+    array("id" => "by"),
+);
+$tselect = make_select(
+    "tby",
+    $tby,
+    array("month" => "Month", "year" => "Year"),
+    "",
+    "form-select",
+    FALSE,
+    FALSE,
+    TRUE,
+    array("id" => "tby"),
+);
 
 $data = pg_execute($dbconn, $stname, $args);
 
 $t->title = "NWS COOP Obs per month per WFO";
 
-$wselect = networkSelect("WFO", $wfo, array(), "wfo");
+$wselect = networkSelect("WFO", $wfo, array(), "wfo", FALSE, "form-select");
+$addSelectAttributes = function ($select, $id) {
+    $select = str_replace('class="iemselect2"', 'class="form-select iemselect2"', $select);
+    if (strpos($select, 'class="') === false) {
+        $select = str_replace("<select ", '<select class="form-select" ', $select);
+    }
+    return str_replace("<select ", "<select id=\"{$id}\" ", $select);
+};
+$wselect = $addSelectAttributes($wselect, "wfo");
 
-$ys = yearSelect("2010", $year);
-$ms = monthSelect($month);
+$ys = $addSelectAttributes(yearSelect("2010", $year), "year");
+$ms = $addSelectAttributes(monthSelect($month), "month");
 
 $table = "";
 while ($row = pg_fetch_assoc($data)) {
@@ -114,45 +142,71 @@ while ($row = pg_fetch_assoc($data)) {
         );
     }
 }
-$header = "<th>NWSLI</th><th>Name</th>";
+$header = "<th scope=\"col\">NWSLI</th><th scope=\"col\">Name</th>";
 if ($by == "day") {
-    $header = "<th>Day</th>";
+    $header = "<th scope=\"col\">Day</th>";
 }
 
 $t->content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/nws/">NWS User Resources</a></li>
- <li class="active">NWS COOP Observation Counts by Month by WFO</li>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
+ <li class="breadcrumb-item"><a href="/nws/">NWS User Resources</a></li>
+ <li class="breadcrumb-item active" aria-current="page">NWS COOP Observation Counts by Month by WFO</li>
 </ol>
+</nav>
 
-<p>This application prints out a summary of COOP reports received by the IEM
+<header class="mb-4">
+<h1 class="h3">NWS COOP Observation Counts</h1>
+<p class="mb-0">This application prints out a summary of COOP reports received by the IEM
 on a per month and per WFO basis.  Errors do occur and perhaps the IEM's ingestor
-is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</a> of any errors you may suspect!
+is "missing" data from sites. Please <a href="/info/contacts.php">let us know</a> of any errors you may suspect.</p>
+</header>
 
-<form method="GET" name="changeme">
-<table class="table table-sm">
-<tr>
-<td><strong>Select WFO:</strong> {$wselect} </td>
-<td><strong>Aggregate By:</strong> {$bselect} </td>
-<td><strong>By Month or Year:</strong> {$tselect} </td>
-<td><strong>Select Year:</strong>{$ys}</td>
-<td><strong>Select Month:</strong>{$ms}</td>
-</tr>
-</table>
-<input type="submit" value="View Report" />
+<form method="GET" name="changeme" class="card shadow-sm mb-4">
+<div class="card-body">
+<div class="row g-3 align-items-end">
+<div class="col-md-6 col-lg-3">
+<label for="wfo" class="form-label">WFO</label>
+{$wselect}
+</div>
+<div class="col-sm-6 col-lg-2">
+<label for="by" class="form-label">Aggregate by</label>
+{$bselect}
+</div>
+<div class="col-sm-6 col-lg-2">
+<label for="tby" class="form-label">Time period</label>
+{$tselect}
+</div>
+<div class="col-sm-6 col-lg-2">
+<label for="year" class="form-label">Year</label>
+{$ys}
+</div>
+<div class="col-sm-6 col-lg-2">
+<label for="month" class="form-label">Month</label>
+{$ms}
+</div>
+<div class="col-lg-1">
+<button type="submit" class="btn btn-primary w-100">View</button>
+</div>
+</div>
+</div>
 </form>
 
-<h3>COOP Report for wfo: {$wfo}, {$tlabel}</h3>
+<section aria-labelledby="report-heading">
+<h2 id="report-heading" class="h5">COOP report for WFO {$wfo}, {$tlabel}</h2>
 
-<table class="table table-striped table-sm table-bordered">
+<div class="table-responsive">
+<table class="table table-striped table-sm table-bordered table-hover align-middle">
 <thead class="sticky">
-<tr>{$header}<th>Possible</th>
-<th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th>
-<th>Snowdepth Obs</th></tr>
+<tr>{$header}<th scope="col">Possible</th>
+<th scope="col">Precip Obs</th><th scope="col">Temperature Obs</th><th scope="col">Snowfall Obs</th>
+<th scope="col">Snowdepth Obs</th></tr>
 </thead>
 <tbody>
 {$table}
 </tbody>
 </table>
+</div>
+</section>
 EOM;
 $t->render('full.phtml');

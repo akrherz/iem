@@ -6,15 +6,12 @@ require_once "../../include/jpgraph/jpgraph.php";
 require_once "../../include/jpgraph/jpgraph_line.php";
 require_once "../../include/jpgraph/jpgraph_date.php";
 /* We need to get some CGI vars! */
-$year = get_str404("year", null);
-$month = get_str404("month", null);
-$day = get_str404("day", null);
+$dt = dt_from_cgi_ymd();
 $pvar = get_str404("pvar", null);
-if (is_null($year) || is_null($month) || is_null($day) || is_null($pvar)) {
+if (is_null($pvar)) {
     http_response_code(422);
-    die("Missing year, month, day, pvar");
+    die("Missing pvar");
 }
-$sts = mktime(0, 0, 0, $month, $day, $year);
 
 $vars = array();
 $pgconn = iemdb("other");
@@ -31,7 +28,7 @@ $stname = iem_pg_prepare($pgconn, "SELECT * from flux_data WHERE " .
 $stname2 = iem_pg_prepare($pgconn, "SELECT * from flux_meta WHERE " .
     "sts < $1 and ets > $1");
 
-$rs = pg_execute($pgconn, $stname, array(date('Y-m-d', $sts)));
+$rs = pg_execute($pgconn, $stname, array($dt->format("Y-m-d")));
 
 $data = array(
     "NSTL11" => array(),
@@ -65,13 +62,13 @@ $labels = array(
     "NSTL30FT" => "NSTL30FT",
     "NSTL110" => "NSTL110"
 );
-$rs = pg_execute($pgconn, $stname2, array(date('Y-m-d', $sts)));
+$rs = pg_execute($pgconn, $stname2, array($dt->format("Y-m-d")));
 while ($row = pg_fetch_assoc($rs)) {
     $st = $row["station"];
     $labels[$st] =  $row["surface"];
 }
 
-$ts_lbl = date("d M Y", $sts);
+$ts_lbl = $dt->format("d M Y");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640, 350);

@@ -14,29 +14,25 @@ include("../../../include/jpgraph/jpgraph_led.php");
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
-$station = array_key_exists("station", $_GET) ? $_GET["station"] : "SKCI4";
-$year = get_int404("year", 2018);
-$month = get_int404("month", 1);
-$day = get_int404("day", 1);
-$myTime = mktime(0, 0, 0, $month, $day, $year);
-$yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
-
-/* Dig in the archive for our data! */
+$station = get_str404("station", "SKCI4");
+$dt = dt_from_cgi_ymd();
+if ($dt->format("Y") > 2019) {
+    $dt = new DateTimeImmutable("2019-12-01");
+}
 $dbconn = iemdb("snet");
-$tbl = sprintf("t%s", date("Y_m", $myTime));
+$tbl = sprintf("t%s", $dt->format("Y_m"));
 $stname = iem_pg_prepare($dbconn, "SELECT * from $tbl
-                 WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-$rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
+                 WHERE station = $1 and valid >= $2 and valid < $2::date + '24 hours'::interval ORDER by valid ASC");
+$rs = pg_execute($dbconn, $stname, array($station, $dt->format("Y-m-d")));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();
     $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
     die();
 }
 
-$titleDate = date("M d, Y", $myTime);
+$titleDate = $dt->format("M d, Y");
 $cityname = $cities[$station]['name'];
 
-/* BEGIN GOOD WORK HERE */
 $times = array();
 $temps = array();
 $dewps = array();

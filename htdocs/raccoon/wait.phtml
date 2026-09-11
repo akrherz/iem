@@ -5,12 +5,13 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$jobid = isset($_REQUEST["jobid"]) ? xssafe($_REQUEST["jobid"]) : null;
+$jobid = get_str404("jobid", null);
 if (is_null($jobid)) {
     http_response_code(422);
     die("jobid required");
 }
 $status = "PROCESSING";
+$basefn = null;
 if ($jobid) {
     $mesosite = iemdb("mesosite");
     $stname = iem_pg_prepare($mesosite, "SELECT * from racoon_jobs where jobid = $1");
@@ -48,7 +49,7 @@ if ($status == "DONE!") {
 $t->content = <<<EOM
 <h3>IEM Raccoon</h3>
 
-<p>This page will refresh once per minute with the status of your request. It 
+<p>This page will refresh once per minute with the status of your request. It
 typically takes 1-3 minutes for the powerpoint to be generated!
 
 <p>Current status is: {$status}

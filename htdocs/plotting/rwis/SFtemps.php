@@ -11,10 +11,10 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 
 /** We need these vars to make this work */
-$subc = array_key_exists("subc", $_GET) ? $_GET["subc"] : "";
-$dwpf = array_key_exists("dwpf", $_GET) ? $_GET["dwpf"] : "";
-$tmpf = array_key_exists("tmpf", $_GET) ? $_GET["tmpf"] : "";
-$pcpn = array_key_exists("pcpn", $_GET) ? $_GET["pcpn"] : "";
+$subc = get_str404("subc", "");
+$dwpf = get_str404("dwpf", "");
+$tmpf = get_str404("tmpf", "");
+$pcpn = get_str404("pcpn", "");
 $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
@@ -75,6 +75,11 @@ $Adwpf = array();
 $freezing = array();
 $times = array();
 
+/**
+ * Checks if a value is valid for plotting
+ * @param string $v The value to check
+ * @return string The original value if valid, otherwise an empty string
+ */
 function checker($v)
 {
     if ($v == "") {
@@ -120,7 +125,6 @@ $graph->SetColor("lightyellow");
 if (max($pcpn) != "" && isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
 if (isset($limit))  $graph->SetScale("datlin", 25, 35);
 $graph->img->SetMargin(40, 55, 105, 115);
-//$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
 
 if (max($pcpn) != "" && isset($_GET["pcpn"])) {
     $graph->y2axis->SetTitle("Precipitation [inch]");

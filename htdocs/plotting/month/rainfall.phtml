@@ -1,5 +1,5 @@
 <?php
-$OL = "10.6.1";
+$OL = "10.10.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
@@ -24,48 +24,93 @@ $t->jsextra = <<<EOM
 EOM;
 
 $t->title = "Monthly Rainfall Traces";
+$addSelectAttributes = fn($select, $id) => str_replace(
+    "<select ",
+    "<select id=\"{$id}\" ",
+    str_replace('class="iemselect2"', 'class="form-select iemselect2"', $select),
+);
 
 $content = <<<EOM
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-3">
+<li class="breadcrumb-item"><a href="/plotting/">Plotting</a></li>
+<li class="breadcrumb-item active" aria-current="page">Monthly Rainfall Traces</li>
+</ol>
+</nav>
 
-<h3>Monthly Rainfall Traces</h3>
+<header class="mb-4">
+<h1 class="h3">Monthly Rainfall Traces</h1>
 
-<p>This application creates a plot of observed precipitation versus 
-climatology for a site of your choice in Iowa. 
+<p>This application creates a plot of observed precipitation versus
+climatology for a site of your choice in Iowa.</p>
+</header>
 EOM;
 if (strlen($station) > 0) {
-    $nselect = networkSelect($network, $station);
-    $yselect = yearSelect(2004, $year, "year");
-    $mselect = monthSelect($month);
+    $nselect = networkSelect($network, $station, array(), "station", FALSE, "form-select");
+    $nselect = $addSelectAttributes($nselect, "station");
+    $yselect = $addSelectAttributes(yearSelect(2004, $year, "year"), "year");
+    $mselect = $addSelectAttributes(monthSelect($month), "month");
     $content .= <<<EOM
-<form name="ds" action="rainfall.phtml" method="GET">
+<form name="ds" action="rainfall.phtml" method="GET" class="card shadow-sm mb-4">
+<div class="card-body">
 <input type="hidden" value="{$network}" name="network">
-<table cellspacing=2 border=1 cellpadding=2>
-<tr><th>Site ID:</th><th>Select Year:</th><th>Select Month:</th></tr>
-<tr><td>{$nselect}
-<a href="rainfall.phtml?network={$network}">Select from map</a></td>
-  <td>{$yselect}</td>
-    <td>{$mselect}</td></tr>
-</table>
-<input type="submit" value="Make Plot">
+<div class="row g-3 align-items-end">
+<div class="col-lg-5">
+<label for="station" class="form-label">Site</label>
+{$nselect}
+<div class="form-text"><a href="rainfall.phtml?network={$network}">Select from map</a></div>
+</div>
+<div class="col-sm-6 col-lg-3">
+<label for="year" class="form-label">Year</label>
+{$yselect}
+</div>
+<div class="col-sm-6 col-lg-2">
+<label for="month" class="form-label">Month</label>
+{$mselect}
+</div>
+<div class="col-lg-2">
+<button type="submit" class="btn btn-primary w-100">Make plot</button>
+</div>
+</div>
+</div>
 </form>
 
-<p><img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" alt="Time Series" />
+<section aria-labelledby="plot-heading">
+<h2 id="plot-heading" class="h5">Monthly precipitation</h2>
+<img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" alt="Monthly rainfall trace for site {$station}" class="img-fluid" />
+</section>
 EOM;
 } else {
-    $nselect = networkSelect($network, "");
+    $nselect = networkSelect($network, "", array(), "station", FALSE, "form-select");
+    $nselect = $addSelectAttributes($nselect, "station");
     $content .= <<<EOM
+<div class="mb-4">
+<div class="btn-group flex-wrap" role="group" aria-label="Rainfall network selection">
+<a class="btn btn-outline-primary" href="rainfall.phtml?network=IA_ASOS">Iowa ASOS</a>
+<a class="btn btn-outline-primary" href="rainfall.phtml?network=IA_COOP">Iowa NWS COOP</a>
+</div>
+</div>
 
-<br /><a href="rainfall.phtml?network=IA_ASOS">Iowa ASOS</a> &nbsp; 
-<a href="rainfall.phtml?network=AWOS">Iowa AWOS</a> &nbsp; 
-<a href="rainfall.phtml?network=IA_COOP">Iowa NWS COOP</a> &nbsp; 
-<a href="rainfall.phtml?network=KCCI">KCCI-TV SchoolNet</a> &nbsp; 
-
-<form name="olselect">
+<form name="olselect" action="rainfall.phtml" method="GET">
 <input type="hidden" value="{$network}" name="network">
-<table><tr><th>Select Station</th>
-<td>{$nselect}</td>
-<td><input type="submit" value="Make Plot"></tr></table>
-<div id="map" data-network="{$network}"></div>
+<div class="row g-4">
+<div class="col-lg-5">
+<section class="card" aria-labelledby="station-heading">
+<div class="card-header"><h2 id="station-heading" class="h5 mb-0">Select station</h2></div>
+<div class="card-body">
+<label for="station" class="form-label">Site</label>
+{$nselect}
+<button type="submit" class="btn btn-primary mt-3">Make plot</button>
+</div>
+</section>
+</div>
+<div class="col-lg-7">
+<section class="card" aria-labelledby="map-heading">
+<div class="card-header"><h2 id="map-heading" class="h5 mb-0">Select from map</h2></div>
+<div class="card-body"><div id="map" data-network="{$network}" class="border rounded" style="min-height: 24rem;"></div></div>
+</section>
+</div>
+</div>
 </form>
 EOM;
 }

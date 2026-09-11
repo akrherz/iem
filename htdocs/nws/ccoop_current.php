@@ -16,6 +16,12 @@ $sortcol = get_str404('sortcol', 'ts');
 $sortdir = get_str404('sortdir', 'desc');
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
+/**
+ * Format precipitation values for display.
+ *
+ * @param float $val The precipitation value.
+ * @return string Formatted precipitation value.
+ */
 function precip_formatter($val)
 {
     if ($val === '') return '';
@@ -24,6 +30,13 @@ function precip_formatter($val)
     return $val;
 }
 
+/**
+ * Generate an HTML table row for a given station's data.
+ *
+ * @param array $dict The station data.
+ * @param bool $oddrow Whether the row is an odd row (for styling).
+ * @return string The HTML table row.
+ */
 function make_row($dict, $oddrow)
 {
     $s = "<tr";
@@ -110,6 +123,15 @@ foreach ($db as $site => $value) {
     }
 }
 
+/**
+ * Get the URL for sorting a column.
+ *
+ * @param string $baseurl The base URL for the sort links.
+ * @param string $column The column to sort by.
+ * @param string $sortCol The current sort column.
+ * @param string $sortDir The current sort direction.
+ * @return string The URL for sorting the column.
+ */
 function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 {
     $newSort = ($sortDir == "asc") ? "desc" : "asc";

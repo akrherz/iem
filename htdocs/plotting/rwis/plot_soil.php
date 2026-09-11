@@ -61,8 +61,6 @@ $graph = new Graph(650, 550, "example1");
 $graph->SetScale("datlin");
 $graph->SetMarginColor("white");
 $graph->SetColor("lightyellow");
-//$graph->img->SetMargin(40,55,105,105);
-//$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
 
 $graph->title->Set($cities[$station]['name'] . " RWIS Soil Probe Data");
 $graph->subtitle->Set("Values at 15 different depths [inch] shown");
@@ -70,7 +68,6 @@ $graph->subtitle->Set("Values at 15 different depths [inch] shown");
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 
-//$graph->xaxis->SetTitle("Time Period:");
 $graph->xaxis->SetTitleMargin(67);
 $graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");
