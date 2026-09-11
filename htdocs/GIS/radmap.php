@@ -8,14 +8,18 @@ require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 
-$vtec_phenomena = $reference["vtec_phenomena"];
-$vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb("postgis");
 
 $plotmeta = array(
     "title" => array(),
     "subtitle" => ""
 );
+$sector_wfo = null;
+$wfo = null;
+$phenomena = null;
+$significance = null;
+$eventid = null;
+$year = null;
 
 /**
  * Draw a black bar at the top of the image
@@ -53,7 +57,7 @@ function draw_header($map, $img, $width, $height)
  */
 function get_goes_fn_and_time($ts, $product)
 {
-    $domain = Array("WV", "IR", "VIS");
+    $domain = array("WV", "IR", "VIS");
     if (!in_array($product, $domain)) {
         return array(NULL, NULL);
     }
@@ -164,7 +168,7 @@ if (gettype($layers) == "string") {
 }
 
 // Alias for visual plot of VTEC
-if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)){
+if (array_key_exists("visual", $_GET) && array_key_exists("wfo", $_GET)) {
     $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
@@ -187,18 +191,26 @@ if (array_key_exists("vtec", $_GET)) {
     $tokens = explode(".", $cvtec);
     if (sizeof($tokens) == 7) {
         list(
-            $year, $pclass, $status, $wfo, $phenomena, $significance,
+            $year,
+            $pclass,
+            $status,
+            $wfo,
+            $phenomena,
+            $significance,
             $eventid
         ) = explode(".", $cvtec);
     } else {
         list(
-            $year, $wfo, $phenomena, $significance,
+            $year,
+            $wfo,
+            $phenomena,
+            $significance,
             $eventid
         ) = explode(".", $cvtec);
     }
     $eventid = intval($eventid);
     $year = intval($year);
-    if ($year < 1980 || $year > 2030){
+    if ($year < 1980 || $year > 2030) {
         die405();
     }
     $wfo = substr($wfo, 1, 3);
@@ -225,8 +237,11 @@ if (array_key_exists("vtec", $_GET)) {
 EOM;
     $stname = iem_pg_prepare($postgis, $sql);
     $rs = pg_execute($postgis, $stname, array(
-        $wfo, $phenomena, $eventid,
-        $significance, $year,
+        $wfo,
+        $phenomena,
+        $eventid,
+        $significance,
+        $year,
     ));
     if ($rs === FALSE || pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
     $row = pg_fetch_assoc($rs, 0);
@@ -295,7 +310,7 @@ if (array_key_exists("pid", $_REQUEST)) {
 if (array_key_exists("bbox", $_GET)) {
     $sector = "custom";
     $bbox = explode(",", $_GET["bbox"]);
-    if (sizeof($bbox) != 4){
+    if (sizeof($bbox) != 4) {
         die405();
     }
     $sectors["custom"] = array("epsg" => 4326, "ext" => $bbox);
@@ -315,8 +330,10 @@ if ($sector == "wfo") {
         $sectors["wfo"] = array(
             "epsg" => 4326,
             "ext" => array(
-                $row["xmin"] - $buffer, $row["ymin"] - $buffer,
-                $row["xmax"] + $buffer, $row["ymax"] + $buffer
+                $row["xmin"] - $buffer,
+                $row["ymin"] - $buffer,
+                $row["xmax"] + $buffer,
+                $row["ymax"] + $buffer
             )
         );
     }
@@ -352,7 +369,10 @@ if ($mins > 0) {
     $radts->sub(new DateInterval("PT{$mins}M"));
 }
 
-/* Lets Plot stuff already! */
+// Ensure sector is a valid key at this point.
+if (!array_key_exists($sector, $sectors)) {
+    die405();
+}
 $mapFile = "../../data/gis/base" . $sectors[$sector]['epsg'] . ".map";
 $map = new mapObj($mapFile);
 $map->setSize($width, $height);
@@ -508,7 +528,7 @@ $states = $map->getLayerByName("states");
 $states->status = MS_ON;
 $states->draw($map, $img);
 
-/* All SBWs for a WFO */
+// All SBWs for a WFO
 if (in_array("allsbw", $layers) && array_key_exists("sector_wfo", $_REQUEST)) {
     $sbwh = $map->getLayerByName("allsbw");
     $sbwh->status =  MS_ON;
@@ -603,21 +623,25 @@ $sql = sprintf(
 $watches->data = $sql;
 $watches->draw($map, $img);
 
-/* Plot the warning explicitly */
-if (isset($_REQEST["pid"])) {
+// Plot the warning explicitly
+if (!empty($_REQUEST["pid"])) {
+    $pid_literal = pg_escape_literal($postgis, $pid);
     $wc = new LayerObj($map);
     $wc->setConnectionType(MS_POSTGIS, "");
     $wc->connection = get_dbconn_str("postgis");
     $wc->status = MS_ON;
-    $sql = sprintf("geom from (select geom, product_id from sps "
-        . "WHERE product_id = '$pid') as foo using unique product_id using SRID=4326");
+    $sql = sprintf(
+        "geom from (select geom, product_id from sps "
+            . "WHERE product_id = %s) as foo using unique product_id using SRID=4326",
+        $pid_literal
+    );
     $wc->data = $sql;
     $wc->type = MS_LAYER_LINE;
     $wc->setProjection("init=epsg:4326");
 
     $wcc0 = new ClassObj($wc);
     $wcc0->name = "Product";
-    $wcc0s0 = new StyleObj($wcc0, 'circle');
+    $wcc0s0 = new StyleObj($wcc0);
     $wcc0s0->color->setRGB(255, 0, 0);
     $wcc0s0->size = 3;
     $wc->draw($map, $img);
@@ -639,6 +663,10 @@ if (array_key_exists("vtec", $_REQUEST) && in_array("cbw", $layers)) {
     $wc->data = $sql;
     $wc->type = MS_LAYER_LINE;
     $wc->setProjection("init=epsg:4326");
+
+    $reference = get_reference();
+    $vtec_phenomena = $reference["vtec_phenomena"];
+    $vtec_significance = $reference["vtec_significance"];
 
     $wcc0 = new ClassObj($wc);
     $wcc0->name = $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance];

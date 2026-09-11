@@ -15,98 +15,98 @@ $ms2 = monthSelect(12, "month2");
 $ds2 = daySelect(31, "day2");
 $hs2 = gmtHourSelect(0, "hour2");
 
-$t->content = <<<EOM
-<ol class="breadcrumb">
-    <li><a href="/scan/">SCAN</a></li>
-    <li class="active">Download Data</li>
- </ol>
+$addFormSelectClass = fn($select) => str_replace(
+  "<select ",
+  '<select class="form-select" ',
+  $select,
+);
+$ys = $addFormSelectClass($ys);
+$ms = $addFormSelectClass($ms);
+$ds = $addFormSelectClass($ds);
+$hs = $addFormSelectClass($hs);
+$ys2 = $addFormSelectClass($ys2);
+$ms2 = $addFormSelectClass($ms2);
+$ds2 = $addFormSelectClass($ds2);
+$hs2 = $addFormSelectClass($hs2);
 
+$t->content = <<<EOM
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/scan/">SCAN</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Download Data</li>
+</ol>
+</nav>
+
+<header class="mb-4">
+<h1 class="h3">SCAN Data Download</h1>
 <p>Filling out this form will provide you with whatever archive data the
 IEM has from the SCAN network.  The archive has some holes in it.
-<a href="/cgi-bin/request/scan.py?help" class="btn btn-secondary">Backend documentation</a>
-exists for those that wish to script against this service.</p>
+<a href="/cgi-bin/request/scan.py?help" class="btn btn-outline-secondary btn-sm">Backend documentation</a>
+exists for those who wish to script against this service.</p>
+</header>
 
 <form method="GET" action="/cgi-bin/request/scan.py">
 <div class="form2url"></div>
-<div class="row">
-<div class="col-md-7">
-
+<div class="row g-4">
+<div class="col-lg-7">
+<section class="card h-100" aria-labelledby="station-heading">
+<div class="card-body">
+<h2 id="station-heading" class="h5">1. Select Station(s)</h2>
+<p class="text-muted small">Choose the SCAN stations to include in the download.</p>
 <div id="iemss" data-network="SCAN"></div>
 
-</div><div class="col-md-5">
-
-<p><h3>2. Select Start/End Time:</h3><br>
-<i>Times are in UTC.</i>
-<table>
-  <tr>
-    <td></td>
-    <th>Year</th><th>Month</th><th>Day</th><th>Hour</th>
-  </tr>
-
-  <tr>
-    <th>Start:</th>
-    <td>{$ys}</td>
-    <td>{$ms}</td>
-    <td>{$ds}</td>
-    <td>{$hs}
-    </td>
-  </tr>
-
-  <tr>
-    <th>End:</th>
-    <td>{$ys2}</td>
-    <td>
-     {$ms2}
-    </td>
-    <td>
-     {$ds2}
-    </td>
-    <td>
-     {$hs2}
-    </td>
-  </tr>
+<h2 class="h5 mt-4">2. Select Start/End Time</h2>
+<p class="text-muted small">Times are in UTC.</p>
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+<thead><tr><th scope="col"></th><th scope="col">Year</th><th scope="col">Month</th><th scope="col">Day</th><th scope="col">Hour</th></tr></thead>
+<tbody>
+<tr><th scope="row">Start</th><td>{$ys}</td><td>{$ms}</td><td>{$ds}</td><td>{$hs}</td></tr>
+<tr><th scope="row">End</th><td>{$ys2}</td><td>{$ms2}</td><td>{$ds2}</td><td>{$hs2}</td></tr>
+</tbody>
 </table>
+</div>
+</div>
+</section>
+</div>
 
-<p><h3>3. Select Variables:</h3><br>
-<select size=5 name="vars" MULTIPLE>
-  <option value="tmpf">Air Temperature
-  <option value="dwpf">Dew Point Temperature
-  <option value="sknt">Wind Speed [knots]
-  <option value="drct">Wind Direction
-  <option value="srad">Solar Radiation [Wm**-2]
-  <option value="pres">Pressure
-  <option value="phour">Hourly Precipitation
-  <option value="c1tmpf">2 inch Soil Temperature
-  <option value="c2tmpf">4 inch Soil Temperature
-  <option value="c3tmpf">8 inch Soil Temperature
-  <option value="c4tmpf">20 inch Soil Temperature
-  <option value="c5tmpf">40 inch Soil Temperature
-  <option value="c1smv">2 inch Volumetric Soil Moisture
-  <option value="c2smv">4 inch Volumetric Soil Moisture
-  <option value="c3smv">8 inch Volumetric Soil Moisture
-  <option value="c4smv">20 inch Volumetric Soil Moisture
-  <option value="c5smv">40 inch Volumetric Soil Moisture
+<div class="col-lg-5">
+<section class="card h-100" aria-labelledby="options-heading">
+<div class="card-body">
+<h2 id="options-heading" class="h5">3. Request Options</h2>
+<div class="mb-3">
+<label for="vars" class="form-label">Select variables</label>
+<select id="vars" size="7" name="vars" multiple class="form-select">
+  <option value="tmpf">Air Temperature</option>
+  <option value="dwpf">Dew Point Temperature</option>
+  <option value="sknt">Wind Speed [knots]</option>
+  <option value="drct">Wind Direction</option>
+  <option value="srad">Solar Radiation [Wm**-2]</option>
+  <option value="pres">Pressure</option>
+  <option value="phour">Hourly Precipitation</option>
+  <option value="c1tmpf">2 inch Soil Temperature</option>
+  <option value="c2tmpf">4 inch Soil Temperature</option>
+  <option value="c3tmpf">8 inch Soil Temperature</option>
+  <option value="c4tmpf">20 inch Soil Temperature</option>
+  <option value="c5tmpf">40 inch Soil Temperature</option>
+  <option value="c1smv">2 inch Volumetric Soil Moisture</option>
+  <option value="c2smv">4 inch Volumetric Soil Moisture</option>
+  <option value="c3smv">8 inch Volumetric Soil Moisture</option>
+  <option value="c4smv">20 inch Volumetric Soil Moisture</option>
+  <option value="c5smv">40 inch Volumetric Soil Moisture</option>
 </select>
+</div>
+<div class="mb-3"><label for="what" class="form-label">4. How to view?</label><select id="what" name="what" class="form-select"><option value="download">Download to Disk</option><option value="view">View online</option></select></div>
+<div class="mb-3"><label for="delim" class="form-label">5. Data delimitation</label><div class="form-text mb-2">How should the output values be separated?</div><select id="delim" name="delim" class="form-select"><option value="comma">Comma</option><option value="space">Space</option><option value="tab">Tab</option></select></div>
+</div>
+</section>
+</div>
+</div>
 
-<p><h3>4. How to view?</h3><br>
-<select name="what">
-  <option value="download">Download to Disk
-  <option value="view">View on-line
-</select>
-
-<p><h3>5. Data Delimitation:</h3><br>
-How shall the output values be seperated?
-<br><select name="delim">
-    <option value="comma">Comma</option>
-    <option value="space">Space</option>
-    <option value="tab">Tab</option>
-</select>
-
-<p><h3>Submit Form:</h3><br>
-<input type="submit" value="Process Data Request">
-<input type="reset">
-
-</div></div>
+<div class="d-flex gap-2 mt-4">
+<button type="submit" class="btn btn-primary">Process Data Request</button>
+<button type="reset" class="btn btn-outline-secondary">Reset</button>
+</div>
 
 </form>
 EOM;

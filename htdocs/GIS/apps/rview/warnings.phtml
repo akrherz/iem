@@ -9,6 +9,7 @@ require_once "../../../../include/myview.php";
 require_once "../../../../include/memcache.php";
 require_once "../../../../include/warnings_plot.php";
 $t = new MyView();
+$reference = get_reference();
 require_once "../../../../include/rview_lib.php";
 $baseuri = "warnings.phtml";
 putenv("TZ=UTC");

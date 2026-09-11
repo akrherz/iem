@@ -4,6 +4,7 @@ define("IEM_APPID", 85);
 require_once "../../include/myview.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
+$reference = get_reference();
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $wfo = substr(get_str404("wfo", 'DMX'), 0, 4);
@@ -20,7 +21,7 @@ if ($which == 'wfo') {
     $service = "";
     $uri = sprintf(
         "%s/json/vtec_events.py?wfo=%s&year=%s",
-        $INTERNAL_BASEURL,
+        IEMConfig::INTERNAL_BASEURL,
         $wfo,
         $year
     );
@@ -28,7 +29,7 @@ if ($which == 'wfo') {
     $service = "_bystate";
     $uri = sprintf(
         "%s/json/vtec_events_bystate.py?state=%s&year=%s",
-        $INTERNAL_BASEURL,
+        IEMConfig::INTERNAL_BASEURL,
         $state,
         $year
     );
@@ -40,8 +41,8 @@ if ($phenomena != "" && $pon) {
     $uri .= sprintf("&phenomena=%s", $phenomena);
 }
 $public_uri = str_replace(
-    $INTERNAL_BASEURL,
-    $EXTERNAL_BASEURL,
+    IEMConfig::INTERNAL_BASEURL,
+    IEMConfig::EXTERNAL_BASEURL,
     $uri
 );
 

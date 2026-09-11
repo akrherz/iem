@@ -8,6 +8,7 @@ require_once "../../include/mlib.php";
 
 $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
+$reference = get_reference();
 
 /* Figure out what our VTEC is! */
 $vtec = get_str404("vtec", "2008.KICT.SV.W.0345");
@@ -71,8 +72,8 @@ $buffer = 0.3;
 
 $xmax = 0;
 $ymax = 0;
+$ymin = 0;
 $xmin = 0;
-$xmax = 0;
 $gdimg_dest = null;
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($i > 8) {

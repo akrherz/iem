@@ -8,6 +8,7 @@ require_once "../../../include/reference.php";
 require_once "../../../include/forms.php";
 $connect = iemdb("postgis");
 pg_query($connect, "SET TIME ZONE 'UTC'");
+$reference = get_reference();
 
 $year = get_int404("year", 2008);
 $month = get_int404("month", 1);

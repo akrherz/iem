@@ -4,10 +4,17 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/mlib.php";
+$reference = get_reference();
 $vtec_action = $reference["vtec_action"];
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
+/**
+ * Format a date string into a human-readable format with UTC timezone.
+ *
+ * @param string|null $val The date string to format
+ * @return string Formatted date string or "not available" if null
+ */
 function nice_date($val)
 {
     if (is_null($val)) return "not available";
@@ -53,26 +60,25 @@ if ($has_error) {
     http_response_code(422);
     echo $error_message;
     exit;
-} else {
-    if (isset($_REQUEST["year1"])) {
-        $ts = mktime($_REQUEST["hour1"], $_REQUEST["minute1"], 0, $_REQUEST["month1"], $_REQUEST["day1"], $_REQUEST["year1"]);
-        $ts2 = mktime($_REQUEST["hour2"], $_REQUEST["minute2"], 0, $_REQUEST["month2"], $_REQUEST["day2"], $_REQUEST["year2"]);
-    } else {
-        $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("APIFAIL");
-        $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : die("APIFAIL");
-    }
-
-    $tsSQL = date("Y-m-d H:i:00+00", $ts);
-    $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
-
-    $result = pull_vtec_events_by_wfo_year(
-        $connect,
-        $mywfos,
-        $tsSQL,
-        $tsSQL2,
-        $_GET
-    );
 }
+if (isset($_REQUEST["year1"])) {
+    $ts = mktime($_REQUEST["hour1"], $_REQUEST["minute1"], 0, $_REQUEST["month1"], $_REQUEST["day1"], $_REQUEST["year1"]);
+    $ts2 = mktime($_REQUEST["hour2"], $_REQUEST["minute2"], 0, $_REQUEST["month2"], $_REQUEST["day2"], $_REQUEST["year2"]);
+} else {
+    $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("APIFAIL");
+    $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : die("APIFAIL");
+}
+
+$tsSQL = date("Y-m-d H:i:00+00", $ts);
+$tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
+
+$result = pull_vtec_events_by_wfo_year(
+    $connect,
+    $mywfos,
+    $tsSQL,
+    $tsSQL2,
+    $_GET
+);
 
 header('Content-disposition: attachment; filename=sbw_interval.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
@@ -108,7 +114,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 while ($row = pg_fetch_assoc($result)) {
     $uri = sprintf(
         "<a href=\"%s/vtec?year=%s&wfo=%s&phenomena=%s&significance=%s&eventid=%04d\">%s</a>",
-        $EXTERNAL_BASEURL,
+        IEMConfig::EXTERNAL_BASEURL,
         date('Y', strtotime($row["polygon_begin"])),
         rectify_wfo($row["wfo"]),
         $row["phenomena"],
@@ -141,6 +147,12 @@ while ($row = pg_fetch_assoc($result)) {
 echo "</Document>
 </kml>";
 
+/**
+ * Pull a list of WFOs that are located in the specified states.
+ *
+ * @param array $state_abbreviations List of state abbreviations to filter WFOs by
+ * @return array|null List of WFOs located in the specified states, or null if none found
+ */
 function pull_wfos_in_states($state_abbreviations)
 {
     $db = iemdb("mesosite");
@@ -183,6 +195,16 @@ function pull_wfos_in_states($state_abbreviations)
     return $wfos;
 }
 
+/**
+ * Pull VTEC events from the SBW table for the given WFOs and year range.
+ *
+ * @param PgSql\Connection $db Database connection
+ * @param array $wfos List of WFOs to filter
+ * @param string $tsSQL Start timestamp for filtering
+ * @param string $tsSQL2 End timestamp for filtering
+ * @param array $form Form data containing additional filters
+ * @return PgSql\Result Query result containing the VTEC events
+ */
 function pull_vtec_events_by_wfo_year(
     $db,
     $wfos,
