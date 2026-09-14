@@ -16,7 +16,7 @@ $stname = iem_pg_prepare(
     $dbconn,
     "SELECT c.*, t.id as station, t.name, " .
         "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on " .
-        "(c.iemid = t.iemid) WHERE t.network = $1"
+        "(c.iemid = t.iemid) WHERE t.network = $1 and c.valid > now() - interval '1 day'"
 );
 $sortcol = get_str404("sortcol", "station");
 $network = get_str404("network", "IA_ASOS", 10);
@@ -90,11 +90,10 @@ $now = new DateTime("now");
 $thisyear = $now->format("Y");
 foreach ($finalA as $key => $val) {
     $ts = new DateTime($val["uv"]);
-    $fmt = ($ts->format("Y") == $thisyear) ? "d G:i" : "Y M d G:i";
     $table .= '<tr ';
     if ($i) $table .= 'class="even"';
     $table .= '><td>' . $val["station"] . '</td><td>' . $val["name"] . '</td>
-  <td>' . $ts->format($fmt) . 'Z</td>
+  <td>' . $ts->format("d G:i") . 'Z</td>
   <td id="divider">' . pp($val["tmpf"], 0) . '</td>' .
         vp($val["tmpf_qc_av"], 1) .
         vp($val["tmpf_qc_sc"], 1) .
