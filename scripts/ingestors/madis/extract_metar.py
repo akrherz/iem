@@ -1,6 +1,6 @@
 """Extract MADIS METAR information.
 
-called from RUN_20MIN.sh
+called from RUN_20AFTER.sh
 """
 
 import os
@@ -55,22 +55,23 @@ def process_metars(metars):
     collective = f"000 \r\r\nSAUS99 KISU {utc():%d%H%M}\r\r\nMETAR\r\r\n"
     collective += "\r\r\n".join(metars)
     collective += "\r\r\n\003"
-    # Send this to metar_parser.py
     cmd = [
-        "python",
-        "/home/meteor_ldm/pyWWA/parsers/metar_parser.py",
+        "pywwa-parse-metar",
         "-x",
         "-l",
     ]
     with Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE) as proc:
-        proc.communicate(collective.encode("utf-8"))
+        stdout, stderr = proc.communicate(collective.encode("utf-8"))
+        LOG.info("pywwa-parse-metar stdout: %s", stdout.decode("utf-8"))
+        LOG.info("pywwa-parse-metar stderr: %s", stderr.decode("utf-8"))
 
 
 def main():
     """Go Main Go."""
-    # Find most recent two files
+    # Processing this in near real time is probably most useful for older
+    # timestamps so to get more data, so start at two hours ago
     fns = []
-    for offset in range(5):
+    for offset in range(2, 5):
         now = utc() - timedelta(hours=offset)
         for j in range(300, -1, -1):
             fn = f"/mesonet/data/madis/metar/{now:%Y%m%d_%H}00_{j}.nc"
@@ -87,8 +88,9 @@ def main():
             process_metars(metars)
 
 
-def workflow(fn):
+def workflow(fn: str):
     """Run for given netcdf filename."""
+    LOG.info("Processing %s", fn)
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
     # Load up current data for ASOS networks
