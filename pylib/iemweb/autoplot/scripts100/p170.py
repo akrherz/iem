@@ -9,6 +9,8 @@ the years and there is some non-standard nomenclature used by some sites.
 The thunder (TS) reports are delineated into three categories here to
 hopefully allow more accurate statistics.
 <ul>
+    <li><strong>All Rain Reports (RA)</strong> incldues any mention of
+    <code>RA</code> in any present weather code</li>
     <li><strong>All Thunder Reports (TS)</strong> includes any
     <code>TS</code> mention in any present weather code</li>
     <li><strong>Thunder in Vicinity (VCTS)</strong> includes any
@@ -30,6 +32,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 PDICT = {
+    "RA": "All Rain Reports (RA)",
     "TS": "All Thunder Reports (TS)",
     "VCTS": "Thunder in Vicinity (VCTS)",
     "1": "Thunder Reports (excluding VCTS)",
