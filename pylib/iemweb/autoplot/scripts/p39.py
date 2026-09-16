@@ -1,7 +1,9 @@
 """
 This plot compares the month to date average
-temperature of this month against any previous month of your choice.
-The plot then contains this month's to date average temperature along
+temperature or precipitation
+of this month against any previous month of your choice.
+The plot then contains this month's to date average temperature
+or precipitation along
 with the scenarios of the remaining days for this month from each of
 the past years.  These scenarios provide a good approximation of what is
 possible for the remainder of the month.
@@ -20,8 +22,12 @@ from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "manual": "Select comparison month manually",
-    "high": "Based on effective date, find warmest same month on record",
-    "low": "Based on effective date, find coldest same month on record",
+    "high": "Based on effective date, find maximum record for same month",
+    "low": "Based on effective date, find minimum record for same month",
+}
+VDICT = {
+    "avg_temp": "Average Temperature",
+    "total_precip": "Total Precipitation",
 }
 
 
@@ -32,6 +38,13 @@ def get_description():
     lastmonth = (today.replace(day=1)) - timedelta(days=25)
     desc["arguments"] = [
         ARG_STATION,
+        {
+            "type": "select",
+            "options": VDICT,
+            "name": "var",
+            "label": "Variable to Plot",
+            "default": "avg_temp",
+        },
         {
             "type": "select",
             "name": "compare",
@@ -75,13 +88,15 @@ def compute_compare_month(ctx: dict, cursor):
     res = cursor.execute(
         sql_helper(
             """
-        select year, avg((high+low)/2) from alldata
+        select year, avg((high+low)/2) as avg_temp,
+        sum(precip) as total_precip from alldata
         where station = :station and month = :month and year != :year
         and high is not null and low is not null
         GROUP by year
-        ORDER by avg {mydir} LIMIT 1
+        ORDER by {varname} {mydir} LIMIT 1
         """,
             mydir="desc" if compare == "high" else "asc",
+            varname=ctx["var"],
         ),
         {
             "station": station,
@@ -110,24 +125,27 @@ def plotter(ctx: dict, conn: Connection | None = None):
     # beat month
     res = conn.execute(
         sql_helper(
-            "SELECT extract(day from day), (high+low)/2. as t from "
-            "alldata WHERE station = :station and year = :year and "
-            "month = :month ORDER by day ASC"
+            """
+    SELECT extract(day from day), (high+low)/2. as t, precip as p from
+    alldata WHERE station = :station and year = :year and
+    month = :month ORDER by day ASC"""
         ),
         {"station": station, "year": year, "month": month},
     )
     if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
-    prevmonth = [float(row["t"]) for row in res.mappings()]
+    col = "t" if ctx["var"] == "avg_temp" else "p"
+    prevmonth = [float(row[col]) for row in res.mappings()]
 
     # build history
     res = conn.execute(
         sql_helper(
-            "SELECT year, day, (high+low)/2. as t from alldata "
-            "WHERE station = :station and month = :month and "
-            "extract(day from day) <= :days "
-            "and day < :ets ORDER by day ASC"
+            """
+    SELECT year, day, (high+low)/2. as t, precip as p from alldata
+    WHERE station = :station and month = :month and
+    extract(day from day) <= :days
+    and day < :ets ORDER by day ASC"""
         ),
         {
             "station": station,
@@ -143,7 +161,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
             data = (
                 np.ma.ones((effective_date.year - row["year"] + 1, days)) * -99
             )
-        data[row["year"] - baseyear, row["day"].day - 1] = row["t"]
+        data[row["year"] - baseyear, row["day"].day - 1] = row[col]
     # Do we have data for the effective_date ?
     pos = (
         effective_date.day
@@ -156,9 +174,10 @@ def plotter(ctx: dict, conn: Connection | None = None):
     data.mask = data < -98
     avgs = np.ma.zeros(np.shape(data))
     prevavg = []
+    func = np.nanmean if ctx["var"] == "avg_temp" else np.nansum
     for i in range(days):
-        avgs[:, i] = np.nanmean(data[:, : i + 1], 1)
-        prevavg.append(np.nanmean(prevmonth[: i + 1]))
+        avgs[:, i] = func(data[:, : i + 1], 1)
+        prevavg.append(func(prevmonth[: i + 1]))
     avgs.mask = data.mask
     # duplicate the last day for each year, if the value is missing
     for yr in range(np.shape(data)[0] - 1):
@@ -192,6 +211,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     lv = avgs[-1, pos - 1]
     if np.ma.is_masked(lv):
         lv = avgs[-1, pos - 2]
+    units = "°F" if ctx["var"] == "avg_temp" else "in"
     ax.plot(
         np.arange(1, pos + 1),
         avgs[-1, :pos],
@@ -200,7 +220,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         color="brown",
         label=(
             f"{calendar.month_abbr[effective_date.month]} "
-            f"{effective_date:%Y}, {lv:.2f}°F"
+            f"{effective_date:%Y}, {lv:.2f}{units}"
         ),
     )
     # For historical, we can additionally plot the month values
@@ -213,11 +233,12 @@ def plotter(ctx: dict, conn: Connection | None = None):
             color="brown",
             linestyle="-.",
             zorder=2,
-            label="%s %s Final, %.2f°F"
+            label="%s %s Final, %.2f%s"
             % (
                 calendar.month_abbr[effective_date.month],
                 effective_date.year,
                 avgs[-1, -1],
+                units,
             ),
         )
     ax.plot(
@@ -228,13 +249,12 @@ def plotter(ctx: dict, conn: Connection | None = None):
         zorder=3,
         label=(
             f"{calendar.month_abbr[oldmonth.month]} {oldmonth.year}, "
-            f"{prevavg[-1]:.2f}"
-            "°F"
+            f"{prevavg[-1]:.2f}{units}"
         ),
     )
 
     ax.set_xlim(1, days)
-    ax.set_ylabel("Month to Date Average Temp °F")
+    ax.set_ylabel(f"Month to Date {VDICT[ctx['var']]}{units}")
     ax.set_xlabel("Day of Month")
     ax.grid(True)
     ax.legend(loc="best", fontsize=10)
