@@ -13,6 +13,7 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2026-09-16: The ``FLW`` pil was added to the ``WAR`` alias collective.
 - 2026-08-07: Added `key_messages_afd`, which operates like the `aviation_afd`
   parameter, but returns the Key Messages section of an AFD product.
 - 2026-06-09: The `pil` needs to be alphanumeric characters (A-Z 0-9).
@@ -25,8 +26,6 @@ Changelog
   reached to return only the latest non-MADISHF METAR when requesting just
   one, but return anything available when requesting more than 1.  Will likely
   regret this decision as well.
-- 2026-03-09: The METAR service was updated to not consider the IEM generated
-  METARs based on the MADIS HF feed.
 
 Examples
 ~~~~~~~~
@@ -128,7 +127,7 @@ from sqlalchemy.sql.expression import TextClause
 from iemweb.util import get_ct
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{3,6}$", re.IGNORECASE)
-WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
+WARPIL = "FLS FFS AWW TOR SVR FFW FLW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
 KEY_MESSAGES_AFD = re.compile(
     r"^\.KEY\sMESSAGES[\s\.]", re.IGNORECASE | re.MULTILINE
