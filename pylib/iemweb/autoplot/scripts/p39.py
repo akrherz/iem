@@ -85,18 +85,24 @@ def compute_compare_month(ctx: dict, cursor):
         return year, month
     station = ctx["station"]
     effective_date = ctx["date"]
+    valid_condition = (
+        "high is not null and low is not null"
+        if compare == "high"
+        else "precip is not null"
+    )
     res = cursor.execute(
         sql_helper(
             """
         select year, avg((high+low)/2) as avg_temp,
         sum(precip) as total_precip from alldata
         where station = :station and month = :month and year != :year
-        and high is not null and low is not null
+        and {valid_condition}
         GROUP by year
         ORDER by {varname} {mydir} LIMIT 1
         """,
             mydir="desc" if compare == "high" else "asc",
             varname=ctx["var"],
+            valid_condition=valid_condition,
         ),
         {
             "station": station,
@@ -254,7 +260,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     )
 
     ax.set_xlim(1, days)
-    ax.set_ylabel(f"Month to Date {VDICT[ctx['var']]}{units}")
+    ax.set_ylabel(f"Month to Date {VDICT[ctx['var']]} {units}")
     ax.set_xlabel("Day of Month")
     ax.grid(True)
     ax.legend(loc="best", fontsize=10)
