@@ -117,17 +117,20 @@ def plotter(ctx: dict):
     )
 
     df["fall_length"] = pd.to_numeric(df["fall_length"])
-    fig = figure(apctx=ctx)
-    ax = fig.subplots(3, 1)
+    fig = figure(
+        title=(f"{df.index[0]:.0f}-{df.index[-1]:.0f} {ctx['_sname']}"),
+        subtitle="91 Day Average Temperatures",
+        apctx=ctx,
+    )
+    axheight = 0.22
+    ax = [
+        fig.add_axes((0.1, 0.68, 0.8, axheight)),
+        fig.add_axes((0.1, 0.38, 0.8, axheight)),
+        fig.add_axes((0.1, 0.08, 0.8, axheight)),
+    ]
 
     ax[0].plot(obs.index.values, obs["avgt"].values)
     ax[0].set_ylim(obs["avgt"].min() - 8, obs["avgt"].max() + 8)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax[0].set_title(
-        f"{ab.year}-{year + 3} {ctx['_sname']}\n91 Day Average Temperatures"
-    )
     ax[0].set_ylabel("Trailing 91 Day Avg T °F")
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
     ax[0].grid(True)
