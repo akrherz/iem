@@ -14,9 +14,7 @@ from typing import Annotated
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest, NoDataFound
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD,
     LATITUDE_FIELD,
@@ -25,6 +23,7 @@ from iemweb.fields import (
     MONTH_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):

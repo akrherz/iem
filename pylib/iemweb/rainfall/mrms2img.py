@@ -28,14 +28,13 @@ from osgeo import gdal, osr
 from pydantic import Field
 from pyiem.exceptions import NoDataFound
 from pyiem.util import archive_fetch, utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD,
     HOUR_FIELD,
     MINUTE_FIELD,
     MONTH_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 # Workaround future
 gdal.UseExceptions()

@@ -62,9 +62,8 @@ from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.web.fields import NETWORK_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import NETWORK_FIELD_OPTIONAL
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

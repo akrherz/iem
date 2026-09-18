@@ -33,9 +33,8 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.web.fields import DAY_OF_MONTH_FIELD_OPTIONAL, STATION_LIST_FIELD
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import DAY_OF_MONTH_FIELD_OPTIONAL, STATION_LIST_FIELD
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 

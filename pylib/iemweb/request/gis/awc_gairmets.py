@@ -29,9 +29,8 @@ import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import HOUR_FIELD, MINUTE_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import HOUR_FIELD, MINUTE_FIELD
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"

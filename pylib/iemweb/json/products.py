@@ -25,10 +25,10 @@ https://mesonet.agron.iastate.edu/json/products.py
 import json
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import json_response_dict
 
 

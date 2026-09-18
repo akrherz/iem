@@ -45,9 +45,9 @@ from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.util import utc
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import json_response_dict
 
 

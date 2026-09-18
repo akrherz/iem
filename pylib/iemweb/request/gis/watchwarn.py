@@ -104,13 +104,12 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.util import utc
+from pyiem.web.fields import VTEC_YEAR_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
 from sqlalchemy.engine import Connection
 from stream_zip import ZIP_32, stream_zip
-
-from iemweb.fields import VTEC_YEAR_FIELD_OPTIONAL
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

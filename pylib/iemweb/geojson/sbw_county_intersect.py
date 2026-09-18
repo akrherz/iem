@@ -27,9 +27,7 @@ https://mesonet.agron.iastate.edu/geojson/sbw_county_intersect.py\
 
 import geopandas as gpd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     VTEC_ETN_FIELD,
     VTEC_PH_FIELD,
@@ -37,6 +35,7 @@ from iemweb.fields import (
     VTEC_YEAR_FIELD,
     WFO3_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):

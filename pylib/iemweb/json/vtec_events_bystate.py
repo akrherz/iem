@@ -37,15 +37,15 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import ISO8601
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     STATE_FIELD,
     VTEC_PH_FIELD_OPTIONAL,
     VTEC_SIG_FIELD_OPTIONAL,
     VTEC_YEAR_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.mlib import rectify_wfo
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

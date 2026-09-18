@@ -55,9 +55,8 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
+from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

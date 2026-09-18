@@ -23,10 +23,10 @@ https://mesonet.agron.iastate.edu/geojson/networks.py
 import json
 
 from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import json_response_dict
 
 

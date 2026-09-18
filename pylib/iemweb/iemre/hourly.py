@@ -27,9 +27,8 @@ from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_domain, get_hourly_ncname, hourly_offset
 from pyiem.reference import ISO8601
 from pyiem.util import convert_value, ncopen, utc
+from pyiem.web.fields import LATITUDE_FIELD, LONGITUDE_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD, TZ_FIELD
 
 ISO = "%Y-%m-%dT%H:%MZ"
 

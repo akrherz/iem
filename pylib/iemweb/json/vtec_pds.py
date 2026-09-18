@@ -13,10 +13,10 @@ import json
 
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 

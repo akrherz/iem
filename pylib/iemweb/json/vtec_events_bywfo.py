@@ -35,15 +35,15 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     VTEC_PH_FIELD_OPTIONAL,
     VTEC_SIG_FIELD_OPTIONAL,
     VTEC_YEAR_FIELD,
     WFO3_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 

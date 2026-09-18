@@ -66,9 +66,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.util import convert_value
+from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 # Cull a fragmentation warning from pandas due to our hacky things
 warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)

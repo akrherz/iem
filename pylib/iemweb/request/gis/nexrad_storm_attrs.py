@@ -49,9 +49,8 @@ import shapefile
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import HOUR_FIELD_OPTIONAL, MINUTE_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import HOUR_FIELD_OPTIONAL, MINUTE_FIELD_OPTIONAL
 
 
 class Schema(CGIModel):

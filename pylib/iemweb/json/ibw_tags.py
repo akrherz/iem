@@ -38,9 +38,9 @@ from pydantic import Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
+from pyiem.web.fields import CALLBACK_FIELD, STATE_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, STATE_FIELD_OPTIONAL
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 
