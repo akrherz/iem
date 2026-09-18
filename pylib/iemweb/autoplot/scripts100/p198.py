@@ -56,6 +56,7 @@ PDICT3 = {
     "mlcin_jkg": "Mixed Layer (100hPa) CIN (J/kg)",
     "mucape_jkg": "Most Unstable CAPE (J/kg)",
     "mucin_jkg": "Most Unstable CIN (J/kg)",
+    "pwater_inch": "Precipitable Water (inch)",
     "pwater_mm": "Precipitable Water (mm)",
     "shear_sfc_1km_smps": "Shear 0-1km AGL Magnitude (m/s)",
     "shear_sfc_3km_smps": "Shear 0-3km AGL Magnitude (m/s)",
@@ -209,6 +210,9 @@ def plotter(ctx: dict):
                 },
             )
     else:
+        conv = {
+            "pwater_inch": "pwater_mm",
+        }
         leveltitle = ""
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
@@ -221,7 +225,7 @@ def plotter(ctx: dict):
                 {varname} is not null
             """,
                     yrcol=yrcol,
-                    varname=varname,
+                    varname=conv.get(varname, varname),
                     hrlimiter=hrlimiter,
                 ),
                 conn,
@@ -230,6 +234,8 @@ def plotter(ctx: dict):
                     "months": months,
                 },
             )
+        if varname in conv and not dfin.empty:
+            dfin[varname] = dfin[conv[varname]] / 25.4  # convert mm to inch
     df = compute(dfin, varname)
     if ctx["quorum"] == "yes":
         # need quorums
@@ -260,7 +266,7 @@ def plotter(ctx: dict):
             df[colname].min() - rng * 0.1, df[colname].max() + rng * 0.1
         )
     ax.axhline(avgv, color="k")
-    ax.text(df.index.values[-1] + 2, avgv, f"Avg:\n{avgv:.1f}")
+    ax.text(df.index.values[-1] + 2, avgv, f"Avg:\n{avgv:.2f}")
     ax.set_xlabel("Year")
     ax.set_ylabel(f"{PDICT4[agg]} {PDICT3[varname]}{leveltitle}")
     ax.grid(True)
