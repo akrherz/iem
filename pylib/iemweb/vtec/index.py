@@ -10,7 +10,7 @@ import os
 import re
 from typing import Annotated
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
@@ -20,10 +20,11 @@ from pyiem.web.fields import (
     VTEC_PH_FIELD,
     VTEC_SIG_FIELD,
     VTEC_YEAR_FIELD,
-    WFO3_FIELD,
 )
 from pyiem.webutil import CGIModel, error_log, iemapp
 from sqlalchemy.engine import Connection
+
+from iemweb.mlib import rectify_wfo
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_FORM = (
@@ -40,11 +41,24 @@ class Schema(CGIModel):
     vtec: Annotated[
         str | None, Field(description="VTEC String", pattern=VTEC_RE)
     ] = None
-    wfo: WFO3_FIELD = "DMX"
+    wfo: Annotated[
+        str,
+        Field(
+            description="WFO Identifier",
+            pattern=r"^[A-Z]{3,4}$",
+            max_length=4,
+        ),
+    ] = "DMX"
     eventid: VTEC_ETN_FIELD = 10
     phenomena: VTEC_PH_FIELD = "TO"
     significance: VTEC_SIG_FIELD = "W"
     year: VTEC_YEAR_FIELD = 2026
+
+    @field_validator("wfo", mode="before")
+    @classmethod
+    def rectify_wfo(cls, value: str) -> str:
+        """Ensure WFO is 4 characters."""
+        return rectify_wfo(value)
 
 
 @with_sqlalchemy_conn("postgis")
