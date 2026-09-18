@@ -35,10 +35,9 @@ from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.web.fields import NETWORK_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, iemapp
 from pyiem.windrose_utils import windrose
-
-from iemweb.fields import NETWORK_FIELD_OPTIONAL
 
 
 class Schema(CGIModel):

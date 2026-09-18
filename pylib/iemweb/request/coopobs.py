@@ -45,13 +45,12 @@ from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     NETWORK_FIELD,
     STATION_LIST_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):

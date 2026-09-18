@@ -74,11 +74,7 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import DateTime, String, bindparam
-from sqlalchemy.dialects.postgresql import ARRAY
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD,
     MINUTE_FIELD,
@@ -88,6 +84,9 @@ from iemweb.fields import (
     TZ_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from sqlalchemy import DateTime, String, bindparam
+from sqlalchemy.dialects.postgresql import ARRAY
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

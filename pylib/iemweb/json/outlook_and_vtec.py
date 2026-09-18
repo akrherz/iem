@@ -38,12 +38,12 @@ import pandas as pd
 from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import get_ps_string
-from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     OUTLOOK_DAY_FIELD,
     WFO3_FIELD,
 )
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
 from iemweb.util import json_response_dict
 
 

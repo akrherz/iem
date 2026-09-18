@@ -47,15 +47,14 @@ from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD,
     MINUTE_FIELD,
     MONTH_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"

@@ -46,10 +46,10 @@ from pydantic import Field
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct, json_response_dict
 
 

@@ -30,9 +30,8 @@ from zoneinfo import ZoneInfo
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import NETWORK_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import NETWORK_FIELD, TZ_FIELD
 
 
 class Schema(CGIModel):

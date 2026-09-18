@@ -8,16 +8,22 @@ app is found at `Github iemvtec repo <https://github.com/akrherz/iemvtec>`_.
 import json
 import os
 import re
+from typing import Annotated
 
 from pydantic import Field, field_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
+from pyiem.web.fields import (
+    VTEC_ETN_FIELD,
+    VTEC_PH_FIELD,
+    VTEC_SIG_FIELD,
+    VTEC_YEAR_FIELD,
+)
 from pyiem.webutil import CGIModel, error_log, iemapp
 from sqlalchemy.engine import Connection
 
-from iemweb.fields import VTEC_PH_FIELD, VTEC_SIG_FIELD, VTEC_YEAR_FIELD
 from iemweb.mlib import rectify_wfo
 
 # sadly, I have a lot of links in the wild without a status?
@@ -32,22 +38,21 @@ LEGACY_URL_RE = re.compile(f"/event/{VTEC_FORM}")
 class Schema(CGIModel):
     """See how we are called."""
 
-    vtec: str = Field(None, description="VTEC String", pattern=VTEC_RE)
-    wfo: str = Field(
-        "DMX",
-        description="WFO Identifier",
-        pattern=r"^[A-Z]{3,4}$",
-        max_length=4,
-    )
-    eventid: int = Field(
-        45,
-        description="Event Identifier",
-        ge=1,
-        le=9999,
-    )
+    vtec: Annotated[
+        str | None, Field(description="VTEC String", pattern=VTEC_RE)
+    ] = None
+    wfo: Annotated[
+        str,
+        Field(
+            description="WFO Identifier",
+            pattern=r"^[A-Z]{3,4}$",
+            max_length=4,
+        ),
+    ] = "DMX"
+    eventid: VTEC_ETN_FIELD = 10
     phenomena: VTEC_PH_FIELD = "TO"
     significance: VTEC_SIG_FIELD = "W"
-    year: VTEC_YEAR_FIELD = 2024
+    year: VTEC_YEAR_FIELD = 2026
 
     @field_validator("wfo", mode="before")
     @classmethod

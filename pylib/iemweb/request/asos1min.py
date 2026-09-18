@@ -24,9 +24,8 @@ from io import StringIO
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import STATION_LIST_FIELD, TZ_FIELD
 
 SAMPLING = {
     "1min": 1,

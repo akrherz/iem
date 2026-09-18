@@ -32,9 +32,8 @@ import requests
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import LOG, utc
+from pyiem.web.fields import CALLBACK_FIELD, WFO3_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import CALLBACK_FIELD, WFO3_FIELD
 
 
 class Schema(CGIModel):

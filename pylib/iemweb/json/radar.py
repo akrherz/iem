@@ -53,13 +53,13 @@ from typing import Annotated
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD_OPTIONAL,
     LONGITUDE_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.util import json_response_dict
 
 BASEDIR = "/mesonet/ARCHIVE/data"

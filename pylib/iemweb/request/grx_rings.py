@@ -30,9 +30,8 @@ from typing import Annotated
 
 from pydantic import Field
 from pyiem.util import html_escape
+from pyiem.web.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 
 
 class Schema(CGIModel):

@@ -39,9 +39,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
 from pyiem.util import utc
+from pyiem.web.fields import DAY_OF_MONTH_FIELD, NETWORK_FIELD
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-
-from iemweb.fields import DAY_OF_MONTH_FIELD, NETWORK_FIELD
 
 DEGF = units.degF
 DEGC = units.degC

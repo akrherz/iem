@@ -15,14 +15,13 @@ syear=2024&smonth=1&sday=1&eyear=2024&emonth=12&eday=31
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD,
     MONTH_FIELD,
     STATION_LIST_FIELD,
     YEAR_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):

@@ -19,9 +19,8 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
+from pyiem.web.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD, YEAR_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD, YEAR_FIELD
 
 nt = NetworkTable("IACLIMATE", only_online=False)
 

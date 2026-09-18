@@ -37,14 +37,14 @@ from pydantic import Field
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import hourly_offset
 from pyiem.util import mm2inch, ncopen
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD,
     LONGITUDE_FIELD,
     TZ_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.util import json_response_dict
 
 

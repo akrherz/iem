@@ -30,9 +30,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.htmlgen import make_select
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import archive_fetch, utc
+from pyiem.web.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD
 
 LOG = logging.getLogger(__name__)
 

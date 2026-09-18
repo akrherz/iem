@@ -27,10 +27,10 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
+from pyiem.web.fields import CALLBACK_FIELD, NETWORK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
-from iemweb.fields import CALLBACK_FIELD, NETWORK_FIELD
 from iemweb.util import json_response_dict
 
 

@@ -26,9 +26,9 @@ https://mesonet.agron.iastate.edu/json/state_ugc.py?state=LM
 import json
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.web.fields import CALLBACK_FIELD, STATE_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, STATE_FIELD
 from iemweb.util import json_response_dict
 
 

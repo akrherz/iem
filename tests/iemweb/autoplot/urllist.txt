@@ -423,6 +423,7 @@
 198/network:RAOB::station:_OAX::hour:12::month:all::agg:avg::var:tmpc::level:500::quorum:no::_r:t::dpi:100.png
 198/network:RAOB::station:_OAX::hour:ALL::month:mjj::agg:max::var:pwater_mm::level:500::quorum:no::_r:43::dpi:100.png
 198/network:RAOB::station:_OAX::hour:12::month:spring::agg:max::var:height::level:825::quorum:yes::_r:43::dpi:100.png
+198/network:RAOB::station:_OAX::hour:12::month:spring::agg:max::var:pwater_inch::level:825::quorum:yes::_r:43::dpi:100.png
 199/opt:1::date:2024-07-24::_r:t::dpi:100.png
 199/opt:2::date:2024-07-24::_r:t::dpi:100.png
 199/opt:3::date:2024-07-24::_r:t::dpi:100.png

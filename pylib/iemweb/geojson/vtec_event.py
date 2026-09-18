@@ -50,9 +50,7 @@ from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     VTEC_ETN_FIELD,
     VTEC_PH_FIELD,
@@ -60,6 +58,8 @@ from iemweb.fields import (
     VTEC_YEAR_FIELD,
     WFO3_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.util import json_response_dict
 
 

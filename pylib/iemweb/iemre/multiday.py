@@ -47,10 +47,10 @@ from pyiem.iemre import (
     get_gid,
 )
 from pyiem.util import convert_value, ncopen, utc
+from pyiem.web.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
-from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.json.climodat_dd import compute_taxis
 from iemweb.util import json_response_dict
 

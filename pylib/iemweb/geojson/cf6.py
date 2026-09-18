@@ -31,10 +31,10 @@ import simplejson as json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import get_ct, json_response_dict
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")

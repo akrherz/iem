@@ -25,13 +25,12 @@ from typing import Annotated
 from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     MONTH_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 
 class Schema(CGIModel):

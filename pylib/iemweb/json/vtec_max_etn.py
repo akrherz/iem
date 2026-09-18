@@ -26,9 +26,9 @@ from typing import Annotated
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_dbconn
+from pyiem.web.fields import CALLBACK_FIELD, VTEC_YEAR_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, VTEC_YEAR_FIELD
 from iemweb.util import get_ct, json_response_dict
 
 

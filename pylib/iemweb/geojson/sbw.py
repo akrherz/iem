@@ -56,9 +56,9 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
+from pyiem.web.fields import CALLBACK_FIELD, STATE_LIST_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, STATE_LIST_FIELD_OPTIONAL
 from iemweb.mlib import rectify_wfo, unrectify_wfo
 from iemweb.util import get_ct, json_response_dict
 

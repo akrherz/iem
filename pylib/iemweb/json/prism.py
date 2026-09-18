@@ -39,9 +39,9 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import daily_offset
 from pyiem.util import c2f, mm2inch, ncopen
+from pyiem.web.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD
 from iemweb.util import json_response_dict
 
 

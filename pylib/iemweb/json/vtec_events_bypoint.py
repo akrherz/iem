@@ -64,13 +64,13 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD,
     LONGITUDE_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.mlib import rectify_wfo
 from iemweb.util import json_response_dict
 

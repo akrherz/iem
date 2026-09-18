@@ -24,9 +24,7 @@ from io import BytesIO
 from osgeo import ogr
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD_OPTIONAL,
     MINUTE_FIELD_OPTIONAL,
@@ -34,6 +32,7 @@ from iemweb.fields import (
     VTEC_ETN_FIELD_OPTIONAL,
     YEAR_FIELD_OPTIONAL,
 )
+from pyiem.webutil import CGIModel, iemapp
 
 ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"

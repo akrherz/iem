@@ -73,9 +73,9 @@ from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
+from pyiem.web.fields import LATITUDE_FIELD_OPTIONAL, LONGITUDE_FIELD_OPTIONAL
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
-from iemweb.fields import LATITUDE_FIELD_OPTIONAL, LONGITUDE_FIELD_OPTIONAL
 from iemweb.mlib import unrectify_wfo
 
 fiona.supported_drivers["KML"] = "rw"

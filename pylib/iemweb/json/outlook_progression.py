@@ -53,13 +53,13 @@ import geopandas as gpd
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import (
+from pyiem.web.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD,
     LONGITUDE_FIELD,
 )
+from pyiem.webutil import CGIModel, iemapp
+
 from iemweb.util import get_ct, json_response_dict
 
 

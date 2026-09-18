@@ -27,9 +27,9 @@ import pandas as pd
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
+from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.fields import CALLBACK_FIELD
 from iemweb.util import json_response_dict
 
 

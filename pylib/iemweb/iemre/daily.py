@@ -39,9 +39,8 @@ from pyiem.iemre import (
     get_domain,
 )
 from pyiem.util import convert_value, ncopen
+from pyiem.web.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 from pyiem.webutil import CGIModel, iemapp
-
-from iemweb.fields import LATITUDE_FIELD, LONGITUDE_FIELD
 
 
 class Schema(CGIModel):
