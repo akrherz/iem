@@ -28,12 +28,13 @@ $by = get_str404("by", "cccc");
 $view = get_str404("view", 'grid');
 $order = get_str404("order", "asc");
 
-$year = get_int404("year", date("Y"), $minval=$ARCHIVE_BEGIN);
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
-$year2 = get_int404("year2", date("Y"), $minval=$ARCHIVE_BEGIN);
-$month2 = get_int404("month2", date("m"));
-$day2 = get_int404("day2", date("d"));
+$lastyear = intval(date("Y")) + 1;
+$year = get_int404("year", date("Y"), $ARCHIVE_BEGIN, $lastyear);
+$month = get_int404("month", date("m"), 1, 12);
+$day = get_int404("day", date("d"), 1, 31);
+$year2 = get_int404("year2", date("Y"), $ARCHIVE_BEGIN, $lastyear);
+$month2 = get_int404("month2", date("m"), 1, 12);
+$day2 = get_int404("day2", date("d"), 1, 31);
 
 $pilselect = make_select("pil", $pil, $reference['prodDefinitions'], $jscallback = "",
     $cssclass = "form-select iemselect2",
