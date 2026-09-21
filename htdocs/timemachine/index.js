@@ -1,5 +1,9 @@
 /* global moment */
-let dt = moment(); // Current application time
+// dt is always kept in UTC mode; product intervals, image templates, and the
+// URL timestamp are all UTC-based, so this is the single source of truth.
+// Use dt.clone().local() when a local-time representation is needed so this
+// shared object is never mutated into local mode.
+let dt = moment.utc(); // Current application time
 let irealtime = true; // Is our application in realtime mode or not
 let isUpdating = false; // Prevent recursive calls
 
@@ -19,13 +23,19 @@ function escapeHTML(val) {
               .replace(/'/g, '&#039;');
 }
 
+function isDailyMode(opt) {
+    // Daily+ interval products are a plain calendar date with no time-of-day
+    // or timezone concept, so they get their own URL/display handling.
+    return Boolean(opt) && parseInt(opt.getAttribute('data-interval'), 10) >= 1440;
+}
+
 function updateURL() {
     // Update the URL with the current product and timestamp
     const url = new URL(window.location.href);
     const opt = getSelectedOption();
     if (!opt) {return;}
     const pid = opt.value;
-    const stamp = dt.utc().format('YYYYMMDDHHmm');
+    const stamp = isDailyMode(opt) ? dt.format('YYYYMMDD') : dt.format('YYYYMMDDHHmm');
     url.searchParams.set('product', pid);
     url.searchParams.set('timestamp', irealtime ? "0" : stamp);
     window.history.replaceState({}, '', url);
@@ -35,9 +45,10 @@ function readURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const pid = urlParams.get('product');
     const stamp = urlParams.get('timestamp');
-    // parse the timestamp
+    // parse the timestamp, a bare 8-digit value is a calendar date
     if (stamp && stamp !== "0") {
-        dt = moment.utc(stamp, 'YYYYMMDDHHmm');
+        const fmt = stamp.length <= 8 ? 'YYYYMMDD' : 'YYYYMMDDHHmm';
+        dt = moment.utc(stamp, fmt);
         irealtime = false;
     }
     // Set the product
@@ -101,7 +112,7 @@ function updateTimeDisplay() {
     monthElem.textContent = dt.format('MMM');
     dayElem.textContent = dt.format('D');
 
-    const hour = dt.local().hour();
+    const hour = dt.hour();
     const period = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
     hourElem.textContent = `${hour12} ${period}`;
@@ -117,8 +128,8 @@ function updateTimeDisplay() {
 
 // Helper functions for update() complexity reduction
 function calculateTimeConstraints(opt) {
-    const ets = moment();
-    const sts = moment(opt.getAttribute('data-sts'));
+    const ets = moment.utc();
+    const sts = moment.utc(opt.getAttribute('data-sts'));
     const interval = parseInt(opt.getAttribute('data-interval'), 10);
     const avail_lag = parseInt(opt.getAttribute('data-avail_lag'), 10);
     const time_offset = parseInt(opt.getAttribute('data-time_offset'), 10);
@@ -233,12 +244,22 @@ function update() {
 
 function updateUITimestamp() {
     const opt = getSelectedOption();
-    if (parseInt(opt.getAttribute('data-interval'), 10) >= 1440) {
-        document.getElementById('utctime').textContent = dt.utc().format('YYYY-MM-DD');
-        document.getElementById('localtime').textContent = dt.local().format('MMM Do YYYY');
+    const dateCard = document.getElementById('datetime-card');
+    const localCard = document.getElementById('local-card');
+    const utcCard = document.getElementById('utc-card');
+    if (isDailyMode(opt)) {
+        // A calendar date only, timezone conversion does not apply
+        document.getElementById('datetime').textContent = dt.format('MMM Do YYYY');
+        dateCard.style.display = 'flex';
+        localCard.style.display = 'none';
+        utcCard.style.display = 'none';
     } else {
-        document.getElementById('utctime').textContent = dt.utc().format('YYYY-MM-DD HH:mm');
-        document.getElementById('localtime').textContent = dt.local().format('MMM Do YYYY h:mm a');
+        const localDt = dt.clone().local();
+        document.getElementById('utctime').textContent = dt.format('YYYY-MM-DD HH:mm');
+        document.getElementById('localtime').textContent = localDt.format('MMM Do YYYY h:mm a');
+        dateCard.style.display = 'none';
+        localCard.style.display = 'flex';
+        utcCard.style.display = 'flex';
     }
 }
 function getSelectedOption() {
@@ -297,7 +318,7 @@ function buildUI() {
 }
 function refresh() {
     if (irealtime) {
-        dt = moment();
+        dt = moment.utc();
     }
 }
 
@@ -345,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (realtimeButton) {
         realtimeButton.addEventListener('click', (event) => {
             event.preventDefault();
-            dt = moment(); // Reset to current time
+            dt = moment.utc(); // Reset to current time
             irealtime = true; // Enable realtime mode
             update(); // Update the UI
         });

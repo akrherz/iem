@@ -10,7 +10,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script type="text/javascript" src="index.js?v=2"></script>
+<script type="text/javascript" src="index.js?v=3"></script>
 EOM;
 
 $t->content = <<<EOM
@@ -22,12 +22,17 @@ navigate the archive.</p>
 <div class="row align-items-center" style="margin-bottom: 15px;">
     <div class="col-lg-4 col-md-6 order-md-2" style="margin-bottom: 10px;">
         <div class="time-display" style="flex-direction: column; gap: 10px;">
-            <div class="time-card" style="padding: 5px 10px;">
+            <div class="time-card" id="datetime-card" style="padding: 5px 10px; display: none;">
+                <div class="icon">📅</div>
+                <h4 style="font-size: 0.9rem; margin: 0 5px 0 0;">Date</h4>
+                <p id="datetime" class="time-text" style="font-size: 0.9rem;"></p>
+            </div>
+            <div class="time-card" id="local-card" style="padding: 5px 10px;">
                 <div class="icon">🕒</div>
                 <h4 style="font-size: 0.9rem; margin: 0 5px 0 0;">Local</h4>
                 <p id="localtime" class="time-text" style="font-size: 0.9rem;"></p>
             </div>
-            <div class="time-card" style="padding: 5px 10px;">
+            <div class="time-card" id="utc-card" style="padding: 5px 10px;">
                 <div class="icon">🌍</div>
                 <h4 style="font-size: 0.9rem; margin: 0 5px 0 0;">UTC</h4>
                 <p id="utctime" class="time-text" style="font-size: 0.9rem;"></p>
