@@ -179,7 +179,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     # Figure out the x-size of the storage array
     days = int((inclusive_ets - sts).days) + 1
     # If we have leap day involved, extend by one
-    if sts.month == 1 and days > 100:
+    if days == 365:
         days += 1
 
     # observed values, which can not include the scenario start date.
@@ -224,7 +224,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         if i == 0:
             baseyear = row["year"]
             data = (
-                np.ma.ones((scenario_start_date.year - row["year"] + 1, days))
+                np.ma.ones((scenario_start_date.year - row["year"], days))
                 * -99
             )
         offset = (row["day"] - sts.replace(year=row["year"])).days
@@ -282,7 +282,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
             observed_cum,
             zorder=3,
             lw=2,
-            color="brown",
+            color="blue",
             label=f"{sts:%Y}, {observed_cum[-1]:.2f}{units}",
         )
     comparison_cum = [
@@ -291,20 +291,22 @@ def plotter(ctx: dict, conn: Connection | None = None):
     complabel = (
         "" if ctx["which"] == "year" else f" {month_name[comparison_month]}"
     )
-    # This ensures the plot looks OK, alas, undefined param space if these
-    # do not align
-    compdays = min(len(comparison_cum), days)
-    ax.plot(
-        pd.date_range(start=sts, periods=compdays),
-        comparison_cum[:compdays],
-        lw=2,
-        color="brown",
-        linestyle="-.",
-        zorder=2,
-        label=(
-            f"{comparison_year}{complabel}, {comparison_cum[-1]:.2f}{units}"
-        ),
-    )
+    if comparison_cum:
+        # This ensures the plot looks OK, alas, undefined param space if these
+        # do not align
+        compdays = min(len(comparison_cum), days)
+        ax.plot(
+            pd.date_range(start=sts, periods=compdays),
+            comparison_cum[:compdays],
+            lw=2,
+            color="brown",
+            linestyle="-.",
+            zorder=2,
+            label=(
+                f"{comparison_year}{complabel}, "
+                f"{comparison_cum[-1]:.2f}{units}"
+            ),
+        )
 
     label_day_of_months = [1, 8, 15, 22, 29]
     if days > 45:
