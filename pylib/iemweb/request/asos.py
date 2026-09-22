@@ -405,9 +405,9 @@ def overloaded(environ: dict):
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 70:  # Cut back on logging
+    if val > 90:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/asos.py over cpu thres: {val}")
-    return val > 60
+    return val > 80
 
 
 def get_stations(form):
@@ -511,7 +511,7 @@ def preflight_checks(environ: dict, start_response: Callable) -> str | None:
     help=__doc__,
     parse_times=False,
     schema=MyModel,
-    ip_throttle_secs=0.5,
+    ip_throttle_secs=5.0,
 )
 def application(environ: dict, start_response: Callable):
     """Go main"""
