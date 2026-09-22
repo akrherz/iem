@@ -494,7 +494,7 @@ monthly_opts = [
     {"id": 47, "label": "Snowfall vs Precip Total for a Month"},
     {
         "id": 39,
-        "label": "Scenarios for this month besting some previous month",
+        "label": "Scenarios for month/year besting some previous month/year",
     },
     {
         "id": 138,
