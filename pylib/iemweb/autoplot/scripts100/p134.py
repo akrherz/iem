@@ -18,6 +18,7 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
+from matplotlib.offsetbox import AnchoredText
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -257,7 +258,7 @@ def plotter(ctx: dict):
         ts = datetime(2000, 1, 1) + timedelta(days=int(i))
         if ts.day == 1:
             xticks.append(i)
-            xticklabels.append(ts.strftime("%-d %b"))
+            xticklabels.append(ts.strftime("%b\n%-d"))
     ax.set_xticks(xticks)
     lax.set_xticks(xticks)
     lax.set_xticklabels(xticklabels)
@@ -280,7 +281,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.59, 0.5, 0.4, 0.4))
     ax.bar(df.index.values, series.values, color="blue", width=1)
     minval = series.min() - 5
-    if varname == "driest":
+    if varname in ["driest", "wettest"]:
         minval = 0
     ax.set_ylim(bottom=minval)
     ax.text(
@@ -292,6 +293,7 @@ def plotter(ctx: dict):
         bbox=bboxprops,
     )
     ax.grid(True)
+    ax.set_ylabel(units)
 
     # CDF
     ax = fig.add_axes((0.59, 0.1, 0.4, 0.3))
@@ -299,25 +301,24 @@ def plotter(ctx: dict):
     ptile = np.percentile(X2, [0, 5, 50, 95, 100])
     N = len(series.values)
     F2 = np.array(range(N)) / float(N) * 100.0
-    ax.plot(X2, 100.0 - F2)
+    ax.plot(X2, F2)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     mysort = df.sort_values(by=XREF[varname], ascending=True)
     info = (
         f"Min: {series.min():.2f} {mysort.index[0]:.0f}\n"
-        f"95th: {ptile[1]:.2f}\n"
+        f"5th: {ptile[1]:.2f}\n"
         f"Mean: {series.mean():.2f}\n"
         f"STD: {series.std():.2f}\n"
-        f"5th: {ptile[3]:.2f}\n"
+        f"95th: {ptile[3]:.2f}\n"
         f"Max: {series.max():.2f} {mysort.index[-1]:.0f}"
     )
-    ax.text(
-        0.75,
-        0.95,
+    at = AnchoredText(
         info,
-        transform=ax.transAxes,
-        va="top",
-        bbox=dict(facecolor="white", edgecolor="k"),
+        loc="lower right",
+        frameon=True,
     )
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax.add_artist(at)
     ax.text(
         0.03,
         1.01,
