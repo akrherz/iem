@@ -288,9 +288,9 @@ def gen_metars(obs: dict, filename, convids=False):
                 t_temptxt = f"T{t_tmpc}{t_dwpc} "
             tokens = (
                 f"{metarid} {ob['valid']:%d%H%M}Z {windtxt} {temptxt} "
-                f"RMK AO2 {t_temptxt}="
+                f"RMK AO2 {t_temptxt}"
             ).split()
-            fp.write(" ".join(tokens) + "\015\015\012")
+            fp.write(" ".join(tokens) + "=\015\015\012")
         fp.write("\015\015\012\003")
 
 
