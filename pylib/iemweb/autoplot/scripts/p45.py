@@ -2,16 +2,22 @@
 Computes the frequency of having an overcast sky reported.  There
 are a number of caveats to this plot as sensors and observing techniques
 have changed over the years!  The algorithm specifically looks for the
-OVC condition to be reported in the METAR observation.
+OVC condition to be reported in the METAR observation. For a month of a year
+to be considered within the plot, at least 80% of the available observations
+for that month need to have sky cover reported.
 """
 
 import calendar
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 PDICT = {
     "single": "Compute for single hour of the day",
@@ -78,7 +84,9 @@ def plotter(ctx: dict):
     SELECT extract(year from (valid at time zone :tzname))::int as year,
     extract(month from (valid at time zone :tzname))::int as month,
     SUM(case when (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC'
-        or skyc4 = 'OVC') then 1 else 0 end) as hits, count(*)
+        or skyc4 = 'OVC') then 1 else 0 end) as hits,
+    sum(case when skyc1 is not null then 1 else 0 end) as skyc1_count,
+    count(*)
     from alldata where station = :station and valid > '1951-01-01'
     {hr_limiter} and report_type = 3 GROUP by year, month order by year, month
         """,
@@ -94,28 +102,88 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    # Ensure we have a reasonable quorum
+    df = df[(df["skyc1_count"] / df["count"]) > 0.8]
     df["freq"] = df["hits"] / df["count"] * 100.0
     climo = df.groupby("month").sum()
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
-    title = (
-        f"({df['year'].min():.0f}-{datetime.now().year}) "
-        f"{ctx['_sname']}\n"
-        f"Frequency of Overcast Cloud Observation {tt}"
-    )
-    fig = figure(apctx=ctx, title=title)
-    ax = fig.subplots(2, 1)
+    title = f"({df['year'].min():.0f}-{datetime.now().year}) {ctx['_sname']}"
+    subtitle = f"Frequency of Overcast Cloud Observation {tt}"
+    fig = figure(apctx=ctx, title=title, subtitle=subtitle)
+    ax: list[Axes] = fig.subplots(2, 1)
+    # Compute the monthly min and max value along with the years those happened
+    maxes = df.loc[df.groupby("month")["freq"].idxmax()]
+    mins = df.loc[df.groupby("month")["freq"].idxmin()]
+    label_bbox = dict(facecolor="white", edgecolor="none", alpha=0.8, pad=1)
+    ax[0].grid(True, zorder=0)
+    # Thin whisker showing the full period-of-record range for the month
+    for month_ in climo.index.values:
+        lo = mins.loc[mins["month"] == month_, "freq"].iloc[0]
+        hi = maxes.loc[maxes["month"] == month_, "freq"].iloc[0]
+        ax[0].plot([month_, month_], [lo, hi], color="0.6", lw=1, zorder=2)
     ax[0].bar(
         climo.index.values - 0.2,
         climo["freq"].values,
-        fc="red",
-        ec="red",
+        fc="gray",
+        ec="k",
+        alpha=0.7,
         width=0.4,
         label="Climatology",
         align="center",
+        zorder=3,
     )
+    ax[0].scatter(
+        maxes["month"].to_numpy(),
+        maxes["freq"].to_numpy(),
+        marker="^",
+        s=40,
+        fc="green",
+        ec="k",
+        label="Period Max",
+        zorder=5,
+    )
+    for row in maxes.itertuples():
+        ax[0].text(
+            row.month,
+            row.freq + 2,
+            f"{row.freq:.0f}%\n{row.year:.0f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            zorder=6,
+            bbox=label_bbox,
+        )
+    ax[0].scatter(
+        mins["month"].to_numpy(),
+        mins["freq"].to_numpy(),
+        marker="v",
+        s=40,
+        fc="orangered",
+        ec="k",
+        label="Period Min",
+        zorder=5,
+    )
+    for row in mins.itertuples():
+        ax[0].text(
+            row.month,
+            row.freq - 2,
+            f"{row.freq:.0f}%\n{row.year:.0f}",
+            ha="center",
+            va="top",
+            fontsize=9,
+            zorder=6,
+            bbox=label_bbox,
+        )
     for i, row in climo.iterrows():
-        ax[0].text(i - 0.2, row["freq"] + 1, f"{row['freq']:.0f}", ha="center")
+        ax[0].text(
+            i - 0.2,
+            row["freq"] + 1,
+            f"{row['freq']:.0f}",
+            ha="center",
+            fontsize=10,
+            zorder=6,
+        )
 
     thisyear = df[df["year"] == year]
     if not thisyear.empty:
@@ -123,25 +191,33 @@ def plotter(ctx: dict):
             thisyear["month"].values + 0.2,
             thisyear["freq"].values,
             fc="blue",
-            ec="blue",
+            ec="k",
             width=0.4,
             label=str(year),
             align="center",
+            zorder=3,
         )
     for _, row in thisyear.iterrows():
         ax[0].text(
             row["month"] + 0.2,
-            row["freq"] + 1,
-            "%.0f" % (row["freq"],),
+            row["freq"] + 3,
+            f"{row['freq']:.0f}",
             ha="center",
+            fontsize=10,
+            zorder=6,
         )
     ax[0].set_ylim(0, 100)
     ax[0].set_xlim(0.5, 12.5)
-    ax[0].legend(ncol=2)
+    ax[0].legend(
+        ncol=4,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.05),
+        fontsize=9,
+        frameon=True,
+    )
     ax[0].set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax[0].set_xticks(range(1, 13))
-    ax[0].grid(True)
-    ax[0].set_xticklabels(calendar.month_abbr[1:])
+    ax[0].set_xticklabels([f"\n{v}" for v in calendar.month_abbr[1:]])
     ax[0].set_ylabel("Frequency [%]")
 
     # Plot second one now
