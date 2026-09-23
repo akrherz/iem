@@ -4,7 +4,9 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 import numpy as np
@@ -130,7 +132,7 @@ SURFACE_URI = (
 )
 
 
-def merge(atmos, surface):
+def merge(atmos, surface) -> dict:
     """Merge the surface data into the atmospheric one, return a dict.
 
     Args:
@@ -237,13 +239,13 @@ def METARwind(sknt, drct, gust):
     if str(d5)[-1] == "5":
         d5 -= 5
     s += "%03.0f%02.0f" % (d5, sknt)
-    if gust is not None:
+    if pd.notna(gust):
         s += "G%02.0f" % (gust,)
     s += "KT"
     return s
 
 
-def gen_metars(obs, filename, convids=False):
+def gen_metars(obs: dict, filename, convids=False):
     """Create METAR Data files
 
     Args:
@@ -273,29 +275,22 @@ def gen_metars(obs, filename, convids=False):
             temptxt = ""
             t_temptxt = ""
             windtxt = ""
-            if ob.get("sknt") is not None and ob.get("drct") is not None:
+            if pd.notna(ob.get("sknt")) and pd.notna(ob.get("drct")):
                 windtxt = METARwind(ob["sknt"], ob["drct"], ob.get("gust"))
-            if obs.get("tmpf") is not None and obs.get("dwpf") is not None:
+            if pd.notna(ob.get("tmpf")) and pd.notna(ob.get("dwpf")):
                 m_tmpc, t_tmpc = METARtemp(
                     convert_value(ob["tmpf"], "degF", "degC")
                 )
                 m_dwpc, t_dwpc = METARtemp(
                     convert_value(ob["dwpf"], "degF", "degC")
                 )
-                temptxt = "%s/%s" % (m_tmpc, m_dwpc)
-                t_temptxt = "T%s%s " % (t_tmpc, t_dwpc)
-            fp.write(
-                ("%s %s %s %s RMK AO2 %s%s\015\015\012")
-                % (
-                    metarid,
-                    ob["valid"].strftime("%d%H%MZ"),
-                    windtxt,
-                    temptxt,
-                    t_temptxt,
-                    "=",
-                )
-            )
-
+                temptxt = f"{m_tmpc}/{m_dwpc}"
+                t_temptxt = f"T{t_tmpc}{t_dwpc} "
+            tokens = (
+                f"{metarid} {ob['valid']:%d%H%M}Z {windtxt} {temptxt} "
+                f"RMK AO2 {t_temptxt}"
+            ).split()
+            fp.write(" ".join(tokens) + "=\015\015\012")
         fp.write("\015\015\012\003")
 
 
@@ -370,16 +365,16 @@ def fetch(uri: str) -> pd.DataFrame:
     return df
 
 
-def ldm_insert_metars(fn1, fn2):
+def ldm_insert_metars(fn: str):
     """Insert into LDM please"""
-    for fn in [fn1, fn2]:
-        proc = subprocess.Popen(
-            ["pqinsert", "-p", fn.replace("/tmp/", ""), fn],
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-        )
-        os.waitpid(proc.pid, 0)
-        os.unlink(fn)
+    cmd = ["pqinsert", "-p", Path(fn).name, fn]
+    LOG.info("Inserting %s into LDM", Path(fn).name)
+    proc = subprocess.Popen(
+        cmd,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
+    os.waitpid(proc.pid, 0)
 
 
 def main():
@@ -403,11 +398,13 @@ def main():
     obs = {k: v for k, v in obs.items() if v["online"]}
 
     ts = utc().strftime("%d%H%M")
-    fn1 = f"/tmp/IArwis{ts}.sao"
-    fn2 = f"/tmp/IA.rwis{ts}.sao"
-    gen_metars(obs, fn1, False)
-    gen_metars(obs, fn2, True)
-    ldm_insert_metars(fn1, fn2)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        fn1 = f"{tmpdir}/IArwis{ts}.sao"
+        fn2 = f"{tmpdir}/IA.rwis{ts}.sao"
+        gen_metars(obs, fn1, False)
+        gen_metars(obs, fn2, True)
+        ldm_insert_metars(fn1)
+        ldm_insert_metars(fn2)
 
     update_iemaccess(obs)
 

@@ -9,9 +9,9 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import pygrib
-from pyiem.util import archive_fetch, exponential_backoff, logger
+import requests
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 
@@ -37,20 +37,37 @@ def need_to_run(valid: datetime, hr) -> bool:
     return False
 
 
-def fetch(valid, hr):
+def fetch(valid: datetime, hr: int) -> None:
     """Fetch the data for this timestamp"""
-    uri = valid.strftime(
-        "https://noaa-nam-pds.s3.amazonaws.com/"
-        f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
+    baseurl_aws = f"https://noaa-nam-pds.s3.amazonaws.com/nam.{valid:%Y%m%d}/"
+    baseurl_nomads = (
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
+        f"nam.{valid:%Y%m%d}/"
     )
-    req = exponential_backoff(httpx.get, uri, timeout=30)
-    if req is None or req.status_code != 200:
-        LOG.warning("failed to get idx: %s", uri)
+    idxname = f"nam.t{valid:%H}z.conusnest.hiresf0{hr}.tm00.grib2.idx"
+    baseurl = baseurl_aws
+    for _ in range(2):
+        try:
+            resp = requests.get(baseurl + idxname, timeout=30)
+            if resp.status_code == 404:
+                baseurl = baseurl_nomads
+                resp = None
+                LOG.info("404 %s", baseurl + idxname)
+                continue
+            resp.raise_for_status()
+            break
+        except requests.exceptions.RequestException as exp:
+            LOG.info("failed to get idx: %s, exp: %s", baseurl + idxname, exp)
+            resp = None
+            baseurl = baseurl_nomads
+
+    if resp is None:
+        LOG.error("Failed to fetch idx for valid: %s hr: %s", valid, hr)
         return
 
     offsets = []
     neednext = False
-    for line in req.content.decode("utf-8").split("\n"):
+    for line in resp.content.decode("utf-8").split("\n"):
         tokens = line.split(":")
         if len(tokens) < 3:
             continue
@@ -79,17 +96,21 @@ def fetch(valid, hr):
     )
 
     if len(offsets) != 8:
-        LOG.info("warning, found %s gribs for %s[%s]", len(offsets), valid, hr)
+        LOG.info("Found %s gribs for %s[%s]", len(offsets), valid, hr)
+    remote_gribfn = baseurl + idxname[:-4]
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
-        req = exponential_backoff(
-            httpx.get, uri[:-4], headers=headers, timeout=30
-        )
-        if req is None:
-            LOG.info("failure for uri: %s", uri)
-            continue
+        try:
+            resp = requests.get(remote_gribfn, headers=headers, timeout=30)
+            if resp.status_code == 404:
+                LOG.info("404 %s %s", remote_gribfn, headers)
+                continue
+            resp.raise_for_status()
+        except requests.exceptions.RequestException as exp:
+            LOG.warning("failed to get data: %s, exp: %s", remote_gribfn, exp)
+            return
         with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
-            tmpfd.write(req.content)
+            tmpfd.write(resp.content)
         subprocess.call(["pqinsert", "-p", pqstr, tmpfd.name])
         os.unlink(tmpfd.name)
 
