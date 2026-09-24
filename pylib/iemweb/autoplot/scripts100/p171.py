@@ -251,16 +251,13 @@ def plotter(ctx: dict):
     )
     # Add sums to RHS
     sumdf = df2.sum(axis="columns").fillna(0)
-    for year, count in sumdf.items():
-        ax.text(12, year, f"{count:.0f}")
     # Add some horizontal lines
-    for i, year in enumerate(range(df["year"].min(), df["year"].max() + 1)):
+    for i, year in enumerate(range(df2.index[0], df2.index[-1] + 1)):
         ax.text(
             12 + 0.7, i + 0.5, f"{sumdf[year]:4.0f}", ha="right", va="center"
         )
-        if year % 5 != 0:
-            continue
-        ax.axhline(i, zorder=3, lw=1, color="gray")
+        if year % 5 == 0:
+            ax.axhline(i, zorder=3, lw=1, color="gray")
     ax.text(1.0, -0.02, "Total", transform=ax.transAxes)
     ax.text(
         0.0,
