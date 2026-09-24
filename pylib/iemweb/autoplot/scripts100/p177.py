@@ -35,10 +35,11 @@ PLOTTYPES = {
     "m": "Meteogram (Temperature, Dew Point, Wind)",
     "8": "Battery Voltage",
     "3": "Daily Max/Min 4 Inch Soil Temps",
+    "d": "Daily Max/Min Air Temps and Precipitation",
+    "5": "Daily Potential Evapotranspiration",
     "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
     "7": "Daily Soil Water + Change",
     "4": "Daily Solar Radiation",
-    "5": "Daily Potential Evapotranspiration",
     "encrh": "Enclosure Relative Humidity",
     "6": "Histogram of Volumetric Soil Moisture",
     "10": "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4)",
@@ -435,6 +436,70 @@ def make_daily_rainfall_soil_rh(ctx):
         )
         ax.set_ylim(0, 100)
         ax.set_ylabel("Average\nRelative Humidity [%]")
+    common(ax)
+
+    return fig, df
+
+
+def plot_daily_hilo_rainfall(ctx):
+    """Give them what they want."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            sql_helper("""
+            SELECT valid, rain_in_tot_qc, tair_c_max_qc, tair_c_min_qc
+            from sm_daily where station = :station and valid >= :sts
+            and valid <= :ets ORDER by valid ASC
+            """),
+            conn,
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"].strftime("%Y-%m-%d"),
+                "ets": ctx["ets"].strftime("%Y-%m-%d"),
+            },
+            index_col="valid",
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for Query")
+
+    df["high"] = c2f(df["tair_c_max_qc"].to_numpy())
+    df["low"] = c2f(df["tair_c_min_qc"].to_numpy())
+
+    title = f"ISUSM Station: {ctx['_sname']} Timeseries"
+    subtitle = "Daily High/Low Temperature and Precipitation"
+
+    fig, ax = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
+
+    def common(ax):
+        """do common things."""
+        ax.grid(True)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
+        interval = int(len(df.index) / 7.0 + 1)
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+
+    ax.plot(
+        df.index.values,
+        df["high"].to_numpy(),
+        color="red",
+    )
+    ax.plot(
+        df.index.values,
+        df["low"].to_numpy(),
+        color="blue",
+    )
+    ax.set_ylabel("Air Temperature [°F]")
+
+    ax2 = ax.twinx()
+    ax2.bar(
+        df.index.values,
+        df["rain_in_tot_qc"].to_numpy(),
+        color="green",
+        align="center",
+    )
+    ax2.set_ylim(bottom=0)
+    ax2.set_ylabel("Precipitation [inch]")
+
+    ax.set_zorder(ax2.get_zorder() + 1)
+
     common(ax)
 
     return fig, df
@@ -1281,6 +1346,8 @@ def plotter(ctx: dict):
         fig, df = plot4iemre(ctx, lon, lat)
     elif ctx["opt"] == "at":
         fig, df = plot_at(ctx)
+    elif ctx["opt"] == "d":
+        fig, df = plot_daily_hilo_rainfall(ctx)
     elif ctx["opt"] == "sm":
         fig, df = plot_sm(ctx)
     elif ctx["opt"] == "3":

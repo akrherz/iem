@@ -328,6 +328,7 @@
 165/w:air::sector:IA::var:high_above::popt:values::year:2020::threshold:32::p:50::sday:0824::syear:1893::eyear:2024::cmap:BrBG::_r:t::dpi:100.png
 165/w:air::sector:IA::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
 165/w:air::sector:AZ::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
+165/w:soil::sector:IA::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
 166/w:state::state:IA::network:WFO::cwa:GRB::fema:7::limit:year::_r:t::dpi:100.png
 166/w:cwa::state:IA::network:WFO::cwa:DMX::fema:7::limit:year::_r:t::dpi:100::_cb:1.png
 166/w:fema::state:IA::network:WFO::cwa:DMX::fema:7::limit:year::_r:t::dpi:100::_cb:1.png
@@ -385,6 +386,8 @@
 177/network:ISUSM::station:BOOI4::opt:sm::sts:2023-07-18%201000::ets:2023-07-25%201000::_r:t::dpi:100.png
 177/network:ISUSM::station:BOOI4::opt:at::sts:2023-07-18%201000::ets:2023-07-25%201000::_r:t::dpi:100.png
 177/network:ISUSM::station:BOOI4::opt:1::sts:2023-07-21%201600::ets:2023-07-22%201600::_r:t::dpi:100.png
+177/network:ISUSM::station:BOOI4::opt:d::sts:2023-07-21%201600::ets:2023-07-29%201600.png
+177/network:ISUSM::station:BOOI4::opt:d::sts:2024-07-21%201600::ets:2024-07-29%201600.png
 177/network:ISUSM::station:BOOI4::opt:4iemre::sts:2023-01-01%200000::ets:2023-01-02%200000.png
 178/t:state::network:WFO::wfo:DMX::state:IA::hour:1::ilabel:yes::ts:2018-01-29%201504::cmap:gist_rainbow.png
 180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
