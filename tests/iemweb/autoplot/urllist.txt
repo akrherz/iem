@@ -328,6 +328,7 @@
 165/w:air::sector:IA::var:high_above::popt:values::year:2020::threshold:32::p:50::sday:0824::syear:1893::eyear:2024::cmap:BrBG::_r:t::dpi:100.png
 165/w:air::sector:IA::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
 165/w:air::sector:AZ::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
+165/w:soil::sector:IA::var:spring_below::popt:contour::year:2024::threshold:32::sday:1026::cmap:BrBG::_r:t::dpi:100.png
 166/w:state::state:IA::network:WFO::cwa:GRB::fema:7::limit:year::_r:t::dpi:100.png
 166/w:cwa::state:IA::network:WFO::cwa:DMX::fema:7::limit:year::_r:t::dpi:100::_cb:1.png
 166/w:fema::state:IA::network:WFO::cwa:DMX::fema:7::limit:year::_r:t::dpi:100::_cb:1.png

@@ -6,12 +6,20 @@ Sadly, this app can only plot one state's worth of data at a time.  If a
 given year failed to meet the given threshold, it is not included on the
 plot nor with the computed percentiles.
 
-<br /><br />
+<p>
 <strong>Description of Observed Frequency:</strong> If requested, this
 app will generate a plot showing the date of a given percentile for the
 first/last temperature exceedance.  As a practical example of the 50th
 percentile, the date plotted means that 50% of the previous years on
 record experienced that temperature threshold by the given date.
+</p>
+
+<p>
+<strong>Update 24 Sep 2026</strong>: The soil temperature algorithm was updated
+to use the daily max and min values instead of the daily average to guide
+the plotted dates.  In this way, it behaves like how the air temperature
+algorithm works for this plot.
+</p>
 """
 
 from datetime import date, datetime, timedelta
@@ -31,7 +39,7 @@ PDICT2 = {
 }
 PDICT = {
     "air": "Air Temperature",
-    "soil": "0-10cm ERA5Land Avg Soil Temperature",
+    "soil": "0-10cm ERA5Land Soil Temperature",
 }
 
 MONTH_DOMAIN = {
@@ -40,9 +48,12 @@ MONTH_DOMAIN = {
     "high_above": list(range(1, 13)),
 }
 SQLOPT = {
-    "spring_below": " low < :t ",
-    "high_above": " high >= :t ",
-    "fall_below": " low < :t ",
+    "air_spring_below": " low < :t ",
+    "air_high_above": " high >= :t ",
+    "air_fall_below": " low < :t ",
+    "soil_spring_below": " era5land_soilt4_min < :t ",
+    "soil_high_above": " era5land_soilt4_max >= :t ",
+    "soil_fall_below": " era5land_soilt4_min < :t ",
 }
 YRGP = {
     "spring_below": "year",
@@ -163,9 +174,6 @@ def plotter(ctx: dict):
     nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", date.today().year)
-    sql = SQLOPT[varname]
-    if ctx["w"] == "soil":
-        sql = sql.replace("high", "soil").replace("low", "soil")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -173,7 +181,7 @@ def plotter(ctx: dict):
             -- create virtual table with winter_year included
             WITH events as (
                 SELECT station, day, year, high, low,
-                ((era5land_soilt4_max + era5land_soilt4_min) / 2.) as soil,
+                era5land_soilt4_max, era5land_soilt4_min,
                 case when month < 7 then year - 1 else year end as winter_year,
                 extract(doy from day) as doy
                 from {table} WHERE month = ANY(:months) and
@@ -192,7 +200,7 @@ def plotter(ctx: dict):
             """,
                 table=f"alldata_{sector.lower()}",
                 order=ORDER[varname],
-                ssql=sql,
+                ssql=SQLOPT[f"{ctx['w']}_{varname}"],
                 ygrp=YRGP[varname],
             ),
             conn,
