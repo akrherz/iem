@@ -38,6 +38,7 @@ from pyiem.nws import vtec
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+from iemweb.mlib import unrectify_wfo
 
 if TYPE_CHECKING:
     from matplotlib.text import Text
@@ -236,7 +237,7 @@ def plotter(ctx: dict):
 
     params = {"syear": ctx["syear"], "eyear": eyear}
     wfolimiter = " and wfo = :wfo "
-    params["wfo"] = station
+    params["wfo"] = unrectify_wfo(station)
     if opt == "state":
         wfolimiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
