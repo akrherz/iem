@@ -476,16 +476,6 @@ def plot_daily_hilo_rainfall(ctx):
         interval = int(len(df.index) / 7.0 + 1)
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
 
-    ax2 = ax.twinx()
-    ax2.bar(
-        df.index.values,
-        df["rain_in_tot_qc"].to_numpy(),
-        color="green",
-        align="center",
-    )
-    ax2.set_ylim(bottom=0)
-    ax2.set_ylabel("Precipitation [inch]")
-
     ax.plot(
         df.index.values,
         df["high"].to_numpy(),
@@ -497,6 +487,19 @@ def plot_daily_hilo_rainfall(ctx):
         color="blue",
     )
     ax.set_ylabel("Air Temperature [°F]")
+
+    ax2 = ax.twinx()
+    ax2.bar(
+        df.index.values,
+        df["rain_in_tot_qc"].to_numpy(),
+        color="green",
+        align="center",
+    )
+    ax2.set_ylim(bottom=0)
+    ax2.set_ylabel("Precipitation [inch]")
+
+    ax.set_zorder(ax2.get_zorder() + 1)
+
     common(ax)
 
     return fig, df
