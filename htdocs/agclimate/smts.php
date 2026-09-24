@@ -99,6 +99,10 @@ Many of the stations track the humidity within the logger enclosure to ensure
 that desiccant packs are working as intended.  Elevated humidity leads to
 damage of wiring.
 EOM;
+$desc["d"] = <<<EOM
+A timeseries plot showing daily high and low temperatures along with total
+precipitation .
+EOM;
 
 $thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar, '', 'form-select w-100');
