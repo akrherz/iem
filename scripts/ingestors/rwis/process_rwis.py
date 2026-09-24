@@ -8,9 +8,10 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import httpx
+import click
 import numpy as np
 import pandas as pd
+import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
@@ -271,7 +272,10 @@ def gen_metars(obs: dict, filename, convids=False):
                 LOG.info("nwsli: %s is unknown remote_id", sid)
                 continue
             if convids:
-                metarid = RWIS2METAR.get(f"{remoteid:02.0f}", "XXXX")
+                metarid = RWIS2METAR.get(f"{remoteid:02.0f}")
+                if metarid is None:
+                    LOG.info("remoteid: %s has no RWIS2METAR", remoteid)
+                    continue
             temptxt = ""
             t_temptxt = ""
             windtxt = ""
@@ -334,7 +338,7 @@ def process_features(features):
 
 def fetch(uri: str) -> pd.DataFrame:
     """Download the files we need"""
-    res = exponential_backoff(httpx.get, uri, timeout=30)
+    res = exponential_backoff(requests.get, uri, timeout=30)
     if res is None:
         LOG.info("failed to fetch %s", uri)
         sys.exit()
@@ -377,8 +381,35 @@ def ldm_insert_metars(fn: str):
     os.waitpid(proc.pid, 0)
 
 
-def main():
+def gen_gempak_station_file(fh):
+    """Generate a station file useful for GEMPAK."""
+    nt = NetworkTable("IA_RWIS", only_online=False)
+    for sid, props in nt.sts.items():
+        if props["remote_id"] is None:
+            LOG.info("Unknown remote_id for %s", sid)
+            continue
+        icao = RWIS2METAR.get(f"{props['remote_id']:02.0f}")
+        if icao is None:
+            LOG.info("RWIS2METAR has no entry for %s", sid)
+            continue
+        fh.write(
+            f"{icao:9s} "
+            f"{props['remote_id']:05.0f} "
+            f"{props['name']:32s} "
+            f"IA US {props['lat'] * 100:5.0f} {props['lon'] * 100:6.0f} "
+            f"{props['elevation']:5.0f}  0"
+            "\n"
+        )
+
+
+@click.command()
+@click.option("--gentable", is_flag=True, help="Generate GEMPAK station file")
+def main(gentable: bool):
     """Go Main Go"""
+    if gentable:
+        with open("IARWIS.tbl", "w") as fh:
+            gen_gempak_station_file(fh)
+        return
     atmos = fetch(ATMOS_URI)
     surface = fetch(SURFACE_URI)
     if atmos.empty or surface.empty:
