@@ -298,7 +298,7 @@ for this image by visiting that autoplot.</p>
 <p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
  class="img-fluid"></p>
 EOM;
-        } else if (substr($pil, 0, 3) == "SPS" && (int)date("Y", $basets) >= 2001) {
+        } else if (substr($pil, 0, 3) == "SPS" && (int)date("Y", $basets) >= 2001 && strpos($product_id, "WOCN") === False) {
             // Account for multi-segment SPS by counting $$ occurrences
             $segments = substr_count($row["data"], "$$");
             // Can only do one, so this is the best we can do
