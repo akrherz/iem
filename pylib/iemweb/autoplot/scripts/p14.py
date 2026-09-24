@@ -77,15 +77,15 @@ def plotter(ctx: dict, conn: Connection | None = None):
             bins.append(row["precip"])
             base += onefifth
 
+    # 1/5 may end up adding an extra bin due to truncation
+    bins = bins[:5]
+
     if len(bins) != 5:
-        raise NoDataFound("Not enough data found.")
+        raise NoDataFound("Failed to generate five bins")
 
     normal = total / float(endyear - minyear - 1)
-    # A rounding edge case
-    if last_precip != bins[-1]:
-        bins.append(last_precip)
-    if len(bins) != 6:
-        raise NoDataFound("Not enough data found.")
+    # Append the last precipitation value to close the bins
+    bins.append(last_precip)
 
     df = pd.DataFrame(
         {"bin": range(1, len(bins)), "lower": bins[0:-1], "upper": bins[1:]},
@@ -111,10 +111,10 @@ def plotter(ctx: dict, conn: Connection | None = None):
                    as tot2,
     sum(case when precip >= :b3 and precip < :b4 then precip else 0 end)
                    as tot3,
-    sum(case when precip >= :b4 and precip < :b5 then precip else 0 end)
+    sum(case when precip >= :b4 and precip <= :b5 then precip else 0 end)
                    as tot4
     from alldata where extract(doy from day) < :doy and
-    station = :station and precip > 0 and year > 1879 GROUP by year
+    station = :station and precip > 0.009 GROUP by year
     """),
         {
             "b0": bins[0],
@@ -142,11 +142,9 @@ def plotter(ctx: dict, conn: Connection | None = None):
     addl = ""
     if jdaylimit < 367:
         addl = f" thru {today:%-d %b}"
-    title = (
-        f"{ctx['_sname']} [{minyear}-{endyear - 1}]\n"
-        f"Daily Precipitation Contributions{addl}"
-    )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    title = f"{ctx['_sname']} [{minyear}-{endyear - 1}]"
+    subtitle = f"Daily Precipitation Contributions{addl}"
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
     bars = ax.bar(
         np.arange(5) - 0.2,
