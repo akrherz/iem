@@ -18,8 +18,8 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, set_property, utc
 from tqdm import tqdm
@@ -203,7 +203,7 @@ def dl_archive(df, dt):
                 uri = f"{baseuri}{page}/access/{dt:%Y/%m}/{fn}"
                 for _ in range(3):
                     try:
-                        resp = httpx.get(uri, timeout=60)
+                        resp = requests.get(uri, timeout=60)
                         if resp.status_code == 404:
                             LOG.info("dl_archive %s missing", uri)
                             resp = None
@@ -380,13 +380,13 @@ def dl_realtime(df, dt, mdt, page):
     tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
     if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
         uri = f"{HIDDENURL}/{tmpfn}"
-        with httpx.stream("GET", uri, timeout=60) as resp:
+        with requests.get(uri, stream=True, timeout=60) as resp:
             if resp.status_code != 200:
                 loglvl = LOG.info if dt.month != mdt.month else LOG.warning
                 loglvl("Got HTTP %s for %s", resp.status_code, uri)
                 sys.exit(2)
             with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
-                for chunk in resp.iter_bytes():
+                for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
                         fh.write(chunk)
     with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:

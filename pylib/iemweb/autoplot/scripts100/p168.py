@@ -34,8 +34,6 @@ def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """

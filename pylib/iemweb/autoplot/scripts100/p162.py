@@ -15,18 +15,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
+from iemweb.autoplot import ARG_ZSTATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
+        ARG_ZSTATION,
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc

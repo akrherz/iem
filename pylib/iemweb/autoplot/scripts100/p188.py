@@ -17,6 +17,8 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "spring": "Min Temp after first Spring Temp above",
     "fall": "Max Temp after first Fall Temp below",
@@ -28,13 +30,7 @@ def get_description():
     desc = {"data": True, "description": __doc__}
     today = date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             options=PDICT,

@@ -10,6 +10,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
 
 PDICT = {
@@ -24,13 +25,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="var",
@@ -109,7 +104,7 @@ def plotter(ctx: dict):
     ax.grid(True)
 
     # second plot
-    ax = fig.add_axes([current_pos.x0, 0.1, current_pos.width, 0.35])
+    ax = fig.add_axes((current_pos.x0, 0.1, current_pos.width, 0.35))
     ax.bar(df.index.values, df[varname] - df["avgval"])
     meanval = (df[varname] - df["avgval"]).mean()
     ax.axhline(meanval, color="green", lw=2, zorder=5)

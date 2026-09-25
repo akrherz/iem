@@ -9,7 +9,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
+import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
@@ -25,7 +25,7 @@ def do(ts):
     remotefn = ts.strftime("5kmffg_%Y%m%d%H.grb2")
     url = f"https://ftp-wpc.ncep.noaa.gov/workoff/ffg/{remotefn}"
     LOG.info("fetching %s", url)
-    req = exponential_backoff(httpx.get, url, timeout=20)
+    req = exponential_backoff(requests.get, url, timeout=20)
     if req is None or req.status_code != 200:
         LOG.warning("Download of %s failed", url)
         return

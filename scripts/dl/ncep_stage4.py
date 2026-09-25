@@ -12,7 +12,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 
-import httpx
+import requests
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -40,10 +40,10 @@ def download(now: datetime, offset: int):
             try:
                 url = f"https://nomads.ncep.noaa.gov/pub{upath}"
                 LOG.info("fetching %s", url)
-                response = httpx.get(url, timeout=60)
+                response = requests.get(url, timeout=60)
                 response.raise_for_status()
                 break
-            except httpx.HTTPError as exp:
+            except requests.RequestException as exp:
                 lvl = LOG.info if offset < 24 else LOG.warning
                 lvl("dl %s failed: %s", url, exp)
                 if offset == 0:

@@ -9,7 +9,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
+import requests
 from pyiem.database import get_dbconnc
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
@@ -31,7 +31,7 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     uri = f"{IEM}/GIS/radmap.php?sector={sectorName}&ts={tstamp}&{layers}"
     if bbox is not None:
         uri = f"{IEM}/GIS/radmap.php?bbox={bbox}&ts={tstamp}&{layers}"
-    req = exponential_backoff(httpx.get, uri, timeout=60)
+    req = exponential_backoff(requests.get, uri, timeout=60)
     if req is None or req.status_code != 200:
         LOG.warning("%s failure", uri)
         return

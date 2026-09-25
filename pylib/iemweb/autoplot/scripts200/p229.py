@@ -44,6 +44,7 @@ def get_description():
                 name="state",
                 default="IA",
                 label="Select CONUS-Only State:",
+                contiguous=True,
             ),
             dict(
                 type="datetime",

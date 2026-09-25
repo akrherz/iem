@@ -13,8 +13,8 @@ import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, logger
 
 LOG = logger()
@@ -77,11 +77,16 @@ def process_grib(grb):
     subprocess.call(cmd)
 
 
-def workflow(url):
+def workflow(url: str):
     """Fetch the URL, see what we have."""
     try:
-        with httpx.stream("GET", url) as resp, open("data.bin", "wb") as fh:
-            fh.writelines(resp.iter_bytes())
+        with (
+            requests.get(url, stream=True, timeout=60) as resp,
+            open("data.bin", "wb") as fh,
+        ):
+            for chunk in resp.iter_content(chunk_size=1024):
+                if chunk:
+                    fh.write(chunk)
     except Exception as exp:
         LOG.info("download_ndfd failed to fetch %s: %s", url, exp)
         return

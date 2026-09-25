@@ -15,6 +15,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
 
+from iemweb.autoplot import ARG_ZSTATION
+
 PDICT = {
     "svrtor": "Severe Thunderstorm + Tornado Warnings",
     "ffw": "Flash Flood Warnings",
@@ -25,13 +27,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station (not all have 1 minute, sorry):",
-        ),
+        ARG_ZSTATION,
         dict(
             type="select",
             options=PDICT,

@@ -109,6 +109,8 @@ def plotter(ctx: dict):
         "day >= '1900-01-01' ORDER by day ASC",
         (station,),
     )
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     highs = np.zeros((cursor.rowcount,), "f")
     lows = np.zeros((cursor.rowcount,), "f")
     for i, row in enumerate(cursor):
