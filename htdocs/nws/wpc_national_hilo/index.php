@@ -54,6 +54,8 @@ function write_entry($entry){
 
 $yearselected = ($opt == 0) ? ' checked="checked" ': "";
 $stateselected = ($opt == 1) ? ' checked="checked" ': "";
+$jsonInitialParams = json_encode($initialParams);
+$jsonTitle = json_encode($title);
 $t->content = <<<EOM
 <nav aria-label="breadcrumb">
 <ol class="breadcrumb">
@@ -196,11 +198,11 @@ $t->content = <<<EOM
 </div>
 
 <script type="application/json" id="initial-params">
-<?php echo json_encode($initialParams); ?>
+{$jsonInitialParams}
 </script>
 
 <script type="application/json" id="page-title">
-<?php echo json_encode($title); ?>
+{$jsonTitle}
 </script>
 
 EOM;

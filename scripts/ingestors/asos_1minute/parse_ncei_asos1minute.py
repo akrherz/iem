@@ -380,7 +380,7 @@ def dl_realtime(df, dt, mdt, page):
     tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
     if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
         uri = f"{HIDDENURL}/{tmpfn}"
-        with requests.get(uri, stream=True) as resp:
+        with requests.get(uri, stream=True, timeout=60) as resp:
             if resp.status_code != 200:
                 loglvl = LOG.info if dt.month != mdt.month else LOG.warning
                 loglvl("Got HTTP %s for %s", resp.status_code, uri)

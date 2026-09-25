@@ -81,7 +81,7 @@ def workflow(url: str):
     """Fetch the URL, see what we have."""
     try:
         with (
-            requests.get(url, stream=True) as resp,
+            requests.get(url, stream=True, timeout=60) as resp,
             open("data.bin", "wb") as fh,
         ):
             for chunk in resp.iter_content(chunk_size=1024):
