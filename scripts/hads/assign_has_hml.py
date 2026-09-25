@@ -3,8 +3,8 @@
 Run from RUN_0Z.sh
 """
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
@@ -29,8 +29,9 @@ def deal_with_unknown(station: str, conn: Connection = None):
         return
     # 2. Does this site exist upstream
     try:
-        resp = httpx.get(
-            f"https://api.water.noaa.gov/nwps/v1/gauges/{station}"
+        resp = requests.get(
+            f"https://api.water.noaa.gov/nwps/v1/gauges/{station}",
+            timeout=60,
         )
         resp.raise_for_status()
     except Exception:

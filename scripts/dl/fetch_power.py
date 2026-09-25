@@ -16,8 +16,8 @@ import time
 from datetime import date, datetime, timedelta
 
 import click
-import httpx
 import numpy as np
+import requests
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_grids, set_grids
 from pyiem.util import exponential_backoff, logger, ncopen
@@ -76,12 +76,12 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
             f"longitude-max={x0 + 9.9}&parameters=ALLSKY_SFC_SW_DWN&"
             f"community=SB&start={sts:%Y%m%d}&end={ets:%Y%m%d}&format=netcdf"
         )
-        resp = exponential_backoff(httpx.get, url, timeout=60)
+        resp = exponential_backoff(requests.get, url, timeout=60)
         # Can't find docs on how many requests/sec are allowed...
         if resp is not None and resp.status_code == 429:
             LOG.info("Got 429 (too-many-requests), sleeping 60")
             time.sleep(60)
-            resp = exponential_backoff(httpx.get, url, timeout=60)
+            resp = exponential_backoff(requests.get, url, timeout=60)
         if resp is None or resp.status_code != 200:
             LOG.warning(
                 "failed to download %s with %s %s",
@@ -92,7 +92,7 @@ def main(year: int | None, dt: datetime | None, domain: str, force: bool):
             continue
         ncfn = f"/tmp/power{year}_{domain}.nc"
         with open(ncfn, "wb") as fh:
-            for chunk in resp.iter_bytes(chunk_size=1024):
+            for chunk in resp.iter_content(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
         with ncopen(ncfn) as nc:

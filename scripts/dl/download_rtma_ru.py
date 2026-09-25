@@ -10,8 +10,8 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
@@ -34,7 +34,7 @@ def fetch_aws(dt: datetime):
         f"https://s3.amazonaws.com/noaa-rtma-pds/rtma2p5{b}ru.{dt:%Y%m%d}/"
         f"rtma2p5_ru.t{dt:%H%M}z.2dvarges_ndfd.grb2"
     )
-    req = exponential_backoff(httpx.get, url, timeout=30)
+    req = exponential_backoff(requests.get, url, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx: %s", url)
         return
@@ -78,7 +78,7 @@ def fetch(dt):
         "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/"
         f"rtma2p5_ru.{dt:%Y%m%d}/rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2.idx"
     )
-    req = exponential_backoff(httpx.get, uri, timeout=30)
+    req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx: %s", uri)
         return
@@ -105,7 +105,7 @@ def fetch(dt):
         for pr in offsets:
             headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
             req = exponential_backoff(
-                httpx.get, uri[:-4], headers=headers, timeout=30
+                requests.get, uri[:-4], headers=headers, timeout=30
             )
             if req is None:
                 LOG.warning("failure for uri: %s", uri)
