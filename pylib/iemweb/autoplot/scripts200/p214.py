@@ -15,6 +15,7 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot import ARG_ZSTATION
 from iemweb.util import month2months
 
 VDICT = {
@@ -56,13 +57,7 @@ def get_description():
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["highcharts"] = True
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
+        ARG_ZSTATION,
         dict(
             type="select",
             name="month",
@@ -206,9 +201,6 @@ def add_data(ctx):
         )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     minyear = ctx["df"]["utc_valid"].dt.year.min()
     ctx["xlabel"] = VDICT[ctx["x"]]
     ctx["ylabel"] = ADICT[ctx["agg"]] + " " + VDICT[ctx["y"]]

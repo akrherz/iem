@@ -27,7 +27,7 @@ def get_description():
         dict(
             type="float",
             name="thres",
-            default="0.10",
+            default=0.10,
             label="Precipitation Threshold (inch)",
         ),
         dict(
@@ -39,17 +39,6 @@ def get_description():
         ),
     ]
     return desc
-
-
-def get_color(val, cat):
-    """Helper."""
-    if cat == "t":
-        if val > 0:
-            return "r"
-        return "b"
-    if val > 0:
-        return "b"
-    return "r"
 
 
 def plotter(ctx: dict):

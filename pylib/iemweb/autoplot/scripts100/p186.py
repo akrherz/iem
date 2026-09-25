@@ -21,8 +21,9 @@ import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_fips, state_names
-from pyiem.util import LOG
 from scipy.interpolate import interp1d
+
+from iemweb import error_log
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -91,7 +92,7 @@ def plotter(ctx: dict):
         resp.raise_for_status()
         jdata = resp.json()
     except Exception as exp:
-        LOG.info(exp)
+        error_log(ctx, exp)
         raise NoDataFound("Drought Web Service failed.") from exp
     if not jdata.get("d"):
         raise NoDataFound("Data Not Found.")

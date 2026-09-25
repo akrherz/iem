@@ -495,10 +495,36 @@ def plot_daily_hilo_rainfall(ctx):
         color="green",
         align="center",
     )
+
+    # Improve readability as long periods have skinny bars
+    if len(df.index) > 30:
+        # Filter to not show zeros / close to zero
+        raindf = df[df["rain_in_tot_qc"] > 0.01]
+        if not raindf.empty:
+            ax2.scatter(
+                raindf.index.values,
+                raindf["rain_in_tot_qc"].to_numpy(),
+                color="green",
+            )
+
     ax2.set_ylim(bottom=0)
     ax2.set_ylabel("Precipitation [inch]")
 
     ax.set_zorder(ax2.get_zorder() + 1)
+    ax.legend(
+        [
+            Line2D([], [], color="red"),
+            Line2D([], [], color="blue"),
+            Line2D([], [], color="green"),
+        ],
+        [
+            "High",
+            "Low",
+            "Rainfall",
+        ],
+        ncol=3,
+        loc=(0.65, 1.0),
+    )
 
     common(ax)
 

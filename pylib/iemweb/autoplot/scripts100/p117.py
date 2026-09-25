@@ -59,6 +59,8 @@ def plotter(ctx: dict):
             params={"station": station},
             index_col=None,
         )
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     sdd = df.pivot(index="year", columns="month", values="sdd")
     days = df.pivot(index="year", columns="month", values="days")
     df = sdd.join(days, lsuffix="sdd", rsuffix="days")

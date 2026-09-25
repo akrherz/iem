@@ -25,6 +25,8 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
 
+from iemweb.autoplot import ARG_ZSTATION
+
 PDICT = {
     "tmpf": "Air Temperature [°F]",
     "dwpf": "Dew Point Temperature [°F]",
@@ -41,13 +43,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
+        ARG_ZSTATION,
         dict(type="hour", name="h1", default=6, label="First Hour:"),
         dict(
             type="hour",

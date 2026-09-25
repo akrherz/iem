@@ -17,7 +17,6 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from pyiem.database import sql_helper, with_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from sqlalchemy.engine import Connection
 
@@ -39,13 +38,13 @@ def get_description():
         dict(
             type="int",
             name="base",
-            default="50",
+            default=50,
             label="Growing Degree Day Base (F)",
         ),
         dict(
             type="int",
             name="ceil",
-            default="86",
+            default=86,
             label="Growing Degree Day Ceiling (F)",
         ),
         dict(
@@ -69,8 +68,6 @@ def plotter(ctx: dict, conn: Connection | None = None):
     ceil = ctx["ceil"]
     today: date = ctx["date"]
     bs = ctx["_nt"].sts[station]["archive_begin"]
-    if bs is None:
-        raise NoDataFound("Unknown station metadata.")
     byear = bs.year
     eyear = today.year + 1
     res = conn.execute(
