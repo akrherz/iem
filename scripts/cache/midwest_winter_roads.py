@@ -8,7 +8,7 @@ import pathlib
 import subprocess
 import tempfile
 
-import httpx
+import requests
 from pyiem.util import utc
 
 # This was found to be 14 MB and not include Iowa
@@ -26,9 +26,9 @@ REAL_EARTH = "https://realearth.ssec.wisc.edu/api/shapes?products=ROADS-IADOT"
 def main():
     """Go Main Go."""
     utcnow = utc().replace(minute=0)
-    with httpx.Client() as client, tempfile.TemporaryDirectory() as tmpdir:
+    with tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
-        resp = client.get(REAL_EARTH, timeout=60)
+        resp = requests.get(REAL_EARTH, timeout=60)
         resp.raise_for_status()
         pathlib.Path("temp.geojson").write_text(resp.text)
         name = "midwest_winter_roads"

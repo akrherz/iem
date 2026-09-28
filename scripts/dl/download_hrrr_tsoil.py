@@ -11,8 +11,8 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
@@ -45,7 +45,7 @@ def fetch(valid):
     uri = valid.strftime(
         f"{baseuri}/hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfprsf00.grib2.idx"
     )
-    req = exponential_backoff(httpx.get, uri, timeout=30)
+    req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx %s", uri)
         return
@@ -79,7 +79,7 @@ def fetch(valid):
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
-            httpx.get, uri[:-4], headers=headers, timeout=30
+            requests.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
             LOG.info("failure for uri: %s", uri)

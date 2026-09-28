@@ -20,8 +20,8 @@ import subprocess
 import tempfile
 from datetime import timedelta
 
-import httpx
 import numpy as np
+import requests
 from PIL import Image, PngImagePlugin
 from pyiem.mrms import make_colorramp
 from pyiem.util import archive_fetch, logger, utc
@@ -39,7 +39,7 @@ def get_file(tmpdir, now, routes):
         fn = now.strftime(f"H99999999_I000{i}_G_%d%b%Y_%H%M00").upper()
         uri = f"{BASEURL}/{fn}.out"
         try:
-            resp = httpx.get(uri, timeout=10)
+            resp = requests.get(uri, timeout=10)
             # A common case that I don't need verbosity about
             if i == 7 and resp.status_code == 404:
                 LOG.info("Got 404 for %s", uri)

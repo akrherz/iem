@@ -17,9 +17,9 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import numpy as np
 import pygrib
+import requests
 from affine import Affine
 from pyiem.iemre import (
     DOMAINS,
@@ -61,13 +61,12 @@ def compute_model_valid(valid: datetime) -> datetime | None:
             f"{offset:03.0f}_T_2M.grib2.bz2"
         )
         try:
-            with httpx.Client() as client:
-                response = client.head(testfn)
+            response = requests.head(testfn, timeout=30)
             if response.status_code == 200:
                 LOG.info("Found ICON model data for %s", model_valid)
                 return model_valid
-        except httpx.RequestError:
-            # Handle request errors (e.g., network issues)
+        except requests.RequestException as exp:
+            LOG.info("Failure with %s %s", testfn, exp)
             continue
     return None
 
@@ -90,22 +89,21 @@ def grib_download(model_valid: datetime, valid: datetime) -> None:
         LOG.info("Downloading %s", url)
         for attempt in range(3):
             try:
-                with httpx.Client() as client:
-                    response = client.get(url)
-                    if response.status_code == 404:
-                        # Try something 6 hours older
-                        mv2 = model_valid - timedelta(hours=6)
-                        fo2 = fhour_off + 6
-                        url = (
-                            f"{baseurl}{mv2:%H}/{meta['gname']}/"
-                            "icon_global_icosahedral_single-level_"
-                            f"{mv2:%Y%m%d%H}_{fo2:03.0f}_"
-                            f"{meta['gname'].upper()}.grib2.bz2"
-                        )
-                        response = client.get(url)
+                response = requests.get(url, timeout=60)
+                if response.status_code == 404:
+                    # Try something 6 hours older
+                    mv2 = model_valid - timedelta(hours=6)
+                    fo2 = fhour_off + 6
+                    url = (
+                        f"{baseurl}{mv2:%H}/{meta['gname']}/"
+                        "icon_global_icosahedral_single-level_"
+                        f"{mv2:%Y%m%d%H}_{fo2:03.0f}_"
+                        f"{meta['gname'].upper()}.grib2.bz2"
+                    )
+                    response = requests.get(url, timeout=60)
                 response.raise_for_status()
                 break
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+            except requests.RequestException as e:
                 LOG.error("Failed to download %s: %s", filename, e)
                 time.sleep(5)
             if attempt == 2:

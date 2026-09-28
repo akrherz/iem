@@ -6,7 +6,7 @@ Run daily from RUN_2AM.sh
 import os
 import subprocess
 
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.reference import nwsli2state
 from pyiem.util import logger
@@ -39,7 +39,7 @@ def get_current(dbconn):
 def get_idp() -> dict:
     """See what AHPS has."""
     LOG.info("Fetching %s", SERVICE)
-    req = httpx.get(SERVICE, timeout=60)
+    req = requests.get(SERVICE, timeout=60)
     if req.status_code != 200:
         LOG.info("Got %s fetching %s", req.status_code, SERVICE)
         return {}
