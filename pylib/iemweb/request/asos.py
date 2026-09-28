@@ -405,9 +405,9 @@ def overloaded(environ: dict):
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 90:  # Cut back on logging
+    if val > 70:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/asos.py over cpu thres: {val}")
-    return val > 80
+    return val > 60
 
 
 def get_stations(form):

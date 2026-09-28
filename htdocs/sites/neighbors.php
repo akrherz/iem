@@ -1,4 +1,8 @@
 <?php
+define("THROTTLE_APP", "sites/neighbors");
+define("THROTTLE_LIMIT", 8);
+define("TEMPLATE", "sites.phtml");
+// sites calls throttle
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/sites.php";
@@ -61,4 +65,4 @@ the data for this page. </p>
 
 {$table}
 EOM;
-$t->render('sites.phtml');
+$t->render(TEMPLATE);

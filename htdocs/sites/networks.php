@@ -1,4 +1,7 @@
 <?php
+define("THROTTLE_APP", "sites/networks");
+define("THROTTLE_LIMIT", 8);
+// sites calls throttle
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 6);
 require_once "../../include/database.inc.php";
