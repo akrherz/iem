@@ -7,8 +7,8 @@ from datetime import datetime
 from io import StringIO
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger
 
@@ -38,7 +38,7 @@ def main(newerthan: datetime):
     )
     with StringIO() as sio:
         try:
-            resp = httpx.get(url, timeout=30)
+            resp = requests.get(url, timeout=30)
             resp.raise_for_status()
             sio.write(resp.text.replace(", ", ","))  # remove space after comma
         except Exception as exp:

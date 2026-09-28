@@ -23,9 +23,9 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 
 import click
-import httpx
 import numpy as np
 import rasterio
+import requests
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
@@ -44,20 +44,18 @@ def get_geotiff(valid: datetime, source: str) -> np.ndarray | None:
         f"3B-HHR-{source}.MS.MRG.3IMERG.{valid:%Y%m%d}-S{valid:%H%M%S}-"
         f"E{endts:%H%M%S}.{minutes:04.0f}.V07C.30min.tif"
     )
-    auth = httpx.NetRCAuth()
-    with httpx.Client(auth=auth, follow_redirects=False) as client:
-        LOG.info("Fetching %s", url)
-        try:
-            resp = client.get(url, timeout=10)
-            resp.raise_for_status()
-        except Exception as exp:
-            LOG.info("Error fetching %s: %s", url, exp)
-            return None
-        pathlib.Path("pps.tif").write_bytes(resp.content)
-        with rasterio.open("pps.tif") as src:
-            pmm = src.read(1) / 10.0
-            # Life choice, set anything above 300mm to zero
-            pmm = np.where(pmm > 300, 0, pmm)
+    LOG.info("Fetching %s", url)
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+    except Exception as exp:
+        LOG.info("Error fetching %s: %s", url, exp)
+        return None
+    pathlib.Path("pps.tif").write_bytes(resp.content)
+    with rasterio.open("pps.tif") as src:
+        pmm = src.read(1) / 10.0
+        # Life choice, set anything above 300mm to zero
+        pmm = np.where(pmm > 300, 0, pmm)
     return pmm
 
 
@@ -70,21 +68,19 @@ def get_netcdf(valid, source) -> np.ndarray | None:
         "var=precipitation&time=%Y-%m-%dT%H%%3A%M%%3A00Z&"
         "accept=netcdf4-classic"
     )
-    auth = httpx.NetRCAuth()
-    with httpx.Client(auth=auth, follow_redirects=False) as client:
-        try:
-            resp = client.get(url, timeout=10)
-            if resp.status_code in (301, 302, 303, 307, 308):
-                url = resp.headers["Location"]
-                LOG.info("Redirected to %s", url)
-                resp = client.get(url, timeout=120, follow_redirects=True)
-                if resp.status_code in (400, 404):  # Out of time bounds or nd
-                    LOG.info("Got %d, no data for %s", resp.status_code, valid)
-                    return None
-            resp.raise_for_status()
-        except Exception as exp:
-            LOG.info("Got exception %s for %s", exp, url)
-            return None
+    try:
+        resp = requests.get(url, timeout=10)
+        if resp.status_code in (301, 302, 303, 307, 308):
+            url = resp.headers["Location"]
+            LOG.info("Redirected to %s", url)
+            resp = requests.get(url, timeout=120)
+            if resp.status_code in (400, 404):  # Out of time bounds or nd
+                LOG.info("Got %d, no data for %s", resp.status_code, valid)
+                return None
+        resp.raise_for_status()
+    except Exception as exp:
+        LOG.info("Got exception %s for %s", exp, url)
+        return None
     # Check content-type return header
     ct = resp.headers.get("content-type", "")
     if not ct.startswith("application/x-netcdf"):

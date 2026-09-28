@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 
 import click
-import httpx
+import requests
 from affine import Affine
 from pyiem.iemre import get_grids, reproject2iemre, set_grids
 from pyiem.util import logger, ncopen
@@ -22,7 +22,7 @@ def main(valid):
         "sfav2_CONUS_24h_%Y%m%d12.nc"
     )
     try:
-        resp = httpx.get(url, timeout=60)
+        resp = requests.get(url, timeout=60)
         resp.raise_for_status()
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(resp.content)

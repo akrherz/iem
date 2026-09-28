@@ -2,8 +2,8 @@
 
 from datetime import date
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 
 
@@ -20,7 +20,7 @@ def main():
         )
 
     url = "https://www.cpc.ncep.noaa.gov/data/indices/sstoi.indices"
-    data = httpx.get(url, timeout=30).content.decode("ascii").split("\n")
+    data = requests.get(url, timeout=30).content.decode("ascii").split("\n")
 
     for line in data[1:]:
         tokens = line.split()
@@ -49,7 +49,7 @@ def main():
         )
 
     url = "https://www.cpc.ncep.noaa.gov/data/indices/soi.3m.txt"
-    data = httpx.get(url, timeout=30).content.decode("ascii").split("\n")
+    data = requests.get(url, timeout=30).content.decode("ascii").split("\n")
 
     for line in data[1:]:
         if len(line) < 3:

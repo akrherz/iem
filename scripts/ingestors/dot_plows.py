@@ -3,7 +3,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from pyiem.util import exponential_backoff, logger, utc
 
@@ -37,7 +37,7 @@ def workflow():
     for row in cursor:
         current[row[0]] = row[1]
 
-    req = exponential_backoff(httpx.get, URI, timeout=30)
+    req = exponential_backoff(requests.get, URI, timeout=30)
     if req is None:
         return
     if req.status_code != 200:
