@@ -61,7 +61,7 @@ def compute_model_valid(valid: datetime) -> datetime | None:
             f"{offset:03.0f}_T_2M.grib2.bz2"
         )
         try:
-            response = requests.head(testfn)
+            response = requests.head(testfn, timeout=30)
             if response.status_code == 200:
                 LOG.info("Found ICON model data for %s", model_valid)
                 return model_valid

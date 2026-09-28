@@ -56,7 +56,7 @@ def do_month(sts: datetime):
         dirname = now.strftime("/mesonet/data/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
-        localfn = now.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
+        localfn = now.strftime("/mesonet/data/merra2/%Y/%Y%m%d_tmp.nc")
         resp = requests.get(uri, stream=True, timeout=60)
         with open(localfn, "wb") as f:
             f.writelines(resp.iter_content(chunk_size=8192))
@@ -64,6 +64,7 @@ def do_month(sts: datetime):
         try:
             nc = netCDF4.Dataset(localfn)
             nc.close()
+            os.rename(localfn, localfn.replace("_tmp.nc", ".nc"))
         except Exception:
             LOG.warning("ncopen %s failed, deleting.", localfn)
             os.unlink(localfn)
