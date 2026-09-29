@@ -419,11 +419,11 @@ def application(environ: dict, start_response: callable):
                     "COUNTY": row["county"],
                     "STATE": row["state"],
                     "SOURCE": row["source"],
-                    "REMARK": tremark[:SZ_REMARK],
+                    "REMARK": tremark[:SZ_REMARK].strip(),
                     "LAT": row["lat"],
                     "LON": row["lon"],
                     "UGC": row["ugc"],
-                    "UGCNAME": row["ugcname"][:SZ_UGCNAME],
+                    "UGCNAME": row["ugcname"][:SZ_UGCNAME].strip(),
                     "QUALIFY": row["qualifier"],
                 }
                 shp.point(row["lon"], row["lat"])
