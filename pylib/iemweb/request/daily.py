@@ -221,7 +221,7 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     return sio.getvalue()
 
 
-@iemapp(help=__doc__, schema=MyCGI, parse_times=True)
+@iemapp(help=__doc__, schema=MyCGI, parse_times=True, ip_throttle_secs=1.0)
 def application(environ, start_response):
     """See how we are called"""
     if environ["sts"] is None or environ["ets"] is None:

@@ -511,7 +511,7 @@ def preflight_checks(environ: dict, start_response: Callable) -> str | None:
     help=__doc__,
     parse_times=False,
     schema=MyModel,
-    ip_throttle_secs=5.0,
+    ip_throttle_secs=1.0,
 )
 def application(environ: dict, start_response: Callable):
     """Go main"""
