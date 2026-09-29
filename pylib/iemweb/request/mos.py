@@ -130,7 +130,7 @@ def get_data(sts, ets, station, model, fmt):
     return sio.getvalue()
 
 
-@iemapp(help=__doc__, schema=MyModel, default_tz="UTC", ip_throttle_secs=5.0)
+@iemapp(help=__doc__, schema=MyModel, default_tz="UTC", ip_throttle_secs=1.0)
 def application(environ, start_response):
     """See how we are called"""
     if environ["sts"] is None or environ["ets"] is None:
