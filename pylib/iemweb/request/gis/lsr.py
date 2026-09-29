@@ -81,6 +81,8 @@ from iemweb.mlib import unrectify_wfo
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 ISO8660 = "%Y-%m-%dT%H:%M"
+SZ_REMARK = 200
+SZ_UGCNAME = 128
 
 
 class Schema(CGIModel):
@@ -360,10 +362,10 @@ def application(environ: dict, start_response: callable):
             to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
             magnitude, l.wfo, type, typetext,
             city, county, l.state, l.source,
-            substr(coalesce(remark, ''),0,200) as tremark,
+            coalesce(remark, '') as tremark,
             ST_y(l.geom) as lat, ST_x(l.geom) as lon,
             to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
-            u.ugc, coalesce(u.name, '') as ugcname, qualifier
+            u.ugc, substr(coalesce(u.name, ''), 1, 128) as ugcname, qualifier
             from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
             valid >= :sts and valid < :ets {sql_filters}
             ORDER by dvalid ASC
@@ -387,11 +389,11 @@ def application(environ: dict, start_response: callable):
             shp.field("COUNTY", "C", 40)
             shp.field("STATE", "C", 2)
             shp.field("SOURCE", "C", 40)
-            shp.field("REMARK", "C", 200)
+            shp.field("REMARK", "C", SZ_REMARK)
             shp.field("LAT", "F", 7, 4)
             shp.field("LON", "F", 9, 4)
             shp.field("UGC", "C", 6)
-            shp.field("UGCNAME", "C", 128)
+            shp.field("UGCNAME", "C", SZ_UGCNAME)
             shp.field("QUALIFY", "C", 1)
             for row in res.mappings():
                 tremark = ""
@@ -417,11 +419,11 @@ def application(environ: dict, start_response: callable):
                     "COUNTY": row["county"],
                     "STATE": row["state"],
                     "SOURCE": row["source"],
-                    "REMARK": tremark,
+                    "REMARK": tremark[:SZ_REMARK],
                     "LAT": row["lat"],
                     "LON": row["lon"],
                     "UGC": row["ugc"],
-                    "UGCNAME": row["ugcname"],
+                    "UGCNAME": row["ugcname"][:SZ_UGCNAME],
                     "QUALIFY": row["qualifier"],
                 }
                 shp.point(row["lon"], row["lat"])
