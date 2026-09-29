@@ -130,8 +130,8 @@ def get_dataframe(ctx: dict) -> pd.DataFrame:
         {varname} is not null
         ORDER by {varname} {sorder} LIMIT 10
     """
+    yearagg = "year"
     if ctx["period"] == "monthly":
-        yearagg = "year"
         if month == "winter":
             yearagg = "case when month = 12 then year + 1 else year end"
         sql = """
@@ -237,7 +237,7 @@ def plotter(ctx: dict):
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax = fig.add_axes((0.1, 0.1, 0.5, 0.8))
     ax.barh(
-        range(10, 0, -1),
+        range(len(df.index), 0, -1),
         df[varname],
         ec="green",
         fc="green",
