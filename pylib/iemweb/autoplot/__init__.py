@@ -398,7 +398,12 @@ daily_opts = [
         "id": 142,
         "label": "Trailing X Number of Days Temp/Precip Departures",
     },
-    {"id": 132, "label": "Top 10 Precip/Temperature Values by Month/Season"},
+    {
+        "id": 132,
+        "label": (
+            "Top 10 Precip/Temp Daily Values or Monthly Totals by Month/Season"
+        ),
+    },
     {"id": 190, "label": "Year of Daily High/Low Temperature Record"},
 ]
 monthly_opts = [

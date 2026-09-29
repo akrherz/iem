@@ -46,6 +46,10 @@ MDICT = {
     "nov": "November",
     "dec": "December",
 }
+PDICT = {
+    "daily": "Compute Daily Totals",
+    "monthly": "Compute Monthly Totals",
+}
 
 METRICS = {
     "total_precip": "Total Precipitation",
@@ -73,11 +77,18 @@ def get_description():
             label="Which Metric to Summarize",
             options=METRICS,
         ),
+        {
+            "type": "select",
+            "name": "period",
+            "default": "daily",
+            "label": "Period for Computation",
+            "options": PDICT,
+        },
         dict(
             type="int",
             name="days",
             default=1,
-            label="Over how many consecutive days",
+            label="Over how many consecutive days (ignored for monthly)",
         ),
         dict(
             type="select",
@@ -90,20 +101,16 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
-    """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
+def get_dataframe(ctx: dict) -> pd.DataFrame:
+    """Figure out what we want from the database."""
     varname = ctx["var"]
+    station = ctx["station"]
     days = ctx["days"]
-
+    month = ctx["month"]
     months = month2months(month)
-
     sorder = "ASC" if varname == "min_greatest_low" else "DESC"
-    with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            sql_helper(
-                """WITH data as (
+    sql = """
+        WITH data as (
             SELECT month, day, day - ':days days'::interval as start_date,
             count(*) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
             current row) as count,
@@ -117,15 +124,34 @@ def plotter(ctx: dict):
             current row) as min_greatest_low
             from alldata WHERE station = :station)
 
-            SELECT day as end_date, start_date, {varname} from data WHERE
-            month = ANY(:months) and
-            extract(month from start_date) = ANY(:months) and count = :d2 and
-            {varname} is not null
-            ORDER by {varname} {sorder} LIMIT 10
-            """,
-                varname=varname,
-                sorder=sorder,
-            ),
+        SELECT day as end_date, start_date, {varname} from data WHERE
+        month = ANY(:months) and
+        extract(month from start_date) = ANY(:months) and count = :d2 and
+        {varname} is not null
+        ORDER by {varname} {sorder} LIMIT 10
+    """
+    yearagg = "year"
+    if ctx["period"] == "monthly":
+        if month == "winter":
+            yearagg = "case when month = 12 then year + 1 else year end"
+        sql = """
+    with data as (
+        select {yearagg} as ya, min(day) as start_date, max(day) as end_date,
+        count(*) as count,
+        sum(precip) as total_precip,
+        sum(snow) as total_snowfall,
+        min(high) as max_least_high,
+        max(low) as min_greatest_low
+        from alldata WHERE station = :station and month = ANY(:months)
+        GROUP by ya
+    )
+        select ya as year, start_date, end_date, {varname} from data WHERE
+        {varname} is not null
+        ORDER by {varname} {sorder} LIMIT 10
+        """
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            sql_helper(sql, yearagg=yearagg, varname=varname, sorder=sorder),
             conn,
             params={
                 "days": days - 1,
@@ -137,6 +163,17 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
+    return df
+
+
+def plotter(ctx: dict):
+    """Go"""
+    station = ctx["station"]
+    month = ctx["month"]
+    varname = ctx["var"]
+    days = ctx["days"]
+
+    df = get_dataframe(ctx)
     ylabels = []
     fmt = "%.2f" if varname == "total_precip" else "%.0f"
     if varname == "total_snowfall":
@@ -144,7 +181,20 @@ def plotter(ctx: dict):
     for _, row in df.iterrows():
         # no strftime support for old days, so we hack at it
         lbl = fmt % (row[varname],)
-        if days > 1:
+        if ctx["period"] == "monthly":
+            if row["start_date"].month == row["end_date"].month:
+                lbl += (
+                    f" -- {calendar.month_abbr[row['end_date'].month]} "
+                    f"{row['end_date'].year}"
+                )
+            else:
+                lbl += (
+                    f" -- {calendar.month_abbr[row['start_date'].month]} "
+                    f"{row['start_date'].year} to "
+                    f"{calendar.month_abbr[row['end_date'].month]} "
+                    f"{row['end_date'].year}"
+                )
+        elif days > 1:
             sts = row["end_date"] - timedelta(days=days - 1)
             if sts.month == row["end_date"].month:
                 lbl += " -- %s %s-%s, %s" % (
@@ -175,15 +225,19 @@ def plotter(ctx: dict):
     tt = f"{METRICS[varname]} [days={days}]"
     if days == 1:
         tt = f"Single Day {TRANSLATION[varname]}"
-    title = (
-        f"{ctx['_sname']}:: Top 10 Events\n"
-        f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.now().year})"
-    )
+    title = f"{ctx['_sname']}:: Top 10 Events"
+    subtitle = f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.now().year})"
+    if ctx["period"] == "monthly":
+        title = f"{ctx['_sname']}:: Top 10 Monthly"
+        subtitle = (
+            f"{METRICS[varname]} ({MDICT[month]}) "
+            f"({ab.year}-{datetime.now().year})"
+        )
 
-    fig = figure(apctx=ctx, title=title)
+    fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax = fig.add_axes((0.1, 0.1, 0.5, 0.8))
     ax.barh(
-        range(10, 0, -1),
+        range(len(df.index), 0, -1),
         df[varname],
         ec="green",
         fc="green",
