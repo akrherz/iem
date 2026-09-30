@@ -48,7 +48,7 @@ MDICT = {
 }
 PDICT = {
     "daily": "Compute Daily Totals",
-    "monthly": "Compute Monthly Totals",
+    "monthly": "Compute Single Month Totals",
 }
 
 METRICS = {
@@ -136,14 +136,15 @@ def get_dataframe(ctx: dict) -> pd.DataFrame:
             yearagg = "case when month = 12 then year + 1 else year end"
         sql = """
     with data as (
-        select {yearagg} as ya, min(day) as start_date, max(day) as end_date,
+        select {yearagg} as ya, month,
+        min(day) as start_date, max(day) as end_date,
         count(*) as count,
         sum(precip) as total_precip,
         sum(snow) as total_snowfall,
         min(high) as max_least_high,
         max(low) as min_greatest_low
         from alldata WHERE station = :station and month = ANY(:months)
-        GROUP by ya
+        GROUP by ya, month
     )
         select ya as year, start_date, end_date, {varname} from data WHERE
         {varname} is not null
