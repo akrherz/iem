@@ -10,8 +10,8 @@ import tempfile
 from datetime import datetime, timezone
 
 import click
-import httpx
 import pygrib
+import requests
 from pyiem.util import archive_fetch, logger
 
 LOG = logger()
@@ -59,7 +59,7 @@ def workflow(now: datetime):
         )
         LOG.info("Downloading %s", url)
         try:
-            resp = httpx.get(url, timeout=60)
+            resp = requests.get(url, timeout=60)
             resp.raise_for_status()
         except Exception as exp:
             LOG.info("Failed to get %s got %s", url, exp)

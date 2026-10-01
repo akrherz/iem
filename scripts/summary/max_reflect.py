@@ -10,8 +10,8 @@ import time
 from datetime import timedelta, timezone
 
 import click
-import httpx
 import numpy as np
+import requests
 from osgeo import gdal, gdalconst
 from pyiem.database import get_dbconn
 from pyiem.util import archive_fetch, logger, utc
@@ -145,7 +145,7 @@ def run(tmpdir, prod, sts):
     layer = "nexrad_tc" if prod == "n0r" else "n0q_tc"
     if sts.hour == 6:
         layer = f"{layer}6"
-    resp = httpx.get(
+    resp = requests.get(
         f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
         timeout=120,
     )
@@ -166,7 +166,7 @@ def run(tmpdir, prod, sts):
 
     # US
     url = f"{URLBASE}sector=conus&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
-    resp = httpx.get(url, timeout=120)
+    resp = requests.get(url, timeout=120)
     if resp.status_code != 200:
         LOG.warning("Got status_code %s for %s", resp.status_code, url)
     else:

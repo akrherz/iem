@@ -7,17 +7,20 @@ import os
 import pathlib
 import subprocess
 import sys
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import click
-import httpx
 import pandas as pd
+import requests
 import tqdm
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.ncei import ds3505
 from pyiem.nws.products.metarcollect import normid, to_iemaccess, to_metar
 from pyiem.util import c2f, logger, utc
 
+if TYPE_CHECKING:
+    from datetime import datetime
 LOG = logger()
 TMPDIR = "/mesonet/tmp"
 
@@ -66,7 +69,7 @@ def main(airforce, wban, faa, year1, year2):
         if not os.path.isfile(f"{TMPDIR}/{lfn}"):
             uri = f"https://www.ncei.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
             try:
-                req = httpx.get(uri, timeout=30)
+                req = requests.get(uri, timeout=30)
                 req.raise_for_status()
             except Exception:
                 LOG.info("Failed to fetch %s", uri)
@@ -108,6 +111,7 @@ def main(airforce, wban, faa, year1, year2):
                 if data is None:
                     bad += 1
                     continue
+                valid: datetime = data["valid"]
                 current_tmpf = None
                 current_metar = None
                 new_tmpf = (
@@ -117,15 +121,15 @@ def main(airforce, wban, faa, year1, year2):
                 )
                 if data["report_type"] not in ["FM-15", "FM-16"]:
                     continue
-                if data["valid"].minute == 0:
+                if valid.minute == 0:
                     continue
-                if data["valid"] in obsdf.index:
+                if valid in obsdf.index:
                     if new_tmpf is None:
                         continue
                     if not obsdf.at[data["valid"], "editable"]:
                         continue
-                    current_metar = obsdf.at[data["valid"], "metar"]
-                    current_tmpf = obsdf.at[data["valid"], "tmpf"]
+                    current_metar = obsdf.at[valid, "metar"]
+                    current_tmpf = obsdf.at[valid, "tmpf"]
                 if (
                     pd.notna(current_tmpf)
                     and new_tmpf is not None
@@ -134,8 +138,8 @@ def main(airforce, wban, faa, year1, year2):
                     skipped += 1
                     continue
                 textprod = mock.Mock()
-                textprod.valid = data["valid"]
-                textprod.utcnow = data["valid"]
+                textprod.valid = valid
+                textprod.utcnow = valid
                 mtr = to_metar(textprod, data["metar"])
                 # Avoid KDSM 150559Z AUTO RMK IEM_DS3505
                 if len(mtr.code) == 32:
@@ -144,28 +148,28 @@ def main(airforce, wban, faa, year1, year2):
                 if current_metar is not None:
                     acursor = asosdb.cursor()
                     # Life choices, if this is first, we need to delete lots
-                    if data["valid"].day == 1:
+                    if valid.day == 1:
                         acursor.execute(
                             f"delete from t{data['valid'].year} "
                             "where station = %s and valid >= %s "
                             "and valid < %s",
                             (
                                 dbid,
-                                data["valid"].replace(hour=0, minute=0),
-                                data["valid"].replace(hour=8, minute=0),
+                                valid.replace(hour=0, minute=0),
+                                valid.replace(hour=8, minute=0),
                             ),
                         )
                         deleted += acursor.rowcount
                     acursor.execute(
                         f"delete from t{data['valid'].year} "
                         "where station = %s and valid = %s",
-                        (dbid, data["valid"]),
+                        (dbid, valid),
                     )
                     deleted += acursor.rowcount
                     acursor.close()
                     asosdb.commit()
                     print(
-                        f"{data['valid']} {current_tmpf} -> {new_tmpf} | "
+                        f"{valid} {current_tmpf} -> {new_tmpf} | "
                         f"{current_metar} -> {mtr.code}"
                     )
                 to_iemaccess(

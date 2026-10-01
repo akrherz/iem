@@ -65,7 +65,7 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def dowork(query: Schema):
+def dowork(query: Schema) -> str:
     """Do work!"""
     valid = query.valid
     # We want data for the UTC date and timestamps are in the rears, so from
@@ -89,22 +89,23 @@ def dowork(query: Schema):
     if not os.path.isfile(ncfn):
         return json.dumps(res)
     i, j = get_nav("STAGE4").find_ij(query.lon, query.lat)
-    if i is not None:
-        with ncopen(ncfn) as nc:
-            res["gridi"] = i
-            res["gridj"] = j
+    if i is None:
+        return json.dumps(res)
+    with ncopen(ncfn) as nc:
+        res["gridi"] = i
+        res["gridj"] = j
 
-            ppt = nc.variables["p01m"][sidx:eidx, j, i]
+        ppt = nc.variables["p01m"][sidx:eidx, j, i]
 
-        for tx, pt in enumerate(ppt):
-            valid = sts + timedelta(hours=tx)
-            utcnow = valid.astimezone(ZoneInfo("UTC"))
-            res["data"].append(
-                {
-                    "end_valid": utcnow.strftime("%Y-%m-%dT%H:00:00Z"),
-                    "precip_in": myrounder(mm2inch(pt), 2),
-                }
-            )
+    for tx, pt in enumerate(ppt):
+        valid = sts + timedelta(hours=tx)
+        utcnow = valid.astimezone(ZoneInfo("UTC"))
+        res["data"].append(
+            {
+                "end_valid": utcnow.strftime("%Y-%m-%dT%H:00:00Z"),
+                "precip_in": myrounder(mm2inch(pt), 2),
+            }
+        )
 
     return json.dumps(res)
 

@@ -7,7 +7,7 @@ import os
 import subprocess
 import tempfile
 
-import httpx
+import requests
 from pyiem.util import logger
 
 LOG = logger()
@@ -17,7 +17,7 @@ def main():
     """Go Main Go."""
     uri = "http://iem.local/agclimate/isusm.csv"
     try:
-        resp = httpx.get(uri, timeout=30)
+        resp = requests.get(uri, timeout=30)
         resp.raise_for_status()
         content = resp.content
     except Exception as exp:

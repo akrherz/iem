@@ -4,8 +4,8 @@ Called from RUN_2AM.sh for yesterday and ten days ago.
 """
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
@@ -60,7 +60,7 @@ def check_date(dt):
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        j = httpx.get(uri, timeout=60).json()
+        j = requests.get(uri, timeout=60).json()
         iemre = j["data"][0]
         obs.at[station, "iemid"] = nt.sts[station]["iemid"]
         obs.at[station, "iemre_min"] = convert_value(

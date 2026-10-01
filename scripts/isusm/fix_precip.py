@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
@@ -50,7 +50,7 @@ def get_hdf(nt, dt):
                 f"{nt.sts[station]['lat']:.2f}/{ldate:%Y-%m-%d}"
             )
             try:
-                resp = httpx.get(uri, timeout=30)
+                resp = requests.get(uri, timeout=30)
                 resp.raise_for_status()
                 jdata = resp.json()
             except Exception as exp:

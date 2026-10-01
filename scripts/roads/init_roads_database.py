@@ -3,7 +3,7 @@
 * JSON data is in Google 3857
 """
 
-import httpx
+import requests
 from ingest_roads_rest import LOG, URI
 from pyiem.database import get_dbconn
 from shapely.geometry import LineString, MultiLineString
@@ -13,7 +13,7 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    resp = httpx.get(URI, timeout=30)
+    resp = requests.get(URI, timeout=30)
     jobj = resp.json()
     archive_begin = "2022-12-20 12:00"
     LOG.info("adding %s rows to roads_base", len(jobj["features"]))

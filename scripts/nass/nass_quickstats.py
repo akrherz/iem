@@ -6,9 +6,9 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.util import get_properties, logger
 from sqlalchemy.engine import Connection
@@ -48,7 +48,7 @@ def get_df(year, sts, topic):
         params["load_time__GE"] = sts.strftime("%Y-%m-%d %H:%M:%S")
     params.update(topic)
     try:
-        resp = httpx.get(SERVICE, params=params, timeout=300)
+        resp = requests.get(SERVICE, params=params, timeout=300)
         # Shrug, getting a Bad Request when there is no data
         if resp.status_code == 400:
             return None

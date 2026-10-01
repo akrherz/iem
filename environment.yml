@@ -31,8 +31,6 @@ dependencies:
   - libgdal-grib
   # important
   - geopandas
-  # Get stuff
-  - httpx
   # mrms script
   - imageio
   # Unknown problem with netCDF4 not loading
@@ -83,7 +81,6 @@ dependencies:
   # for testing
   - pytest
   - pytest-cov
-  - pytest-httpx
   - pytest-mpl
   - pytest-runner
   - pytest-xdist

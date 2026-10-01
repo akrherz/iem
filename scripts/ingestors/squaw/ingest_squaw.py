@@ -2,7 +2,7 @@
 
 import re
 
-import httpx
+import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.util import logger
 from sqlalchemy.engine import Connection
@@ -18,9 +18,9 @@ def main(conn: Connection = None) -> None:
         "period=2&site_no=05470500"
     )
     try:
-        resp = httpx.get(uri, timeout=30)
+        resp = requests.get(uri, timeout=30)
         resp.raise_for_status()
-    except httpx.RequestError as err:
+    except requests.RequestException as err:
         LOG.info("failed to fetch %s: %s", uri, err)
         return
     data = resp.text

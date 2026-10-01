@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import click
-import httpx
+import requests
 from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
@@ -33,9 +33,10 @@ def do(now: datetime):
     if routes == "ac":
         service = "http://iem.local/roads/iem.php"
 
-    req = httpx.get(service, timeout=60)
+    resp = requests.get(service, timeout=60)
+    resp.raise_for_status()
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
-        tmpfd.write(req.content)
+        tmpfd.write(resp.content)
     pqstr = (
         f"plot {routes} {now:%Y%m%d%H%M} iaroads.png "
         f"iaroads/iaroads_{now:%H%M}.png png"

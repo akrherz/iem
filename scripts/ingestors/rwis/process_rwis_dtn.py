@@ -1,8 +1,8 @@
 """Ingest Iowa DOT RWIS data provided by DTN."""
 
-import httpx
 import numpy as np
 import pandas as pd
+import requests
 from metpy.units import masked_array, units
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -49,7 +49,7 @@ def main():
             f"&endDate={edate}&units=us&precision=0"
         )
 
-        resp = httpx.get(URI, timeout=60, headers=headers)
+        resp = requests.get(URI, timeout=60, headers=headers)
         if resp.status_code != 200:
             LOG.info("Fetch %s got status_code %s", URI, resp.status_code)
             continue
