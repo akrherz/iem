@@ -11,6 +11,8 @@ request 120 days or less of data at one time if you do not filter the request.
 Changelog
 ---------
 
+- 2026-09-30: Fixed a bug with `Non` being returned for the ARTCC field instead
+  of an empty string.
 - 2025-01-09: Added `FL` field (Flight Level) to the output, units are `ft`.
 - 2024-06-28: Initital documentation release
 - 2024-07-31: A `product_id` field was added to the output, but only non-null
@@ -152,7 +154,7 @@ def run(query: Schema, start_response: callable):
             '/IC([^/]*)/?')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/?')), 0, 255) as turb,
-        artcc, product_id, flight_level,
+        coalesce(artcc, '') as artcc, product_id, flight_level,
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
         valid >= :sts and valid < :ets ORDER by valid ASC

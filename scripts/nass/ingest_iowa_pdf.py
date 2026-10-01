@@ -9,8 +9,8 @@ import warnings
 from datetime import datetime, timedelta
 
 import click
-import httpx
 import pytesseract
+import requests
 from pdf2image import convert_from_path
 from pdfminer.high_level import extract_text
 from pyiem.database import get_dbconnc
@@ -243,13 +243,13 @@ def workflow(sunday, engine, remotefn):
     # Find the PDF by looking at Monday, Tuesday, and Wednesday
     found = False
     if remotefn is not None:
-        req = httpx.get(f"{BASEURL}/{sunday:%Y}/{remotefn}")
+        req = requests.get(f"{BASEURL}/{sunday:%Y}/{remotefn}", timeout=30)
     else:
         for day in [1, 2, 3, 0]:
             valid = sunday + timedelta(days=day)
             uri = get_url(valid)
             LOG.info("Attempting %s", uri)
-            req = httpx.get(uri)
+            req = requests.get(uri, timeout=30)
             if req.status_code == 200:
                 found = True
                 break

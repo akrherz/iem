@@ -3,7 +3,7 @@
 * JSON data is in 3857
 """
 
-import httpx
+import requests
 from pyiem.database import get_dbconn
 from shapely.geometry import LineString, MultiLineString
 
@@ -29,7 +29,8 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    resp = httpx.get(URI, timeout=30)
+    resp = requests.get(URI, timeout=30)
+    resp.raise_for_status()
     jobj = resp.json()
     queue = []
     for feat in jobj["features"]:

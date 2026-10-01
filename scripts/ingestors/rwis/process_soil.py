@@ -4,8 +4,8 @@ import json
 import sys
 from datetime import datetime, timedelta, timezone
 
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.util import exponential_backoff, logger
 
@@ -63,7 +63,7 @@ def process_features(features):
 
 def main():
     """Go Main Go."""
-    resp = exponential_backoff(httpx.get, URI, timeout=30)
+    resp = exponential_backoff(requests.get, URI, timeout=30)
     if resp is None:
         LOG.info("failed to fetch %s", URI)
         return

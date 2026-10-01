@@ -2,8 +2,8 @@
 
 from datetime import timedelta
 
-import httpx
 import pandas as pd
+import requests
 from ingest_roads_rest import LOG, URI
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
@@ -24,7 +24,7 @@ def main():
             index_col="idot_id",
         )
     LOG.info("found %s rows from roads_base", len(df.index))
-    resp = httpx.get(URI, timeout=30)
+    resp = requests.get(URI, timeout=30)
     jobj = resp.json()
     archive_begin = utc()
     for feat in jobj["features"]:
