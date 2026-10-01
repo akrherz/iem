@@ -27,12 +27,32 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css"/ >
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<link rel="stylesheet" type="text/css" href="index.css"/ >
+<link rel="stylesheet" type="text/css" href="index.css?v=2"/ >
 EOM;
 
 $t->content = <<<EOM
 <div class="container-fluid">
 <h3>ISU Soil Moisture Network</h3>
+
+<section class="app-announcement mb-3" aria-labelledby="app-announcement-title">
+  <div class="app-announcement-icon" aria-hidden="true">
+    <i class="bi bi-phone"></i>
+  </div>
+  <div class="flex-grow-1">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+      <span class="app-announcement-label">Testing release</span>
+      <span class="small text-muted">Android and iOS</span>
+    </div>
+    <h4 id="app-announcement-title" class="h5 mb-1">A new ISU Soil Moisture app is being developed.</h4>
+    <p class="mb-0 small">
+    For Google Play Store access:
+    <a href="https://play.google.com/apps/testing/edu.iastate.mesonet.isusm_app">join via the web</a>
+    or <a href="https://play.google.com/store/apps/details?id=edu.iastate.mesonet.isusm_app">join via android</a>.
+    For iOS access, please email <a href="/info/contacts.php">daryl</a>.
+    </p>
+  </div>
+</section>
+
 
 <span id="defaultdt" data-dt="{$dt}"></span>
 
