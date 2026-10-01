@@ -506,6 +506,14 @@ def preflight_checks(environ: dict, start_response: Callable) -> str | None:
     return None
 
 
+def compute_table(sts: datetime, ets: datetime):
+    """Figure out if we don't need the massive alldata parent."""
+    # Tables are partitioned by UTC year
+    sts_utc = sts.astimezone(ZoneInfo("UTC"))
+    ets_utc = ets.astimezone(ZoneInfo("UTC"))
+    return f"t{sts_utc:%Y}" if sts_utc.year == ets_utc.year else "alldata"
+
+
 # NOTE This app can't be cached via iemapp since it is a generator
 @iemapp(
     help=__doc__,
@@ -594,12 +602,12 @@ def application(environ: dict, start_response: Callable):
 
     gisextra = environ["latlon"]
     elev_extra = environ["elev"]
-    table = "alldata"
+    table = compute_table(sts, ets)
     metalimiter = ""
     colextra = "0 as lon, 0 as lat, 0 as elev, "
     if gisextra or elev_extra:
         colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, elevation, "
-        table = "alldata a JOIN stations t on (a.station = t.id)"
+        table = f"{table} a JOIN stations t on (a.station = t.id)"
         metalimiter = "t.network ~* 'ASOS' and "
 
     rlimiter = ""
