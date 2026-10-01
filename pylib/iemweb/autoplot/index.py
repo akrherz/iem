@@ -428,8 +428,9 @@ def add_to_plotvars(value, fdict, arg, res):
 def set_cookie_networkselect(cookies, headers, arg, value):
     """Set a cookie with special logic for how stations are handled."""
     network = arg.get("network", "")
-    name = f"{arg['name']}_{network}"  # Important
-    if value == cookies.get(name):
+    name = f"{arg['name']}_{network}"
+    # network could be a list of strings, if so, ignore it
+    if not isinstance(network, str) or value == cookies.get(name):
         return
     headers.append(
         (
