@@ -2,6 +2,8 @@
 # Run every 5 minutes...
 VALID="$(date -u +'%Y-%m-%dT%H:%M'):00"
 
+python ingestors/other/ingest_ot0018.py &
+
 cd cache || exit 1
 python nws_wawa_archive.py &
 
