@@ -60,7 +60,7 @@ class Schema(CGIModel):
         str, Field(description="Product to request", max_length=100)
     ]
 
-    @field_validator("dstr", mode="before")
+    @field_validator("dstr", mode="after")
     @classmethod
     def validate_dstr(cls, val):
         """Ensure this converts to a datetime."""

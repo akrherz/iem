@@ -10,6 +10,7 @@ import calendar
 import numpy as np
 import pandas as pd
 from matplotlib import ticker
+from matplotlib.figure import Figure
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
@@ -93,9 +94,11 @@ def get_description():
     return desc
 
 
-def plot_trendline(fig, ctx, data, year0, lastyear):
+def plot_trendline(
+    fig: Figure, ctx: dict, data: np.ndarray, year0: int, lastyear: int
+):
     """Add the right hand side plot of trendline."""
-    ax = fig.add_axes([0.55, 0.1, 0.4, 0.8])
+    ax = fig.add_axes((0.55, 0.1, 0.4, 0.8))
     threshold = ctx["threshold"]
     if ctx["w"] == "last":
         threshold = np.max(data[-1, :])
@@ -108,6 +111,8 @@ def plot_trendline(fig, ctx, data, year0, lastyear):
             doys.append(idx[0])
         except ValueError:
             pass
+    if not doys:
+        return
 
     ax.scatter(years, doys, s=40)
     ax.set_xlim(year0 - 0.5, lastyear + 0.5)
@@ -142,9 +147,10 @@ def plot_trendline(fig, ctx, data, year0, lastyear):
     dt = pd.Timestamp("2000-01-01") + pd.Timedelta(days=int(meany))
     ax.annotate(
         f"Mean: {dt.strftime('%b %d')}",
-        xy=(0.9, meany),
+        xy=(1.01, meany),
         xycoords=("axes fraction", "data"),
-        va="top",
+        va="center",
+        rotation=-90,
     )
     ax.text(
         0.9,
@@ -215,12 +221,12 @@ def plotter(ctx: dict):
         if ctx["short_desc"] != "FD"
         else "Accumulated Days Suitable for Field Work"
     )
-    title = (
-        f"{state_names[state]} {tt}\n"
+    title = f"{state_names[state]} {tt}"
+    subtitle = (
         f"USDA NASS {year0:.0f}-{lastyear:.0f} -- "
         "Daily Linear Interpolated Values Between Weekly Reports"
     )
-    fig = figure(title=title, apctx=ctx)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes((0.05, 0.1, 0.35, 0.8))
 
     data = np.ma.ones((df["yeari"].max() + 1, 366), "f") * -1

@@ -104,7 +104,7 @@ def get_description():
     return desc
 
 
-def plotsbw(mp, df):
+def plotsbw(mp, df: gpd.GeoDataFrame):
     """Do sbw plotting."""
     df["color"] = df["ps"].apply(lambda x: NWS_COLORS.get(x, "k"))
     for panel in mp.panels:
@@ -117,10 +117,11 @@ def plotsbw(mp, df):
         df2.plot(
             ax=panel.ax,
             aspect=None,
-            edgecolor=df2["color"],
+            edgecolor=df2["color"].to_list(),
             facecolor="None",
             lw=2,
             zorder=Z_OVERLAY2 + 3,
+            add_labels=False,
         )
 
 
