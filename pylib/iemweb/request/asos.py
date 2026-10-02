@@ -8,10 +8,13 @@ Documentation on /cgi-bin/request/asos.py
 
 This cgi-bin script provides METAR/ASOS data.  It has a IP-based rate limit for
 requests to prevent abuse.  A `503 Service Unavailable` response will be
-returned if the server is under heavy load.
+returned if the server is under heavy load.  A `429 Too Many Requests` response
+will be returned if the IP-based rate limit is exceeded.
 
 Changelog:
 
+- 2026-10-02: Some database performance improvements were made and initial
+  monitoring indicates improved response time.
 - 2026-08-17: HTTP `OPTIONS` requests should be properly handled now.
 - 2026-04-21: Due to incessant requests against this service a 1 second
   per-IP throttle is now in place.  There is literally no reason to hit this
@@ -21,8 +24,6 @@ Changelog:
   to be allowed with the request prior to the database query for the actual
   data. You will get a HTTP 422 in this instance with a message to reduce size.
 - 2024-04-01: Fix recently introduced bug with time sort order.
-- 2024-03-29: This service had an intermediate bug whereby if the `tz` value
-  was not provided, it would default to `America/Chicago` instead of `UTC`.
 
 Example Usage
 -------------

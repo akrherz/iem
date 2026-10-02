@@ -10,13 +10,29 @@ and some more official totals with some sites reporting explicit values.  One
 should also note that typically the airport stations are for a 24 hour period
 over standard time, which means 1 AM to 1 AM daylight time.
 
+This service has a per-IP throttle requiring sequential requests with a two
+second sleep between requests.
+
 Changelog
 ---------
 
+- 2026-10-02: The ``network`` parameter is now optional allowing for the
+  service to dump everything for a single date at a time.  The service
+  ignores any end date parameters in this usage case.  Additionally, this
+  request will result in climatology variables **not** being included.
+- 2026-10-02: The IEM ``network`` identifier is now included within the
+  response to help with disambiguing the station identifier that is sometimes
+  shared between networks.  The IEM enforces unique station+network
+  identifiers.
 - 2026-02-26: Address issue with non-ASCII characters breaking service (GIGO).
 
 Example Usage
 -------------
+
+Request all IEM summary values for 15 January 2020.  Note that climatology
+variables are not included with this request.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?sts=2020-01-15
 
 Request all high temperature data for Ames, IA (AMW) for the month of January
 2019:
@@ -30,7 +46,7 @@ Request daily precipitation and the climatology for all stations in Washington
 state on 23 June 2023 in Excel format:
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?\
-sts=2023-06-23&ets=2023-06-23&network=WA_ASOS&stations=_ALL&\
+sts=2023-06-23&ets=2023-06-23&network=WA_ASOS&\
 var=precip_in,climo_precip_in&format=excel
 
 """
@@ -45,7 +61,12 @@ from pydantic import Field
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.web.fields import DAY_OF_MONTH_FIELD_OPTIONAL, NETWORK_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    MONTH_FIELD_OPTIONAL,
+    NETWORK_FIELD,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, error_log, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -65,8 +86,14 @@ class MyCGI(CGIModel):
     format: Annotated[str, Field(description="The format of the output")] = (
         "csv"
     )
-    na: Annotated[str, Field(description="The NA value to use")] = "None"
-    network: NETWORK_FIELD
+    na: Annotated[
+        str,
+        Field(
+            description="The string representation of missing values.",
+            pattern=r"^(?:None|M|blank)$",
+        ),
+    ] = "None"
+    network: NETWORK_FIELD = ""
     station: Annotated[
         ListOrCSVType,
         Field(
@@ -99,19 +126,11 @@ class MyCGI(CGIModel):
             ),
         ),
     ] = None
-    year1: Annotated[
-        int | None, Field(description="Start year when sts is not provided")
-    ] = None
-    month1: Annotated[
-        int | None, Field(description="Start month when sts is not provided")
-    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
     day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
-    year2: Annotated[
-        int | None, Field(description="End year when ets is not provided")
-    ] = None
-    month2: Annotated[
-        int | None, Field(description="End month when ets is not provided")
-    ] = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
@@ -127,7 +146,7 @@ def overloaded(environ: dict):
     return val > 20
 
 
-def get_climate(network, stations):
+def get_climate(network: str, stations: list[str]) -> str | pd.DataFrame:
     """Fetch the climatology for these stations"""
     nt = NetworkTable(network, only_online=False)
     if not nt.sts:
@@ -161,15 +180,24 @@ def get_climate(network, stations):
     return df
 
 
-def get_data(network, sts, ets, stations, cols, na, fmt):
+def get_data(network: str, sts, ets, stations, cols, na, fmt: str):
     """Go fetch data please"""
     if not cols:
         cols = copy.deepcopy(DEFAULT_COLS)
     cols.insert(0, "day")
     cols.insert(0, "station")
-    climate = get_climate(network, stations)
-    if isinstance(climate, str):
-        return climate
+    cols.append("network")
+    climate = None
+    # When network == "", we are getting everything for a single day!
+    query_limiter = "s.day = :st"
+    if network != "":
+        query_limiter = (
+            "s.day >= :st and s.day <= :et and t.network = :network "
+            "and t.id = ANY(:ds)"
+        )
+        climate = get_climate(network, stations)
+        if isinstance(climate, str):
+            return climate
 
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
@@ -187,24 +215,24 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
             min_feel, avg_feel, max_feel,
             max_sknt as max_wind_speed_kts,
             max_gust as max_wind_gust_kts,
-            srad_mj, ncei91, to_char(day, 'mmdd') as sday
+            srad_mj, ncei91, to_char(day, 'mmdd') as sday, network
             from summary s JOIN stations t
-            on (t.iemid = s.iemid) WHERE
-            s.day >= :st and s.day <= :et and
-            t.network = :n and t.id = ANY(:ds)
-            ORDER by day ASC"""
+            on (t.iemid = s.iemid) WHERE {query_limiter}
+            ORDER by day, t.id ASC""",
+                query_limiter=query_limiter,
             ),
             conn,
-            params={"st": sts, "et": ets, "n": network, "ds": stations},
+            params={"st": sts, "et": ets, "network": network, "ds": stations},
         )
-    # Join to climate data frame
-    df = df.merge(
-        climate,
-        how="left",
-        left_on=["ncei91", "sday"],
-        right_on=["station", "sday"],
-        suffixes=("", "_r"),
-    )
+    if climate is not None:
+        # Join to climate data frame
+        df = df.merge(
+            climate,
+            how="left",
+            left_on=["ncei91", "sday"],
+            right_on=["station", "sday"],
+            suffixes=("", "_r"),
+        )
     df = df[df.columns.intersection(cols)]
     if na != "blank":
         df = df.fillna(na)
@@ -224,9 +252,14 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
 @iemapp(help=__doc__, schema=MyCGI, parse_times=True, ip_throttle_secs=1.0)
 def application(environ, start_response):
     """See how we are called"""
-    if environ["sts"] is None or environ["ets"] is None:
-        raise IncompleteWebRequest("Missing start and end times")
-    sts, ets = environ["sts"].date(), environ["ets"].date()
+    query: MyCGI = environ["_cgimodel_schema"]
+    if query.sts is None:
+        raise IncompleteWebRequest("Missing required start time information.")
+    if query.ets is None:
+        if query.network != "":
+            raise IncompleteWebRequest("Required end time missing.")
+        query.ets = query.sts
+    sts, ets = query.sts.date(), query.ets.date()
 
     if sts.year != ets.year and overloaded(environ):
         start_response(
@@ -234,13 +267,11 @@ def application(environ, start_response):
         )
         return [b"ERROR: server over capacity, please try later"]
 
-    fmt = environ.get("format", "csv")
     stations = environ["stations"]
     if not stations:
         stations = environ["station"]
-    if not stations:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"ERROR: No stations specified for request"]
+    if not stations and query.network != "":
+        stations = ["_ALL"]
     network = environ["network"][:20]
     if "_ALL" in stations:
         if (ets - sts).days > 366:
@@ -250,20 +281,19 @@ def application(environ, start_response):
         stations = list(NetworkTable(network, only_online=False).sts.keys())
     cols = environ["var"]
     na = environ["na"]
-    if na not in ["M", "None", "blank"]:
+    if query.format != "excel":
+        payload = get_data(
+            network, sts, ets, stations, cols, na, query.format
+        ).encode(
+            "ascii",
+            errors="ignore",
+        )
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"ERROR: Invalid `na` value provided. {M, None, blank}"]
-    if fmt != "excel":
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [
-            get_data(network, sts, ets, stations, cols, na, fmt).encode(
-                "ascii",
-                errors="ignore",
-            )
-        ]
+        return [payload]
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=daily.xlsx"),
     ]
+    payload = get_data(network, sts, ets, stations, cols, na, query.format)
     start_response("200 OK", headers)
-    return [get_data(network, sts, ets, stations, cols, na, fmt)]
+    return [payload]
