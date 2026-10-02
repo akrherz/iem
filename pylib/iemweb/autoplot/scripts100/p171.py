@@ -109,11 +109,15 @@ def get_description():
     return desc
 
 
-def get_ugc_name(ugc):
+def get_ugc_name(ugc: str) -> tuple[str, str]:
     """Return the WFO and county name."""
     cursor = get_dbconn("postgis").cursor()
     cursor.execute(
-        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+        (
+            "SELECT name, wfo from ugcs where ugc = %s "
+            "order by end_ts desc nulls first"
+        ),
+        (ugc,),
     )
     return cursor.fetchone()
 
