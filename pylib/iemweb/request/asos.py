@@ -520,7 +520,6 @@ def compute_table(sts: datetime, ets: datetime):
     help=__doc__,
     parse_times=False,
     schema=MyModel,
-    ip_throttle_secs=1.0,
 )
 def application(environ: dict, start_response: Callable):
     """Go main"""
