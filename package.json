@@ -25,10 +25,10 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/ol": "^7.0.0",
-    "eslint": "^10.9.1",
-    "eslint-plugin-jsdoc": "^64.2.1",
-    "globals": "^17.11.0",
-    "prettier": "^3.9.6",
+    "eslint": "^10.11.0",
+    "eslint-plugin-jsdoc": "^65.0.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
     "typescript": "^7.0.2"
   },
   "engines": {
