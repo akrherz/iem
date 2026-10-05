@@ -25,6 +25,11 @@ if (array_key_exists("e", $_GET)) {
     if ($e === false) {
         die405();
     }
+    // Ensure that the timestamp is within reason
+    $year = intval($e->format("Y"));
+    if ($year < 1982 || $year > 2030) {
+        die405();
+    }
 }
 $pil = get_str404("pil", null, $maxlength=6);
 if (is_null($pil) || trim($pil) == "") {
