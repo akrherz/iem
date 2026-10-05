@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.database import sql_helper, with_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
 from sqlalchemy.engine import Connection
@@ -56,8 +56,11 @@ def get_description():
 def get_data(ctx: dict, conn: Connection | None = None):
     """Get some data please"""
     station = ctx["station"]
-    threshold = ctx["threshold"]
-    threshold = TRACE_VALUE if threshold in ["T", "t"] else float(threshold)
+    t_in = ctx["threshold"]
+    try:
+        threshold = TRACE_VALUE if t_in in ["T", "t"] else float(t_in)
+    except ValueError as exp:
+        raise IncompleteWebRequest("Invalid threshold value.") from exp
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
