@@ -20,6 +20,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
+import warnings
 from datetime import datetime, timedelta, timezone
 
 import click
@@ -32,6 +33,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
+# Stuck on older rasterio that warns on newest numpy
+warnings.simplefilter("ignore", DeprecationWarning)
 
 
 def get_geotiff(valid: datetime, source: str) -> np.ndarray | None:
