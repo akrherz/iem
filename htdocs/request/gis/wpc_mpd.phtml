@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 129);
 require_once "../../../include/myview.php";
@@ -6,6 +6,7 @@ require_once "../../../include/forms.php";
 
 $t = new MyView();
 $t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $content = <<<EOM
 <div class="container-fluid">
 <nav aria-label="breadcrumb">
@@ -169,11 +170,7 @@ $content .= <<<EOM
     <div class="alert alert-primary" role="alert">
       <strong><i class="bi bi-api"></i> API Integration:</strong> The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
       NWS Text products and can be used to call an IEM API to fetch the text of
-      this product: <code>{$EXTERNAL_BASEURL}/api/1/nwstext/{PROD_ID}</code>
-    </div>
-    <div class="alert alert-info" role="alert">
-      <strong><i class="bi bi-link-45deg"></i> SPC Integration:</strong> The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
-      a stable URL into SPC's website like so: <code>https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</code>
+      this product: <code>{$eburl}/api/1/nwstext/{PROD_ID}</code>
     </div>
   </div>
 </div>

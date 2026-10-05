@@ -12,7 +12,7 @@ $day = intval($dt->format("d"));
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 
 $dirRef = date("Y/m/d", $myTime);
-$dataurl = "{$EXTERNAL_BASEURL}/archive/data/$dirRef/text/ot/ot0002.dat";
+$dataurl = IEMConfig::EXTERNAL_BASEURL . "/archive/data/$dirRef/text/ot/ot0002.dat";
 
 $ys = yearSelect(2003, $year, "year");
 $ms = monthSelect($month, "month");

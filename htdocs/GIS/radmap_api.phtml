@@ -1,8 +1,9 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "RadMap API";
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <style>
 div.item h4 {
@@ -31,9 +32,9 @@ that the API presented here may change in the future.
 
 <h3>Basic HTML example:</h3>
 <pre>
-&lt;img src="{$EXTERNAL_BASEURL}/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
+&lt;img src="{$eburl}/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
 </pre>
-<img src="/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" 
+<img src="/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000"
 width="640" height="480" alt="radmap image"/>
 
 <h3>HTTP GET Parameters</h3>
@@ -42,13 +43,13 @@ width="640" height="480" alt="radmap image"/>
 <div class="desc">
  Layer(s) to draw in the map. Here is a list of available layers:
 <ul>
-    <li><i>airtemps</i> - <strong>Realtime Only</strong> Plot 2 meter air 
+    <li><i>airtemps</i> - <strong>Realtime Only</strong> Plot 2 meter air
         temperatures in Fahrenheit.</li>
  <li><i>cbw</i> - County/Zone based Watch/Warning/Advisories</li>
  <li><i>county_warnings</i> - County based Warnings</li>
  <li><i>cwas</i> - National Weather Service County Warning Area (CWA)</li>
  <li><i>goes</i> - <a href="goes.phtml">GOES Satellite</a> imagery, you
- also need to specify the product as a seperate 
+ also need to specify the product as a seperate
  CGI variable. <sup>[2]</sup>
  <ul>
      <li><i>goes_product</i> VIS for visible, IR for infrared, and WV for water
@@ -61,7 +62,7 @@ width="640" height="480" alt="radmap image"/>
  <li><i>nexrad</i> - CONUS Nexrad Base Reflectivity Composite <sup>[2]</sup></li>
  <li><i>places</i> - 2010 Census Incorporated Places </li>
  <li><i>ridge</i> - Single Site <a href="ridge.phtml">NEXRAD/TDWR</a> imagery, you
- also need to specify the RADAR site and level 3 product as two seperate 
+ also need to specify the RADAR site and level 3 product as two seperate
  CGI variables. <sup>[2]</sup>
  <ul>
      <li><i>ridge_radar</i> 3 character radar identifier</li>
@@ -116,7 +117,7 @@ time or the realtime imagery if no time (variable ts) is specified.
 <div class="item">
  <h4>&amp;vtec=...</h4>
 <div class="desc">
- VTEC identification string of a specific product.  The result is a map 
+ VTEC identification string of a specific product.  The result is a map
  centered on this product with a timestamp set to product issuance. An
  example VTEC string is: "2008.O.NEW.KDMX.TO.W.0048".
 </div>
@@ -125,7 +126,7 @@ time or the realtime imagery if no time (variable ts) is specified.
 <div class="item">
  <h4>&amp;pid=...</h4>
 <div class="desc">
-  This is for the specific example of offices who issue geometries with 
+  This is for the specific example of offices who issue geometries with
   their SPS statements.  An example string is: "200903082123-KGRR-WWUS83-SPSGRR"
 </div>
 </div>
@@ -141,7 +142,7 @@ time or the realtime imagery if no time (variable ts) is specified.
 <div class="item">
  <h4>&amp;ts=YYYYMMDDHHII</h4>
 <div class="desc">
-  Timestamp in UTC for which the map is valid for.  For example, 6:45 UTC on 
+  Timestamp in UTC for which the map is valid for.  For example, 6:45 UTC on
 5 Jun 2005 would be "200506050645".  For the imagery layers, this timestamp is
 used to find the closest imagery in time.
 </div>
@@ -150,7 +151,7 @@ used to find the closest imagery in time.
 <div class="item">
  <h4>&amp;ts1=YYYYMMDDHHII&amp;ts2=YYYYMMDDHHII</h4>
 <div class="desc">
-  Start and end timestamp in UTC for to look for Local Storm Reports. 
+  Start and end timestamp in UTC for to look for Local Storm Reports.
   For example, 6:45 UTC on 5 Jun 2005 would be "200506050645". If ts1 is not
   specified, it defaults to the value of ts.
 </div>
@@ -188,7 +189,7 @@ now = datetime(2008, 8, 3, 0, 0)
 ets = datetime(2008, 8, 3, 12, 0)
 interval = timedelta(minutes=5)
 
-baseuri = "{$EXTERNAL_BASEURL}/GIS/radmap.php?"
+baseuri = "{$eburl}/GIS/radmap.php?"
 baseuri += "width=800&amp;height=600&amp;bbox=-95,42.5,-89,45.5"
 baseuri += "&amp;layers[]=uscounties&amp;layers[]=nexrad&amp;layers[]=sbw"
 baseuri += "&amp;layers[]=watch_by_county"

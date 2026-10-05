@@ -7,6 +7,7 @@ $t->iem_resource = "IEMRE";
 
 $s4link = sprintf("/archive/data/%s/stage4/", date("Y/m/d"));
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <div class="container-fluid">
 <h3 class="mb-4">IEM Reanalysis (IEMRE)</h3>
@@ -287,9 +288,9 @@ fields are refined as better and more detailed data is processed.</p>
             </div>
             <div class="card-body">
                 <p class="card-text"><strong>Form:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/multiday/{YYYY-MM-DD::date1}/{YYYY-MM-DD::date2}/{LAT}/{LON}/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/multiday/{YYYY-MM-DD::date1}/{YYYY-MM-DD::date2}/{LAT}/{LON}/json</code>
                 <p class="card-text mt-2"><strong>Example:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/multiday/2010-05-01/2010-09-30/42.54/-96.40/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/multiday/2010-05-01/2010-09-30/42.54/-96.40/json</code>
             </div>
         </div>
     </div>
@@ -302,9 +303,9 @@ fields are refined as better and more detailed data is processed.</p>
             </div>
             <div class="card-body">
                 <p class="card-text"><strong>Form:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/daily/{YYYY-MM-DD}/{LAT}/{LON}/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/daily/{YYYY-MM-DD}/{LAT}/{LON}/json</code>
                 <p class="card-text mt-2"><strong>Example:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/daily/2010-05-01/42.54/-96.40/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/daily/2010-05-01/42.54/-96.40/json</code>
             </div>
         </div>
     </div>
@@ -317,9 +318,9 @@ fields are refined as better and more detailed data is processed.</p>
             </div>
             <div class="card-body">
                 <p class="card-text"><strong>Form:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/hourly/{YYYY-MM-DD}/{LAT}/{LON}/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/hourly/{YYYY-MM-DD}/{LAT}/{LON}/json</code>
                 <p class="card-text mt-2"><strong>Example:</strong></p>
-                <code class="d-block bg-light p-2 rounded">{$EXTERNAL_BASEURL}/iemre/hourly/2010-05-01/42.54/-96.40/json</code>
+                <code class="d-block bg-light p-2 rounded">{$eburl}/iemre/hourly/2010-05-01/42.54/-96.40/json</code>
                 <small class="text-muted">Single Day's Hourly (CDT/CST) Request</small>
             </div>
         </div>

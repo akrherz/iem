@@ -7,12 +7,19 @@ require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $nt = new NetworkTable("ISUSM");
 
-$PUBLIC_URI = "{$EXTERNAL_BASEURL}/api/1/currents.json?network=ISUSM";
+$PUBLIC_URI = IEMConfig::EXTERNAL_BASEURL . "/api/1/currents.json?network=ISUSM";
 $arr = array(
     "network" => "ISUSM",
 );
 $jobj = iemws_json("currents.json", $arr);
 
+/**
+ * Pretty print a value for display in the table.
+ *
+ * @param mixed $val The value to format.
+ * @param string $fmt The sprintf format string.
+ * @return string The formatted value or "M" if null.
+ */
 function pretty($val, $fmt)
 {
     // Pretty print things for the table
