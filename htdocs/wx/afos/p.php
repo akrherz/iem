@@ -27,7 +27,8 @@ if (array_key_exists("e", $_GET)) {
     }
     // Ensure that the timestamp is within reason
     $year = intval($e->format("Y"));
-    if ($year < 1982 || $year > 2030) {
+    $maxYear = intval(gmdate("Y")) + 1;
+    if ($year < 1982 || $year > $maxYear) {
         die405();
     }
 }
