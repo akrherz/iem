@@ -11,10 +11,11 @@ requests can be slow.
 Changelog
 ---------
 
+- 2026-10-05: The AI Bots now seem to love this service, so a serial
+  request throttle per remote client IP is now in place.
 - 2024-04-18: Allowed cross-year requests, but limited to 365 days when
   requesting more than one station.
 - 2024-04-09: Migrated to pydantic based CGI field validation.
-- 2024-03-15: Initial documentation added
 
 Example Requests
 ----------------
@@ -199,7 +200,7 @@ def threshold_search(table: pd.DataFrame, threshold, thresholdvar: str):
     return pd.DataFrame(res)
 
 
-@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema, ip_throttle_secs=0.1)
 def application(environ, start_response):
     """Go do something"""
     if environ["sts"] is None or environ["ets"] is None:

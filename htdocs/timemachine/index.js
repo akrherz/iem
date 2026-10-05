@@ -108,15 +108,17 @@ function updateTimeDisplay() {
     const hourElem = document.getElementById('hour-value');
     const minuteElem = document.getElementById('minute-value');
 
-    yearElem.textContent = dt.year();
-    monthElem.textContent = dt.format('MMM');
-    dayElem.textContent = dt.format('D');
+    // dt is UTC; the widgets show local time, matching the "Local" card
+    const localDt = dt.clone().local();
+    yearElem.textContent = localDt.year();
+    monthElem.textContent = localDt.format('MMM');
+    dayElem.textContent = localDt.format('D');
 
-    const hour = dt.hour();
+    const hour = localDt.hour();
     const period = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
     hourElem.textContent = `${hour12} ${period}`;
-    minuteElem.textContent = dt.format('mm');
+    minuteElem.textContent = localDt.format('mm');
 
     // Set ARIA attributes for live update
     yearElem.setAttribute('aria-live', 'polite');
