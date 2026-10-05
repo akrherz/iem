@@ -52,7 +52,7 @@ def main():
         cob[thisStation]["SNOD"] = float(thisSnowD)
         cob[thisStation]["LAT"] = row["lat"]
         cob[thisStation]["LON"] = row["lon"]
-        cob[thisStation]["NAME"] = row["name"]
+        cob[thisStation]["NAME"] = row["name"] or ""
         cob[thisStation]["ELEV_M"] = row["elevation"]
         cob[thisStation]["PMOI"] = 0.0
         cob[thisStation]["SMOI"] = 0.0
@@ -113,7 +113,7 @@ def main():
                 item["SMOI"] = -99.0
             w.record(
                 sid,
-                item["NAME"],
+                item["NAME"][:64].strip(),
                 item["ELEV_M"],
                 ts,
                 "1200",
