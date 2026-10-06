@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
@@ -29,11 +30,11 @@ Line coverage shapefile in the <i>NAD83 UTM Zone15 North</i> projection.
 <p>This file is in KML format, which works in many applications, such as
 Google Earth.<br />
 
-<a href="/kml/roadcond.kml">{$EXTERNAL_BASEURL}/kml/roadcond.kml</a>
+<a href="/kml/roadcond.kml">{$eburl}/kml/roadcond.kml</a>
 
 <p>Also, here is a test layer you can use to see the various colors used.<br />
 
-<a href="/kml/roadcond.php?test">{$EXTERNAL_BASEURL}/kml/roadcond.php?test</a>
+<a href="/kml/roadcond.php?test">{$eburl}/kml/roadcond.php?test</a>
 
 <h4>Open GIS Consortium Web Services:</h4>
 <p>
@@ -44,6 +45,6 @@ application to one of these services.
 </p>
 
 <p><strong>Web Map Service:</strong>
-<br /> <code>{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
+<br /> <code>{$eburl}/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
 EOM;
 $t->render('single.phtml');

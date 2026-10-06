@@ -25,7 +25,7 @@ $ar = array(
 $pselect = make_select("period", 1, $ar);
 
 $archivedir = '/archive/data/' . date("Y") . '/' . date('m') . '/' . date('d') . '/GIS/mrms';
-
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <h3>IEM Rainfall</h3>
 
@@ -146,7 +146,7 @@ If your GIS system supports accessing Web Map Service (WMS),
 you can directly pull in some of these rainfall estimates
 from the IEM server.  Our WMS URI is:
 <pre>
-{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/rainfall.cgi?
+{$eburl}/cgi-bin/wms/iowa/rainfall.cgi?
 </pre>
 
 <p>Pulling data into GIS applications via these services has not been widely
@@ -218,7 +218,7 @@ choose is the end time of the given accumulation period. <strong>This time
 is in UTC / GMT time!</strong> You could script
 against this service by using a URI like so:<br /><br />
 <code>
-{$EXTERNAL_BASEURL}/rainfall/mrms2img.py?year=2014&amp;month=9&amp;day=4&amp;hour=0&amp;period=24
+{$eburl}/rainfall/mrms2img.py?year=2014&amp;month=9&amp;day=4&amp;hour=0&amp;period=24
 </code>
 </p>
 

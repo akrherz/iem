@@ -22,7 +22,7 @@ $t->jsextra = <<<EOM
 <script src="emergencies.js"></script>
 EOM;
 
-
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <div class="container-fluid">
     <div class="row">
@@ -53,7 +53,7 @@ $t->content = <<<EOM
             <div class="alert alert-secondary" role="alert">
                 <h6 class="alert-heading"><i class="bi bi-link-45deg"></i> External Resources</h6>
                 <p class="mb-2">Link to <a href="https://en.wikipedia.org/wiki/List_of_United_States_tornado_emergencies" class="alert-link" target="_blank">Wikipedia List of United States tornado emergencies</a></p>
-                <p class="mb-0">Data available via <a href="/api/1/docs#/vtec/service_nws_emergencies__fmt__get" class="alert-link">IEM webservice</a>: <code>{$EXTERNAL_BASEURL}/api/1/nws/emergencies.geojson</code></p>
+                <p class="mb-0">Data available via <a href="/api/1/docs#/vtec/service_nws_emergencies__fmt__get" class="alert-link">IEM webservice</a>: <code>{$eburl}/api/1/nws/emergencies.geojson</code></p>
             </div>
         </div>
         <div class="col-md-6">

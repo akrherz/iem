@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
@@ -7,12 +7,13 @@ define("IEM_APPID", 67);
 $t->title = "GIS RADAR Information";
 
 $d = date("Y/m/d");
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $t->content = <<<EOM
 <style>
 .coded {
-    border-top: 1px solid #ccc; 
-    background: #EEFFCC; 
-    border-bottom: 1px solid #ccc; 
+    border-top: 1px solid #ccc;
+    background: #EEFFCC;
+    border-bottom: 1px solid #ccc;
     padding-left: 5px;
 }
 </style>
@@ -24,13 +25,13 @@ and produce plots within GIS. Please do not use these services in applications
 that have thousands of simultaneous users!  Our servers will melt!</div>
 
 <div style="width: 310px; float: right; border: 1px solid #000; padding: 5px; margin: 5px;">
-<a href="{$EXTERNAL_BASEURL}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
-<img width="300" src="{$EXTERNAL_BASEURL}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+<a href="{$eburl}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+<img width="300" src="{$eburl}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
 </a>
 <br />May 3, 1999 : Moore Oklahoma F5 Tornado 7:12 PM.
 </div>
 
-<p>Since 2003, the IEM has been providing <a href="/docs/nexrad_mosaic/">mosiacs</a> 
+<p>Since 2003, the IEM has been providing <a href="/docs/nexrad_mosaic/">mosiacs</a>
 of National Weather Service
 RADAR imagery for use within GIS systems.  While these mosaics are nice, they
 are often ugly at very small scales (due to the crude nature of the mosaicking
@@ -38,10 +39,10 @@ process).  These images are also of base reflectivity and not of non-compositabl
 products like velocity.
 
 <p>The services mentioned on this page provide access to products that contain
-data from one RADAR site for one level3 product at one volume scan time!  The 
+data from one RADAR site for one level3 product at one volume scan time!  The
 archive for these products starts in 2012.
 
-<p>These images are provided in the 
+<p>These images are provided in the
 <a href="https://spatialreference.org/ref/epsg/4326/">EPSG:4326</a> projection. This
 is a commonly used projection for what people like to call "un-projected" lat/lon. Of
 course, this is not correct terminology, but anyway...
@@ -55,11 +56,11 @@ course, this is not correct terminology, but anyway...
 
 <h3>Realtime Raw Data:</h3>
 
-<p>The most recent imagery is dumped into a browser navigable folder 
+<p>The most recent imagery is dumped into a browser navigable folder
 <a href="/data/gis/images/4326/ridge/">here</a>. There is one folder per RADAR
 site given by its three character call identifier.  Data for FAA and DOD RADARs
-is available as well here.  Due to storage and CPU constraints, we are not 
-processing all level3 products at this time.  The following is a list of 
+is available as well here.  Due to storage and CPU constraints, we are not
+processing all level3 products at this time.  The following is a list of
 processed products, click on the name for a color ramp for that product.
 <ul>
  <li>TZL - <a href="legends/TZL.gif">TDWR Base Reflectivity</a></li>
@@ -83,17 +84,17 @@ like volume coverage pattern and may contain other information in the future.
 <h3>Archived Raw Data:</h3>
 
 <p>An intense aspect of this effort is to archive all of the images we generate!
-This is a scary proposition at the moment, but if we fail, let us fail in a 
+This is a scary proposition at the moment, but if we fail, let us fail in a
 spectacular manner!  This should generate terabytes of data per year and millions
 of files!  Anyway, these images are organized like the real-time data, but in
 per-UTC day folders like so:
 <br />
-<a href="/archive/data/{$d}/GIS/ridge/">{$EXTERNAL_BASEURL}/archive/data/{$d}/GIS/ridge/</a> 
+<a href="/archive/data/{$d}/GIS/ridge/">{$eburl}/archive/data/{$d}/GIS/ridge/</a>
 
 <p>Data appears in the archive at the same time as it does for the realtime data.
 So this is neat, but how can you programically work with this data?  Here is
 <a href="https://github.com/akrherz/DEV/blob/main/ridge/fetch_files.py">a example script</a>
-that uses the API below to download a single RADAR product for a time period of 
+that uses the API below to download a single RADAR product for a time period of
 your choice.
 
 <h3>JSON Metadata services</h3>
@@ -104,15 +105,15 @@ web services that may be able to help you.  These services are still being devel
 so please send critical feedback on how to improve them.
 
 <p><strong>Available RADARs:</strong><br /> This service returns single site and
-composite RADAR IDs for a location and time of your choice.  This attempts to 
-answer the question: if I want to show a map for New York City on 28 March 2011, 
+composite RADAR IDs for a location and time of your choice.  This attempts to
+answer the question: if I want to show a map for New York City on 28 March 2011,
 which RADAR sites are available?  If you do not specific a location, the
 service returns an estimate of RADARs available for the date of your timestamp.
 <br />
 <pre class="coded">
-URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=available
+URI: {$eburl}/json/radar.py?operation=available
 HTTPD GET Variables:
- lat    - (optional) Latitude of your interested point 
+ lat    - (optional) Latitude of your interested point
  lon    - (optional) Longitude (-180 to 180) of your interested point
  start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
 </pre></p>
@@ -120,9 +121,9 @@ HTTPD GET Variables:
 <p><strong>Available Products for RADAR:</strong><br /> This service returns
 what products are available for this RADAR near a given time. <br />
 <pre class="coded">
-URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=products
+URI: {$eburl}/json/radar.py?operation=products
 HTTPD GET Variables:
- radar  - RADAR identifier 
+ radar  - RADAR identifier
  start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
 </pre></p>
 
@@ -132,9 +133,9 @@ radar, product, and during a period of time.  The results of this query can
 then be fed back to request actual images or tiles from the Tile Map Service.
 <strong>This service has a 500 scan limit return for each query.</strong><br />
 <pre class="coded">
-URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=list
+URI: {$eburl}/json/radar.py?operation=list
 HTTPD GET Variables:
- radar  - RADAR identifier 
+ radar  - RADAR identifier
  product- level3 product identifier
  start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
  end    - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
@@ -142,24 +143,24 @@ HTTPD GET Variables:
 
 <h3>Tile Map Service</h3>
 
-<p>The IEM provides a caching <a href="/ogc/">tile map service</a> to provide 
+<p>The IEM provides a caching <a href="/ogc/">tile map service</a> to provide
 tiles to Google Maps type applications in spherical mercator projection. This
 archive and current realtime imagery is exposed via this service!  Here is how
 you can access it:<br />
 <pre class="coded">
 Archived:
-{$EXTERNAL_BASEURL}/cache/tile.py/1.0.0/ridge::BMX-N0Q-201201230813/7/33/50.png
+{$eburl}/cache/tile.py/1.0.0/ridge::BMX-N0Q-201201230813/7/33/50.png
 
 Latest imagery:
-{$EXTERNAL_BASEURL}/cache/tile.py/1.0.0/ridge::BMX-N0Q-0/7/33/50.png
+{$eburl}/cache/tile.py/1.0.0/ridge::BMX-N0Q-0/7/33/50.png
 </pre>
 
 <p>The 7/33/50 portion is the standard Z/X/Y tile map specification, your plotting
-application will generate these automatically.  The key portion is the 
-"ridge::BMX-N0Q-201201230813" service name.  This is used by the server code to 
-find the archived image you want.  The "BMX-N0Q-201201230813" should hopefully 
+application will generate these automatically.  The key portion is the
+"ridge::BMX-N0Q-201201230813" service name.  This is used by the server code to
+find the archived image you want.  The "BMX-N0Q-201201230813" should hopefully
 make sense, it is the combination of RADAR ID, product ID, and UTC timestamp of
-the imagery!  Specifying zero as the timestamp will give you the most recent 
+the imagery!  Specifying zero as the timestamp will give you the most recent
 image, which is hopefully current!
 
 <p>There you have it, we would be happy to know what you think of this.  Hopefully
@@ -168,7 +169,7 @@ we will come up with something clever to provide legends for the imagery!
 
 <h3>LDM Service</h3>
 
-<p>All of the generated imagery passes through Unidata's LDM software.  If you 
+<p>All of the generated imagery passes through Unidata's LDM software.  If you
 have LDM and would like a feed of the imagery, we can certainly provide you
 one!  It comes on the EXP feedtype with easy to use product identifiers.
 

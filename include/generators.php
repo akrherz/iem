@@ -181,7 +181,7 @@ EOF;
  */
 function gen_feature($t)
 {
-    global $EXTERNAL_BASEURL;
+    $eburl = IEMConfig::EXTERNAL_BASEURL;
     $s = '';
 
     $connection = iemdb("mesosite");
@@ -318,7 +318,7 @@ EOM;
 <script src="index.js"></script>
 {$jsextra}
 EOF;
-        $huri = "{$EXTERNAL_BASEURL}/onsite/features/cat.php?day=" . $row["permalink"];
+        $huri = "{$eburl}/onsite/features/cat.php?day=" . $row["permalink"];
         $fbtext = <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOF;
@@ -357,10 +357,11 @@ EOF;
                 '<div class="d-flex align-items-center">' .
                 '<span class="badge bg-primary me-2 flex-shrink-0">%s</span>' .
                 '<small class="text-truncate">' .
-                '<a href="onsite/features/cat.php?day=%s" class="text-decoration-none">%s%s</a>' .
+                '<a href="%s/onsite/features/cat.php?day=%s" class="text-decoration-none">%s%s</a>' .
                 '</small>' .
                 '</div></div></div>',
                 $row["yr"],
+                $eburl,
                 substr($row["valid"], 0, 10),
                 $icon,
                 htmlspecialchars($row["title"])

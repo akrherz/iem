@@ -236,6 +236,7 @@ EOM;
 if (isset($_GET["hail"])) {
     require_once "../../include/cow_worker.php";
 } else {
+    $eburl = IEMConfig::EXTERNAL_BASEURL;
     $content .= <<<EOM
 
 <h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
@@ -315,7 +316,7 @@ Warnings was added, but note that verifying LSRs only became an option after
 </p>
 
 <p>The JSON emitting service endpoint is:
-<br /><code>{$EXTERNAL_BASEURL}/api/1/cow.json</code></p>
+<br /><code>{$eburl}/api/1/cow.json</code></p>
 
 <p>This endpoint accepts a large number of CGI parameters via HTTP GET. None of
 the parameters are required.</p>

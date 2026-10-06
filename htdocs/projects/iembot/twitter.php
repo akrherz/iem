@@ -158,7 +158,7 @@ if (is_null($screen_name) || is_null($iembot_account_id)) {
     $connection = new TwitterOAuth(TWITTER_KEY, TWITTER_SECRET);
     $request_token = $connection->oauth(
         "oauth/request_token",
-        ["oauth_callback" => "{$EXTERNAL_BASEURL}/projects/iembot/twitter.php?cb"]
+        ["oauth_callback" => IEMConfig::EXTERNAL_BASEURL . "/projects/iembot/twitter.php?cb"]
     );
     $_SESSION['token'] = $token = $request_token['oauth_token'];
     $_SESSION['token_secret'] = $request_token['oauth_token_secret'];

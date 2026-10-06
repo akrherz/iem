@@ -3,19 +3,26 @@ require_once "../../../config/settings.inc.php";
 header("Content-type: text/plain");
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 echo <<<EOM
 Title: Iowa ASOS Only
 Refresh: 5
 Color: 200 200 255
-IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png" 
-IconFile: 2, 15, 15, 8, 8, "{$EXTERNAL_BASEURL}/request/grx/cloudcover.png" 
+IconFile: 1, 18, 32, 2, 31, "{$eburl}/request/grx/windbarbs.png"
+IconFile: 2, 15, 15, 8, 8, "{$eburl}/request/grx/cloudcover.png"
 Font: 1, 11, 1, "Courier New"
 
 EOM;
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
 
-function s2icon($s)  // skipcq
+/**
+ * Convert wind speed in knots to an icon code.
+ *
+ * @param float $s Wind speed in knots.
+ * @return string Icon code.
+ */
+function s2icon($s)
 {
     if ($s < 2.5) return "1,21";
     if ($s < 5) return "1,1";
@@ -55,13 +62,13 @@ foreach ($jobj["data"] as $bogus => $iemob) {
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
 
     echo "Object: " . $mydata["lat"] . "," . $mydata["lon"] . "
-  Threshold: 999 
+  Threshold: 999
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
-  Icon: 0,0,000,2,5,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n\" 
+  Icon: 0,0,000,2,5,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n\"
   Threshold: 150
-  Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \" 
-  Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \" 
- End: 
+  Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \"
+  Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \"
+ End:
 
 ";
 }

@@ -51,6 +51,7 @@ if (
     $delta = (
         ($newlat - $metadata["lat"]) ** 2 +
         ($newlon - $metadata["lon"]) ** 2) ** 0.5;
+    $eburl = IEMConfig::EXTERNAL_BASEURL;
     $msg = <<<EOM
 IEM Sites Move Request
 ======================
@@ -62,8 +63,8 @@ IEM Sites Move Request
 > LAT:         {$newlat} OLD: {$metadata["lat"]}
 > EMAIL:       {$email}
 
-Review with suggested location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}&suggested_lat={$newlat}&suggested_lon={$newlon}
-Original location: {$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
+Review with suggested location: {$eburl}/sites/site.php?network={$network}&station={$station}&suggested_lat={$newlat}&suggested_lon={$newlon}
+Original location: {$eburl}/sites/site.php?network={$network}&station={$station}
 EOM;
     if ((($delta > 0.0001) && ($delta < 0.5)) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
@@ -119,6 +120,11 @@ EOM;
 $t->sites_current = "base";
 
 
+/**
+ * Pretty print functions for station attribute keys and values.
+ * @param string $key The attribute key.
+ * @return string The pretty printed value.
+ */
 function pretty_key($key)
 {
     if ($key == "TRACKS_STATION") {
@@ -126,6 +132,13 @@ function pretty_key($key)
     }
     return $key;
 }
+
+/**
+ * Pretty print functions for station attribute values.
+ * @param string $key The attribute key.
+ * @param string $value The attribute value.
+ * @return string The pretty printed value.
+ */
 function pretty_value($key, $value)
 {
     if ($key == "TRACKS_STATION") {
@@ -196,6 +209,12 @@ EOM;
     }
 }
 
+/**
+ * Format a DateTime object as a string.
+ *
+ * @param DateTime|null $val The DateTime object to format.
+ * @return string The formatted date string or an empty string if null.
+ */
 function df($val){
     if (is_null($val)){
         return "";

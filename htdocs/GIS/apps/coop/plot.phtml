@@ -192,8 +192,9 @@ while ($row = pg_fetch_assoc($rs)) {
 /* ------------------------------------------------------- */
 
 
+$eburl = IEMConfig::EXTERNAL_BASEURL;
 $tr = "# " . $ndate . " " . $vardef[$var] . "
-# Download From: {$EXTERNAL_BASEURL}/GIS/apps/coop/plot.phtml
+# Download From: {$eburl}/GIS/apps/coop/plot.phtml
 # Download Date: " . date("d M Y") . "
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";

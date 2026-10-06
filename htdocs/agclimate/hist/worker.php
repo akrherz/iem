@@ -91,7 +91,7 @@ if (isset($_GET["todisk"])) {
 
 echo "# ISU Ag Climate Download -- Iowa Environmental Mesonet $cr";
 echo "# For units and more information: $cr";
-echo "#    {$EXTERNAL_BASEURL}/agclimate/info.txt $cr";
+echo "#    " . IEMConfig::EXTERNAL_BASEURL . "/agclimate/info.txt $cr";
 echo "# Data Contact: $cr";
 echo "#    Daryl Herzmann akrherz@iastate.edu 515.294.5978 $cr";
 
@@ -104,8 +104,8 @@ echo $cr;
 $c = iemdb("isuag");
 $rs = array();
 $tbl = sprintf("%s", $rtype);
-$stname = iem_pg_prepare($c, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
-   $str_vars from $tbl 
+$stname = iem_pg_prepare($c, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid,
+   $str_vars from $tbl
    WHERE station = ANY($1) and
    valid BETWEEN '$str_sts' and '$str_ets'
    ORDER by station, valid");

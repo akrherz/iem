@@ -245,14 +245,14 @@ function iemws_json($endpoint, $args)
 // Make sure a page is HTTPS when called
 function force_https()
 {
-    global $EXTERNAL_BASEURL;
+    $eburl = IEMConfig::EXTERNAL_BASEURL;
     // Require that EXTERNAL_BASEURL is https, otherwise we have infinite loop
-    if (strpos($EXTERNAL_BASEURL, "https://") !== 0) {
+    if (strpos($eburl, "https://") !== 0) {
         return;
     }
     if (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] !== "on") {
         // Ensure we collapse folks that have bookmarks to aliases
-        header("Location: {$EXTERNAL_BASEURL}" . $_SERVER["REQUEST_URI"]);
+        header("Location: {$eburl}" . $_SERVER["REQUEST_URI"]);
         exit();
     }
 }

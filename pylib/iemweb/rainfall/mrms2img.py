@@ -103,7 +103,10 @@ def workflow(tmpdir, valid, period, start_response):
             f"MRMS {period}HR Precip Ending {title}"
         )
         # Optional, allows ArcGIS to auto show a legend
-        ds.GetRasterBand(1).ComputeStatistics(True)
+        try:
+            ds.GetRasterBand(1).ComputeStatistics(True)
+        except RuntimeError as exp:
+            raise NoDataFound(f"Backend file {ppath} corrupted") from exp
         # top left x, w-e pixel resolution, rotation,
         # top left y, rotation, n-s pixel resolution
         ds.SetGeoTransform([-130.0, 0.01, 0, 55.0, 0, -0.01])
