@@ -165,7 +165,7 @@ def plotter(ctx: dict):
 
     ds = get_grids(dt, domain=domain)
     cmap = get_cmap(ctx["cmap"])
-    data = unit_convert(ds, varname)
+    data = np.ma.asarray(unit_convert(ds, varname))
     ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
     if pd.isna(ptiles).any():
         raise NoDataFound("Insufficient data for plotting.")
