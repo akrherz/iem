@@ -7,16 +7,16 @@ between 6 UTC to 6 UTC, which is Central Standard Time all year round.</p>
 variant of this plot.
 """
 
-import os
 from datetime import datetime, timedelta
 
 import numpy as np
+import pandas as pd
+import xarray as xr
 from metpy.units import masked_array, units
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import get_nav
-from pyiem.iemre import daily_offset, get_daily_ncname
+from pyiem.iemre import get_grids
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import ncopen
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
 
@@ -93,11 +93,11 @@ def get_description():
     return desc
 
 
-def unit_convert(nc, varname, idx0):
+def unit_convert(ds: xr.Dataset, varname: str) -> np.ndarray:
     """Convert units."""
     data = None
     if not varname.startswith("range"):
-        data = nc.variables[varname][idx0]
+        data = ds.variables[varname]
     if varname in ["min_rh", "max_rh"]:
         pass
     elif varname in ["rsds", "power_swdn"]:
@@ -129,8 +129,8 @@ def unit_convert(nc, varname, idx0):
     else:  # range_tmpk range_tmpk_12z
         vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
         vname1 = vname2.replace("low", "high")
-        d1 = nc.variables[vname1][idx0]
-        d2 = nc.variables[vname2][idx0]
+        d1 = ds.variables[vname1]
+        d2 = ds.variables[vname2]
         data = (
             masked_array(d1, units("degK")).to(units("degF")).m
             - masked_array(d2, units("degK")).to(units("degF")).m
@@ -162,49 +162,47 @@ def plotter(ctx: dict):
     mp = MapPlot(**mpargs)
 
     plot_units = ""
-    idx0 = daily_offset(dt)
-    ncfn = get_daily_ncname(dt.year, domain=domain)
-    if not os.path.isfile(ncfn):
-        raise NoDataFound("No Data Found.")
-    with ncopen(ncfn) as nc:
-        cmap = get_cmap(ctx["cmap"])
-        data = unit_convert(nc, varname, idx0)
-        if np.ma.is_masked(data) and data.mask.all():
-            raise NoDataFound("All data is missing.")
-        ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
-        if varname in ["rsds", "power_swdn"]:
-            plot_units = "MJ d-1"
-            clevs = pretty_bins(0, ptiles[1])
-            clevs[0] = 0.01
-            cmap = cmap.with_extremes(under="white")
-        elif varname == "wind_speed":
-            plot_units = "mph"
-            clevs = pretty_bins(0, ptiles[1])
-            clevs[0] = 0.01
-        elif varname in ["min_rh", "max_rh"]:
-            plot_units = "%"
-            clevs = pretty_bins(0, 100)
-        elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
-            plot_units = "inch"
-            if ptiles[2] < 1:
-                clevs = np.arange(0, 1.01, 0.1)
-            else:
-                clevs = pretty_bins(0, ptiles[2])
-            clevs[0] = 0.01
-            cmap = cmap.with_extremes(under="white")
-        elif varname in [
-            "high_tmpk",
-            "low_tmpk",
-            "high_tmpk_12z",
-            "low_tmpk_12z",
-            "avg_dwpk",
-            "high_soil4t",
-            "low_soil4t",
-            "range_tmpk",
-            "range_tmpk_12z",
-        ]:
-            plot_units = "F"
-            clevs = pretty_bins(ptiles[0], ptiles[1])
+
+    ds = get_grids(dt, domain=domain)
+    cmap = get_cmap(ctx["cmap"])
+    data = np.ma.asarray(unit_convert(ds, varname))
+    ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
+    if pd.isna(ptiles).any():
+        raise NoDataFound("Insufficient data for plotting.")
+    if varname in ["rsds", "power_swdn"]:
+        plot_units = "MJ d-1"
+        clevs = pretty_bins(0, ptiles[1])
+        clevs[0] = 0.01
+        cmap = cmap.with_extremes(under="white")
+    elif varname == "wind_speed":
+        plot_units = "mph"
+        clevs = pretty_bins(0, np.abs(ptiles[1]))
+        clevs[0] = 0.01
+    elif varname in ["min_rh", "max_rh"]:
+        plot_units = "%"
+        clevs = pretty_bins(0, 100)
+    elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
+        plot_units = "inch"
+        clevs = (
+            np.arange(0, 1.01, 0.1)
+            if ptiles[2] < 1
+            else pretty_bins(0, ptiles[2])
+        )
+        clevs[0] = 0.01
+        cmap = cmap.with_extremes(under="white")
+    elif varname in [
+        "high_tmpk",
+        "low_tmpk",
+        "high_tmpk_12z",
+        "low_tmpk_12z",
+        "avg_dwpk",
+        "high_soil4t",
+        "low_soil4t",
+        "range_tmpk",
+        "range_tmpk_12z",
+    ]:
+        plot_units = "F"
+        clevs = pretty_bins(ptiles[0], ptiles[1])
 
     if ptype == "c":
         x, y = np.meshgrid(gridnav.x_points, gridnav.y_points)

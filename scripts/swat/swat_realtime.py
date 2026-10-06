@@ -90,16 +90,22 @@ def workflow(page, huc12s):
                     get_daily_ncname(now.year), "r"
                 )
             # mrms precip
-            precip = np.flipud(mrms_nchandles[now.year]["p01d"][offset])
+            precip = np.flipud(
+                mrms_nchandles[now.year].variables["p01d"][offset]
+            )
             pdata = mrms_czs.gen_stats(precip, huc12s["simple_geom"])
             # IEMRE high and low
-            highk = np.flipud(iemre_nchandles[now.year]["high_tmpk"][offset])
+            highk = np.flipud(
+                iemre_nchandles[now.year].variables["high_tmpk"][offset]
+            )
             hdata = convert_value(
                 iemre_czs.gen_stats(highk, huc12s["simple_geom"]),
                 "degK",
                 "degC",
             )
-            lowk = np.flipud(iemre_nchandles[now.year]["low_tmpk"][offset])
+            lowk = np.flipud(
+                iemre_nchandles[now.year].variables["low_tmpk"][offset]
+            )
             ldata = convert_value(
                 iemre_czs.gen_stats(lowk, huc12s["simple_geom"]),
                 "degK",
