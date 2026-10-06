@@ -183,10 +183,11 @@ def plotter(ctx: dict):
         clevs = pretty_bins(0, 100)
     elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
         plot_units = "inch"
-        if ptiles[2] < 1:
-            clevs = np.arange(0, 1.01, 0.1)
-        else:
-            clevs = pretty_bins(0, ptiles[2])
+        clevs = (
+            np.arange(0, 1.01, 0.1)
+            if ptiles[2] < 1
+            else pretty_bins(0, ptiles[2])
+        )
         clevs[0] = 0.01
         cmap = cmap.with_extremes(under="white")
     elif varname in [
