@@ -218,7 +218,7 @@ def get_daily_data(ctx, sdate, edate):
                 as sdd86_rank
             from monthly)
 
-        SELECT station,
+        SELECT station, name,
         high as high_val, low as low_val, precip as precip_val,
         avgt as avgt_val, sdd86 as sdd86_val,
         high - avg_high as high_dep, low - avg_low as low_dep,
@@ -226,7 +226,8 @@ def get_daily_data(ctx, sdate, edate):
         sdd86 - avg_sdd86 as sdd86_dep,
         precip_rank, avgt_rank, high_rank, low_rank, sdd86_rank,
         ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-        as aridity, max_date from ranks where year = :year
+        as aridity, max_date from ranks r, stations t where year = :year
+        and r.station = t.id and t.network ~* 'CLIMATE'
         """,
                 table=table,
                 yearcond=yearcond,
