@@ -2,6 +2,7 @@
 // Main landing page for the IEM Sites stuff
 $OL = "10.10.0";
 define("IEM_APPID", 5);
+require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 if (array_key_exists("station", $_GET) && array_key_exists("network", $_GET)) {
     $uri = sprintf(
@@ -14,7 +15,6 @@ if (array_key_exists("station", $_GET) && array_key_exists("network", $_GET)) {
 }
 require_once "../../include/mlib.php";
 force_https();
-require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 
