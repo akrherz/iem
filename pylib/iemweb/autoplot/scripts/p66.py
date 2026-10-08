@@ -2,19 +2,18 @@
 This chart presents the daily frequency of the
 given date having the prescribed number of previous days above or below
 some provided treshold. <a href="/plotting/auto/?q=216">Autoplot 216</a>
-provides actual streaks and yearly maximum values.
+provides actual streaks and yearly maximum values.</p>
 
 <p>The accumulated precipitation metric is for an inclusive number of trailing
 days evaluated at that given day, so there is not double accounting for days
 that participate in a trailing day period that ended in the future.  Rewording,
 an example frequency of 25% of May 1 would indicate that on that date, it had
 an inclusive trailing number of days accumulation above or below the choosen
-threshold.
+threshold.</p>
 
-<p><strong>2 Oct 2023:</strong> The plotting logic was updated to plot
-the frequency of a given day participating in a streak, rather than the
-frequency of a streak ending on that day.  This should be a more useful
-metric for the user.
+<p><strong>7 Oct 2026:</strong> The value for leap day was corrected to
+properly compute the frequency for that given day.  It likely is still noisy
+vs surrounding days.
 """
 
 import calendar
@@ -104,7 +103,6 @@ def plotter(ctx: dict):
     df["hit"] = False
     syear = df.index[0].year
     eyear = df.index[-1].year
-    years = eyear - syear + 1
     if varname == "precip":
         df["trail"] = df[varname].rolling(window=f"{days}D").agg("sum")
     else:
@@ -125,7 +123,11 @@ def plotter(ctx: dict):
     for day in range(days):
         df["hit"] = df["hit"] | hits.shift(0 - day)
 
-    freq = df[["sday", "hit"]].groupby("sday").sum() / years * 100.0
+    freq = (
+        df[["sday", "hit"]].groupby("sday").sum()
+        / df[["sday", "hit"]].groupby("sday").count()
+        * 100.0
+    )
     freq = freq.reindex(
         pd.date_range("2000-01-01", "2000-12-31").strftime("%m%d")
     ).fillna(0)

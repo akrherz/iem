@@ -110,6 +110,7 @@
 60/network:IA_ASOS::zstation:DSM::var:tmpf::w:freq::threshold:120::direction:above::cmap:jet::_r:t::dpi:100.png
 61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
 61/var:precip::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
+66/network:IACLIMATE::station:IATAME::var:precip::dir:below::threshold:0.01::days:7::scale:100::_r:43::dpi:100.png
 69/network:IACLIMATE::station:IA0000::var:high::which:above::unit:degrees::mag:0::month:winter::opt:percent::_r:t::dpi:100.png
 69/network:IACLIMATE::station:IATAME::var:high::which:above::unit:degrees::mag:-15::month:all::opt:percent::year:2026::_r:t::dpi:100.png
 69/network:IACLIMATE::station:IATAME::var:high::which:abs_below::unit:sigma::mag:-1::month:all::opt:percent::year:2026::_r:t::dpi:100.png
