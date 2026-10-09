@@ -90,6 +90,7 @@
 44/plot:bar::opt:wfo::network:WFO::station:DLH::state:IA::fema:7::limit:no::c:winter::phenomena:TO::significance:W::syear:1986::eyear:2025::s:jul1::_r:43::dpi:100.png
 45/network:IA_ASOS::zstation:DSM::year:2020::which:all.png
 48/ugc:IAC169::phenomena:TO::significance:W::_r:t::dpi:100.png
+48/ugc:IAZ048::month:winter::phenomena:WC::significance:W::_r:t::dpi:100.png
 49/network:IACLIMATE::station:IA0262::syear:1893::eyear:2026::var:high::days:1::f:avg::opt:rng::threshold:40::threshold2:60::_r:43::dpi:100.png
 49/network:IACLIMATE::station:IATAME::syear:1893::eyear:2026::var:snow::days:1::f:avg::opt:rng::threshold:0.1::threshold2:4::_r:43::dpi:100.png
 50/network:WFO::station:OAX::state:IA::opt:wfo::p:count::agg:issuance::date1:2010-04-01::date2:2025-01-29::_r:43::dpi:100.png

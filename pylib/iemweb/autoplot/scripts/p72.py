@@ -194,7 +194,7 @@ def plotter(ctx: dict):
                     "edate": ctx["edate"],
                 },
             )
-            dfall[sfcol] = dfseason["frequency"]
+            dfall[sfcol] = dfseason["frequency"].fillna(0)
             subtitle = f"All Year + {MDICT[ctx['season']]}"
         else:
             dfall[sfcol] = -1
@@ -212,7 +212,7 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(
         dfall.index.values,
-        dfall["frequency"].values,
+        dfall["frequency"].to_numpy(),
         color="tan",
         align="center",
         label="All Year",
@@ -222,7 +222,7 @@ def plotter(ctx: dict):
     if dfseason is not None:
         ax.plot(
             dfall.index.values,
-            dfall[sfcol].values,
+            dfall[sfcol].to_numpy(),
             drawstyle="steps-pre",
             label=MDICT[ctx["season"]],
             lw=2,
