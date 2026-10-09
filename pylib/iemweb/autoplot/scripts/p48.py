@@ -17,6 +17,8 @@ from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
+from iemweb.util import MONTH_DICT, month2months
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
@@ -28,6 +30,13 @@ def get_description():
             default="IAZ048",
             label="Select UGC Zone/County:",
         ),
+        {
+            "type": "select",
+            "name": "month",
+            "default": "year",
+            "label": "Limit to Month/Season:",
+            "options": MONTH_DICT,
+        },
         dict(
             type="phenomena",
             name="phenomena",
@@ -50,7 +59,12 @@ def plotter(ctx: dict, conn: Connection):
     ugc = ctx["ugc"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
-
+    month = ctx["month"]
+    months = []
+    month_limiter = ""
+    if month != "year":
+        months = month2months(month)
+        month_limiter = " and extract(month from issue) = ANY(:months) "
     res = conn.execute(
         sql_helper("""
     SELECT s.wfo, s.tzname, u.name from ugcs u JOIN stations s on
@@ -72,14 +86,18 @@ def plotter(ctx: dict, conn: Connection):
         "phenomena": phenomena,
         "significance": significance,
         "wfo": wfo,
+        "months": months,
     }
     res = conn.execute(
-        sql_helper("""
+        sql_helper(
+            """
     SELECT count(*), min(issue at time zone :tzname),
     max(issue at time zone :tzname)
     from warnings WHERE ugc = :ugc and phenomena = :phenomena
-    and significance = :significance and wfo = :wfo
-    """),
+    and significance = :significance and wfo = :wfo {month_limiter}
+    """,
+            month_limiter=month_limiter,
+        ),
         params,
     )
     row = res.fetchone()
@@ -90,21 +108,24 @@ def plotter(ctx: dict, conn: Connection):
         raise NoDataFound("No Results Found, try flipping zone/county")
 
     res = conn.execute(
-        sql_helper("""
+        sql_helper(
+            """
      WITH coverage as (
         SELECT extract(year from issue) as yr, eventid,
         generate_series(issue at time zone :tzname,
                         expire at time zone :tzname, '1 minute'::interval) as s
                         from warnings where
         ugc = :ugc and phenomena = :phenomena and significance = :significance
-        and wfo = :wfo),
+        and wfo = :wfo {month_limiter}),
       minutes as (SELECT distinct yr, eventid,
         (extract(hour from s)::numeric * 60. +
          extract(minute from s)::numeric) as m
         from coverage)
 
     SELECT minutes.m, count(*) from minutes GROUP by m
-          """),
+          """,
+            month_limiter=month_limiter,
+        ),
         params,
     )
 
@@ -119,11 +140,14 @@ def plotter(ctx: dict, conn: Connection):
     vals = data / float(cnt) * 100.0
     title = (
         f"[{ugc}] {name} :: {vtec.get_ps_string(phenomena, significance)} "
-        f"({phenomena}.{significance})\n"
-        f"{cnt} Events - {sts:%Y-%m-%d %I:%M %p} to {ets:%Y-%m-%d %I:%M %p}"
+        f"({phenomena}.{significance})"
+    )
+    subtitle = (
+        f"{cnt} Events - {sts:%Y-%m-%d %I:%M %p} to {ets:%Y-%m-%d %I:%M %p} "
+        f"over {MONTH_DICT[month]}"
     )
 
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(np.arange(1440), vals, ec="b", fc="b")
     if np.max(vals) > 50:
         ax.set_ylim(0, 100)
