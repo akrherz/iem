@@ -960,7 +960,7 @@ function dt_from_cgi_ymd()
         return $now;
     }
     // Some basic bounds not exceeded within IEM
-    $year = get_int404('year', (int)$now->format("Y"), 1800, intval($now->format("Y")) + 5);
+    $year = get_int404('year', (int)$now->format("Y"), 1800, intval($now->format("Y")) + 1);
     $month = get_int404('month', (int)$now->format("m"), 1, 12);
     // Careful here as we don't want to end up with an invalid date by chance
     $day = get_int404('day', 1, 1, 31);
