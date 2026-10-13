@@ -93,18 +93,12 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
     $val = file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
     $bcolor = "success";
     $rcolor = "success";
-    $ocolor = "success";
     $acolor = "success";
     $bandwidth = 0;
     $req = 0;
-    $ok = 0;
     $apirate = 0;
     if ($val) {
         $jobj = json_decode($val);
-
-        $ok = $jobj->stats->telemetry_ok;
-        if ($ok < 90) $ocolor = "warning";
-        if ($ok < 80) $ocolor = "danger";
 
         $apirate = $jobj->stats->telemetry_rate;
         if ($apirate > 300) $acolor = "warning";
@@ -123,8 +117,6 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
     $bpercent = min(intval($bandwidth / 240.0  * 100.0), 100);
     $rlabel = sprintf("%s req/s", number_format($req));
     $rpercent = min(intval($req / 15000.0 * 100.0), 100);
-    $olabel = sprintf("%.0f%%", $ok);
-    $opercent = intval($ok);
     $alabel = sprintf("%.1f req/s", $apirate);
     $apercent = min(intval($apirate / 500.0 * 100.0), 100);
 
@@ -153,16 +145,6 @@ $get_website_stats = cacheable("websitestats", 120)(function ()
     <span>API/Data Services: {$alabel}</span>
     <div class="progress">
         <div class="progress-bar bg-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
-        </div>
-    </div>
-  </div>
-
-  <div class="mb-2">
-    <span>API Success: {$olabel}</span>
-    <div class="progress">
-        <div class="progress-bar bg-{$ocolor}" role="progressbar"
-        aria-valuenow="{$opercent}" aria-valuemin="0" aria-valuemax="100"
-        style="width: {$opercent}%;">
         </div>
     </div>
   </div>
