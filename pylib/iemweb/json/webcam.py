@@ -7,6 +7,13 @@ Changelog
 
 - 2024-08-05: Initial documtation update
 
+Example Requests
+----------------
+
+Provide webcam metadata for a specific date
+
+https://mesonet.agron.iastate.edu/json/webcam.cgi?cid=ISUC-006&date=20210101
+
 """
 
 import json

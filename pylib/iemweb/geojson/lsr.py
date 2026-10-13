@@ -128,6 +128,13 @@ class Schema(CGIModel):
     west: LONGITUDE_FIELD_OPTIONAL = None
     north: LATITUDE_FIELD_OPTIONAL = None
     south: LATITUDE_FIELD_OPTIONAL = None
+    fmt: Annotated[  # Needed for get_ct to properly work.
+        str,
+        Field(
+            description="Output format (fixed to geojson).",
+            pattern=r"^geojson$",
+        ),
+    ] = "geojson"
 
     @model_validator(mode="after")
     def validate_spatial_bounds(self):
