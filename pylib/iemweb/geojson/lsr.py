@@ -59,6 +59,7 @@ from pyiem.web.fields import (
     CALLBACK_FIELD,
     LATITUDE_FIELD_OPTIONAL,
     LONGITUDE_FIELD_OPTIONAL,
+    VTEC_ETN_FIELD,
     VTEC_PH_FIELD_OPTIONAL,
     VTEC_SIG_FIELD,
     VTEC_YEAR_FIELD,
@@ -79,12 +80,7 @@ class Schema(CGIModel):
             description="Include any associated warnings in the output.",
         ),
     ] = False
-    eventid: Annotated[
-        int,
-        Field(
-            description="If provided, use the given eventid to find LSRs for.",
-        ),
-    ] = 103
+    eventid: VTEC_ETN_FIELD = 103
     phenomena: VTEC_PH_FIELD_OPTIONAL = None
     significance: VTEC_SIG_FIELD = "W"
     states: Annotated[
@@ -132,13 +128,6 @@ class Schema(CGIModel):
     west: LONGITUDE_FIELD_OPTIONAL = None
     north: LATITUDE_FIELD_OPTIONAL = None
     south: LATITUDE_FIELD_OPTIONAL = None
-    fmt: Annotated[
-        str,
-        Field(
-            description="Output format (fixed to geojson).",
-            pattern=r"^geojson$",
-        ),
-    ] = "geojson"
 
     @model_validator(mode="after")
     def validate_spatial_bounds(self):
@@ -159,6 +148,9 @@ class Schema(CGIModel):
     def parse_valid(cls, value, _info):
         """Ensure we have a valid time."""
         fmt = "%Y%m%d%H%M"
+        # Le Sigh
+        if not isinstance(value, str):
+            raise ValueError("Value must be a string representing a datetime.")
         if value.find("T") > 0 and len(value) >= 16:
             fmt = "%Y-%m-%dT%H:%M"
             value = value[:16]

@@ -71,7 +71,7 @@ def application(environ, start_response):
     end_ts = environ["end_ts"]
     dt = environ["date"]
     if dt is not None:
-        start_ts = datetime.strptime(dt, "%Y%m%d")
+        start_ts = datetime.strptime(dt.replace("-", ""), "%Y%m%d")
         start_ts = start_ts.replace(tzinfo=ZoneInfo("America/Chicago"))
         end_ts = start_ts + timedelta(days=1)
     else:
