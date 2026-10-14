@@ -247,7 +247,7 @@ def plotter(ctx: dict):
         if ldate.year == dt.year:
             delta = (val - lval) / float(d1 - d0)
             for i, jday in enumerate(range(d0, d1 + 1)):
-                data[dt.year - year0, jday] = lval + i * delta
+                data[dt.year - year0, jday - 1] = lval + i * delta
         else:
             data[ldate.year - year0, d0:] = np.max(data[ldate.year - year0, :])
 
