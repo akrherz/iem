@@ -41,7 +41,7 @@ from pyiem.grid.nav import IFC, MRMS_IEMRE, PRISM, STAGE4, get_nav
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.util import get_properties
+from pyiem.util import LOG, get_properties
 from pyproj import Proj
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
@@ -374,8 +374,8 @@ def set_data(ctx: dict):
             rng = [float(x) for x in ctx["rng"].split()]
             if len(rng) == 2:
                 clevs = pretty_bins(rng[0], rng[1])
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.warning("Exception encountered while parsing rng: %s", exp)
 
     ctx["clevs"] = clevs
     ctx["p01d"] = p01d

@@ -15,7 +15,7 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
@@ -109,8 +109,8 @@ def plot_trendline(
             idx = np.digitize([threshold], data[year - year0, :], right=True)
             years.append(year)
             doys.append(idx[0])
-        except ValueError:
-            pass
+        except ValueError as exp:
+            LOG.warning("ValueError encountered: %s", exp)
     if not doys:
         return
 

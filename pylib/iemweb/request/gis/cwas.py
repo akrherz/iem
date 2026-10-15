@@ -38,6 +38,13 @@ import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
@@ -54,36 +61,16 @@ class Schema(CGIModel):
     format: Annotated[
         str, Field(description="Output format, either kml or shp")
     ] = "shp"
-    year1: int = Field(
-        default=None, description="Start year when sts is not provided"
-    )
-    month1: int = Field(
-        default=None, description="Start month when sts is not provided"
-    )
-    day1: int = Field(
-        default=None, description="Start day when sts is not provided"
-    )
-    hour1: int = Field(
-        default=None, description="Start hour when sts is not provided"
-    )
-    minute1: int = Field(
-        default=None, description="Start minute when sts is not provided"
-    )
-    year2: int = Field(
-        default=None, description="End year when ets is not provided"
-    )
-    month2: int = Field(
-        default=None, description="End month when ets is not provided"
-    )
-    day2: int = Field(
-        default=None, description="End day when ets is not provided"
-    )
-    hour2: int = Field(
-        default=None, description="End hour when ets is not provided"
-    )
-    minute2: int = Field(
-        default=None, description="End minute when ets is not provided"
-    )
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 23
+    minute2: MINUTE_FIELD = 59
 
 
 def run(query: Schema, start_response: callable):

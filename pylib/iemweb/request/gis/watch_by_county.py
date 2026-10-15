@@ -73,7 +73,7 @@ def application(environ, start_response):
     try:
         ts, fn = get_ts_fn(environ)
     except Exception as exp:
-        raise IncompleteWebRequest("bad input provided") from exp
+        raise IncompleteWebRequest("Provided time values invalid") from exp
     if environ["etn"] is not None:
         etnLimiter = f"and eventid = {int(environ.get('etn'))}"
     else:
