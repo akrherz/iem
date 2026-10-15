@@ -92,6 +92,7 @@ class Schema(CGIModel):
     minute2: MINUTE_FIELD = 59
 
     @field_validator("d", mode="after")
+    @classmethod
     def validate_days(cls, v):
         """Validate and convert the list of days to integers."""
         return [int(x) for x in v]
