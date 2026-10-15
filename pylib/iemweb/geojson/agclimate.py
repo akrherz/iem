@@ -32,6 +32,7 @@ import json
 from datetime import timedelta
 from typing import Annotated
 
+import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pydantic import AwareDatetime, Field
@@ -97,7 +98,7 @@ def cci(row, shade_effect):
 
 def safe_t(val, _units="degC"):
     """Safe value."""
-    if val is None:
+    if pd.isna(val):
         return "M"
     return f"{convert_value(val, _units, 'degF'):.1f}"
 
@@ -121,6 +122,24 @@ def safe_m(val):
     if val is None or val < 0:
         return "M"
     return round(val * 100.0, 0)
+
+
+def dwpf(row: dict) -> str:
+    """Safe conversion to dew point to avoid troubles."""
+    if (
+        row["tair_c_avg"] is None
+        or row["rh"] is None
+        or row["rh"] < 5
+        or row["rh"] > 101
+        or row["tair_c_avg"] < -50
+        or row["tair_c_avg"] > 60
+    ):
+        return "M"
+    computed = dewpoint_from_relative_humidity(
+        units("degC") * row["tair_c_avg"],
+        units("percent") * row["rh"],
+    ).magnitude
+    return safe_t(computed)
 
 
 def compute_plant_water(row):
@@ -285,14 +304,7 @@ def get_data(conn, ts):
                         if not q.get("tmpf", False)
                         else "M"
                     ),
-                    "dwpf": "M"
-                    if row["tair_c_avg"] is None or row["rh"] is None
-                    else safe_t(
-                        dewpoint_from_relative_humidity(
-                            units("degC") * row["tair_c_avg"],
-                            units("percent") * row["rh"],
-                        ).magnitude
-                    ),
+                    "dwpf": dwpf(row),
                     "high": safe_t(row["max_tmpc"], "degC"),
                     "low": safe_t(row["min_tmpc"], "degC"),
                     "pday": safe(row["pday"], 2),
