@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from pyiem.reference import ISO8601
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 from pyiem.webutil import error_log
 from TileCache import InvalidTMSRequest
 from TileCache.Service import wsgiHandler
@@ -93,8 +93,8 @@ def release_slot(fd):
         try:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.info("Exception encountered while releasing slot: %s", exp)
 
 
 def get_ct(environ: dict) -> str:

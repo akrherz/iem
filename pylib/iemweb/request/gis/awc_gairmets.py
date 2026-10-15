@@ -29,7 +29,13 @@ import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.web.fields import HOUR_FIELD, MINUTE_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
@@ -44,26 +50,14 @@ class Schema(CGIModel):
         None
     )
     ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
-    year1: Annotated[
-        int | None, Field(description="Start Year in UTC, when sts not set.")
-    ] = None
-    month1: Annotated[
-        int | None, Field(description="Start Month in UTC, when sts not set.")
-    ] = None
-    day1: Annotated[
-        int | None, Field(description="Start Day in UTC, when sts not set.")
-    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour1: HOUR_FIELD = 0
     minute1: MINUTE_FIELD = 0
-    year2: Annotated[
-        int | None, Field(description="End Year in UTC, when ets not set.")
-    ] = None
-    month2: Annotated[
-        int | None, Field(description="End Month in UTC, when ets not set.")
-    ] = None
-    day2: Annotated[
-        int | None, Field(description="End Day in UTC, when ets not set.")
-    ] = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
 

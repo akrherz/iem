@@ -35,9 +35,16 @@ from io import BytesIO
 from typing import Annotated
 
 import geopandas as gpd
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -73,36 +80,22 @@ class Schema(CGIModel):
             "C==Convective(SPC), E=Excessive Rain(WPC)"
         ),
     )
-    year1: Annotated[
-        int | None, Field(description="Start year when sts is not set.")
-    ] = None
-    month1: Annotated[
-        int | None, Field(description="Start month when sts is not set.")
-    ] = None
-    day1: Annotated[
-        int | None, Field(description="Start day when sts is not set.")
-    ] = None
-    hour1: Annotated[
-        int | None, Field(description="Start hour when sts is not set.")
-    ] = None
-    minute1: Annotated[
-        int | None, Field(description="Start minute when sts is not set.")
-    ] = None
-    year2: Annotated[
-        int | None, Field(description="End year when ets is not set.")
-    ] = None
-    month2: Annotated[
-        int | None, Field(description="End month when ets is not set.")
-    ] = None
-    day2: Annotated[
-        int | None, Field(description="End day when ets is not set.")
-    ] = None
-    hour2: Annotated[
-        int | None, Field(description="End hour when ets is not set.")
-    ] = None
-    minute2: Annotated[
-        int | None, Field(description="End minute when ets is not set.")
-    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 23
+    minute2: MINUTE_FIELD = 59
+
+    @field_validator("d", mode="after")
+    @classmethod
+    def validate_days(cls, v):
+        """Validate and convert the list of days to integers."""
+        return [int(x) for x in v]
 
 
 def get_context(environ):

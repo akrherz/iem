@@ -44,10 +44,13 @@ from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD,
     LATITUDE_FIELD,
     LONGITUDE_FIELD,
     MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
 )
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
@@ -68,56 +71,30 @@ class Schema(CGIModel):
     sts: Annotated[
         AwareDatetime | None, Field(description="The start time of the query")
     ] = None
-    year1: Annotated[
-        int | None,
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    degrees: Annotated[
+        float,
         Field(
-            description="The start year of the query, when sts not provided",
+            description="The distance in degrees for a spatial filter",
+            gt=0,
+            lt=90,
         ),
-    ] = None
-    month1: Annotated[
-        int | None,
+    ] = 1.0
+    filter: Annotated[
+        bool,
         Field(
-            description="The start month of the query, when sts not provided",
+            description="Should we filter by distance from a point?",
         ),
-    ] = None
-    day1: Annotated[
-        int | None,
-        Field(
-            description="The start day of the query, when sts is not provided",
-        ),
-    ] = None
-    degrees: float = Field(
-        default=1.0,
-        description="The distance in degrees for a spatial filter",
-        gt=0,
-        lt=90,
-    )
-    filter: bool = Field(
-        default=False,
-        description="Should we filter by distance from a point?",
-    )
+    ] = False
     lat: LATITUDE_FIELD = 41.99
     lon: LONGITUDE_FIELD = -91.99
     hour1: HOUR_FIELD = 0
     minute1: MINUTE_FIELD = 0
-    year2: Annotated[
-        int | None,
-        Field(
-            description="The end year of the query, when ets is not provided",
-        ),
-    ] = None
-    month2: Annotated[
-        int | None,
-        Field(
-            description="The end month of the query, when ets is not provided",
-        ),
-    ] = None
-    day2: Annotated[
-        int | None,
-        Field(
-            description="The end day of the query, when ets is not provided",
-        ),
-    ] = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
 
