@@ -4,6 +4,9 @@ These are thread-safe and served by a dedicated Gunicorn backend for maximum
 tile throughput.
 """
 
+import time
+from wsgiref.handlers import format_date_time
+
 from iemweb.c.tile import application as c_application
 from iemweb.cache.tile import application as cache_application
 
@@ -16,6 +19,20 @@ _ROUTES = {
     "/c/c.py": c_application,
     "/cache/tile.py": cache_application,
 }
+FOURTEEN_DAYS = 14 * 24 * 60 * 60
+
+
+def _strip_head_body(environ: dict, result):
+    """HEAD responses must not carry a body (RFC 9110), so drop it.
+
+    Headers (e.g. Content-Length) set by the handler are left intact.
+    """
+    if environ.get("REQUEST_METHOD") != "HEAD":
+        return result
+    close = getattr(result, "close", None)
+    if close is not None:
+        close()
+    return []
 
 
 def application(environ: dict, start_response: callable):
@@ -25,8 +42,6 @@ def application(environ: dict, start_response: callable):
     `/cache` endpoints so Apache-level Expires configuration is mirrored
     when served from the sidecar.
     """
-    import time
-    from wsgiref.handlers import format_date_time
 
     path_info: str = environ.get("PATH_INFO", "")
     for script_name, handler in _ROUTES.items():
@@ -41,7 +56,7 @@ def application(environ: dict, start_response: callable):
                 or script_name == "/c/tile.py"
                 or script_name == "/c/c.py"
             ):
-                ttl = 14 * 24 * 60 * 60  # 14 days
+                ttl = FOURTEEN_DAYS
 
             def header_wrapper(status, headers, exc_info=None, _ttl=ttl):
                 # Capture ttl in a default argument to avoid late-binding
@@ -56,8 +71,8 @@ def application(environ: dict, start_response: callable):
                     headers.append(("Expires", expires))
                 return start_response(status, headers, exc_info)
 
-            return handler(environ, header_wrapper)
+            return _strip_head_body(environ, handler(environ, header_wrapper))
 
     # We will do something better, someday...
     start_response("200 OK", [("Content-Type", "text/plain")])
-    return [b"OK\n"]
+    return _strip_head_body(environ, [b"OK\n"])
