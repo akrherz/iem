@@ -11,17 +11,20 @@ def application(environ, start_response):
     status_code = int(environ.get("REDIRECT_STATUS", 200))
     error_log(environ, f"{status_code} {environ.get('REQUEST_URI')}")
     ip = environ.get("REMOTE_ADDR")
-    write_telemetry(
-        TELEMETRY(
-            timing=0,
-            status_code=status_code,
-            client_addr=ip,
-            app=environ.get("REDIRECT_SCRIPT_URL"),
-            request_uri=environ.get("REQUEST_URI"),
-            vhost=environ.get("HTTP_HOST"),
-            valid=utc(),
+    # Ignore 502s as these are likely errors between the proxy and the backend
+    # and so not actionable
+    if status_code != 502:
+        write_telemetry(
+            TELEMETRY(
+                timing=0,
+                status_code=status_code,
+                client_addr=ip,
+                app=environ.get("REDIRECT_SCRIPT_URL"),
+                request_uri=environ.get("REQUEST_URI"),
+                vhost=environ.get("HTTP_HOST"),
+                valid=utc(),
+            )
         )
-    )
 
     status = f"{status_code} {HTTP_RESPONSES.get(status_code, 'Unknown')}"
     headers = [("Content-type", "text/plain")]

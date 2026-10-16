@@ -149,7 +149,7 @@ not be implied as an endorsement. Of course, you can just search google for
       <li><a href="/json/raob.py?help">Sounding/RAOB Data</a></li>
       <li><a href="/geojson/sps.py?help">Special Weather Statements (SPS)</a></li>
       <li><a href="/json/sps_by_point.py?help">Special Weather Statements (SPS) by Point</a></li>
-      <li><a href="/json/nwstext.py?help">Text Data</a></li>
+      <li><a href="/geojson/nwstext.py?help">NWS Text Data</a> GeoJSON (geo-encoded by issuance center)</li>
       <li><a href="/json/nwstext_search.py?help">Text Product Metadata Search</a></li>
       <li><a href="/json/wpcmpd.py?help">WPC Mesoscale Discussions</a></li>
       <li><a href="/json/wpcoutlook.py?help">WPC Outlooks</a></li>
