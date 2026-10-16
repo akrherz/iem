@@ -62,8 +62,11 @@ class Schema(CGIModel):
     hours: Annotated[int, Field(ge=1, le=72)] = 1
     valid: Annotated[
         AwareDatetime,
-        Field(description=("Timestamp to retrieve products approximate for.")),
-    ] = utc()
+        Field(
+            default_factory=lambda: utc().replace(second=0, minute=0),
+            description=("Timestamp to retrieve products approximate for."),
+        ),
+    ]
     direction: Annotated[
         str,
         Field(
