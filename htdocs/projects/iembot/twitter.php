@@ -5,6 +5,16 @@ define("IEM_APPID", 102);
 require_once "../../../include/myview.php";
 require_once "../../../include/vendor/autoload.php";
 
+$t = new MyView();
+$t->content = <<<EOM
+<p>
+The IEMBot X app is again disabled awaiting the restoration of functionality
+by X.  Please see this <a href="https://devcommunity.x.com/t/please-x-again-have-mercy-again-on-my-weather-bots/277929">forum discussion</a>
+</p>
+EOM;
+$t->render("single.phtml");
+die();
+
 use Abraham\TwitterOAuth\TwitterOAuth;
 
 require_once "../../../include/iemprop.php";
