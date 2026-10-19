@@ -30,7 +30,7 @@ def process(valid: datetime):
         "-O",
         fn,
         (
-            "https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/"
+            "https://data.gesdisc.earthdata.nasa.gov/data/NLDAS/"
             f"NLDAS_NOAH0125_H.2.0/{valid:%Y}/{valid:%03j}/NLDAS_NOAH0125_H."
             f"A{valid:%Y%m%d}.{valid:%H}00.020.nc"
         ),
