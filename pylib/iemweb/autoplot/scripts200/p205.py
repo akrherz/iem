@@ -31,6 +31,8 @@ def get_description():
             name="max_tmpf_above",
             default=90,
             optional=True,
+            ge=-100,
+            le=150,
             label="Daily Max Temperature Above (threshold F): [optional]",
         ),
         dict(
@@ -45,6 +47,8 @@ def get_description():
             name="min_tmpf_below",
             default=70,
             optional=True,
+            ge=-100,
+            le=150,
             label="Daily Min Temperature Below (threshold F): [optional]",
         ),
         dict(
@@ -52,6 +56,8 @@ def get_description():
             name="max_feel_above",
             default=90,
             optional=True,
+            ge=-100,
+            le=150,
             label="Daily Max Feels Like Temp Above (threshold F): [optional]",
         ),
         dict(
@@ -59,6 +65,8 @@ def get_description():
             name="min_feel_below",
             default=0,
             optional=True,
+            ge=-100,
+            le=150,
             label="Daily Min Feels Like Temp Below (threshold F): [optional]",
         ),
         dict(
@@ -66,6 +74,8 @@ def get_description():
             name="max_dwpf_below",
             default=50,
             optional=True,
+            ge=-70,
+            le=100,
             label="Daily Maximum Dewpoint Below (threshold F): [optional]",
         ),
         dict(
@@ -73,6 +83,8 @@ def get_description():
             name="max_dwpf_above",
             default=70,
             optional=True,
+            ge=-70,
+            le=100,
             label="Daily Maximum Dewpoint Above (threshold F): [optional]",
         ),
         dict(
@@ -80,6 +92,8 @@ def get_description():
             name="max_rh_below",
             default=50,
             optional=True,
+            ge=0,
+            le=100,
             label="Daily Maximum Relative Humidity Below (%): [optional]",
         ),
         dict(
@@ -87,6 +101,8 @@ def get_description():
             name="avg_smph_below",
             default=10,
             optional=True,
+            ge=0,
+            le=150,
             label="Daily Average Wind Speed Below (threshold MPH): [optional]",
         ),
         {
@@ -94,6 +110,8 @@ def get_description():
             "name": "max_smph_above",
             "default": 50,
             "optional": True,
+            "ge": 0,
+            "le": 150,
             "label": "Daily Max Wind Speed Above (threshold MPH): [optional]",
         },
         {
@@ -101,6 +119,8 @@ def get_description():
             "name": "max_smph_below",
             "default": 50,
             "optional": True,
+            "ge": 0,
+            "le": 150,
             "label": "Daily Max Wind Speed Below (threshold MPH): [optional]",
         },
         {
@@ -108,6 +128,8 @@ def get_description():
             "name": "max_gust_above",
             "default": 50,
             "optional": True,
+            "ge": 0,
+            "le": 150,
             "label": "Daily Max Wind Gust Above (threshold MPH): [optional]",
         },
         {
@@ -115,6 +137,8 @@ def get_description():
             "name": "max_gust_below",
             "default": 50,
             "optional": True,
+            "ge": 0,
+            "le": 150,
             "label": "Daily Max Wind Gust Below (threshold MPH): [optional]",
         },
     ]
@@ -149,25 +173,25 @@ def plotter(ctx: dict):
             f"max_tmpf::int <= {tokens[1]} then 1 else 0 end as tmpf_hit"
         )
         labels["tmpf_hit"] = f"High Temp {tokens[0]:.0f}F - {tokens[1]:.0f}F"
-    if ctx.get("avg_smph_below"):
+    if ctx.get("avg_smph_below") is not None:
         params.append(
             f"case when avg_sknt * 1.15 < {ctx['avg_smph_below']:.0f} "
             "then 1 else 0 end as smph_hit"
         )
         labels["smph_hit"] = f"Avg Wind < {ctx['avg_smph_below']:.0f}MPH"
-    if ctx.get("max_gust_above"):
+    if ctx.get("max_gust_above") is not None:
         params.append(
             f"case when max_gust * 1.15 > {ctx['max_gust_above']:.0f} "
             "then 1 else 0 end as gust_hit"
         )
         labels["gust_hit"] = f"Wind Gust > {ctx['max_gust_above']:.0f}MPH"
-    elif ctx.get("max_gust_below"):
+    elif ctx.get("max_gust_below") is not None:
         params.append(
             f"case when max_gust * 1.15 < {ctx['max_gust_below']:.0f} "
             "then 1 else 0 end as gust_hit"
         )
         labels["gust_hit"] = f"Wind Gust < {ctx['max_gust_below']:.0f}MPH"
-    if ctx.get("max_smph_above"):
+    if ctx.get("max_smph_above") is not None:
         params.append(
             f"case when max_sknt * 1.15 > {ctx['max_smph_above']:.0f} "
             "then 1 else 0 end as max_smph_hit"
@@ -189,7 +213,8 @@ def plotter(ctx: dict):
         df = pd.read_sql(
             sql_helper(
                 """
-    SELECT {cols}, extract(doy from day) as doy from summary s JOIN stations t
+    SELECT {cols}, extract(doy from day) as doy,
+    extract(month from day) as month from summary s JOIN stations t
     ON (s.iemid = t.iemid) WHERE t.id = :station and t.network = :network""",
                 cols=" , ".join(params),
             ),
@@ -201,7 +226,7 @@ def plotter(ctx: dict):
 
     df["all_hit"] = 1
     for col in df.columns:
-        if col == "doy":
+        if col in ["doy", "month"]:
             continue
         df.loc[df[col] < 1, "all_hit"] = 0
     gdf = df.groupby("doy").mean()
@@ -212,7 +237,7 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:
-        if col == "doy":
+        if col in ["doy", "month"]:
             continue
         try:
             color = "k" if col == "all_hit" else next(colors)
@@ -227,8 +252,22 @@ def plotter(ctx: dict):
         )
 
     ax.legend(ncol=3, loc=(-0.05, -0.21), fontsize=14)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    starts = (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
+    # Grid lines at month starts, labels centered mid-month
+    ax.set_xticks(starts)
+    ax.set_xticklabels([])
+    ax.set_xticks([s + 15 for s in starts], minor=True)
+    ax.tick_params(axis="x", which="minor", length=0)
+
+    monthly = df[["month", "all_hit"]].groupby("month").mean()
+    xticklabels = []
+    for month, row in monthly.iterrows():
+        abbr = calendar.month_abbr[int(month)]
+        xticklabels.append(
+            f"{abbr}\n{row['all_hit'] * 100:.1f}%",
+        )
+    ax.set_xticklabels(xticklabels, minor=True)
+
     ax.set_position([0.1, 0.2, 0.75, 0.7])
     ax.set_xlim(1, 365)
     ax.set_ylim(-2, 102)
