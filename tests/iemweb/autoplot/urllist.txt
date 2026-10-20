@@ -485,6 +485,11 @@
 203/typ:W::sort:S::date:2024-05-21::dpi:100.png
 204/var:daily_high_depart::network:IACLIMATE::station:IATAME::days:31::syear:2006::eyear:2026::cmap:RdBu::_r:t::dpi:100.png
 205/network:IA_ASOS::station:DSM::max_tmpf_above:90::max_feel_above:90::_r:t::dpi:100.png
+205/network:IA_ASOS::station:DSM::max_gust_above:20::max_feel_above:90::_r:t::dpi:100.png
+205/network:IA_ASOS::station:DSM::max_gust_below:20::max_feel_above:90::_r:t::dpi:100.png
+205/network:IA_ASOS::station:DSM::max_smph_above:20::max_feel_above:90::_r:t::dpi:100.png
+205/network:IA_ASOS::station:DSM::max_smph_below:20::max_feel_above:90::_r:t::dpi:100.png
+205/network:IA_ASOS::station:DSM::max_rh_below:20::max_feel_above:90::_r:t::dpi:100.png
 206/t:conus::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 206/t:state::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 206/t:fema::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
