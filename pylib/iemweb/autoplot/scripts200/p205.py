@@ -34,6 +34,13 @@ def get_description():
             label="Daily Max Temperature Above (threshold F): [optional]",
         ),
         dict(
+            type="text",
+            name="max_tmpf_range",
+            default="70 to 79",
+            optional=True,
+            label="Daily Max Temperature Inclusive Range (deg F): [optional]",
+        ),
+        dict(
             type="int",
             name="min_tmpf_below",
             default=70,
@@ -84,18 +91,32 @@ def get_description():
         ),
         {
             "type": "int",
+            "name": "max_smph_above",
+            "default": 50,
+            "optional": True,
+            "label": "Daily Max Wind Speed Above (threshold MPH): [optional]",
+        },
+        {
+            "type": "int",
+            "name": "max_smph_below",
+            "default": 50,
+            "optional": True,
+            "label": "Daily Max Wind Speed Below (threshold MPH): [optional]",
+        },
+        {
+            "type": "int",
             "name": "max_gust_above",
             "default": 50,
             "optional": True,
             "label": "Daily Max Wind Gust Above (threshold MPH): [optional]",
         },
-        dict(
-            type="text",
-            name="max_tmpf_range",
-            default="70 to 79",
-            optional=True,
-            label="Daily Max Temperature Inclusive Range (deg F): [optional]",
-        ),
+        {
+            "type": "int",
+            "name": "max_gust_below",
+            "default": 50,
+            "optional": True,
+            "label": "Daily Max Wind Gust Below (threshold MPH): [optional]",
+        },
     ]
     return desc
 
@@ -140,6 +161,28 @@ def plotter(ctx: dict):
             "then 1 else 0 end as gust_hit"
         )
         labels["gust_hit"] = f"Wind Gust > {ctx['max_gust_above']:.0f}MPH"
+    elif ctx.get("max_gust_below"):
+        params.append(
+            f"case when max_gust * 1.15 < {ctx['max_gust_below']:.0f} "
+            "then 1 else 0 end as gust_hit"
+        )
+        labels["gust_hit"] = f"Wind Gust < {ctx['max_gust_below']:.0f}MPH"
+    if ctx.get("max_smph_above"):
+        params.append(
+            f"case when max_sknt * 1.15 > {ctx['max_smph_above']:.0f} "
+            "then 1 else 0 end as max_smph_hit"
+        )
+        labels["max_smph_hit"] = (
+            f"Max Wind Speed > {ctx['max_smph_above']:.0f}MPH"
+        )
+    elif ctx.get("max_smph_below"):
+        params.append(
+            f"case when max_sknt * 1.15 < {ctx['max_smph_below']:.0f} "
+            "then 1 else 0 end as max_smph_hit"
+        )
+        labels["max_smph_hit"] = (
+            f"Max Wind Speed < {ctx['max_smph_below']:.0f}MPH"
+        )
     if not params:
         raise NoDataFound("Please select some options for plotting.")
     with get_sqlalchemy_conn("iem") as conn:
@@ -165,7 +208,7 @@ def plotter(ctx: dict):
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     ab = "N/A" if ab is None else ab
-    title = f"{ctx['_sname']} ({ab.year}-)\nDaily Observed Frequency"
+    title = f"{ctx['_sname']} ({ab.year}-) Daily Observed Frequency"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:
