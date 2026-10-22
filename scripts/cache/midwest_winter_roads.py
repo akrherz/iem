@@ -28,8 +28,12 @@ def main():
     utcnow = utc().replace(minute=0)
     with tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
-        resp = requests.get(REAL_EARTH, timeout=60)
-        resp.raise_for_status()
+        try:
+            resp = requests.get(REAL_EARTH, timeout=60)
+            resp.raise_for_status()
+        except requests.RequestException as e:
+            print(f"Failed to fetch {REAL_EARTH}: {e}")
+            return
         pathlib.Path("temp.geojson").write_text(resp.text)
         name = "midwest_winter_roads"
         subprocess.call(
