@@ -179,8 +179,13 @@ def do(meta: dict, station: str, acis_station: str) -> int:
     acis["atemp_estimated"] = acis["ahigh"].isna()
     acis["aprecip_estimated"] = acis["aprecip"].isna()
 
-    LOG.info("Loaded %s rows from ACIS", len(acis.index))
     acis = acis.set_index("day")
+    LOG.info(
+        "Loaded %s rows between %s and %s from ACIS",
+        len(acis.index),
+        acis.index.min(),
+        acis.index.max(),
+    )
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
@@ -192,8 +197,14 @@ def do(meta: dict, station: str, acis_station: str) -> int:
             conn,
             params={"station": station},
             index_col="day",
+            parse_dates=["day"],
         )
-    LOG.info("Loaded %s rows from IEM", len(obs.index))
+    LOG.info(
+        "Loaded %s rows between %s and %s from IEM",
+        len(obs.index),
+        obs.index.min(),
+        obs.index.max(),
+    )
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
