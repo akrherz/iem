@@ -19,10 +19,11 @@ missing data for the year to be considered in the plot.</p>
 from datetime import date, timedelta
 
 import pandas as pd
-from iemweb.autoplot import ARG_STATION
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "cdd": "Cooling Degree Days",
