@@ -136,6 +136,13 @@ def cull_missing(df: pd.DataFrame, dt: date, colname: str, missingdays: int):
     return resdf, list(filter(lambda x: x > minyear, years))
 
 
+def average_accumulations(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute the mean accumulated value for each observation day."""
+    jday = df[["row", "accum"]].groupby("row").mean()
+    jday.loc[jday.index[-1], "accum"] = jday.iloc[-2]["accum"]
+    return jday
+
+
 def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
@@ -215,10 +222,9 @@ def plotter(ctx: dict):
 
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Average
-    jday = df[["row", "accum"]].groupby("row").mean()
+    jday = average_accumulations(df)
     if jday.empty or len(jday.index) < 3:
         raise NoDataFound("No data found for variable.")
-    jday.loc[df.index[-1], "accum"] = jday.iloc[-2]["accum"]
     if climo.empty:
         ax.plot(
             range(1, len(jday.index) + 1),
