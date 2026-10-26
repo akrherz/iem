@@ -13,8 +13,8 @@ LOG = logger()
 
 def doit(now, model):
     """Figure out the model runtime we care about"""
-    mos_pgconn = get_dbconn("mos")
-    iem_pgconn = get_dbconn("iem")
+    mos_pgconn = get_dbconn("mos", rw=False)
+    iem_pgconn = get_dbconn("iem", rw=False)
     mcursor = mos_pgconn.cursor()
     icursor = iem_pgconn.cursor()
     mcursor.execute(

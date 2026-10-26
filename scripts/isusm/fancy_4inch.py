@@ -97,7 +97,7 @@ def main(days: int):
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
     # Query out the data
-    with get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("isuag", rw=False) as conn:
         df = pd.read_sql(
             sql_helper("""
             WITH ranges as (
@@ -157,7 +157,7 @@ def main(days: int):
         df = df.drop(station)
 
     # Query out centroids of counties...
-    with get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis", rw=False) as conn:
         cdf = pd.read_sql(
             """SELECT ST_x(ST_centroid(the_geom)) as lon,
             ST_y(ST_centroid(the_geom)) as lat

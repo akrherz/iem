@@ -14,7 +14,7 @@ def main():
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
     nt.sts["IA5992"]["lat"] = 41.65
-    coop = get_dbconn("coop")
+    coop = get_dbconn("coop", rw=False)
 
     obs = []
     cursor = coop.cursor()

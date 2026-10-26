@@ -10,7 +10,7 @@ LOG = logger()
 
 def main():
     """Go main go"""
-    pgconn = get_dbconn("isuag")
+    pgconn = get_dbconn("isuag", rw=True)
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
 

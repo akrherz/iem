@@ -95,18 +95,19 @@ def shpschema():
 
 def main():
     """Go Main Go"""
-    pgconn, pcursor = get_dbconnc("radar")
+    now = utc()
+    delete_job = now.minute % 10 == 0
+    pgconn, pcursor = get_dbconnc("radar", rw=delete_job)
 
     os.chdir("/tmp")
 
     # Delete anything older than 20 minutes
-    now = utc()
     ets = now - timedelta(minutes=20)
 
     shp = shpschema()
 
     # Less aggressively delete data
-    if now.minute % 10 == 0:
+    if delete_job:
         pcursor.execute(
             "DELETE from nexrad_attributes WHERE valid < %s",
             (ets,),

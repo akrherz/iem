@@ -12,9 +12,9 @@ OFFLINE_YR = utc().year - 1
 def main():
     """Go Main Go"""
     nt = NetworkTable("RAOB", only_online=False)
-    pgconn = get_dbconn("raob")
+    pgconn = get_dbconn("raob", rw=False)
     pcursor = pgconn.cursor()
-    pgconn2 = get_dbconn("mesosite")
+    pgconn2 = get_dbconn("mesosite", rw=True)
     mcursor = pgconn2.cursor()
 
     progress = tqdm(list(nt.sts.keys()))

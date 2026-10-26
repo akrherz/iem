@@ -18,7 +18,7 @@ from pyiem.plot import MapPlot
 def main():
     """Go Main Go"""
     st = NetworkTable("IACLIMATE")
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=False)
     ccursor = pgconn.cursor()
 
     ts = datetime.now() - timedelta(days=1)

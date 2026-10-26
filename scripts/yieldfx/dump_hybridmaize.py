@@ -19,7 +19,7 @@ DIRPATH = "/mesonet/share/pickup/yieldfx"
 def main():
     """Go Main Go"""
     nt = NetworkTable("ISUSM")
-    ipgconn = get_dbconn("iem")
+    ipgconn = get_dbconn("iem", rw=False)
     icursor = ipgconn.cursor()
     today = date.today()
     for i, site in enumerate(SITES):

@@ -53,7 +53,7 @@ def do_network(network):
 
 def main():
     """Main"""
-    with get_dbconn("mesosite") as conn:
+    with get_dbconn("mesosite", rw=True) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "with data as (SELECT id from networks where "

@@ -12,7 +12,7 @@ from pyiem.util import utc
 
 def zero_hourly(station, sts, ets):
     """Zero out the hourly data"""
-    pgconn = get_dbconn("isuag")
+    pgconn = get_dbconn("isuag", rw=True)
     cursor = pgconn.cursor()
     for table in ["sm_hourly", "sm_minute"]:
         cursor.execute(

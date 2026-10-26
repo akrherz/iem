@@ -105,7 +105,7 @@ def bnds(val, lower, upper):
 
 def dbsave(ts, data):
     """Save the data!"""
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=True)
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute(

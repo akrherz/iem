@@ -179,7 +179,7 @@ def load_baseline(location: str):
 
 def replace_forecast(df: pd.DataFrame, location: str):
     """Replace dataframe data with forecast for this location"""
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=False)
     cursor = pgconn.cursor()
     today = date.today()
     nextjan1 = date(today.year + 1, 1, 1)
@@ -233,7 +233,7 @@ def replace_forecast(df: pd.DataFrame, location: str):
 
 def replace_cfs(df: pd.DataFrame, location: str):
     """Replace the CFS data for this year!"""
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=False)
     cursor = pgconn.cursor()
     coop = XREF[location]["climodat"]
     today = date.today() + timedelta(days=3)
@@ -276,7 +276,7 @@ def replace_obs_iem(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn("iem")
+    pgconn = get_dbconn("iem", rw=False)
     cursor = pgconn.cursor()
     station = XREF[location]["station"]
     today = date.today()
@@ -338,7 +338,7 @@ def replace_obs(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn("isuag")
+    pgconn = get_dbconn("isuag", rw=False)
     cursor = pgconn.cursor()
     isusm = XREF[location]["isusm"]
     today = date.today()

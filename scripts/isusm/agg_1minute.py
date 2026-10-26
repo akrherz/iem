@@ -122,7 +122,7 @@ def do_date_ops(df):
 )
 def main(dt: datetime | None):
     """Do things."""
-    pgconn = get_dbconn("isuag")
+    pgconn = get_dbconn("isuag", rw=True)
     # We need to collect up data for periods representing CST dates, this
     # is tricky business
     # TODO memory troubles with more than 7 days of data :/
@@ -133,7 +133,7 @@ def main(dt: datetime | None):
     # 6z is the start of such a date
     sts = utc(sts.year, sts.month, sts.day, 6)
     ets = sts + timedelta(days=8)
-    with get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("isuag", rw=False) as conn:
         # Get the minute data
         mdf = (
             pd.read_sql(
