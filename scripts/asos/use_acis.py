@@ -108,7 +108,8 @@ def do(meta, acis_station, interactive):
     acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
     pgconn = get_dbconn("iem", rw=True)
-    with get_sqlalchemy_conn("iem", rw=False) as conn:
+    # Not necessarily rw=True, but the previous line requires anyway
+    with get_sqlalchemy_conn("iem", rw=True) as conn:
         obs = pd.read_sql(
             """
             SELECT day, max_tmpf, min_tmpf, pday
