@@ -4,10 +4,13 @@ IEM_APPID 92
 """
 
 import calendar
+import math
 import os
 import pathlib
 import re
 from datetime import date, datetime, timedelta
+from html import unescape
+from urllib.parse import quote, unquote
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -32,6 +35,9 @@ for _sn in "AK HI PR VI GU AS MP".split():
 NETWORK_RE = re.compile(r"^[A-Z0-9_\-]+$")
 DATE_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})$")
 SDAY_RE = re.compile(r"^(\d{2})(\d{2})$")
+DAT_GID_RE = re.compile(
+    r"^\{[0-9A-Fa-f]{8}-(?:[0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}\}$"
+)
 DATETIME_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2}) (\d{1,2})(\d{2})$")
 HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
@@ -299,7 +305,9 @@ def cmap_handler(fdict: dict, value: str, arg: dict, res: dict) -> str:
         f'id="{arg["name"]}_r" value="on"{checked}> '
         f'<label for="{arg["name"]}_r">Reverse Colormap?</label>'
     )
-    res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
+    res["pltvars"].append(
+        f"{arg['name']}:{unescape(value)}{'_r' if reverse_on else ''}"
+    )
     return s
 
 
@@ -405,21 +413,24 @@ def add_to_plotvars(value, fdict, arg, res):
         return
     if arg["type"] == "vtec_ps":
         suffix = arg["name"]
-        value = html_escape(fdict.get(f"phenomena{suffix}", "SV"))
+        value = fdict.get(f"phenomena{suffix}", "SV")
         res["pltvars"].append(f"phenomena{suffix}:{value}")
-        value = html_escape(fdict.get(f"significance{suffix}", "W"))
+        value = fdict.get(f"significance{suffix}", "W")
         res["pltvars"].append(f"significance{suffix}:{value}")
         return
     if arg["type"] == "cmap":
         return
     if isinstance(value, str | int | float):
+        if isinstance(value, str):
+            value = unescape(value)
         res["pltvars"].append(f"{arg['name']}:{value}")
-    elif isinstance(value, date):
-        res["pltvars"].append(f"{arg['name']}:{value.strftime('%Y-%m-%d')}")
+    # Careful, datetime is a subclass of date
     elif isinstance(value, datetime):
         res["pltvars"].append(
             f"{arg['name']}:{value.strftime('%Y-%m-%d %H%M')}"
         )
+    elif isinstance(value, date):
+        res["pltvars"].append(f"{arg['name']}:{value.strftime('%Y-%m-%d')}")
     else:
         for val in value:
             res["pltvars"].append(f"{arg['name']}:{val}")
@@ -430,24 +441,34 @@ def set_cookie_networkselect(cookies, headers, arg, value):
     network = arg.get("network", "")
     name = f"{arg['name']}_{network}"
     # network could be a list of strings, if so, ignore it
-    if not isinstance(network, str) or value == cookies.get(name):
+    if not isinstance(network, str):
+        return
+    value = str(value)
+    if value == unquote(cookies.get(name, "")):
         return
     headers.append(
         (
             "Set-Cookie",
-            f"{name}={value}; Path=/plotting/auto/; Max-Age=8640000",
+            (
+                f"{name}={quote(value, safe='')}; "
+                "Path=/plotting/auto/; Max-Age=8640000"
+            ),
         )
     )
 
 
 def set_cookie(cookies, headers, name, value):
     """Optionally set a cookie in the response headers."""
-    if value == cookies.get(name):
+    value = str(value)
+    if value == unquote(cookies.get(name, "")):
         return
     headers.append(
         (
             "Set-Cookie",
-            f"{name}={value}; Path=/plotting/auto/; Max-Age=8640000",
+            (
+                f"{name}={quote(value, safe='')}; "
+                "Path=/plotting/auto/; Max-Age=8640000"
+            ),
         )
     )
 
@@ -455,22 +476,26 @@ def set_cookie(cookies, headers, name, value):
 def get_cookie_value(arg, cookies):
     """Some custom cruft here."""
     if arg["type"] in ["state", "csector"]:
-        return cookies.get(arg["name"])
+        value = cookies.get(arg["name"])
+        return unquote(value) if value is not None else None
     if arg["type"] == "networkselect":
-        return cookies.get(f"{arg['name']}_{arg['network']}")
+        value = cookies.get(f"{arg['name']}_{arg['network']}")
+        return unquote(value) if value is not None else None
     return None
 
 
-def get_timing(apid):
+def get_timing(apid: str) -> int:
     """Get a timing sample."""
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "SELECT avg(timing)::int from autoplot_timing where appid = %s "
-        "and valid > (now() - '7 days'::interval)",
-        (apid,),
-    )
-    timing = cursor.fetchone()["avg"]
-    pgconn.close()
+    pgconn, cursor = get_dbconnc("mesosite", rw=False)
+    try:
+        cursor.execute(
+            "SELECT avg(timing)::int from autoplot_timing where appid = %s "
+            "and valid > (now() - '7 days'::interval)",
+            (apid,),
+        )
+        timing = cursor.fetchone()["avg"]
+    finally:
+        pgconn.close()
     return timing if timing is not None else -1
 
 
@@ -480,11 +505,20 @@ def compute_dat_label(attribs: dict) -> str:
     wfo = attribs.get("wfo", "")
     efscale = attribs.get("efscale", "")
     try:
-        length = attribs.get("length")
-    except ValueError:
-        length = 0
-    sts = pd.Timestamp(attribs.get("starttime") / 1000, unit="s", tz="UTC")
-    return f"{wfo} {efscale} {event_id} {sts:%H%M}Z {length:.0f} miles"
+        length = float(attribs.get("length"))
+    except (OverflowError, TypeError, ValueError):
+        length = 0.0
+    if not math.isfinite(length):
+        length = 0.0
+    try:
+        starttime = float(attribs.get("starttime"))
+        if not math.isfinite(starttime):
+            raise ValueError("non-finite starttime")
+        sts = pd.Timestamp(starttime / 1000, unit="s", tz="UTC")
+        stime = f"{sts:%H%M}Z"
+    except (OverflowError, TypeError, ValueError):
+        stime = "????Z"
+    return f"{wfo} {efscale} {event_id} {stime} {length:.0f} miles"
 
 
 def dat_handler(fdict: dict, res: dict) -> str:
@@ -492,7 +526,7 @@ def dat_handler(fdict: dict, res: dict) -> str:
     dt = fdict.get("dat", "2024/05/21")
     gid = fdict.get("datglobalid", "")
     # Ensure that gid looks like a guid
-    if len(gid) != 38:
+    if not DAT_GID_RE.fullmatch(gid):
         gid = "{495DE596-B299-41FE-9C90-13C87E43FE0B}"
     res["pltvars"].append(f"datglobalid:{gid}")
     # Query DAT for the list of events
@@ -516,14 +550,16 @@ def dat_handler(fdict: dict, res: dict) -> str:
             resp = client.get(url, timeout=30)
             resp.raise_for_status()
             datjson = resp.json()
-    except Exception as exp:
+    except (requests.RequestException, ValueError) as exp:
         raise BadWebRequest("Unable to load DAT events.") from exp
     for feat in datjson.get("features", []):
         _globalid = feat["attributes"]["globalid"]
+        globalid = html_escape(_globalid)
+        label = html_escape(compute_dat_label(feat["attributes"]))
         ss += (
-            f'<option value="{_globalid}" '
-            f"{'selected=' if _globalid == gid else ''}>"
-            f"{compute_dat_label(feat['attributes'])} </option>\n"
+            f'<option value="{globalid}" '
+            f"{'selected' if _globalid == gid else ''}>"
+            f"{label} </option>\n"
         )
     ss += "</select>"
     return (
@@ -536,52 +572,34 @@ def dat_handler(fdict: dict, res: dict) -> str:
     )
 
 
-def numeric_handler(value: str, arg: dict) -> list[str, str]:
+def numeric_handler(value: str, arg: dict) -> tuple[str, str]:
     """Generate the HTML form."""
     try:
-        float(value)
-    except ValueError:
+        number = float(value) if value != "" else None
+    except (TypeError, ValueError, OverflowError):
+        number = None
+    if number is None or not math.isfinite(number):
         value = arg["default"]
-    if value != "":
-        if "gt" in arg and float(value) <= arg["gt"]:
-            value = arg["default"]
-        if "lt" in arg and float(value) >= arg["lt"]:
-            value = arg["default"]
+        try:
+            number = float(value) if value != "" else None
+        except (TypeError, ValueError, OverflowError):
+            number = None
+        if number is not None and not math.isfinite(number):
+            raise ValueError("Numeric default must be finite")
+    if number is not None and (
+        ("gt" in arg and number <= arg["gt"])
+        or ("lt" in arg and number >= arg["lt"])
+    ):
+        value = arg["default"]
 
     return str(value), (
         f'<input type="text" name="{arg["name"]}" size="60" value="{value}">'
     )
 
 
-def generate_form(apid, fdict: dict, headers, cookies):
-    """Generate out the form, oh boy!"""
-    res = {
-        "title": "IEM Autoplot",
-        "nassmsg": "",
-        "description": "",
-        "imguri": f"/plotting/auto/plot/{apid}/",
-        "pltvars": [],
-        "formhtml": "",
-        "image": "",
-        "extrascripts": "",
-        "headextra": "",
-        "dataextra": "",
-        "issues": "",
-        "frontend": None,
-    }
-    if apid == 0:
-        return res
+def determine_format(fdict: dict, meta: dict) -> str:
+    """Figure out the format for this request."""
     fmt = fdict.get("_fmt")
-    # This should be instant, but the other end may be doing a thread
-    # restart, which takes a bit of time.
-    meta = get_metadict(int(apid))
-    res["title"] = f"{apid}. {meta['title']}"
-    res["frontend"] = meta.get("frontend")
-    if meta.get("description"):
-        res["description"] = (
-            '<div class="alert alert-info"><h4>Plot Description:</h4>'
-            f"{meta['description']}</div>"
-        )
     if fmt is None:
         if meta.get("highcharts", False):
             fmt = "js"
@@ -589,16 +607,17 @@ def generate_form(apid, fdict: dict, headers, cookies):
             fmt = "text"
         else:
             fmt = "png"
-    if meta.get("nass") is not None:
-        res["nassmsg"] = """
-<p><div class="alert alert-warning">This data presentation utilizes the
-        <a href="http://quickstats.nass.usda.gov/">USDA NASS Quickstats</a>.
-        This presentation is not endorsed nor certified by USDA.
-</div></p>
-        """
-    form = ""
+
+    return fmt
+
+
+def process_arguments(
+    fdict: dict, meta: dict, cookies: dict, headers: dict, res: dict
+) -> str:
+    """Figure out the arguments."""
     formhtml = ""
     for arg in meta["arguments"]:
+        form = ""
         value = fdict.get(arg["name"], get_cookie_value(arg, cookies))
         if arg.get("multiple", False):
             value = ensure_list(fdict, arg["name"])
@@ -692,96 +711,110 @@ def generate_form(apid, fdict: dict, headers, cookies):
             f"</div></div>"
             "\n"
         )
-    if fdict.get("_cb") == "1":
-        res["pltvars"].append("_cb:1")
-    res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
-    if fdict.get("_wait") != "yes":
-        if fmt == "text":
-            try:
-                resp = requests.get(
-                    f"http://iem.local{res['imguri']}.txt",
-                    timeout=300,
-                )
-                resp.raise_for_status()
-                content = resp.text
-            except Exception:
-                content = "Exception encountered generating text"
-            res["image"] = f"<pre>\n{content}</pre>"
-        elif fmt == "js":
-            res["image"] = (
-                '<div id="ap_container" style="width:100%s;height:400px;">'
-                "</div>"
-                '<div id="ap_container_controls"></div>'
+    return formhtml
+
+
+def add_content_to_res(fmt: str, apid: int, res: dict):
+    """Add content to the response based on the format specified by `fmt`."""
+    imguri = html_escape(res["imguri"])
+    if fmt == "text":
+        try:
+            resp = requests.get(
+                f"http://iem.local{res['imguri']}.txt",
+                timeout=300,
             )
-            res["extrascripts"] += f"""
+            resp.raise_for_status()
+            content = resp.text
+        except requests.RequestException as exp:
+            LOG.warning(
+                "Got exception from %s.txt generating text: %s",
+                res["imguri"],
+                exp,
+            )
+            content = "Exception encountered generating text"
+        res["image"] = f"<pre>\n{content}</pre>"
+    elif fmt == "js":
+        res["image"] = (
+            '<div id="ap_container" style="width:100%;height:400px;">'
+            "</div>"
+            '<div id="ap_container_controls"></div>'
+        )
+        res["extrascripts"] += f"""
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/accessibility.js">
 </script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/heatmap.js"></script>
-<script src="{res["imguri"]}.js"></script>
-            """
-        elif fmt == "maptable":
-            res["image"] = (
-                '<div class="iem-maptable row" '
-                f'data-geojson-src="{res["imguri"]}.geojson"></div>'
-            )
-            res["headextra"] += """
+<script src="{imguri}.js"></script>
+        """
+    elif fmt == "maptable":
+        res["image"] = (
+            '<div class="iem-maptable row" '
+            f'data-geojson-src="{imguri}.geojson"></div>'
+        )
+        res["headextra"] += """
 <link type="text/css"
- href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css"
- rel="stylesheet" />
-            """
-            res["extrascripts"] += """
+href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css"
+rel="stylesheet" />
+        """
+        res["extrascripts"] += """
 <script
- src='https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js'>
+src='https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js'>
 </script>
 <script src="/js/maptable.js?v=2"></script>
-            """
-        elif fmt in ["png", "svg"]:
-            timing_secs = get_timing(apid) + 1
-            res["image"] = f"""
+        """
+    elif fmt in ["png", "svg"]:
+        timing_secs = get_timing(apid) + 1
+        res["image"] = f"""
 <div class="card mb-4">
-    <div class="card-header">
-        <h4 class="card-title mb-0">
-            <span class="badge bg-primary me-2">3</span>
-            Generated Chart
-        </h4>
-    </div>
-    <div class="card-body">
-        <div id="willload" class="text-center p-4"
-         data-timingsecs={timing_secs}>
-            <div class="mb-3">
-    <i class="bi bi-graph-up"
-    style="font-size:2rem;color:#6c757d;margin-bottom:0.5rem;"
-    aria-hidden="true"></i>
-                <p class="mb-2">Based on recent timings, plot generation
-                averages {timing_secs} seconds. Please wait while your
-                chart is being generated...</p>
-            </div>
-            <div class="progress" style="height: 8px;">
+<div class="card-header">
+    <h4 class="card-title mb-0">
+        <span class="badge bg-primary me-2">3</span>
+        Generated Chart
+    </h4>
+</div>
+<div class="card-body">
+    <div id="willload" class="text-center p-4"
+        data-timingsecs={timing_secs}>
+        <div class="mb-3">
+<i class="bi bi-graph-up"
+style="font-size:2rem;color:#6c757d;margin-bottom:0.5rem;"
+aria-hidden="true"></i>
+            <p class="mb-2">Based on recent timings, plot generation
+            averages {timing_secs} seconds. Please wait while your
+            chart is being generated...</p>
+        </div>
+        <div class="progress" style="height: 8px;">
 <div id="timingbar"
-    class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
-    role="progressbar" aria-valuenow="0"
-    aria-valuemin="0" aria-valuemax="{timing_secs}"
-    style="width: 0%;"></div>
-            </div>
+class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+role="progressbar" aria-valuenow="0"
+aria-valuemin="0" aria-valuemax="{timing_secs}"
+style="width: 0%;"></div>
         </div>
-        <div class="text-center">
-            <img src="{res["imguri"]}.{fmt}" class="img-fluid"
-                 id="theimage" alt="Generated chart" />
-        </div>
+    </div>
+    <div class="text-center">
+        <img src="{imguri}.{fmt}" class="img-fluid"
+                id="theimage" alt="Generated chart" />
     </div>
 </div>
-            """
-        elif fmt == "pdf":
-            res["image"] = f"""
-<object id="windrose-plot" src="{res["imguri"]}.{fmt}" width="700px"
- height="700px">
-    <embed src="{res["imguri"]}.{fmt}" width="700px" height="700px">
-    </embed>
+</div>
+        """
+    elif fmt == "pdf":
+        res["image"] = f"""
+<object id="windrose-plot" src="{imguri}.{fmt}" width="700px"
+height="700px">
+<embed src="{imguri}.{fmt}" width="700px" height="700px">
+</embed>
 </object>
-            """
+        """
+
+
+def add_boilerplate_to_res(
+    fmt: str, meta: dict, res: dict, apid: str, formhtml: str
+) -> None:
+    """Add form items that are boilerplate."""
+    imguri = html_escape(res["imguri"])
     opts = {
         "png": "Chart Image (.PNG)",
         "svg": "Scalable Vector Graphic (.SVG)",
@@ -794,7 +827,7 @@ def generate_form(apid, fdict: dict, headers, cookies):
     if meta.get("maptable"):
         opts["maptable"] = "Interactive Map + Table"
     sel = make_select("_fmt", fmt, opts, showvalue=False)
-    formhtml += (
+    formhtml = formhtml + (
         '<div class="row align-items-center apdiv">'
         '<div class="col-sm-4">'
         '<label class="form-label fw-semibold mb-0">'
@@ -852,7 +885,7 @@ def generate_form(apid, fdict: dict, headers, cookies):
     </div>
     <div class="card-body">
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{res["imguri"]}.txt" class="btn btn-primary"
+            <a href="{imguri}.txt" class="btn btn-primary"
             aria-label="Download direct text link">
                 <i class="bi bi-file-text me-1" aria-hidden="true"></i>
                 Direct Text Link
@@ -860,12 +893,12 @@ def generate_form(apid, fdict: dict, headers, cookies):
         """
     if meta.get("data"):
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.csv" class="btn btn-primary"
+            <a href="{imguri}.csv" class="btn btn-primary"
             aria-label="Download CSV data">
                 <i class="bi bi-download me-1" aria-hidden="true"></i>
                 CSV Data
             </a>
-            <a href="{res["imguri"]}.xlsx" class="btn btn-success"
+            <a href="{imguri}.xlsx" class="btn btn-success"
             aria-label="Download Excel file">
                      <i class="bi bi-file-earmark-spreadsheet me-1"
                          aria-hidden="true"></i>
@@ -874,7 +907,7 @@ def generate_form(apid, fdict: dict, headers, cookies):
         """
     if meta["maptable"]:
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.geojson" class="btn btn-info"
+            <a href="{imguri}.geojson" class="btn btn-info"
             aria-label="Download GeoJSON file">
                 <i class="bi bi-map me-1" aria-hidden="true"></i>
                 GeoJSON
@@ -882,7 +915,7 @@ def generate_form(apid, fdict: dict, headers, cookies):
         """
     if meta.get("raster"):
         res["dataextra"] += f"""
-            <a href="{res["imguri"]}.geotiff" class="btn btn-warning"
+            <a href="{imguri}.geotiff" class="btn btn-warning"
             aria-label="Download GeoTIFF file">
                 <i class="bi bi-globe me-1" aria-hidden="true"></i>
                 GeoTIFF
@@ -904,6 +937,52 @@ def generate_form(apid, fdict: dict, headers, cookies):
     and provide the URL address currently shown by your web browser.
 </div>
     """
+
+
+def generate_form(apid, fdict: dict, headers, cookies) -> dict:
+    """Generate out the form, oh boy!"""
+    res = {
+        "title": "IEM Autoplot",
+        "nassmsg": "",
+        "description": "",
+        "imguri": f"/plotting/auto/plot/{apid}/",
+        "pltvars": [],
+        "formhtml": "",
+        "image": "",
+        "extrascripts": "",
+        "headextra": "",
+        "dataextra": "",
+        "issues": "",
+        "frontend": None,
+    }
+    if apid == 0:
+        return res
+    # This should be instant, but the other end may be doing a thread
+    # restart, which takes a bit of time.
+    meta = get_metadict(int(apid))
+    fmt = determine_format(fdict, meta)
+    res["title"] = f"{apid}. {meta['title']}"
+    res["frontend"] = meta.get("frontend")
+    if meta.get("description"):
+        res["description"] = (
+            '<div class="alert alert-info"><h4>Plot Description:</h4>'
+            f"{meta['description']}</div>"
+        )
+    if meta.get("nass") is not None:
+        res["nassmsg"] = """
+<p><div class="alert alert-warning">This data presentation utilizes the
+        <a href="http://quickstats.nass.usda.gov/">USDA NASS Quickstats</a>.
+        This presentation is not endorsed nor certified by USDA.
+</div></p>
+        """
+    formhtml = process_arguments(fdict, meta, cookies, headers, res)
+    if fdict.get("_cb", "") == "1":
+        res["pltvars"].append("_cb:1")
+    res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
+    if fdict.get("_wait", "") != "yes":
+        add_content_to_res(fmt, int(apid), res)
+
+    add_boilerplate_to_res(fmt, meta, res, apid, formhtml)
     return res
 
 
