@@ -536,7 +536,24 @@ def dat_handler(fdict: dict, res: dict) -> str:
     )
 
 
-def generate_form(apid, fdict, headers, cookies):
+def numeric_handler(value: str, arg: dict) -> list[str, str]:
+    """Generate the HTML form."""
+    try:
+        float(value)
+    except ValueError:
+        value = arg["default"]
+    if value != "":
+        if "gt" in arg and float(value) <= arg["gt"]:
+            value = arg["default"]
+        if "lt" in arg and float(value) >= arg["lt"]:
+            value = arg["default"]
+
+    return str(value), (
+        f'<input type="text" name="{arg["name"]}" size="60" value="{value}">'
+    )
+
+
+def generate_form(apid, fdict: dict, headers, cookies):
     """Generate out the form, oh boy!"""
     res = {
         "title": "IEM Autoplot",
@@ -620,11 +637,14 @@ def generate_form(apid, fdict, headers, cookies):
             form = cmap_handler(fdict, value, arg, res)
         elif arg["type"] == "fema":
             form = make_select(arg["name"], value, FEMA_REGIONS)
-        elif arg["type"] in ["text", "int", "float"]:
+        elif arg["type"] == "text":
+            # NOTE XSS is handled within pyiem
             form = (
                 f'<input type="text" name="{arg["name"]}" size="60" '
                 f'value="{value}">'
             )
+        elif arg["type"] in ["int", "float"]:
+            value, form = numeric_handler(value, arg)
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
             try:
                 form = datetypes_handler(arg, int(value))
@@ -1014,7 +1034,7 @@ box above.</p>
     """
 
 
-def generate(fdict, headers, cookies):
+def generate(fdict: dict, headers, cookies):
     """Return a dict of things for the template engine."""
     try:
         apid = int(fdict.get("q", 0))
