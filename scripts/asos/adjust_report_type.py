@@ -39,8 +39,8 @@ def main(dt: datetime):
     """Go."""
     sts = utc(dt.year, dt.month, dt.day)
     ets = sts + timedelta(hours=24)
-    asosdb = get_dbconn("asos")
-    with get_sqlalchemy_conn("asos") as conn:
+    asosdb = get_dbconn("asos", rw=True)
+    with get_sqlalchemy_conn("asos", rw=False) as conn:
         df = pd.read_sql(
             "SELECT station, date_trunc('hour', valid) as ts, "
             "sum(case when report_type = 3 then 1 else 0 end) as rcount, "

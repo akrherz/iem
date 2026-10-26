@@ -36,7 +36,7 @@ def get_data(dt: date | None) -> pd.DataFrame:
         lmt = "valid = :valid"
         params["valid"] = dt
 
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("iem", rw=False) as conn:
         cf6 = pd.read_sql(
             sql_helper(
                 "SELECT * from cf6_data where {lmt} ORDER by station ASC",
@@ -55,7 +55,7 @@ def get_data(dt: date | None) -> pd.DataFrame:
 
 def update_climodat(cf6df, xref, valid):
     """Update iemaccess."""
-    with get_sqlalchemy_conn("coop") as conn:
+    with get_sqlalchemy_conn("coop", rw=False) as conn:
         obs = pd.read_sql(
             "select station, high, low, precip from alldata WHERE day = %s",
             conn,
@@ -65,7 +65,7 @@ def update_climodat(cf6df, xref, valid):
     df = cf6df.join(xref, how="inner")
     if df.empty:
         return
-    dbconn = get_dbconn("coop")
+    dbconn = get_dbconn("coop", rw=True)
     cursor = dbconn.cursor()
     uvals = 0
     urows = 0
@@ -107,9 +107,9 @@ def update_climodat(cf6df, xref, valid):
 
 def update_iemaccess(cf6df, valid):
     """Update iemaccess."""
-    dbconn = get_dbconn("iem")
+    dbconn = get_dbconn("iem", rw=True)
     table = f"summary_{valid.year}"
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("iem", rw=False) as conn:
         # NB: we should not have any of these station IDs in the COOP network
         obs = pd.read_sql(
             sql_helper(
@@ -173,7 +173,7 @@ def update_iemaccess(cf6df, valid):
 
 def build_xref():
     """Build a cross reference"""
-    with get_sqlalchemy_conn("mesosite") as conn:
+    with get_sqlalchemy_conn("mesosite", rw=False) as conn:
         df = pd.read_sql(
             """
             with data as (

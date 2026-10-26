@@ -11,7 +11,7 @@ from pyiem.nws.product import TextProduct
 from pyiem.util import noaaport_text
 
 BAD_CHARS = r"[^\n\r\001\003a-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
-PGCONN = get_dbconn("afos")
+PGCONN = get_dbconn("afos", rw=True)
 XREF_SOURCE = {
     "KABE": "KPHI",
     "KABI": "KSJT",

@@ -32,7 +32,7 @@ def _do_update(icursor, valid, iemid, precip):
 def run(valid: datetime):
     """Do Work."""
     nt = NetworkTable("USCRN")
-    iem_pgconn = get_dbconn("iem")
+    iem_pgconn = get_dbconn("iem", rw=True)
     LOG.info("Processing %s", valid.date())
     with get_sqlalchemy_conn("uscrn") as conn:
         # Fetch enough data to cross all the dates

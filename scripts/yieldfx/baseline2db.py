@@ -15,12 +15,12 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconn("coop", rw=True)
     cursor = pgconn.cursor()
 
     # Need to have a merge of windspeed and average rh
     dsm = {}
-    ipgconn = get_dbconn("iem")
+    ipgconn = get_dbconn("iem", rw=False)
     icursor = ipgconn.cursor()
     icursor.execute(
         "select day, avg_sknt, avg_rh from summary where iemid = 37004 "

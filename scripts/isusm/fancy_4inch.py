@@ -46,7 +46,7 @@ def get_grib(now, fhour):
     return None
 
 
-def do_nam(valid):
+def do_nam(valid: datetime):
     """Compute county level estimates based on NAM data"""
     # run 6z to 6z, close enough
     now = datetime(valid.year, valid.month, valid.day, 6)
@@ -54,6 +54,7 @@ def do_nam(valid):
     lons = None
     count = 0
     grib = None
+    data = None
     for offset in [0, 6, 12, 18]:
         runtime = now + timedelta(hours=offset)
         for fhour in range(6):
@@ -63,7 +64,7 @@ def do_nam(valid):
             if lats is None:
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
-    if grib is None or lats is None:
+    if grib is None or lats is None or data is None:
         LOG.warning("Failed to find NAM data for %s", valid)
         return None, None, None
     data += grib.values
@@ -97,7 +98,7 @@ def main(days: int):
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
     # Query out the data
-    with get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("isuag", rw=False) as conn:
         df = pd.read_sql(
             sql_helper("""
             WITH ranges as (
@@ -157,7 +158,7 @@ def main(days: int):
         df = df.drop(station)
 
     # Query out centroids of counties...
-    with get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis", rw=False) as conn:
         cdf = pd.read_sql(
             """SELECT ST_x(ST_centroid(the_geom)) as lon,
             ST_y(ST_centroid(the_geom)) as lat

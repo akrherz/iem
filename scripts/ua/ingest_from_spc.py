@@ -168,7 +168,7 @@ def main(valid, station):
     """Run for the given valid time!"""
     LOG.info("running for %s", valid)
     nt = NetworkTable("RAOB")
-    dbconn = get_dbconn("raob")
+    dbconn = get_dbconn("raob", rw=True)
     # check what we have
     with get_sqlalchemy_conn("raob") as conn:
         obs = pd.read_sql(

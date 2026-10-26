@@ -82,11 +82,11 @@ def main():
         link = Path("/mesonet/ARCHIVE/data") / str(year)
         target = Path(f"/mnt/archive32/ARCHIVE/data/{year}")
         workflow(link, target)
-    for year in range(2015, 2019):
+    for year in range(2015, 2020):
         link = Path("/mesonet/ARCHIVE/data") / str(year)
         target = Path(f"/mnt/archive5/ARCHIVE/data/{year}")
         workflow(link, target)
-    for year in range(2019, 2024):
+    for year in range(2020, 2024):
         link = Path("/mesonet/ARCHIVE/data") / str(year)
         target = Path(f"/mnt/archive32/ARCHIVE/data/{year}")
         workflow(link, target)
