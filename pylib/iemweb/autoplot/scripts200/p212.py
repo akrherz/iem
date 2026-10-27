@@ -194,6 +194,8 @@ def get_data(ctx: dict):
         dfin = dfin[dfin["sday"].str.slice(0, 4) != "0229"]
     # create the climatology dataframe
     df = dfin[["sday", ctx["var"]]].groupby("sday").describe()
+    # Colapse the multi-index columns
+    df.columns = [col[1] for col in df.columns.values]
     # Merge in this year's obs
     df[f"{ctx['var']}_{ctx['year']}"] = dfin[
         dfin["year"] == ctx["year"]
@@ -237,7 +239,7 @@ def get_highcharts(ctx: dict) -> str:
     units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
     myyearcol = f"{ctx['var']}_{ctx['year']}"
     title = ctx["title"].replace("\n", "\\n")
-    tc = ("ticks", "")
+    tc = "ticks"
     mx = df[f"{ctx['var']}_max_year"]
     mn = df[f"{ctx['var']}_min_year"]
     containername = ctx["_e"]
@@ -299,7 +301,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Average",
                 data: {
-        df[[tc, (ctx["var"], "mean")]].replace({np.nan: None}).values.tolist()
+        df[[tc, "mean"]].replace({np.nan: None}).values.tolist()
     },
                 zIndex: 2,
                 color: "#000000",
@@ -311,9 +313,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Range",
                 data: {
-        df[[tc, (ctx["var"], "min"), (ctx["var"], "max")]]
-        .replace({np.nan: None})
-        .values.tolist()
+        df[[tc, "min", "max"]].replace({np.nan: None}).values.tolist()
     },
                 type: "arearange",
                 lineWidth: 0,
@@ -338,9 +338,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "25-75 %tile",
                 data: {
-        df[[tc, (ctx["var"], "25%"), (ctx["var"], "75%")]]
-        .replace({np.nan: None})
-        .values.tolist()
+        df[[tc, "25%", "75%"]].replace({np.nan: None}).values.tolist()
     },
                 type: "arearange",
                 lineWidth: 0,
@@ -362,7 +360,7 @@ def plotter(ctx: dict):
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
     ax.set_position([0.1, 0.1, 0.88, 0.8])
     colname = f"{ctx['var']}_{ctx['year']}"
-    x = df["utc_valid"].values
+    x = df["utc_valid"].to_numpy()
     # Things could be too-irregular for a line plot
     ax.scatter(
         x,
@@ -374,20 +372,20 @@ def plotter(ctx: dict):
     )
     ax.fill_between(
         x,
-        df[ctx["var"], "min"].values,
-        df[ctx["var"], "max"].values,
+        df["min"].to_numpy(),
+        df["max"].to_numpy(),
         zorder=1,
         color="lightblue",
     )
     ax.fill_between(
         x,
-        df[ctx["var"], "25%"].values,
-        df[ctx["var"], "75%"].values,
+        df["25%"].to_numpy(),
+        df["75%"].to_numpy(),
         zorder=2,
         color="tan",
         label="25-75 %tile",
     )
-    ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
+    ax.plot(x, df["mean"].to_numpy(), color="k", zorder=3, label="Avg")
     # buffer out the yaxis some more
     maxval = ctx["dfin"][ctx["var"]].max()
     minval = ctx["dfin"][ctx["var"]].min()

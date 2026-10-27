@@ -174,8 +174,8 @@ def plotter(ctx: dict):
     if ctx["which"] == "average":
         ttitle = f"Average ({ADICT[ctx['climo']]})"
     title = (
-        f"{ctx['_sname']} ({obs.index.values[0]:%Y %b %d}-"
-        f"{obs.index.values[-1]:%Y %b %d})\n"
+        f"{ctx['_sname']} ({obs.index[0]:%Y %b %d}-"
+        f"{obs.index[-1]:%Y %b %d})\n"
         f"Maximum Straight Days with {PDICT[varname]} {ttitle}"
     )
     fitbox(fig, title, 0.1, 0.92, 0.9, 0.97)
@@ -194,7 +194,7 @@ def plotter(ctx: dict):
     ):
         d2 = row["enddate"]
         d1 = d2 - timedelta(days=row["period"] - 1)
-        df.at[idx, "startdate"] = f"{d1:%Y-%m-%d}"
+        df.loc[idx, "startdate"] = f"{d1:%Y-%m-%d}"
         fig.text(
             0.7,
             ypos,

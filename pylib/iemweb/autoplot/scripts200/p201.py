@@ -445,9 +445,11 @@ def plotter(ctx: dict):
         ax.yaxis.set_major_locator(MaxNLocator(min_n_ticks=1, integer=True))
 
     # Condition the dataframe
-    df = df.reindex(
-        pd.date_range(sts, ets, freq="D", name="date"), fill_value="NONE"
-    ).reset_index()
+    df = (
+        df.reindex(pd.date_range(sts, ets, freq="D", name="date"))
+        .reset_index()
+        .fillna("NONE")
+    )
     df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
     return fig, df

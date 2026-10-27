@@ -137,7 +137,7 @@ def overlay_info(fig, df: gpd.GeoDataFrame):
     )
 
 
-def get_df(table, product_id):
+def get_df(table, product_id) -> gpd.GeoDataFrame:
     """Find me data."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
@@ -182,7 +182,7 @@ def plotter(ctx: dict):
         df = get_df("lsrs", product_id)
     if df.empty:
         raise NoDataFound("Failed to find LSRs by given product identifier!")
-    df["magnitude"] = df["magnitude"].fillna("")
+    df["magnitude"] = df["magnitude"].astype(object).fillna("")
     if len(df.index) == 1:
         title = f"LSR: {df.at[0, 'city']} {df.at[0, 'typetext']}"
         timeinfo = f"@ {df.at[0, 'local_valid']:%-d %b %Y %-I:%M %p}"

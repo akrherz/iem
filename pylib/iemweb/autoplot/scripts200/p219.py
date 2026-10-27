@@ -150,7 +150,7 @@ def plotter(ctx: dict):
     # prevent all nan from becoming an object
     df = df.fillna(np.nan).infer_objects()
     df["next_valid"] = (
-        df.reset_index().shift(-1)["valid"].values - df.index.values
+        df.reset_index().shift(-1)["valid"].to_numpy() - df.index.to_numpy()
     )
     product_id = df.iloc[0]["product_id"]
     amd = "Amended " if df.iloc[0]["is_amendment"] else ""
@@ -260,18 +260,18 @@ def plotter(ctx: dict):
 
     # Between 3.5-4.5 plot the wind arrows
     ax.barbs(
-        df.index.values,
+        df.index.to_numpy(),
         [3.8] * sz,
-        df["u"].values,
-        df["v"].values,
+        df["u"].to_numpy(),
+        df["v"].to_numpy(),
         zorder=3,
         color="k",
     )
     ax.barbs(
-        df.index.values,
+        df.index.to_numpy(),
         [3.8] * sz,
-        df["ws_u"].values,
-        df["ws_v"].values,
+        df["ws_u"].to_numpy(),
+        df["ws_v"].to_numpy(),
         zorder=4,
         color="r",
     )

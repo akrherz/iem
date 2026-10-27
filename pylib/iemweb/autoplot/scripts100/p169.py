@@ -257,9 +257,9 @@ def plotter(ctx: dict):
             ets = entry.index[0].to_pydatetime()
         else:
             ets -= timedelta(minutes=1)
-        events.at[valid, "use"] = 1
-        events.at[valid, "start_valid_utc"] = sts
-        events.at[valid, "end_valid_utc"] = ets
+        events.loc[valid, "use"] = 1
+        events.loc[valid, "start_valid_utc"] = sts
+        events.loc[valid, "end_valid_utc"] = ets
         # Allow the output to contain more data
         if len(labels) >= 10:
             continue

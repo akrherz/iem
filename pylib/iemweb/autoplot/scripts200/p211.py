@@ -138,14 +138,14 @@ def make_wind_plot(ctx, ptype):
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         gust,
         zorder=1,
         width=1.0 / 1440.0,
         label="Gust",
     )
     ax.bar(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         sknt,
         zorder=2,
         width=1.0 / 1440.0,
@@ -155,7 +155,7 @@ def make_wind_plot(ctx, ptype):
     ax.grid(True)
     ax.legend(loc="best")
     ax2 = ax.twinx()
-    ax2.scatter(df["local_valid"].values, df["drct"].values, c="k")
+    ax2.scatter(df["local_valid"].to_numpy(), df["drct"].to_numpy(), c="k")
     ax2.set_ylabel("Wind Direction")
     ax2.set_yticks(np.arange(0, 361, 45))
     ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
@@ -177,7 +177,7 @@ def get_ttitle(df):
 
 def make_precip_plot(ctx):
     """Generate a precip plot, please."""
-    df = ctx["df"]
+    df: pd.DataFrame = ctx["df"]
     # Accumulate the precipitation
     df["precip_accum"] = df["precip"].cumsum()
     df["precip_rate1"] = df["precip"] * 60.0
@@ -192,7 +192,7 @@ def make_precip_plot(ctx):
     ax.set_position([0.06, 0.1, 0.81, 0.78])
 
     ax.bar(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         df["precip_rate1"],
         width=1.0 / 1440.0,
         color="b",
@@ -200,7 +200,7 @@ def make_precip_plot(ctx):
         zorder=1,
     )
     ax.plot(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         df["precip_rate15"],
         color="tan",
         label="Hourly Rate over 15min",
@@ -208,7 +208,7 @@ def make_precip_plot(ctx):
         zorder=3,
     )
     ax.plot(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         df["precip_rate60"],
         color="r",
         label="Actual Hourly Rate",
@@ -216,7 +216,7 @@ def make_precip_plot(ctx):
         zorder=3,
     )
     ax.plot(
-        df["local_valid"].values,
+        df["local_valid"].to_numpy(),
         df["precip_accum"],
         color="k",
         label="Accumulation",
@@ -227,7 +227,7 @@ def make_precip_plot(ctx):
     # Find max precip
     df2 = df[df["precip"] == df["precip"].max()]
     if not df2.empty:
-        idx = df2.index.values[0]
+        idx = df2.index[0]
         x = 1.02
         y = 0.95
         ax.text(
@@ -265,7 +265,7 @@ def make_precip_plot(ctx):
 
 def make_meteo_plot(ctx):
     """Generate a meteogram plot, please."""
-    df = ctx["df"]
+    df: pd.DataFrame = ctx["df"]
     title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Meteogram"
     fig = figure(apctx=ctx, title=title)
 
@@ -273,14 +273,14 @@ def make_meteo_plot(ctx):
     # -----------------------------
     ax = fig.add_axes((0.1, 0.69, 0.85, axheight))
     ax.plot(
-        df["local_valid"].values,
-        df["tmpf"].values,
+        df["local_valid"].to_numpy(),
+        df["tmpf"].to_numpy(),
         zorder=1,
         label="Air Temp",
     )
     ax.plot(
-        df["local_valid"].values,
-        df["dwpf"].values,
+        df["local_valid"].to_numpy(),
+        df["dwpf"].to_numpy(),
         zorder=1,
         label="Dew Point",
     )
@@ -301,8 +301,8 @@ def make_meteo_plot(ctx):
         )
         df2 = df[df["gust"].notna()]
         ax.bar(
-            df2["local_valid"].values,
-            df2["gust"].values,
+            df2["local_valid"].to_numpy(),
+            df2["gust"].to_numpy(),
             zorder=1,
             width=1.0 / 1440.0,
             label="Wind Gust",
@@ -315,8 +315,8 @@ def make_meteo_plot(ctx):
         )
         df2 = df[df["sknt"].notna()]
         ax.bar(
-            df2["local_valid"].values,
-            df2["sknt"].values,
+            df2["local_valid"].to_numpy(),
+            df2["sknt"].to_numpy(),
             zorder=2,
             width=1.0 / 1440.0,
             label="Wind Speed",
@@ -324,8 +324,8 @@ def make_meteo_plot(ctx):
     ax.legend(loc=(0, 1), ncol=3)
     ax2 = ax.twinx()
     ax2.scatter(
-        df["local_valid"].values,
-        df["drct"].values,
+        df["local_valid"].to_numpy(),
+        df["drct"].to_numpy(),
         zorder=1,
         edgecolor="k",
         facecolor="white",
@@ -346,8 +346,8 @@ def make_meteo_plot(ctx):
     # -----------------------------
     ax = fig.add_axes((0.1, 0.09, 0.85, axheight))
     ax.plot(
-        df["local_valid"].values,
-        df["pres1"].values,
+        df["local_valid"].to_numpy(),
+        df["pres1"].to_numpy(),
         zorder=1,
     )
     ax.grid(True)

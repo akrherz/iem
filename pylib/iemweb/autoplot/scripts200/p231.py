@@ -109,7 +109,7 @@ def plotter(ctx: dict):
     enddf = df[df["sday"] == f"{ctx['on']:%m%d}"].set_index("station")
     if startdf.empty or enddf.empty:
         raise NoDataFound("No data available for given date.")
-    df = startdf.join(enddf, how="inner", lsuffix="_start", rsuffix="_end")
+    df = startdf.join(enddf, how="inner", suffixes=("_start", "_end"))
     df = df.sort_values("spi_start", ascending=True)
     df["depart_change"] = df["depart_end"] - df["depart_start"]
     df["spi_change"] = df["spi_end"] - df["spi_start"]

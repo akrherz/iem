@@ -132,15 +132,15 @@ def get_df(ctx):
             conn,
             params={
                 "station": ctx["station"],
-                "sts": str(events.index.values[0]),
+                "sts": events.index.to_numpy()[0],
             },
             index_col="valid",
         )
     if obs.empty:
         raise NoDataFound("No Data Found.")
     ctx["title"] = (
-        f"{ctx['_sname']} ({str(events.index.values[0])[:10]} "
-        f"to {str(obs.index.values[-1])[:10]})\n"
+        f"{ctx['_sname']} ({events.index[0]:%Y-%m-%d} "
+        f"to {obs.index[-1]:%Y-%m-%d})\n"
         f"Frequency of NWS Headline for {ctx['ugc']} by {PDICT2[ctx['var']]}"
     )
     if ctx["opt"] == "yes":
@@ -177,7 +177,7 @@ def plotter(ctx: dict):
     v1 = f"{ctx['p1']}.{ctx['s1']}"
     hty = ctx["df"][v1 + "%"]
     ax.bar(
-        ctx["df"].index.values,
+        ctx["df"].index.to_numpy(),
         hty,
         label=get_ps_string(ctx["p1"], ctx["s1"]),
         color=NWS_COLORS[v1],
@@ -186,17 +186,17 @@ def plotter(ctx: dict):
     v2 = f"{ctx['p2']}.{ctx['s2']}"
     ehw = ctx["df"][f"{v2}%"]
     ax.bar(
-        ctx["df"].index.values,
-        ehw.values,
-        bottom=hty.values,
+        ctx["df"].index.to_numpy(),
+        ehw.to_numpy(),
+        bottom=hty.to_numpy(),
         label=get_ps_string(ctx["p2"], ctx["s2"]),
         color=NWS_COLORS[v2],
     )
     non = ctx["df"]["None%"]
     ax.bar(
-        ctx["df"].index.values,
-        non,
-        bottom=(hty + ehw).values,
+        ctx["df"].index.to_numpy(),
+        non.to_numpy(),
+        bottom=(hty + ehw).to_numpy(),
         label="No Headline",
         color="#EEEEEE",
     )

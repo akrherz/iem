@@ -170,7 +170,7 @@ def plotter(ctx: dict):
     # pivot
     df = df.pivot(index="date", columns="hour", values=varname).reset_index()
     df = df.dropna()
-    df["doy"] = pd.to_datetime(df["date"]).dt.dayofyear
+    df["doy"] = pd.to_datetime(df["date"]).dt.day_of_year
     df["year"] = pd.to_datetime(df["date"]).dt.year
     df["week"] = (df["doy"] / 7).astype(int)
     df["delta"] = df[h2] - df[h1]

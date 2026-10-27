@@ -235,7 +235,8 @@ def get_data(network: str, sts, ets, stations, cols, na, fmt: str):
         )
     df = df[df.columns.intersection(cols)]
     if na != "blank":
-        df = df.fillna(na)
+        # Output-only; cast to object so a str fill is valid for numeric cols
+        df = df.astype(object).fillna(na)
     if fmt == "json":
         return df.to_json(orient="records", date_format="iso")
     if fmt == "excel":

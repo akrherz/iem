@@ -147,7 +147,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.08, 0.55, 0.5, 0.35))
     df2 = df.loc[sts:ets]
     if not df2.empty:
-        ax.plot(df2.index.values, df2["diff"], label="Difference", lw=2)
+        ax.plot(df2.index, df2["diff"], label="Difference", lw=2)
         ax.set_ylabel(f"{PDICT[varname]} Difference")
         ax.grid(True)
         if ets - sts < timedelta(days=2):
@@ -188,7 +188,7 @@ def plotter(ctx: dict):
 
     # Plot the frequency of differences by week of year and hour of day
     df["hour"] = df.index.hour
-    df["week"] = df.index.dayofyear // 7
+    df["week"] = df.index.day_of_year // 7
     df["hit"] = np.where(df["diff"] >= ctx["diff"], 1, 0)
     freq = df[["week", "hour", "hit"]].groupby(["week", "hour"]).mean()
     freq = freq.unstack(level="hour")

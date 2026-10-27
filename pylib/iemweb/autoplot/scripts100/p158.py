@@ -10,7 +10,6 @@ from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
-import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -85,7 +84,7 @@ def get_highcharts(ctx: dict) -> str:
     """Do highcharts variant"""
     add_context(ctx)
     df = ctx["df"]
-    df["ticks"] = df.index.values.view(np.int64) // 1e3
+    df["ticks"] = df.index.as_unit("ms").asi8
     lines = []
     lines2 = []
     lines3 = []
@@ -104,7 +103,7 @@ def get_highcharts(ctx: dict) -> str:
         "ws_120m_s",
         "ws_120m_nwht",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines.append(
             f"""{{
             name: '{col}',
@@ -123,7 +122,7 @@ def get_highcharts(ctx: dict) -> str:
         "airtc_120m_1",
         "airtc_120m_2",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines2.append(
             f"""{{
             name: '{col}',
@@ -142,7 +141,7 @@ def get_highcharts(ctx: dict) -> str:
         "rh_120m_1",
         "rh_120m_2",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines3.append(
             f"""{{
             name: '{col}',
@@ -166,7 +165,7 @@ def get_highcharts(ctx: dict) -> str:
         "winddir_120m_s",
         "winddir_120m_nw",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines4.append(
             f"""{{
             name: '{col}',
@@ -321,26 +320,26 @@ def plotter(ctx: dict):
     for height in [5, 10, 20, 40, 80, 120]:
         x = "_1" if height == 120 else ""
         ax1.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"airtc_{height}m{x}"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"airtc_{height}m{x}"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax2.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"rh_{height}m{x}"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"rh_{height}m{x}"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax3.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"ws_{height}m_s"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"ws_{height}m_s"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax4.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"winddir_{height}m_s"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"winddir_{height}m_s"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )

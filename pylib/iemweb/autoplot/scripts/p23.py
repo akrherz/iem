@@ -73,6 +73,7 @@ def plotter(ctx: dict):
             conn,
             params={"sts": sts, "ets": ets},
             index_col="monthdate",
+            parse_dates=["monthdate"],
         )
         df = pd.read_sql(
             sql_helper("""
