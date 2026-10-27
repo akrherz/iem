@@ -45,7 +45,7 @@ S=/opt/iem/scripts
 03,13,24 * * * * cd $S/plots; bash HOURLY_PLOTS.sh
 
 # webalizer
-0 0 * * * cd $S/webalizer; bah processlogs.sh
+1 * * * * cd $S/webalizer; bash processlogs.sh
 
 # Run 36h runs dont finish until 50 after
 55 * * * * cd $S; bah RUN_40_AFTER_2.sh
