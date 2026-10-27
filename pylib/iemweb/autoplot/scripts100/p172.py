@@ -246,8 +246,8 @@ def plotter(ctx: dict):
         doy_trunc = df["row"].max()
     for year, color in zip(
         [
-            df["binyear"][df["accum"].idxmax()],
-            df["binyear"][df[df["row"] == doy_trunc]["accum"].idxmin()],
+            df.at[df["accum"].idxmax(), "binyear"],
+            df.at[df[df["row"] == doy_trunc]["accum"].idxmin(), "binyear"],
             year1,
             year2,
             year3,
