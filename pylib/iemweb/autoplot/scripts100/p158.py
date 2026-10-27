@@ -10,7 +10,6 @@ from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
-import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -85,7 +84,7 @@ def get_highcharts(ctx: dict) -> str:
     """Do highcharts variant"""
     add_context(ctx)
     df = ctx["df"]
-    df["ticks"] = df.index.values.view(np.int64) // 1e3
+    df["ticks"] = df.index.as_unit("ms").asi8
     lines = []
     lines2 = []
     lines3 = []
@@ -321,26 +320,26 @@ def plotter(ctx: dict):
     for height in [5, 10, 20, 40, 80, 120]:
         x = "_1" if height == 120 else ""
         ax1.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"airtc_{height}m{x}"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"airtc_{height}m{x}"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax2.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"rh_{height}m{x}"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"rh_{height}m{x}"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax3.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"ws_{height}m_s"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"ws_{height}m_s"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )
         ax4.plot(
-            ctx["df"].index.values,
-            ctx["df"][f"winddir_{height}m_s"].values,
+            ctx["df"].index.to_numpy(),
+            ctx["df"][f"winddir_{height}m_s"].to_numpy(),
             lw=2,
             label=f"{height}m",
         )

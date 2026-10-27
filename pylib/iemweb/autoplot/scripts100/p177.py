@@ -193,9 +193,13 @@ def make_inversion_plot(ctx):
     axes = fig.subplots(3, 1, sharex=True)
     ax = axes[0]
     ax.set_position([0.07, 0.7, axwidth, axheight])
-    ax.plot(df["valid"], c2f(df["tair_15_c_avg_qc"].values), label="1.5 feet")
-    ax.plot(df["valid"], c2f(df["tair_5_c_avg_qc"].values), label="5 feet")
-    ax.plot(df["valid"], c2f(df["tair_10_c_avg_qc"].values), label="10 feet")
+    ax.plot(
+        df["valid"], c2f(df["tair_15_c_avg_qc"].to_numpy()), label="1.5 feet"
+    )
+    ax.plot(df["valid"], c2f(df["tair_5_c_avg_qc"].to_numpy()), label="5 feet")
+    ax.plot(
+        df["valid"], c2f(df["tair_10_c_avg_qc"].to_numpy()), label="10 feet"
+    )
     ax.grid(True)
     ax.set_ylabel("Air Temperature °F")
     ax.set_title(f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries")
@@ -207,8 +211,8 @@ def make_inversion_plot(ctx):
     ax.plot(
         df["valid"],
         (
-            c2f(df["tair_10_c_avg_qc"].values)
-            - c2f(df["tair_15_c_avg_qc"].values)
+            c2f(df["tair_10_c_avg_qc"].to_numpy())
+            - c2f(df["tair_15_c_avg_qc"].to_numpy())
         ),
     )
     ax.grid(True)
@@ -221,7 +225,7 @@ def make_inversion_plot(ctx):
     ax.bar(
         df["valid"],
         convert_value(
-            df["ws_ms_max_qc"].values, "meter / second", "mile / hour"
+            df["ws_ms_max_qc"].to_numpy(), "meter / second", "mile / hour"
         ),
         zorder=2,
         color="red",
@@ -231,7 +235,7 @@ def make_inversion_plot(ctx):
     ax.bar(
         df["valid"],
         convert_value(
-            df["ws_ms_avg_qc"].values, "meter / second", "mile / hour"
+            df["ws_ms_avg_qc"].to_numpy(), "meter / second", "mile / hour"
         ),
         zorder=3,
         color="lightblue",
@@ -338,15 +342,15 @@ def make_daily_rad_plot(ctx):
         .rename(columns={"index": "valid"})
     )
     df["jday"] = df["valid"].dt.strftime("%j").astype(int)
-    df = df.join(maxes, on="jday", suffixes=("_", ""))
+    df = df.join(maxes, on="jday", suffixes=("", "_"))
 
     title = (
         f"ISUSM Station: {ctx['_sname']} Timeseries\n Daily Solar Radiation"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
-        df["valid"].values,
-        df["rad"].values,
+        df["valid"].to_numpy(),
+        df["rad"].to_numpy(),
         fc="tan",
         ec="brown",
         zorder=2,
@@ -354,8 +358,8 @@ def make_daily_rad_plot(ctx):
         label="Observed",
     )
     ax.plot(
-        df["valid"].values,
-        df["tmax"].values,
+        df["valid"].to_numpy(),
+        df["tmax"].to_numpy(),
         label=r"Modelled Max $\tau$ =0.75",
         color="k",
         lw=1.5,
@@ -406,7 +410,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax = fig.add_axes((0.1, 0.7, 0.8, 0.2))
     ax.bar(
         df.index.to_numpy(),
-        df["rain_in_tot_qc"].values,
+        df["rain_in_tot_qc"].to_numpy(),
         color="blue",
         align="center",
     )
@@ -415,7 +419,7 @@ def make_daily_rainfall_soil_rh(ctx):
     common(ax)
 
     ax = fig.add_axes((0.1, 0.4, 0.8, 0.2))
-    vals = c2f(df["t4_c_avg_qc"].values)
+    vals = c2f(df["t4_c_avg_qc"].to_numpy())
     ax.bar(
         df.index.to_numpy(),
         vals,
@@ -430,7 +434,7 @@ def make_daily_rainfall_soil_rh(ctx):
     if not pd.isna(df["rh_avg_qc"]).all():
         ax.bar(
             df.index.to_numpy(),
-            df["rh_avg_qc"].values,
+            df["rh_avg_qc"].to_numpy(),
             color="blue",
             align="center",
         )
@@ -552,9 +556,9 @@ def make_daily_plot(ctx):
     if df.empty:
         raise NoDataFound("No Data Found for Query")
 
-    mins = c2f(df["min"].values)
-    maxs = c2f(df["max"].values)
-    avgs = c2f(df["avg"].values)
+    mins = c2f(df["min"].to_numpy())
+    maxs = c2f(df["max"].to_numpy())
+    avgs = c2f(df["avg"].to_numpy())
     title = (
         f"ISUSM Station: {ctx['_sname']} Timeseries\n"
         "Daily Max/Min/Avg 4 inch Soil Temperatures"
@@ -736,7 +740,7 @@ def make_daily_water_change_plot(ctx):
     if not df["depth"].isnull().all():
         df2 = df[df["depth"] > 0]
         ax[0].bar(
-            df2["valid"].values,
+            df2["valid"].to_numpy(),
             df2["depth"].to_numpy(),
             color="b",
             width=1.1,
@@ -747,7 +751,9 @@ def make_daily_water_change_plot(ctx):
     ax[0].set_ylim(bottom=0)
 
     # Second plot
-    bars = ax[1].bar(df["valid"].values, df["change"].values, color="b")
+    bars = ax[1].bar(
+        df["valid"].to_numpy(), df["change"].to_numpy(), color="b"
+    )
     for mybar in bars:
         mybar.set_color("r" if mybar.get_y() < 0 else "b")
     ax[1].set_ylabel("Soil Water Change [inch]")
@@ -759,7 +765,7 @@ def make_daily_water_change_plot(ctx):
     if (ctx["ets"] - ctx["sts"]).total_seconds() < (60 * 86400):
         ylim = ax[1].get_ylim()[1]
         # Attempt to place precip text above this plot
-        pdf["pday"] = pdf["rain_in_tot_qc"].values
+        pdf["pday"] = pdf["rain_in_tot_qc"].to_numpy()
         for valid, row in pdf.iterrows():
             if row["pday"] > 0:
                 ax[1].text(
@@ -956,12 +962,12 @@ def plot4iemre(ctx: dict, lon: float, lat: float):
     ax.plot(vtimes, t4, label="IEMRE Hourly")
     ax.plot(
         df.index.to_pydatetime(),
-        c2f(df["t4_c_avg_qc"].values),
+        c2f(df["t4_c_avg_qc"].to_numpy()),
         label="ISUSM QC",
     )
     ax.plot(
         df.index.to_pydatetime(),
-        c2f(df["t4_c_avg"].values),
+        c2f(df["t4_c_avg"].to_numpy()),
         label="ISUSM Obs",
     )
 
@@ -1064,8 +1070,8 @@ def plot_at(ctx: dict):
     ax1.plot(df.index, c2f(df["tair_c_avg_qc"]), color="r", label="Air Temp")
     ax1.set_ylabel("Temperature [°F]")
     dwpf = dewpoint_from_relative_humidity(
-        units("degC") * df["tair_c_avg_qc"].values,
-        units("percent") * df["rh_avg_qc"].values,
+        units("degC") * df["tair_c_avg_qc"].to_numpy(),
+        units("percent") * df["rh_avg_qc"].to_numpy(),
     )
     ax1.plot(df.index, dwpf.to(units("degF")), color="g", label="Dew Point")
 
@@ -1077,7 +1083,7 @@ def plot_at(ctx: dict):
     ax1_2 = ax1.twinx()
     if not pd.isna(df["slrkj_tot_qc"]).all():
         ax1_2.plot(
-            df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k"
+            df.index, df["slrkj_tot_qc"].to_numpy() / 60.0 * 1000, color="k"
         )
         ax1_2.set_ylabel("Solar Radiation [$W m^{-2}$]")
     apply_xaxis_formatting(ax1, ctx)
@@ -1169,17 +1175,20 @@ def plot_meteogram(ctx):
     df2 = df[df["tair_c_avg_qc"] > -30]
     if not df2.empty:
         ax.plot(
-            df2.index.values, c2f(df2["tair_c_avg_qc"]), color="r", label="Air"
+            df2.index.to_numpy(),
+            c2f(df2["tair_c_avg_qc"]),
+            color="r",
+            label="Air",
         )
         dwpf = (
             dewpoint_from_relative_humidity(
-                units("degC") * df2["tair_c_avg_qc"].values,
-                units("percent") * df2["rh_avg_qc"].values,
+                units("degC") * df2["tair_c_avg_qc"].to_numpy(),
+                units("percent") * df2["rh_avg_qc"].to_numpy(),
             )
             .to(units("degF"))
             .m
         )
-        ax.plot(df2.index.values, dwpf, color="g", label="Dew Point")
+        ax.plot(df2.index.to_numpy(), dwpf, color="g", label="Dew Point")
     ax.grid(True)
     ax.set_ylabel("Temperature [°F]")
     ax.legend(loc="best", ncol=2)

@@ -187,7 +187,7 @@ def get_highcharts(ctx: dict) -> str:
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
-    df["ticks"] = df["valid"].astype(np.int64) // 1e3
+    df["ticks"] = df["valid"].dt.as_unit("ms").astype(np.int64)
     lines = []
     if "id" in df.columns:
         fxs = df["id"].unique()
@@ -208,7 +208,8 @@ def get_highcharts(ctx: dict) -> str:
                 }}
             """
             )
-    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 1e3
+    # Epoch milliseconds, independent of the index's datetime resolution
+    ctx["odf"]["ticks"] = ctx["odf"].index.as_unit("ms").asi8
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
         lines.append(
@@ -325,7 +326,7 @@ def plotter(ctx: dict):
         and ctx[ctx["var"]] in ctx["odf"].columns
     ):
         ax.plot(
-            ctx["odf"].index.values,
+            ctx["odf"].index.to_numpy(),
             ctx["odf"][ctx[ctx["var"]]],
             lw=2,
             color="k",

@@ -174,8 +174,8 @@ def plotter(ctx: dict):
     if ctx["which"] == "average":
         ttitle = f"Average ({ADICT[ctx['climo']]})"
     title = (
-        f"{ctx['_sname']} ({obs.index.values[0]:%Y %b %d}-"
-        f"{obs.index.values[-1]:%Y %b %d})\n"
+        f"{ctx['_sname']} ({obs.index[0]:%Y %b %d}-"
+        f"{obs.index[-1]:%Y %b %d})\n"
         f"Maximum Straight Days with {PDICT[varname]} {ttitle}"
     )
     fitbox(fig, title, 0.1, 0.92, 0.9, 0.97)

@@ -132,7 +132,7 @@ def get_df(ctx):
             conn,
             params={
                 "station": ctx["station"],
-                "sts": str(events.index.values[0]),
+                "sts": events.index.to_numpy()[0],
             },
             index_col="valid",
         )

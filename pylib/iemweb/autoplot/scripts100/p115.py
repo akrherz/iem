@@ -186,18 +186,19 @@ def plotter(ctx: dict):
     )
 
     # create a better resulting dataframe
-    resdf = pd.DataFrame(index=years)
+    resdf = pd.DataFrame(index=pd.Series(years).astype(object))
     resdf.index.name = "YEAR"
+    resdf.loc["MEAN"] = pd.NA
     for i, month_abbr in enumerate(calendar.month_abbr[1:], start=1):
         col = month_abbr.upper()
         resdf[col] = df[df["month"] == i].set_index("year")[varname]
-        resdf.loc["MEAN"][col] = df[df["month"] == i][varname].mean()
+        resdf.loc["MEAN", col] = df[df["month"] == i][varname].mean()
     resdf["ANN"] = yrmean if varname not in ["precip", "snow"] else yrsum
-    resdf.loc["MEAN"]["ANN"] = resdf["ANN"].mean()
+    resdf.loc["MEAN", "ANN"] = resdf["ANN"].mean()
     resdf["WATER YEAR"] = (
         wyrmean if varname not in ["precip", "snow"] else wyrsum
     )
-    resdf.loc["MEAN"]["WATER YEAR"] = resdf["WATER YEAR"].mean()
+    resdf.loc["MEAN", "WATER YEAR"] = resdf["WATER YEAR"].mean()
     y1 = int(ctx.get("syear", 1990))
 
     fig, ax = figure_axes(

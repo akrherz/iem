@@ -263,8 +263,8 @@ def plotter(ctx: dict):
     for station in df2.index.values:
         if station not in nt.sts:
             continue
-        df2.at[station, "lat"] = nt.sts[station]["lat"]
-        df2.at[station, "lon"] = nt.sts[station]["lon"]
+        df2.loc[station, "lat"] = nt.sts[station]["lat"]
+        df2.loc[station, "lon"] = nt.sts[station]["lon"]
     if "lat" not in df2.columns:
         raise NoDataFound("No Data was found")
     df2 = df2[df2["lat"].notna()]

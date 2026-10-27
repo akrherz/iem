@@ -239,7 +239,7 @@ def get_highcharts(ctx: dict) -> str:
     units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
     myyearcol = f"{ctx['var']}_{ctx['year']}"
     title = ctx["title"].replace("\n", "\\n")
-    tc = ("ticks", "")
+    tc = "ticks"
     mx = df[f"{ctx['var']}_max_year"]
     mn = df[f"{ctx['var']}_min_year"]
     containername = ctx["_e"]
@@ -360,7 +360,7 @@ def plotter(ctx: dict):
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
     ax.set_position([0.1, 0.1, 0.88, 0.8])
     colname = f"{ctx['var']}_{ctx['year']}"
-    x = df["utc_valid"].values
+    x = df["utc_valid"].to_numpy()
     # Things could be too-irregular for a line plot
     ax.scatter(
         x,
@@ -372,20 +372,20 @@ def plotter(ctx: dict):
     )
     ax.fill_between(
         x,
-        df["min"].values,
-        df["max"].values,
+        df["min"].to_numpy(),
+        df["max"].to_numpy(),
         zorder=1,
         color="lightblue",
     )
     ax.fill_between(
         x,
-        df["25%"].values,
-        df["75%"].values,
+        df["25%"].to_numpy(),
+        df["75%"].to_numpy(),
         zorder=2,
         color="tan",
         label="25-75 %tile",
     )
-    ax.plot(x, df["mean"].values, color="k", zorder=3, label="Avg")
+    ax.plot(x, df["mean"].to_numpy(), color="k", zorder=3, label="Avg")
     # buffer out the yaxis some more
     maxval = ctx["dfin"][ctx["var"]].max()
     minval = ctx["dfin"][ctx["var"]].min()
