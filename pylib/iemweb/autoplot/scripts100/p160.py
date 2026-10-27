@@ -198,7 +198,9 @@ def get_highcharts(ctx: dict) -> str:
                 .tz_convert(ZoneInfo(ctx["tzname"]))
                 .strftime("%-m/%-d %-I%p %Z")
             )
-            v = df2[["ticks", f"{ctx['var']}_value"]].to_json(orient="values")
+            v = df2[["ticks", f"{ctx['var']}_value"]].to_json(
+                orient="values", date_format="iso"
+            )
             lines.append(
                 f"""{{
                 name: '{issued}',
@@ -211,7 +213,9 @@ def get_highcharts(ctx: dict) -> str:
     # Epoch milliseconds, independent of the index's datetime resolution
     ctx["odf"]["ticks"] = ctx["odf"].index.as_unit("ms").asi8
     if ctx["var"] in ctx:
-        v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
+        v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(
+            orient="values", date_format="iso"
+        )
         lines.append(
             f"""{{
                 name: 'Obs',

@@ -103,7 +103,7 @@ def get_highcharts(ctx: dict) -> str:
         "ws_120m_s",
         "ws_120m_nwht",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines.append(
             f"""{{
             name: '{col}',
@@ -122,7 +122,7 @@ def get_highcharts(ctx: dict) -> str:
         "airtc_120m_1",
         "airtc_120m_2",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines2.append(
             f"""{{
             name: '{col}',
@@ -141,7 +141,7 @@ def get_highcharts(ctx: dict) -> str:
         "rh_120m_1",
         "rh_120m_2",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines3.append(
             f"""{{
             name: '{col}',
@@ -165,7 +165,7 @@ def get_highcharts(ctx: dict) -> str:
         "winddir_120m_s",
         "winddir_120m_nw",
     ]:
-        vals = df[["ticks", col]].to_json(orient="values")
+        vals = df[["ticks", col]].to_json(orient="values", date_format="iso")
         lines4.append(
             f"""{{
             name: '{col}',

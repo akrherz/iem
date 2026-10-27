@@ -342,7 +342,7 @@ def make_daily_rad_plot(ctx):
         .rename(columns={"index": "valid"})
     )
     df["jday"] = df["valid"].dt.strftime("%j").astype(int)
-    df = df.join(maxes, on="jday", suffixes=("", "_"))
+    df = df.join(maxes, on="jday", suffixes=("_", ""))
 
     title = (
         f"ISUSM Station: {ctx['_sname']} Timeseries\n Daily Solar Radiation"
