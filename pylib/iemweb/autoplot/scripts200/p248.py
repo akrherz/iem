@@ -226,7 +226,7 @@ def plotter(ctx: dict):
             )
     if df.empty:
         raise NoDataFound("No data found for query")
-    df["doy"] = df["date"].dt.dayofyear
+    df["doy"] = df["date"].dt.day_of_year
     df["year"] = df["date"].dt.year
 
     tt = OUTLOOKS[ctx["threshold"]].split("(")[0].strip()

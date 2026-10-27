@@ -188,7 +188,7 @@ def plotter(ctx: dict):
 
     # Plot the frequency of differences by week of year and hour of day
     df["hour"] = df.index.hour
-    df["week"] = df.index.dayofyear // 7
+    df["week"] = df.index.day_of_year // 7
     df["hit"] = np.where(df["diff"] >= ctx["diff"], 1, 0)
     freq = df[["week", "hour", "hit"]].groupby(["week", "hour"]).mean()
     freq = freq.unstack(level="hour")

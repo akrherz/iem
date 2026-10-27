@@ -142,15 +142,15 @@ def plotter(ctx: dict):
     dt1 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=mindoy)
     dt2 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=maxdoy)
     every = [1, 8, 15, 22]
-    if dt2.dayofyear - dt1.dayofyear > 60:
+    if dt2.day_of_year - dt1.day_of_year > 60:
         every = [1, 15]
-    if dt2.dayofyear - dt1.dayofyear > 120:
+    if dt2.day_of_year - dt1.day_of_year > 120:
         every = [
             1,
         ]
     for dt in pd.date_range(dt1, dt2):
         if dt.day in every:
-            xticks.append(dt.dayofyear)
+            xticks.append(dt.day_of_year)
             xticklabels.append(dt.strftime("%b %d"))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
