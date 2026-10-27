@@ -28,10 +28,10 @@ from pyiem.plot import figure_axes
 from pyiem.util import utc
 
 # Requested removal of bankfull
-STAGES = "low action flood moderate major record".split()
+STAGES = "action minor moderate major record".split()
 COLORS = {
     "action": "#ffff72",
-    "flood": "#ffc672",
+    "minor": "#ffc672",
     "moderate": "#ff7272",
     "major": "#e28eff",
 }

@@ -10,9 +10,10 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 
 LOG = logger()
+DICTION = ("action", "minor", "moderate", "major")
 
 
-def process_site(mcursor, nwsli, meta):
+def process_site(mcursor, nwsli: str, meta: dict):
     """Do our processing work"""
 
     url = f"https://api.water.noaa.gov/nwps/v1/gauges/{nwsli}"
@@ -32,6 +33,9 @@ def process_site(mcursor, nwsli, meta):
 
     msg = ""
     for name, entry in res.get("flood", {}).get("categories", {}).items():
+        if name not in DICTION:
+            LOG.info("Ignoring unknown label %s for %s", name, nwsli)
+            continue
         key = f"sigstage_{name}"
         val = entry["stage"]
         if val < 0:
@@ -47,23 +51,18 @@ def process_site(mcursor, nwsli, meta):
     LOG.info("updating %s with %s", nwsli, msg)
     mcursor.execute(
         """
-        UPDATE stations SET sigstage_low = %s,
+        UPDATE stations SET
         sigstage_action = %s,
-        sigstage_bankfull = %s,
-        sigstage_flood = %s,
+        sigstage_minor = %s,
         sigstage_moderate = %s,
-        sigstage_major = %s,
-        sigstage_record = %s
+        sigstage_major = %s
         WHERE iemid = %s
     """,
         (
-            meta.get("sigstage_low"),
             meta.get("sigstage_action"),
-            meta.get("sigstage_bankfull"),
-            meta.get("sigstage_flood"),
+            meta.get("sigstage_minor"),
             meta.get("sigstage_moderate"),
             meta.get("sigstage_major"),
-            meta.get("sigstage_record"),
             meta["iemid"],
         ),
     )
@@ -74,7 +73,7 @@ def process_site(mcursor, nwsli, meta):
 def main(network):
     """Go Main Go"""
     nt = NetworkTable(network)
-    with get_dbconn("mesosite") as dbconn:
+    with get_dbconn("mesosite", rw=True) as dbconn:
         for sid, meta in nt.sts.items():
             mcursor = dbconn.cursor()
             process_site(mcursor, sid, meta)

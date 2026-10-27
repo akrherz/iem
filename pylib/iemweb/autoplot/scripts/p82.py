@@ -65,7 +65,7 @@ COLORIZE = {
     "yes": "Yes, colorize cells based on values",
     "no": "No, do not colorize cells",
 }
-STAGES = "action flood moderate major".split()
+STAGES = "action minor moderate major".split()
 COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 
 
