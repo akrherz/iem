@@ -493,6 +493,7 @@
 206/t:conus::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 206/t:state::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 206/t:fema::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
+206/t:fema::network:WFO::wfo:DMX::state:IA::above:1::below:100::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 207/v:snow::t:cwa::network:WFO::wfo:RIW::csector:TN::p:contour::endts:2025-01-20%201549::hours:12::sz:50::f:linear::z:plot::coop:yes::c:yes::ct:yes::lw:1::_r:t::dpi:100.png
 207/pz:no::v:snow::t:state::network:WFO::wfo:DMX::csector:IA::p:both::endts:2024-12-31%201800::hours:12::sz:50::f:linear::z:yes::coop:no::cocorahs:yes::c:yes::ct:yes::lw:1::_r:t::dpi:100.png
 208/network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:auto::_r:43::dpi:100.png

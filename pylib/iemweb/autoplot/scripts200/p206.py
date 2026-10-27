@@ -8,7 +8,7 @@ import pandas as pd
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
 
 from iemweb.autoplot import ARG_FEMA
 
@@ -115,7 +115,7 @@ def get_description():
     return desc
 
 
-def get_df(ctx, buf=2.25):
+def get_df(ctx, buf=1.0) -> pd.DataFrame:
     """Figure out what data we need to fetch here"""
     if ctx["t"] == "state":
         bnds = reference.state_bounds[ctx["state"]]
@@ -191,7 +191,7 @@ def plotter(ctx: dict):
         sector=sector,
         state=ctx["state"],
         fema_region=ctx["fema"],
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        cwa=ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:],
         axisbg="white",
         title=f"{PDICT2[ctx['v']]} for {ctx['title']} on {ctx['day']}",
         nocaption=True,
@@ -206,17 +206,15 @@ def plotter(ctx: dict):
         ramp = np.append(ramp, np.arange(40, 80, 10))
         ramp = np.append(ramp, np.arange(80, 120, 20))
     # Data QC, cough
-    if ctx.get("above"):
-        df = df[df[varname] < ctx["above"]]
-    if ctx.get("below"):
-        df = df[df[varname] > ctx["below"]]
+    if ctx.get("above") is not None:
+        df = df.loc[df[varname] < ctx["above"]]
+    if ctx.get("below") is not None:
+        df = df.loc[df[varname] > ctx["below"]]
     if df.empty:
         raise NoDataFound("No data was found for your query")
     # with QC done, we compute ramps
     if ramp is None:
-        ramp = np.linspace(
-            df[varname].min() - 5, df[varname].max() + 5, 10, dtype="i"
-        )
+        ramp = pretty_bins(df[varname].min() - 1, df[varname].max() + 5)
 
     if ctx["p"] == "both":
         mp.contourf(
