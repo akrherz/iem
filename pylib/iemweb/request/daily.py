@@ -141,9 +141,9 @@ def overloaded(environ: dict):
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 25:  # Cut back on logging
+    if val > 50:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/daily.py over cpu thres: {val}")
-    return val > 20
+    return val > 40
 
 
 def get_climate(network: str, stations: list[str]) -> str | pd.DataFrame:
