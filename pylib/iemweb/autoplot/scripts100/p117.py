@@ -63,7 +63,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
     sdd = df.pivot(index="year", columns="month", values="sdd")
     days = df.pivot(index="year", columns="month", values="days")
-    df = sdd.join(days, lsuffix="sdd", rsuffix="days")
+    df = sdd.join(days, suffixes=("sdd", "days"))
 
     res += (
         "             # OF DAYS MAXT >86                     "

@@ -96,8 +96,8 @@ def plotter(ctx: dict):
     nwsdf = pd.DataFrame(data["ndfd"])
     nwsdf["date"] = pd.to_datetime(nwsdf["date"])
     nwsdf = nwsdf.set_index("date")
-    df = df.join(nwsdf, how="outer", rsuffix="ndfd")
-    df = df.join(gfsdf, how="outer", rsuffix="gfs")
+    df = df.join(nwsdf, how="outer", suffixes=("", "ndfd"))
+    df = df.join(gfsdf, how="outer", suffixes=("", "gfs"))
     if df.empty:
         raise NoDataFound("No data found!")
     df["sday"] = df.index.strftime("%m%d")

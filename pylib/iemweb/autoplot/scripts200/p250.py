@@ -147,7 +147,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.08, 0.55, 0.5, 0.35))
     df2 = df.loc[sts:ets]
     if not df2.empty:
-        ax.plot(df2.index.values, df2["diff"], label="Difference", lw=2)
+        ax.plot(df2.index, df2["diff"], label="Difference", lw=2)
         ax.set_ylabel(f"{PDICT[varname]} Difference")
         ax.grid(True)
         if ets - sts < timedelta(days=2):

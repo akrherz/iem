@@ -338,7 +338,7 @@ def make_daily_rad_plot(ctx):
         .rename(columns={"index": "valid"})
     )
     df["jday"] = df["valid"].dt.strftime("%j").astype(int)
-    df = df.join(maxes, on="jday", lsuffix="_")
+    df = df.join(maxes, on="jday", suffixes=("_", ""))
 
     title = (
         f"ISUSM Station: {ctx['_sname']} Timeseries\n Daily Solar Radiation"
@@ -405,7 +405,7 @@ def make_daily_rainfall_soil_rh(ctx):
 
     ax = fig.add_axes((0.1, 0.7, 0.8, 0.2))
     ax.bar(
-        df.index.values,
+        df.index.to_numpy(),
         df["rain_in_tot_qc"].values,
         color="blue",
         align="center",
@@ -417,7 +417,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax = fig.add_axes((0.1, 0.4, 0.8, 0.2))
     vals = c2f(df["t4_c_avg_qc"].values)
     ax.bar(
-        df.index.values,
+        df.index.to_numpy(),
         vals,
         color="brown",
         align="center",
@@ -429,7 +429,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax = fig.add_axes((0.1, 0.1, 0.8, 0.2))
     if not pd.isna(df["rh_avg_qc"]).all():
         ax.bar(
-            df.index.values,
+            df.index.to_numpy(),
             df["rh_avg_qc"].values,
             color="blue",
             align="center",
@@ -477,12 +477,12 @@ def plot_daily_hilo_rainfall(ctx):
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
 
     ax.plot(
-        df.index.values,
+        df.index.to_numpy(),
         df["high"].to_numpy(),
         color="red",
     )
     ax.plot(
-        df.index.values,
+        df.index.to_numpy(),
         df["low"].to_numpy(),
         color="blue",
     )
@@ -490,7 +490,7 @@ def plot_daily_hilo_rainfall(ctx):
 
     ax2 = ax.twinx()
     ax2.bar(
-        df.index.values,
+        df.index.to_numpy(),
         df["rain_in_tot_qc"].to_numpy(),
         color="green",
         align="center",
@@ -502,7 +502,7 @@ def plot_daily_hilo_rainfall(ctx):
         raindf = df[df["rain_in_tot_qc"] > 0.01]
         if not raindf.empty:
             ax2.scatter(
-                raindf.index.values,
+                raindf.index.to_numpy(),
                 raindf["rain_in_tot_qc"].to_numpy(),
                 color="green",
             )
@@ -561,7 +561,7 @@ def make_daily_plot(ctx):
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
-        df.index.values,
+        df.index.to_numpy(),
         maxs - mins,
         bottom=mins,
         fc="tan",
@@ -571,7 +571,7 @@ def make_daily_plot(ctx):
         label="Max/Min",
     )
     ax.scatter(
-        df.index.values,
+        df.index.to_numpy(),
         avgs,
         marker="*",
         s=30,
@@ -814,7 +814,7 @@ def plot_sm(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No Data Found for Query")
-    valid = df.index.values
+    valid = df.index.to_numpy()
 
     (fig, ax) = figure_axes(
         apctx=ctx,
@@ -990,7 +990,7 @@ def plot2(ctx):
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
     d04t = df["t4_c_avg_qc"]
-    valid = df.index.values
+    valid = df.index.to_numpy()
 
     title = f"ISUSM Station: {ctx['_sname']} :: Soil Temperature Timeseries"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -1186,13 +1186,13 @@ def plot_meteogram(ctx):
 
     # ----------------
     ax = axes[1]
-    ax.bar(df.index.values, df["ws_mph_max_qc"], width=barwidth, color="r")
-    ax.bar(df.index.values, df["ws_mph_qc"], width=barwidth, color="b")
+    ax.bar(df.index.to_numpy(), df["ws_mph_max_qc"], width=barwidth, color="r")
+    ax.bar(df.index.to_numpy(), df["ws_mph_qc"], width=barwidth, color="b")
     ax.grid(True)
     ax.set_ylabel("Wind Speed [MPH]")
 
     ax2 = ax.twinx()
-    ax2.scatter(df.index.values, df["winddir_d1_wvt_qc"], color="g")
+    ax2.scatter(df.index.to_numpy(), df["winddir_d1_wvt_qc"], color="g")
     ax2.set_ylabel("Wind Direction [deg]")
     ax2.set_ylim(-1, 361)
     ax2.set_yticks(range(0, 361, 45))

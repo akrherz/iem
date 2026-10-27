@@ -194,6 +194,8 @@ def get_data(ctx: dict):
         dfin = dfin[dfin["sday"].str.slice(0, 4) != "0229"]
     # create the climatology dataframe
     df = dfin[["sday", ctx["var"]]].groupby("sday").describe()
+    # Colapse the multi-index columns
+    df.columns = [col[1] for col in df.columns.values]
     # Merge in this year's obs
     df[f"{ctx['var']}_{ctx['year']}"] = dfin[
         dfin["year"] == ctx["year"]
@@ -299,7 +301,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Average",
                 data: {
-        df[[tc, (ctx["var"], "mean")]].replace({np.nan: None}).values.tolist()
+        df[[tc, "mean"]].replace({np.nan: None}).values.tolist()
     },
                 zIndex: 2,
                 color: "#000000",
@@ -311,9 +313,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Range",
                 data: {
-        df[[tc, (ctx["var"], "min"), (ctx["var"], "max")]]
-        .replace({np.nan: None})
-        .values.tolist()
+        df[[tc, "min", "max"]].replace({np.nan: None}).values.tolist()
     },
                 type: "arearange",
                 lineWidth: 0,
@@ -338,9 +338,7 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "25-75 %tile",
                 data: {
-        df[[tc, (ctx["var"], "25%"), (ctx["var"], "75%")]]
-        .replace({np.nan: None})
-        .values.tolist()
+        df[[tc, "25%", "75%"]].replace({np.nan: None}).values.tolist()
     },
                 type: "arearange",
                 lineWidth: 0,
@@ -374,20 +372,20 @@ def plotter(ctx: dict):
     )
     ax.fill_between(
         x,
-        df[ctx["var"], "min"].values,
-        df[ctx["var"], "max"].values,
+        df["min"].values,
+        df["max"].values,
         zorder=1,
         color="lightblue",
     )
     ax.fill_between(
         x,
-        df[ctx["var"], "25%"].values,
-        df[ctx["var"], "75%"].values,
+        df["25%"].values,
+        df["75%"].values,
         zorder=2,
         color="tan",
         label="25-75 %tile",
     )
-    ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
+    ax.plot(x, df["mean"].values, color="k", zorder=3, label="Avg")
     # buffer out the yaxis some more
     maxval = ctx["dfin"][ctx["var"]].max()
     minval = ctx["dfin"][ctx["var"]].min()
