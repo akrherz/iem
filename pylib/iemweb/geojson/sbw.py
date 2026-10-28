@@ -117,7 +117,7 @@ class Schema(CGIModel):
     def ensure_some_timestamp(self):
         """Ensure that we have some timestamp set."""
         if self.ts is None and self.sts is None and self.ets is None:
-            self.ts = utc()
+            object.__setattr__(self, "ts", utc())
         if (self.sts is not None and self.ets is None) or (
             self.sts is None and self.ets is not None
         ):

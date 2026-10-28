@@ -13,8 +13,8 @@ def test_asos_request():
         "&ets=2026-01-01T00:00Z&format=comma"
     )
     # exhaust the generator for coverage purposes
-    list(resp.response)
-    assert resp.status_code == 400
+    payload = "".join(resp.text)
+    assert resp.status_code == 400, payload
 
 
 def test_asos_alldata_greater_than_24hours():
@@ -24,5 +24,5 @@ def test_asos_alldata_greater_than_24hours():
         "?sts=1900-01-01T00:00Z&ets=2026-01-01T00:00Z&format=comma"
     )
     # exhaust the generator for coverage purposes
-    list(resp.response)
-    assert resp.status_code == 400
+    payload = "".join(resp.text)
+    assert resp.status_code == 400, payload
