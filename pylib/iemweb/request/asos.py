@@ -434,7 +434,7 @@ def get_stations(form):
 
 def get_time_bounds(form, tzinfo):
     """Figure out the exact time bounds desired"""
-    schema: CGIModel = form["_cgimodel_schema"]
+    schema: MyModel = form["_cgimodel_schema"]
     if form["hours"] is not None:
         ets = utc()
         sts = ets - timedelta(hours=int(form.get("hours")))
@@ -453,19 +453,18 @@ def get_time_bounds(form, tzinfo):
 
         if form["sts"] is None:
             form["sts"] = _get("1").replace(tzinfo=tzinfo)
-            # Force a validation
-            schema.sts = form["sts"]
         if form["ets"] is None:
             form["ets"] = _get("2").replace(tzinfo=tzinfo)
-            # Force a validation
-            schema.ets = form["ets"]
+        if form["sts"] == form["ets"]:
+            form["ets"] += timedelta(days=1)
+        if form["sts"] > form["ets"]:
+            form["sts"], form["ets"] = form["ets"], form["sts"]
+        # Force a validation
+        schema.sts = form["sts"]
+        schema.ets = form["ets"]
     except Exception:
         return None, None
 
-    if form["sts"] == form["ets"]:
-        form["ets"] += timedelta(days=1)
-    if form["sts"] > form["ets"]:
-        form["sts"], form["ets"] = form["ets"], form["sts"]
     return form["sts"], form["ets"]
 
 
