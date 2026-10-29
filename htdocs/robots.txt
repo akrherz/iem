@@ -1,10 +1,6 @@
-# Robots file for IEM 
-
-Crawl-delay: 120
+# Robots file for IEM
+User-agent: *
 Disallow: /usage/
 Disallow: /tmp/
-Disallow: /data/NIDS/
-Disallow: /data/nexrd2/
-Disallow: /data/model/
 Disallow: /archive/nexrad/
-Disallow: /archive/raw/snet/
+Disallow: /archive/raw/
