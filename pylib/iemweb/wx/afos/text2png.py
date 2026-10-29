@@ -129,6 +129,7 @@ def get_mckey(environ: dict) -> str:
     help=__doc__,
     memcachekey=get_mckey,
     content_type="image/png",
+    ip_throttle_secs=1,
 )
 def application(environ: dict, start_response):
     """Go Main Go"""
