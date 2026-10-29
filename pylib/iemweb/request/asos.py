@@ -136,12 +136,6 @@ class MyModel(CGIModel):
             ),
         ),
     ] = False
-    ets: Annotated[
-        AwareDatetime | None,
-        Field(
-            description=("The end time of the data request."),
-        ),
-    ] = None
     format: Annotated[
         str,
         Field(
@@ -214,10 +208,20 @@ class MyModel(CGIModel):
             ),
         ),
     ] = None
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=("The end time of the data request."),
+            ge=utc(1900, 1, 1),
+            lt=utc(utc().year + 1, 12, 31),
+        ),
+    ] = None
     sts: Annotated[
         AwareDatetime | None,
         Field(
             description=("The start time of the data request."),
+            ge=utc(1900, 1, 1),
+            lt=utc(utc().year + 1, 12, 31),
         ),
     ] = None
     trace: Annotated[
@@ -430,6 +434,7 @@ def get_stations(form):
 
 def get_time_bounds(form, tzinfo):
     """Figure out the exact time bounds desired"""
+    schema: MyModel = form["_cgimodel_schema"]
     if form["hours"] is not None:
         ets = utc()
         sts = ets - timedelta(hours=int(form.get("hours")))
@@ -450,13 +455,16 @@ def get_time_bounds(form, tzinfo):
             form["sts"] = _get("1").replace(tzinfo=tzinfo)
         if form["ets"] is None:
             form["ets"] = _get("2").replace(tzinfo=tzinfo)
+        if form["sts"] == form["ets"]:
+            form["ets"] += timedelta(days=1)
+        if form["sts"] > form["ets"]:
+            form["sts"], form["ets"] = form["ets"], form["sts"]
+        # Force a validation
+        schema.sts = form["sts"]
+        schema.ets = form["ets"]
     except Exception:
         return None, None
 
-    if form["sts"] == form["ets"]:
-        form["ets"] += timedelta(days=1)
-    if form["sts"] > form["ets"]:
-        form["sts"], form["ets"] = form["ets"], form["sts"]
     return form["sts"], form["ets"]
 
 
@@ -548,7 +556,7 @@ def application(environ: dict, start_response: Callable):
     report_types = [int(x) for x in environ["report_type"]]
     tzinfo = ZoneInfo(environ["tz"])
     sts, ets = get_time_bounds(environ, tzinfo)
-    if sts is None:
+    if sts is None or ets is None:
         pgconn.close()
         start_response(
             "422 Unprocessable Entity", [("Content-type", "text/plain")]

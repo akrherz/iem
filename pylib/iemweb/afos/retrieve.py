@@ -286,8 +286,10 @@ class Schema(CGIModel):
 
     @field_validator("sdate", "edate", mode="before")
     @classmethod
-    def rectify_datestr(cls, v: str):
+    def rectify_datestr(cls, v: str | datetime):
         """pydantic can't seem to handle this."""
+        if isinstance(v, datetime):
+            return v
         # pydantic/pydantic/issues/9308
         if 8 <= len(v) < 10:
             # zero pad
@@ -297,18 +299,21 @@ class Schema(CGIModel):
     @model_validator(mode="after")
     def rectify_model(self):
         """Apply some business logic to what the user provided.."""
-        self.sdate = (
+        newsdate = (
             self.sdate.replace(tzinfo=timezone.utc)
             if self.sdate.tzinfo is None
             else self.sdate.astimezone(timezone.utc)
         )
-        self.edate = (
+        newedate = (
             self.edate.replace(tzinfo=timezone.utc)
             if self.edate.tzinfo is None
             else self.edate.astimezone(timezone.utc)
         )
-        if self.edate < self.sdate:
-            self.sdate, self.edate = self.edate, self.sdate
+        if newedate < newsdate:
+            newsdate, newedate = newedate, newsdate
+        # Avoid recursion
+        object.__setattr__(self, "sdate", newsdate)
+        object.__setattr__(self, "edate", newedate)
         return self
 
 

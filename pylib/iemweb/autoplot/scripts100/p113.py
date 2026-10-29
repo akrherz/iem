@@ -150,6 +150,9 @@ def do_year_overlay(
         )
     elif plotvar == "precip":
         combos = (("precip", "max_precip", operator.ge),)
+
+    xs = []
+    ys = []
     for _, row in obs.iterrows():
         ts = pd.Timestamp(row["day"])
         if ts not in df.index:
@@ -157,15 +160,19 @@ def do_year_overlay(
         dfrow = df.loc[ts]
         for col, dfcol, op in combos:
             if op(row[col], dfrow[dfcol]):
-                ax.scatter(
-                    [ts],
-                    [row[col]],
-                    facecolor=color,
-                    edgecolor="yellow",
-                    alpha=0.8,
-                    s=50,
-                    zorder=5,
-                )
+                xs.append(ts)
+                ys.append(row[col])
+    if xs:
+        ax.scatter(
+            xs,
+            ys,
+            facecolor=color,
+            edgecolor="yellow",
+            alpha=0.8,
+            s=50,
+            zorder=5,
+            label="Record",
+        )
 
 
 def generate_plot(ctx: dict, df: pd.DataFrame, bs: date, be: date) -> Figure:
@@ -280,7 +287,9 @@ def generate_plot(ctx: dict, df: pd.DataFrame, bs: date, be: date) -> Figure:
     ax.set_ylabel(
         "Precipitation [inch]" if plotvar == "precip" else "Temperature °F"
     )
-    ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
+    ax.set_xlim(
+        ctx["sday"] - timedelta(days=1), ctx["eday"] + timedelta(days=1)
+    )
     days = 1
     if ctx["eday"] - ctx["sday"] < timedelta(days=71):
         days = [1, 8, 15, 22, 29]
@@ -370,7 +379,7 @@ def plotter(ctx: dict):
                 res += bad
                 continue
             row = df.loc[ts]
-            if row["max_high"] is None or row["min_low"] is None:
+            if pd.isna(row["max_high"]) or pd.isna(row["min_low"]):
                 res += bad
                 continue
             if varname == "maxmin":

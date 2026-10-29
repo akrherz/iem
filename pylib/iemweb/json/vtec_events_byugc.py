@@ -133,7 +133,7 @@ class Schema(CGIModel):
                 val = parse_date(getattr(self, col))
                 if col == "edate":
                     val = val.replace(hour=23, minute=59, second=59)
-                setattr(self, scol, val)
+                object.__setattr__(self, scol, val)
             except Exception as exp:
                 raise ValueError(
                     f"Invalid {col} provided: {getattr(self, col)}"
