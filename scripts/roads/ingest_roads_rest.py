@@ -213,7 +213,7 @@ def main():
                 props["LONG_NAME"],
             )
             continue
-        segid = current.at[idot_id, "segid"]
+        segid = current.loc[idot_id, "segid"]
         raw = props["HL_PAVEMENT_CONDITION"]
         if raw is None:
             continue
@@ -238,7 +238,7 @@ def main():
             LOG.info("CARS_MSG_UPDATE_DATE is missing, default to utcnow!")
             valid = utc()
         # Save to log, if difference
-        if cond != current.at[idot_id, "cond_code"]:
+        if cond != current.loc[idot_id, "cond_code"]:
             if not progress.disable:
                 progress.write("Inserting %s to roads_log", segid)
             cursor.execute(

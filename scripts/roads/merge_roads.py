@@ -12,10 +12,10 @@ from shapely.geometry import LineString, MultiLineString
 
 def main():
     """Go Main, please"""
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("postgis", rw=True)
     cursor = pgconn.cursor()
-    with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(
+    with get_sqlalchemy_conn("postgis", rw=True) as conn:
+        current_roads = pd.read_sql(
             sql_helper("""
     SELECT idot_id, longname from roads_base
     where (archive_end is null or archive_end > now())
@@ -23,14 +23,16 @@ def main():
             conn,
             index_col="idot_id",
         )
-    LOG.info("found %s rows from roads_base", len(df.index))
+    current_roads["covered"] = False
+    LOG.info("found %s rows from roads_base", len(current_roads.index))
     resp = requests.get(URI, timeout=30)
     jobj = resp.json()
     archive_begin = utc()
     for feat in jobj["features"]:
         props = feat["attributes"]
         idot_id = props["SEGMENT_ID"]
-        if idot_id in df.index:
+        if idot_id in current_roads.index:
+            current_roads.loc[idot_id, "covered"] = True
             continue
         # Geometry is [[pt]] and we only have single segments
         path = MultiLineString([LineString(feat["geometry"]["paths"][0])])
@@ -100,6 +102,19 @@ def main():
             VALUES (%s, %s, 0)
         """,
             (segid, archive_begin),
+        )
+    LOG.info(
+        "Covered %s of %s roads",
+        current_roads["covered"].sum(),
+        len(current_roads.index),
+    )
+    for idot_id, row in current_roads[~current_roads["covered"]].iterrows():
+        LOG.warning(
+            "Road with idot_id %s %s was not covered", idot_id, row["longname"]
+        )
+        cursor.execute(
+            "UPDATE roads_base SET archive_end = %s WHERE idot_id = %s",
+            (archive_begin, idot_id),
         )
     cursor.close()
     pgconn.commit()
