@@ -10,6 +10,7 @@ observation over the years is problematic.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,26 +19,29 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot.description import PlotDescription, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        )
-    ]
-    return desc
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("asos")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["zstation"]
+    station = ctx.zstation
 
     res = conn.execute(
         sql_helper("""
@@ -72,7 +76,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = f"{ctx['_sname']} ({ab.year}-{date.today().year})"
+    title = f"{ctx.sname} ({ab.year}-{date.today().year})"
     subtitle = "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.plot(

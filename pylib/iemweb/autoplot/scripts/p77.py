@@ -7,6 +7,7 @@ days represented by the period.
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,18 +16,26 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [ARG_STATION]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
 
     today = datetime.now()
     thisyear = today.year
@@ -51,7 +60,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     title = (
-        f"{ctx['_sname']} :: Period Between\n"
+        f"{ctx.sname} :: Period Between\n"
         "Average Last and First High Temperature of Year"
     )
     fig = figure(title=title, apctx=ctx)

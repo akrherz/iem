@@ -21,12 +21,23 @@ yet.</p>
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "yes": "Yes, Include only Year to Date period each year",
@@ -55,91 +66,76 @@ OPTDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    syear: Annotated[
+        int,
+        YearArg(min=1973, label="Start year (if data available) for plot:"),
+    ] = 1973
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1973,
-            default=1973,
-            name="syear",
-            label="Start year (if data available) for plot:",
-        ),
-        dict(
-            type="year",
-            min=1973,
-            default=date.today().year,
-            name="eyear",
             label="End year (inclusive, if data available) for plot:",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="select",
-            options=PDICT,
-            name="ytd",
-            default="no",
-            label="Include Only Year to Date Data?",
-        ),
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": "0101",
-            "label": "Start Date for Custom Date Range:",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": "1231",
-            "label": "Inclusive End Date for Custom Date Range:",
-        },
-        dict(
-            type="year",
-            min=1973,
-            default=date.today().year,
-            name="year",
-            label="Year to Highlight:",
-        ),
-        dict(
-            type="select",
-            options=VDICT,
-            name="var",
-            default="heatindex",
-            label="Select variable to plot:",
-        ),
-        dict(
-            type="select",
-            options=OPTDICT,
-            name="inc",
-            default="no",
-            label=(
-                "Include cases where windchill or heatindex is not additive"
-            ),
-        ),
-        {
-            "type": "int",
-            "min": 0,
-            "max": 99999,
-            "name": "ylimit",
-            "default": 0,
-            "label": "Y Axis Hours Limit (0 for automatic):",
-        },
     ]
-    return desc
+    ytd: Annotated[
+        str, SelectArg(options=PDICT, label="Include Only Year to Date Data?")
+    ] = "no"
+    sday: Annotated[
+        date,
+        SDayArg(label="Start Date for Custom Date Range:", default="0101"),
+    ]
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive End Date for Custom Date Range:", default="1231"
+        ),
+    ]
+    year: Annotated[
+        int,
+        YearArg(
+            min=1973,
+            label="Year to Highlight:",
+            default=lambda: date.today().year,
+        ),
+    ]
+    var: Annotated[
+        str, SelectArg(options=VDICT, label="Select variable to plot:")
+    ] = "heatindex"
+    inc: Annotated[
+        str,
+        SelectArg(
+            options=OPTDICT,
+            label="Include cases where windchill or heatindex is not additive",
+        ),
+    ] = "no"
+    ylimit: Annotated[
+        int,
+        IntArg(
+            min=0, max=99999, label="Y Axis Hours Limit (0 for automatic):"
+        ),
+    ] = 0
 
 
-def get_doylimit(ytd: str, varname: str, ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_doylimit(ytd: str, varname: str, ctx: Params):
     """Get the SQL limiter"""
     if ytd == "no":
         return ""
     if ytd == "custom":
-        if ctx["sday"] < ctx["eday"]:
+        if ctx.sday < ctx.eday:
             return (
                 "and extract(doy from valid) >= extract(doy from :sday) "
                 "and extract(doy from valid) <= extract(doy from :eday) "
@@ -162,15 +158,15 @@ def get_doylimit(ytd: str, varname: str, ctx: dict):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    highlightyear = ctx["year"]
-    sdate = date(ctx["syear"], 1, 1)
-    edate = date(ctx["eyear"] + 1, 1, 1)
-    ytd = ctx["ytd"]
-    varname = ctx["var"]
-    inc = ctx["inc"]
+    station = ctx.zstation
+    highlightyear = ctx.year
+    sdate = date(ctx.syear, 1, 1)
+    edate = date(ctx.eyear + 1, 1, 1)
+    ytd = ctx.ytd
+    varname = ctx.var
+    inc = ctx.inc
     doylimiter = get_doylimit(ytd, varname, ctx)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -183,8 +179,8 @@ def plotter(ctx: dict):
             and report_type = 3 {doylimiter}"""),
             conn,
             params={
-                "sday": ctx["sday"],
-                "eday": ctx["eday"],
+                "sday": ctx.sday,
+                "eday": ctx.eday,
                 "station": station,
                 "sdate": sdate,
                 "edate": edate,
@@ -251,9 +247,9 @@ def plotter(ctx: dict):
     title = f"{title}till {date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
     if ytd == "custom":
-        title = f"Custom Range: {ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+        title = f"Custom Range: {ctx.sday:%-d %b} thru {ctx.eday:%-d %b}"
     title = (
-        f"{ctx['_sname']} ({minyear}-{maxyear})\n"
+        f"{ctx.sname} ({minyear}-{maxyear})\n"
         f"{title2.split('::')[0]} Histogram ({title}){inctitle}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
@@ -306,7 +302,7 @@ def plotter(ctx: dict):
     ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
     dy = 24 * (int(ymax / 240) + 1)
     ax.set_yticks(range(0, ymax, dy))
-    ax.set_ylim(-0.5, (ymax + 5) if ctx["ylimit"] == 0 else ctx["ylimit"])
+    ax.set_ylim(-0.5, (ymax + 5) if ctx.ylimit == 0 else ctx.ylimit)
     ax2 = ax.twinx()
     ax2.set_ylim(-0.5, ymax + 5)
     ax2.set_yticks(range(0, ymax, dy))

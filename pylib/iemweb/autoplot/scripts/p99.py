@@ -7,7 +7,7 @@ the daily standard deviation departures.
 """
 
 from datetime import date, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -16,6 +16,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -23,33 +25,31 @@ if TYPE_CHECKING:
 PDICT = {"abs": "Departure in degrees", "sigma": "Depature in sigma"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=date.today().year,
-            label="Which Year:",
-        ),
-        dict(
-            type="select",
-            name="delta",
-            options=PDICT,
-            label="How to present the daily departures",
-            default="abs",
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int, YearArg(label="Which Year:", default=lambda: date.today().year)
     ]
-    return desc
+    delta: Annotated[
+        str,
+        SelectArg(options=PDICT, label="How to present the daily departures"),
+    ] = "abs"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    delta = ctx["delta"]
-    year = ctx["year"]
+    station = ctx.station
+    delta = ctx.delta
+    year = ctx.year
     clstation = ctx["_nt"].sts[station]["ncei91"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -98,7 +98,7 @@ def plotter(ctx: dict):
     df["high_sigma"] = (df["high"] - df["avg_high"]) / df["stddev_high"]
     df["low_sigma"] = (df["low"] - df["avg_low"]) / df["stddev_low"]
 
-    title = f"{ctx['_sname']} :: Climatology & {year} Observations"
+    title = f"{ctx.sname} :: Climatology & {year} Observations"
     fig = figure(
         apctx=ctx,
         title=title,

@@ -9,6 +9,8 @@ with each day above a given threshold and the average over that period.
 provides actual streaks and yearly maximum values.
 """
 
+from typing import Annotated
+
 import numpy as np
 import pandas as pd
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -16,6 +18,8 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High Temperature",
@@ -34,27 +38,27 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="precip",
-            label="Which Variable:",
-            options=PDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(label="Which Variable:", options=PDICT)] = (
+        "precip"
+    )
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
 
     rows = []
     for dy in range(1, 32):
@@ -92,7 +96,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     df = pd.DataFrame(rows)
 
     title = (
-        f"{ctx['_sname']} Statistics of {PDICT.get(varname)} "
+        f"{ctx.sname} Statistics of {PDICT.get(varname)} "
         "over 1-31 Consecutive Days"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)

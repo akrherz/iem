@@ -19,6 +19,7 @@ the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -33,6 +34,16 @@ from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"jan1": "January 1", "jul1": "July 1"}
 PDICT2 = {
@@ -47,65 +58,48 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT2,
-            label="View by WFO or State?",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-        ),
-        dict(type="state", default="IA", name="state", label="Select State:"),
-        ARG_FEMA,
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="SV",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            label="Split the year on date:",
-            default="jan1",
-            name="split",
-        ),
-        dict(
-            type="select",
-            options=PDICT3,
-            label="How to color bars for left plot:",
-            default="daily",
-            name="f",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="View by WFO or State?")
+    ] = "wfo"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "SV"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+    split: Annotated[
+        str, SelectArg(options=PDICT, label="Split the year on date:")
+    ] = "jan1"
+    f: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="How to color bars for left plot:"),
+    ] = "daily"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"][:4]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    split = ctx["split"]
-    opt = ctx["opt"]
-    state = ctx["state"]
+    station = ctx.station[:4]
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    split = ctx.split
+    opt = ctx.opt
+    state = ctx.state
 
     params = {
         "phenomena": phenomena,
@@ -118,7 +112,7 @@ def plotter(ctx: dict):
         wfolimiter = " substr(ugc, 1, 2) = :state "
     elif opt == "fema":
         wfolimiter = " substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
+        params["states"] = fema_region2states(ctx.fema)
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -171,7 +165,7 @@ def plotter(ctx: dict):
     if opt == "state":
         title = f"NWS Issued Alerts for State of {state_names[state]}"
     elif opt == "fema":
-        title = f"NWS Issued Alerts for FEMA {FEMA_REGIONS[ctx['fema']]}"
+        title = f"NWS Issued Alerts for FEMA {FEMA_REGIONS[ctx.fema]}"
     title += (
         "\n"
         "Period between First and Last "
@@ -183,9 +177,9 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.12, 0.1, 0.61, 0.8))
 
     # Create a color bar for the number of events per day
-    cmap = get_cmap(ctx["cmap"]).with_extremes(under="tan", over="k")
+    cmap = get_cmap(ctx.cmap).with_extremes(under="tan", over="k")
     bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
-    if ctx["f"] == "accum":
+    if ctx.f == "accum":
         maxval = (
             int(
                 df[["vtec_year", "count"]]
@@ -204,7 +198,7 @@ def plotter(ctx: dict):
             bins = np.linspace(1, maxval, 20, dtype="i")
 
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
-    if ctx["f"] != "none":
+    if ctx.f != "none":
         cax = fig.add_axes(
             [0.01, 0.12, 0.02, 0.6], frameon=False, yticks=[], xticks=[]
         )
@@ -212,7 +206,7 @@ def plotter(ctx: dict):
             cax, norm=norm, cmap=cmap, extend="max", spacing="proportional"
         )
         cb.set_label(
-            "Daily Count" if ctx["f"] == "daily" else "Accum Count",
+            "Daily Count" if ctx.f == "daily" else "Accum Count",
             loc="bottom",
         )
 
@@ -226,9 +220,9 @@ def plotter(ctx: dict):
             fc="tan",
             align="center",
         )
-        if ctx["f"] == "none":
+        if ctx.f == "none":
             continue
-        if ctx["f"] == "daily":
+        if ctx.f == "daily":
             ax.barh(
                 gdf["vtec_year"].values,
                 [1] * len(gdf.index),
@@ -281,7 +275,7 @@ def plotter(ctx: dict):
     ax.barh(
         gdf.index.values,
         gdf["count"].values,
-        color="blue" if ctx["f"] != "accum" else cmap(norm([gdf["count"]]))[0],
+        color="blue" if ctx.f != "accum" else cmap(norm([gdf["count"]]))[0],
         align="center",
     )
     ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)

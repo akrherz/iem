@@ -8,6 +8,7 @@ are commmon when computing this metric for high or low temperature.
 """
 
 from datetime import UTC, date
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -18,26 +19,29 @@ from pyiem.plot import figure_axes
 from pyiem.util import utc
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot.description import PlotDescription, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        )
-    ]
-    return desc
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("iem")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["zstation"]
+    station = ctx.zstation
     ts1973 = utc(1973, 1, 1)
     utcnow = utc()
     rs = conn.execute(
@@ -89,7 +93,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
 
     df = pd.DataFrame(rows)
     title = (
-        f"{ctx['_sname']} ({minvalid.year}-{date.today().year})\n"
+        f"{ctx.sname} ({minvalid.year}-{date.today().year})\n"
         "Bias of 24 Hour 'Day' Split for Precipitation"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

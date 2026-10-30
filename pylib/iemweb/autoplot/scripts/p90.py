@@ -99,6 +99,7 @@ away as sometimes it will take 3-5 minutes to generate a map :(
 """
 
 from datetime import UTC, date, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -120,6 +121,19 @@ from rasterstats import zonal_stats
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    FloatArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
@@ -159,139 +173,125 @@ PDICT5 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    tom = today + timedelta(days=3)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
-        ),
-        dict(
-            type="select",
-            name="v",
-            default="lastyear",
-            options=PDICT2,
-            label="Select statistic to plot:",
-        ),
-        dict(
-            type="select",
-            name="ilabel",
-            default="yes",
-            options=PDICT3,
-            label="Overlay values on map?",
-        ),
-        dict(
-            type="select",
-            name="geo",
-            default="ugc",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    v: Annotated[
+        str, SelectArg(options=PDICT2, label="Select statistic to plot:")
+    ] = "lastyear"
+    ilabel: Annotated[
+        str, SelectArg(options=PDICT3, label="Overlay values on map?")
+    ] = "yes"
+    geo: Annotated[
+        str,
+        SelectArg(
             options=PDICT4,
             label="Plot by UGC (Counties/Parishes/Zones) or Polygons?",
         ),
-        dict(
-            type="select",
-            name="drawc",
-            default="yes",
+    ] = "ugc"
+    drawc: Annotated[
+        str,
+        SelectArg(
             options=PDICT5,
             label="Plot County/Parish borders on polygon summary maps?",
         ),
-        dict(
-            type="year",
+    ] = "yes"
+    year: Annotated[
+        int,
+        YearArg(
             min=1986,
-            name="year",
-            default=today.year,
             label="Select start year (only for year count/average):",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="year",
+    ]
+    year2: Annotated[
+        int,
+        YearArg(
             min=1986,
-            name="year2",
-            default=today.year,
             label="Select end year (only for year count/average) (inclusive):",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="datetime",
-            name="sdate",
-            default="2006/01/01 0000",
+    ]
+    sdate: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start DateTime UTC:",
             min="1986/01/01 0000",
+            default="2006/01/01 0000",
         ),
-        dict(
-            type="datetime",
-            name="edate",
-            default=tom.strftime("%Y/%m/%d 0000"),
+    ]
+    edate: Annotated[
+        datetime,
+        DateTimeArg(
             label="End DateTime UTC:",
             min="1986/01/01 0000",
-            max=tom.strftime("%Y/%m/%d 0000"),
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (when appropriate)",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State: (when appropriate)",
-        ),
-        ARG_FEMA,
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="TO",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="A",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-        dict(
-            optional=True,
-            name="interval",
-            type="float",
-            default=1,
-            label=(
-                "Specify an interval for the colorbar to use instead of "
-                "dynamic. (optional)"
+            max=lambda: (date.today() + timedelta(days=3)).strftime(
+                "%Y/%m/%d 0000"
+            ),
+            default=lambda: (date.today() + timedelta(days=3)).strftime(
+                "%Y/%m/%d 0000"
             ),
         ),
     ]
-    return desc
+    station: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (when appropriate)"
+        ),
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State: (when appropriate)")
+    ] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "TO"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "A"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
+    interval: Annotated[
+        float | None,
+        FloatArg(
+            label="Specify an interval for the colorbar to use instead of "
+            "dynamic. (optional)",
+            default=1,
+        ),
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 @with_sqlalchemy_conn("postgis")
-def get_raster(ctx: dict, conn: Connection | None = None):
+def get_raster(ctx: Params, conn: Connection | None = None):
     """polygon workflow"""
-    if ctx["geo"] == "ugc":
+    if ctx.geo == "ugc":
         raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=UTC)
-    ctx["edate"] = ctx["edate"].replace(tzinfo=UTC)
-    varname = ctx["v"]
+    ctx.sdate = ctx.sdate.replace(tzinfo=UTC)
+    ctx.edate = ctx.edate.replace(tzinfo=UTC)
+    varname = ctx.v
     if varname == "events":
         raise NoDataFound("Sorry, not implemented for polygon summaries.")
-    station = ctx["station"][:4]
-    state = ctx["state"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    t = ctx["t"]
-    sdate = ctx["sdate"]
+    station = ctx.station[:4]
+    state = ctx.state
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    t = ctx.t
+    sdate = ctx.sdate
     if sdate.year < 2001:
-        ctx["sdate"] = utc(2001, 1, 1)
-        sdate = ctx["sdate"]
-    edate = ctx["edate"]
-    year = ctx["year"]
-    year2 = ctx["year2"]
+        ctx.sdate = utc(2001, 1, 1)
+        sdate = ctx.sdate
+    edate = ctx.edate
+    year = ctx.year
+    year2 = ctx.year2
     # figure out the start and end timestamps
     if varname in ["total", "days", "lastyear"]:
         sts = sdate
@@ -321,7 +321,7 @@ def get_raster(ctx: dict, conn: Connection | None = None):
     if t == "cwa":
         (west, south, east, north) = wfo_bounds[station[-3:]]
     elif t == "fema":
-        (west, south, east, north) = fema_region_bounds[int(ctx["fema"])]
+        (west, south, east, north) = fema_region_bounds[int(ctx.fema)]
     elif t == "conus":
         (west, south, east, north) = (-125, 24, -66.5, 49)
     else:
@@ -351,7 +351,7 @@ def get_raster(ctx: dict, conn: Connection | None = None):
     ones = np.ones((YSZ, XSZ))
     counts = np.zeros((YSZ, XSZ))
     wfolimiter = ""
-    if ctx["t"] == "cwa":
+    if ctx.t == "cwa":
         wfolimiter = " wfo = :wfo and "
     params = {
         "sdate": f"{sdate:%m%d}",
@@ -481,8 +481,8 @@ def get_raster(ctx: dict, conn: Connection | None = None):
 
     maxv = np.max(counts)
     if varname not in ["lastyear", "days"]:
-        if ctx.get("interval") is not None:
-            interval = float(ctx["interval"])
+        if ctx.interval is not None:
+            interval = float(ctx.interval)
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
         elif varname in ["total", "yearcount"]:
@@ -503,22 +503,22 @@ def get_raster(ctx: dict, conn: Connection | None = None):
 
 
 @with_sqlalchemy_conn("postgis")
-def do_ugc(ctx: dict, conn: Connection | None = None):
+def do_ugc(ctx: Params, conn: Connection | None = None):
     """Do UGC based logic."""
-    varname = ctx["v"]
-    station = ctx["station"][:4]
-    state = ctx["state"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    t = ctx["t"]
-    sdate: date = ctx["sdate"]
-    edate: date = ctx["edate"]
-    year = ctx["year"]
-    year2 = ctx["year2"]
+    varname = ctx.v
+    station = ctx.station[:4]
+    state = ctx.state
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    t = ctx.t
+    sdate: date = ctx.sdate
+    edate: date = ctx.edate
+    year = ctx.year
+    year2 = ctx.year2
     df = None
     states = [state]
     if t == "fema":
-        states = fema_region2states(ctx["fema"])
+        states = fema_region2states(ctx.fema)
     sqlfilter = ""
     if t == "cwa":
         sqlfilter = "wfo = :wfo and "
@@ -780,8 +780,8 @@ def do_ugc(ctx: dict, conn: Connection | None = None):
         for key, item in data.items():
             data[key] = round(item / float(years), 2)
         maxv = df["average"].max()
-        if ctx.get("interval") is not None:
-            interval = float(ctx["interval"])
+        if ctx.interval is not None:
+            interval = float(ctx.interval)
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
         else:
@@ -816,18 +816,18 @@ def do_ugc(ctx: dict, conn: Connection | None = None):
     ctx["df"] = df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     # Covert datetime to UTC
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=UTC)
-    ctx["edate"] = ctx["edate"].replace(tzinfo=UTC)
-    state = ctx["state"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    station = ctx["station"][:4]
-    t = ctx["t"]
-    ilabel = ctx["ilabel"] == "yes"
-    geo = ctx["geo"]
+    ctx.sdate = ctx.sdate.replace(tzinfo=UTC)
+    ctx.edate = ctx.edate.replace(tzinfo=UTC)
+    state = ctx.state
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    station = ctx.station[:4]
+    t = ctx.t
+    ilabel = ctx.ilabel == "yes"
+    geo = ctx.geo
     grid = None
     aff = None
     crs = None
@@ -843,7 +843,7 @@ def plotter(ctx: dict):
             f"{subtitle}"
         )
     elif t == "fema":
-        subtitle = f"Plotted for FEMA Region {ctx['fema']}, {subtitle}"
+        subtitle = f"Plotted for FEMA Region {ctx.fema}, {subtitle}"
     elif t == "conus":
         subtitle = f"Plotted for Contiguous US, {subtitle}"
     else:
@@ -854,9 +854,9 @@ def plotter(ctx: dict):
     )
     mp = MapPlot(
         apctx=ctx,
-        sector=ctx["t"] if ctx["t"] != "fema" else "fema_region",
+        sector=ctx.t if ctx.t != "fema" else "fema_region",
         state=state,
-        fema_region=int(ctx["fema"]),
+        fema_region=int(ctx.fema),
         cwa=station if len(station) == 3 else station[1:],
         axisbg="white",
         title=title,
@@ -864,9 +864,9 @@ def plotter(ctx: dict):
         nocaption=True,
         titlefontsize=16,
     )
-    cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
+    cmap = get_cmap(ctx.cmap).with_extremes(under="white")
     if geo == "ugc":
-        if ctx["v"] == "hour":
+        if ctx.v == "hour":
             cl = [
                 "Mid",
                 "",
@@ -929,7 +929,7 @@ def plotter(ctx: dict):
             units=ctx["units"],
             extend=ctx.get("extend", "both"),
         )
-        if ctx["drawc"] == "yes":
+        if ctx.drawc == "yes":
             mp.drawcounties()
 
     return mp.fig, ctx["df"]

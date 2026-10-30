@@ -17,6 +17,8 @@ and the wall clock time when the watch was either cancelled or upgraded.
 In this case, both lines are presented as equal.
 """
 
+from typing import Annotated
+
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
@@ -25,6 +27,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import get_monofont
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "wfo": "Summarize by NWS Forecast Office",
@@ -32,44 +43,30 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "which",
-            "default": "ugc",
-            "label": "Summarize By:",
-            "options": PDICT,
-        },
-        {
-            "type": "networkselect",
-            "name": "wfo",
-            "default": "DMX",
-            "network": "WFO",
-            "label": "Select NWS Forecast Office:",
-        },
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAC153",
-            label="Select UGC Zone/County:",
-        ),
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="TO",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="A",
-            label="Select Watch/Warning Significance Level:",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    which: Annotated[str, SelectArg(label="Summarize By:", options=PDICT)] = (
+        "ugc"
+    )
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(network="WFO", label="Select NWS Forecast Office:"),
+    ] = "DMX"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAC153"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "TO"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "A"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def print_top(fig, events: pd.DataFrame):
@@ -111,22 +108,22 @@ def print_top(fig, events: pd.DataFrame):
         y -= 0.05
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ugc = ctx["ugc"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
+    ugc = ctx.ugc
+    phenomena = ctx.phenomena
+    significance = ctx.significance
     params = {
         "phenomena": phenomena,
         "significance": significance,
-        "wfo": ctx["wfo"],
+        "wfo": ctx.wfo,
         "ugc": ugc,
         "tzname": "America/Chicago",
     }
     lid = ugc
     name = ""
     ugclimiter = ""
-    if ctx["which"] == "ugc":
+    if ctx.which == "ugc":
         with get_sqlalchemy_conn("postgis") as conn:
             res = conn.execute(
                 sql_helper("""
@@ -143,9 +140,9 @@ def plotter(ctx: dict):
                 name = row[2]
         ugclimiter = " ugc = :ugc and "
     else:
-        lid = f"NWS {ctx['wfo']}"
-        name = ctx["_nt"].sts[ctx["wfo"]]["name"]
-        params["tzname"] = ctx["_nt"].sts[ctx["wfo"]]["tzname"]
+        lid = f"NWS {ctx.wfo}"
+        name = ctx["_nt"].sts[ctx.wfo]["name"]
+        params["tzname"] = ctx["_nt"].sts[ctx.wfo]["tzname"]
 
     issuecol = "issue"
     expirecol = "expire"

@@ -12,6 +12,7 @@ well.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,16 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot, figure, get_cmap
 from pyiem.reference import TRACE_VALUE, Z_OVERLAY2, Z_OVERLAY2_LABEL
 from pyiem.util import convert_value
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    SidArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "max_tmpf": "High Temperature (°F)",
@@ -69,73 +80,58 @@ STAGES = "action minor moderate major".split()
 COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 600}
-    today = date.today()
-    m90 = today - timedelta(days=90)
-    desc["arguments"] = [
-        dict(
-            type="sid",
-            name="station",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station",
-            include_climodat=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        SidArg(
+            network="IA_ASOS", label="Select Station", include_climodat=True
         ),
-        dict(
-            type="select",
-            name="var",
-            default="pday",
-            label="Which Daily Variable:",
-            options=PDICT,
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=m90.strftime("%Y/%m/%d"),
+    ] = "DSM"
+    var: Annotated[
+        str, SelectArg(label="Which Daily Variable:", options=PDICT)
+    ] = "pday"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="1900/01/01",
+            default=lambda: (date.today() - timedelta(days=90)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
+    ]
+    edate: Annotated[
+        date,
+        DateArg(
             label="End Date:",
             min="1900/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        {
-            "type": "select",
-            "options": LAYOUT,
-            "default": "calendar",
-            "label": "Select calendar layout",
-            "name": "layout",
-        },
-        {
-            "type": "select",
-            "options": COLORIZE,
-            "default": "yes",
-            "label": "Colorize cells?",
-            "name": "colorize",
-        },
-        {
-            "type": "cmap",
-            "default": "jet",
-            "name": "cmap",
-            "label": "Select color ramp:",
-        },
-        {
-            "type": "text",
-            "label": (
-                "Specify minimum, maximum, interval for color ramp bins "
-                "as comma separated values (e.g. 0,101,10)"
-            ),
-            "default": "0,101,10",
-            "optional": True,
-            "name": "interval",
-        },
     ]
-    return desc
+    layout: Annotated[
+        str, SelectArg(options=LAYOUT, label="Select calendar layout")
+    ] = "calendar"
+    colorize: Annotated[
+        str, SelectArg(options=COLORIZE, label="Colorize cells?")
+    ] = "yes"
+    cmap: Annotated[str, CmapArg(label="Select color ramp:")] = "jet"
+    interval: Annotated[
+        str | None,
+        TextArg(
+            label="Specify minimum, maximum, interval for color ramp bins "
+            "as comma separated values (e.g. 0,101,10)",
+            default="0,101,10",
+        ),
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=600
+    )
 
 
 def column_plot(fig: Figure, sdate: date, edate: date, data: dict[date, dict]):
@@ -238,12 +234,12 @@ def add_stages_legend(fig, stagevals):
         fig.legend(handles, labels, ncol=4, loc=(0.4, 0.915))
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
+    station = ctx.station
+    varname = ctx.var
+    sdate = ctx.sdate
+    edate = ctx.edate
     # Check for more than 12 months of data
     if pd.date_range(sdate, edate).strftime("%Y%m").nunique() > 12:
         raise NoDataFound("Date range cannot exceed 12 months.")
@@ -310,9 +306,9 @@ def plotter(ctx: dict):
     stagevals = []
     rows = []
     data = {}
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     if ctx.get("interval", "") != "":
-        tokens = ctx["interval"].replace("T", f"{TRACE_VALUE}").split(",")
+        tokens = ctx.interval.replace("T", f"{TRACE_VALUE}").split(",")
         if len(tokens) != 3:
             raise NoDataFound("Invalid interval specified.")
         minv, maxv, interval = map(float, tokens)
@@ -382,7 +378,7 @@ def plotter(ctx: dict):
             if not pd.isna(row["max_rstage"]):
                 idx = np.digitize(row["max_rstage"], stagevals)
                 data[row["day"]]["cellcolor"] = COLORS[idx]
-        if ctx["colorize"] == "yes":
+        if ctx.colorize == "yes":
             rawval = rows[-1][varname]
             if rawval is not None:
                 color = cmap(norm([rawval]))[0]
@@ -405,7 +401,7 @@ def plotter(ctx: dict):
     )
     subtitle = f"{sdate:%-d %b %Y} thru {edate:%-d %b %Y}"
 
-    if ctx["layout"] == "calendar":
+    if ctx.layout == "calendar":
         fig = calendar_plot(
             sdate,
             edate,
@@ -423,7 +419,7 @@ def plotter(ctx: dict):
             figsize=(8, 8),
         )
         column_plot(fig, sdate, edate, data)
-        if ctx["colorize"] == "yes":
+        if ctx.colorize == "yes":
             # Create a ScalarMappable for the colorbar
             sm = ScalarMappable(cmap=cmap, norm=norm)
             sm.set_array([])  # Required for ScalarMappable

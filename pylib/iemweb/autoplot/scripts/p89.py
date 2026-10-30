@@ -10,6 +10,7 @@ precipitation fell over locations that needed it.
 
 import os
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -25,46 +26,47 @@ from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure
 from pyiem.util import ncopen
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Select Year (1893-)",
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year (1893-)", default=lambda: date.today().year
         ),
-        dict(
-            type="float",
-            name="daythres",
-            default="0.50",
-            label="1 Day Precipitation Threshold [inch]",
-        ),
-        dict(
-            type="int",
-            name="period",
-            default="7",
-            label="Over Period of Trailing Days",
-        ),
-        dict(
-            type="float",
-            name="trailthres",
-            default="0.50",
-            label="Trailing Day Precipitation Threshold [inch]",
-        ),
-        dict(type="state", name="state", default="IA", label="For State"),
     ]
-    return desc
+    daythres: Annotated[
+        float, FloatArg(label="1 Day Precipitation Threshold [inch]")
+    ] = 0.5
+    period: Annotated[int, IntArg(label="Over Period of Trailing Days")] = 7
+    trailthres: Annotated[
+        float, FloatArg(label="Trailing Day Precipitation Threshold [inch]")
+    ] = 0.5
+    state: Annotated[str, StateArg(label="For State")] = "IA"
 
 
-def do_date(ctx, now: datetime, precip, daythres, trailthres):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def do_date(ctx: Params, now: datetime, precip, daythres, trailthres):
     """Do the local date and return a dict"""
     idx = daily_offset(now)
     ctx["days"].append(now)
-    sevenday = np.sum(precip[(idx - ctx["period"]) : idx, :, :], 0)
+    sevenday = np.sum(precip[(idx - ctx.period) : idx, :, :], 0)
     ptrail = np.where(ctx["iowa"] > 0, sevenday, -1)
     pday = np.where(ctx["iowa"] > 0, precip[idx, :, :], -1)
     tots = np.sum(np.where(pday >= daythres, 1, 0))
@@ -83,7 +85,7 @@ def do_date(ctx, now: datetime, precip, daythres, trailthres):
     )
 
 
-def get_data(ctx):
+def get_data(ctx: Params):
     """Do the processing work, please"""
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.GeoDataFrame.from_postgis(
@@ -92,14 +94,14 @@ def get_data(ctx):
                 "where state_abbr = :stabbr"
             ),
             conn,
-            params={"stabbr": ctx["state"]},
+            params={"stabbr": ctx.state},
             index_col="state_abbr",
             geom_col="the_geom",
         )
     if states.empty:
         raise NoDataFound("No data was found.")
 
-    ncfn = get_daily_ncname(ctx["year"])
+    ncfn = get_daily_ncname(ctx.year)
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Missing {ncfn}")
     with ncopen(ncfn) as nc:
@@ -120,18 +122,16 @@ def get_data(ctx):
         ctx["iowa"] = np.flipud(hasdata)
         ctx["iowapts"] = float(np.sum(np.where(hasdata > 0, 1, 0)))
 
-        now = datetime(ctx["year"], 1, 1)
-        now += timedelta(days=ctx["period"] - 1)
-        ets = datetime(ctx["year"], 12, 31)
+        now = datetime(ctx.year, 1, 1)
+        now += timedelta(days=ctx.period - 1)
+        ets = datetime(ctx.year, 12, 31)
         today = datetime.now()
         if ets > today:
             ets = today - timedelta(days=1)
         ctx["days"] = []
         rows = []
-        trailthres = (
-            (ctx["trailthres"] * units("inch")).to(units("mm")).magnitude
-        )
-        daythres = (ctx["daythres"] * units("inch")).to(units("mm")).magnitude
+        trailthres = (ctx.trailthres * units("inch")).to(units("mm")).magnitude
+        daythres = (ctx.daythres * units("inch")).to(units("mm")).magnitude
         while now < ets:
             row = do_date(ctx, now, precip, daythres, trailthres)
             if row:
@@ -141,12 +141,12 @@ def get_data(ctx):
     return pd.DataFrame(rows)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    daythres = ctx["daythres"]
-    trailthres = ctx["trailthres"]
-    period = ctx["period"]
-    state = ctx["state"][:2]
+    daythres = ctx.daythres
+    trailthres = ctx.trailthres
+    period = ctx.period
+    state = ctx.state[:2]
     df = get_data(ctx)
     if df.empty:
         raise NoDataFound("No data found for query.")

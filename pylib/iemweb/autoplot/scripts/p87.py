@@ -12,6 +12,7 @@ weather code present.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,14 @@ from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "BLSN": "Blowing Snow (BLSN)",
@@ -38,56 +47,47 @@ PDICT = {
 PDICT2 = {"week": "group by week of year", "doy": "group by day of year"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="code",
-            default="TS",
-            options=PDICT,
-            label="Code appearing in present weather:",
-        ),
-        dict(
-            type="select",
-            name="groupby",
-            default="week",
-            options=PDICT2,
-            label="How to group the results:",
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=1971,
-            label="Start Year of Analysis (inclusive):",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=date.today().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    code: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Code appearing in present weather:"),
+    ] = "TS"
+    groupby: Annotated[
+        str, SelectArg(options=PDICT2, label="How to group the results:")
+    ] = "week"
+    syear: Annotated[
+        int, YearArg(label="Start Year of Analysis (inclusive):")
+    ] = 1971
+    eyear: Annotated[
+        int,
+        YearArg(
             label="End Year of Analysis (inclusive):",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    syear = ctx["syear"]
-    eyear = ctx["eyear"]
-    groupby = ctx["groupby"]
+    station = ctx.zstation
+    syear = ctx.syear
+    eyear = ctx.eyear
+    groupby = ctx.groupby
     sts = date(syear, 1, 1)
     ets = date(eyear + 1, 1, 1)
-    code = ctx["code"]
+    code = ctx.code
     if code == "PSN":
         code = "+SN"
         PDICT["+SN"] = PDICT["PSN"]
@@ -163,7 +163,7 @@ def plotter(ctx: dict):
 
     data.mask = np.where(data == 0, True, False)
     title = (
-        f"{ctx['_sname']}:: {PDICT[code]} Reports\n"
+        f"{ctx.sname}:: {PDICT[code]} Reports\n"
         f"[{minyear:.0f} - {maxyear:.0f}] by hour and "
         f"{PDICT2[groupby].replace('group ', '')}"
     )

@@ -7,6 +7,7 @@ plot labels.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,15 @@ from pyiem.plot import figure_axes
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DayArg,
+    IntArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "Average High Temperature",
@@ -25,40 +35,41 @@ PDICT = {
 UNITS = {"high": "°F", "low": "°F", "precip": "inch"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which Variable:",
-            options=PDICT,
-        ),
-        dict(type="int", name="days", default=45, label="How many days:"),
-        dict(type="month", name="month", default="7", label="Select Month:"),
-        dict(type="day", name="day", default="15", label="Select Day:"),
-        dict(
-            type="year",
-            name="year",
-            default=date.today().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(label="Which Variable:", options=PDICT)] = (
+        "high"
+    )
+    days: Annotated[int, IntArg(label="How many days:")] = 45
+    month: Annotated[int, MonthArg(label="Select Month:")] = 7
+    day: Annotated[int, DayArg(label="Select Day:")] = 15
+    year: Annotated[
+        int,
+        YearArg(
             label="Year to Highlight in Chart",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
-    month = ctx["month"]
-    day = ctx["day"]
+    station = ctx.station
+    varname = ctx.var
+    month = ctx.month
+    day = ctx.day
     dt = date(2000, month, day)
-    days = ctx["days"]
-    year = ctx["year"]
+    days = ctx.days
+    year = ctx.year
     ctx["before_period"] = "%s-%s" % (
         (dt - timedelta(days=days)).strftime("%-d %b"),
         (dt - timedelta(days=1)).strftime("%-d %b"),
@@ -120,7 +131,7 @@ def plotter(ctx: dict):
     xvals = df[f"{varname}_before"].values
     yvals = df[f"{varname}_after"].values
     fig, ax = figure_axes(
-        title=f"{ctx['_sname']} :: {PDICT.get(varname)} over",
+        title=f"{ctx.sname} :: {PDICT.get(varname)} over",
         subtitle=f"{days} days prior to and after {dt:%-d %B}",
         apctx=ctx,
     )

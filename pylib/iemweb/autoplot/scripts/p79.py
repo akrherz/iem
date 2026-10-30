@@ -7,6 +7,7 @@ relative humidity value is computed.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.ticker as mticker
 import metpy.calc as mcalc
@@ -16,6 +17,13 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -39,41 +47,37 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    on: Annotated[
+        date | None,
+        DateArg(
+            label="Overlay observations on given calendar date",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-        {
-            "type": "date",
-            "name": "on",
-            "optional": True,
-            "label": "Overlay observations on given calendar date",
-            "default": date.today().strftime("%Y/%m/%d"),
-        },
-    ]
-    return desc
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    month = ctx["month"]
+    station = ctx.zstation
+    month = ctx.month
     months = month2months(month)
-    on_date: date | None = ctx.get("on")
+    on_date: date | None = ctx.on
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -200,7 +204,7 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     titles = [
-        f"{ctx['_sname']}:: ",
+        f"{ctx.sname}:: ",
         (
             f"Average Dew Point by Wind Direction (month={month.upper()}) "
             f"({max([1973, ab.year])}-{datetime.now().year})"

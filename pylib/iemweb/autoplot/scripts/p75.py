@@ -3,6 +3,7 @@ Simple plot of seasonal/yearly precipitation totals.
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,8 @@ from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT2 = {
     "winter": "Winter (Dec, Jan, Feb)",
@@ -25,32 +28,30 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="season",
-            default="winter",
-            label="Select Season:",
-            options=PDICT2,
-        ),
-        dict(
-            type="year", name="year", default=1893, label="Start Year of Plot"
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    season: Annotated[
+        str, SelectArg(label="Select Season:", options=PDICT2)
+    ] = "winter"
+    year: Annotated[int, YearArg(label="Start Year of Plot")] = 1893
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     pgconn, cursor = get_dbconnc("coop")
-    station = ctx["station"]
-    season = ctx["season"]
+    station = ctx.station
+    season = ctx.season
     _ = PDICT2[season]
-    startyear = ctx["year"]
+    startyear = ctx.year
 
     cursor.execute(
         """
@@ -93,7 +94,7 @@ def plotter(ctx: dict):
     df = pd.DataFrame(rows).set_index("year")
 
     title = (
-        f"{ctx['_sname']} {df.index[0]:.0f}-{df.index[-1]:.0f} :: "
+        f"{ctx.sname} {df.index[0]:.0f}-{df.index[-1]:.0f} :: "
         f"Precipitation [{PDICT2[season]}] "
     )
     fig = figure(title=title, apctx=ctx)

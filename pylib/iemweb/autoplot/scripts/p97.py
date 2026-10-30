@@ -11,6 +11,7 @@ and precipitation.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -20,6 +21,18 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
 from pyiem.util import LOG
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "sector": "Plot by Sector / State",
@@ -118,119 +131,97 @@ GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 SGDD_KNOWN_BASES = [32, 50, 52]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT,
-            default="sector",
-            label="Select spatial domain type to plot:",
-            name="d",
-        ),
-        dict(
-            type="csector", name="sector", default="IA", label="Plot Sector:"
-        ),
-        dict(
-            type="networkselect",
-            default="DMX",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    d: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Select spatial domain type to plot:"),
+    ] = "sector"
+    sector: Annotated[str, CSectorArg(label="Plot Sector:")] = "IA"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
             network="WFO",
             label="NWS WFO to plot (when selected above for domain):",
-            name="wfo",
         ),
-        dict(
-            type="select",
-            name="var",
-            default="precip_depart",
-            label="Which Variable to Plot:",
-            options=PDICT2,
+    ] = "DMX"
+    var: Annotated[
+        str, SelectArg(label="Which Variable to Plot:", options=PDICT2)
+    ] = "precip_depart"
+    bins: Annotated[
+        str | None,
+        TextArg(
+            label="Hard-code plot bins (space separated) [optional]:",
+            default="0 0.25 0.5 0.75 1",
         ),
-        {
-            "type": "text",
-            "name": "bins",
-            "default": "0 0.25 0.5 0.75 1",
-            "optional": True,
-            "label": "Hard-code plot bins (space separated) [optional]:",
-        },
-        dict(
-            type="int",
-            default=50,
-            name="gddbase",
-            label=(
-                "Growing Degree Day base(F)<br />if you choose a sector "
-                "covering more than 10 states, you are limited to values of "
-                "32, 41, 46, 48, 50, 51, 52 (long story why)"
-            ),
+    ] = None
+    gddbase: Annotated[
+        int,
+        IntArg(
+            label="Growing Degree Day base(F)<br />if you choose a sector "
+            "covering more than 10 states, you are limited to values of "
+            "32, 41, 46, 48, 50, 51, 52 (long story why)"
         ),
-        dict(
-            type="int",
-            default=86,
-            name="gddceil",
-            label=(
-                "Growing Degree Day ceiling(F)<br />if you choose a sector "
-                "covering more than 10 states, thist must be 86 "
-                "(long story why)"
-            ),
+    ] = 50
+    gddceil: Annotated[
+        int,
+        IntArg(
+            label="Growing Degree Day ceiling(F)<br />if you choose a sector "
+            "covering more than 10 states, thist must be 86 "
+            "(long story why)"
         ),
-        dict(
-            type="date",
-            name="date1",
-            default=(today - timedelta(days=30)).strftime("%Y/%m/%d"),
+    ] = 86
+    date1: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="1893/01/01",
+            default=lambda: (
+                datetime.today() - timedelta(days=1) - timedelta(days=30)
+            ).strftime("%Y/%m/%d"),
         ),
-        dict(
-            type="select",
-            name="usdm",
-            default="no",
-            label="Overlay Drought Monitor",
-            options=PDICT4,
-        ),
-        dict(
-            type="date",
-            name="date2",
-            default=today.strftime("%Y/%m/%d"),
+    ]
+    usdm: Annotated[
+        str, SelectArg(label="Overlay Drought Monitor", options=PDICT4)
+    ] = "no"
+    date2: Annotated[
+        date,
+        DateArg(
             label="End Date (inclusive):",
             min="1893/01/01",
-        ),
-        dict(
-            type="select",
-            name="p",
-            default="contour",
-            label="Data Presentation Options",
-            options=PDICT3,
-        ),
-        dict(type="cmap", name="cmap", default="RdYlBu", label="Color Ramp:"),
-        dict(
-            type="select",
-            options=PDICT5,
-            default="yes",
-            name="c",
-            label="Label Values?",
-        ),
-        dict(
-            type="select",
-            options=PDICT6,
-            label=(
-                "Which Climatology to Use?<br />Note that NCEI 1991-2020 "
-                "climatology only works with some base plot variables."
-            ),
-            default="climate51",
-            name="ct",
-        ),
-        dict(
-            type="text",
-            name="cull",
-            default="",
-            label=(
-                "Space or comma separated IEM stations ids (ST####) to cull "
-                "from the plot."
+            default=lambda: (datetime.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
             ),
         ),
     ]
-    return desc
+    p: Annotated[
+        str, SelectArg(label="Data Presentation Options", options=PDICT3)
+    ] = "contour"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdYlBu"
+    c: Annotated[str, SelectArg(options=PDICT5, label="Label Values?")] = "yes"
+    ct: Annotated[
+        str,
+        SelectArg(
+            options=PDICT6,
+            label="Which Climatology to Use?<br />Note that NCEI 1991-2020 "
+            "climatology only works with some base plot variables.",
+        ),
+    ] = "climate51"
+    cull: Annotated[
+        str,
+        TextArg(
+            label="Space or comma separated IEM stations ids (ST####) to cull "
+            "from the plot."
+        ),
+    ] = ""
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def cull_to_list(vals: str):
@@ -263,17 +254,17 @@ def compute_tables_wfo(wfo):
 
 
 def replace_gdd_climo(
-    ctx: dict, df: pd.DataFrame, table: str, date1: date, date2: date
+    ctx: Params, df: pd.DataFrame, table: str, date1: date, date2: date
 ) -> pd.DataFrame:
     """Here we are, incredible pain."""
     # Short circuit if we are not doing departures
-    if ctx["var"] in ["gdd_sum", "sdd_sum", "sgdd_sum"]:
+    if ctx.var in ["gdd_sum", "sdd_sum", "sgdd_sum"]:
         return df
     params = {
         "d1": date1.strftime("%m%d"),
         "d2": date2.strftime("%m%d"),
-        "gddbase": ctx["gddbase"],
-        "gddceil": ctx["gddceil"],
+        "gddbase": ctx.gddbase,
+        "gddceil": ctx.gddceil,
     }
     daylimit = "WHERE sday >= :d1 and sday <= :d2"
     if params["d1"] > params["d2"]:
@@ -283,7 +274,7 @@ def replace_gdd_climo(
     highcol = "high"
     lowcol = "low"
     gddprefix = "gdd"
-    if "sgdd" in ctx["var"]:
+    if "sgdd" in ctx.var:
         gddprefix = "sgdd"
         highcol = "era5land_soilt4_max"
         lowcol = "era5land_soilt4_min"
@@ -318,16 +309,16 @@ def replace_gdd_climo(
     return df
 
 
-def build_climate_sql(ctx: dict, table: str):
+def build_climate_sql(ctx: Params, table: str):
     """figure out how to get climatology..."""
     gddclimocol = "0"
     sgddclimocol = "0"
-    if ctx["gddbase"] in SGDD_KNOWN_BASES:
-        sgddclimocol = f"sgdd{ctx['gddbase']}"
-    if ctx["gddbase"] in GDD_KNOWN_BASES:
-        gddclimocol = f"gdd{ctx['gddbase']}"
+    if ctx.gddbase in SGDD_KNOWN_BASES:
+        sgddclimocol = f"sgdd{ctx.gddbase}"
+    if ctx.gddbase in GDD_KNOWN_BASES:
+        gddclimocol = f"gdd{ctx.gddbase}"
     stjoin = "id"
-    if ctx["ct"] == "ncei_climate91":
+    if ctx.ct == "ncei_climate91":
         stjoin = "ncei91"
     netlimiter = "t.network ~* 'CLIMATE'"
     if table != "alldata":
@@ -336,18 +327,18 @@ def build_climate_sql(ctx: dict, table: str):
     sql = f"""
     SELECT t.id as station, to_char(valid, 'mmdd') as sday, precip, high,
     low, {gddclimocol} as gdd, {sgddclimocol} as sgdd, cdd65, hdd65, snow,
-    sdd86 from {ctx["ct"]} c, stations t WHERE c.station = t.{stjoin} and
+    sdd86 from {ctx.ct} c, stations t WHERE c.station = t.{stjoin} and
     {netlimiter} """
 
     return sql
 
 
-def get_data(ctx: dict):
+def get_data(ctx: Params):
     """Compute the data needed for this app."""
-    cull = cull_to_list(ctx["cull"])
-    date1 = ctx["date1"]
-    date2 = min([ctx["date2"], date.today()])
-    sector = ctx["sector"]
+    cull = cull_to_list(ctx.cull)
+    date1 = ctx.date1
+    date2 = min([ctx.date2, date.today()])
+    sector = ctx.sector
     table = f"alldata_{sector.lower()}" if len(sector) == 2 else "alldata"
     tables = [table]
     dfs = []
@@ -359,21 +350,21 @@ def get_data(ctx: dict):
             f"alldata_{x}"
             for x in "nd mn wi mi sd ne ia il in oh ks mo ky".split()
         ]
-    if ctx["d"] == "wfo":
-        tables, bnds = compute_tables_wfo(ctx["wfo"])
+    if ctx.d == "wfo":
+        tables, bnds = compute_tables_wfo(ctx.wfo)
         wfo_limiter = (
             f" and ST_Contains(St_MakeEnvelope({bnds[0]}, {bnds[1]}, "
             f"{bnds[2]}, {bnds[3]}, 4326), geom) "
         )
     if "alldata" in tables or len(tables) > 9:
-        if ctx["gddbase"] not in GDD_KNOWN_BASES:
+        if ctx.gddbase not in GDD_KNOWN_BASES:
             raise NoDataFound(
                 f"GDD Base must be {','.join(str(s) for s in GDD_KNOWN_BASES)}"
             )
-        ctx["gddceil"] = 86
+        ctx.gddceil = 86
     params = {
-        "gddbase": ctx["gddbase"],
-        "gddceil": ctx["gddceil"],
+        "gddbase": ctx.gddbase,
+        "gddceil": ctx.gddceil,
         "date1": date1,
         "date2": date2,
         "cull": cull,
@@ -504,7 +495,7 @@ def get_data(ctx: dict):
                 geom_col="geom",
             )  # type: ignore
             LOG.info("Finishing %s table query", table)
-            if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
+            if ctx.gddbase not in GDD_KNOWN_BASES or ctx.gddceil != 86:
                 # We need to compute our own GDD Climatology, Le Sigh
                 df = replace_gdd_climo(ctx, df, table, date1, date2)
             if not df.empty:
@@ -513,47 +504,47 @@ def get_data(ctx: dict):
         raise NoDataFound("No Data Found.")
     df = pd.concat(dfs)
     # Drop any entries with NaN
-    df = df[~pd.isna(df[ctx["var"]])]
+    df = df[~pd.isna(df[ctx.var])]
     if df.empty:
         raise NoDataFound("All data found to be missing.")
     # Attempt to ensure the column is numeric
-    df[ctx["var"]] = pd.to_numeric(df[ctx["var"]])
+    df[ctx.var] = pd.to_numeric(df[ctx.var])
     # Require 90% quorum
     df = df[df["obs"] > (df["obs"].max() * 0.9)]
-    return df.reindex(df[ctx["var"]].abs().sort_values(ascending=False).index)
+    return df.reindex(df[ctx.var].abs().sort_values(ascending=False).index)
 
 
-def geojson(ctx: dict):
+def geojson(ctx: Params):
     """Generate a GeoDataFrame ready for geojson."""
-    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
+    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx.var
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    if ctx["var"] in NCEI_MISSING and ctx["ct"].startswith("ncei"):
+    if ctx.var in NCEI_MISSING and ctx.ct.startswith("ncei"):
         raise NoDataFound(
             "NCEI Climatology for GDDs does not exist, use IEM Climatology"
         )
     df = get_data(ctx)
-    sector = ctx["sector"]
-    date1 = ctx["date1"]
-    date2 = min([ctx["date2"], date.today()])
-    varname = ctx["var"]
+    sector = ctx.sector
+    date1 = ctx.date1
+    date2 = min([ctx.date2, date.today()])
+    varname = ctx.var
 
     datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
     subtitle = ""
     if (
         varname.find("gdd") > -1
-        and (ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86)
+        and (ctx.gddbase not in GDD_KNOWN_BASES or ctx.gddceil != 86)
         and varname not in ["gdd_sum", "sgdd_sum"]
     ):
         subtitle = "Period of Record Climatology is used for custom GDD"
     elif varname.find("depart") > -1:
         subtitle = (
-            f"{date1.year} is compared with {PDICT6[ctx['ct']]}"
+            f"{date1.year} is compared with {PDICT6[ctx.ct]}"
             " to compute departures"
         )
-        if ctx["ct"] == "ncei_climate91":
+        if ctx.ct == "ncei_climate91":
             subtitle = (
                 f"{date1.year} is compared with NCEI 1991-2020 Climatology to "
                 "compute departures"
@@ -561,24 +552,24 @@ def plotter(ctx: dict):
     elif varname.startswith("c"):
         subtitle = (
             "Climatology is based on data from "
-            f"19{ctx['ct'][-2:]}-{date.today().year - 1}"
+            f"19{ctx.ct[-2:]}-{date.today().year - 1}"
         )
-    if "sgdd" in ctx["var"]:
+    if "sgdd" in ctx.var:
         subtitle += " 4in Soil Temp Estimated by ERA5Land"
-    if ctx["d"] == "sector":
+    if ctx.d == "sector":
         state = sector
         sector = "state" if len(sector) == 2 else sector
         cwa = None
     else:
         sector = "cwa"
-        cwa = ctx["wfo"]
+        cwa = ctx.wfo
         state = None
     # This causes grief
     ctx.pop("csector", None)
     _gt = (
         PDICT2[varname]
-        .replace("$base", str(ctx["gddbase"]))
-        .replace("$ceil", str(ctx["gddceil"]))
+        .replace("$base", str(ctx.gddbase))
+        .replace("$ceil", str(ctx.gddceil))
     )
     mp = MapPlot(
         apctx=ctx,
@@ -594,7 +585,7 @@ def plotter(ctx: dict):
         nocaption=True,
     )
     fmt = "%.2f"
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     extend = "both"
     if varname in [
         "precip_depart",
@@ -622,14 +613,14 @@ def plotter(ctx: dict):
         clevels = pretty_bins(df[varname].min(), df[varname].max())
         fmt = "%.0f"
         extend = "neither"
-    if ctx.get("bins"):
+    if ctx.bins:
         try:
-            clevels = [float(x) for x in ctx["bins"].split()]
+            clevels = [float(x) for x in ctx.bins.split()]
         except ValueError as exp:
             msg = "Invalid bins provided, should be space separated"
             raise NoDataFound(msg) from exp
     cmap = cmap.with_extremes(bad="white")
-    if ctx["p"] == "contour" and len(clevels) > 1:
+    if ctx.p == "contour" and len(clevels) > 1:
         mp.contourf(
             df["lon"].values,
             df["lat"].values,
@@ -640,10 +631,10 @@ def plotter(ctx: dict):
             extend=extend,
         )
 
-    if ctx["c"] == "yes":
+    if ctx.c == "yes":
         df2 = df
-        if ctx["d"] == "wfo":
-            df2 = df[df["wfo"] == ctx["wfo"]]
+        if ctx.d == "wfo":
+            df2 = df[df["wfo"] == ctx.wfo]
         mp.plot_values(
             df2["lon"].values,
             df2["lat"].values,
@@ -652,10 +643,10 @@ def plotter(ctx: dict):
             labelbuffer=5,
         )
     if (
-        state is not None or sector == "iailin" or ctx["d"] == "wfo"
+        state is not None or sector == "iailin" or ctx.d == "wfo"
     ) and sector != "conus":
         mp.drawcounties()
-    if ctx["usdm"] == "yes":
+    if ctx.usdm == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
 
     return mp.fig, df.round(2)

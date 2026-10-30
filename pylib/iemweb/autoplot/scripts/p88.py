@@ -8,6 +8,7 @@ reliable/comparable.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,41 +16,43 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "clear": "clear",
     "cloudy": "mostly cloudy",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="select",
-            name="which",
-            default="cloudy",
-            options=PDICT,
-            label="Compute differences based on:",
-        ),
-        dict(
-            type="cmap", name="cmap", default="RdYlGn_r", label="Color Ramp:"
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    which: Annotated[
+        str, SelectArg(options=PDICT, label="Compute differences based on:")
+    ] = "cloudy"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdYlGn_r"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    which = ctx["which"]
+    station = ctx.zstation
+    which = ctx.which
 
     data = np.zeros((24, 52), "f")
 
@@ -97,9 +100,9 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"({max([ab.year, 1973])}-{date.today().year})\n"
-        f"Hourly Temp Departure (skies were {PDICT[ctx['which']]} vs all)"
+        f"Hourly Temp Departure (skies were {PDICT[ctx.which]} vs all)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -110,7 +113,7 @@ def plotter(ctx: dict):
         interpolation="nearest",
         vmin=(0 - maxv),
         vmax=maxv,
-        cmap=get_cmap(ctx["cmap"]),
+        cmap=get_cmap(ctx.cmap),
     )
     a = fig.colorbar(cs)
     a.ax.set_ylabel("Temperature Departure °F")

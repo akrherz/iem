@@ -9,6 +9,7 @@ of a given SOI to be felt in the midwestern US.
 """
 
 from datetime import date
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -19,49 +20,52 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from scipy import stats
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    StationArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, StationArg(label="Select Station", network="IACLIMATE")
+    ] = "IA0000"
+    month: Annotated[int, MonthArg(label="Start Month:")] = 9
+    months: Annotated[int, IntArg(label="Number of Months to Average:")] = 2
+    lag: Annotated[
+        int, IntArg(label="Number of Months to Lag for SOI Value:")
+    ] = -3
+    h: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Hide/Show week SOI events -0.5 to 0.5"
         ),
-        dict(type="month", name="month", default=9, label="Start Month:"),
-        dict(
-            type="int",
-            name="months",
-            default=2,
-            label="Number of Months to Average:",
-        ),
-        dict(
-            type="int",
-            name="lag",
-            default=-3,
-            label="Number of Months to Lag for SOI Value:",
-        ),
-        dict(
-            type="select",
-            name="h",
-            default="none",
-            options=PDICT,
-            label="Hide/Show week SOI events -0.5 to 0.5",
-        ),
-        dict(
-            type="text",
-            default=str(date.today().year),
-            name="year",
+    ] = "none"
+    year: Annotated[
+        str,
+        TextArg(
             label="Year(s) to Highlight in Chart (comma delimited)",
+            default=lambda: str(date.today().year),
         ),
-        dict(type="cmap", name="cmap", default="RdYlGn", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdYlGn"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def title(wanted):
@@ -74,16 +78,16 @@ def title(wanted):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
-    station = ctx["station"]
-    lagmonths = ctx["lag"]
-    months = ctx["months"]
-    month = ctx["month"]
-    highyears = [int(x) for x in ctx["year"].split(",")]
-    h = ctx["h"]
+    station = ctx.station
+    lagmonths = ctx.lag
+    months = ctx.months
+    month = ctx.month
+    highyears = [int(x) for x in ctx.year.split(",")]
+    h = ctx.h
 
     wantmonth = month + lagmonths
     yearoffset = 0
@@ -131,14 +135,14 @@ def plotter(ctx: dict):
         data["precip"] += _precip
         data["temp"].append(float(_temp))
 
-    title2 = f"{ctx['_sname']} :: {title(wanted)}"
+    title2 = f"{ctx.sname} :: {title(wanted)}"
     subtitle = "%s SOI (3 month average)" % (
         date(2000, wantmonth, 1).strftime("%B"),
     )
     fig = figure(title=title2, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes((0.07, 0.12, 0.53, 0.75))
 
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     zdata = np.arange(-2.0, 2.1, 0.5)
     norm = mpcolors.BoundaryNorm(zdata, cmap.N)
     rows = []
