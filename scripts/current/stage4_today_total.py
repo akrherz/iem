@@ -29,6 +29,8 @@ def doday(ts, realtime):
     now = sts
     total = None
     lts = None
+    lats = None
+    lons = None
     while now < ets:
         gmt = now.astimezone(UTC)
         ppath = gmt.strftime("%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
@@ -44,7 +46,7 @@ def doday(ts, realtime):
                 grbs.close()
         now += interval
 
-    if lts is None:
+    if lts is None or lats is None:
         if ts.hour > 1:
             LOG.info("found no data for date: %s", ts)
         return

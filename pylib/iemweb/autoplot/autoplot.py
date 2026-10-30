@@ -335,7 +335,7 @@ def workflow(mc, environ: dict, fmt: str):
             dtz = df.index.tz
             # We could have timezone or zoneinfo :/
             if dtz is not None and dtz in [
-                UTC,
+                ZoneInfo("UTC"),  # until everything gets converted...
                 UTC,
             ]:
                 df.index = df.index.strftime(ISO8601)
