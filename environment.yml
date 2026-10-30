@@ -54,8 +54,8 @@ dependencies:
   - openldap
   # excel output
   - openpyxl
-  # due to config settings
-  - pandas>=3
+  # due to join suffixes usage
+  - pandas>=3.1
   # mod-wsgi
   - paste
   # PIL

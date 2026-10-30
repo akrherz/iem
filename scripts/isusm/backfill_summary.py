@@ -112,7 +112,7 @@ def compute_drct(dt: date):
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
 def main(dt: datetime):
     """Go Main Go"""
-    dt = dt.date()
+    dt_ = dt.date()
     with get_sqlalchemy_conn("isuag") as conn:
         obs = pd.read_sql(
             sql_helper("""
@@ -122,7 +122,7 @@ def main(dt: datetime):
     where valid = :dt and t.network = 'ISUSM'
     """),
             conn,
-            params={"dt": dt},
+            params={"dt": dt_},
             index_col="iemid",
         )
     with get_sqlalchemy_conn("iem") as conn:
@@ -133,21 +133,21 @@ def main(dt: datetime):
     where day = :dt and t.network = 'ISUSM'
     """),
             conn,
-            params={"dt": dt},
+            params={"dt": dt_},
             index_col="iemid",
         )
-    obs = obs.join(summary, how="left", rsuffix="_summary")
+    obs = obs.join(summary, how="left", suffixes=("", "_summary"))
     LOG.info(
         "Found %s obs for date: %s",
         len(obs.index),
-        dt,
+        dt_,
     )
     with get_dbconn("iem") as pgconn:
         process(pgconn, obs)
         pgconn.commit()
 
     # Lovely one-offs
-    compute_drct(dt)
+    compute_drct(dt_)
 
 
 if __name__ == "__main__":

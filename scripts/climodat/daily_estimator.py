@@ -15,6 +15,7 @@ RUN_2AM.sh - processes yesterday, which should run all sites
 """
 
 from datetime import date, datetime
+from typing import Any
 
 import click
 import numpy as np
@@ -90,6 +91,7 @@ def init_df(state, dt: date):
 def load_current(df: pd.DataFrame, state: str, dt: date):
     """load what our database currently has."""
     # Load up any available observations
+    params: dict[str, Any] = {"date": dt, "stations": df.index.values.tolist()}
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             sql_helper(
@@ -102,7 +104,7 @@ def load_current(df: pd.DataFrame, state: str, dt: date):
                 table=f"alldata_{state.lower()}",
             ),
             conn,
-            params={"date": dt, "stations": df.index.values.tolist()},
+            params=params,
             index_col="station",
         )
     # combine this back into the main table
@@ -137,23 +139,23 @@ def estimate_precip(df, ds: xr.Dataset):
     idx = df["precip_estimated"] | pd.isnull(df["precip"])
     for sid, row in df[idx].iterrows():
         # ensure precip_etimated is set
-        df.at[sid, "precip_estimated"] = True
+        df.loc[sid, "precip_estimated"] = True
         if row["precip_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
             precip_hour = 24
         else:
             precip = grid12[row["gridj"], row["gridi"]]
             precip_hour = 7  # not precise
-        df.at[sid, "precip_hour"] = precip_hour
+        df.loc[sid, "precip_hour"] = precip_hour
         # denote trace
         if 0 < precip < 0.01:
-            df.at[sid, "precip"] = TRACE_VALUE
+            df.loc[sid, "precip"] = TRACE_VALUE
         elif precip < 0:
-            df.at[sid, "precip"] = 0
+            df.loc[sid, "precip"] = 0
         elif np.isnan(precip) or np.ma.is_masked(precip):
-            df.at[sid, "precip"] = 0
+            df.loc[sid, "precip"] = 0
         else:
-            df.at[sid, "precip"] = precip
+            df.loc[sid, "precip"] = precip
     return df
 
 
@@ -177,7 +179,7 @@ def estimate_hilo(df: pd.DataFrame, ds: xr.Dataset):
     idx = df["temp_estimated"] | pd.isnull(df["high"]) | pd.isnull(df["low"])
     for sid, row in df[idx].iterrows():
         # ensure temp_etimated is set
-        df.at[sid, "temp_estimated"] = True
+        df.loc[sid, "temp_estimated"] = True
         if row["temp_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
             temp_hour = 24
@@ -185,14 +187,14 @@ def estimate_hilo(df: pd.DataFrame, ds: xr.Dataset):
             val = highgrid12[row["gridj"], row["gridi"]]
             temp_hour = 7  # Not precise
         if not pd.isna(val):
-            df.at[sid, "temp_hour"] = temp_hour
-            df.at[sid, "high"] = int(round(val, 0))
+            df.loc[sid, "temp_hour"] = temp_hour
+            df.loc[sid, "high"] = int(round(val, 0))
         if row["temp_hour"] in [0, 22, 23, 24]:
             val = lowgrid00[row["gridj"], row["gridi"]]
         else:
             val = lowgrid12[row["gridj"], row["gridi"]]
         if not pd.isna(val):
-            df.at[sid, "low"] = int(round(val, 0))
+            df.loc[sid, "low"] = int(round(val, 0))
     return df
 
 
@@ -213,9 +215,9 @@ def update_database(cursor, table: str, df: pd.DataFrame):
             LOG.warning(
                 "Culling %s low: %s > high: %s", row.Index, row.low, row.high
             )
-            df.at[row.Index, "low"] = None
-            df.at[row.Index, "temp_estimated"] = True
-            df.at[row.Index, "high"] = None
+            df.loc[row.Index, "low"] = None
+            df.loc[row.Index, "temp_estimated"] = True
+            df.loc[row.Index, "high"] = None
         LOG.info(
             "%s Hi[%s,%2s]=%3s Lo=%3s Pcp[%s,%2s]=%6s Snow=%6s Snowd=%6s",
             row.Index,
@@ -252,6 +254,10 @@ def update_database(cursor, table: str, df: pd.DataFrame):
 def merge_obs(df: pd.DataFrame, state, ts):
     """Merge data from observations."""
     networks = [f"{state}_COOP", f"{state}_ASOS", f"{state}_DCP"]
+    params: dict[str, Any] = {
+        "networks": networks,
+        "dt": ts,
+    }
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
             sql_helper(
@@ -270,7 +276,7 @@ def merge_obs(df: pd.DataFrame, state, ts):
             """
             ),
             conn,
-            params={"networks": networks, "dt": ts},
+            params=params,
             index_col="tracks",
         )
     if obs.empty:
@@ -315,9 +321,9 @@ def merge_threaded(df, threaded):
         copysid = threaded[sid]
         if copysid in df.index:
             # This gets tricky, but we need to retain the dbhas flag
-            dbhas = sid in df.index and df.at[sid, "dbhas"]
+            dbhas = sid in df.index and df.loc[sid, "dbhas"]
             df.loc[sid] = df.loc[copysid]
-            df.at[sid, "dbhas"] = dbhas
+            df.loc[sid, "dbhas"] = dbhas
     return df
 
 
@@ -326,9 +332,9 @@ def merge_threaded(df, threaded):
 @click.option("--state", "st", default=None, help="Single state to process")
 def main(dt: datetime, st):
     """Go Main Go."""
-    dt = dt.date()
+    dt_ = dt.date()
     ds = get_grids(
-        dt,
+        dt_,
         varnames=[
             "high_tmpk",
             "low_tmpk",
@@ -342,13 +348,13 @@ def main(dt: datetime, st):
     states = state_names.keys() if st is None else [st]
     for state in states:
         # initialize our dataframe based on station table metadata
-        df, threaded = init_df(state, dt)
+        df, threaded = init_df(state, dt_)
         if df is None:
             LOG.info("skipping state %s as load_table empty", state)
             continue
         # Load what our database has for current obs
-        df = load_current(df, state, dt)
-        df = merge_obs(df, state, dt)
+        df = load_current(df, state, dt_)
+        df = merge_obs(df, state, dt_)
         # IEMRE does not exist for these states, so we skip this
         if state not in NON_CONUS:
             df = estimate_hilo(df, ds)
@@ -359,7 +365,7 @@ def main(dt: datetime, st):
                 LOG.info(
                     "state: %s date: %s missing: %s, skipping...",
                     state,
-                    dt.strftime("%Y-%m-%d"),
+                    dt_.strftime("%Y-%m-%d"),
                     missing,
                 )
                 continue

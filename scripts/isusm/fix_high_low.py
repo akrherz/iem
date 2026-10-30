@@ -3,6 +3,8 @@
 Called from RUN_2AM.sh for yesterday and ten days ago.
 """
 
+from datetime import datetime
+
 import click
 import pandas as pd
 import requests
@@ -62,11 +64,11 @@ def check_date(dt):
         )
         j = requests.get(uri, timeout=60).json()
         iemre = j["data"][0]
-        obs.at[station, "iemid"] = nt.sts[station]["iemid"]
-        obs.at[station, "iemre_min"] = convert_value(
+        obs.loc[station, "iemid"] = nt.sts[station]["iemid"]
+        obs.loc[station, "iemre_min"] = convert_value(
             iemre["daily_low_f"], "degF", "degC"
         )
-        obs.at[station, "iemre_max"] = convert_value(
+        obs.loc[station, "iemre_max"] = convert_value(
             iemre["daily_high_f"], "degF", "degC"
         )
 
@@ -98,10 +100,9 @@ def check_date(dt):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
-def main(dt):
+def main(dt: datetime):
     """Go Main Go."""
-    dt = dt.date()
-    check_date(dt)
+    check_date(dt.date())
 
 
 if __name__ == "__main__":

@@ -197,11 +197,11 @@ def main(valid, station):
             continue
         if sid in obs.index:
             # skip sites that are locked
-            if obs.at[sid, "locked"]:
+            if obs.loc[sid, "locked"]:
                 LOG.warning("skipping locked %s", sid)
                 continue
             # arb decision that we have enough data already
-            if obs.loc[sid, "nullcnt"] < 10 < obs.at[sid, "count"]:
+            if obs.loc[sid, "nullcnt"] < 10 < obs.loc[sid, "count"]:
                 continue
         progress.set_description(sid)
         sid3 = sid.removeprefix("K")
@@ -222,7 +222,7 @@ def main(valid, station):
                 continue
             rob.station = sid
             rob.valid = valid
-            obs.at[sid, "added"] = len(rob.profile)
+            obs.loc[sid, "added"] = len(rob.profile)
             rob.database_save(cursor)
         except Exception as exp:
             fn = f"/tmp/{sid}_{valid:%Y%m%d%H%M}_fail"

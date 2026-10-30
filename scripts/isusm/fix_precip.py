@@ -172,8 +172,8 @@ def update_precip(dt, station, hdf):
 )
 def main(dt: datetime):
     """Go main go"""
-    dt = dt.date()
-    LOG.info("Processing date: %s", dt)
+    dt_ = dt.date()
+    LOG.info("Processing date: %s", dt_)
     nt = NetworkTable("ISUSM")
 
     # Get our obs
@@ -182,23 +182,23 @@ def main(dt: datetime):
             "SELECT station, rain_in_tot from sm_daily where "
             "valid = %s ORDER by station ASC",
             conn,
-            params=(dt,),
+            params=(dt_,),
             index_col="station",
         )
     if df.empty:
-        LOG.warning("no observations found for %s, aborting", dt)
+        LOG.warning("no observations found for %s, aborting", dt_)
         return
     df["obs"] = df["rain_in_tot"]
-    hdf = get_hdf(nt, dt)
+    hdf = get_hdf(nt, dt_)
     if hdf.empty:
-        LOG.warning("hdf is empty, abort for %s", dt)
+        LOG.warning("hdf is empty, abort for %s", dt_)
         return
 
     # lets try some QC
     for station in df.index.values:
         # the daily total is 12 CST to 12 CST, so that is always 6z
         # so we want the 7z total
-        sts = utc(dt.year, dt.month, dt.day, 7)
+        sts = utc(dt_.year, dt_.month, dt_.day, 7)
         ets = sts + timedelta(hours=24)
         # OK, get our data
         ldf = hdf[
@@ -206,7 +206,7 @@ def main(dt: datetime):
             & (hdf["valid"] >= sts)
             & (hdf["valid"] < ets)
         ]
-        df.at[station, "stage4"] = ldf["precip_in"].sum()
+        df.loc[station, "stage4"] = ldf["precip_in"].sum()
 
     df["diff"] = df["obs"] - df["stage4"]
     for station, row in df.iterrows():
@@ -220,17 +220,17 @@ def main(dt: datetime):
         ):
             # print to keep email log more pretty
             print(
-                f"ISUSM fix_precip {dt} {station} "
+                f"ISUSM fix_precip {dt_} {station} "
                 f"stageIV: {row['stage4']:.2f} obs: {row['obs']:.2f}"
             )
             print_debugging(station)
             if station == "MCSI4":
                 LOG.warning("Not updating Marcus")
-                set_iemacces(station, dt, row["obs"])
+                set_iemacces(station, dt_, row["obs"])
                 continue
-            update_precip(dt, station, hdf)
+            update_precip(dt_, station, hdf)
         else:
-            set_iemacces(station, dt, row["obs"])
+            set_iemacces(station, dt_, row["obs"])
 
 
 if __name__ == "__main__":
