@@ -40,7 +40,7 @@ from typing import Annotated
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD_OPTIONAL
+from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -76,7 +76,7 @@ class Schema(CGIModel):
         ),
     ] = None
     station: STATION_LIST_FIELD
-    tz: TZ_FIELD_OPTIONAL = "UTC"
+    tz: TZ_FIELD = "UTC"
     year1: int = Field(
         None,
         description="The year for the start time, if sts is not provided",
