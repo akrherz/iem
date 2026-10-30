@@ -17,6 +17,7 @@ missing data for the year to be considered in the plot.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -24,6 +25,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "cdd": "Cooling Degree Days",
@@ -48,73 +57,56 @@ TITLES = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    thisyear = today.year
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            default="precip",
-            label="Variable to accumulate?",
-        ),
-        {
-            "type": "int",
-            "name": "base",
-            "default": 50,
-            "label": "CDD/GDD/HDD Base Temperature °F",
-        },
-        {
-            "type": "int",
-            "name": "ceil",
-            "default": 86,
-            "label": "GDD Ceiling Temperature °F",
-        },
-        dict(
-            type="year",
-            name="year1",
-            default=thisyear,
-            label="Additional Year to Plot:",
-        ),
-        dict(
-            type="year",
-            name="year2",
-            optional=True,
-            default=(thisyear - 1),
-            label="Additional Year to Plot: (optional)",
-        ),
-        dict(
-            type="year",
-            name="year3",
-            optional=True,
-            default=(thisyear - 2),
-            label="Additional Year to Plot: (optional)",
-        ),
-        dict(
-            type="sday",
-            name="sdate",
-            default="0101",
-            label="Start Day of Year for Plot:",
-        ),
-        dict(
-            optional=True,
-            type="sday",
-            name="edate",
-            default=f"{today:%m%d}",
-            label="End Day of Year for Plot:",
-        ),
-        dict(
-            type="int",
-            default=3,
-            label="Number of missing days to allow before excluding year",
-            name="m",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Variable to accumulate?")
+    ] = "precip"
+    base: Annotated[int, IntArg(label="CDD/GDD/HDD Base Temperature °F")] = 50
+    ceil: Annotated[int, IntArg(label="GDD Ceiling Temperature °F")] = 86
+    year1: Annotated[
+        int,
+        YearArg(
+            label="Additional Year to Plot:", default=lambda: date.today().year
         ),
     ]
-    return desc
+    year2: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to Plot: (optional)",
+            default=lambda: date.today().year - 1,
+        ),
+    ] = None
+    year3: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to Plot: (optional)",
+            default=lambda: date.today().year - 2,
+        ),
+    ] = None
+    sdate: Annotated[
+        date, SDayArg(label="Start Day of Year for Plot:", default="0101")
+    ]
+    edate: Annotated[
+        date | None,
+        SDayArg(
+            label="End Day of Year for Plot:",
+            default=lambda: f"{date.today():%m%d}",
+        ),
+    ] = None
+    m: Annotated[
+        int,
+        IntArg(label="Number of missing days to allow before excluding year"),
+    ] = 3
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def cull_missing(df: pd.DataFrame, dt: date, colname: str, missingdays: int):
@@ -136,18 +128,18 @@ def cull_missing(df: pd.DataFrame, dt: date, colname: str, missingdays: int):
     return resdf, list(filter(lambda x: x > minyear, years))
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    year1 = ctx.get("year1")
-    year2 = ctx.get("year2")
-    year3 = ctx.get("year3")
-    sdate = ctx["sdate"]
+    year1 = ctx.year1
+    year2 = ctx.year2
+    year3 = ctx.year3
+    sdate = ctx.sdate
     # belt and suspenders
-    assert ctx["var"] in PDICT
+    assert ctx.var in PDICT
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
             sql_helper("""
@@ -173,14 +165,14 @@ def plotter(ctx: dict):
                 as accum
             from obs ORDER by day ASC
         """,
-                col=SQLCOL[ctx["var"]],
-                varname=ctx["var"],
+                col=SQLCOL[ctx.var],
+                varname=ctx.var,
             ),
             conn,
             params={
                 "sday": sdate.strftime("%m%d"),
-                "base": ctx["base"],
-                "ceil": ctx["ceil"],
+                "base": ctx.base,
+                "ceil": ctx.ceil,
                 "stid": station,
             },
             index_col="day",
@@ -190,27 +182,26 @@ def plotter(ctx: dict):
     # Truncate plot
     doy_trunc = 365
     today = ctx.get("edate", date.today())
-    if ctx.get("edate") is not None:
+    if ctx.edate is not None:
         today_doy = int(today.strftime("%j"))
         sdate_doy = int(sdate.strftime("%j"))
         offset = 0 if today_doy > sdate_doy else 365
         doy_trunc = today_doy + offset - sdate_doy
         df = df[df["row"] <= doy_trunc]
 
-    df, cullyears = cull_missing(df, ctx["sdate"], ctx["var"], ctx["m"])
+    df, cullyears = cull_missing(df, ctx.sdate, ctx.var, ctx.m)
     if df.empty:
         raise NoDataFound("No data found for variable.")
     if not climo.empty:
         df = df.join(climo, how="left", on="sday")
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
-    tt = TITLES[ctx["var"]] % ctx
+    tt = TITLES[ctx.var] % ctx
     title = f"Accumulated {tt}{extra} after {sdate:%-d %B}"
-    subtitle = f"{ctx['_sname']} ({df['binyear'].min()}-{date.today().year})"
+    subtitle = f"{ctx.sname} ({df['binyear'].min()}-{date.today().year})"
     if cullyears:
         subtitle += (
-            f", {len(cullyears)} years excluded due to "
-            f"missing > {ctx['m']} days"
+            f", {len(cullyears)} years excluded due to missing > {ctx.m} days"
         )
 
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
@@ -278,9 +269,9 @@ def plotter(ctx: dict):
             lw=2,
         )
     # NCEI91 Climatology
-    if not climo.empty and ctx["var"] in ["precip", "snow"]:
+    if not climo.empty and ctx.var in ["precip", "snow"]:
         df2 = df[df["binyear"] == 2000]
-        acc = df2[f"c{ctx['var']}"].cumsum()
+        acc = df2[f"c{ctx.var}"].cumsum()
         maxval = acc.max()
         ax.plot(
             range(1, len(acc.index) + 1),

@@ -31,6 +31,7 @@ any confusion this causes.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -42,6 +43,17 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 AVG_YEAR1 = 2008
 PDICT = {
@@ -58,55 +70,39 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT,
-            label="How to summarize the data?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to summarize the data?")
+    ] = "wfo"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAC169"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    c: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="Total by Selected Phenomena/Significance or Combo",
         ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAC169",
-            label="Select UGC Zone/County:",
-        ),
-        ARG_FEMA,
-        {
-            "type": "select",
-            "options": PDICT2,
-            "name": "c",
-            "default": "single",
-            "label": "Total by Selected Phenomena/Significance or Combo",
-        },
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="FF",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "single"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "FF"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Greens"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def get_ugc_name(ugc: str) -> tuple[str, str]:
@@ -122,13 +118,13 @@ def get_ugc_name(ugc: str) -> tuple[str, str]:
     return cursor.fetchone()
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    opt = ctx["opt"]
-    state = ctx["state"]
+    station = ctx.station
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    opt = ctx.opt
+    state = ctx.state
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
@@ -145,30 +141,30 @@ def plotter(ctx: dict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
     elif opt == "fema":
         wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
+        params["states"] = fema_region2states(ctx.fema)
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
-        params["ugc"] = ctx["ugc"]
+        params["ugc"] = ctx.ugc
 
     subtitle = (
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance}) Issued by Year, Month"
     )
-    if ctx["c"] != "single":
-        if ctx["c"] == "svrtor":
+    if ctx.c != "single":
+        if ctx.c == "svrtor":
             params["ph"] = ["SV", "TO"]
-        elif ctx["c"] == "svrtorffw":
+        elif ctx.c == "svrtorffw":
             params["ph"] = ["SV", "TO", "FF"]
-        elif ctx["c"] == "heat":
+        elif ctx.c == "heat":
             params["ph"] = ["EH", "XH"]
         params["sig"] = "W"
-        subtitle = f"{PDICT2[ctx['c']]} Issued by Year, Month"
+        subtitle = f"{PDICT2[ctx.c]} Issued by Year, Month"
 
     with get_sqlalchemy_conn("postgis") as conn:
         # NB quasi hack here as we have some redundant ETNs for a given year
@@ -216,20 +212,20 @@ def plotter(ctx: dict):
         columns=range(1, 13),
     )
 
-    title = f"NWS {ctx['_sname']}"
+    title = f"NWS {ctx.sname}"
     if opt == "state":
         title = (
             "NWS Issued for Counties/Zones for State of "
             f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
-        name, wfo = get_ugc_name(ctx["ugc"])
+        name, wfo = get_ugc_name(ctx.ugc)
         title = (
             f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
-            f"[{ctx['ugc']}] {name}"
+            f"[{ctx.ugc}] {name}"
         )
     elif opt == "fema":
-        title = f"NWS Issued for FEMA Region {ctx['fema']}"
+        title = f"NWS Issued for FEMA Region {ctx.fema}"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Print the top 10 days
     ypos = 0.9
@@ -250,7 +246,7 @@ def plotter(ctx: dict):
         linewidths=0.5,
         ax=ax,
         vmin=1,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         zorder=2,
     )
     # Add sums to RHS

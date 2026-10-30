@@ -6,9 +6,10 @@ the specified amount.  This plot will take some time to generate, so please
 be patient with it!
 """
 
+import datetime as dt
 import os
 from datetime import date, datetime, timedelta
-from typing import cast
+from typing import Annotated, cast
 
 import geopandas as gpd
 import numpy as np
@@ -22,36 +23,48 @@ from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import convert_value, ncopen
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    FloatArg,
+    PlotDescription,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": False}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        dict(type="state", name="sector", default="IA", label="Select State:"),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sector: Annotated[str, StateArg(label="Select State:")] = "IA"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Date:",
             min="2011/01/01",
+            default=lambda: (datetime.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="float",
-            name="threshold",
-            default=2.0,
-            label="Date Precipitation Threshold (inch)",
-        ),
-        dict(type="cmap", name="cmap", default="terrain", label="Color Ramp:"),
     ]
-    return desc
+    threshold: Annotated[
+        float, FloatArg(label="Date Precipitation Threshold (inch)")
+    ] = 2.0
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "terrain"
 
 
-def get_raster(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=False
+    )
+
+
+def get_raster(ctx: Params):
     """Do the RASTER work."""
-    dt: date = ctx["date"]
-    sector = ctx["sector"]
-    threshold = ctx["threshold"]
+    dt: date = ctx.date
+    sector = ctx.sector
+    threshold = ctx.threshold
     threshold_mm = convert_value(threshold, "inch", "millimeter")
 
     idx1 = daily_offset(dt)
@@ -123,28 +136,28 @@ def get_raster(ctx: dict):
     return grid, affine, MRMS_IEMRE.crs
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     grid, affine, crs = get_raster(ctx)
 
     mp = MapPlot(
         apctx=ctx,
         sector="state",
-        state=ctx["sector"],
+        state=ctx.sector,
         titlefontsize=14,
         subtitlefontsize=12,
         title=(
             "NOAA MRMS: Number of Recent Days "
-            f'till Accumulating {ctx["threshold"]}" of Precip'
+            f'till Accumulating {ctx.threshold}" of Precip'
         ),
         subtitle=(
-            f"valid {ctx['date']:%-d %b %Y}: based on per calendar day "
+            f"valid {ctx.date:%-d %b %Y}: based on per calendar day "
             "estimated preciptation, MultiSensorPass2 and "
             "RadarOnly products"
         ),
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"]).with_extremes(over="k", under="white")
+    cmap = get_cmap(ctx.cmap).with_extremes(over="k", under="white")
     mp.imshow(
         grid,
         affine,

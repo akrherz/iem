@@ -6,12 +6,21 @@ but using a different climatology.
 """
 
 import calendar
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    StationArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "por": "Period of Record (por) Climatology",
@@ -37,87 +46,80 @@ LABELS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["data"] = True
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT3,
-            default="temps",
-            name="v",
-            label="Which Variable(s) to Plot",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    v: Annotated[
+        str, SelectArg(options=PDICT3, label="Which Variable(s) to Plot")
+    ] = "temps"
+    station1: Annotated[
+        str, StationArg(label="Select First Station:", network="IACLIMATE")
+    ] = "IATDSM"
+    c1: Annotated[
+        str,
+        SelectArg(
+            label="Climatology Source for First Station:", options=PDICT
         ),
-        dict(
-            type="station",
-            name="station1",
-            default="IATDSM",
-            label="Select First Station:",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="select",
-            name="c1",
-            label="Climatology Source for First Station:",
-            default="1951",
-            options=PDICT,
-        ),
-        dict(
-            type="station",
-            name="station2",
-            default="IATDSM",
-            optional=True,
+    ] = "1951"
+    station2: Annotated[
+        str | None,
+        StationArg(
             label="Select Second Station (Optional):",
             network="IACLIMATE",
+            default="IATDSM",
         ),
-        dict(
-            type="select",
-            name="c2",
-            label="Climatology Source for Second Station:",
-            default="1951",
-            options=PDICT,
+    ] = None
+    c2: Annotated[
+        str,
+        SelectArg(
+            label="Climatology Source for Second Station:", options=PDICT
         ),
-        dict(
-            type="select",
-            name="s",
+    ] = "1951"
+    s: Annotated[
+        str,
+        SelectArg(
             label="For difference plot, should smoother be applied:",
-            default="0",
             options=PDICT2,
         ),
-        dict(
-            type="year",
+    ] = "0"
+    sy1: Annotated[
+        int,
+        YearArg(
             min=1880,
-            name="sy1",
-            default=1991,
             label="Inclusive Start Year for First Station Period of Years:",
         ),
-        dict(
-            type="year",
+    ] = 1991
+    ey1: Annotated[
+        int,
+        YearArg(
             min=1880,
-            name="ey1",
-            default=2020,
             label="Inclusive End Year for First Station Period of Years:",
         ),
-        dict(
-            type="year",
+    ] = 2020
+    sy2: Annotated[
+        int,
+        YearArg(
             min=1880,
-            name="sy2",
-            default=1981,
             label="Inclusive Start Year for Second Station Period of Years:",
         ),
-        dict(
-            type="year",
+    ] = 1981
+    ey2: Annotated[
+        int,
+        YearArg(
             min=1880,
-            name="ey2",
-            default=2010,
             label="Inclusive End Year for Second Station Period of Years:",
         ),
-    ]
-    return desc
+    ] = 2010
 
 
-def pick_climate(ctx, idx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def pick_climate(ctx: Params, idx):
     """Figure out what we need to use."""
     climo = ctx.get(f"c{idx}", "1951")
     cltable = "climate"
@@ -136,13 +138,13 @@ def pick_climate(ctx, idx):
     return cltable, clstation
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    varname = ctx["v"]
-    station1 = ctx["station1"]
-    station2 = ctx.get("station2")
-    c1 = ctx["c1"]
-    c2 = ctx.get("c2")
+    varname = ctx.v
+    station1 = ctx.station1
+    station2 = ctx.station2
+    c1 = ctx.c1
+    c2 = ctx.c2
 
     cltable1, clstation1 = pick_climate(ctx, "1")
 
@@ -160,8 +162,8 @@ def plotter(ctx: dict):
                 conn,
                 params={
                     "station": station1,
-                    "sy1": ctx["sy1"],
-                    "ey1": ctx["ey1"],
+                    "sy1": ctx.sy1,
+                    "ey1": ctx.ey1,
                 },
                 index_col=None,
             )
@@ -199,8 +201,8 @@ def plotter(ctx: dict):
                     conn,
                     params={
                         "station": station2,
-                        "sy2": ctx["sy2"],
-                        "ey2": ctx["ey2"],
+                        "sy2": ctx.sy2,
+                        "ey2": ctx.ey2,
                     },
                     index_col=None,
                 )
@@ -246,10 +248,10 @@ def plotter(ctx: dict):
 
     c1label = c1
     if c1 == "custom":
-        c1label = f"[{ctx['sy1']}-{ctx['ey1']}]"
+        c1label = f"[{ctx.sy1}-{ctx.ey1}]"
     c2label = c2
     if c2 == "custom":
-        c2label = f"[{ctx['sy2']}-{ctx['ey2']}]"
+        c2label = f"[{ctx.sy2}-{ctx.ey2}]"
     var1 = "high" if varname == "temps" else varname
     var2 = "low" if varname == "temps" else None
     ax0.plot(
@@ -285,8 +287,8 @@ def plotter(ctx: dict):
             title = "Daily Climatology Comparison"
             subtitle = (
                 f"[{station1}] {ctx['_nt1'].sts[station1]['name']} "
-                f"{PDICT[ctx['c1']]} vs [{station2}] "
-                f"{ctx['_nt2'].sts[station2]['name']} {PDICT[ctx['c2']]}"
+                f"{PDICT[ctx.c1]} vs [{station2}] "
+                f"{ctx['_nt2'].sts[station2]['name']} {PDICT[ctx.c2]}"
             )
             label = f"{station1} ({c1}) - {station2} ({c2})"
         ax0.plot(
@@ -303,15 +305,15 @@ def plotter(ctx: dict):
                 label=f"Low {station2} ({c2label})",
             )
         delta = df[f"{var1}diff"]
-        if ctx["s"] != "0":
+        if ctx.s != "0":
             ax1.text(
                 0.01,
                 0.99,
-                f"** {int(ctx['s'])} Day Smoother Applied",
+                f"** {int(ctx.s)} Day Smoother Applied",
                 transform=ax1.transAxes,
                 va="top",
             )
-            delta = delta.rolling(window=int(ctx["s"])).mean()
+            delta = delta.rolling(window=int(ctx.s)).mean()
         ax1.plot(
             df.index.values,
             delta.values,
@@ -320,8 +322,8 @@ def plotter(ctx: dict):
         )
         if var2 is not None:
             delta = df["lowdiff"]
-            if ctx["s"] != "0":
-                delta = delta.rolling(window=int(ctx["s"])).mean()
+            if ctx.s != "0":
+                delta = delta.rolling(window=int(ctx.s)).mean()
             ax1.plot(
                 df.index.values, delta, color="b", label=f"Low Diff {label}"
             )

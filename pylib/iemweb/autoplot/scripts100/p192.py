@@ -1,6 +1,7 @@
 """Generates analysis maps of ASOS station data."""
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,17 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    FloatArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
@@ -40,69 +52,58 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 600, "data": True}
-    utcnow = utc()
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (ignored if plotting state)"
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (ignored if plotting state)",
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State: (ignored if plotting wfo)")
+    ] = "IA"
+    v: Annotated[
+        str, SelectArg(options=PDICT2, label="Select statistic to plot:")
+    ] = "vsby"
+    above: Annotated[
+        float | None,
+        FloatArg(
+            label="Remove any plotted values above threshold:", default=9999
         ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State: (ignored if plotting wfo)",
+    ] = None
+    below: Annotated[
+        float | None,
+        FloatArg(
+            label="Remove any plotted values below threshold:", default=-9999
         ),
-        dict(
-            type="select",
-            name="v",
-            default="vsby",
-            options=PDICT2,
-            label="Select statistic to plot:",
-        ),
-        dict(
-            type="float",
-            name="above",
-            optional=True,
-            default=9999,
-            label="Remove any plotted values above threshold:",
-        ),
-        dict(
-            type="float",
-            name="below",
-            optional=True,
-            default=-9999,
-            label="Remove any plotted values below threshold:",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=utcnow.strftime("%Y/%m/%d %H00"),
+    ] = None
+    valid: Annotated[
+        datetime | None,
+        DateTimeArg(
             label="Valid Analysis Time (UTC)",
-            optional=True,
             min="1986/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d %H00"),
         ),
-        dict(type="cmap", name="cmap", default="gray", label="Color Ramp:"),
-    ]
-    return desc
+    ] = None
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "gray"
 
 
-def get_df(ctx, bnds, buf=2.25):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=600, data=True
+    )
+
+
+def get_df(ctx: Params, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
-    if ctx.get("valid"):
-        valid = ctx["valid"].replace(tzinfo=UTC)
+    if ctx.valid:
+        valid = ctx.valid.replace(tzinfo=UTC)
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
                 sql_helper("""
@@ -158,9 +159,9 @@ def get_df(ctx, bnds, buf=2.25):
             )
     if df.empty:
         raise NoDataFound("Database query found no results.")
-    if ctx["v"].startswith("wetbulb"):
+    if ctx.v.startswith("wetbulb"):
         # somewhat expensive, so we only do when necessary
-        df[ctx["v"]] = (
+        df[ctx.v] = (
             wet_bulb_temperature(
                 altimeter_to_station_pressure(
                     df["alti"].values * units.inHg,
@@ -172,30 +173,30 @@ def get_df(ctx, bnds, buf=2.25):
             .to(units.degF)
             .magnitude
         )
-    return df.dropna(subset=[ctx["v"]]), valid
+    return df.dropna(subset=[ctx.v]), valid
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    varname = ctx["v"]
+    varname = ctx.v
 
-    if ctx["t"] == "state":
-        bnds = reference.state_bounds[ctx["state"]]
-        title = reference.state_names[ctx["state"]]
-    elif ctx["t"] == "conus":
+    if ctx.t == "state":
+        bnds = reference.state_bounds[ctx.state]
+        title = reference.state_names[ctx.state]
+    elif ctx.t == "conus":
         bnds = reference.SECTORS["conus"]
         title = "Contiguous United States"
     else:
-        bnds = reference.wfo_bounds[ctx["wfo"]]
-        title = f"NWS CWA {ctx['_sname']}"
+        bnds = reference.wfo_bounds[ctx.wfo]
+        title = f"NWS CWA {ctx.sname}"
     df, valid = get_df(ctx, bnds)
     mp = MapPlot(
         apctx=ctx,
-        sector=ctx["t"],
-        state=ctx["state"],
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        sector=ctx.t,
+        state=ctx.state,
+        cwa=(ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:]),
         axisbg="white",
-        title=f"{PDICT2[ctx['v']].split('(')[0]} for {title}",
+        title=f"{PDICT2[ctx.v].split('(')[0]} for {title}",
         subtitle=f"Map valid: {valid:%d %b %Y %H:%M} UTC",
         nocaption=True,
         titlefontsize=16,
@@ -204,10 +205,10 @@ def plotter(ctx: dict):
     if varname == "vsby":
         ramp = np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9])
     # Data QC, cough
-    if ctx.get("above"):
-        df = df[df[varname] < ctx["above"]]
-    if ctx.get("below"):
-        df = df[df[varname] > ctx["below"]]
+    if ctx.above:
+        df = df[df[varname] < ctx.above]
+    if ctx.below:
+        df = df[df[varname] > ctx.below]
     if df.empty:
         raise NoDataFound("No data found after applying thresholds")
     # with QC done, we compute ramps
@@ -215,7 +216,7 @@ def plotter(ctx: dict):
         ramp = np.linspace(
             df[varname].min() - 5, df[varname].max() + 5, 10, dtype="i"
         )
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     if varname == "wetbulb_awips":
         # approximately what AWIPS is using
         cmap_obj = get_cmap("jet")
@@ -265,10 +266,10 @@ def plotter(ctx: dict):
             units=UNITS[varname],
             cmap=cmap,
         )
-    if ctx["t"] == "state":
-        df2 = df[df["state"] == ctx["state"]]
+    if ctx.t == "state":
+        df2 = df[df["state"] == ctx.state]
     else:
-        df2 = df[df["wfo"] == ctx["wfo"]]
+        df2 = df[df["wfo"] == ctx.wfo]
 
     mp.plot_values(
         df2["lon"].values,
@@ -277,9 +278,9 @@ def plotter(ctx: dict):
         "%.1f",
         labelbuffer=10,
     )
-    if ctx["t"] != "conus":
+    if ctx.t != "conus":
         mp.drawcounties()
-    if ctx["t"] == "cwa":
+    if ctx.t == "cwa":
         mp.draw_cwas()
 
     return mp.fig, df

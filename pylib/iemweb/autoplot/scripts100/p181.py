@@ -9,7 +9,9 @@ sets the year-to-date period used for each year.
 updated to be space delimited so to allow negative numbers to be used.
 """
 
+import datetime as dt
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,6 +20,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avgt": "Average Temperature",
@@ -37,79 +47,65 @@ def parse_range(rng: str) -> list[float]:
     ]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Select Year-to-Date End Date (inclusive):",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=(today.year - 1),
-            label="Additional Year to Compare:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT,
-            default="high",
-            label="Variable to Plot:",
-        ),
-        dict(
-            type="text",
-            name="r1",
-            default="50 59",
-            label="Range #1 (inclusive, space separated)",
-        ),
-        dict(
-            type="text",
-            name="r2",
-            default="60 69",
-            label="Range #2 (inclusive, space separated)",
-        ),
-        dict(
-            type="text",
-            name="r3",
-            default="70 79",
-            label="Range #3 (inclusive, space separated)",
-        ),
-        dict(
-            type="text",
-            name="r4",
-            default="80 89",
-            label="Range #4 (inclusive, space separated)",
-        ),
-        dict(
-            type="text",
-            name="r5",
-            default="90 99",
-            label="Range #5 (inclusive, space separated)",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+    year: Annotated[
+        int,
+        YearArg(
+            label="Additional Year to Compare:",
+            default=lambda: date.today().year - 1,
+        ),
+    ]
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Variable to Plot:")
+    ] = "high"
+    r1: Annotated[
+        str, TextArg(label="Range #1 (inclusive, space separated)")
+    ] = "50 59"
+    r2: Annotated[
+        str, TextArg(label="Range #2 (inclusive, space separated)")
+    ] = "60 69"
+    r3: Annotated[
+        str, TextArg(label="Range #3 (inclusive, space separated)")
+    ] = "70 79"
+    r4: Annotated[
+        str, TextArg(label="Range #4 (inclusive, space separated)")
+    ] = "80 89"
+    r5: Annotated[
+        str, TextArg(label="Range #5 (inclusive, space separated)")
+    ] = "90 99"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     try:
-        r1 = parse_range(ctx["r1"])
-        r2 = parse_range(ctx["r2"])
-        r3 = parse_range(ctx["r3"])
-        r4 = parse_range(ctx["r4"])
-        r5 = parse_range(ctx["r5"])
+        r1 = parse_range(ctx.r1)
+        r2 = parse_range(ctx.r2)
+        r3 = parse_range(ctx.r3)
+        r4 = parse_range(ctx.r4)
+        r5 = parse_range(ctx.r5)
     except ValueError as exp:
         raise NoDataFound("Invalid Range Provided") from exp
-    dt = ctx["date"]
-    year = ctx["year"]
-    varname = ctx["var"]
+    dt = ctx.date
+    year = ctx.year
+    varname = ctx.var
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -139,7 +135,7 @@ def plotter(ctx: dict):
         .sum()
     )
 
-    title = f"{ctx['_sname']} :: Jan 1 - {dt:%b %-d} {PDICT[varname]} Days"
+    title = f"{ctx.sname} :: Jan 1 - {dt:%b %-d} {PDICT[varname]} Days"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(
         np.arange(1, 6) - 0.25, gdf.mean().values, width=-0.25, label="Average"

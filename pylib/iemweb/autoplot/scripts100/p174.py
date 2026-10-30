@@ -5,6 +5,7 @@ choosing.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -12,62 +13,67 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot.description import (
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "temp": "High and Low Temperature",
     "dewp": "High and Low Dew Point Temp",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    edate = date.today()
-    sdate = edate - timedelta(days=90)
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation1",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station 1:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation1: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 1:")
+    ] = "DSM"
+    zstation2: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 2:")
+    ] = "IKV"
+    var: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Select variable to plot comparison of"
         ),
-        dict(
-            type="zstation",
-            name="zstation2",
-            default="IKV",
-            network="IA_ASOS",
-            label="Select Station 2:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            default="temp",
-            label="Select variable to plot comparison of",
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=sdate.strftime("%Y/%m/%d"),
+    ] = "temp"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=edate.strftime("%Y/%m/%d"),
-            label="End Date:",
+            default=lambda: (date.today() - timedelta(days=90)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            label="End Date:",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
+        ),
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station1 = ctx["zstation1"]
-    station2 = ctx["zstation2"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
-    varname = ctx["var"]
+    station1 = ctx.zstation1
+    station2 = ctx.zstation2
+    sdate = ctx.sdate
+    edate = ctx.edate
+    varname = ctx.var
 
     d = "tmpf" if varname == "temp" else "dwpf"
     with get_sqlalchemy_conn("iem") as conn:

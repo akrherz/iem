@@ -6,6 +6,7 @@ uses an irregular spacing.
 """
 
 from datetime import date
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -16,21 +17,27 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import CmapArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
+    station = ctx.zstation
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -81,14 +88,14 @@ def plotter(ctx: dict):
     syear = max([1973, ab.year])
 
     (fig, ax) = figure_axes(
-        title=f"({syear}-{date.today().year}) {ctx['_sname']} Ceiling",
+        title=f"({syear}-{date.today().year}) {ctx.sname} Ceiling",
         subtitle="Frequency of first cloud level with BKN or OVC reported",
         apctx=ctx,
     )
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
-    cmap = get_cmap(ctx["cmap"]).with_extremes(under="#F9CCCC")
+    cmap = get_cmap(ctx.cmap).with_extremes(under="#F9CCCC")
     # If the number of bounds is greater than the cmap colors, we need to
     # adjust
     if len(bounds) > cmap.N:

@@ -6,7 +6,8 @@ prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -15,42 +16,46 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            default="ETTI4",
-            label="Select Station",
-            network="TALLTOWERS",
-        ),
-        dict(
-            type="datetime",
-            name="dt",
-            default="2016/09/15 2340",
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(label="Select Station", network="TALLTOWERS")
+    ] = "ETTI4"
+    dt: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start Time (UTC Time Zone):",
             min="2016/04/01 0000",
             max="2021/09/01 0000",
-        ),
-        dict(
-            type="int",
-            name="minutes",
-            default=10,
-            label="Number of Minutes to Plot",
+            default="2016/09/15 2340",
         ),
     ]
-    return desc
+    minutes: Annotated[int, IntArg(label="Number of Minutes to Plot")] = 10
 
 
-def add_context(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def add_context(ctx: Params):
     """Get plot context"""
-    ctx["dt"] = ctx["dt"].replace(tzinfo=UTC)
-    dt = ctx["dt"]
-    station = ctx["station"]
-    minutes = ctx["minutes"]
+    ctx.dt = ctx.dt.replace(tzinfo=UTC)
+    dt = ctx.dt
+    station = ctx.station
+    minutes = ctx.minutes
     # We can't deal with thousands of datapoints on the plot, so we stride
     # appropriately with hopes of limiting to 1000 x points
     size = minutes * 60.0
@@ -80,7 +85,7 @@ def add_context(ctx):
         raise NoDataFound("Failed to find any data.")
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Do highcharts variant"""
     add_context(ctx)
     df = ctx["df"]
@@ -311,7 +316,7 @@ createChart('hc4', 'Wind Direction', ["""
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
 

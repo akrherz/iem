@@ -7,13 +7,25 @@ season has started or ended. In this situation, hopefully the Right-Thing
 is done!
 """
 
+import datetime as dt
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -61,57 +73,54 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "cache": 3600, "description": __doc__}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="csector",
-            name="csector",
-            default="conus",
-            label="Select Sector:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    csector: Annotated[str, CSectorArg(label="Select Sector:")] = "conus"
+    var: Annotated[
+        str,
+        SelectArg(
+            options=NASS_CROP_PROGRESS, label="Available variables to plot:"
         ),
-        dict(
-            type="select",
-            options=NASS_CROP_PROGRESS,
-            default="corn_planting",
-            name="var",
-            label="Available variables to plot:",
+    ] = "corn_planting"
+    w: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="What to compare present number against?"
         ),
-        dict(
-            type="select",
-            options=PDICT2,
-            default="avg",
-            label="What to compare present number against?",
-            name="w",
+    ] = "avg"
+    weeks: Annotated[
+        int,
+        IntArg(
+            label="Number of weeks ago to compare against (when appropriate):"
         ),
-        dict(
-            type="int",
-            default=1,
-            label="Number of weeks ago to compare against (when appropriate):",
-            name="weeks",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+    ] = 1
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Valid Date:",
             min="1981/01/01",
-            max=today.strftime("%Y/%m/%d"),
+            max=lambda: date.today().strftime("%Y/%m/%d"),
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="BrBG", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "BrBG"
 
 
-def get_df(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def get_df(ctx: Params):
     """Figure out what data we need to fetch here"""
-    dt = ctx["date"]
+    dt = ctx.date
     # Rectify to Sunday
     if dt.isoweekday() < 7:
         dt = dt - timedelta(days=dt.isoweekday())
-    varname = ctx["var"]
+    varname = ctx.var
     params2 = NASS_CROP_PROGRESS_LOOKUP[varname]
     params = {}
     if isinstance(params2, list):
@@ -142,7 +151,7 @@ def get_df(ctx):
     # Average at least ten years
     syear = max([1981, dt.year - 10])
     eyear = syear + 10
-    week_ending_start = dt - timedelta(days=ctx["weeks"] * 7)
+    week_ending_start = dt - timedelta(days=ctx.weeks * 7)
     for state, gdf in df.groupby("state_alpha"):
         sdf = gdf.copy().set_index("week_ending")
         # TOO DIFFICULT to know what to do in this case.
@@ -173,17 +182,17 @@ def get_df(ctx):
         data[state] = {
             "avg": avgval,
             "thisval": thisval,
-            f"week{ctx['weeks']}ago": pval,
+            f"week{ctx.weeks}ago": pval,
         }
     ctx["df"] = pd.DataFrame.from_dict(data, orient="index")
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["df"] = ctx["df"].dropna(how="all")
     ctx["df"].index.name = "state"
-    col = "avg" if ctx["w"] == "avg" else f"week{ctx['weeks']}ago"
+    col = "avg" if ctx.w == "avg" else f"week{ctx.weeks}ago"
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
     ctx["title"] = f"{dt:%-d %b %Y} USDA NASS {NASS_CROP_PROGRESS[varname]}"
-    if ctx["w"] == "avg":
+    if ctx.w == "avg":
         ctx["subtitle"] = (
             f"Top value is {dt.year} percentage, bottom value is "
             f"departure from {syear}-{eyear - 1} avg"
@@ -195,7 +204,7 @@ def get_df(ctx):
         )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     get_df(ctx)
     labels = {}
@@ -222,7 +231,7 @@ def plotter(ctx: dict):
         nocaption=True,
     )
     levels = range(-40, 41, 10)
-    cmap = get_cmap(ctx["cmap"]).with_extremes(bad="white")
+    cmap = get_cmap(ctx.cmap).with_extremes(bad="white")
     mp.fill_states(
         data,
         ilabel=True,

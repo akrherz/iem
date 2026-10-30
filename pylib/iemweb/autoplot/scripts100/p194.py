@@ -13,6 +13,7 @@ Having said that, it should be close!
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -25,6 +26,15 @@ from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.reference import LATLON
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "0": "D0: Abnormally Dry",
     "1": "D1: Moderate Drought",
@@ -35,50 +45,48 @@ PDICT = {
 PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 600}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="csector",
-            name="csector",
-            default="IA",
-            label="Select state/sector to plot",
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=f"{today.year}/01/01",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "IA"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="2000/01/04",
-            max=today.strftime("%Y/%m/%d"),
+            max=lambda: date.today().strftime("%Y/%m/%d"),
+            default=lambda: f"{date.today().year}/01/01",
         ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
+    ]
+    edate: Annotated[
+        date,
+        DateArg(
             label="End Date:",
             min="2000/01/04",
-            max=today.strftime("%Y/%m/%d"),
+            max=lambda: date.today().strftime("%Y/%m/%d"),
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(
-            type="select",
-            name="d",
-            default="0",
+    ]
+    d: Annotated[
+        str,
+        SelectArg(
             options=PDICT,
             label="Select Drought Classification (at and above counted):",
         ),
-        dict(
-            type="select",
-            name="w",
-            default="percent",
-            options=PDICT2,
-            label="How to express time for plot:",
-        ),
-        dict(type="cmap", name="cmap", default="plasma", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "0"
+    w: Annotated[
+        str, SelectArg(options=PDICT2, label="How to express time for plot:")
+    ] = "percent"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "plasma"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=600
+    )
 
 
 def make_tuesday(dt: date):
@@ -95,18 +103,18 @@ def make_tuesday(dt: date):
     return tuesday
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    csector = ctx["csector"]
-    sdate = make_tuesday(ctx["sdate"])
-    edate = make_tuesday(ctx["edate"])
-    dlevel = ctx["d"]
+    csector = ctx.csector
+    sdate = make_tuesday(ctx.sdate)
+    edate = make_tuesday(ctx.edate)
+    dlevel = ctx.d
 
     griddelta = 0.1
     mp = MapPlot(
         apctx=ctx,
         title=(
-            f'{PDICT2[ctx["w"]]} at or above "{PDICT[dlevel]}" '
+            f'{PDICT2[ctx.w]} at or above "{PDICT[dlevel]}" '
             f"{sdate:%b %-d, %Y} - {edate:%b %-d, %Y}"
         ),
         subtitle=(
@@ -177,7 +185,7 @@ def plotter(ctx: dict):
 
     maxval = 10 if np.max(raster) < 11 else np.max(raster)
     ramp = np.linspace(1, maxval + 1, 11, dtype="i")
-    if ctx["w"] == "percent":
+    if ctx.w == "percent":
         ramp = np.arange(0, 101, 10, dtype=float)
         ramp[0] = 0.01
         ramp[-1] = 100.0
@@ -185,7 +193,7 @@ def plotter(ctx: dict):
         # week in there
         raster = raster / ((edate - sdate).days / 7.0 + 1.0) * 100.0
     # plot
-    cmap = stretch_cmap(ctx["cmap"], ramp).with_extremes(
+    cmap = stretch_cmap(ctx.cmap, ramp).with_extremes(
         under="white", bad="white"
     )
     lon_edges = np.concatenate(
@@ -202,7 +210,7 @@ def plotter(ctx: dict):
         raster2,
         ramp,
         cmap=cmap,
-        units="count" if ctx["w"] == "weeks" else "Percent",
+        units="count" if ctx.w == "weeks" else "Percent",
         clip_on=False,
     )
     if len(csector) == 2:

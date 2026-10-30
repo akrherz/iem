@@ -17,12 +17,22 @@ day's sounding if running this application prior to those ingest times.
 """
 
 import calendar
+import datetime as dt
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "18": "18 UTC"}
 PDICT2 = {
@@ -41,68 +51,59 @@ PDICT4 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = utc()
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="RAOB",
-            default="_OAX",
-            label="Select Station:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="RAOB", label="Select Station:")
+    ] = "_OAX"
+    date: Annotated[
+        dt.date,
+        DateArg(
             min="1946/01/01",
-            max=today.strftime("%Y/%m/%d"),
+            max=lambda: utc().strftime("%Y/%m/%d"),
             label="Date of the Sounding:",
-        ),
-        dict(
-            type="select",
-            name="hour",
-            default="00",
-            options=PDICT,
-            label="Which Sounding from Above Date:",
-        ),
-        dict(
-            type="select",
-            name="which",
-            default="month",
-            options=PDICT2,
-            label="Compare this sounding against (dates):",
-        ),
-        dict(
-            type="select",
-            name="h",
-            default="same",
-            options=PDICT4,
-            label="Compare this sounding against (hour):",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpc",
-            options=PDICT3,
-            label="Which Sounding Variable to Plot:",
+            default=lambda: utc().strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+    hour: Annotated[
+        str, SelectArg(options=PDICT, label="Which Sounding from Above Date:")
+    ] = "00"
+    which: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Compare this sounding against (dates):"
+        ),
+    ] = "month"
+    h: Annotated[
+        str,
+        SelectArg(
+            options=PDICT4, label="Compare this sounding against (hour):"
+        ),
+    ] = "same"
+    var: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="Which Sounding Variable to Plot:"),
+    ] = "tmpc"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")
-    varname = ctx["var"]
-    ts = ctx["date"]
-    hour = int(ctx["hour"])
+    varname = ctx.var
+    ts = ctx.date
+    hour = int(ctx.hour)
     ts = utc(ts.year, ts.month, ts.day, hour)
-    which = ctx["which"]
+    which = ctx.which
     stations = [station]
     name = ctx["_nt"].sts[station]["name"]
     if station.startswith("_"):
@@ -125,7 +126,7 @@ def plotter(ctx: dict):
     params["hours"] = [hour]
     if hour == 18:
         params["hours"] = [hour, 0]
-    if ctx["h"].upper() == "ALL":
+    if ctx.h.upper() == "ALL":
         hrlimit = ""
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
@@ -183,7 +184,7 @@ def plotter(ctx: dict):
 
     title = f"{station} {name} {ts:%Y/%m/%d %H} UTC Sounding"
     tt = "All Year" if which == "none" else calendar.month_name[ts.month]
-    uu = "Any Hour" if ctx["h"] == "all" else f"{hour} UTC"
+    uu = "Any Hour" if ctx.h == "all" else f"{hour} UTC"
     subtitle = (
         f"({pd.Timestamp(df.iloc[0]['min_valid']).year}-"
         f"{pd.Timestamp(df.iloc[0]['max_valid']).year}) Percentile Ranks "

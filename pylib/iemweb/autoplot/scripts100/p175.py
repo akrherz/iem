@@ -7,6 +7,7 @@ snow depth reported approximately at 7 AM.
 
 import os
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -21,34 +22,40 @@ from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value, ncopen
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    year = today.year if today.month > 9 else today.year - 1
-    desc["arguments"] = [
-        dict(
-            type="year",
-            name="year",
-            default=year,
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    year: Annotated[
+        int,
+        YearArg(
             label="Year of December for Winter Season",
-        ),
-        dict(
-            type="float",
-            name="thres",
-            default="1.0",
-            label="Snow Cover Threshold [inch]",
-        ),
-        dict(
-            contiguous=True,
-            type="state",
-            name="state",
-            default="IA",
-            label="For State",
+            default=lambda: (
+                date.today().year
+                if date.today().month > 9
+                else date.today().year - 1
+            ),
         ),
     ]
-    return desc
+    thres: Annotated[float, FloatArg(label="Snow Cover Threshold [inch]")] = (
+        1.0
+    )
+    state: Annotated[str, StateArg(contiguous=True, label="For State")] = "IA"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def f(st, snowd, metric, stpts):
@@ -63,12 +70,12 @@ def f(st, snowd, metric, stpts):
     return np.nan if v is np.ma.masked else v
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    year = ctx["year"]
-    thres = ctx["thres"]
+    year = ctx.year
+    thres = ctx.thres
     metric = convert_value(thres, "inch", "millimeter")
-    state = ctx["state"][:2]
+    state = ctx.state[:2]
 
     sts = datetime(year, 10, 1, 12)
     ets = datetime(year + 1, 5, 1, 12)

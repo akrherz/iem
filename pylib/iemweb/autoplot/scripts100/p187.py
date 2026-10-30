@@ -5,6 +5,8 @@ observations in the state.  The green line is a simple average of the
 plot.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -12,6 +14,8 @@ from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "precip": "Total Precipitation",
@@ -21,26 +25,26 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="precip",
-            label="Variable to Plot:",
-            options=PDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(label="Variable to Plot:", options=PDICT)
+    ] = "precip"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
     assert varname in PDICT
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -75,7 +79,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
 
     fig = figure(
-        title=ctx["_sname"],
+        title=ctx.sname,
         subtitle=(
             f"Yearly {PDICT[varname]} Percentile for all "
             f"{station[:2]} stations"

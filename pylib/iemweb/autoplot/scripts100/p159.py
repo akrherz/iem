@@ -15,6 +15,7 @@ the early 1970s for most stations</p>
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
@@ -23,6 +24,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -75,128 +85,113 @@ UNITS = {
 DIRS = {"aoa": "At or Above", "below": "Below"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="dwpf",
-            label="Which Variable",
-            options=METRICS,
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="aoa",
-            label="Threshold Direction:",
-            options=DIRS,
-        ),
-        dict(
-            type="float",
-            name="thres",
-            default=65,
-            label="Threshold (°F, %, mph, inHg, mb):",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Date Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="sday",
-            name="sdate",
-            default="0101",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    var: Annotated[str, SelectArg(label="Which Variable", options=METRICS)] = (
+        "dwpf"
+    )
+    dir: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=DIRS)
+    ] = "aoa"
+    thres: Annotated[
+        float, FloatArg(label="Threshold (°F, %, mph, inHg, mb):")
+    ] = 65
+    month: Annotated[str, SelectArg(label="Date Limiter", options=MDICT)] = (
+        "all"
+    )
+    sdate: Annotated[
+        date,
+        SDayArg(
             label="Inclusive Start Day of Year (when Date Limiter is custom):",
+            default="0101",
         ),
-        dict(
-            type="sday",
-            name="edate",
-            default=f"{date.today():%m%d}",
-            label="Inclusive End Day of Year (when Date Limiter is custom):",
-        ),
-        dict(
-            type="year",
-            min=1973,
-            default=date.today().year,
-            label="Year to Highlight",
-            name="year",
-        ),
-        {
-            "type": "year",
-            "name": "syear",
-            "default": 1920,
-            "label": "Limit Data Analysis to inclusive start year:",
-        },
     ]
-    return desc
+    edate: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive End Day of Year (when Date Limiter is custom):",
+            default=lambda: f"{date.today():%m%d}",
+        ),
+    ]
+    year: Annotated[
+        int,
+        YearArg(
+            min=1973,
+            label="Year to Highlight",
+            default=lambda: date.today().year,
+        ),
+    ]
+    syear: Annotated[
+        int, YearArg(label="Limit Data Analysis to inclusive start year:")
+    ] = 1920
 
 
-def set_df(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def set_df(ctx: Params):
     """Set the dataframe"""
     offset = "ts"
     ctx["mlabel"] = (
-        MDICT[ctx["month"]]
-        if ctx["month"] != "jul1"
+        MDICT[ctx.month]
+        if ctx.month != "jul1"
         else "Jul-Jun [year of Jul shown]"
     )
     ctx["totaldays"] = 0
     months = list(range(1, 13))
     doylimit = ""
-    if ctx["month"] in ["all", "jul1", "ytd"]:
-        if ctx["month"] == "jul1":
+    if ctx.month in ["all", "jul1", "ytd"]:
+        if ctx.month == "jul1":
             offset = "ts - '6 months'::interval"
-    elif ctx["month"] == "custom":
+    elif ctx.month == "custom":
         doylimit = (
             " and to_char(ts, 'mmdd') >= :sdate and "
             "to_char(ts, 'mmdd') <= :edate "
         )
-        ctx["totaldays"] = (ctx["edate"] - ctx["sdate"]).days + 1
-        ctx["mlabel"] = f" {ctx['sdate']:%b %-d} thru {ctx['edate']:%b %-d}"
-        if ctx["sdate"] > ctx["edate"]:
+        ctx["totaldays"] = (ctx.edate - ctx.sdate).days + 1
+        ctx["mlabel"] = f" {ctx.sdate:%b %-d} thru {ctx.edate:%b %-d}"
+        if ctx.sdate > ctx.edate:
             ctx["totaldays"] = (
-                ctx["edate"].replace(year=2001) - ctx["sdate"]
+                ctx.edate.replace(year=2001) - ctx.sdate
             ).days + 1
-            days = (ctx["edate"] - date(2000, 1, 1)).days + 1
+            days = (ctx.edate - date(2000, 1, 1)).days + 1
             offset = f"ts - '{days} days'::interval"
             doylimit = (
                 " and (to_char(ts, 'mmdd') >= :sdate or "
                 "to_char(ts, 'mmdd') <= :edate) "
             )
-    elif ctx["month"] == "fall":
+    elif ctx.month == "fall":
         months = [9, 10, 11]
-    elif ctx["month"] == "winter":
+    elif ctx.month == "winter":
         months = [12, 1, 2]
         offset = "ts + '1 month'::interval"
-    elif ctx["month"] == "spring":
+    elif ctx.month == "spring":
         months = [3, 4, 5]
-    elif ctx["month"] == "summer":
+    elif ctx.month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{ctx.month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
     ctx["months"] = months
-    opp = ">=" if ctx["dir"] == "aoa" else "<"
+    opp = ">=" if ctx.dir == "aoa" else "<"
 
-    dbvarname = ctx["var"]
-    if ctx["var"] == "sped":
+    dbvarname = ctx.var
+    if ctx.var == "sped":
         dbvarname = "(sknt * 1.15)"
-    elif ctx["var"] == "gust":
+    elif ctx.var == "gust":
         dbvarname = "(gust * 1.15)"
-    elif ctx["var"] == "dd":
+    elif ctx.var == "dd":
         dbvarname = "(tmpf - dwpf)"
-    if ctx["month"] == "ytd":
+    if ctx.month == "ytd":
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
@@ -221,14 +216,14 @@ def set_df(ctx: dict):
             ),
             conn,
             params={
-                "tzname": ctx["_nt"].sts[ctx["zstation"]]["tzname"],
-                "t": ctx["thres"],
-                "station": ctx["zstation"],
+                "tzname": ctx["_nt"].sts[ctx.zstation]["tzname"],
+                "t": ctx.thres,
+                "station": ctx.zstation,
                 "months": months,
                 "sday": date.today().strftime("%m%d"),
-                "sdate": ctx["sdate"].strftime("%m%d"),
-                "edate": ctx["edate"].strftime("%m%d"),
-                "start": f"{ctx['syear']}-01-01",
+                "sdate": ctx.sdate.strftime("%m%d"),
+                "edate": ctx.edate.strftime("%m%d"),
+                "start": f"{ctx.syear}-01-01",
             },
             index_col=None,
         )
@@ -236,20 +231,20 @@ def set_df(ctx: dict):
         raise NoDataFound("Error, no results returned!")
 
 
-def set_fig(ctx: dict):
+def set_fig(ctx: Params):
     """Set the plot"""
     ydf = ctx["df"].groupby("year").sum()
     title = (
-        f"({ctx['mlabel']}) {METRICS[ctx['var']]} Hours {DIRS[ctx['dir']]} "
-        f"{ctx['thres']}{UNITS[ctx['var']]}\n"
-        f"{ctx['_sname']}:: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
+        f"({ctx['mlabel']}) {METRICS[ctx.var]} Hours {DIRS[ctx.dir]} "
+        f"{ctx.thres}{UNITS[ctx.var]}\n"
+        f"{ctx.sname}:: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
     # Loop over plot years and background highlight any years with less than
     # 80% data coverage
     obscount = len(ctx["months"]) * 30 * 24 * 0.8
-    if ctx["month"] == "ytd":
+    if ctx.month == "ytd":
         obscount = int(f"{date.today():%j}") * 24 * 0.8
-    elif ctx["month"] == "custom":
+    elif ctx.month == "custom":
         obscount = ctx["totaldays"] * 24 * 0.8
     ctx["fig"] = figure(apctx=ctx, title=title)
     quorum = ydf[ydf["obs"] > obscount]
@@ -275,10 +270,10 @@ def set_fig(ctx: dict):
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:
             ax.axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
-    if ctx["year"] in ydf.index.values:
-        val = ydf.loc[ctx["year"]]
+    if ctx.year in ydf.index.values:
+        val = ydf.loc[ctx.year]
         ax.bar(
-            ctx["year"],
+            ctx.year,
             val["hits"],
             align="center",
             fc="orange",
@@ -307,7 +302,7 @@ def set_fig(ctx: dict):
         ec="b",
         label="Avg",
     )
-    thisyear = ctx["df"][ctx["df"]["year"] == ctx["year"]]
+    thisyear = ctx["df"][ctx["df"]["year"] == ctx.year]
     if not thisyear.empty:
         ax1.bar(
             thisyear["hour"].values,
@@ -317,7 +312,7 @@ def set_fig(ctx: dict):
             zorder=5,
             fc="orange",
             ec="orange",
-            label=f"{ctx['year']}",
+            label=f"{ctx.year}",
         )
     ax1.set_xlim(-0.5, 23.5)
     ax1.grid(True)
@@ -326,12 +321,12 @@ def set_fig(ctx: dict):
     ax1.set_xticks(range(0, 24, 4))
     ax1.set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     ax1.set_xlabel(
-        f"Hour of Day ({ctx['_nt'].sts[ctx['zstation']]['tzname']})",
+        f"Hour of Day ({ctx['_nt'].sts[ctx.zstation]['tzname']})",
         ha="right",
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     set_df(ctx)
     set_fig(ctx)

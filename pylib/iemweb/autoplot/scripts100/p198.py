@@ -11,11 +11,20 @@ locations, the place that the sounding is made has moved over the years..
 <strong>Some derived parameters are a work-in-progress.</strong>
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "ALL": "Any Hour"}
@@ -80,60 +89,43 @@ PDICT5 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="RAOB",
-            default="_OAX",
-            label="Select Station:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="RAOB", label="Select Station:")
+    ] = "_OAX"
+    hour: Annotated[
+        str, SelectArg(options=PDICT, label="Which Routine Sounding:")
+    ] = "00"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    agg: Annotated[
+        str,
+        SelectArg(
+            options=PDICT4, label="Which Statistical Aggregate to Plot:"
         ),
-        dict(
-            type="select",
-            name="hour",
-            default="00",
-            options=PDICT,
-            label="Which Routine Sounding:",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="agg",
-            default="avg",
-            options=PDICT4,
-            label="Which Statistical Aggregate to Plot:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpc",
-            options=PDICT3,
-            label="Which Sounding Variable to Plot:",
-        ),
-        dict(
-            type="int",
-            name="level",
-            default=500,
-            label="Which Pressure (hPa) level:",
-        ),
-        dict(
-            type="select",
-            name="quorum",
-            default="yes",
+    ] = "avg"
+    var: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="Which Sounding Variable to Plot:"),
+    ] = "tmpc"
+    level: Annotated[int, IntArg(label="Which Pressure (hPa) level:")] = 500
+    quorum: Annotated[
+        str,
+        SelectArg(
             options=PDICT5,
             label="Should there be a quorum check before plotting?",
         ),
-    ]
-    return desc
+    ] = "yes"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def compute(dfin: pd.DataFrame, varname: str):
@@ -158,18 +150,18 @@ def compute(dfin: pd.DataFrame, varname: str):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")
-    varname = ctx["var"]
-    hour = ctx["hour"]
+    varname = ctx.var
+    hour = ctx.hour
     if hour != "ALL":
         hour = int(hour)
-    month = ctx["month"]
-    level = ctx["level"]
-    agg = ctx["agg"]
+    month = ctx.month
+    level = ctx.level
+    agg = ctx.agg
     offset = 0
     months = month2months(month)
 
@@ -237,7 +229,7 @@ def plotter(ctx: dict):
         if varname in conv and not dfin.empty:
             dfin[varname] = dfin[conv[varname]] / 25.4  # convert mm to inch
     df = compute(dfin, varname)
-    if ctx["quorum"] == "yes":
+    if ctx.quorum == "yes":
         # need quorums
         df = df[df[f"{varname}_count"] > ((len(months) * 28) * 0.75)]
     if df.empty:

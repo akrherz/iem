@@ -5,7 +5,8 @@ plot uses a JSON data service provided by the
 <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -15,6 +16,14 @@ from pyiem.plot import figure_axes
 from pyiem.reference import state_fips, state_names
 from pyiem.util import LOG
 
+from iemweb.autoplot.description import (
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 SERVICE = (
     "https://droughtmonitor.unl.edu"
     "/DmData/DataTables.aspx/ReturnTabularDMAreaPercent_"
@@ -23,49 +32,51 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 PDICT = {"state": "Plot Individual State", "national": "Plot CONUS"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today()
-    sts = today - timedelta(days=720)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            default="state",
-            name="s",
-            options=PDICT,
-            label="Plot for state or CONUS:",
-        ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="date",
-            name="sdate",
-            default=sts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    s: Annotated[
+        str, SelectArg(options=PDICT, label="Plot for state or CONUS:")
+    ] = "state"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="2000/01/01",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            label="End Date:",
-            min="2000/01/01",
+            default=lambda: (datetime.today() - timedelta(days=720)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            label="End Date:",
+            min="2000/01/01",
+            default=lambda: datetime.today().strftime("%Y/%m/%d"),
+        ),
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
-    state = ctx["state"].upper()
+    sdate = ctx.sdate
+    edate = ctx.edate
+    state = ctx.state.upper()
 
     fips = ""
     for key, entry in state_fips.items():
         if entry == state:
             fips = f"{key:02.0f}"
-    if ctx["s"] == "state":
+    if ctx.s == "state":
         payload = {"area": f"'{fips}'", "statstype": "'2'", "diff": "'0'"}
         suffix = "state"
     else:
@@ -101,7 +112,7 @@ def plotter(ctx: dict):
     df.index.name = "Date"
 
     df = df.reset_index()
-    tt = state_names[state] if ctx["s"] == "state" else "CONUS"
+    tt = state_names[state] if ctx.s == "state" else "CONUS"
     title = (
         f"Areal coverage of Drought for {tt}\n"
         f"from US Drought Monitor {df['Date'].min():%-d %B %Y} - "

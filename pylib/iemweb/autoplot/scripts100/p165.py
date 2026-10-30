@@ -23,6 +23,7 @@ algorithm works for this plot.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,17 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
 PDICT2 = {
@@ -67,87 +79,69 @@ ORDER = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "w",
-            "default": "air",
-            "label": "Which Temperature:",
-            "options": PDICT,
-        },
-        dict(type="state", name="sector", default="IA", label="Select State:"),
-        dict(
-            type="select",
-            name="var",
-            default="spring_below",
-            label="Select Plot Type:",
-            options=PDICT2,
-        ),
-        dict(
-            type="select",
-            name="popt",
-            default="contour",
-            label="Plot Display Options:",
-            options=PDICT3,
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[str, SelectArg(label="Which Temperature:", options=PDICT)] = (
+        "air"
+    )
+    sector: Annotated[str, StateArg(label="Select State:")] = "IA"
+    var: Annotated[
+        str, SelectArg(label="Select Plot Type:", options=PDICT2)
+    ] = "spring_below"
+    popt: Annotated[
+        str, SelectArg(label="Plot Display Options:", options=PDICT3)
+    ] = "contour"
+    year: Annotated[
+        int,
+        YearArg(
             label="Year:",
             min=1893,
-        ),
-        dict(
-            type="int",
-            name="threshold",
-            default=32,
-            label="Temperature Threshold (F):",
-        ),
-        dict(
-            type="int",
-            default=50,
-            optional=True,
-            name="p",
-            label=(
-                "Plot date of given observed frequency / "
-                "percentiles (%): [optional]"
-            ),
-        ),
-        dict(
-            optional=True,
-            type="sday",
-            default=f"{today:%m%d}",
-            name="sday",
-            label="Plot percentiles for a given date [optional]",
-        ),
-        dict(
-            type="year",
-            default=1893,
-            optional=True,
-            name="syear",
-            label="Inclusive start year for percentiles: [optional]",
-        ),
-        dict(
-            type="year",
-            default=today.year,
-            optional=True,
-            name="eyear",
-            label="Inclusive end year for percentiles: [optional]",
-        ),
-        dict(type="cmap", name="cmap", default="BrBG", label="Color Ramp:"),
-        dict(
-            type="int",
-            default=2,
-            name="cint",
-            optional=True,
-            label="Contour interval in days (optional):",
+            default=lambda: (datetime.today() - timedelta(days=1)).year,
         ),
     ]
-    return desc
+    threshold: Annotated[int, IntArg(label="Temperature Threshold (F):")] = 32
+    p: Annotated[
+        int | None,
+        IntArg(
+            label="Plot date of given observed frequency / "
+            "percentiles (%): [optional]",
+            default=50,
+        ),
+    ] = None
+    sday: Annotated[
+        date | None,
+        SDayArg(
+            label="Plot percentiles for a given date [optional]",
+            default=lambda: f"{datetime.today() - timedelta(days=1):%m%d}",
+        ),
+    ] = None
+    syear: Annotated[
+        int | None,
+        YearArg(
+            label="Inclusive start year for percentiles: [optional]",
+            default=1893,
+        ),
+    ] = None
+    eyear: Annotated[
+        int | None,
+        YearArg(
+            label="Inclusive end year for percentiles: [optional]",
+            default=lambda: (datetime.today() - timedelta(days=1)).year,
+        ),
+    ] = None
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "BrBG"
+    cint: Annotated[
+        int | None,
+        IntArg(label="Contour interval in days (optional):", default=2),
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def th(val):
@@ -162,15 +156,15 @@ def th(val):
     return "nd"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    sector = ctx["sector"]
+    sector = ctx.sector
     if len(sector) != 2:
         raise NoDataFound("Sorry, this app doesn't support multi-state plots.")
-    varname: str = ctx["var"]
-    year = ctx["year"]
-    popt = ctx["popt"]
-    threshold = ctx["threshold"]
+    varname: str = ctx.var
+    year = ctx.year
+    popt = ctx.popt
+    threshold = ctx.threshold
     nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", date.today().year)
@@ -200,7 +194,7 @@ def plotter(ctx: dict):
             """,
                 table=f"alldata_{sector.lower()}",
                 order=ORDER[varname],
-                ssql=SQLOPT[f"{ctx['w']}_{varname}"],
+                ssql=SQLOPT[f"{ctx.w}_{varname}"],
                 ygrp=YRGP[varname],
             ),
             conn,
@@ -218,33 +212,33 @@ def plotter(ctx: dict):
     df["doy"] = (df["event"] - df["min_day"]).apply(lambda x: x.days)
 
     basedate = date(2000, 7 if varname.startswith("fall") else 1, 1)
-    if ctx.get("p") is not None:
+    if ctx.p is not None:
         # Remove low count stations
         df2 = df[["doy"]].groupby("station").count()
         df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
-        df2 = df[["doy"]].groupby("station").quantile(ctx["p"] / 100.0).copy()
+        df2 = df[["doy"]].groupby("station").quantile(ctx.p / 100.0).copy()
         df2["pdate"] = df2["doy"].apply(
             lambda x: (basedate + timedelta(days=int(x))).strftime("%-m/%-d")
         )
         title = (
-            f"{ctx['p']:.0f}{th(str(ctx['p']))} Percentile Date of "
-            f"{PDICT[ctx['w']]} {PDICT2[varname]} {threshold}°F"
+            f"{ctx.p:.0f}{th(str(ctx.p))} Percentile Date of "
+            f"{PDICT[ctx.w]} {PDICT2[varname]} {threshold}°F"
         )
         extra = (
             ", period of record: "
             f"{df[YRGP[varname]].min():.0f}-{df[YRGP[varname]].max():.0f}"
         )
-    elif ctx.get("sday") is not None:
+    elif ctx.sday is not None:
         # Compute percentiles for the given date
         df2 = df[["doy"]].groupby("station").count()
         df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
-        doy = (ctx["sday"] - basedate).days
+        doy = (ctx.sday - basedate).days
         hits = df[df["doy"] <= doy]["doy"].groupby("station").count()
         # count again due to filtering above
         df2 = df[["doy"]].groupby("station").count()
         df2["percentile"] = (hits / df2["doy"] * 100).fillna(0)
         title = (
-            f"Percentile on {ctx['sday']:%-d %b} of {PDICT2[varname]} "
+            f"Percentile on {ctx.sday:%-d %b} of {PDICT2[varname]} "
             f"{threshold}°F"
         )
         extra = (
@@ -255,7 +249,7 @@ def plotter(ctx: dict):
         df2 = df[df[YRGP[varname]] == year].copy()
         # Require sites have enough data
         df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
-        title = f"{year} {PDICT[ctx['w']]} {PDICT2[varname]} {threshold}°F"
+        title = f"{year} {PDICT[ctx.w]} {PDICT2[varname]} {threshold}°F"
         df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
         extra = ""
     if df2.empty:
@@ -269,24 +263,24 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data was found")
     df2 = df2[df2["lat"].notna()]
     subtitle = f"based on NWS COOP and IEM Daily Estimates{extra}"
-    if ctx["w"] == "soil":
+    if ctx.w == "soil":
         subtitle = "based on ERA5 Land Grid Point Estimates"
     mp = MapPlot(
         apctx=ctx,
         sector="state",
-        state=ctx["sector"],
+        state=ctx.sector,
         continental_color="white",
         title=title,
         subtitle=subtitle,
         nocaption=True,
     )
-    if ctx.get("p") is None and ctx.get("sday") is not None:
+    if ctx.p is None and ctx.sday is not None:
         mp.contourf(
             df2["lon"].to_numpy(),
             df2["lat"].to_numpy(),
             df2["percentile"].to_numpy(),
             np.arange(0, 101, 10),
-            cmap=ctx["cmap"],
+            cmap=ctx.cmap,
             extend="neither",
         )
         mp.plot_values(
@@ -304,7 +298,7 @@ def plotter(ctx: dict):
             levs = np.arange(
                 df2["doy"].min() - 1,
                 df2["doy"].max() + 1,
-                ctx["cint"],
+                ctx.cint,
                 dtype="i",
             )
         if popt == "contour" and (levs[-1] - levs[0]) > 5:
@@ -319,7 +313,7 @@ def plotter(ctx: dict):
                 df2["doy"],
                 levs,
                 clevlabels=levlables,
-                cmap=ctx["cmap"],
+                cmap=ctx.cmap,
             )
         mp.plot_values(
             df2["lon"], df2["lat"], df2["pdate"].values, labelbuffer=5

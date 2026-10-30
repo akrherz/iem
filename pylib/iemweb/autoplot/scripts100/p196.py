@@ -22,11 +22,16 @@ to issue Extreme Heat Warning instead of an Excessive Heat Warning.</p>
 the automated weather station resides in.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import PlotDescription, SelectArg, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "no": "Consider all Heat Index / Wind Chill Values",
@@ -40,49 +45,44 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select station:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select station:")
+    ] = "AMW"
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="Should observations be limited?")
+    ] = "no"
+    var: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Which feels like temperature to plot?"
         ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="no",
-            name="opt",
-            label="Should observations be limited?",
-        ),
-        dict(
-            type="select",
-            options=PDICT2,
-            default="heat",
-            name="var",
-            label="Which feels like temperature to plot?",
-        ),
-    ]
-    return desc
+    ] = "heat"
 
 
-def get_df(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def get_df(ctx: Params):
     """Figure out what data we need to fetch here"""
-    ctx["ugc"] = ctx["_nt"].sts[ctx["station"]]["ugc_zone"]
+    ctx["ugc"] = ctx["_nt"].sts[ctx.station]["ugc_zone"]
     ctx["s1"] = "Y"
     ctx["s2"] = "W"
-    if ctx["var"] == "heat":
+    if ctx.var == "heat":
         ctx["p1"] = "HT"
         ctx["p2"] = "EH"
         tlimit = " and issue < '2025-01-01' "
-    elif ctx["var"] == "heat25":
+    elif ctx.var == "heat25":
         ctx["p1"] = "HT"
         ctx["p2"] = "XH"
         tlimit = " and issue > '2025-01-01' "
-    elif ctx["var"] == "chill":
+    elif ctx.var == "chill":
         ctx["p1"] = "WC"
         ctx["p2"] = "WC"
         tlimit = " and issue < '2024-09-01' "
@@ -117,7 +117,7 @@ def get_df(ctx):
         )
     if events.empty:
         raise NoDataFound(f"No Alerts were found for UGC: {ctx['ugc']}")
-    thres = "tmpf > 70" if ctx["var"].startswith("heat") else "tmpf < 40"
+    thres = "tmpf > 70" if ctx.var.startswith("heat") else "tmpf < 40"
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
             sql_helper(
@@ -131,7 +131,7 @@ def get_df(ctx):
             ),
             conn,
             params={
-                "station": ctx["station"],
+                "station": ctx.station,
                 "sts": events.index.to_numpy()[0],
             },
             index_col="valid",
@@ -139,12 +139,12 @@ def get_df(ctx):
     if obs.empty:
         raise NoDataFound("No Data Found.")
     ctx["title"] = (
-        f"{ctx['_sname']} ({events.index[0]:%Y-%m-%d} "
+        f"{ctx.sname} ({events.index[0]:%Y-%m-%d} "
         f"to {obs.index[-1]:%Y-%m-%d})\n"
-        f"Frequency of NWS Headline for {ctx['ugc']} by {PDICT2[ctx['var']]}"
+        f"Frequency of NWS Headline for {ctx['ugc']} by {PDICT2[ctx.var]}"
     )
-    if ctx["opt"] == "yes":
-        if ctx["var"] == "heat":
+    if ctx.opt == "yes":
+        if ctx.var == "heat":
             obs = obs[obs["feel"] > obs["tmpf"]]
         else:
             obs = obs[obs["feel"] < obs["tmpf"]]
@@ -169,7 +169,7 @@ def get_df(ctx):
         ctx["df"][f"{vtec}%"] = ctx["df"][vtec] / ctx["df"]["Total"] * 100.0
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     get_df(ctx)
     (fig, ax) = figure_axes(apctx=ctx)
@@ -203,14 +203,14 @@ def plotter(ctx: dict):
     ax.legend(loc=(-0.03, -0.22), ncol=3)
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.grid(True)
-    _tt = "All Obs Considered" if ctx["opt"] == "no" else "Only Additive Obs"
+    _tt = "All Obs Considered" if ctx.opt == "no" else "Only Additive Obs"
     ax.set_xlabel(f"Feels Like °F, {_tt}")
     ax.set_ylabel("Frequency [%]")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_title(ctx["title"])
 
     # Clip the plot in the case of wind chill
-    if ctx["var"].startswith("chill"):
+    if ctx.var.startswith("chill"):
         vals = non[non < 100]
         if len(vals.index) > 0:
             ax.set_xlim(right=vals.index.values[-1] + 2)

@@ -15,7 +15,8 @@ to use some heuristics to associate those with an actual political
 boundary.  This fails about one percent of the time.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "NONE": "All LSR Types",
@@ -96,64 +106,55 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = utc() + timedelta(days=1)
-    jan1 = today.replace(month=1, day=1)
-    desc["arguments"] = [
-        dict(
-            type="csector",
-            default="conus",
-            name="csector",
-            label="Geographical extent to plot:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="count",
-            options=PDICT2,
-            label="Which metric to plot:",
-        ),
-        dict(
-            type="datetime",
-            name="sdate",
-            default=jan1.strftime("%Y/%m/%d 0000"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    csector: Annotated[
+        str, CSectorArg(label="Geographical extent to plot:")
+    ] = "conus"
+    var: Annotated[
+        str, SelectArg(options=PDICT2, label="Which metric to plot:")
+    ] = "count"
+    sdate: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start Date / Time (UTC, inclusive):",
             min="2002/01/01 0000",
-        ),
-        dict(
-            type="datetime",
-            name="edate",
-            default=today.strftime("%Y/%m/%d 0000"),
-            label="End Date / Time (UTC):",
-            min="2002/01/01 0000",
-            max=today.strftime("%Y/%m/%d 0000"),
-        ),
-        dict(
-            type="select",
-            name="filter",
-            default="NONE",
-            options=MDICT,
-            label="Local Storm Report Type Filter",
-        ),
-        dict(
-            type="select",
-            name="by",
-            default="wfo",
-            label="Aggregate Option:",
-            options=PDICT,
-        ),
-        dict(type="cmap", name="cmap", default="plasma", label="Color Ramp:"),
-        dict(
-            type="select",
-            options=PDICT3,
-            default="yes",
-            label="Label values on map?",
-            name="lbl",
+            default=lambda: (
+                (utc() + timedelta(days=1))
+                .replace(month=1, day=1)
+                .strftime("%Y/%m/%d 0000")
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Date / Time (UTC):",
+            min="2002/01/01 0000",
+            max=lambda: (utc() + timedelta(days=1)).strftime("%Y/%m/%d 0000"),
+            default=lambda: (utc() + timedelta(days=1)).strftime(
+                "%Y/%m/%d 0000"
+            ),
+        ),
+    ]
+    filter: Annotated[
+        str, SelectArg(options=MDICT, label="Local Storm Report Type Filter")
+    ] = "NONE"
+    by: Annotated[str, SelectArg(label="Aggregate Option:", options=PDICT)] = (
+        "wfo"
+    )
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "plasma"
+    lbl: Annotated[
+        str, SelectArg(options=PDICT3, label="Label values on map?")
+    ] = "yes"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def get_count_bins(df: pd.DataFrame, varname: str):
@@ -173,15 +174,15 @@ def get_count_bins(df: pd.DataFrame, varname: str):
     return bins
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     params = {
-        "sts": ctx["sdate"].replace(tzinfo=UTC),
-        "ets": ctx["edate"].replace(tzinfo=UTC),
+        "sts": ctx.sdate.replace(tzinfo=UTC),
+        "ets": ctx.edate.replace(tzinfo=UTC),
     }
-    varname = ctx["var"]
-    by = ctx["by"]
-    myfilter = ctx["filter"]
+    varname = ctx.var
+    by = ctx.by
+    myfilter = ctx.filter
     if myfilter == "NONE":
         tlimiter = ""
     elif myfilter == "NRS":
@@ -203,10 +204,10 @@ def plotter(ctx: dict):
         tlimiter = " and typetext = :myfilter "
         params["myfilter"] = myfilter
     state_limiter = ""
-    if len(ctx["csector"]) == 2:
+    if len(ctx.csector) == 2:
         state_limiter = " and l.state = :state "
-        params["state"] = ctx["csector"]
-    cmap = get_cmap(ctx["cmap"])
+        params["state"] = ctx.csector
+    cmap = get_cmap(ctx.cmap)
     extend = "neither"
 
     if varname == "days":
@@ -426,7 +427,7 @@ def plotter(ctx: dict):
             bins=bins,
             lblformat=lformat,
             cmap=cmap,
-            ilabel=ctx["lbl"] == "yes",
+            ilabel=ctx.lbl == "yes",
             units=units,
             extend=extend,
             labelbuffer=0,
@@ -439,7 +440,7 @@ def plotter(ctx: dict):
             bins=bins,
             lblformat=lformat,
             cmap=cmap,
-            ilabel=ctx["lbl"] == "yes",
+            ilabel=ctx.lbl == "yes",
             units=units,
             extend=extend,
             labelbuffer=1,
@@ -451,7 +452,7 @@ def plotter(ctx: dict):
             bins=bins,
             lblformat=lformat,
             cmap=cmap,
-            ilabel=ctx["lbl"] == "yes",
+            ilabel=ctx.lbl == "yes",
             units=units,
             extend=extend,
             labelbuffer=0,

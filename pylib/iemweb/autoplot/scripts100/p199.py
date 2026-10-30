@@ -3,7 +3,9 @@ This application generates maps of daily ISU
 Soil Moisture Network Data.
 """
 
+import datetime as dt
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from metpy.units import units
@@ -13,6 +15,9 @@ from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot.geoplot import MapPlot
 from pyiem.tracker import loadqc
 from pyiem.util import mm2inch
+
+from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PLOTTYPES = {
     "1": "Max/Min 4 Inch Soil Temps",
@@ -27,33 +32,34 @@ PLOTTYPES = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    ets = datetime.now().replace(minute=0)
-    sts = ets - timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="1",
-            options=PLOTTYPES,
-            label="Select Plot Type:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=sts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PLOTTYPES, label="Select Plot Type:")
+    ] = "1"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Select Date",
             min="2012/01/01",
+            default=lambda: (
+                datetime.now().replace(minute=0) - timedelta(days=1)
+            ).strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
 
 
-def plot1(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plot1(ctx: Params):
     """Daily four inch depth high/low temp."""
-    dt = datetime(ctx["date"].year, ctx["date"].month, ctx["date"].day)
+    dt = datetime(ctx.date.year, ctx.date.month, ctx.date.day)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             """
@@ -93,7 +99,7 @@ def plot1(ctx):
     return data, df
 
 
-def plot2(ctx):
+def plot2(ctx: Params):
     """Daily air high/low temp."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -104,7 +110,7 @@ def plot2(ctx):
             tair_c_min_qc is not null
         """,
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -132,7 +138,7 @@ def plot2(ctx):
     return data, df
 
 
-def plot3(ctx):
+def plot3(ctx: Params):
     """Daily air high/low temp."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -141,7 +147,7 @@ def plot3(ctx):
             valid = %s and t4_c_avg_qc is not null
         """,
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -165,7 +171,7 @@ def plot3(ctx):
     return data, df
 
 
-def plot4(ctx):
+def plot4(ctx: Params):
     """Daily rad."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -174,7 +180,7 @@ def plot4(ctx):
             valid = %s and slrkj_tot_qc is not null
         """,
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -195,14 +201,14 @@ def plot4(ctx):
     return data, df
 
 
-def plot5(ctx, col):
+def plot5(ctx: Params, col):
     """Daily ET."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             f"SELECT station, {col}_qc from sm_daily WHERE valid = %s and "
             f"{col}_qc >= 0",
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -227,7 +233,7 @@ def plot5(ctx, col):
     return data, df
 
 
-def plot7(ctx):
+def plot7(ctx: Params):
     """Daily peak wind."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -237,7 +243,7 @@ def plot7(ctx):
             valid = %s and ws_mph_max_qc is not null
         """,
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -259,14 +265,14 @@ def plot7(ctx):
     return data, df
 
 
-def plot8(ctx):
+def plot8(ctx: Params):
     """Daily peak wind."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             "SELECT station, ws_mph_qc from sm_daily WHERE valid = %s and "
             "ws_mph_qc is not null",
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -288,7 +294,7 @@ def plot8(ctx):
     return data, df
 
 
-def plot9(ctx):
+def plot9(ctx: Params):
     """Daily peak wind."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -296,7 +302,7 @@ def plot9(ctx):
             "sm_daily WHERE valid = %s and vwc24_qc is not null "
             "and station != 'FRUI4'",
             conn,
-            params=(ctx["date"],),
+            params=(ctx.date,),
             index_col="station",
         )
     if df.empty:
@@ -322,9 +328,9 @@ def plot9(ctx):
     return data, df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ctx["qc"] = loadqc(date=ctx["date"])
+    ctx["qc"] = loadqc(date=ctx.date)
     ctx["nt"] = NetworkTable("ISUSM", only_online=False)
     if not ctx["nt"].sts:
         raise NoDataFound("No station metadata found.")
@@ -337,38 +343,38 @@ def plotter(ctx: dict):
     ctx["nt"].sts["DONI4"]["lon"] += 0.05
     ctx["nt"].sts["DONI4"]["lat"] -= 0.2
 
-    if ctx["opt"] == "1":
+    if ctx.opt == "1":
         title = "ISU Soil Moisture Max/Min 4 Inch Soil Temperature"
         subtitle = "based on available hourly observations"
         data, df = plot1(ctx)
-    elif ctx["opt"] == "2":
+    elif ctx.opt == "2":
         title = "ISU Soil Moisture Max/Min Air Temperature"
         subtitle = "based on available daily summary data"
         data, df = plot2(ctx)
-    elif ctx["opt"] == "3":
+    elif ctx.opt == "3":
         title = "ISU Soil Moisture Average 4 Inch Soil Temperature"
         subtitle = "based on available daily summary data"
         data, df = plot3(ctx)
-    elif ctx["opt"] == "4":
+    elif ctx.opt == "4":
         title = "ISU Soil Moisture Solar Radiation [MJ]"
         subtitle = "based on available daily summary data"
         data, df = plot4(ctx)
-    elif ctx["opt"] == "5":
+    elif ctx.opt == "5":
         title = "ISU Soil Moisture Potential Evapotranspiration [inch]"
         subtitle = "based on available daily summary data"
         data, df = plot5(ctx, "dailyet")
-    elif ctx["opt"] == "6":
+    elif ctx.opt == "6":
         title = "ISU Soil Moisture Precipitation [inch]"
         subtitle = (
             "based on available daily summary data, liquid equiv of snow "
             "estimated"
         )
         data, df = plot5(ctx, "rain_in_tot")
-    elif ctx["opt"] == "7":
+    elif ctx.opt == "7":
         title = "ISU Soil Moisture Peak Wind Gust [MPH]"
         subtitle = "based on available daily summary data"
         data, df = plot7(ctx)
-    elif ctx["opt"] == "8":
+    elif ctx.opt == "8":
         title = "ISU Soil Moisture Average Wind Speed [MPH]"
         subtitle = "based on available daily summary data"
         data, df = plot8(ctx)
@@ -382,7 +388,7 @@ def plotter(ctx: dict):
         )
         data, df = plot9(ctx)
 
-    tle = ctx["date"].strftime("%b %-d, %Y")
+    tle = ctx.date.strftime("%b %-d, %Y")
     mp = MapPlot(
         apctx=ctx,
         sector="iowa",

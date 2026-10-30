@@ -6,6 +6,7 @@ the computation of the average nor minimum value.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -13,6 +14,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "full": "Show Full Year Totals",
@@ -20,34 +23,31 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Year to Compare:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="full",
-            label="Day Period Limit:",
-            name="limit",
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(label="Year to Compare:", default=lambda: date.today().year),
     ]
-    return desc
+    limit: Annotated[
+        str, SelectArg(options=PDICT, label="Day Period Limit:")
+    ] = "full"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
-    limit = ctx["limit"]
+    station = ctx.station
+    year = ctx.year
+    limit = ctx.limit
     limitsql = ""
     limittitle = ""
     today = date.today() - timedelta(days=1)
@@ -113,7 +113,7 @@ def plotter(ctx: dict):
     df = df.set_index("level")
 
     title = (
-        f"{ctx['_sname']} :: Max Days per Year {limittitle}\n"
+        f"{ctx.sname} :: Max Days per Year {limittitle}\n"
         "at or above given high temperature threshold"
     )
 

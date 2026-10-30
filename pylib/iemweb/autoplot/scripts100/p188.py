@@ -11,6 +11,7 @@ high reached 60+ degrees until the end of each year.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -18,6 +19,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "spring": "Min Temp after first Spring Temp above",
@@ -25,47 +33,45 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            options=PDICT,
-            default="fall",
-            label="Which metric to compute",
-            name="var",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which metric to compute")
+    ] = "fall"
+    thres: Annotated[
+        int,
+        IntArg(
+            label="Temperature Threshold (°F) for initial date of exceedence"
         ),
-        dict(
-            type="int",
-            name="thres",
-            default=32,
-            label="Temperature Threshold (°F) for initial date of exceedence",
-        ),
-        dict(
-            type="int",
-            name="thres2",
-            default=60,
-            label="Temperature Threshold (°F) to count days above/below",
-        ),
-        dict(
-            type="year",
-            default=today.year,
-            name="year",
+    ] = 32
+    thres2: Annotated[
+        int,
+        IntArg(label="Temperature Threshold (°F) to count days above/below"),
+    ] = 60
+    year: Annotated[
+        int,
+        YearArg(
             label="Year to Highlight in Chart",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
-    thres = ctx["thres"]
-    thres2 = ctx["thres2"]
+    station = ctx.station
+    varname = ctx.var
+    thres = ctx.thres
+    thres2 = ctx.thres2
     if varname == "fall":
         sql = """
         WITH doy as (
@@ -119,10 +125,10 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df2 = None
-    if ctx["year"] in df.index:
-        df2 = df.loc[ctx["year"]]
+    if ctx.year in df.index:
+        df2 = df.loc[ctx.year]
     title = (
-        f"{ctx['_sname']} :: {PDICT[varname]}\n"
+        f"{ctx.sname} :: {PDICT[varname]}\n"
         f"{title} ({df.index.min():.0f}-{df.index.max():.0f})"
     )
     fig = figure(apctx=ctx, title=title)
@@ -133,7 +139,7 @@ def plotter(ctx: dict):
 
     ax.bar(df.index.values, df["peak_value"], zorder=1)
     if df2 is not None:
-        ax.bar(ctx["year"], df2["peak_value"], color="red", zorder=2)
+        ax.bar(ctx.year, df2["peak_value"], color="red", zorder=2)
     ax.grid(True)
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylim(df["peak_value"].min() - 5, df["peak_value"].max() + 5)
@@ -153,7 +159,7 @@ def plotter(ctx: dict):
 
     ax3.bar(df.index.values, df["count_days"], zorder=1)
     if df2 is not None:
-        ax3.bar(ctx["year"], df2["count_days"], zorder=2, color="red")
+        ax3.bar(ctx.year, df2["count_days"], zorder=2, color="red")
     ax3.grid(True)
     tt = "above" if varname == "fall" else "below"
     tt2 = "High" if varname == "fall" else "low"
@@ -168,7 +174,7 @@ def plotter(ctx: dict):
     val = f"{df2['count_days']:.0f}" if df2 is not None else "M"
     ax3.set_xlabel(
         f"{len(df[df['count_days'] == 0].index):.0f} years with 0 days, "
-        f"{ctx['year']} = {val}"
+        f"{ctx.year} = {val}"
     )
 
     return fig, df

@@ -11,6 +11,7 @@ date.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -19,102 +20,106 @@ from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value
 
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
 UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="select",
-            name="units",
-            default="mph",
-            options=UNITS,
-            label="Units of Average Wind Speed",
-        ),
-        dict(
-            type="text",
-            name="p1",
-            optional=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    units: Annotated[
+        str, SelectArg(options=UNITS, label="Units of Average Wind Speed")
+    ] = "mph"
+    p1: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0501-0510",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="text",
-            name="p2",
-            optional=True,
+    ] = None
+    p2: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0511-0520",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="text",
-            name="p3",
-            optional=True,
+    ] = None
+    p3: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0521-0530",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="text",
-            name="p4",
-            optional=True,
+    ] = None
+    p4: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0601-0610",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="text",
-            name="p5",
-            optional=True,
+    ] = None
+    p5: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0611-0620",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="text",
-            name="p6",
-            optional=True,
+    ] = None
+    p6: Annotated[
+        str | None,
+        TextArg(
+            label="Optional. Average for inclusive period of days",
             default="0621-0630",
-            label="Optional. Average for inclusive period of days",
         ),
-        dict(
-            type="year",
-            name="y1",
-            optional=True,
-            default=1973,
+    ] = None
+    y1: Annotated[
+        int | None,
+        YearArg(
             label="Optional. Limit Period of Record to inclusive start year",
+            default=1973,
         ),
-        dict(
-            type="year",
-            name="y2",
-            optional=True,
-            default=today.year,
+    ] = None
+    y2: Annotated[
+        int | None,
+        YearArg(
             label="Optional. Limit Period of Record to inclusive end year",
+            default=lambda: date.today().year,
         ),
-    ]
-    return desc
+    ] = None
 
 
-def add_context(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def add_context(ctx: Params):
     """get context for both output types"""
-    station = ctx["zstation"]
+    station = ctx.zstation
     ctx["station"] = station
-    units = ctx["units"]
-    p1 = ctx.get("p1")
-    p2 = ctx.get("p2")
-    p3 = ctx.get("p3")
-    p4 = ctx.get("p4")
-    p5 = ctx.get("p5")
-    p6 = ctx.get("p6")
-    y1 = ctx.get("y1")
-    y2 = ctx.get("y2")
+    units = ctx.units
+    p1 = ctx.p1
+    p2 = ctx.p2
+    p3 = ctx.p3
+    p4 = ctx.p4
+    p5 = ctx.p5
+    p6 = ctx.p6
+    y1 = ctx.y1
+    y2 = ctx.y2
 
     ylimiter = ""
     if y1 is not None and y2 is not None:
@@ -204,16 +209,16 @@ def add_context(ctx):
     ctx["xlabel"] = ("Hour of Day (timezone: %s)") % (
         ctx["_nt"].sts[station]["tzname"],
     )
-    ctx["title"] = f"{ctx['_sname']} [{y1}-{y2}]"
+    ctx["title"] = f"{ctx.sname} [{y1}-{y2}]"
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """highcharts output"""
     add_context(ctx)
     lines = []
     dash_styles = ["Solid", "ShortDash"]
     for month, df2 in ctx["df"].groupby("month"):
-        v = df2[["hour", f"avg_{ctx['units']}"]].to_json(orient="values")
+        v = df2[["hour", f"avg_{ctx.units}"]].to_json(orient="values")
         lines.append(
             f"""
 {{
@@ -254,7 +259,7 @@ Highcharts.chart('{containername}', {{
 """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
     (fig, ax) = figure_axes(
@@ -279,7 +284,7 @@ def plotter(ctx: dict):
     for month, df2 in ctx["df"].groupby("month"):
         ax.plot(
             df2["hour"].values,
-            df2["avg_%s" % (ctx["units"],)],
+            df2["avg_%s" % (ctx.units,)],
             label=ctx["labels"][month],
             lw=2,
             color=colors[month],
