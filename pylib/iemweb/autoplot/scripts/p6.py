@@ -9,6 +9,7 @@ representing the given percentile.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from scipy.stats import norm
+
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "sum-precip": "Total Precipitation [inch]",
@@ -32,47 +42,42 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Year to highlight:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    year: Annotated[
+        int,
+        YearArg(label="Year to highlight:", default=lambda: date.today().year),
+    ]
+    syear: Annotated[
+        int,
+        YearArg(
+            label="Inclusive start year (if data exists) to use in plot",
+            min=1850,
         ),
-        {
-            "type": "year",
-            "name": "syear",
-            "label": "Inclusive start year (if data exists) to use in plot",
-            "min": 1850,
-            "default": 1850,
-        },
-        {
-            "type": "year",
-            "name": "eyear",
-            "label": "Inclusive end year (if data exists) to use in plot",
-            "min": 1850,
-            "default": today.year,
-        },
-        dict(
-            type="month",
-            name="month",
-            default=today.month,
-            label="Select Month",
-        ),
-        dict(
-            type="select",
-            name="type",
-            default="sum-precip",
-            label="Which metric to plot?",
-            options=PDICT,
+    ] = 1850
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="Inclusive end year (if data exists) to use in plot",
+            min=1850,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    month: Annotated[
+        int, MonthArg(label="Select Month", default=lambda: date.today().month)
+    ]
+    type: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "sum-precip"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def add_percentile_table(
@@ -116,12 +121,12 @@ def add_percentile_table(
     ax.axis("off")
 
 
-def plotter(ctx: dict) -> tuple:
+def plotter(ctx: Params) -> tuple:
     """Go"""
-    state = ctx["state"]
-    year = ctx["year"]
-    month = ctx["month"]
-    plotvar: str = ctx["type"]
+    state = ctx.state
+    year = ctx.year
+    month = ctx.month
+    plotvar: str = ctx.type
 
     with get_sqlalchemy_conn("coop") as conn:
         # Generate dataframe of yearly observed values for the given month
@@ -149,8 +154,8 @@ def plotter(ctx: dict) -> tuple:
             conn,
             params={
                 "month": month,
-                "syear": ctx["syear"],
-                "eyear": ctx["eyear"],
+                "syear": ctx.syear,
+                "eyear": ctx.eyear,
             },
             index_col=None,
         )

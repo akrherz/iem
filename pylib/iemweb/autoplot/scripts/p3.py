@@ -29,6 +29,7 @@ values would only have one year included!</p>
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -37,6 +38,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "max-high": "Maximum High",
@@ -91,61 +99,56 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="month",
-            default=today.month,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[
+        int | str,
+        SelectArg(
             label="Month/Season",
             options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="type",
-            default="max-high",
-            label="Which metric to plot?",
-            options=PDICT,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default="-99",
-            label="Threshold (optional, specify when appropriate):",
-        ),
-        dict(
-            type="year",
-            default=1850,
-            label="Potential Minimum Year (inclusive) to use in plot:",
-            name="syear",
-            min=1850,
-        ),
-        dict(
-            type="year",
-            default=today.year,
-            label="Potential Maximum Year (inclusive) to use in plot:",
-            name="eyear",
-            min=1850,
-        ),
-        dict(
-            type="select",
-            options=PDICT2,
-            name="decadal",
-            default="no",
-            label="Aggregate plot by decades:",
+            default=lambda: date.today().month,
         ),
     ]
-    return desc
+    type: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "max-high"
+    threshold: Annotated[
+        float,
+        FloatArg(label="Threshold (optional, specify when appropriate):"),
+    ] = -99.0
+    syear: Annotated[
+        int,
+        YearArg(
+            label="Potential Minimum Year (inclusive) to use in plot:",
+            min=1850,
+        ),
+    ] = 1850
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="Potential Maximum Year (inclusive) to use in plot:",
+            min=1850,
+            default=lambda: date.today().year,
+        ),
+    ]
+    decadal: Annotated[
+        str, SelectArg(options=PDICT2, label="Aggregate plot by decades:")
+    ] = "no"
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_highcharts(ctx: Params) -> str:
     """Go high charts"""
     add_ctx(ctx)
-    ptinterval = "10" if ctx["decadal"] else "1"
+    ptinterval = "10" if ctx.decadal else "1"
     containername = ctx["_e"]
     return f"""
 Highcharts.chart('{containername}', {{
@@ -169,10 +172,10 @@ Highcharts.chart('{containername}', {{
         }}, {{
         tooltip: {{valueDecimals: 2}},
         name: '30 Year Trailing Avg',
-    pointStart: {ctx["df"].index.min() + (3 if ctx["decadal"] else 30)},
+    pointStart: {ctx["df"].index.min() + (3 if ctx.decadal else 30)},
     pointInterval: {ptinterval},
     width: 2,
-    data: {ctx["tavg"][(3 if ctx["decadal"] else 30) :]}
+    data: {ctx["tavg"][(3 if ctx.decadal else 30) :]}
         }},{{
             tooltip: {{
                 valueDecimals: 2
@@ -188,16 +191,16 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def add_ctx(ctx: dict):
+def add_ctx(ctx: Params):
     """Get the context"""
-    ctx["decadal"] = ctx.get("decadal") == "yes"
+    ctx.decadal = ctx.decadal == "yes"
     # Lower the start year if decadal
-    if ctx["decadal"]:
-        ctx["syear"] -= ctx["syear"] % 10
-    station = ctx["station"]
-    month = ctx["month"]
-    ptype = ctx["type"]
-    threshold = ctx["threshold"]
+    if ctx.decadal:
+        ctx.syear -= ctx.syear % 10
+    station = ctx.station
+    month = ctx.month
+    ptype = ctx.type
+    threshold = ctx.threshold
 
     lag = "0 days"
     if month == "fall":
@@ -220,7 +223,7 @@ def add_ctx(ctx: dict):
         months = [int(month)]
         label = calendar.month_name[int(month)]
 
-    decagg = 10 if ctx["decadal"] else 1
+    decagg = 10 if ctx.decadal else 1
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -292,14 +295,14 @@ def add_ctx(ctx: dict):
                 "station": station,
                 "months": months,
                 "t": threshold,
-                "syear": ctx["syear"],
-                "eyear": ctx["eyear"],
+                "syear": ctx.syear,
+                "eyear": ctx.eyear,
             },
             index_col="myyear",
         )
     if df.empty:
         raise NoDataFound("No data was found for query")
-    if ctx["decadal"]:
+    if ctx.decadal:
         df.index = df.index * 10
         # Need to fix the sum() operations above
         for colname in [
@@ -334,7 +337,7 @@ def add_ctx(ctx: dict):
     tavg = [None] * 30
     for i in range(30, len(data)):
         tavg.append(float(np.average(data[i - 30 : i])))
-    if ctx["decadal"]:
+    if ctx.decadal:
         tavg = [None] * 3
         for i in range(3, len(data)):
             tavg.append(float(np.average(data[i - 3 : i])))
@@ -343,10 +346,10 @@ def add_ctx(ctx: dict):
     # End interval is inclusive
     ctx["a1991_2020"] = df.loc[1991:2020, ptype].mean()
     ctx["ptype"] = ptype
-    ctx["station"] = station
-    ctx["threshold"] = threshold
-    ctx["month"] = month
-    ctx["title"] = f"{ctx['_sname']} {df.index.min()}-{df.index.max()}"
+    ctx.station = station
+    ctx.threshold = threshold
+    ctx.month = month
+    ctx["title"] = f"{ctx.sname} {df.index.min()}-{df.index.max()}"
     ctx["subtitle"] = f"{label} {PDICT[ptype]}"
     if ptype.find("days") == 0 and ptype.find("avg") == -1:
         ctx["subtitle"] += f" ({threshold})"
@@ -360,7 +363,7 @@ def add_ctx(ctx: dict):
     return ctx
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
 
@@ -383,7 +386,7 @@ def plotter(ctx: dict):
         ctx["data"],
         color=colorabove,
         align="edge",
-        width=9 if ctx["decadal"] else 1,
+        width=9 if ctx.decadal else 1,
     )
     for i, mybar in enumerate(bars):
         if ctx["data"][i] < ctx["avgv"]:
@@ -406,7 +409,7 @@ def plotter(ctx: dict):
         )
     ax.set_xlim(
         ctx["df"].index.min() - 1,
-        ctx["df"].index.max() + (11 if ctx["decadal"] else 1),
+        ctx["df"].index.max() + (11 if ctx.decadal else 1),
     )
     if ctx["ptype"].find("precip") == -1 and ctx["ptype"].find("days") == -1:
         ax.set_ylim(min(ctx["data"]) - 5, max(ctx["data"]) + 5)
@@ -417,7 +420,7 @@ def plotter(ctx: dict):
     ax.legend(ncol=3, loc="best", fontsize=10)
 
     # Print out the top 10 years and bottom 10 years
-    if not ctx["decadal"]:
+    if not ctx.decadal:
         label = "Top 10 Years"
         for idx, row in (
             ctx["df"]
@@ -425,7 +428,7 @@ def plotter(ctx: dict):
             .head(10)
             .iterrows()
         ):
-            yr = f"{idx - 1}-{idx}" if ctx["month"] == "winter" else f"{idx}"
+            yr = f"{idx - 1}-{idx}" if ctx.month == "winter" else f"{idx}"
             label += f"\n{yr}: {precision % row[ctx['ptype']]}"
         fig.text(
             0.81,
@@ -441,7 +444,7 @@ def plotter(ctx: dict):
             .head(10)
             .iterrows()
         ):
-            yr = f"{idx - 1}-{idx}" if ctx["month"] == "winter" else f"{idx}"
+            yr = f"{idx - 1}-{idx}" if ctx.month == "winter" else f"{idx}"
             label += f"\n{yr}: {precision % row[ctx['ptype']]}"
         fig.text(
             0.81,

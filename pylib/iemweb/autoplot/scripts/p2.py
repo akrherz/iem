@@ -6,12 +6,23 @@ highlight any years with a combined sigma distance of 2.5.
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
+
+from iemweb.autoplot.description import (
+    IntArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    StationArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "total_precip": "Precipitation (inch)",
@@ -42,82 +53,59 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.now()
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
-        dict(type="month", name="month", default=today.month, label="Month"),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Year to Highlight",
-        ),
-        dict(
-            type="int",
-            default=50,
-            name="gddbase",
-            label="Growing Degree Day base (°F)",
-        ),
-        dict(
-            type="int",
-            default=86,
-            name="gddceil",
-            label="Growing Degree Day ceiling (°F)",
-        ),
-        {
-            "type": "select",
-            "name": "xvar",
-            "label": "X-axis Variable",
-            "options": PDICT,
-            "default": "gdd",
-        },
-        {
-            "type": "select",
-            "name": "xagg",
-            "label": "X-axis Statistic",
-            "options": PDICT2,
-            "default": "sigma",
-        },
-        {
-            "type": "select",
-            "name": "yvar",
-            "label": "Y-axis Variable",
-            "options": PDICT,
-            "default": "total_precip",
-        },
-        {
-            "type": "select",
-            "name": "yagg",
-            "label": "Y-axis Statistic",
-            "options": PDICT2,
-            "default": "sigma",
-        },
-        {
-            "type": "int",
-            "min": 1,
-            "max": 31,
-            "default": 25,
-            "name": "quorum",
-            "label": "Days with data for a month to be included in plot.",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, StationArg(label="Select Station", network="IACLIMATE")
+    ] = "IA0000"
+    month: Annotated[
+        int, MonthArg(label="Month", default=lambda: datetime.now().month)
     ]
-    return desc
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to Highlight", default=lambda: datetime.now().year
+        ),
+    ]
+    gddbase: Annotated[int, IntArg(label="Growing Degree Day base (°F)")] = 50
+    gddceil: Annotated[
+        int, IntArg(label="Growing Degree Day ceiling (°F)")
+    ] = 86
+    xvar: Annotated[str, SelectArg(label="X-axis Variable", options=PDICT)] = (
+        "gdd"
+    )
+    xagg: Annotated[
+        str, SelectArg(label="X-axis Statistic", options=PDICT2)
+    ] = "sigma"
+    yvar: Annotated[str, SelectArg(label="Y-axis Variable", options=PDICT)] = (
+        "total_precip"
+    )
+    yagg: Annotated[
+        str, SelectArg(label="Y-axis Statistic", options=PDICT2)
+    ] = "sigma"
+    quorum: Annotated[
+        int,
+        IntArg(
+            min=1,
+            max=31,
+            label="Days with data for a month to be included in plot.",
+        ),
+    ] = 25
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
-    year = ctx["year"]
+    station = ctx.station
+    month = ctx.month
+    year = ctx.year
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -133,20 +121,20 @@ def plotter(ctx: dict):
     from alldata WHERE station = :station and month = :month
     and {reqvar1} is not null and {reqvar2} is not null GROUP by year
             """,
-                reqvar1=REQ_VAR[ctx["xvar"]],
-                reqvar2=REQ_VAR[ctx["yvar"]],
+                reqvar1=REQ_VAR[ctx.xvar],
+                reqvar2=REQ_VAR[ctx.yvar],
             ),
             conn,
             params={
-                "gddbase": ctx["gddbase"],
-                "gddceil": ctx["gddceil"],
+                "gddbase": ctx.gddbase,
+                "gddceil": ctx.gddceil,
                 "station": station,
                 "month": month,
             },
             index_col="year",
         )
     # Require a quorum
-    df = df[df["days"] >= ctx["quorum"]]
+    df = df[df["days"] >= ctx.quorum]
     if len(df.index) < 3:
         raise NoDataFound("ERROR: No Data Found")
 
@@ -156,16 +144,8 @@ def plotter(ctx: dict):
         df[f"{varname}_sigma"] = (df[varname] - vstats["mean"]) / vstats["std"]
         df[f"{varname}_departure"] = df[varname] - vstats["mean"]
 
-    xvar = (
-        ctx["xvar"]
-        if ctx["xagg"] == "value"
-        else f"{ctx['xvar']}_{ctx['xagg']}"
-    )
-    yvar = (
-        ctx["yvar"]
-        if ctx["yagg"] == "value"
-        else f"{ctx['yvar']}_{ctx['yagg']}"
-    )
+    xvar = ctx.xvar if ctx.xagg == "value" else f"{ctx.xvar}_{ctx.xagg}"
+    yvar = ctx.yvar if ctx.yagg == "value" else f"{ctx.yvar}_{ctx.yagg}"
 
     h_slope, intercept, r_value, _, _ = stats.linregress(
         df[xvar].to_numpy(), df[yvar].to_numpy()
@@ -173,10 +153,10 @@ def plotter(ctx: dict):
 
     y1 = df[xvar].min() * h_slope + intercept
     y2 = df[xvar].max() * h_slope + intercept
-    title = f"{ctx['_sname']} :: For Month of {calendar.month_name[month]}"
+    title = f"{ctx.sname} :: For Month of {calendar.month_name[month]}"
     subtitle = (
-        f"X: {PDICT[ctx['xvar']]} ({PDICT2[ctx['xagg']]})"
-        f" Y: {PDICT[ctx['yvar']]} ({PDICT2[ctx['yagg']]})"
+        f"X: {PDICT[ctx.xvar]} ({PDICT2[ctx.xagg]})"
+        f" Y: {PDICT[ctx.yvar]} ({PDICT2[ctx.yagg]})"
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.set_position([0.1, 0.12, 0.8, 0.78])
@@ -190,7 +170,7 @@ def plotter(ctx: dict):
 
     # Find interesting values to label
     df["distance"] = (
-        df[f"{ctx['xvar']}_sigma"] ** 2 + df[f"{ctx['yvar']}_sigma"] ** 2
+        df[f"{ctx.xvar}_sigma"] ** 2 + df[f"{ctx.yvar}_sigma"] ** 2
     ) ** 0.5
     events = df.query(f"distance > 2.5 or year == {year:.0f}")
     for _year, row in events.iterrows():
@@ -209,15 +189,15 @@ def plotter(ctx: dict):
             )
 
     # Ensure the axes are balanced for non-value plots
-    if ctx["xagg"] != "value" and not df[xvar].isna().all():
+    if ctx.xagg != "value" and not df[xvar].isna().all():
         xmax = df[xvar].abs().max() + 0.25
         ax.set_xlim(0 - xmax, xmax)
-    if ctx["yagg"] != "value" and not df[yvar].isna().all():
+    if ctx.yagg != "value" and not df[yvar].isna().all():
         ymax = df[yvar].abs().max() + 0.25
         ax.set_ylim(0 - ymax, ymax)
 
-    ax.set_xlabel(f"{PDICT[ctx['xvar']]} ({PDICT2[ctx['xagg']]})")
-    ax.set_ylabel(f"{PDICT[ctx['yvar']]} ({PDICT2[ctx['yagg']]})")
+    ax.set_xlabel(f"{PDICT[ctx.xvar]} ({PDICT2[ctx.xagg]})")
+    ax.set_ylabel(f"{PDICT[ctx.yvar]} ({PDICT2[ctx.yagg]})")
     ax.grid(True)
     ax.legend(loc="best", ncol=2, fontsize=10)
 

@@ -7,12 +7,22 @@ variable.
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "below": "Daily Range Below Emphasis",
@@ -29,58 +39,46 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.now()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="year",
-            min=1900,
-            name="year",
-            default=today.year,
-            label="Select Year:",
-        ),
-        dict(
-            type="int",
-            name="emphasis",
-            default="-99",
-            label=(
-                "Temperature(°F) or RH(%) Line of Emphasis (-99 disables):"
-            ),
-        ),
-        dict(
-            type="select",
-            name="var",
-            label="Which variable to plot?",
-            default="dwpf",
-            options=PDICT2,
-        ),
-        dict(
-            type="select",
-            name="opt",
-            label="Option for Highlighting",
-            default="touches",
-            options=PDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    year: Annotated[
+        int,
+        YearArg(
+            min=1900, label="Select Year:", default=lambda: datetime.now().year
         ),
     ]
-    return desc
+    emphasis: Annotated[
+        int,
+        IntArg(
+            label="Temperature(°F) or RH(%) Line of Emphasis (-99 disables):"
+        ),
+    ] = -99
+    var: Annotated[
+        str, SelectArg(label="Which variable to plot?", options=PDICT2)
+    ] = "dwpf"
+    opt: Annotated[
+        str, SelectArg(label="Option for Highlighting", options=PDICT)
+    ] = "touches"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    emphasis = ctx["emphasis"]
-    opt = ctx["opt"]
-    varname = ctx["var"]
+    station = ctx.zstation
+    year = ctx.year
+    emphasis = ctx.emphasis
+    opt = ctx.opt
+    varname = ctx.var
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -106,7 +104,7 @@ def plotter(ctx: dict):
     minval = df[f"min_{varname}"].min()
     maxval = df[f"max_{varname}"].max()
     title = (
-        f"{ctx['_sname']}:: {year} "
+        f"{ctx.sname}:: {year} "
         f"Daily Min/Max {PDICT2[varname]}\n"
         f"Period: {df.index.values[0]:%-d %B} to {df.index.values[-1]:%-d %B}"
         f" , Min: {minval:.0f} Max: {maxval:.0f}"

@@ -12,6 +12,7 @@ for more details.
 
 from calendar import month_abbr
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -19,27 +20,31 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=date.today().year,
-            label="Year to Highlight",
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(label="Year to Highlight", default=lambda: date.today().year),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
+    station = ctx.station
+    year = ctx.year
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -69,7 +74,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
     df["largest_change"] = df["largest_change"] * -1
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         "Max 1 Aug till 30 Jun Low Temp Drop Exceeding "
         "Previous Min Low for Season"
     )

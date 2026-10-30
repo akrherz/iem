@@ -8,6 +8,7 @@ highest frequency.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 
 from iemweb.autoplot import ARG_STATION, get_monofont
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -39,56 +49,49 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="binsize",
-            default=1,
-            label="Histogram Bin Size:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    binsize: Annotated[int, IntArg(label="Histogram Bin Size:")] = 1
+    x: Annotated[
+        str | None,
+        TextArg(
+            label="X-Axis Limits [min max] (optional):", default="-60 130"
         ),
-        {
-            "type": "text",
-            "name": "x",
-            "default": "-60 130",
-            "label": "X-Axis Limits [min max] (optional):",
-            "optional": True,
-        },
-        {
-            "type": "text",
-            "name": "y",
-            "default": "-60 130",
-            "label": "Y-Axis Limits [min max] (optional):",
-            "optional": True,
-        },
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+    ] = None
+    y: Annotated[
+        str | None,
+        TextArg(
+            label="Y-Axis Limits [min max] (optional):", default="-60 130"
         ),
-        dict(
-            type="year",
-            optional=True,
-            default=date.today().year,
+    ] = None
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    year: Annotated[
+        int | None,
+        YearArg(
             label="Optional: Overlay Observations for given year",
-            name="year",
+            default=lambda: date.today().year,
         ),
-        dict(type="cmap", name="cmap", default="Blues", label="Color Ramp:"),
-    ]
-    return desc
+    ] = None
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Blues"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    binsize = ctx["binsize"]
-    month = ctx["month"]
-    year = ctx.get("year")
+    station = ctx.station
+    binsize = ctx.binsize
+    month = ctx.month
+    year = ctx.year
     with get_sqlalchemy_conn("coop") as conn:
         ddf = pd.read_sql(
             sql_helper(
@@ -124,9 +127,7 @@ def plotter(ctx: dict):
         "Daily High vs Low Temperature Histogram + Range between Low + High "
         f"(month={month.upper()})"
     )
-    title = (
-        f"{ctx['_sname']} ({ddf['year'].min():.0f}-{ddf['year'].max():.0f})"
-    )
+    title = f"{ctx.sname} ({ddf['year'].min():.0f}-{ddf['year'].max():.0f})"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     kax = fig.add_axes((0.65, 0.5, 0.3, 0.36))
     kax.grid(True)
@@ -177,7 +178,7 @@ def plotter(ctx: dict):
         fig.text(xpos, ypos, label, fontproperties=monofont)
 
     ax = fig.add_axes((0.07, 0.17, 0.5, 0.73))
-    res = ax.pcolormesh(xedges, yedges, hist.T, cmap=get_cmap(ctx["cmap"]))
+    res = ax.pcolormesh(xedges, yedges, hist.T, cmap=get_cmap(ctx.cmap))
     cax = fig.add_axes((0.07, 0.08, 0.5, 0.01))
     fig.colorbar(res, label="Days per Year", orientation="horizontal", cax=cax)
     ax.grid(True)
@@ -257,9 +258,9 @@ def plotter(ctx: dict):
         )
         ax.legend(loc=2)
 
-    if ctx.get("x"):
-        ax.set_xlim(*[float(x) for x in ctx["x"].split()])
-    if ctx.get("y"):
-        ax.set_ylim(*[float(y) for y in ctx["y"].split()])
+    if ctx.x:
+        ax.set_xlim(*[float(x) for x in ctx.x.split()])
+    if ctx.y:
+        ax.set_ylim(*[float(y) for y in ctx.y.split()])
 
     return fig, df

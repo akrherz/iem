@@ -5,6 +5,7 @@ the user.  The colors represent the number of days for the period shown.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
@@ -16,61 +17,59 @@ from pyiem.plot import figure, get_cmap
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    year = today.year if today.month > 5 else today.year - 1
-    desc["gallery"] = {
-        "year": 2023,
-    }
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(
             label="Select Year",
             min=1893,
+            default=lambda: (
+                date.today().year
+                if date.today().month > 5
+                else date.today().year - 1
+            ),
         ),
-        dict(
-            type="int",
-            name="gdd1",
-            default="1135",
-            label="Growing Degree Day Start",
-        ),
-        dict(
-            type="int",
-            name="gdd2",
-            default="1660",
-            label="Growing Degree Day End",
-        ),
-        dict(
-            type="int",
-            default=50,
-            name="gddbase",
-            label="Growing Degree Day base (°F)",
-        ),
-        dict(
-            type="int",
-            default=86,
-            name="gddceil",
-            label="Growing Degree Day ceiling (°F)",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
-    return desc
+    gdd1: Annotated[int, IntArg(label="Growing Degree Day Start")] = 1135
+    gdd2: Annotated[int, IntArg(label="Growing Degree Day End")] = 1660
+    gddbase: Annotated[int, IntArg(label="Growing Degree Day base (°F)")] = 50
+    gddceil: Annotated[
+        int, IntArg(label="Growing Degree Day ceiling (°F)")
+    ] = 86
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        gallery={
+            "year": 2023,
+        },
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
-    gdd1 = ctx["gdd1"]
-    gdd2 = ctx["gdd2"]
+    station = ctx.station
+    year = ctx.year
+    gdd1 = ctx.gdd1
+    gdd2 = ctx.gdd2
 
     res = conn.execute(
         sql_helper(
@@ -79,8 +78,8 @@ def plotter(ctx: dict, conn: Connection | None = None):
             "ORDER by day ASC"
         ),
         {
-            "base": ctx["gddbase"],
-            "ceil": ctx["gddceil"],
+            "base": ctx.gddbase,
+            "ceil": ctx.gddceil,
             "year": year,
             "st": station,
         },
@@ -142,15 +141,15 @@ def plotter(ctx: dict, conn: Connection | None = None):
     success = np.array(success)
     starts = np.array(starts)
 
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     bmin = min(heights[success]) - 1
     bmax = max(heights[success]) + 1
     bins = np.arange(bmin, bmax + 1.1)
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
     title = (
-        f"{ctx['_sname']} :: {year} GDD "
-        f"[base={ctx['gddbase']},ceil={ctx['gddceil']}]\n"
+        f"{ctx.sname} :: {year} GDD "
+        f"[base={ctx.gddbase},ceil={ctx.gddceil}]\n"
         f"Period between GDD {gdd1} and {gdd2}, gray bars incomplete"
     )
     fig = figure(apctx=ctx, title=title)

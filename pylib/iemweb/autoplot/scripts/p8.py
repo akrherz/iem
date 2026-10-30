@@ -8,6 +8,7 @@ precipitation for a period of your choice.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,38 +17,43 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    y2 = date.today().year
-    y1 = y2 - 20
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(type="year", name="syear", default=y1, label="Enter Start Year:"),
-        dict(
-            type="year",
-            name="eyear",
-            default=y2,
-            label="Enter End Year (inclusive):",
-        ),
-        dict(
-            type="int",
-            name="threshold",
-            default="80",
-            label="Threshold Percentage [%]:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    syear: Annotated[
+        int,
+        YearArg(
+            label="Enter Start Year:", default=lambda: date.today().year - 20
         ),
     ]
-    return desc
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="Enter End Year (inclusive):",
+            default=lambda: date.today().year,
+        ),
+    ]
+    threshold: Annotated[int, IntArg(label="Threshold Percentage [%]:")] = 80
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    syear = ctx["syear"]
-    eyear = ctx["eyear"]
-    threshold = ctx["threshold"]
+    station = ctx.station
+    syear = ctx.syear
+    eyear = ctx.eyear
+    threshold = ctx.threshold
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -78,7 +84,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Failed to find any data.")
     df["freq"] = df["hits"] / df["total"] * 100.0
 
-    title = f"{ctx['_sname']} :: Monthly Precipitation Reliability"
+    title = f"{ctx.sname} :: Monthly Precipitation Reliability"
     subtitle = (
         f"Period: {syear}-{eyear}, % of Months above {threshold}% "
         "of Long Term Avg"

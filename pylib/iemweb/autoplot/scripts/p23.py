@@ -4,6 +4,7 @@ temperature or precipitation departures and El Nino index values.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avg_high": "Average High Temperature [°F]",
@@ -23,42 +31,37 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    year = date.today().year - 7
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="syear",
-            default=year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    syear: Annotated[
+        int,
+        YearArg(
             label="Start Year of Plot",
             min=1950,
-        ),
-        dict(
-            type="int",
-            name="years",
-            default="8",
-            label="Number of Years to Plot",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="avg_temp",
-            label="Which Monthly Variable to plot?",
-            options=PDICT,
+            default=lambda: date.today().year - 7,
         ),
     ]
-    return desc
+    years: Annotated[int, IntArg(label="Number of Years to Plot")] = 8
+    var: Annotated[
+        str, SelectArg(label="Which Monthly Variable to plot?", options=PDICT)
+    ] = "avg_temp"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    syear = ctx["syear"]
-    years = ctx["years"]
-    varname = ctx["var"]
+    station = ctx.station
+    syear = ctx.syear
+    years = ctx.years
+    varname = ctx.var
 
     sts = datetime(syear, 1, 1)
     ets = datetime(syear + years, 1, 1)
@@ -122,7 +125,7 @@ def plotter(ctx: dict):
     df["nino34"] = ndf["anom_34"]
 
     title = (
-        f"{ctx['_sname']}:: Monthly Departure of {PDICT.get(varname)} "
+        f"{ctx.sname}:: Monthly Departure of {PDICT.get(varname)} "
         "+ Niño 3.4 Index\n"
         "Climatology computed from present day period of record"
     )

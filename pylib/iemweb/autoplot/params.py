@@ -67,3 +67,16 @@ class AutoplotParams(BaseModel):
     def get(self, key: str, default: Any = None) -> Any:
         """Dict style read with a default."""
         return self[key] if key in self else default
+
+    def pop(self, key: str, *default: Any) -> Any:
+        """Dict style pop, the key is no longer seen by ``get``."""
+        if key not in self:
+            if default:
+                return default[0]
+            raise KeyError(key)
+        value = self[key]
+        if (name := self._field_name(key)) is not None:
+            self.model_fields_set.discard(name)
+        else:
+            (self.model_extra or {}).pop(key, None)
+        return value

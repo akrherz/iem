@@ -7,6 +7,7 @@ second threshold.
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,28 +17,30 @@ from pyiem.plot import figure_axes
 from scipy.stats import linregress
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int", name="t1", default=32, label="Temperature Threshold 1:"
-        ),
-        dict(
-            type="int", name="t2", default=29, label="Temperature Threshold 2:"
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    t1: Annotated[int, IntArg(label="Temperature Threshold 1:")] = 32
+    t2: Annotated[int, IntArg(label="Temperature Threshold 2:")] = 29
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    t1 = ctx["t1"]
-    t2 = ctx["t2"]
+    station = ctx.station
+    t1 = ctx.t1
+    t2 = ctx.t2
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
@@ -72,7 +75,7 @@ def plotter(ctx: dict):
             fmt = "%b %-d" if ts.day == 1 else "%-d"
             xticklabels.append(ts.strftime(fmt))
 
-    title = f"{ctx['_sname']}\nFirst Fall Temperature Occurences"
+    title = f"{ctx.sname}\nFirst Fall Temperature Occurences"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)

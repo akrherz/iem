@@ -8,6 +8,7 @@ may not have data for the entire range you select.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot.windrose import WindrosePlot, histogram
 from pyiem.util import drct2text
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -60,73 +69,63 @@ RAMPS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "defaults": {"_r": "88"}}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    syear: Annotated[
+        int,
+        YearArg(
+            label="Start Year Limit (inclusive):",
+            min=1900,
+            max=lambda: date.today().year,
         ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-        {
-            "type": "year",
-            "default": 1900,
-            "name": "syear",
-            "label": "Start Year Limit (inclusive):",
-            "min": 1900,
-            "max": date.today().year,
-        },
-        {
-            "type": "year",
-            "default": date.today().year,
-            "name": "eyear",
-            "label": "End Year Limit (inclusive):",
-            "min": 1900,
-            "max": date.today().year,
-        },
-        dict(
-            type="select",
-            name="opt",
-            default="ts",
-            label="Which metric to plot?",
-            options=PDICT,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=80,
-            label="Threshold (when appropriate):",
-        ),
-        dict(
-            type="select",
-            name="r",
-            label="Select wind speed binning interval to use for plot",
-            default="20",
-            options=RAMPS,
+    ] = 1900
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="End Year Limit (inclusive):",
+            min=1900,
+            max=lambda: date.today().year,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    opt: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "ts"
+    threshold: Annotated[
+        float, FloatArg(label="Threshold (when appropriate):")
+    ] = 80
+    r: Annotated[
+        str,
+        SelectArg(
+            label="Select wind speed binning interval to use for plot",
+            options=RAMPS,
+        ),
+    ] = "20"
 
 
-def get_ramp(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, defaults={"_r": "88"}
+    )
+
+
+def get_ramp(ctx: Params):
     """np.array for the ramp."""
-    label = RAMPS[ctx["r"]].replace(" MPH", "")
+    label = RAMPS[ctx.r].replace(" MPH", "")
     arr = [int(v) for v in label.split(",")]
     arr.insert(0, 0)
     return np.array(arr)
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Generate the highcharts variant"""
     add_ctx(ctx)
     bins = get_ramp(ctx)
@@ -236,50 +235,50 @@ def get_highcharts(ctx: dict) -> str:
     """
 
 
-def add_ctx(ctx):
+def add_ctx(ctx: Params):
     """Do the agnostic stuff"""
-    ctx["station"] = ctx["zstation"]
-    months = month2months(ctx["month"])
+    ctx["station"] = ctx.zstation
+    months = month2months(ctx.month)
 
     limiter = "array_to_string(wxcodes, '') ~* 'TS'"
     title = "Thunderstorm (TS) contained in METAR"
     params = {
-        "thres": ctx["threshold"],
+        "thres": ctx.threshold,
         "station": ctx["station"],
         "months": months,
-        "sdate": date(ctx["syear"], 1, 1),
-        "edate": date(ctx["eyear"] + 1, 1, 1),
+        "sdate": date(ctx.syear, 1, 1),
+        "edate": date(ctx.eyear + 1, 1, 1),
     }
-    if ctx["opt"] == "tmpf_above":
+    if ctx.opt == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
-        title = f"Air Temp at or above {ctx['threshold']}°F"
-    elif ctx["opt"] == "ra":
+        title = f"Air Temp at or above {ctx.threshold}°F"
+    elif ctx.opt == "ra":
         limiter = "array_to_string(wxcodes, '') ~* 'RA'"
         title = "Rain (RA) contained in METAR"
-    elif ctx["opt"] == "sn":
+    elif ctx.opt == "sn":
         limiter = "array_to_string(wxcodes, '') ~* 'SN'"
         title = "Snow (SN) contained in METAR"
-    elif ctx["opt"] == "p01i":
+    elif ctx.opt == "p01i":
         limiter = "p01i > 0"
         title = "Measurable Precipitation Reported"
-    elif ctx["opt"] == "tmpf_below":
+    elif ctx.opt == "tmpf_below":
         limiter = "round(tmpf::numeric,0) < :thres"
-        title = f"Air Temp below {ctx['threshold']}°F"
-    elif ctx["opt"] == "dwpf_below":
+        title = f"Air Temp below {ctx.threshold}°F"
+    elif ctx.opt == "dwpf_below":
         limiter = "round(dwpf::numeric,0) < :thres"
-        title = f"Dew Point below {ctx['threshold']}°F"
-    elif ctx["opt"] == "dwpf_above":
+        title = f"Dew Point below {ctx.threshold}°F"
+    elif ctx.opt == "dwpf_above":
         limiter = "round(dwpf::numeric,0) >= :thres"
-        title = f"Dew Point at or above {ctx['threshold']}°F"
-    elif ctx["opt"] == "relh_above":
+        title = f"Dew Point at or above {ctx.threshold}°F"
+    elif ctx.opt == "relh_above":
         limiter = "relh >= :thres"
-        title = f"Relative Humidity at or above {ctx['threshold']}%"
-    elif ctx["opt"] == "relh_below":
+        title = f"Relative Humidity at or above {ctx.threshold}%"
+    elif ctx.opt == "relh_below":
         limiter = "relh < :thres"
-        title = f"Relative Humidity below {ctx['threshold']}%"
-    elif ctx["opt"] == "p01i_above":
+        title = f"Relative Humidity below {ctx.threshold}%"
+    elif ctx.opt == "p01i_above":
         limiter = "p01i > :thres"
-        title = f"Precipitation Above {ctx['threshold']} inches"
+        title = f"Precipitation Above {ctx.threshold} inches"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
             sql_helper(
@@ -304,17 +303,17 @@ def add_ctx(ctx):
 
     ctx["plottitle"] = (
         f"{minvalid.year}-{maxvalid.year} {ctx['station']} Wind Rose, "
-        f"month={ctx['month'].upper()}"
+        f"month={ctx.month.upper()}"
     )
     ctx["title"] = (
         f"{minvalid.year}-{maxvalid.year} {ctx['station']} Wind Rose, "
-        f"month={ctx['month'].upper()}"
+        f"month={ctx.month.upper()}"
     )
-    ctx["subtitle"] = f"{ctx['_sname']}, {title}"
+    ctx["subtitle"] = f"{ctx.sname}, {title}"
     return ctx
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
 

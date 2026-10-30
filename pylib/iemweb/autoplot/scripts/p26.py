@@ -9,6 +9,7 @@ is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot.
 import calendar
 from contextlib import suppress
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,13 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "fall": "Minimum Temperature after 1 July",
@@ -27,45 +35,42 @@ PDICT = {
 PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=datetime.now().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(
             label="Year (of fall season) to highlight:",
+            default=lambda: datetime.now().year,
         ),
-        dict(
-            type="select",
-            name="half",
-            default="fall",
-            label="Option to Plot:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="low",
-            label="Variable to Plot:",
-            options=PDICT2,
-        ),
-        dict(type="int", name="t", label="Highlight Temperature", default=32),
     ]
-    return desc
+    half: Annotated[str, SelectArg(label="Option to Plot:", options=PDICT)] = (
+        "fall"
+    )
+    var: Annotated[
+        str, SelectArg(label="Variable to Plot:", options=PDICT2)
+    ] = "low"
+    t: Annotated[int, IntArg(label="Highlight Temperature")] = 32
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def add_ctx(ctx, conn: Connection | None = None):
+def add_ctx(ctx: Params, conn: Connection | None = None):
     """Get the raw infromations we need"""
     today = date.today()
     thisyear = today.year
-    year = ctx["year"]
-    station = ctx["station"]
-    varname = ctx["var"]
-    half = ctx["half"]
+    year = ctx.year
+    station = ctx.station
+    varname = ctx.var
+    half = ctx.half
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -145,19 +150,19 @@ def add_ctx(ctx, conn: Connection | None = None):
     df["dates"] = pd.date_range(sts, periods=len(doys))
     df = df.set_index("doy")
     ctx["df"] = df
-    ctx["year"] = year
-    ctx["half"] = half
-    if ctx["half"] == "fall":
+    ctx.year = year
+    ctx.half = half
+    if ctx.half == "fall":
         title = "Season to Date Minimum Daily %s Temperature after 1 July"
     else:
         title = "Year to Date Maximum Daily %s Temperature"
     title = title % (varname.capitalize(),)
     ctx["ylabel"] = title
-    ctx["title"] = f"{startyear}-{thisyear - 1} {ctx['_sname']}\n{title}"
+    ctx["title"] = f"{startyear}-{thisyear - 1} {ctx.sname}\n{title}"
     return ctx
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Do highcharts"""
     add_ctx(ctx)
     rng = ctx["df"][["dates", "mins", "maxs"]].to_json(
@@ -215,7 +220,7 @@ Highcharts.chart('{containername}', {{
         tooltip: {{valueDecimals: 2}},
         data: {mean}
     }},{{
-        name: '{ctx["year"]}',
+        name: '{ctx.year}',
         type: 'line',
         color: 'blue',
         tooltip: {{valueDecimals: 0}},
@@ -226,7 +231,7 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
     df = ctx["df"]
@@ -253,12 +258,12 @@ def plotter(ctx: dict):
         color="b",
         lw=1.5,
         zorder=6,
-        label=f"{ctx['year']}",
+        label=f"{ctx.year}",
     )
-    if ctx["half"] == "spring":
+    if ctx.half == "spring":
         ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
         ax.set_xticklabels(calendar.month_abbr[1:])
-    if ctx["half"] == "fall":
+    if ctx.half == "fall":
         ax.set_xticks(
             np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
             + 183
@@ -267,11 +272,11 @@ def plotter(ctx: dict):
         labels.extend(calendar.month_abbr[1:7])
         ax.set_xticklabels(labels)
     ax.set_ylabel(f"{ctx['ylabel']} °F")
-    ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)
+    ax.axhline(ctx.t, linestyle="--", lw=1, color="k", zorder=6)
     ax.text(
         ax.get_xlim()[1],
-        ctx["t"],
-        f"{ctx['t']:.0f}°F",
+        ctx.t,
+        f"{ctx.t:.0f}°F",
         va="center",
     )
     ax.grid(True)
@@ -280,7 +285,7 @@ def plotter(ctx: dict):
     r2 = Rectangle((0, 0), 1, 1, fc="tan")
     r3 = Rectangle((0, 0), 1, 1, fc="gold")
 
-    loc = 1 if ctx["half"] == "fall" else 4
+    loc = 1 if ctx.half == "fall" else 4
     ax.legend(
         [r, r2, r3, a[0], b[0]],
         [
@@ -288,7 +293,7 @@ def plotter(ctx: dict):
             "95$^{th}$ %tile",
             "50$^{th}$ %tile",
             "Average",
-            f"{ctx['year']}",
+            f"{ctx.year}",
         ],
         loc=loc,
     )

@@ -8,6 +8,7 @@ one observation per hour.
 """
 
 import calendar
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -16,6 +17,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    ZHourArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temperature [°F]",
@@ -28,54 +38,46 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(type="zhour", name="hour", default=20, label="At Time (UTC):"),
-        {
-            "type": "select",
-            "name": "var",
-            "default": "tmpf",
-            "label": "Which Variable to Plot:",
-            "options": PDICT,
-        },
-        dict(
-            type="float",
-            name="t1",
-            default=70,
-            label="Lower Bound [units of selected var] (inclusive):",
-        ),
-        dict(
-            type="float",
-            name="t2",
-            default=79,
-            label="Upper Bound [units of selected var] (inclusive):",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    hour: Annotated[int, ZHourArg(label="At Time (UTC):")] = 20
+    var: Annotated[
+        str, SelectArg(label="Which Variable to Plot:", options=PDICT)
+    ] = "tmpf"
+    t1: Annotated[
+        float,
+        FloatArg(label="Lower Bound [units of selected var] (inclusive):"),
+    ] = 70
+    t2: Annotated[
+        float,
+        FloatArg(label="Upper Bound [units of selected var] (inclusive):"),
+    ] = 79
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    hour = ctx["hour"]
-    t1 = ctx["t1"]
-    t2 = ctx["t2"]
+    station = ctx.zstation
+    hour = ctx.hour
+    t1 = ctx.t1
+    t2 = ctx.t2
     params = {
         "station": station,
         "hour": hour,
         "t1": t1,
         "t2": t2,
     }
-    varname = ctx["var"]
+    varname = ctx.var
     varsql = {
         "tmpf": "round(tmpf::numeric, 0)",
         "dwpf": "round(dwpf::numeric, 0)",
@@ -115,7 +117,7 @@ def plotter(ctx: dict):
     ut = utc(2000, 1, 1, hour, 0)
     localt = ut.astimezone(ZoneInfo(ctx["_nt"].sts[station]["tzname"]))
     title = (
-        f"{ctx['_sname']} ({df['min_utcvalid'].min().year}-"
+        f"{ctx.sname} ({df['min_utcvalid'].min().year}-"
         f"{df['max_utcvalid'].max().year})"
     )
     subtitle = (

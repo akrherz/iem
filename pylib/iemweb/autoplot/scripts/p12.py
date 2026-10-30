@@ -9,6 +9,7 @@ would represent the period of 1 July 2016 to 30 Jun 2017.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "last_high_above": "Last Date At or Above (High Temperature)",
@@ -34,50 +42,41 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    thisyear = date.today().year
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="threshold",
-            default=90,
-            label="Enter Threshold:",
-        ),
-        dict(
-            type="select",
-            name="which",
-            default="last_high_above",
-            label="Date Option:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="season",
-            default="calendar",
-            label="How to split the year:",
-            options=PDICT2,
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=thisyear,
-            max=(thisyear + 1),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    threshold: Annotated[int, IntArg(label="Enter Threshold:")] = 90
+    which: Annotated[str, SelectArg(label="Date Option:", options=PDICT)] = (
+        "last_high_above"
+    )
+    season: Annotated[
+        str, SelectArg(label="How to split the year:", options=PDICT2)
+    ] = "calendar"
+    year: Annotated[
+        int,
+        YearArg(
+            max=lambda: date.today().year + 1,
             label="Year to Highlight in Chart:",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    season = ctx["season"]
-    (extrenum, varname, direction) = ctx["which"].split("_")
-    year = ctx["year"]
+    station = ctx.station
+    threshold = ctx.threshold
+    season = ctx.season
+    (extrenum, varname, direction) = ctx.which.split("_")
+    year = ctx.year
 
     op = ">=" if direction == "above" else "<"
     with get_sqlalchemy_conn("coop") as conn:
@@ -131,7 +130,7 @@ def plotter(ctx: dict):
     if df2.empty:
         raise NoDataFound("No data found.")
     tl = PDICT[f"{extrenum}_{varname}_{direction}"]
-    title = f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days"
+    title = f"{ctx.sname} :: {extrenum.capitalize()} Date and Days"
     fig = figure(title=title, subtitle=f"{tl} {threshold}°F", apctx=ctx)
     # Main plot gets 75% of vertical space
     ax_box = fig.add_axes((0.1, 0.32, 0.65, 0.05), frameon=False)

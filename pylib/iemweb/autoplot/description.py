@@ -23,6 +23,7 @@ class Arg:
     """Base widget definition.  Subclasses set the ``type`` string."""
 
     type: ClassVar[str]
+    virtual: ClassVar[bool] = False
     # Left empty when used as ``Annotated`` metadata on a params model field,
     # the field name is filled in by ``PlotDescription.from_model``.
     name: str = ""
@@ -261,6 +262,7 @@ class VtecPsArg(Arg):
     """VTEC phenomena and significance."""
 
     type: ClassVar[str] = "vtec_ps"
+    virtual: ClassVar[bool] = True
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -300,6 +302,9 @@ class PlotDescription:
                 continue
             default = fld.get_default(call_default_factory=True)
             optional = tmpl.optional or default is None
+            if tmpl.virtual:
+                # Widget writes other ctx keys, the field default is unused
+                optional, default = tmpl.optional, None
             if default is PydanticUndefined or default is None:
                 default = tmpl.default
             if callable(default):

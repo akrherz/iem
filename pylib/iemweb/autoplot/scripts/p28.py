@@ -22,7 +22,9 @@ interactive chart version.
 </ul>
 """
 
+import datetime as dt
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -32,6 +34,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "dep": "Departure [inch]",
@@ -42,36 +46,36 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="opt",
-            default="rank",
-            options=PDICT,
-            label="Interative Chart Variable:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="Interative Chart Variable:")
+    ] = "rank"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="To Date:",
             min="1894/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def add_ctx(ctx, conn=None):
+def add_ctx(ctx: Params, conn=None):
     """Get the plotting context"""
-    station = ctx["station"]
-    dt: date = ctx["date"]
-    opt = ctx["opt"]
+    station = ctx.station
+    dt: date = ctx.date
+    opt = ctx.opt
 
     res = conn.execute(
         sql_helper("""
@@ -158,7 +162,7 @@ def add_ctx(ctx, conn=None):
         spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
     ctx["sdate"] = dt - timedelta(days=360)
-    ctx["title"] = f"[{baseyear + 2}-{datetime.now().year}] {ctx['_sname']}"
+    ctx["title"] = f"[{baseyear + 2}-{datetime.now().year}] {ctx.sname}"
     ctx["subtitle"] = (
         f"{PDICT[opt]} from given x-axis date until {dt:%-d %b %Y}, "
         f"US Drought Monitor: {dclass}"
@@ -188,11 +192,11 @@ def add_ctx(ctx, conn=None):
     ctx["avgs"] = avgs
     ctx["xticks"] = xticks
     ctx["xticklabels"] = xticklabels
-    ctx["station"] = station
+    ctx.station = station
     ctx["y2label"] = PDICT[opt]
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Go"""
     add_ctx(ctx)
     dstart = "Date.UTC(%s, %s, %s)" % (
@@ -298,7 +302,7 @@ Highcharts.chart('"""
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
 
