@@ -16,6 +16,7 @@ from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
+from iemweb.autoplot.description import describe
 
 
 class Schema(CGIModel):
@@ -58,7 +59,7 @@ def get_metadict(pidx: int) -> dict:
         with suppress(Exception):
             timing = get_timing(pidx)
         mod = import_script(pidx)
-        data = mod.get_description()
+        data = describe(mod)
         data["title"] = find_title(pidx)
         defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
         data["maptable"] = hasattr(mod, "geojson")
