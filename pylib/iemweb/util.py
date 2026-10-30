@@ -67,6 +67,16 @@ def json_response_dict(init_dict: dict | None = None) -> dict:
     return {"generated_at": gen_at}
 
 
+def vtec_year_cache_control(environ: dict) -> int | None:
+    """Return a client cache lifetime for a VTEC event from a past year.
+
+    For use as ``iemapp(cache_control=...)``.  Events issued in a prior year
+    rarely change, so clients may cache them for a day.  Current year events
+    get no Cache-Control header.
+    """
+    return 86400 if environ["year"] < utc().year else None
+
+
 def acquire_slot(name: str, max_processes: int):
     """Try to acquire one of 4 processing slots using file locks."""
     lock_dir = Path("/tmp") / name

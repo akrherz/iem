@@ -12,6 +12,8 @@ some additional requested metadata.
 Changelog
 ---------
 
+- 2026-10-30: Events from a prior year are sent with
+  ``Cache-Control: public, max-age=86400``.
 - 2026-02-24: For IEM consistency, the root metadata `generation_time` was
   renamed `generated_at`.
 - 2024-08-16: Initial documentation update
@@ -60,7 +62,7 @@ from pyiem.web.fields import (
 )
 from pyiem.webutil import CGIModel, iemapp
 
-from iemweb.util import json_response_dict
+from iemweb.util import json_response_dict, vtec_year_cache_control
 
 
 class Schema(CGIModel):
@@ -274,6 +276,7 @@ def get_mckey(environ: dict) -> str:
     content_type="application/vnd.geo+json",
     memcacheexpire=3600,
     memcachekey=get_mckey,
+    cache_control=vtec_year_cache_control,
 )
 def application(environ, start_response):
     """Main()"""
