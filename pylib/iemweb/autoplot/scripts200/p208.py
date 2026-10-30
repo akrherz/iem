@@ -21,7 +21,8 @@ total inclusion of any zones/counties that were added to the alert.
 </p>
 """
 
-from datetime import UTC
+from datetime import UTC, datetime
+from typing import Annotated, Any
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -32,6 +33,17 @@ from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_FILL, Z_OVERLAY2, Z_OVERLAY2_LABEL
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    VtecPsArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 PDICT = {
@@ -46,71 +58,60 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 300, "data": True}
-    desc["defaults"] = {"_r": "t"}
-    now = utc()
-    desc["arguments"] = [
-        dict(
-            optional=True,
-            type="datetime",
-            name="valid",
-            default=now.strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    valid: Annotated[
+        datetime | None,
+        DateTimeArg(
             label="UTC Timestamp (inclusive) to plot the given alert at:",
             min="1986/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d %H%M"),
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-        ),
-        dict(type="year", min=1986, default=2024, name="year", label="Year"),
-        dict(
-            type="vtec_ps",
-            name="v",
-            default="SV.W",
-            label="VTEC Phenomena and Significance",
-        ),
-        dict(
-            type="int",
-            default=1,
-            label="VTEC Event Identifier / Sequence Number",
-            name="etn",
-        ),
-        dict(
-            type="select",
-            default="single",
-            name="opt",
-            options=PDICT,
-            label="Special Plot Options / Modes",
-        ),
-        dict(
-            type="select",
-            options=PDICT3,
-            default="auto",
-            name="n",
-            label="Should a NEXRAD Mosaic be overlain:",
-        ),
-    ]
-    return desc
+    ] = None
+    wfo: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    year: Annotated[int, YearArg(min=1986, label="Year")] = 2024
+    v: Annotated[
+        Any, VtecPsArg(label="VTEC Phenomena and Significance", default="SV.W")
+    ] = None
+    etn: Annotated[
+        int, IntArg(label="VTEC Event Identifier / Sequence Number")
+    ] = 1
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="Special Plot Options / Modes")
+    ] = "single"
+    n: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="Should a NEXRAD Mosaic be overlain:"),
+    ] = "auto"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        cache=300,
+        data=True,
+        defaults={"_r": "t"},
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    utcvalid = ctx.get("valid")
-    wfo = ctx["wfo"]
+    utcvalid = ctx.valid
+    wfo = ctx.wfo
     if wfo == "_ALL":
         wfo = "DMX"
     if wfo == "NHC":
-        ctx["opt"] = "expand"
+        ctx.opt = "expand"
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     p1 = ctx["phenomenav"][:2]
     s1 = ctx["significancev"][:1]
-    etn = int(ctx["etn"])
-    year = int(ctx["year"])
+    etn = int(ctx.etn)
+    year = int(ctx.year)
     params = {
         "wfo": wfo[-3:],
         "etn": etn,
@@ -143,7 +144,7 @@ def plotter(ctx: dict):
         )  # type: ignore
     if df.empty:
         raise NoDataFound("VTEC Event was not found, sorry.")
-    if ctx["opt"] == "expand":
+    if ctx.opt == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             df: pd.DataFrame = gpd.read_postgis(
@@ -169,7 +170,7 @@ def plotter(ctx: dict):
                 index_col="ugc",
                 geom_col="simple_geom",
             )  # type: ignore
-    elif ctx["opt"] == "etn":
+    elif ctx.opt == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             df: pd.DataFrame = gpd.read_postgis(
@@ -205,7 +206,7 @@ def plotter(ctx: dict):
             params=params,
             geom_col="geom",
         )  # type: ignore
-    if not sbwdf.empty and ctx["opt"] == "expand":
+    if not sbwdf.empty and ctx.opt == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
@@ -228,7 +229,7 @@ def plotter(ctx: dict):
                 },
                 geom_col="geom",
             )  # type: ignore
-    elif not sbwdf.empty and ctx["opt"] == "etn":
+    elif not sbwdf.empty and ctx.opt == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
@@ -278,12 +279,12 @@ def plotter(ctx: dict):
     if df["is_emergency"].any():
         lbl = f"{vtec.VTEC_PHENOMENA.get(p1, p1)} Emergency"
     title = f"{year} {wfo} {_pds} {lbl} ({p1}.{s1}) #{etn}"
-    if ctx["opt"] in ["expand", "etn"]:
+    if ctx.opt in ["expand", "etn"]:
         title = (
             f"{year} NWS {vtec.VTEC_PHENOMENA.get(p1, p1)} "
             f"{vtec.VTEC_SIGNIFICANCE.get(s1, s1)} ({p1}.{s1})"
         )
-        if ctx["opt"] == "etn":
+        if ctx.opt == "etn":
             title += f" #{etn}"
     mp = MapPlot(
         apctx=ctx,
@@ -303,7 +304,7 @@ def plotter(ctx: dict):
         mp.sector = "cwa"
         mp.cwa = wfo[-3:]
     # CAN statements come here with time == expire :/
-    if ctx["opt"] == "single":
+    if ctx.opt == "single":
         df2: gpd.GeoDataFrame = df[
             (df["issue"] <= utcvalid) & (df["expire"] > utcvalid)
         ]
@@ -358,8 +359,8 @@ def plotter(ctx: dict):
                 edgecolor="k",
                 zorder=Z_OVERLAY2,
             )
-    if ctx["n"] != "off" and (
-        (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on"
+    if ctx.n != "off" and (
+        (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx.n == "on"
     ):
         prod = "N0Q" if df["issue"].iloc[0].year > 2010 else "N0R"
         radval = mp.overlay_nexrad(

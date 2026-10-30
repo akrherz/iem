@@ -27,6 +27,7 @@ showing the bad image and <a href="/info/contacts.php">email it to us</a>!
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -39,6 +40,18 @@ from pyiem.reference import EPSG
 from pyproj import Transformer
 from scipy.interpolate import Rbf
 from shapely.geometry import Point
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateTimeArg,
+    FloatArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
 T2163_4326 = Transformer.from_proj(2163, 4326, always_xy=True)
@@ -91,149 +104,119 @@ PDICT9 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 60}
-    now = datetime.now()
-    desc["gallery"] = {
-        "endts": "2024-01-10 1300",
-        "hours": 24,
-    }
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="v",
-            default="snow",
-            label="Which variable to analyze?",
-            options=PDICT6,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    v: Annotated[
+        str, SelectArg(label="Which variable to analyze?", options=PDICT6)
+    ] = "snow"
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (ignored if plotting state)"
         ),
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (ignored if plotting state)",
-        ),
-        dict(
-            type="csector",
-            name="csector",
-            default="IA",
-            label="Select state/sector to plot",
-        ),
-        dict(
-            type="select",
-            name="p",
-            default="both",
+    ] = "DMX"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "IA"
+    p: Annotated[
+        str,
+        SelectArg(
             options=PDICT3,
             label="Plot or Countour values (for non interactive map):",
         ),
-        dict(
-            type="datetime",
-            name="endts",
-            default=now.strftime("%Y/%m/%d %H%M"),
+    ] = "both"
+    endts: Annotated[
+        datetime,
+        DateTimeArg(
             label="Date Time (central time zone)",
             min="2006/01/01 0000",
+            default=lambda: datetime.now().strftime("%Y/%m/%d %H%M"),
         ),
-        dict(
-            type="int",
-            default=12,
-            label="Trailing Time Window (hours):",
-            name="hours",
-        ),
-        dict(
-            type="int",
-            default=50,
+    ]
+    hours: Annotated[int, IntArg(label="Trailing Time Window (hours):")] = 12
+    sz: Annotated[
+        int,
+        IntArg(
             label="Grid cell size for analysis [integer] &gt;=5 (km)",
-            name="sz",
             min=5,
             max=200,
         ),
-        dict(
-            type="select",
+    ] = 50
+    f: Annotated[
+        str,
+        SelectArg(
             options=PDICT2,
             label="Which SciPy.interpolate.Rbf function to use? r=grid size",
-            default="linear",
-            name="f",
         ),
-        dict(
-            type="select",
+    ] = "linear"
+    z: Annotated[
+        str,
+        SelectArg(
             options=PDICT4,
             label="Shall algorithm attempt to insert zeros into analysis?",
-            default="yes",
-            name="z",
         ),
-        {
-            "type": "int",
-            "default": 3,
-            "name": "zr",
-            "ge": 1,
-            "le": 10,
-            "label": (
-                "If attempting to insert zeros, how many grid cells away "
-                "should they be from an observed point? (integer)"
-            ),
-        },
-        {
-            "type": "select",
-            "name": "pz",
-            "default": "yes",
-            "label": "Should any observed zeros be plotted on the map?",
-            "options": PDICT9,
-        },
-        dict(
-            type="select",
-            options=PDICT5,
-            label="Include NWS COOP reports too?",
-            default="no",
-            name="coop",
+    ] = "yes"
+    zr: Annotated[
+        int,
+        IntArg(
+            ge=1,
+            le=10,
+            label="If attempting to insert zeros, how many grid cells away "
+            "should they be from an observed point? (integer)",
         ),
-        {
-            "type": "select",
-            "options": PDICT5,
-            "label": "Include CoCoRaHS reports too?",
-            "default": "yes",
-            "name": "cocorahs",
-        },
-        dict(
-            type="select",
-            options=PDICT7,
-            label="Clip display to plotted geography?",
-            default="yes",
-            name="c",
+    ] = 3
+    pz: Annotated[
+        str,
+        SelectArg(
+            label="Should any observed zeros be plotted on the map?",
+            options=PDICT9,
         ),
-        dict(
-            type="select",
-            options=PDICT8,
-            label="Plot cities on the map?",
-            default="yes",
-            name="ct",
-        ),
-        dict(
-            type="float",
-            default=1,
+    ] = "yes"
+    coop: Annotated[
+        str, SelectArg(options=PDICT5, label="Include NWS COOP reports too?")
+    ] = "no"
+    cocorahs: Annotated[
+        str, SelectArg(options=PDICT5, label="Include CoCoRaHS reports too?")
+    ] = "yes"
+    c: Annotated[
+        str,
+        SelectArg(options=PDICT7, label="Clip display to plotted geography?"),
+    ] = "yes"
+    ct: Annotated[
+        str, SelectArg(options=PDICT8, label="Plot cities on the map?")
+    ] = "yes"
+    lw: Annotated[
+        float,
+        FloatArg(
             label="Contour line width (pixels) &lt; 10, 0 disables:",
-            name="lw",
             min=0,
             max=10,
         ),
-        {
-            "type": "cmap",
-            "label": "Select color map for precipitation",
-            "default": "jet",
-            "name": "cmap",
+    ] = 1
+    cmap: Annotated[
+        str, CmapArg(label="Select color map for precipitation")
+    ] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=60,
+        gallery={
+            "endts": "2024-01-10 1300",
+            "hours": 24,
         },
-    ]
-    return desc
+    )
 
 
-def load_data(ctx: dict, basets: datetime, endts: datetime):
+def load_data(ctx: Params, basets: datetime, endts: datetime):
     """Generate a dataframe with the data we want to analyze."""
     typs = {
         "rain": ["R"],
@@ -256,7 +239,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             ),
             conn,
             params={
-                "typs": typs[ctx["v"]],
+                "typs": typs[ctx.v],
                 "basets": basets,
                 "endts": endts,
             },
@@ -274,7 +257,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         for dt in pd.date_range(basets.date(), endts.date())
         if basets < datetime(dt.year, dt.month, dt.day, 7) < endts
     ]
-    if ctx["coop"] == "yes" and ctx["v"] not in ["ice", "sleet"]:
+    if ctx.coop == "yes" and ctx.v not in ["ice", "sleet"]:
         with get_sqlalchemy_conn("iem") as conn:
             coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
@@ -288,7 +271,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
                 """,
-                    col="snow" if ctx["v"] in ["snow", "ss"] else "pday",
+                    col="snow" if ctx.v in ["snow", "ss"] else "pday",
                 ),
                 conn,
                 params={
@@ -307,7 +290,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 df = coopdf
             else:
                 df = pd.concat([df, coopdf], ignore_index=True, sort=False)
-    if ctx["cocorahs"] == "yes" and ctx["v"] not in ["ice", "sleet"]:
+    if ctx.cocorahs == "yes" and ctx.v not in ["ice", "sleet"]:
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
@@ -325,7 +308,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
                 """,
-                    col="snow" if ctx["v"] in ["snow", "ss"] else "precip",
+                    col="snow" if ctx.v in ["snow", "ss"] else "precip",
                 ),
                 conn,
                 params={
@@ -351,11 +334,11 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     return df
 
 
-def compute_grid_bounds(ctx, csector):
+def compute_grid_bounds(ctx: Params, csector):
     """Figure out where to look."""
 
     # Lame, we create a temp Map object to get the bounds
-    if ctx["t"] == "cwa":
+    if ctx.t == "cwa":
         sector = "cwa"
     else:
         sector = "state" if len(csector) == 2 else csector
@@ -364,7 +347,7 @@ def compute_grid_bounds(ctx, csector):
         sector=sector,
         nocaption=True,
         state=csector,
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        cwa=(ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:]),
         axisbg="white",
     )
     [xmin, xmax, ymin, ymax] = mp.panels[0].get_extent(EPSG[2163])
@@ -379,21 +362,21 @@ def compute_grid_bounds(ctx, csector):
     ]
 
 
-def add_zeros(df: pd.DataFrame, ctx: dict):
+def add_zeros(df: pd.DataFrame, ctx: Params):
     """Add values of zero where we believe appropriate."""
-    cellsize = ctx["sz"] * 1000.0
-    if ctx["zr"] < 1 or ctx["zr"] > 10:
+    cellsize = ctx.sz * 1000.0
+    if ctx.zr < 1 or ctx.zr > 10:
         raise NoDataFound(
             "Invalid number of grid cells for zero insertion, "
             "must be between 1 and 10"
         )
     newrows = []
-    if ctx["z"] in ["yes", "plot"]:
+    if ctx.z in ["yes", "plot"]:
         xvals = np.arange(
-            ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize * ctx["zr"]
+            ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize * ctx.zr
         )
         yvals = np.arange(
-            ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize * ctx["zr"]
+            ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize * ctx.zr
         )
         grid_points = [(x, y) for y in yvals for x in xvals]
         if grid_points:
@@ -466,7 +449,7 @@ def add_zeros(df: pd.DataFrame, ctx: dict):
     return df
 
 
-def do_analysis(df: pd.DataFrame, ctx: dict):
+def do_analysis(df: pd.DataFrame, ctx: Params):
     """Do the analysis finally."""
     # cull dups to prevent gridding badness
     df2 = (
@@ -477,7 +460,7 @@ def do_analysis(df: pd.DataFrame, ctx: dict):
     )
     if df2.empty:
         raise NoDataFound("No Data Found.")
-    sz = ctx["sz"] * 1000.0
+    sz = ctx.sz * 1000.0
     # Introduce some jitter
     xi = np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2] + sz, sz / 1.9)
     yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz / 1.9)
@@ -487,7 +470,7 @@ def do_analysis(df: pd.DataFrame, ctx: dict):
         df2["level_0"].values,
         df2["level_1"].values,
         df2["val"].values,
-        function=ctx["f"],
+        function=ctx.f,
     )
     vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
@@ -510,24 +493,24 @@ def prettyprint2(val):
     return prettyprint(val, 2)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ctx["sz"] = max(5, ctx["sz"])
-    if ctx["hours"] > 300:
-        ctx["hours"] = 300
-    endts = ctx["endts"]
-    basets = endts - timedelta(hours=ctx["hours"])
+    ctx.sz = max(5, ctx.sz)
+    if ctx.hours > 300:
+        ctx.hours = 300
+    endts = ctx.endts
+    basets = endts - timedelta(hours=ctx.hours)
     # figure out our grid bounds
     csector = ctx.pop("csector")
-    if ctx["t"] == "state" and len(csector) > 2:
-        ctx["sz"] = max(50, ctx["sz"])
+    if ctx.t == "state" and len(csector) > 2:
+        ctx.sz = max(50, ctx.sz)
     ctx["bnds2163"] = compute_grid_bounds(ctx, csector)
     # Retrieve available obs
     df = load_data(ctx, basets, endts)
     # add zeros and QC
     df = add_zeros(df, ctx)
     df["label"] = df["val"].apply(
-        prettyprint2 if ctx["v"] == "ice" else prettyprint
+        prettyprint2 if ctx.v == "ice" else prettyprint
     )
     # do gridding
     df2 = df[df[USEME]]
@@ -535,27 +518,27 @@ def plotter(ctx: dict):
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
     cmap = nwssnow()
-    if ctx["v"] == "ice":
+    if ctx.v == "ice":
         rng = [0.01, 0.1, 0.25, 0.5, 0.75, 1, 2]
         cmap = nwsice()
-    elif ctx["v"] == "rain":
+    elif ctx.v == "rain":
         rng = [0.01, 0.1, 0.5, 1, 2, 3, 5, 10]
-        cmap = ctx["cmap"]
-    if ctx["t"] == "cwa":
+        cmap = ctx.cmap
+    if ctx.t == "cwa":
         sector = "cwa"
     else:
         sector = "state" if len(csector) == 2 else csector
 
-    _t = " & COOP" if ctx["coop"] == "yes" else ""
-    _t += " & CoCoRaHS" if ctx["cocorahs"] == "yes" else ""
+    _t = " & COOP" if ctx.coop == "yes" else ""
+    _t += " & CoCoRaHS" if ctx.cocorahs == "yes" else ""
     title = f"NWS Local Storm Report{_t} Snowfall Total Analysis"
-    if ctx["v"] == "ice":
+    if ctx.v == "ice":
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
-    elif ctx["v"] == "rain":
+    elif ctx.v == "rain":
         title = f"NWS Local Storm Report{_t} Rainfall Total Analysis"
-    elif ctx["v"] == "sleet":
+    elif ctx.v == "sleet":
         title = "NWS Local Storm Report Sleet Total Analysis"
-    elif ctx["v"] == "ss":
+    elif ctx.v == "ss":
         title = f"NWS Local Storm Report{_t} Snowfall + Sleet Total Analysis"
     obcnt = len(df2[df2["state"] != "Z"].index)
     mp = MapPlot(
@@ -563,43 +546,39 @@ def plotter(ctx: dict):
         sector=sector,
         nocaption=True,
         state=csector,
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        cwa=(ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:]),
         axisbg="white",
         title=title,
         subtitle=(
-            f"{obcnt:.0f} reports over past {ctx['hours']:.0f} hours "
+            f"{obcnt:.0f} reports over past {ctx.hours:.0f} hours "
             f"till {endts:%d %b %Y %I:%M %p}, "
-            f"grid size: {ctx['sz']:.0f}km, Rbf: {ctx['f']}"
+            f"grid size: {ctx.sz:.0f}km, Rbf: {ctx.f}"
         ),
     )
-    if (
-        len(vals) > 1
-        and df2["val"].max() > 0
-        and ctx["p"] in ["both", "contour"]
-    ):
+    if len(vals) > 1 and df2["val"].max() > 0 and ctx.p in ["both", "contour"]:
         mp.contourf(
             lons,
             lats,
             vals,
             rng,
             cmap=cmap,
-            clip_on=(ctx["c"] == "yes"),
-            linewidths=ctx["lw"],
+            clip_on=(ctx.c == "yes"),
+            linewidths=ctx.lw,
             spacing="proportional",
         )
         # Allow analysis to bleed outside the CWA per request.
-        if ctx["t"] == "cwa":
+        if ctx.t == "cwa":
             mp.draw_mask(sector="conus")
             mp.draw_cwas(linewidth=2)
     if sector not in ["conus", "midwest"] and not (
-        ctx["t"] == "state" and len(csector) > 2
+        ctx.t == "state" and len(csector) > 2
     ):
         mp.drawcounties()
-    if ctx["ct"] == "yes":
+    if ctx.ct == "yes":
         mp.drawcities(isolated=True, textoutlinewidth=0)
-    if not df.empty and ctx["p"] in ["both", "plot"]:
+    if not df.empty and ctx.p in ["both", "plot"]:
         df2 = df[df["plotme"]]
-        if ctx["pz"] == "no":
+        if ctx.pz == "no":
             df2 = df2[df2["val"] > 0]
         if not df2.empty:
             mp.plot_values(
@@ -609,7 +588,7 @@ def plotter(ctx: dict):
                 fmt="%s",
                 labelbuffer=2,
             )
-    if ctx["z"] == "plot":
+    if ctx.z == "plot":
         df2 = df[df["state"] == "Z"]
         if not df2.empty:
             mp.plot_values(

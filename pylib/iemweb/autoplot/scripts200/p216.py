@@ -9,6 +9,7 @@ the long term climate sites is <a href="/request/coop/fe.phtml">here</a>.
 """
 
 from datetime import timedelta
+from typing import Annotated
 
 import matplotlib.ticker as mticker
 import numpy as np
@@ -18,6 +19,13 @@ from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import get_monofont
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    SidArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "above": "At or Above (AOA) Threshold",
@@ -45,46 +53,35 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "sid",
-            "name": "station",
-            "default": "IATAME",
-            "label": "Select Station:",
-            "network": "IACLIMATE",
-            "include_climodat": True,
-        },
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            options=PDICT2,
-            label="Select which daily variable",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        SidArg(
+            label="Select Station:", network="IACLIMATE", include_climodat=True
         ),
-        dict(
-            type="select",
-            name="dir",
-            default="below",
-            options=PDICT,
-            label="Select temperature direction",
-        ),
-        dict(
-            type="int",
-            name="threshold",
-            default="32",
-            label="hreshold (F or knots):",
-        ),
-    ]
-    return desc
+    ] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT2, label="Select which daily variable")
+    ] = "high"
+    dir: Annotated[
+        str, SelectArg(options=PDICT, label="Select temperature direction")
+    ] = "below"
+    threshold: Annotated[int, IntArg(label="hreshold (F or knots):")] = 32
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_data(ctx: Params):
     """Get the data for this plot."""
-    varname = ctx["var"]
-    station = ctx["station"]
+    varname = ctx.var
+    station = ctx.station
     if ctx["network"].find("CLIMATE") > 0:
         if varname not in ["high", "low"]:
             raise IncompleteWebRequest("Invalid variable for Climate network.")
@@ -129,11 +126,11 @@ def get_data(ctx):
     return obsdf
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    threshold = ctx["threshold"]
-    varname = ctx["var"]
-    mydir = ctx["dir"]
+    threshold = ctx.threshold
+    varname = ctx.var
+    mydir = ctx.dir
 
     op = np.greater_equal if mydir == "above" else np.less
     rows = []
@@ -178,7 +175,7 @@ def plotter(ctx: dict):
     label = "at or above" if mydir == "above" else "below"
     label2 = "Yearly" if mydir == "above" else "Seasonal"
     title = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"[{obsdf.index[0]:%-d %b %Y}-{obsdf.index[-1]:%-d %b %Y}]:: "
         f"{label2} Maximum Consecutive Days with"
     )

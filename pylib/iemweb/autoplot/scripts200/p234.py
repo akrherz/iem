@@ -8,12 +8,23 @@ type only supports up to 12 months plotted at once.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 MDICT = {
@@ -73,97 +84,81 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    jan1 = today.replace(month=1, day=1)
-    desc["arguments"] = [
-        dict(
-            type="date",
-            name="sdate",
-            default=jan1.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date (inclusive):",
             min="1986/01/01",
+            default=lambda: (
+                date.today().replace(month=1, day=1).strftime("%Y/%m/%d")
+            ),
         ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
+    ]
+    edate: Annotated[
+        date,
+        DateArg(
             label="End Date (inclusive):",
             min="1986/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        {
-            "type": "select",
-            "name": "daytz",
-            "default": "local",
-            "label": "Calendar Date Time Zone / Period:",
-            "options": PDICT3,
-        },
-        dict(
-            type="select",
-            name="filter",
-            default="NONE",
-            options=MDICT,
-            label="Local Storm Report Type Filter",
-        ),
-        dict(
-            type="select",
-            name="w",
-            options=PDICT2,
-            default="cwa",
-            label="Plot stats for:",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            all=True,
-            default="DMX",
-            label="Select WFO (when appropriate):",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State (when appropriate):",
-        ),
-        dict(
-            type="select",
-            name="heatmap",
-            options=PDICT,
-            default="yes",
-            label="Colorize calendar cells based on values?",
-        ),
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "label": "Color Ramp:",
-            "default": "viridis",
-        },
     ]
-    return desc
+    daytz: Annotated[
+        str,
+        SelectArg(label="Calendar Date Time Zone / Period:", options=PDICT3),
+    ] = "local"
+    filter: Annotated[
+        str, SelectArg(options=MDICT, label="Local Storm Report Type Filter")
+    ] = "NONE"
+    w: Annotated[str, SelectArg(options=PDICT2, label="Plot stats for:")] = (
+        "cwa"
+    )
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", all=True, label="Select WFO (when appropriate):"
+        ),
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State (when appropriate):")
+    ] = "IA"
+    heatmap: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Colorize calendar cells based on values?"
+        ),
+    ] = "yes"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "viridis"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
-    sts = ctx["sdate"]
-    ets = ctx["edate"]
+    sts = ctx.sdate
+    ets = ctx.edate
     if (ets - sts).days > 366:
         raise NoDataFound("Chart duration needs to be less than 1 year.")
-    wfo = ctx["wfo"]
-    state = ctx["state"]
+    wfo = ctx.wfo
+    state = ctx.state
     params = {
         "tzname": ctx["_nt"].sts[wfo]["tzname"],
         "sts": sts - timedelta(days=2),
         "ets": ets + timedelta(days=2),
         "offset": "",
     }
-    if ctx["daytz"] == "12z":
+    if ctx.daytz == "12z":
         params["offset"] = " - interval '12 hours' "
         params["tzname"] = "UTC"
 
@@ -175,11 +170,11 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
     params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
     wfo_limiter = ""
-    if ctx["w"] == "cwa":
+    if ctx.w == "cwa":
         wfo_limiter = " and wfo = :wfo "
         if wfo == "_ALL":
             wfo_limiter = ""
-        title2 = f"NWS {ctx['_sname']}"
+        title2 = f"NWS {ctx.sname}"
         if wfo == "_ALL":
             title2 = "All NWS Offices"
     else:
@@ -187,7 +182,7 @@ def plotter(ctx: dict):
         params["state"] = state
         title2 = f"{state_names[state]}"
 
-    myfilter = ctx["filter"]
+    myfilter = ctx.filter
     if myfilter == "NONE":
         tlimiter = ""
     elif myfilter == "NRS":
@@ -231,14 +226,14 @@ def plotter(ctx: dict):
         now += timedelta(days=1)
     for dt, row in df.iterrows():
         data[dt] = {"val": row["count"]}
-    dd = params["tzname"] if ctx["daytz"] == "local" else "12 UTC to 12 UTC"
+    dd = params["tzname"] if ctx.daytz == "local" else "12 UTC to 12 UTC"
     fig = calendar_plot(
         sts,
         ets,
         data,
         apctx=ctx,
-        cmap=ctx["cmap"],
-        heatmap=(ctx["heatmap"] == "yes"),
+        cmap=ctx.cmap,
+        heatmap=(ctx.heatmap == "yes"),
         title=f"{title2} :: Preliminary/Unfiltered Local Storm Reports",
         subtitle=(
             f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {dd}. "

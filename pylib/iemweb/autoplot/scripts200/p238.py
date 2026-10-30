@@ -3,11 +3,22 @@ This app generates maps of yearly USDA NASS county yield estimates.  It is a
 bit of a work in progress yet, but will be added to as interest is shown!
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, pretty_bins
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "corn": "Corn Grain",
@@ -20,55 +31,43 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "nass": True}
-    desc["arguments"] = [
-        {
-            "type": "year",
-            "min": 1981,
-            "default": utc().year - 1,
-            "name": "year",
-            "label": "Select year to display",
-        },
-        {
-            "type": "csector",
-            "name": "csector",
-            "default": "IA",
-            "label": "Select state/sector",
-        },
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "corn",
-            "name": "crop",
-            "label": "Select Crop",
-        },
-        {
-            "type": "select",
-            "options": PDICT3,
-            "default": "departure",
-            "name": "var",
-            "label": "Select variable to plot",
-        },
-        {
-            "type": "select",
-            "label": "Label Values?",
-            "default": "yes",
-            "options": PDICT2,
-            "name": "ilabel",
-        },
-        dict(type="cmap", name="cmap", default="BrBG", label="Color Ramp:"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    year: Annotated[
+        int,
+        YearArg(
+            min=1981,
+            label="Select year to display",
+            default=lambda: utc().year - 1,
+        ),
     ]
-    return desc
+    csector: Annotated[str, CSectorArg(label="Select state/sector")] = "IA"
+    crop: Annotated[str, SelectArg(options=PDICT, label="Select Crop")] = (
+        "corn"
+    )
+    var: Annotated[
+        str, SelectArg(options=PDICT3, label="Select variable to plot")
+    ] = "departure"
+    ilabel: Annotated[
+        str, SelectArg(label="Label Values?", options=PDICT2)
+    ] = "yes"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "BrBG"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, nass=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    year1 = max(ctx["year"] - 10, 1981)
-    params = {"y1": year1, "year": ctx["year"], "crop": ctx["crop"].upper()}
+    year1 = max(ctx.year - 10, 1981)
+    params = {"y1": year1, "year": ctx.year, "crop": ctx.crop.upper()}
     params["util"] = "GRAIN"
-    if ctx["crop"] == "soybeans":
+    if ctx.crop == "soybeans":
         params["util"] = "ALL UTILIZATION PRACTICES"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -100,22 +99,22 @@ def plotter(ctx: dict):
     title = "Yield"
     col = "num_value"
     bins = pretty_bins(df[col].min(), df[col].max())
-    if ctx["var"] == "departure":
-        title = f"Yield Departure from {year1}-{ctx['year'] - 1} Average"
+    if ctx.var == "departure":
+        title = f"Yield Departure from {year1}-{ctx.year - 1} Average"
         col = "delta"
         bins = centered_bins(max(df[col].abs().max(), 50))
     mp = MapPlot(
         apctx=ctx,
-        title=f"USDA NASS {ctx['crop'].capitalize()} {ctx['year']} {title}",
+        title=f"USDA NASS {ctx.crop.capitalize()} {ctx.year} {title}",
         stateborderwidth=3,
         nocaption=True,
     )
     mp.fill_ugcs(
         df[col].to_dict(),
         bins=bins,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         units="bu/ac",
-        ilabel=ctx["ilabel"] == "yes",
+        ilabel=ctx.ilabel == "yes",
         lblformat="%.1f",
         labelbuffer=1,
     )

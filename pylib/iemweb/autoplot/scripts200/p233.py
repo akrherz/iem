@@ -6,65 +6,74 @@ but as yearly and monthly totals.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    jan1 = today.replace(month=1, day=1)
-    desc["arguments"] = [
-        dict(
-            type="date",
-            name="sdate",
-            default=jan1.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date (inclusive):",
             min="1986/01/01",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            label="End Date (inclusive):",
-            min="1986/01/01",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            all=True,
-            default="DMX",
-            label="Select WFO:",
-        ),
-        dict(
-            type="select",
-            name="heatmap",
-            options=PDICT,
-            default="yes",
-            label="Colorize calendar cells based on values?",
+            default=lambda: (
+                date.today().replace(month=1, day=1).strftime("%Y/%m/%d")
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            label="End Date (inclusive):",
+            min="1986/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
+        ),
+    ]
+    wfo: Annotated[
+        str, NetworkSelectArg(network="WFO", all=True, label="Select WFO:")
+    ] = "DMX"
+    heatmap: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Colorize calendar cells based on values?"
+        ),
+    ] = "yes"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
-    sts = ctx["sdate"]
-    ets = ctx["edate"]
+    sts = ctx.sdate
+    ets = ctx.edate
     if (ets - sts).days > 366:
         raise NoDataFound("Chart duration needs to be less than 1 year.")
-    wfo = ctx["wfo"]
+    wfo = ctx.wfo
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
     params["sts"] = sts - timedelta(days=2)
@@ -80,7 +89,7 @@ def plotter(ctx: dict):
     params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
     if wfo == "_ALL":
         wfo_limiter = ""
-    title2 = f"NWS {ctx['_sname']}"
+    title2 = f"NWS {ctx.sname}"
     if wfo == "_ALL":
         title2 = "All NWS Offices"
     with get_sqlalchemy_conn("postgis") as conn:
@@ -111,7 +120,7 @@ def plotter(ctx: dict):
         ets,
         data,
         apctx=ctx,
-        heatmap=(ctx["heatmap"] == "yes"),
+        heatmap=(ctx.heatmap == "yes"),
         title=f"Number of SPS Polygons for {title2} by Local Calendar Date",
         subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}",
     )

@@ -4,7 +4,7 @@ approachable frontend is to visit the <a href="/wx/afos/list.phtml">NWS Text
 by WFO</a> page and click on the SPS product you are interested in.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -16,6 +16,14 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
 from pyiem.util import LOG, utc
 from sqlalchemy.engine import Connection
+
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -33,44 +41,42 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    desc["defaults"] = {"_r": "t"}
-    desc["arguments"] = [
-        dict(
-            type="text",
-            name="pid",
-            default="202012300005-KDVN-WWUS83-SPSDVN",
-            label="IEM generated up to 35 char product identifier:",
-        ),
-        dict(
-            type="int",
-            default=0,
-            name="segnum",
-            label="Product Segment Number (starts at 0):",
-        ),
-        {
-            "type": "select",
-            "name": "n",
-            "default": "auto",
-            "label": "Should a NEXRAD Mosaic by overlain:",
-            "options": PDICT3,
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    pid: Annotated[
+        str, TextArg(label="IEM generated up to 35 char product identifier:")
+    ] = "202012300005-KDVN-WWUS83-SPSDVN"
+    segnum: Annotated[
+        int, IntArg(label="Product Segment Number (starts at 0):")
+    ] = 0
+    n: Annotated[
+        str,
+        SelectArg(label="Should a NEXRAD Mosaic by overlain:", options=PDICT3),
+    ] = "auto"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=3600,
+        defaults={"_r": "t"},
+    )
 
 
 @with_sqlalchemy_conn("postgis")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    pid = ctx["pid"][:35]
+    pid = ctx.pid[:35]
     if len(pid) < 30 or any(not pid[x].isdigit() for x in range(4)):
         raise NoDataFound("Invalid pid provided.")
     prodyear = int(pid[:4])
     if prodyear < 1980 or prodyear > utc().year + 1:
         raise NoDataFound("Invalid pid provided.")
-    segnum = ctx["segnum"]
+    segnum = ctx.segnum
     nt = NetworkTable("WFO")
 
     # Compute a population estimate
@@ -232,8 +238,8 @@ def plotter(ctx: dict, conn: Connection | None = None):
         )
     else:
         # disable RADAR if auto and since we have no polygon
-        if ctx["n"] == "auto":
-            ctx["n"] = "off"
+        if ctx.n == "auto":
+            ctx.n = "off"
         mp.fill_ugcs(
             ugcs,
             ec="r",
@@ -244,7 +250,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
             zorder=Z_OVERLAY2 - 1,
             is_firewx=is_fwx,
         )
-    if ctx["n"] != "off":
+    if ctx.n != "off":
         prod = "N0Q" if df["issue"].iloc[0].year > 2010 else "N0R"
         radtime = mp.overlay_nexrad(
             df["issue"].iloc[0].to_pydatetime(), product=prod

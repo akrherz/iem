@@ -10,7 +10,9 @@ with.
 </p>
 """
 
+import datetime as dt
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.patches import Rectangle
@@ -20,6 +22,15 @@ from pyiem.plot import figure
 from pyiem.reference import state_names
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -83,67 +94,48 @@ DAYS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="outlook_type",
-            options=PDICT,
-            default="C",
-            label="Select Outlook Type",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    outlook_type: Annotated[
+        str, SelectArg(options=PDICT, label="Select Outlook Type")
+    ] = "C"
+    day: Annotated[
+        str, SelectArg(options=DAYS, label="Select Day Outlook")
+    ] = "1"
+    w: Annotated[
+        str, SelectArg(options=PDICT2, label="How to summarize data:")
+    ] = "wfo"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO (when appropriate):"
         ),
-        dict(
-            type="select",
-            name="day",
-            options=DAYS,
-            default="1",
-            label="Select Day Outlook",
-        ),
-        dict(
-            type="select",
-            name="w",
-            options=PDICT2,
-            default="wfo",
-            label="How to summarize data:",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO (when appropriate):",
-        ),
-        dict(
-            type="state",
-            name="mystate",
-            default="IA",
-            label="Select State (when appropriate):",
-        ),
-        ARG_FEMA,
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAZ048",
-            label="Select UGC Zone/County (when appropriate):",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month(s) Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="date",
-            name="date",
+    ] = "DMX"
+    mystate: Annotated[
+        str, StateArg(label="Select State (when appropriate):")
+    ] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    ugc: Annotated[
+        str, UgcArg(label="Select UGC Zone/County (when appropriate):")
+    ] = "IAZ048"
+    month: Annotated[
+        str, SelectArg(label="Month(s) Limiter", options=MDICT)
+    ] = "all"
+    date: Annotated[
+        dt.date | None,
+        DateArg(
             label="Set retroactive date (exclude events on or after date):",
-            optional=True,
-            default=f"{date.today():%Y/%m/%d}",
+            default=lambda: f"{date.today():%Y/%m/%d}",
         ),
-    ]
-    return desc
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def clean_legacy(df: pd.DataFrame) -> pd.DataFrame:
@@ -165,22 +157,22 @@ def clean_legacy(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    wfo = ctx["wfo"]
-    outlook_type = ctx["outlook_type"]
-    day = int(ctx["day"])
-    ugc = ctx["ugc"]
+    wfo = ctx.wfo
+    outlook_type = ctx.outlook_type
+    day = int(ctx.day)
+    ugc = ctx.ugc
 
     params = {
         "day": day,
         "outlook_type": outlook_type if outlook_type in ["F", "E"] else "C",
     }
     date_limiter = ""
-    if ctx.get("date") is not None:
+    if ctx.date is not None:
         date_limiter = " and outlook_date < :date "
-        params["date"] = ctx["date"]
-    month = ctx["month"]
+        params["date"] = ctx.date
+    month = ctx.month
     months = month2months(month)
     if month != "all":
         date_limiter = (
@@ -204,7 +196,7 @@ def plotter(ctx: dict):
     elif outlook_type == "W":
         category = "WIND"
     params["category"] = category
-    if ctx["w"] == "all":
+    if ctx.w == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
                 sql_helper(
@@ -228,7 +220,7 @@ def plotter(ctx: dict):
             )
         title2 = "Contiguous US"
     else:
-        if ctx["w"] == "wfo":
+        if ctx.w == "wfo":
             table = "cwa"
             abbrcol = "wfo"
             geoval = wfo
@@ -236,13 +228,13 @@ def plotter(ctx: dict):
             if wfo not in ctx["_nt"].sts:
                 raise NoDataFound("Unknown station metadata.")
             title2 = f"NWS {ctx['_nt'].sts[wfo]['name']} [{wfo}]"
-        elif ctx["w"] == "fema":
+        elif ctx.w == "fema":
             table = "fema_regions"
             abbrcol = "region"
             geomcol = "geom"
-            geoval = ctx["fema"]
+            geoval = ctx.fema
             title2 = f"FEMA Region {geoval}"
-        elif ctx["w"] == "ugc":
+        elif ctx.w == "ugc":
             table = "ugcs"
             abbrcol = "ugc"
             geomcol = "simple_geom"
@@ -262,8 +254,8 @@ def plotter(ctx: dict):
             table = "states"
             geomcol = "the_geom"
             abbrcol = "state_abbr"
-            geoval = ctx["mystate"]
-            title2 = state_names[ctx["mystate"]]
+            geoval = ctx.mystate
+            title2 = state_names[ctx.mystate]
 
         params["geoval"] = geoval
         with get_sqlalchemy_conn("postgis") as conn:
@@ -303,8 +295,8 @@ def plotter(ctx: dict):
     df["plotted"] = True
     df = clean_legacy(df)
     _ll = ""
-    if ctx.get("date") is not None:
-        _ll = f"Prior to {ctx['date']:%-d %b %Y}, "
+    if ctx.date is not None:
+        _ll = f"Prior to {ctx.date:%-d %b %Y}, "
     title = (
         f"{_ll}Most Recent {'WPC' if outlook_type == 'E' else 'SPC'} Day "
         f"{day} {PDICT[outlook_type]} Outlook{title3} for {title2}"

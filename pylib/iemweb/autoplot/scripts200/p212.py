@@ -13,6 +13,7 @@ seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -21,6 +22,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import mm2inch
+
+from iemweb.autoplot.description import (
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "00": "00 UTC",
@@ -66,52 +76,42 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["highcharts"] = True
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="RAOB",
-            default="_OAX",
-            label="Select Station:",
-        ),
-        dict(
-            type="year",
-            min=1946,
-            default=date.today().year,
-            name="year",
-            label="Year to Plot",
-        ),
-        dict(
-            type="select",
-            name="hour",
-            default="00",
-            options=PDICT,
-            label="Which Routine Sounding:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpc",
-            options=PDICT3,
-            label="Which Sounding Variable to Plot:",
-        ),
-        dict(
-            type="int",
-            name="level",
-            default=500,
-            label="Which Pressure (hPa) level:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="RAOB", label="Select Station:")
+    ] = "_OAX"
+    year: Annotated[
+        int,
+        YearArg(
+            min=1946, label="Year to Plot", default=lambda: date.today().year
         ),
     ]
-    return desc
+    hour: Annotated[
+        str, SelectArg(options=PDICT, label="Which Routine Sounding:")
+    ] = "00"
+    var: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="Which Sounding Variable to Plot:"),
+    ] = "tmpc"
+    level: Annotated[int, IntArg(label="Which Pressure (hPa) level:")] = 500
 
 
-def get_data(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=86400,
+        highcharts=True,
+    )
+
+
+def get_data(ctx: Params):
     """Get the data for what was choosen."""
-    station = ctx["station"]
+    station = ctx.station
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")
     stations = [station]
@@ -121,17 +121,17 @@ def get_data(ctx: dict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    varname = ctx["var"]
-    varname_final = ctx["var"]
+    varname = ctx.var
+    varname_final = ctx.var
     if varname == "pwater_in":
         varname = "pwater_mm"
-    level = ctx["level"]
+    level = ctx.level
     params = {
         "stations": stations,
         "level": level,
     }
     hlimiter = "and extract(hour from f.valid at time zone 'UTC') = any(:hrs)"
-    hour = ctx["hour"]
+    hour = ctx.hour
     if hour == "all":
         hlimiter = ""
     elif hour == "both":
@@ -189,59 +189,59 @@ def get_data(ctx: dict):
     dfin["sday"] = dfin.index.strftime("%m%d%H")
     # Drop leapday if this year does not have it.
     try:
-        date(ctx["year"], 2, 29)
+        date(ctx.year, 2, 29)
     except ValueError:
         dfin = dfin[dfin["sday"].str.slice(0, 4) != "0229"]
     # create the climatology dataframe
-    df = dfin[["sday", ctx["var"]]].groupby("sday").describe()
+    df = dfin[["sday", ctx.var]].groupby("sday").describe()
     # Colapse the multi-index columns
     df.columns = [col[1] for col in df.columns.values]
     # Merge in this year's obs
-    df[f"{ctx['var']}_{ctx['year']}"] = dfin[
-        dfin["year"] == ctx["year"]
-    ].set_index("sday")[ctx["var"]]
+    df[f"{ctx.var}_{ctx.year}"] = dfin[dfin["year"] == ctx.year].set_index(
+        "sday"
+    )[ctx.var]
     # Merge in the year of max value
     mx = (
-        dfin.sort_values(ctx["var"], ascending=False)
+        dfin.sort_values(ctx.var, ascending=False)
         .drop_duplicates("sday")
         .set_index("sday")
     )
-    df[f"{ctx['var']}_max_year"] = mx["year"]
+    df[f"{ctx.var}_max_year"] = mx["year"]
     # Merge in the year of max value
     mx = (
-        dfin.sort_values(ctx["var"], ascending=True)
+        dfin.sort_values(ctx.var, ascending=True)
         .drop_duplicates("sday")
         .set_index("sday")
     )
-    df[f"{ctx['var']}_min_year"] = mx["year"]
+    df[f"{ctx.var}_min_year"] = mx["year"]
 
     # Create a utc_valid column for later usage
     df["utc_valid"] = pd.to_datetime(
-        str(ctx["year"]) + df.index,
+        str(ctx.year) + df.index,
         format="%Y%m%d%H",
     ).tz_localize("UTC")
     ctx["df"] = df
     ctx["dfin"] = dfin
 
     ctx["title"] = (
-        f"{station} {name} {PDICT[ctx['hour']]} Sounding "
+        f"{station} {name} {PDICT[ctx.hour]} Sounding "
         f"({dfin['year'].index[0]:%Y-%m-%d %H}z - "
         f"{dfin['year'].index[-1]:%Y-%m-%d %H}z)\n"
         f"{PDICT3[varname]} {ctx['leveltitle']}"
     )
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Make highcharts output."""
     get_data(ctx)
     df = ctx["df"]
     df["ticks"] = df["utc_valid"].astype("int64") // 1e3
-    units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
-    myyearcol = f"{ctx['var']}_{ctx['year']}"
+    units = PDICT3[ctx.var].split()[-1].replace("(", "").replace(")", "")
+    myyearcol = f"{ctx.var}_{ctx.year}"
     title = ctx["title"].replace("\n", "\\n")
     tc = "ticks"
-    mx = df[f"{ctx['var']}_max_year"]
-    mn = df[f"{ctx['var']}_min_year"]
+    mx = df[f"{ctx.var}_max_year"]
+    mn = df[f"{ctx.var}_min_year"]
     containername = ctx["_e"]
     res = f"""
     var max_years = {mx.values.tolist()};
@@ -276,7 +276,7 @@ Highcharts.chart("{containername}", {{
         }},
         yAxis: {{
             title: {{
-                text: "{PDICT3[ctx["var"]]}"
+                text: "{PDICT3[ctx.var]}"
             }}
         }},
         tooltip: {{
@@ -287,7 +287,7 @@ Highcharts.chart("{containername}", {{
         }},
         series: [
             {{
-                name: "{" ".join(PDICT3[ctx["var"]].split()[:-1])}",
+                name: "{" ".join(PDICT3[ctx.var].split()[:-1])}",
                 data: {
         df[["ticks", myyearcol]].replace({np.nan: None}).values.tolist()
     },
@@ -353,19 +353,19 @@ Highcharts.chart("{containername}", {{
     return res.replace("None", "null")
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     get_data(ctx)
     df: pd.DataFrame = ctx["df"]
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
     ax.set_position([0.1, 0.1, 0.88, 0.8])
-    colname = f"{ctx['var']}_{ctx['year']}"
+    colname = f"{ctx.var}_{ctx.year}"
     x = df["utc_valid"].to_numpy()
     # Things could be too-irregular for a line plot
     ax.scatter(
         x,
         df[colname].to_numpy(),
-        label=str(ctx["year"]),
+        label=str(ctx.year),
         zorder=4,
         color="r",
         s=50,
@@ -387,8 +387,8 @@ def plotter(ctx: dict):
     )
     ax.plot(x, df["mean"].to_numpy(), color="k", zorder=3, label="Avg")
     # buffer out the yaxis some more
-    maxval = ctx["dfin"][ctx["var"]].max()
-    minval = ctx["dfin"][ctx["var"]].min()
+    maxval = ctx["dfin"][ctx.var].max()
+    minval = ctx["dfin"][ctx.var].min()
     drange = maxval - minval
     if drange > 0:
         ax.set_ylim(minval - drange * 0.1, maxval + drange * 0.1)
@@ -396,12 +396,12 @@ def plotter(ctx: dict):
 
     minmax = (
         ctx["dfin"]
-        .loc[:, ctx["var"]]
+        .loc[:, ctx.var]
         .groupby(lambda idx_: idx_.month)
         .agg(["max", "idxmax", "min", "idxmin"])
     )
     for month, row in minmax.iterrows():
-        sts = date(ctx["year"], int(month), 1)
+        sts = date(ctx.year, int(month), 1)
         ets = (sts + timedelta(days=35)).replace(day=1)
         ax.plot([sts, ets], [row["max"], row["max"]], zorder=3, color="b")
         ax.text(
@@ -426,11 +426,11 @@ def plotter(ctx: dict):
             bbox=dict(color="white", alpha=0.5),
         )
     ax.legend()
-    ax.set_ylabel(PDICT3[ctx["var"]])
+    ax.set_ylabel(PDICT3[ctx.var])
     ax.grid(True)
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %-d"))
-    ax.set_xlabel(f"Day of {ctx['year']}")
+    ax.set_xlabel(f"Day of {ctx.year}")
     if x[0] != x[-1]:
         ax.set_xlim(x[0], x[-1])
 

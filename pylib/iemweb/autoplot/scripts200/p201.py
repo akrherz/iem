@@ -26,7 +26,7 @@ for the given day.
 
 import calendar
 from datetime import date, timedelta
-from typing import Any
+from typing import Annotated, Any
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -39,6 +39,15 @@ from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "C": "Convective (Categorical)",
@@ -92,106 +101,91 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc: dict[str, Any] = {"description": __doc__, "data": True}
-    today = date.today()
-    jan1 = today.replace(month=1, day=1)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="mode",
-            default="cal",
-            label="Plotting Mode:",
-            options=MDICT,
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=jan1.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    mode: Annotated[str, SelectArg(label="Plotting Mode:", options=MDICT)] = (
+        "cal"
+    )
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date (inclusive):",
             min="1987/01/01",
+            default=lambda: (
+                date.today().replace(month=1, day=1).strftime("%Y/%m/%d")
+            ),
         ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            max=(today + timedelta(days=8)).strftime("%Y/%m/%d"),
+    ]
+    edate: Annotated[
+        date,
+        DateArg(
+            max=lambda: (date.today() + timedelta(days=8)).strftime(
+                "%Y/%m/%d"
+            ),
             label="End Date (inclusive):",
             min="1987/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(
-            type="select",
-            name="outlook_type",
-            options=PDICT,
-            default="C",
-            label="Select Outlook Type",
-        ),
-        dict(
-            type="select",
-            name="day",
-            options=DAYS,
-            default="1",
-            label="Select Day Outlook",
-        ),
-        {
-            "type": "select",
-            "label": "Optionally only plot this threshold value:",
-            "name": "just",
-            "default": "",
-            "options": {
+    ]
+    outlook_type: Annotated[
+        str, SelectArg(options=PDICT, label="Select Outlook Type")
+    ] = "C"
+    day: Annotated[
+        str, SelectArg(options=DAYS, label="Select Day Outlook")
+    ] = "1"
+    just: Annotated[
+        str,
+        SelectArg(
+            label="Optionally only plot this threshold value:",
+            options={
                 "": "All Thresholds",
                 **{k: k for k in COLORS},
             },
-        },
-        dict(
-            type="select",
-            name="w",
-            options=PDICT2,
-            default="wfo",
-            label="How to summarize data:",
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO (when appropriate):",
+    ] = ""
+    w: Annotated[
+        str, SelectArg(options=PDICT2, label="How to summarize data:")
+    ] = "wfo"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO (when appropriate):"
         ),
-        dict(
-            type="state",
-            name="mystate",
-            default="IA",
-            label="Select State (when appropriate):",
-        ),
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAZ048",
-            label="Select UGC Zone/County (when appropriate):",
-        ),
-        ARG_FEMA,
-        dict(
-            type="select",
+    ] = "DMX"
+    mystate: Annotated[
+        str, StateArg(label="Select State (when appropriate):")
+    ] = "IA"
+    ugc: Annotated[
+        str, UgcArg(label="Select UGC Zone/County (when appropriate):")
+    ] = "IAZ048"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    g: Annotated[
+        str,
+        SelectArg(
             options=PDICT3,
-            default="yes",
-            name="g",
             label="Include TSTM (general thunder) in generated calendar?",
         ),
-    ]
-    return desc
+    ] = "yes"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sts = ctx["sdate"]
-    ets = ctx["edate"]
+    sts = ctx.sdate
+    ets = ctx.edate
     if ets < sts:
         sts, ets = ets, sts
-    wfo = ctx["wfo"]
-    outlook_type = ctx["outlook_type"]
-    day = int(ctx["day"])
-    ugc = ctx["ugc"]
+    wfo = ctx.wfo
+    outlook_type = ctx.outlook_type
+    day = int(ctx.day)
+    ugc = ctx.ugc
 
     sqllimiter = ""
     category = "CATEGORICAL"
@@ -212,16 +206,16 @@ def plotter(ctx: dict):
         outlook_type_code = "C"
         category = "WIND"
     threshold_filter = ""
-    if ctx["just"]:
+    if ctx.just:
         threshold_filter = " and d.threshold = :just "
-    if ctx["w"] == "all":
+    if ctx.w == "all":
         params: dict[str, Any] = {
             "category": category,
             "day": day,
             "ot": outlook_type_code,
             "sts": sts,
             "ets": ets,
-            "just": ctx["just"],
+            "just": ctx.just,
             "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
         }
         with get_sqlalchemy_conn("postgis") as conn:
@@ -262,7 +256,7 @@ def plotter(ctx: dict):
             )
         title2 = "Contiguous US"
     else:
-        if ctx["w"] == "wfo":
+        if ctx.w == "wfo":
             table = "cwa"
             abbrcol = "wfo"
             geoval = wfo
@@ -270,7 +264,7 @@ def plotter(ctx: dict):
             if wfo not in ctx["_nt"].sts:
                 raise NoDataFound("Unknown station metadata.")
             title2 = f"NWS {ctx['_nt'].sts[wfo]['name']} [{wfo}]"
-        elif ctx["w"] == "ugc":
+        elif ctx.w == "ugc":
             table = "ugcs"
             abbrcol = "ugc"
             geomcol = "simple_geom"
@@ -286,18 +280,18 @@ def plotter(ctx: dict):
             if cursor.rowcount == 1:
                 name = cursor.fetchone()[0]
             title2 = f"{'County' if ugc[2] == 'C' else 'Zone'} [{ugc}] {name}"
-        elif ctx["w"] == "fema":
+        elif ctx.w == "fema":
             table = "fema_regions"
             abbrcol = "region"
             geomcol = "geom"
-            geoval = ctx["fema"]
-            title2 = f"FEMA Region {ctx['fema']}"
+            geoval = ctx.fema
+            title2 = f"FEMA Region {ctx.fema}"
         else:
             table = "states"
             geomcol = "the_geom"
             abbrcol = "state_abbr"
-            geoval = ctx["mystate"]
-            title2 = state_names[ctx["mystate"]]
+            geoval = ctx.mystate
+            title2 = state_names[ctx.mystate]
 
         params: dict[str, Any] = {
             "geoval": geoval,
@@ -306,7 +300,7 @@ def plotter(ctx: dict):
             "ot": outlook_type_code,
             "sts": sts,
             "ets": ets,
-            "just": ctx["just"],
+            "just": ctx.just,
             "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
         }
         with get_sqlalchemy_conn("postgis") as conn:
@@ -381,7 +375,7 @@ def plotter(ctx: dict):
             ),
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
-    jj = f"Only {ctx['just']}" if ctx["just"] else "Highest"
+    jj = f"Only {ctx.just}" if ctx.just else "Highest"
     title = (
         f"{jj} {'WPC' if outlook_type == 'E' else 'SPC'} Day "
         f"{day} {PDICT[outlook_type]} Outlook for {title2}"
@@ -392,7 +386,7 @@ def plotter(ctx: dict):
     )
     if outlook_type in ["H", "W", "T"]:
         subtitle += ", H/C denotes SIGN/CIG"
-    if ctx["mode"] == "cal":
+    if ctx.mode == "cal":
         fig = calendar_plot(
             sts,
             ets,

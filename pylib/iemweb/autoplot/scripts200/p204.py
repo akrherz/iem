@@ -6,6 +6,7 @@ a trailing number of days to evaluate the metric for.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -16,6 +17,14 @@ from pyiem.plot import figure_axes, get_cmap
 from seaborn import heatmap
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "trail_precip_percent": "Trailing XX Days Precip Percent of Average",
@@ -23,43 +32,40 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT,
-            default="trail_precip_percent",
-            name="var",
-            label="Available variables to plot:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Available variables to plot:")
+    ] = "trail_precip_percent"
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    days: Annotated[
+        int, IntArg(label="Trailing Number of Days (when appropriate):")
+    ] = 31
+    syear: Annotated[
+        int,
+        YearArg(
+            label="Start Year of Plot:", default=lambda: date.today().year - 20
         ),
-        ARG_STATION,
-        dict(
-            type="int",
-            name="days",
-            default="31",
-            label="Trailing Number of Days (when appropriate):",
-        ),
-        dict(
-            type="year",
-            default=(today.year - 20),
-            label="Start Year of Plot:",
-            name="syear",
-        ),
-        dict(
-            type="year",
-            default=today.year,
-            label="End Year (inclusive) of Plot:",
-            name="eyear",
-        ),
-        dict(type="cmap", name="cmap", default="RdBu", label="Color Ramp:"),
     ]
-    return desc
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="End Year (inclusive) of Plot:",
+            default=lambda: date.today().year,
+        ),
+    ]
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdBu"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -69,20 +75,20 @@ def plotter(ctx: dict):
             year from alldata WHERE station = :station ORDER by day ASC
             """),
             conn,
-            params={"station": ctx["station"]},
+            params={"station": ctx.station},
             index_col="day",
             parse_dates="day",
         )
     if df.empty:
         raise NoDataFound("Did not find any data for station!")
-    if ctx["var"] == "trail_precip_percent":
+    if ctx.var == "trail_precip_percent":
         climo = df[["precip", "sday"]].groupby("sday").mean()
         df["precip_avg"] = df.merge(
             climo, left_on="sday", right_index=True, suffixes=("", "_avg")
         )["precip_avg"]
         df["trail_precip_percent"] = (
-            df["precip"].rolling(ctx["days"]).sum()
-            / df["precip_avg"].rolling(ctx["days"]).sum()
+            df["precip"].rolling(ctx.days).sum()
+            / df["precip_avg"].rolling(ctx.days).sum()
             * 100.0
         )
         levels = [0, 25, 50, 75, 100, 150, 200, 250, 300]
@@ -96,21 +102,21 @@ def plotter(ctx: dict):
         levels = list(range(-20, 21, 4))
         label = "Temperature [°F] Departure"
 
-    baseyear = max([df["year"].min(), ctx["syear"]])
-    endyear = min([df["year"].max(), ctx["eyear"]])
+    baseyear = max([df["year"].min(), ctx.syear])
+    endyear = min([df["year"].max(), ctx.eyear])
     years = endyear - baseyear + 1
     if years < 1:
         raise NoDataFound("Station data does not exist for the period picked.")
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     norm = mpcolors.BoundaryNorm(levels, cmap.N)
     data = np.full((years, 366), np.nan)
     df2 = df[(df["year"] >= baseyear) & (df["year"] <= endyear)]
     for day, row in df2.iterrows():
-        data[day.year - baseyear, row["doy"] - 1] = row[ctx["var"]]
+        data[day.year - baseyear, row["doy"] - 1] = row[ctx.var]
 
     title = (
-        f"{ctx['_sname']} ({ctx['syear']}-{ctx['eyear']})\n"
-        f"{PDICT[ctx['var']].replace('XX', str(ctx['days']))}"
+        f"{ctx.sname} ({ctx.syear}-{ctx.eyear})\n"
+        f"{PDICT[ctx.var].replace('XX', str(ctx.days))}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     heatmap(

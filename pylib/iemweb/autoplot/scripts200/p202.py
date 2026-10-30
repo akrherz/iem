@@ -14,6 +14,7 @@ the plotted lines covering the period of record data.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import metpy.calc as mcalc
@@ -26,6 +27,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    HourArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temperature [°F]",
@@ -39,78 +49,66 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        dict(type="hour", name="h1", default=6, label="First Hour:"),
-        dict(
-            type="hour",
-            name="h2",
-            default=18,
-            label="Second (subsequent) Hour:",
-        ),
-        dict(
-            type="year",
-            name="y1",
-            default=date.today().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    h1: Annotated[int, HourArg(label="First Hour:")] = 6
+    h2: Annotated[int, HourArg(label="Second (subsequent) Hour:")] = 18
+    y1: Annotated[
+        int,
+        YearArg(
             label="Year to highlight in chart:",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="year",
-            name="y2",
-            default=date.today().year,
-            label="Additional Year to plot (optional):",
-            optional=True,
-        ),
-        dict(
-            type="year",
-            name="y3",
-            default=date.today().year,
-            label="Additional Year to plot (optional)",
-            optional=True,
-        ),
-        dict(
-            type="year",
-            name="y4",
-            default=date.today().year,
-            label="Additional Year to plot (optional)",
-            optional=True,
-        ),
-        dict(
-            type="select",
-            name="v",
-            default="tmpf",
-            label="Variable to Compare:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="opt",
-            default="no",
-            label="Accumulate the daily plot?",
-            options=PDICT2,
-        ),
-        dict(
-            type="int",
-            name="smooth",
-            default=14,
-            label="Centered smooth of data over given days",
-            ge=1,
-            le=60,
-        ),
-        dict(type="cmap", name="cmap", default="binary", label="Color Ramp:"),
     ]
-    return desc
+    y2: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to plot (optional):",
+            default=lambda: date.today().year,
+        ),
+    ] = None
+    y3: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to plot (optional)",
+            default=lambda: date.today().year,
+        ),
+    ] = None
+    y4: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to plot (optional)",
+            default=lambda: date.today().year,
+        ),
+    ] = None
+    v: Annotated[
+        str, SelectArg(label="Variable to Compare:", options=PDICT)
+    ] = "tmpf"
+    opt: Annotated[
+        str, SelectArg(label="Accumulate the daily plot?", options=PDICT2)
+    ] = "no"
+    smooth: Annotated[
+        int,
+        IntArg(label="Centered smooth of data over given days", ge=1, le=60),
+    ] = 14
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "binary"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    h1 = int(ctx["h1"])
-    h2 = int(ctx["h2"])
-    varname = ctx["v"]
+    station = ctx.zstation
+    h1 = int(ctx.h1)
+    h2 = int(ctx.h2)
+    varname = ctx.v
 
     tzname = ctx["_nt"].sts[station]["tzname"]
 
@@ -181,22 +179,20 @@ def plotter(ctx: dict):
     subtitle = f"{ets:%-I %p} minus {sts:%-I %p} ({sd}) (timezone: {tzname})"
     total_years = df["year"].max() - df["year"].min()
     title = (
-        f"{ctx['_sname']}:: {PDICT[varname]} Difference "
+        f"{ctx.sname}:: {PDICT[varname]} Difference "
         f"({df['year'].min():.0f}-{df['year'].max():.0f})"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
-    if ctx["opt"] == "no":
-        ax.set_xlabel(
-            f"Plotted lines are smoothed over {ctx['smooth']:.0f} days"
-        )
-    ast = "Accumulated Sum" if ctx["opt"] == "yes" else ""
+    if ctx.opt == "no":
+        ax.set_xlabel(f"Plotted lines are smoothed over {ctx.smooth:.0f} days")
+    ast = "Accumulated Sum" if ctx.opt == "yes" else ""
     ax.set_ylabel(f"{PDICT[varname]} {ast} Difference")
 
-    if ctx["opt"] == "no":
+    if ctx.opt == "no":
         # Find a reasonable ymin that gets most of the data
         ymax = df["delta"].abs().describe(percentiles=[0.95])["95%"]
         # Histogram
-        dy = 0.25 if ctx["v"] == "q" else 1.0
+        dy = 0.25 if ctx.v == "q" else 1.0
         H, xedges, yedges = np.histogram2d(
             df["doy"].to_numpy(),
             df["delta"].to_numpy(),
@@ -205,7 +201,7 @@ def plotter(ctx: dict):
                 np.arange(-ymax - 0.5, ymax + 0.5, dy),
             ),
         )
-        cmap = get_cmap(ctx["cmap"]).with_extremes(under="tan")
+        cmap = get_cmap(ctx.cmap).with_extremes(under="tan")
         # Days per year / 7
         data = H.transpose() / 7.0 / total_years
         bins = pretty_bins(0, np.max(data))
@@ -230,10 +226,10 @@ def plotter(ctx: dict):
     gdf = (
         df.groupby("doy")
         .mean(numeric_only=True)
-        .rolling(ctx["smooth"], min_periods=1, center=True)
+        .rolling(ctx.smooth, min_periods=1, center=True)
         .mean()
     )
-    y = gdf["delta"] if ctx["opt"] == "no" else gdf["delta"].cumsum()
+    y = gdf["delta"] if ctx.opt == "no" else gdf["delta"].cumsum()
     ax.plot(
         gdf.index.values,
         y,
@@ -254,10 +250,10 @@ def plotter(ctx: dict):
             gdf = (
                 df2.groupby("doy")
                 .mean(numeric_only=True)
-                .rolling(ctx["smooth"], min_periods=1, center=True)
+                .rolling(ctx.smooth, min_periods=1, center=True)
                 .mean()
             )
-            y = gdf["delta"] if ctx["opt"] == "no" else gdf["delta"].cumsum()
+            y = gdf["delta"] if ctx.opt == "no" else gdf["delta"].cumsum()
             ax.plot(gdf.index.values, y, label=str(year), lw=2, zorder=10)
 
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))

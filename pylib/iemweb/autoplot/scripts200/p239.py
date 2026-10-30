@@ -19,6 +19,9 @@ likely implies a statistically significant relationship.
 </p>
 """
 
+from datetime import date
+from typing import Annotated
+
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
@@ -33,6 +36,13 @@ from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "corn": "Corn Grain",
@@ -45,48 +55,41 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "nass": True}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "corn",
-            "name": "crop",
-            "label": "Select Crop",
-        },
-        ARG_STATION,
-        {
-            "type": "sday",
-            "default": "0501",
-            "name": "sdate",
-            "label": "Select inclusive start day of the year",
-        },
-        {
-            "type": "sday",
-            "default": "0930",
-            "name": "edate",
-            "label": "Select inclusive end day of the year",
-        },
-        {
-            "type": "select",
-            "options": PDICT2,
-            "label": "From which metric to compute yield departure.",
-            "default": "trail10",
-            "name": "how",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "RdYlGn",
-            "label": "Color Ramp:",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    crop: Annotated[str, SelectArg(options=PDICT, label="Select Crop")] = (
+        "corn"
+    )
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sdate: Annotated[
+        date,
+        SDayArg(
+            label="Select inclusive start day of the year", default="0501"
+        ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        SDayArg(label="Select inclusive end day of the year", default="0930"),
+    ]
+    how: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="From which metric to compute yield departure.",
+        ),
+    ] = "trail10"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdYlGn"
 
 
-def get_obsdf(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, nass=True
+    )
+
+
+def get_obsdf(ctx: Params):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -109,9 +112,9 @@ def get_obsdf(ctx: dict):
             conn,
             index_col="year",
             params={
-                "station": ctx["station"],
-                "sts": ctx["sdate"].strftime("%m%d"),
-                "ets": ctx["edate"].strftime("%m%d"),
+                "station": ctx.station,
+                "sts": ctx.sdate.strftime("%m%d"),
+                "ets": ctx.edate.strftime("%m%d"),
             },
         )
     return df
@@ -175,19 +178,19 @@ def bling(df: pd.DataFrame, ax: Axes, col: str, dcol: str):
     )
 
 
-def get_nass(ctx: dict) -> pd.DataFrame:
+def get_nass(ctx: Params) -> pd.DataFrame:
     """Get NASS."""
-    county = ctx["_nt"].sts[ctx["station"]]["ugc_county"]
+    county = ctx["_nt"].sts[ctx.station]["ugc_county"]
     ccol = "state_alpha || 'C' || county_ansi"
     agg_level_desc = "COUNTY"
-    if ctx["station"].endswith("0000"):
+    if ctx.station.endswith("0000"):
         ccol = "state_alpha"
-        county = ctx["station"][:2]
+        county = ctx.station[:2]
         agg_level_desc = "STATE"
     with get_sqlalchemy_conn("coop") as conn:
         # sometimes we have dups :/
         ut = {"corn": "GRAIN", "soybeans": "ALL UTILIZATION PRACTICES"}[
-            ctx["crop"]
+            ctx.crop
         ]
         df = pd.read_sql(
             sql_helper(
@@ -203,7 +206,7 @@ def get_nass(ctx: dict) -> pd.DataFrame:
             conn,
             params={
                 "c": county,
-                "cr": ctx["crop"].upper(),
+                "cr": ctx.crop.upper(),
                 "ut": ut,
                 "agl": agg_level_desc,
             },
@@ -214,12 +217,12 @@ def get_nass(ctx: dict) -> pd.DataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    county = ctx["_nt"].sts[ctx["station"]]["ugc_county"]
+    county = ctx["_nt"].sts[ctx.station]["ugc_county"]
     countyname = get_countyname(county)
-    if ctx["station"].endswith("0000"):
-        county = ctx["station"][:2]
+    if ctx.station.endswith("0000"):
+        county = ctx.station[:2]
         countyname = state_names[county]
     obsdf = get_obsdf(ctx)
     df = get_nass(ctx)
@@ -238,22 +241,22 @@ def plotter(ctx: dict):
     for col in obsdf.columns:
         df[col] = obsdf[col]
 
-    dcol = f"{ctx['how']}_departure"
+    dcol = f"{ctx.how}_departure"
     deltas = df[dcol].to_numpy()
     extent = df[dcol].abs().max()
     if extent == 0:
         raise NoDataFound("No departures found, cannot make a plot.")
     bins = pretty_bins(0 - extent, extent)
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
     df["color"] = list(cmap(norm(deltas)))
     colors = df["color"].values
     fig = figure(
-        title=f"({ctx['sdate']:%-d %b}-{ctx['edate']:%-d %b}) {ctx['_sname']}",
+        title=f"({ctx.sdate:%-d %b}-{ctx.edate:%-d %b}) {ctx.sname}",
         subtitle=(
-            f"USDA NASS {PDICT[ctx['crop']]} "
+            f"USDA NASS {PDICT[ctx.crop]} "
             f"Yield Estimates for {countyname} ({county}), "
-            f"Departures Against Trendline: {PDICT2[ctx['how']]}"
+            f"Departures Against Trendline: {PDICT2[ctx.how]}"
         ),
     )
     mainax_width = 0.4

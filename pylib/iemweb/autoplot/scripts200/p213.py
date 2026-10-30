@@ -13,7 +13,9 @@ results are found with shorter time windows of time to compute the
 percentiles.
 """
 
+import datetime as dt
 from datetime import date, datetime
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -26,6 +28,14 @@ from pyiem.plot import figure, get_cmap
 from pyiem.plot.util import fitbox
 
 from iemweb.autoplot import get_monofont
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temperature [F]",
@@ -41,40 +51,37 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=date.today().strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Date of Interest (used to select week, month, year):",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(
-            type="select",
-            name="v",
-            default="tmpf",
-            label="Variable to Compute Percentiles For:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="opt",
-            default="month",
-            label="Date Range to Compute Percentiles For:",
-            options=PDICT2,
-        ),
-        dict(type="cmap", name="cmap", default="hsv", label="Color Ramp:"),
     ]
-    return desc
+    v: Annotated[
+        str,
+        SelectArg(label="Variable to Compute Percentiles For:", options=PDICT),
+    ] = "tmpf"
+    opt: Annotated[
+        str,
+        SelectArg(
+            label="Date Range to Compute Percentiles For:", options=PDICT2
+        ),
+    ] = "month"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "hsv"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def print_table(fig, df: pd.DataFrame, varname):
@@ -106,12 +113,12 @@ def print_table(fig, df: pd.DataFrame, varname):
         fig.text(xpos, ypos, label, fontproperties=monofont)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    dt: datetime = ctx["date"]
-    opt = ctx["opt"]
-    varname = ctx["v"]
+    station = ctx.zstation
+    dt: datetime = ctx.date
+    opt = ctx.opt
+    varname = ctx.v
 
     tzname = ctx["_nt"].sts[station]["tzname"]
     params = {
@@ -192,7 +199,7 @@ def plotter(ctx: dict):
     sd = fig.add_axes((0.61, 0.13, 0.1, 0.35))
     # Plot total percentiles on the figure
     print_table(fig, obsdf, varname)
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     for hr, gdf in qtile.groupby("hr"):
         tp.plot(
             gdf["quantile"].values * 100.0,
