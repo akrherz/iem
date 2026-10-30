@@ -6,8 +6,7 @@ Called from RUN_40_AFTER.sh
 """
 
 import sys
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -123,7 +122,7 @@ def main(reprocess: bool, dt: datetime | None, station: str | None):
     sts = datetime.now() - timedelta(days=1)
     if dt is not None:
         sts = dt
-    basets = sts.replace(tzinfo=ZoneInfo("UTC")) - timedelta(days=2)
+    basets = sts.replace(tzinfo=UTC) - timedelta(days=2)
     ets = sts + timedelta(days=1)
     params["beginDate"] = sts.strftime("%Y-%m-%d %H:%M")
     params["endDate"] = ets.strftime("%Y-%m-%d %H:%M")
@@ -166,7 +165,7 @@ def main(reprocess: bool, dt: datetime | None, station: str | None):
                     valid = (
                         datetime.strptime(val["date"][:16], "%Y-%m-%d %H:%M")
                         + offset
-                    ).replace(tzinfo=ZoneInfo("UTC"))
+                    ).replace(tzinfo=UTC)
                     if not reprocess and valid < maxts.get(sid, basets):
                         continue
                     if val.get("value") is None:

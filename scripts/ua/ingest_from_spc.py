@@ -201,7 +201,7 @@ def main(valid, station):
                 LOG.warning("skipping locked %s", sid)
                 continue
             # arb decision that we have enough data already
-            if obs.at[sid, "nullcnt"] < 10 < obs.at[sid, "count"]:
+            if obs.loc[sid, "nullcnt"] < 10 < obs.at[sid, "count"]:
                 continue
         progress.set_description(sid)
         sid3 = sid.removeprefix("K")

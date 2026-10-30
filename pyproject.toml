@@ -85,3 +85,9 @@ builtins-strict-checking = false
 "tests/**/*.py" = [
     "S101",  # assert
 ]
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]

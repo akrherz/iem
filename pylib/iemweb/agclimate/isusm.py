@@ -12,6 +12,7 @@ https://mesonet.agron.iastate.edu/agclimate/isusm.py?v=dwpf
 """
 
 from io import BytesIO
+from typing import Annotated
 
 from pydantic import Field
 from pyiem.database import get_dbconn
@@ -31,14 +32,14 @@ CTX = {
 class MyModel(CGIModel):
     """See how we are called."""
 
-    v: str = Field("tmpf", description="Variable to plot")
+    v: Annotated[str, Field(description="Variable to plot")] = "tmpf"
 
 
 def get_currents():
     """Return dict of current values"""
-    dbconn = get_dbconn("iem")
+    dbconn = get_dbconn("iem", rw=False)
     cursor = dbconn.cursor()
-    dbconn2 = get_dbconn("isuag")
+    dbconn2 = get_dbconn("isuag", rw=False)
     cursor2 = dbconn2.cursor()
     data = {}
     cursor.execute(

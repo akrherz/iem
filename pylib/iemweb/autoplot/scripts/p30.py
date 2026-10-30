@@ -63,7 +63,7 @@ def plot_trailing(ax: Axes, df: pd.DataFrame, colname: str):
     trail = [np.mean(vals[i - 30 : i]) for i in range(30, len(vals))]
     ax.plot(df.index.values[30:], trail, lw=4, color="yellow", zorder=4)
     ax.plot(
-        df.index.values[30:],
+        df.index[30:],
         trail,
         lw=1.5,
         color="red",
@@ -72,7 +72,7 @@ def plot_trailing(ax: Axes, df: pd.DataFrame, colname: str):
     )
     ax.axhline(df[colname].mean(), lw=2, color="k", zorder=2, label="Avg")
     ax.text(
-        df.index.values[-1] + 2,
+        df.index[-1] + 2,
         df[colname].mean(),
         f"{df[colname].mean():.0f}",
         ha="left",

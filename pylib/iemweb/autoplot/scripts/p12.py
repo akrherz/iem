@@ -131,12 +131,8 @@ def plotter(ctx: dict):
     if df2.empty:
         raise NoDataFound("No data found.")
     tl = PDICT[f"{extrenum}_{varname}_{direction}"]
-    title = (
-        f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days\n"
-        f"{tl} {threshold}"
-        "°F"
-    )
-    fig = figure(title=title, apctx=ctx)
+    title = f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days"
+    fig = figure(title=title, subtitle=f"{tl} {threshold}°F", apctx=ctx)
     # Main plot gets 75% of vertical space
     ax_box = fig.add_axes((0.1, 0.32, 0.65, 0.05), frameon=False)
     ax = fig.add_axes((0.1, 0.37, 0.65, 0.53))

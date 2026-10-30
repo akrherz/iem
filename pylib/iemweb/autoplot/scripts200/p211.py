@@ -6,7 +6,8 @@ worth of data at this time.  Any reported 1 minute precipitation value
 over 0.50 inches is omitted as bad data.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -28,7 +29,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
+    desc: dict[str, Any] = {"data": True, "description": __doc__}
     sts = utc() - timedelta(days=5)
     desc["gallery"] = {
         "sts": "2023-08-05 0600",
@@ -90,7 +91,7 @@ def get_data(ctx):
     if df.empty:
         raise NoDataFound("No database entries found for station and dates.")
     # assign the UTC timezone to the index
-    df.index = df.index.tz_localize(timezone.utc)
+    df.index = pd.DatetimeIndex(df.index).tz_localize(UTC)
     # Complete the dataframe for the time period of interest
     df = df.reindex(
         pd.date_range(
@@ -189,7 +190,7 @@ def make_precip_plot(ctx):
     )
     title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Rainfall"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
-    ax.set_position([0.06, 0.1, 0.81, 0.78])
+    ax.set_position((0.06, 0.1, 0.81, 0.78))
 
     ax.bar(
         df["local_valid"].to_numpy(),
@@ -363,7 +364,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
     # Make timestamps tzaware
     for col in ["sts", "ets"]:
-        ctx[col] = ctx[col].replace(tzinfo=timezone.utc)
+        ctx[col] = ctx[col].replace(tzinfo=UTC)
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=5):
         raise NoDataFound("Too much data requested, only < 5 days supported.")
     ctx["df"] = get_data(ctx)

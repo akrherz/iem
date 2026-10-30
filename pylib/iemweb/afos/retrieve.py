@@ -112,9 +112,10 @@ fmt=text&sdate=2024-01-01T00:00Z&edate=2025-12-31T23:59Z&limit=1&order=asc
 
 import re
 import zipfile
-from datetime import datetime, timedelta, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from io import BytesIO, StringIO
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -215,7 +216,7 @@ class Schema(CGIModel):
         ),
     ] = 1
     matches: Annotated[
-        str,
+        str | None,
         Field(
             description=(
                 "Attempt a simple substring search within candidate products "
@@ -300,14 +301,14 @@ class Schema(CGIModel):
     def rectify_model(self):
         """Apply some business logic to what the user provided.."""
         newsdate = (
-            self.sdate.replace(tzinfo=timezone.utc)
+            self.sdate.replace(tzinfo=UTC)
             if self.sdate.tzinfo is None
-            else self.sdate.astimezone(timezone.utc)
+            else self.sdate.astimezone(UTC)
         )
         newedate = (
-            self.edate.replace(tzinfo=timezone.utc)
+            self.edate.replace(tzinfo=UTC)
             if self.edate.tzinfo is None
-            else self.edate.astimezone(timezone.utc)
+            else self.edate.astimezone(UTC)
         )
         if newedate < newsdate:
             newsdate, newedate = newedate, newsdate
@@ -411,7 +412,7 @@ def chunk_dates(request: Schema) -> tuple[list[datetime], list[datetime]]:
 
 def do_query_work(
     conn: Connection, request: Schema, sql: TextClause, params: dict
-) -> list[tuple]:
+) -> list[Any]:
     """Do the database query and processing."""
     # Create a series of datetime chunks to iterate through
     sdates, edates = chunk_dates(request)
@@ -488,7 +489,7 @@ def text_handler(rows: list[tuple], afd_logic: re.Pattern | None) -> str:
     parse_times=False,
     ip_throttle_secs=get_ip_throttle_secs,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Process the request."""
     # Capture the client request params
     request: Schema = environ["_cgimodel_schema"]

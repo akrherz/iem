@@ -80,7 +80,7 @@ def get_data(ctx):
     today = ctx["sdate"]
     yesterday = today - timedelta(days=1)
     d180 = today - timedelta(days=180)
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("iem", rw=False) as conn:
         df = pd.read_sql(
             sql_helper("""
         with obs as (
@@ -188,11 +188,11 @@ def plotter(ctx: dict):
     )
     df2 = ctx["df"][pd.notnull(ctx["df"]["lon"])]
     mp.plot_values(
-        df2["lon"].values,
-        df2["lat"].values,
-        df2["val"].values,
-        color=df2["color"].values,
-        labels=df2["label"].values,
+        df2["lon"].to_numpy(),
+        df2["lat"].to_numpy(),
+        df2["val"].to_list(),
+        color=df2["color"].to_list(),
+        labels=df2["label"].to_list(),
         labeltextsize=(8 if ctx["sector"] != "state" else 12),
         textsize=(12 if ctx["sector"] != "state" else 16),
         labelbuffer=10,

@@ -8,6 +8,7 @@ cover the observation point and within one hour of the warning.
 """
 
 from datetime import timedelta
+from typing import Any
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -25,7 +26,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
+    desc: dict[str, Any] = {"description": __doc__, "data": True}
     desc["arguments"] = [
         ARG_ZSTATION,
         dict(
@@ -62,6 +63,11 @@ def get_data(ctx, meta):
         phenomenas = [
             "FF",
         ]
+    params: dict[str, Any] = {
+        "ph": phenomenas,
+        "lon": meta["lon"],
+        "lat": meta["lat"],
+    }
     with get_sqlalchemy_conn("postgis") as conn:
         warndf = pd.read_sql(
             sql_helper(
@@ -74,7 +80,7 @@ def get_data(ctx, meta):
             """
             ),
             conn,
-            params={"ph": phenomenas, "lon": meta["lon"], "lat": meta["lat"]},
+            params=params,
             index_col=None,
         )
     td = timedelta(hours=1)
@@ -138,7 +144,7 @@ def plotter(ctx: dict):
     fig, ax = figure_axes(title=title, apctx=ctx)
     width = 0.45
     height = 0.36
-    ax.set_position([0.05, 0.54, width, height])
+    ax.set_position((0.05, 0.54, width, height))
     ax.set_ylabel("Yearly Precip [inch]")
     ax.bar(x, df["in"], fc="r")
     ax.bar(x, df["near"], bottom=df["in"], fc="b")
@@ -185,7 +191,9 @@ def plotter(ctx: dict):
     ax.set_xlabel("Yearly precip may have missing data")
 
     ax = fig.add_axes((0.58, 0.5, 0.37, 0.31))
-    idx = pd.MultiIndex.from_product([obsdf["precip"].unique(), [True, False]])
+    idx = pd.MultiIndex.from_product(
+        [list(obsdf["precip"].unique()), [True, False]]
+    )
     gdf = (
         obsdf[["precip", "inwarn", "year"]]
         .groupby(["precip", "inwarn"])

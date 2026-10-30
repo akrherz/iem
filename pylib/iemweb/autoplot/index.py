@@ -484,7 +484,7 @@ def get_cookie_value(arg, cookies):
     return None
 
 
-def get_timing(apid: str) -> int:
+def get_timing(apid: int) -> int:
     """Get a timing sample."""
     pgconn, cursor = get_dbconnc("mesosite", rw=False)
     try:

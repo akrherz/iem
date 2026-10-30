@@ -10,6 +10,8 @@ Emits RAOB data in CSV format.
 Changelog
 ---------
 
+- 2026-10-29: The `sts` and `ets` parameters are updated to clarify that they
+  should be timezone aware.
 - 2026-08-13: A bug was corrected with the `sts` and `ets` timestamps not
   being assumed to be in UTC.
 - 2025-04-08: Migration to pydantic validation.
@@ -17,21 +19,21 @@ Changelog
 Example Requests
 ----------------
 
-Provide the KOAX sounding info for July 2024
+Provide the _OAX (Omaha Area) sounding info for July 2024
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=KOAX&\
+https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=_OAX&\
 sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
 
-from datetime import datetime
 from io import StringIO
 from typing import Annotated
 
-from pydantic import Field, model_validator
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
@@ -45,8 +47,22 @@ class Schema(CGIModel):
             description="Download CSV instead of displaying it",
         ),
     ] = False
-    sts: Annotated[datetime, Field(description="Start time in UTC")]
-    ets: Annotated[datetime, Field(description="End time in UTC")]
+    sts: Annotated[
+        AwareDatetime,
+        Field(
+            description="Start time in UTC",
+            ge=utc(1946),
+            le=utc(utc().year + 1, 12, 31),
+        ),
+    ]
+    ets: Annotated[
+        AwareDatetime,
+        Field(
+            description="End time in UTC",
+            ge=utc(1946),
+            le=utc(utc().year + 1, 12, 31),
+        ),
+    ]
     station: Annotated[
         str, Field(description="IEM Station Identifier", max_length=4)
     ] = "KOAX"

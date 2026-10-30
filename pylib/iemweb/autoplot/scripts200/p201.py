@@ -26,6 +26,7 @@ for the given day.
 
 import calendar
 from datetime import date, timedelta
+from typing import Any
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -93,7 +94,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
+    desc: dict[str, Any] = {"description": __doc__, "data": True}
     today = date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
@@ -214,6 +215,15 @@ def plotter(ctx: dict):
     if ctx["just"]:
         threshold_filter = " and d.threshold = :just "
     if ctx["w"] == "all":
+        params: dict[str, Any] = {
+            "category": category,
+            "day": day,
+            "ot": outlook_type_code,
+            "sts": sts,
+            "ets": ets,
+            "just": ctx["just"],
+            "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
+        }
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
                 sql_helper(
@@ -244,15 +254,7 @@ def plotter(ctx: dict):
                     threshold_filter=threshold_filter,
                 ),
                 conn,
-                params={
-                    "category": category,
-                    "day": day,
-                    "ot": outlook_type_code,
-                    "sts": sts,
-                    "ets": ets,
-                    "just": ctx["just"],
-                    "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
-                },
+                params=params,
                 index_col="date",
                 parse_dates=[
                     "date",
@@ -297,6 +299,16 @@ def plotter(ctx: dict):
             geoval = ctx["mystate"]
             title2 = state_names[ctx["mystate"]]
 
+        params: dict[str, Any] = {
+            "geoval": geoval,
+            "category": category,
+            "day": day,
+            "ot": outlook_type_code,
+            "sts": sts,
+            "ets": ets,
+            "just": ctx["just"],
+            "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
+        }
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
                 sql_helper(
@@ -333,18 +345,9 @@ def plotter(ctx: dict):
                     threshold_filter=threshold_filter,
                 ),
                 conn,
-                params={
-                    "geoval": geoval,
-                    "category": category,
-                    "day": day,
-                    "ot": outlook_type_code,
-                    "sts": sts,
-                    "ets": ets,
-                    "just": ctx["just"],
-                    "cigs": ["SIGN", "CIG1", "CIG2", "CIG3"],
-                },
+                params=params,
                 index_col="date",
-                parse_dates="date",
+                parse_dates=["date"],
             )
 
     data = {}
