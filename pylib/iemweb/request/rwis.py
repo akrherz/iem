@@ -81,7 +81,7 @@ from pyiem.web.fields import (
     MONTH_FIELD_OPTIONAL,
     NETWORK_FIELD,
     STATION_LIST_FIELD,
-    TZ_FIELD_OPTIONAL,
+    TZ_FIELD,
     YEAR_FIELD_OPTIONAL,
 )
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
@@ -132,7 +132,7 @@ class Schema(CGIModel):
             pattern="^(dl|txt|html|excel|download)$",
         ),
     ] = "dl"
-    tz: TZ_FIELD_OPTIONAL = "UTC"
+    tz: TZ_FIELD = "UTC"
     src: Annotated[
         str,
         Field(
