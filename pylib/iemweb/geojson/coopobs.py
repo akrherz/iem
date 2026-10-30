@@ -24,7 +24,7 @@ https://mesonet.agron.iastate.edu/geojson/coopobs.py?valid=2024-10-22
 """
 
 import json
-from datetime import date, timezone
+from datetime import UTC, date
 from typing import Annotated
 
 from pydantic import Field
@@ -93,7 +93,7 @@ def run(dt: date, conn: Connection | None = None):
                 properties=dict(
                     station=row["id"],
                     utc_valid=row["coop_valid"]
-                    .astimezone(timezone.utc)
+                    .astimezone(UTC)
                     .strftime(ISO8601),
                     precip=p(row["pday"]),
                     snow=p(row["snow"], 1),

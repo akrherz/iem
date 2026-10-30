@@ -1,7 +1,7 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -42,7 +42,7 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    utcnow = datetime.now(timezone.utc)
+    utcnow = datetime.now(UTC)
     fn = None
     for i in range(10):
         now = utcnow - timedelta(hours=i)

@@ -4,7 +4,7 @@ NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
 will limit which potential headlines events are overlaid on the chart.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -151,7 +151,7 @@ def get_firewx_zone(lon: float, lat: float):
 
 def plotter(ctx: dict):
     """Go"""
-    sts = ctx["valid"].replace(tzinfo=timezone.utc)
+    sts = ctx["valid"].replace(tzinfo=UTC)
     station = ctx["station"]
     tzname = ctx["_nt"].sts[station]["tzname"]
     ets = sts + timedelta(hours=ctx["hours"])
@@ -184,8 +184,8 @@ def plotter(ctx: dict):
             index_col=None,
         )
     if not wwa.empty:
-        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(timezone.utc)
-        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(timezone.utc)
+        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(UTC)
+        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(UTC)
         wwa = wwa[wwa["key"].isin(DOMAIN[ctx["mode"]])].reset_index()
     # Find Obs
     with get_sqlalchemy_conn("asos") as conn:

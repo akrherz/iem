@@ -7,7 +7,7 @@ import pathlib
 import re
 import smtplib
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from zoneinfo import ZoneInfo
@@ -88,7 +88,7 @@ IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
                 continue
             timestring = commit["commit"]["author"]["date"]
             utcvalid = datetime.strptime(timestring, ISO8601)
-            valid = utcvalid.replace(tzinfo=timezone.utc).astimezone(
+            valid = utcvalid.replace(tzinfo=UTC).astimezone(
                 ZoneInfo("America/Chicago")
             )
             data = {

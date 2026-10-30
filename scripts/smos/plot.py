@@ -4,7 +4,7 @@ called from RUN_NOON.sh for 0z and RUN_MIDNIGHT.sh for 12z
 """
 
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -105,7 +105,7 @@ def makeplot(ts, routes="ac"):
 @click.option("--realtime", is_flag=True, help="Operate in realtime mode")
 def main(valid: datetime, realtime: bool):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     makeplot(valid, "ac" if realtime else "a")
     if realtime:
         for d in [1, 5]:

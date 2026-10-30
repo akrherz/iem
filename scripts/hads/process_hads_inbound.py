@@ -10,7 +10,7 @@ called from RUN_10MIN.sh
 """
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -30,7 +30,7 @@ def main(conn: Connection | None = None):
     updated_start = datetime.strptime(
         get_properties().get(PROPERTY_NAME, "2002-01-01T00:00:00Z"),
         ISO8601,
-    ).replace(tzinfo=timezone.utc)
+    ).replace(tzinfo=UTC)
     updated_end = utc()
     set_property(PROPERTY_NAME, updated_end.strftime(ISO8601))
     nt = NetworkTable("ISUSM", only_online=False)
@@ -58,7 +58,7 @@ def main(conn: Connection | None = None):
         updated_start,
         updated_end,
     )
-    obs["v"] = obs["v"].dt.tz_localize(timezone.utc)
+    obs["v"] = obs["v"].dt.tz_localize(UTC)
     obs["dv_interval"] = pd.to_timedelta(obs["dv_interval"])
     updates = 0
     inserts = 0

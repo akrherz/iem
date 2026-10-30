@@ -5,7 +5,7 @@ Called from RUN_20MIN.sh
 """
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
@@ -90,7 +90,7 @@ def get_first_updated():
         sys.exit()
 
     dt = datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=timezone.utc)
+    return dt.replace(tzinfo=UTC)
 
 
 def main():

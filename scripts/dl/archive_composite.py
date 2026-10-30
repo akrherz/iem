@@ -4,7 +4,7 @@ Not called from anywhere, but often manually run :/
 """
 
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.util import logger
@@ -17,8 +17,8 @@ LOG = logger()
 @click.option("--ets", required=True, help="End Time", type=click.DateTime())
 def main(sts: datetime, ets: datetime):
     """Go Main Go"""
-    sts = sts.replace(tzinfo=timezone.utc)
-    ets = ets.replace(tzinfo=timezone.utc)
+    sts = sts.replace(tzinfo=UTC)
+    ets = ets.replace(tzinfo=UTC)
     interval = timedelta(minutes=5)
     now = sts
     while now < ets:

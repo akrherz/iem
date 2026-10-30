@@ -3,7 +3,7 @@
 Run from RUN_NOON.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -136,7 +136,7 @@ def main():
     with ncopen("/mesonet/data/iemre/cfs_current.nc") as nc:
         ts = datetime.strptime(
             nc.getncattr("model_init"), "%Y-%m-%d %H:%M UTC"
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         df = process(nc)
     if not df.empty:
         dbsave(ts, df)

@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -176,7 +176,7 @@ def copy_grib_to_netcdf(valid: datetime, domain: str, fhour: int) -> None:
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime) -> None:
     """Main function to process ICON data for IEMRE."""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     # 1. Figure out which ICON model is available for usage
     model_valid = compute_model_valid(valid)
     if model_valid is None:

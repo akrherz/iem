@@ -20,7 +20,7 @@ tornado track with the lead time in minutes.</p>
 
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -202,7 +202,7 @@ def plotter(ctx: dict):
         trackgdf[col] = pd.to_datetime(
             trackgdf[col] / 1000,
             unit="s",
-        ).dt.tz_localize(timezone.utc)
+        ).dt.tz_localize(UTC)
     track_sts = trackgdf.iloc[0]["starttime"]
     track_ets = trackgdf.iloc[0]["endtime"]
     # Get the warning polygons
@@ -231,7 +231,7 @@ def plotter(ctx: dict):
         )  # type: ignore
     if not tow.empty:
         for col in ["utc_issue", "utc_expire"]:
-            tow[col] = tow[col].dt.tz_localize(timezone.utc)
+            tow[col] = tow[col].dt.tz_localize(UTC)
 
     minutes = int((track_ets - track_sts).total_seconds() / 60.0)
     if minutes <= 0:

@@ -12,7 +12,7 @@ temperature change was an increase during the day or decrease.
 plot, but computes the change over arbitrary time windows.</p>
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -93,7 +93,7 @@ def plot_date(ax, i, dt: date, station, tz) -> bool:
         )
     if df.empty:
         return False
-    df["valid"] = df["valid"].dt.tz_localize(timezone.utc)
+    df["valid"] = df["valid"].dt.tz_localize(UTC)
     # Ensure that we have at least one ob within six hours to start and end
     h6 = timedelta(hours=6)
     dv = df["valid"]

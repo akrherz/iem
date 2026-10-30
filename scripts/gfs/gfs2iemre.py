@@ -6,7 +6,7 @@ Run from RUN_50_AFTER.sh
 import shutil
 import subprocess
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import click
@@ -289,7 +289,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
 @click.option("--domain", default="", help="Run just for domain")
 def main(valid: datetime, domain: str):
     """Do the work."""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     # Run every hour, filter those we don't run
     if valid.hour % 6 != 0:
         return

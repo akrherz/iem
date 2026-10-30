@@ -6,7 +6,7 @@ are available for about 90 hours into the future.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -112,7 +112,7 @@ def plotter(ctx: dict):
     domain = ctx["domain"]
     gridnav = get_nav("iemre", domain)
     ptype = ctx["ptype"]
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
     varname = ctx["var"]
     title = valid.strftime("%-d %B %Y %H:%M UTC")
     mpargs = {

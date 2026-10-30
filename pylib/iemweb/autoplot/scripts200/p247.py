@@ -28,7 +28,7 @@ Central Region NWS maintains a
 this app and provides a table of stats.</p>
 """
 
-from datetime import timezone
+from datetime import UTC
 from io import StringIO
 
 import geopandas as gpd
@@ -234,7 +234,7 @@ def plotdf(mp, df: gpd.GeoDataFrame):
 
 def plotter(ctx: dict):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     with get_sqlalchemy_conn("postgis") as conn:
         ugcdf = gpd.read_postgis(

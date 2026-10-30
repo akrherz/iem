@@ -13,7 +13,7 @@ as the code stands now, you get the next day's outlook.
 option exists for downloading these outlooks in-bulk.</p>
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -182,7 +182,7 @@ def outlook_search(valid, days, outlook_type):
         )
         if res.rowcount == 0:
             return None
-        return res.fetchone()[0].replace(tzinfo=timezone.utc)
+        return res.fetchone()[0].replace(tzinfo=UTC)
 
 
 def compute_datelabel(df):
@@ -219,7 +219,7 @@ def get_threshold_label(threshold, outlook_type) -> str:
 
 def plotter(ctx: dict):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
     day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()
     # Ensure we don't have an incompatable combo
@@ -264,7 +264,7 @@ def plotter(ctx: dict):
             raise NoDataFound("SPC Outlook data was not found!")
         df = fetch(valid)
     for col in ["updated", "product_issue", "issue", "expire"]:
-        df[col] = df[col].dt.tz_localize(timezone.utc)
+        df[col] = df[col].dt.tz_localize(UTC)
     csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"

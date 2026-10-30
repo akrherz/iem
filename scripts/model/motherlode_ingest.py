@@ -6,7 +6,7 @@ Called from RUN_40_AFTER.sh
 """
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
@@ -73,7 +73,7 @@ def run(conn: Connection, model, station, lon, lat, ts):
 
     host = (
         BASE_URL
-        if (datetime.now(timezone.utc) - ts).total_seconds() < 86400
+        if (datetime.now(UTC) - ts).total_seconds() < 86400
         else BASE_URL2
     )
     url = (
@@ -184,7 +184,7 @@ def check_and_run(conn: Connection, model, runtime):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """Do Something"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     with get_sqlalchemy_conn("mos") as conn:
         if valid.hour % 6 == 0:
             ts = valid - timedelta(hours=6)

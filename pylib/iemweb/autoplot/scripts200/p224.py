@@ -32,7 +32,7 @@ to the given timestamp.  This is why we can't have nice things!
 this app and provides a map of WaWa + stats.</p>
 """
 
-from datetime import timezone
+from datetime import UTC
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -87,7 +87,7 @@ def plotter(ctx: dict):
     """Go"""
     if "valid" not in ctx:
         ctx["valid"] = utc()
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
 
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     popyear = min(int(valid.year - (valid.year % 5)), 2020)

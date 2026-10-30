@@ -19,7 +19,7 @@ https://mesonet.agron.iastate.edu/wx/afos/text2png.py\
 """
 
 import string
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 from typing import Annotated
 
@@ -104,7 +104,7 @@ def make_image(e, pil):
     """Do as I say"""
     pgconn = get_dbconn("afos")
     cursor = pgconn.cursor()
-    valid = datetime.strptime(e, "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    valid = datetime.strptime(e, "%Y%m%d%H%M").replace(tzinfo=UTC)
 
     cursor.execute(
         "SELECT data from products WHERE pil = %s and entered = %s",

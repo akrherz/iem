@@ -11,7 +11,7 @@ low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -221,8 +221,8 @@ def get_data(ctx):
 
 def rectify_dates(ctx: dict):
     """Work out some quirks."""
-    ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
-    ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
+    ctx["sts"] = ctx["sts"].replace(tzinfo=UTC)
+    ctx["ets"] = ctx["ets"].replace(tzinfo=UTC)
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=4):
         ctx["ets"] = ctx["sts"] + timedelta(days=4)
 

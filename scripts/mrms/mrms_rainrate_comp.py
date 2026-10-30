@@ -12,7 +12,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -167,7 +167,7 @@ def workflow(now, realtime):
 )
 def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     realtime = False
     if (utc() - valid) < timedelta(minutes=10):
         realtime = True

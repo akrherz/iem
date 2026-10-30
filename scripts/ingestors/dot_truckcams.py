@@ -8,7 +8,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pyproj
 import requests
@@ -90,7 +90,7 @@ def process_features(features):
         # A32049-2025-04-01_13_48_49.jpg
         label, tstamp = url.split("/")[-1].removesuffix(".jpg").split("-", 1)
         valid = datetime.strptime(tstamp, "%Y-%m-%d_%H_%M_%S").replace(
-            tzinfo=timezone.utc
+            tzinfo=UTC
         )
         if label not in current:
             current[label] = valid - timedelta(minutes=1)

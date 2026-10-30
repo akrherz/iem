@@ -21,7 +21,7 @@ total inclusion of any zones/counties that were added to the alert.
 </p>
 """
 
-from datetime import timezone
+from datetime import UTC
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -363,7 +363,7 @@ def plotter(ctx: dict):
     ):
         prod = "N0Q" if df["issue"].iloc[0].year > 2010 else "N0R"
         radval = mp.overlay_nexrad(
-            utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
+            utcvalid.to_pydatetime().replace(tzinfo=UTC),
             product=prod,
             caxpos=(0.02, 0.07, 0.3, 0.005),
         )

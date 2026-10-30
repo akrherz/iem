@@ -7,7 +7,7 @@ RUN_50_AFTER for previous hour and three hours ago.
 import os
 import subprocess
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -183,7 +183,7 @@ def process(fn: str, valid: datetime):
             continue
         ticks = obtime[recnum]
         ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
         if f"{sid}_{network}_{ts:%Y%m%d%H%M}" in dbhaskeys:
             dupes += 1
             continue
@@ -296,7 +296,7 @@ def main(valid: datetime):
         LOG.info("Exiting due to midnight exclusion period.")
         return
 
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     for variant in ["rwis1", "mesonet1"]:
         fn = find_file(variant, valid)
         if fn is None:

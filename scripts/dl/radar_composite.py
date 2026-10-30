@@ -6,7 +6,7 @@ run from RUN_5MIN.sh
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import requests
@@ -94,7 +94,7 @@ def runtime(ts: datetime, routes: str):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     LOG.info("Running for %s", valid)
     # If we are near real-time, also check various archive points
     if (utc() - valid).total_seconds() > 1000:

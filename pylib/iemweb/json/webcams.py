@@ -35,7 +35,7 @@ https://mesonet.agron.iastate.edu/json/webcams.py?network=MCFC
 """
 
 import json
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -131,7 +131,7 @@ def application(environ, start_response):
             if row["cam"] in used:
                 continue
             used.append(row["cam"])
-            utcvalid = row["valid"].astimezone(timezone.utc)
+            utcvalid = row["valid"].astimezone(UTC)
             url = (
                 "https://mesonet.agron.iastate.edu/archive/data/"
                 f"{utcvalid:%Y/%m/%d}/camera/"

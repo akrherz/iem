@@ -4,7 +4,7 @@ import glob
 import os
 import re
 import warnings
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import StringIO
 
 from pyiem.database import get_dbconn
@@ -70,7 +70,7 @@ def fn2datetime(fn):
     if not tokens:
         return None
     ts = datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
-    return ts.replace(tzinfo=timezone.utc)
+    return ts.replace(tzinfo=UTC)
 
 
 def load_grid_ids(scursor, grid_ids):

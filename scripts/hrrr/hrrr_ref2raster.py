@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 import click
@@ -203,7 +203,7 @@ def workflow(valid: datetime, routes: str):
 @click.option("--force", default=False, is_flag=True)
 def main(valid: datetime, rt: bool, force: bool):
     """So Something great"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     LOG.info("valid: %s realtime: %s", valid, rt)
     routes = "ac" if rt else "a"
     # See if we already have output

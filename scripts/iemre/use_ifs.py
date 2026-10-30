@@ -15,7 +15,7 @@ Called from RUN_40_AFTER.sh (4x per day)
 
 import os
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import requests
@@ -169,7 +169,7 @@ def process(valid: datetime, model_valid: datetime) -> None:
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime) -> None:
     """Main function to process IFS data for IEMRE."""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     # 1. Figure out which IFS model is available for usage
     model_valid = compute_model_valid(valid)
     if model_valid is None:

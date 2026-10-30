@@ -35,7 +35,7 @@ product_id=202407160452-KDMX-FXUS63-AFDDMX
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import Field
@@ -79,7 +79,7 @@ def application(environ: dict, start_response: callable):
         utc = datetime.strptime(tokens[0], "%Y%m%d%H%M")
     except ValueError as exp:
         raise BadWebRequest("Invalid timestamp") from exp
-    utc = utc.replace(tzinfo=timezone.utc)
+    utc = utc.replace(tzinfo=UTC)
     root = json_response_dict({"products": []})
 
     sql_bbb = ""

@@ -2,7 +2,7 @@
 
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pandas as pd
 import requests
@@ -46,7 +46,7 @@ def process_features(features):
         valid = (
             datetime(1970, 1, 1)
             + timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         rows.append(
             {
                 "nwsli": props["NWS_ID"],

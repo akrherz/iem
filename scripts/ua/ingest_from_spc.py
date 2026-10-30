@@ -6,7 +6,7 @@ called from RUN_10_AFTER.sh for 00, 12, and 18 UTC
 
 import pathlib
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import pandas as pd
@@ -242,7 +242,7 @@ def main(valid, station):
 @click.option("--station", type=str, default=None)
 def frontend(valid: datetime, station: str | None):
     """Figure out what we need to do here!"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     main(valid, station)
 
 

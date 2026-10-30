@@ -11,7 +11,7 @@ Run from RUN_10MIN.sh
 """
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
@@ -45,7 +45,7 @@ def get_first_updated():
         sys.exit()
 
     dt = datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=timezone.utc)
+    return dt.replace(tzinfo=UTC)
 
 
 def compute_time(argv):
@@ -83,7 +83,7 @@ def do_insert(source_cursor, reset_times, madis):
                 report_type = 3
 
         # While the `alldata` table works, it is slow, so alas
-        table = f"t{row['valid'].astimezone(timezone.utc):%Y}"
+        table = f"t{row['valid'].astimezone(UTC):%Y}"
 
         # Look for previous entries
         cursor.execute(

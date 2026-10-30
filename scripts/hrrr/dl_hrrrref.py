@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 import pygrib
@@ -174,7 +174,7 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
 )
 def main(valid: datetime, skiprecheck: bool):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     if is_archive_complete(valid):
         return
     wait_for_upstream(valid)

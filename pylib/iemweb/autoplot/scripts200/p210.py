@@ -20,7 +20,7 @@ positive.</p>
 issuance counts for a single Weather Forecast Offices.</p>
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import numpy as np
 import pandas as pd
@@ -91,8 +91,8 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
-    ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
+    ctx["sts"] = ctx["sts"].replace(tzinfo=UTC)
+    ctx["ets"] = ctx["ets"].replace(tzinfo=UTC)
     prod_defs = ensure_prodDefinitions_key_in_label()
     pil = ctx["pil"][:3]
     ctx["ets"] = min(ctx["ets"], utc())

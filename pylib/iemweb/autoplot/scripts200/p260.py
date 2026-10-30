@@ -10,7 +10,7 @@ within the state for it to count.</p>
 produces heatmaps and other summary maps.</p>
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from typing import TYPE_CHECKING
 
 import geopandas as gpd
@@ -141,8 +141,8 @@ def plotter(ctx: dict):
     if (ctx["ets"] - ctx["sts"]).days > 32:
         raise NoDataFound("Sorry, period is too long!")
     params = {
-        "sts": ctx["sts"].replace(tzinfo=timezone.utc),
-        "ets": ctx["ets"].replace(tzinfo=timezone.utc),
+        "sts": ctx["sts"].replace(tzinfo=UTC),
+        "ets": ctx["ets"].replace(tzinfo=UTC),
         "ph": [
             phenomena,
         ],

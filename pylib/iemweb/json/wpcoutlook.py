@@ -48,7 +48,7 @@ https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from typing import Annotated
 
@@ -122,15 +122,15 @@ def dotime(time: str, lon, lat, day) -> tuple[pd.DataFrame, datetime]:
             ts += timedelta(days=day - 1)
     else:
         try:
-            ts = datetime.fromisoformat(time.replace("Z", "+00:00"))
+            ts = datetime.fromisoformat(time)
         except ValueError as exp:
             raise IncompleteWebRequest(
                 "time must be a valid ISO8601 timestamp"
             ) from exp
         if ts.tzinfo is None:
-            ts = ts.replace(tzinfo=timezone.utc)
+            ts = ts.replace(tzinfo=UTC)
         else:
-            ts = ts.astimezone(timezone.utc)
+            ts = ts.astimezone(UTC)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
             sql_helper("""

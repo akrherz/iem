@@ -3,7 +3,7 @@ This plot is not meant for interactive use, but a backend for
 CWA plots.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import geopandas as gpd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -68,7 +68,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("CWA Event was not found, sorry.")
     for col in ["issue", "expire"]:
-        df[col] = df[col].dt.tz_localize(timezone.utc)
+        df[col] = df[col].dt.tz_localize(UTC)
     bounds = df["geom"].total_bounds
     row = df.iloc[0]
     mp = MapPlot(

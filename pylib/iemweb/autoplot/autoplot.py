@@ -6,7 +6,7 @@ import pathlib
 import sys
 import tempfile
 import traceback
-from datetime import UTC, timezone
+from datetime import UTC
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
@@ -336,7 +336,7 @@ def workflow(mc, environ: dict, fmt: str):
             # We could have timezone or zoneinfo :/
             if dtz is not None and dtz in [
                 UTC,
-                timezone.utc,
+                UTC,
             ]:
                 df.index = df.index.strftime(ISO8601)
             else:
@@ -349,7 +349,7 @@ def workflow(mc, environ: dict, fmt: str):
                 # We could have timezone or zoneinfo :/
                 if dtz is not None and dtz in [
                     UTC,
-                    timezone.utc,
+                    UTC,
                 ]:
                     df[column] = df[column].dt.strftime(ISO8601)
                 else:
@@ -455,7 +455,7 @@ def application(environ, start_response):
     # Special case for when we are returning a javascript alert
     if fmt == "js" and status == HTTP400:
         start_response(HTTP200, get_response_headers(status, fmt))
-        return [output]
+        return [output.encode("UTF-8")]
     # Figure out what our response headers should be
     start_response(status, get_response_headers(status, fmt))
     if isinstance(output, str):

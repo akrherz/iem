@@ -42,7 +42,7 @@ https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
 
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 import simplejson as json
@@ -194,7 +194,7 @@ def run_sbw(query: Schema):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generated_at": datetime.now(timezone.utc).strftime(ISO8601),
+        "generated_at": datetime.now(UTC).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

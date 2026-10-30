@@ -7,7 +7,7 @@ Run from RUN_50_AFTER.sh for previous hour
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import pygrib
@@ -130,7 +130,7 @@ def fetch(dt):
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
 def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
 
     # Backfilling mode
     for hroffset in [0, 6, 12, 24]:

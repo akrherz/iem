@@ -1,6 +1,6 @@
 """Generates analysis maps of ASOS station data."""
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import numpy as np
 import pandas as pd
@@ -102,7 +102,7 @@ def get_description():
 def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
     if ctx.get("valid"):
-        valid = ctx["valid"].replace(tzinfo=timezone.utc)
+        valid = ctx["valid"].replace(tzinfo=UTC)
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
                 sql_helper("""

@@ -10,7 +10,7 @@ files.
 Run from RUN_10_AFTER.sh at 1z
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import click
 import numpy as np
@@ -167,7 +167,7 @@ def main(ts):
     """Go!"""
     # Extract 00 UTC Data
     if ts is not None:
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
     else:
         ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     data = process(ts)

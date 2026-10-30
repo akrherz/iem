@@ -80,7 +80,7 @@ https://mesonet.agron.iastate.edu/request/maxcsv/ahpsobs_DEWI4.txt
 """
 
 import re
-from datetime import date, timedelta, timezone
+from datetime import UTC, date, timedelta
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -183,16 +183,16 @@ def do_moonphase(lon, lat):
         {
             "new_moon": ephem.next_new_moon(utc())
             .datetime()
-            .replace(tzinfo=timezone.utc),
+            .replace(tzinfo=UTC),
             "full_moon": ephem.next_full_moon(utc())
             .datetime()
-            .replace(tzinfo=timezone.utc),
+            .replace(tzinfo=UTC),
             "first_quarter": ephem.next_first_quarter_moon(utc())
             .datetime()
-            .replace(tzinfo=timezone.utc),
+            .replace(tzinfo=UTC),
             "last_quarter": ephem.next_last_quarter_moon(utc())
             .datetime()
-            .replace(tzinfo=timezone.utc),
+            .replace(tzinfo=UTC),
         }
     ).sort_values(ascending=True)
     # Figure out the timezone
@@ -238,16 +238,16 @@ def do_moon(lon, lat):
     obs.lat = str(lat)
     obs.long = str(lon)
     obs.date = utc().strftime("%Y/%m/%d %H:%M")
-    r1 = obs.next_rising(moon).datetime().replace(tzinfo=timezone.utc)
+    r1 = obs.next_rising(moon).datetime().replace(tzinfo=UTC)
     p1 = moon.moon_phase
     obs.date = r1.strftime("%Y/%m/%d %H:%M")
-    s1 = obs.next_setting(moon).datetime().replace(tzinfo=timezone.utc)
+    s1 = obs.next_setting(moon).datetime().replace(tzinfo=UTC)
     # Figure out the next rise time
     obs.date = s1.strftime("%Y/%m/%d %H:%M")
-    r2 = obs.next_rising(moon).datetime().replace(tzinfo=timezone.utc)
+    r2 = obs.next_rising(moon).datetime().replace(tzinfo=UTC)
     p2 = moon.moon_phase
     obs.date = r2.strftime("%Y/%m/%d %H:%M")
-    s2 = obs.next_setting(moon).datetime().replace(tzinfo=timezone.utc)
+    s2 = obs.next_setting(moon).datetime().replace(tzinfo=UTC)
     label = figure_phase(p1, p2)
     # Figure out the timezone
     pgconn, cursor = get_dbconnc("mesosite")
@@ -720,7 +720,7 @@ def do_ahps(nwsli):
     # see akrherz/iem#187
     df["forecasttime"] = (
         df["valid"]
-        .dt.tz_localize(timezone.utc)
+        .dt.tz_localize(UTC)
         .dt.tz_convert(tzinfo)
         .dt.strftime("%a. %-I %p")
     )

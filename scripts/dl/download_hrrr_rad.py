@@ -9,7 +9,7 @@ Run at 40 AFTER for the previous hour
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import pygrib
@@ -116,7 +116,7 @@ def main(valid: datetime | None):
     """Go Main Go"""
     times = []
     if valid is not None:
-        times.append(valid.replace(tzinfo=timezone.utc))
+        times.append(valid.replace(tzinfo=UTC))
     else:
         times.extend(
             [

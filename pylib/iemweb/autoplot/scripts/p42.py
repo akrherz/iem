@@ -16,7 +16,7 @@ generally wish to see the top 10 longest streaks.</p>
 """
 
 import operator
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -311,7 +311,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
 
     op2 = operator.lt if mydir == "below" else operator.le
     for row in res.mappings():
-        valid: datetime = row["utc_valid"].replace(tzinfo=timezone.utc)
+        valid: datetime = row["utc_valid"].replace(tzinfo=UTC)
         # This is tricky, we need to resolve when time resets.
         if valid > reset_valid:
             if valids:

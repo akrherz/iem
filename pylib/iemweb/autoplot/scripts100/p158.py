@@ -6,7 +6,7 @@ prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -47,7 +47,7 @@ def get_description():
 
 def add_context(ctx):
     """Get plot context"""
-    ctx["dt"] = ctx["dt"].replace(tzinfo=timezone.utc)
+    ctx["dt"] = ctx["dt"].replace(tzinfo=UTC)
     dt = ctx["dt"]
     station = ctx["station"]
     minutes = ctx["minutes"]

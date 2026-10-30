@@ -5,7 +5,7 @@ US, the daily high and low temperature climatology is presented as a
 filled bar for each day plotted when Air Temperature is selected.
 """
 
-from datetime import date, timedelta, timezone
+from datetime import UTC, date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -241,7 +241,7 @@ def plotter(ctx: dict):
     # Construct a local timezone x axis
     x = (
         ctx["df"]
-        .index.tz_localize(timezone.utc)
+        .index.tz_localize(UTC)
         .tz_convert(ctx["_nt"].sts[ctx["station"]]["tzname"])
         .tz_localize(None)
     )

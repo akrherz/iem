@@ -7,7 +7,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 import pygrib
@@ -15,7 +15,7 @@ import requests
 from pyiem.util import archive_fetch, logger
 
 LOG = logger()
-ARCHIVE_SWITCH = datetime(2020, 5, 16, tzinfo=timezone.utc)
+ARCHIVE_SWITCH = datetime(2020, 5, 16, tzinfo=UTC)
 WMO_XREF = {
     "PRES": "LPIA98",
     "DPT": "LRIA98",
@@ -103,7 +103,7 @@ def workflow(now: datetime):
 )
 def main(dt: datetime):
     """Go Main Go."""
-    dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.replace(tzinfo=UTC)
     with tempfile.TemporaryDirectory() as _tmpdir:
         os.chdir(_tmpdir)
         for hr in range(24):

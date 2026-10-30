@@ -7,7 +7,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import requests
 from pyiem.database import get_dbconn
@@ -77,7 +77,7 @@ def process_feature(cursor, domain, feat: dict):
             continue
         valid = datetime(1970, 1, 1) + timedelta(seconds=timestamp / 1000.0)
         # We drop the seconds information as we can't really deal with it yet
-        valid = valid.replace(second=0, tzinfo=timezone.utc)
+        valid = valid.replace(second=0, tzinfo=UTC)
         if valid > CEILING:
             LOG.info("%s is in the future %s, skipping", cam, valid)
             continue

@@ -6,7 +6,7 @@ Run from RUN_40_AFTER.sh for a UTC timestamp 3 hours ago.
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import pygrib
@@ -119,7 +119,7 @@ def fetch(valid: datetime, hr: int) -> None:
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC Time")
 def main(valid: datetime):
     """Go Main Go"""
-    ts = valid.replace(tzinfo=timezone.utc)
+    ts = valid.replace(tzinfo=UTC)
     # script is called every hour, just short circuit the un-needed hours
     if ts.hour % 6 != 0:
         LOG.info("Aborting as time %s is not modulo 6", ts)

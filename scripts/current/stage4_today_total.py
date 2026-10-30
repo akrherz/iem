@@ -4,7 +4,7 @@ Sum up the hourly precipitation from NCEP stage IV and produce maps
 called from RUN_STAGE4.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -30,7 +30,7 @@ def doday(ts, realtime):
     total = None
     lts = None
     while now < ets:
-        gmt = now.astimezone(timezone.utc)
+        gmt = now.astimezone(UTC)
         ppath = gmt.strftime("%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
         with archive_fetch(ppath) as fn:
             if fn is not None:

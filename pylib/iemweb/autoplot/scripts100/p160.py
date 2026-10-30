@@ -16,7 +16,7 @@ hide and show the various lines.</p>
 easily download the raw data in bulk.</p>
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -41,7 +41,6 @@ PDICT = {
     "fx": "Just plot forecasts",
     "obs": "Just plot observations",
 }
-UTC = timezone.utc
 
 
 def get_description():
@@ -358,7 +357,7 @@ def plotter(ctx: dict):
     )
     pos = ax.get_position()
     ax.grid(True)
-    ax.set_position([pos.x0, pos.y0, 0.74, 0.8])
+    ax.set_position((pos.x0, pos.y0, 0.74, 0.8))
     ax.set_xlabel(f"Timestamps in {ctx['tzname']} Timezone")
     ax.legend(loc=(1.0, 0.0))
     fmt = "%Y-%m-%d %H:%M"

@@ -32,7 +32,7 @@ https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000&fmt=excel
 
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 from typing import Annotated
 
@@ -128,7 +128,7 @@ def application(environ, start_response):
         ts = utc()
     else:
         ts = datetime.strptime(environ["ts"], "%Y%m%d%H%M")
-    ts = ts.replace(tzinfo=timezone.utc)
+    ts = ts.replace(tzinfo=UTC)
     fmt = environ["fmt"]
     if environ["lon"] is not None and environ["lat"] is not None:
         watches = pointquery(environ["lon"], environ["lat"])

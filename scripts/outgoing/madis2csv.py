@@ -6,7 +6,7 @@ import os
 import subprocess
 import time
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import numpy.ma
@@ -99,7 +99,7 @@ def main():
         if numpy.ma.is_masked(ot) or ot > 2141347600:
             continue
         ts = datetime(1970, 1, 1) + timedelta(seconds=ot)
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
         db[station] = {
             "STN": station,
             "PROVIDER": providers[recnum],

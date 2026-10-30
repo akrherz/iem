@@ -28,7 +28,7 @@ dstr=201710251200&prod=composite_n0r
 
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 from typing import Annotated
 
@@ -193,9 +193,7 @@ def application(environ, start_response):
     try:
         dstr = environ["dstr"]
         prod = environ["prod"]
-        valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(
-            tzinfo=timezone.utc
-        )
+        valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(tzinfo=UTC)
         return [do_work(valid, prod, start_response)]
     finally:
         release_slot(slot_fd)
