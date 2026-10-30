@@ -228,7 +228,7 @@ def main(dt: datetime):
                 LOG.warning("Not updating Marcus")
                 set_iemacces(station, dt_, row["obs"])
                 continue
-            update_precip(dt, station, hdf)
+            update_precip(dt_, station, hdf)
         else:
             set_iemacces(station, dt_, row["obs"])
 
