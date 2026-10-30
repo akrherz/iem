@@ -21,6 +21,7 @@ tornado track with the lead time in minutes.</p>
 """
 
 from datetime import UTC, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -38,32 +39,31 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS, MapPlot
 
+from iemweb.autoplot.description import CmapArg, DatArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    return {
-        "description": __doc__,
-        "data": True,
-        "cache": 86400,
-        "gallery": {
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    dat: Annotated[
+        str, DatArg(label="Select Date + Tornado Track to plot:")
+    ] = "2024-05-21"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "gist_rainbow"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=86400,
+        gallery={
             "dat": "2024-05-21",
             "datglobalid": "{495DE596-B299-41FE-9C90-13C87E43FE0B}",
         },
-        "arguments": [
-            {
-                "type": "dat",
-                "name": "dat",
-                "default": "2024-05-21",
-                "label": "Select Date + Tornado Track to plot:",
-            },
-            {
-                "type": "cmap",
-                "name": "cmap",
-                "default": "gist_rainbow",
-                "label": "Color Ramp:",
-            },
-        ],
-    }
+    )
 
 
 def plot_points(mp, pts):
@@ -174,7 +174,7 @@ def plot_timeseries(mp, pts, tzinfo):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     # Eh
     datglobalid = ctx["datglobalid"]
@@ -247,7 +247,7 @@ def plotter(ctx: dict):
         # Compute the distance of the segment
         pt = utm_track.interpolate(minute / minutes * utm_track.length)
         rows.append({"geom": pt, "valid": valid})
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     if cmap.N < 13:
         bins = list(range(0, 61, 10))
     else:

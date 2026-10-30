@@ -4,6 +4,7 @@ data.
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pygrib
@@ -16,50 +17,49 @@ from pyiem.meteorology import comprehensive_climate_index
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import archive_fetch, utc
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "no": "No Shade Effect",
     "yes": "Shade Effect",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    now = utc() - timedelta(hours=3)
-    desc["arguments"] = [
-        {
-            "type": "datetime",
-            "name": "valid",
-            "default": now.strftime("%Y/%m/%d %H00"),
-            "label": "Timestamp (UTC):",
-            "min": "2014/10/11 0000",
-        },
-        {
-            "type": "select",
-            "name": "shade",
-            "default": "no",
-            "label": "Shade Effect:",
-            "options": PDICT,
-        },
-        {
-            "type": "csector",
-            "name": "csector",
-            "default": "IA",
-            "label": "Select state/sector",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "afmhot_r",
-            "label": "Color Ramp:",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Timestamp (UTC):",
+            min="2014/10/11 0000",
+            default=lambda: (utc() - timedelta(hours=3)).strftime(
+                "%Y/%m/%d %H00"
+            ),
+        ),
     ]
-    return desc
+    shade: Annotated[str, SelectArg(label="Shade Effect:", options=PDICT)] = (
+        "no"
+    )
+    csector: Annotated[str, CSectorArg(label="Select state/sector")] = "IA"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "afmhot_r"
 
 
-def do_processing(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
+
+
+def do_processing(ctx: Params):
     """So to check for errors"""
-    valid: datetime = ctx["valid"]
+    valid: datetime = ctx.valid
     ppath_f00 = (
         f"{valid:%Y/%m/%d}/model/hrrr/{valid:%H}/"
         f"hrrr.t{valid:%H}z.3kmf00.grib2"
@@ -99,13 +99,13 @@ def do_processing(ctx: dict):
         rh,
         wind_speed(units("m/s") * u, units("m/s") * v),
         units("W/m^2") * srad,
-        shade_effect=ctx["shade"] == "yes",
+        shade_effect=ctx.shade == "yes",
     ).m
 
 
-def get_raster(ctx: dict):
+def get_raster(ctx: Params):
     """Do the computation!"""
-    if ctx["csector"] in ["AK", "HI"]:
+    if ctx.csector in ["AK", "HI"]:
         raise NoDataFound("Sector not available for this plot.")
     # Need to handle incomplete grib files
     try:
@@ -115,13 +115,13 @@ def get_raster(ctx: dict):
     return cci, get_nav("IEMRE", "conus").affine, get_nav("IEMRE", "conus").crs
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ctx["valid"] = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
-    lvalid = ctx["valid"].astimezone(ZoneInfo("America/Chicago"))
+    ctx.valid = ctx.valid.replace(tzinfo=ZoneInfo("UTC"))
+    lvalid = ctx.valid.astimezone(ZoneInfo("America/Chicago"))
     cci, aff, crs = get_raster(ctx)
 
-    sse = "With Shade" if ctx["shade"] == "yes" else "No Shade"
+    sse = "With Shade" if ctx.shade == "yes" else "No Shade"
     mp = MapPlot(
         apctx=ctx,
         title=f"HRRR Derived Comprehensive Climate Index (CCI) [{sse}]",
@@ -129,7 +129,7 @@ def plotter(ctx: dict):
         stateborderwidth=3,
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     levels = list(range(25, 46, 5))
     clabels = [
         "Mild",
@@ -150,7 +150,7 @@ def plotter(ctx: dict):
         extend="both",
         units="CCI",
     )
-    if len(ctx["csector"]) == 2:
+    if len(ctx.csector) == 2:
         mp.drawcounties()
 
     return mp.fig

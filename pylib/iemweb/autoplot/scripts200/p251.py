@@ -3,7 +3,8 @@ The purpose of this autoplot is to generate a time series of NWS warning load
 with time for short fuse warnings.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -15,38 +16,45 @@ from pyiem.nws.vtec import NWS_COLORS
 from pyiem.plot import figure_axes
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    NetworkSelectArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 300}
-    utcnow = utc()
-    desc["arguments"] = [
-        {
-            "type": "networkselect",
-            "name": "wfo",
-            "all": True,
-            "label": "Select WFO:",
-            "default": "_ALL",
-            "network": "WFO",
-        },
-        {
-            "type": "datetime",
-            "name": "sts",
-            "default": f"{utcnow - timedelta(days=1):%Y/%m/%d %H00}",
-            "label": "Start Time (UTC):",
-            "min": "1986/01/01 0000",
-            "max": utc().strftime("%Y/%m/%d 2359"),
-        },
-        {
-            "type": "datetime",
-            "name": "ets",
-            "default": f"{utcnow:%Y/%m/%d %H%M}",
-            "label": "End Time (UTC) (period less than 96 hours):",
-            "min": "1986/01/01 0000",
-            "max": utc().strftime("%Y/%m/%d 2359"),
-        },
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    wfo: Annotated[
+        str, NetworkSelectArg(all=True, label="Select WFO:", network="WFO")
+    ] = "_ALL"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Start Time (UTC):",
+            min="1986/01/01 0000",
+            max=lambda: utc().strftime("%Y/%m/%d 2359"),
+            default=lambda: f"{utc() - timedelta(days=1):%Y/%m/%d %H00}",
+        ),
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Time (UTC) (period less than 96 hours):",
+            min="1986/01/01 0000",
+            max=lambda: utc().strftime("%Y/%m/%d 2359"),
+            default=lambda: f"{utc():%Y/%m/%d %H%M}",
+        ),
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=300
+    )
 
 
 def getp(conn, phenomena, wfo, sts, ets):
@@ -93,11 +101,11 @@ def getp(conn, phenomena, wfo, sts, ets):
     return times, counts
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    wfo = ctx["wfo"]
-    sts = ctx["sts"].replace(tzinfo=UTC)
-    ets = ctx["ets"].replace(tzinfo=UTC)
+    wfo = ctx.wfo
+    sts = ctx.sts.replace(tzinfo=UTC)
+    ets = ctx.ets.replace(tzinfo=UTC)
     if (ets - sts) > timedelta(days=4):
         raise IncompleteWebRequest("Sorry, period must be less than 96 hours.")
     ctx["_nt"].sts["_ALL"] = {

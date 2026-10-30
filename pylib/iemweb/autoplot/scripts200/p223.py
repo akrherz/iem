@@ -7,6 +7,7 @@ the given month and season.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -14,6 +15,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "month": "Grouped by Month",
@@ -30,68 +39,50 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            options=PDICT2,
-            label="Select which daily variable",
-        ),
-        dict(
-            type="select",
-            name="w",
-            default="month",
-            options=PDICT,
-            label="How to group data",
-        ),
-        dict(
-            type="select",
-            name="how",
-            default="percent",
-            options=PDICT3,
-            label="How to express data",
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=1893,
-            label="Inclusive Starting Year:",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=date.today().year,
-            label="Inclusive Ending Year:",
-        ),
-        dict(
-            type="text",
-            name="rng",
-            default="70-79",
-            label="Inclusive (both sides) range of values (F or inch)",
-        ),
-        dict(
-            name="ymax",
-            optional=True,
-            type="float",
-            default=5,
-            label="Y-Axis Maximum Value (optional)",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT2, label="Select which daily variable")
+    ] = "high"
+    w: Annotated[str, SelectArg(options=PDICT, label="How to group data")] = (
+        "month"
+    )
+    how: Annotated[
+        str, SelectArg(options=PDICT3, label="How to express data")
+    ] = "percent"
+    syear: Annotated[int, YearArg(label="Inclusive Starting Year:")] = 1893
+    eyear: Annotated[
+        int,
+        YearArg(
+            label="Inclusive Ending Year:", default=lambda: date.today().year
         ),
     ]
-    return desc
+    rng: Annotated[
+        str,
+        TextArg(label="Inclusive (both sides) range of values (F or inch)"),
+    ] = "70-79"
+    ymax: Annotated[
+        float | None,
+        FloatArg(label="Y-Axis Maximum Value (optional)", default=5),
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    if ctx["rng"].find("-") == -1:
+    station = ctx.station
+    if ctx.rng.find("-") == -1:
         raise NoDataFound("Invalid range provided.")
-    low, high = [float(x) for x in ctx["rng"].split("-")]
-    varname = ctx["var"]
+    low, high = [float(x) for x in ctx.rng.split("-")]
+    varname = ctx.var
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -109,8 +100,8 @@ def plotter(ctx: dict):
                 "low": low,
                 "high": high,
                 "station": station,
-                "syear": ctx["syear"],
-                "eyear": ctx["eyear"],
+                "syear": ctx.syear,
+                "eyear": ctx.eyear,
             },
             index_col="month",
         )
@@ -123,14 +114,14 @@ def plotter(ctx: dict):
     days_per_year = freq / 100.0 * 365.0
     u = "inch" if varname == "precip" else "F"
     title = (
-        f"{ctx['_sname']}:: "
+        f"{ctx.sname}:: "
         f"Daily {PDICT2[varname]} between {low} and {high} {u} (inclusive)\n"
         f"Partition of Observed ({hits}/{count} {freq:.1f}%) "
-        f"Days {PDICT[ctx['w']]} ({ctx['syear']}-{ctx['eyear']})"
+        f"Days {PDICT[ctx.w]} ({ctx.syear}-{ctx.eyear})"
     )
 
     fig, ax = figure_axes(title=title, apctx=ctx)
-    if ctx["how"] == "percent":
+    if ctx.how == "percent":
         col = "freq"
         yunit = "%"
     else:
@@ -138,7 +129,7 @@ def plotter(ctx: dict):
         yunit = "days"
     ax.set_ylabel(f"Frequency [{yunit}]")
     ax.grid(True)
-    if ctx["w"] == "month":
+    if ctx.w == "month":
         df["freq"] = df["hits"] / df["hits"].sum() * 100.0
         df["days"] = df["freq"] / 100 * days_per_year
         bars = ax.bar(df.index.values, df[col].values, width=0.8)

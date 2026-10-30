@@ -32,7 +32,8 @@ to the given timestamp.  This is why we can't have nice things!
 this app and provides a map of WaWa + stats.</p>
 """
 
-from datetime import UTC
+from datetime import UTC, datetime
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -42,6 +43,9 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import DateTimeArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "active": "Include WaWA that have been created or valid at the given time",
@@ -53,45 +57,45 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 120}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT2,
-            name="which",
-            default="pop",
-            label="Aggregate Population or Area",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=utc().strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    which: Annotated[
+        str, SelectArg(options=PDICT2, label="Aggregate Population or Area")
+    ] = "pop"
+    valid: Annotated[
+        datetime | None,
+        DateTimeArg(
             min="2005/10/01 0000",
             label="At Valid Timestamp:",
-            optional=True,
+            default=lambda: utc().strftime("%Y/%m/%d %H%M"),
         ),
-        dict(
-            type="select",
-            name="opt",
-            default="active",
+    ] = None
+    opt: Annotated[
+        str,
+        SelectArg(
             options=PDICT,
             label="How to consider if an event is active [see footnote]",
         ),
-    ]
-    return desc
+    ] = "active"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=120
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     if "valid" not in ctx:
-        ctx["valid"] = utc()
-    valid = ctx["valid"].replace(tzinfo=UTC)
+        ctx.valid = utc()
+    valid = ctx.valid.replace(tzinfo=UTC)
 
-    isscol = "issue" if ctx["opt"] == "within" else "product_issue"
+    isscol = "issue" if ctx.opt == "within" else "product_issue"
     popyear = min(int(valid.year - (valid.year % 5)), 2020)
-    col = "final_pop" if ctx["which"] == "pop" else "final_area_sqkm"
+    col = "final_pop" if ctx.which == "pop" else "final_area_sqkm"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -151,13 +155,13 @@ def plotter(ctx: dict):
     dt = valid.astimezone(ZoneInfo("America/Chicago")).strftime(
         "%Y-%m-%d %-I:%M %p %Z"
     )
-    qualifier = "Active" if ctx["opt"] == "within" else "Created/Active"
+    qualifier = "Active" if ctx.opt == "within" else "Created/Active"
     title = (
-        f"{PDICT2[ctx['which']]} under {qualifier} "
+        f"{PDICT2[ctx.which]} under {qualifier} "
         f"NWS Watch/Warning/Advisory @ {dt}"
     )
     subtitle = "Unofficial IEM Warning/Watch/Advisory data"
-    if ctx["which"] == "pop":
+    if ctx.which == "pop":
         subtitle = f"Based on GPW {popyear} Population and {subtitle}"
     else:
         title = title.replace(" under ", "[sq km] under ")

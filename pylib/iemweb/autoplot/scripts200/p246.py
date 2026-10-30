@@ -4,12 +4,23 @@ being reached by the given calendar date.  This is based on period of record
 observations, so it is an observed frequency.
 """
 
+from datetime import date
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "accum_gdd": "Growing Degree Days",
@@ -17,47 +28,36 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "sday",
-            "default": "0501",
-            "name": "sday",
-            "label": "Select start date to accumulate from:",
-        },
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "accum_gdd",
-            "name": "var",
-            "label": "Which variable to plot?",
-        },
-        {
-            "type": "int",
-            "default": 50,
-            "name": "gddbase",
-            "label": "Growing Degree Day Base Temperature:",
-        },
-        {
-            "type": "int",
-            "default": 86,
-            "name": "gddceil",
-            "label": "Growing Degree Day Ceiling Temperature:",
-        },
-        {
-            "type": "float",
-            "default": 1100,
-            "name": "threshold",
-            "label": "Accumulation Threshold (F or inch):",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sday: Annotated[
+        date,
+        SDayArg(label="Select start date to accumulate from:", default="0501"),
     ]
-    return desc
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which variable to plot?")
+    ] = "accum_gdd"
+    gddbase: Annotated[
+        int, IntArg(label="Growing Degree Day Base Temperature:")
+    ] = 50
+    gddceil: Annotated[
+        int, IntArg(label="Growing Degree Day Ceiling Temperature:")
+    ] = 86
+    threshold: Annotated[
+        float, FloatArg(label="Accumulation Threshold (F or inch):")
+    ] = 1100
 
 
-def get_obsdf(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_obsdf(ctx: Params):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -76,27 +76,27 @@ def get_obsdf(ctx):
             index_col="day",
             parse_dates=["day"],
             params={
-                "station": ctx["station"],
-                "sday": ctx["sday"].strftime("%m%d"),
-                "gddbase": ctx["gddbase"],
-                "gddceil": ctx["gddceil"],
+                "station": ctx.station,
+                "sday": ctx.sday.strftime("%m%d"),
+                "gddbase": ctx.gddbase,
+                "gddceil": ctx.gddceil,
             },
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
     # Check the first year to see if it starts on our sday
-    if df.index[0].strftime("%m%d") != ctx["sday"].strftime("%m%d"):
+    if df.index[0].strftime("%m%d") != ctx.sday.strftime("%m%d"):
         df = df[df["year"] > df.index[0].year]
     # compute the accumulated frequency of accumulated value by day of year
     # over the given threshold
-    df["over_threshold"] = df[ctx["var"]] > ctx["threshold"]
+    df["over_threshold"] = df[ctx.var] > ctx.threshold
     # if the last year is not over threshold, chomp it off too
     if not df.iloc[-1]["over_threshold"]:
         df = df[df["year"] < df.index.year.max()]
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_obsdf(ctx)
 
@@ -105,19 +105,18 @@ def plotter(ctx: dict):
         df[["over_threshold", "day_of_year"]].groupby("day_of_year").mean()
         * 100.0
     )
-    title = PDICT[ctx["var"]]
-    if ctx["var"] == "accum_gdd":
-        title += f" ({ctx['gddbase']}/{ctx['gddceil']})"
+    title = PDICT[ctx.var]
+    if ctx.var == "accum_gdd":
+        title += f" ({ctx.gddbase}/{ctx.gddceil})"
 
-    units = "inch" if ctx["var"] == "accum_precip" else "GDD"
+    units = "inch" if ctx.var == "accum_precip" else "GDD"
     fig = figure(
         title=(
-            f"({df.index[0].year}-{df.index[-1].year}) "
-            f"{ctx['_sname']}:: {title}"
+            f"({df.index[0].year}-{df.index[-1].year}) {ctx.sname}:: {title}"
         ),
         subtitle=(
-            f"Accumulation over {ctx['threshold']} {units} "
-            f"after {ctx['sday']:%b %-d}"
+            f"Accumulation over {ctx.threshold} {units} "
+            f"after {ctx.sday:%b %-d}"
         ),
         apctx=ctx,
     )

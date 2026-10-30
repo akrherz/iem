@@ -10,8 +10,8 @@ within the state for it to count.</p>
 produces heatmaps and other summary maps.</p>
 """
 
-from datetime import UTC, timedelta
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Annotated
 
 import geopandas as gpd
 import pyiem.nws.vtec as vtec
@@ -31,6 +31,16 @@ from pyiem.reference import (
 from pyiem.util import load_geodf, utc
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS
+from iemweb.autoplot.description import (
+    CSectorArg,
+    DateTimeArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -53,83 +63,68 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    sts = utc() - timedelta(days=1)
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "options": PDICT3,
-            "name": "geo",
-            "default": "sbw",
-            "label": "Select Warning Type",
-        },
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT,
-            label="How to plot the data?",
-        ),
-        {
-            "type": "datetime",
-            "min": "1986/01/01 0000",
-            "default": sts.strftime("%Y/%m/%d 0000"),
-            "label": "Start Time (UTC) of event issuance:",
-            "name": "sts",
-        },
-        {
-            "type": "datetime",
-            "min": "1986/01/01 0000",
-            "default": utc().strftime("%Y/%m/%d 0000"),
-            "label": "End Time (UTC) of event issuance (period &gt; 32 days):",
-            "name": "ets",
-        },
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(
-            type="csector",
-            name="csector",
-            default="conus",
-            label="Select state/sector to plot",
-        ),
-        ARG_FEMA,
-        {
-            "type": "select",
-            "options": PDICT2,
-            "name": "c",
-            "default": "single",
-            "label": "Total by Selected Phenomena/Significance or Combo",
-        },
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="FF",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    geo: Annotated[
+        str, SelectArg(options=PDICT3, label="Select Warning Type")
+    ] = "sbw"
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to plot the data?")
+    ] = "wfo"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
+            min="1986/01/01 0000",
+            label="Start Time (UTC) of event issuance:",
+            default=lambda: (utc() - timedelta(days=1)).strftime(
+                "%Y/%m/%d 0000"
+            ),
         ),
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            min="1986/01/01 0000",
+            label="End Time (UTC) of event issuance (period &gt; 32 days):",
+            default=lambda: utc().strftime("%Y/%m/%d 0000"),
+        ),
+    ]
+    wfo: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "conus"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    c: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="Total by Selected Phenomena/Significance or Combo",
+        ),
+    ] = "single"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "FF"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    wfo = ctx["wfo"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    opt = ctx["opt"]
+    wfo = ctx.wfo
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    opt = ctx.opt
     if opt == "all":
         opt = "wfo"
         wfo = "_ALL"
@@ -138,11 +133,11 @@ def plotter(ctx: dict):
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
-    if (ctx["ets"] - ctx["sts"]).days > 32:
+    if (ctx.ets - ctx.sts).days > 32:
         raise NoDataFound("Sorry, period is too long!")
     params = {
-        "sts": ctx["sts"].replace(tzinfo=UTC),
-        "ets": ctx["ets"].replace(tzinfo=UTC),
+        "sts": ctx.sts.replace(tzinfo=UTC),
+        "ets": ctx.ets.replace(tzinfo=UTC),
         "ph": [
             phenomena,
         ],
@@ -151,12 +146,12 @@ def plotter(ctx: dict):
     wfo_limiter = ""
     if wfo == "_ALL":
         wfo_limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
 
     if opt == "csector":
         # Filtering is done later for non-state sectors
         if len(csector) == 2:
-            if ctx["geo"] == "sbw":
+            if ctx.geo == "sbw":
                 gdf = load_geodf("us_states")
                 # Require at least 5% of the area to be within the state
                 wfo_limiter = """
@@ -185,10 +180,10 @@ def plotter(ctx: dict):
     elif opt == "data":
         wfo_limiter = " and w.wfo not in ('AFC', 'AFG', 'GUM', 'JSJ', 'HFO') "
 
-    if ctx["c"] == "svrtor":
+    if ctx.c == "svrtor":
         params["ph"] = ["SV", "TO"]
         params["sig"] = "W"
-    elif ctx["c"] == "svrtorffw":
+    elif ctx.c == "svrtorffw":
         params["ph"] = ["SV", "TO", "FF"]
         params["sig"] = "W"
 
@@ -199,7 +194,7 @@ def plotter(ctx: dict):
             and status = 'NEW' and issue >= :sts and issue < :ets
             {wfo_limiter}
         """
-    if ctx["geo"] == "cbw":
+    if ctx.geo == "cbw":
         sql = """
         select simple_geom as geom, w.wfo, phenomena, significance, eventid
         from warnings w JOIN ugcs u on (w.gid = u.gid)
@@ -238,8 +233,8 @@ def plotter(ctx: dict):
     subtitle += ", ".join(st)
 
     title = (
-        f"Issued between {ctx['sts']:%-d %b %Y %H:%M} and "
-        f"{ctx['ets']:%-d %b %Y %H:%M} UTC "
+        f"Issued between {ctx.sts:%-d %b %Y %H:%M} and "
+        f"{ctx.ets:%-d %b %Y %H:%M} UTC "
     )
     bnds = wwadf.total_bounds
     if opt == "csector":
@@ -248,12 +243,12 @@ def plotter(ctx: dict):
         else:
             title += f"for {SECTORS_NAME[csector]}"
     elif opt == "wfo":
-        title += f"by {ctx['_sname']}"
+        title += f"by {ctx.sname}"
         xref = {"TJSJ": "SJU"}
         bnds = wfo_bounds[xref.get(wfo, wfo[-3:])]
     elif opt == "fema":
-        title += f"for FEMA {FEMA_REGIONS[ctx['fema']]}"
-        bnds = fema_region_bounds[int(ctx["fema"])]
+        title += f"for FEMA {FEMA_REGIONS[ctx.fema]}"
+        bnds = fema_region_bounds[int(ctx.fema)]
     elif opt == "data":
         title += "for Contiguous US"
 

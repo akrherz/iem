@@ -7,6 +7,7 @@ are available for about 90 hours into the future.
 
 import os
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -17,6 +18,14 @@ from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import ncopen, utc
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpk": "2m Air Temperature",
@@ -34,50 +43,39 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    today = datetime.today()
-    desc["arguments"] = [
-        ARG_IEMRE_DOMAIN,
-        dict(
-            type="csector",
-            name="csector",
-            default="midwest",
-            label="Select state/sector to plot",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    domain: Annotated[str, ARG_IEMRE_DOMAIN] = "conus"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "midwest"
+    var: Annotated[
+        str, SelectArg(label="Select Plot Variable:", options=PDICT)
+    ] = "tmpk"
+    ptype: Annotated[
+        str, SelectArg(label="Select Plot Type:", options=PDICT2)
+    ] = "c"
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
+            label="UTC Timestamp:",
+            min="1950/01/01 0000",
+            max=lambda: (utc() + timedelta(hours=100)).strftime(
+                "%Y/%m/%d %H00"
+            ),
+            default=lambda: datetime.today().strftime("%Y/%m/%d 0000"),
         ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpk",
-            label="Select Plot Variable:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="ptype",
-            default="c",
-            label="Select Plot Type:",
-            options=PDICT2,
-        ),
-        {
-            "type": "datetime",
-            "name": "valid",
-            "default": today.strftime("%Y/%m/%d 0000"),
-            "label": "UTC Timestamp:",
-            "min": "1950/01/01 0000",
-            "max": (utc() + timedelta(hours=100)).strftime("%Y/%m/%d %H00"),
-        },
-        {
-            "type": "select",
-            "name": "clip",
-            "default": "yes",
-            "label": "Mask Plot Data?",
-            "options": PDICT3,
-        },
-        dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]
-    return desc
+    clip: Annotated[
+        str, SelectArg(label="Mask Plot Data?", options=PDICT3)
+    ] = "yes"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "magma"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
 
 
 def unit_convert(nc, varname, idx0):
@@ -107,13 +105,13 @@ def unit_convert(nc, varname, idx0):
     return data
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    domain = ctx["domain"]
+    domain = ctx.domain
     gridnav = get_nav("iemre", domain)
-    ptype = ctx["ptype"]
-    valid = ctx["valid"].replace(tzinfo=UTC)
-    varname = ctx["var"]
+    ptype = ctx.ptype
+    valid = ctx.valid.replace(tzinfo=UTC)
+    varname = ctx.var
     title = valid.strftime("%-d %B %Y %H:%M UTC")
     mpargs = {
         "apctx": ctx,
@@ -123,7 +121,7 @@ def plotter(ctx: dict):
         "subtitle": "Sourced from various NOAA/ECMWF IFS/ERA5-Land datasets",
     }
     if domain != "conus":
-        ctx["csector"] = "custom"
+        ctx.csector = "custom"
         mpargs["east"] = gridnav.right_edge
         mpargs["west"] = gridnav.left_edge
         mpargs["south"] = gridnav.bottom_edge
@@ -138,7 +136,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
         # Set bad values to hallow
-        cmap = get_cmap(ctx["cmap"]).with_extremes(bad="#FFFFFF00")
+        cmap = get_cmap(ctx.cmap).with_extremes(bad="#FFFFFF00")
         data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
@@ -183,7 +181,7 @@ def plotter(ctx: dict):
             ilabel=True,
             labelfmt="%.0f",
             cmap=cmap,
-            clip_on=ctx["clip"] == "yes",
+            clip_on=ctx.clip == "yes",
         )
     else:
         mp.imshow(
@@ -193,7 +191,7 @@ def plotter(ctx: dict):
             clevs=clevs,
             cmap=cmap,
             units=plot_units,
-            clip_on=ctx["clip"] == "yes",
+            clip_on=ctx.clip == "yes",
         )
 
     return mp.fig

@@ -7,6 +7,7 @@ but contains totals of Watch, Warnings, and Advisories issued.</p>
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,6 +16,16 @@ from pyiem import reference
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "NONE": "All LSR Types",
@@ -110,8 +121,8 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
+def build_doc() -> str:
+    """Return the description with the LSR filter queries."""
     doc = str(__doc__)
     doc += (
         "<p>This is how some of the LSR summary types map to database "
@@ -120,41 +131,31 @@ def get_description():
     )
     for key, val in FILTERS.items():
         doc += f"<li>{MDICT[key]} - <code>{val}</code></li>\n"
-    doc += "</ul>"
-    desc = {"description": doc, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT,
-            label="How to summarize the data?",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAC169",
-            label="Select UGC Zone/County:",
-        ),
-        dict(
-            type="select",
-            name="filter",
-            default="NONE",
-            options=MDICT,
-            label="Local Storm Report Type Filter",
-        ),
-        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
-    ]
-    return desc
+    return doc + "</ul>"
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to summarize the data?")
+    ] = "wfo"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAC169"
+    filter: Annotated[
+        str, SelectArg(options=MDICT, label="Local Storm Report Type Filter")
+    ] = "NONE"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Greens"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=build_doc(), data=True, cache=86400
+    )
 
 
 def get_ugc_name(ugc):
@@ -166,16 +167,16 @@ def get_ugc_name(ugc):
     return cursor.fetchone()
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    opt = ctx["opt"]
-    state = ctx["state"]
+    station = ctx.station
+    opt = ctx.opt
+    state = ctx.state
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
-    myfilter = ctx["filter"]
+    myfilter = ctx.filter
     tlimiter = FILTERS.get(myfilter, " and typetext = :typetext ")
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
@@ -189,13 +190,13 @@ def plotter(ctx: dict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
     if opt == "state":
         wfo_limiter = " and state = :state "
         params["state"] = state
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
-        params["ugc"] = ctx["ugc"]
+        params["ugc"] = ctx.ugc
     with get_sqlalchemy_conn("postgis") as conn:
         if opt != "ugc":
             daily = pd.read_sql(
@@ -246,17 +247,17 @@ def plotter(ctx: dict):
         columns=range(1, 13),
     )
 
-    title = f"NWS {ctx['_sname']}"
+    title = f"NWS {ctx.sname}"
     if opt == "state":
         title = (
             "NWS Local Storm Reports for State of "
             f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
-        name, wfo = get_ugc_name(ctx["ugc"])
+        name, wfo = get_ugc_name(ctx.ugc)
         title = (
             f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Reports for "
-            f"[{ctx['ugc']}] {name}"
+            f"[{ctx.ugc}] {name}"
         )
     (fig, ax) = figure_axes(
         title=title,
@@ -281,7 +282,7 @@ def plotter(ctx: dict):
         linewidths=0.5,
         ax=ax,
         vmin=1,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         zorder=2,
     )
     g.set_yticklabels(g.get_yticklabels(), rotation=0)

@@ -21,6 +21,7 @@ spatial heatmaps.</p>
 
 import calendar
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -32,6 +33,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, get_monofont
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    UgcArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.autoplot.scripts200.p200 import OUTLOOKS
 
 PDICT = {
@@ -64,84 +74,53 @@ PDICT4 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        {
-            "type": "year",
-            "name": "year",
-            "default": 1986,
-            "label": "Start Year of Plot:",
-            "min": 1986,
-        },
-        {
-            "type": "select",
-            "options": PDICT3,
-            "default": "C",
-            "label": "Select Outlook Type:",
-            "name": "outlook_type",
-        },
-        {
-            "type": "select",
-            "options": OUTLOOKS,
-            "default": "CATEGORICAL.SLGT",
-            "label": "Select Outlook Threshold:",
-            "name": "threshold",
-        },
-        {
-            "type": "select",
-            "options": PDICT4,
-            "default": "1",
-            "label": "Select Day:",
-            "name": "day",
-        },
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT2,
-            label="View by WFO, State or Zone?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    year: Annotated[int, YearArg(label="Start Year of Plot:", min=1986)] = 1986
+    outlook_type: Annotated[
+        str, SelectArg(options=PDICT3, label="Select Outlook Type:")
+    ] = "C"
+    threshold: Annotated[
+        str, SelectArg(options=OUTLOOKS, label="Select Outlook Threshold:")
+    ] = "CATEGORICAL.SLGT"
+    day: Annotated[str, SelectArg(options=PDICT4, label="Select Day:")] = "1"
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="View by WFO, State or Zone?")
+    ] = "wfo"
+    wfo: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    ugc: Annotated[str, UgcArg(label="Select County/Zone:")] = "IAZ048"
+    overlap: Annotated[
+        str,
+        SelectArg(
+            options=PDICT,
+            label="Select Spatial Overlap Threshold:<br />"
+            "<i>Warning: overlap percentage adds 10s of "
+            "seconds to plot generation</i>",
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-        ),
-        ARG_FEMA,
-        dict(type="state", default="IA", name="state", label="Select State:"),
-        {
-            "type": "ugc",
-            "name": "ugc",
-            "default": "IAZ048",
-            "label": "Select County/Zone:",
-        },
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "0",
-            "label": (
-                "Select Spatial Overlap Threshold:<br />"
-                "<i>Warning: overlap percentage adds 10s of "
-                "seconds to plot generation</i>"
-            ),
-            "name": "overlap",
-        },
-    ]
-    return desc
+    ] = "0"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    wfo = ctx["wfo"][:4]
-    opt = ctx["opt"]
-    overlap = ctx["overlap"]
-    state = ctx["state"]
-    ugc = ctx["ugc"]
-    fema = ctx["fema"]
-    (category, threshold) = ctx["threshold"].split(".", 1)
+    wfo = ctx.wfo[:4]
+    opt = ctx.opt
+    overlap = ctx.overlap
+    state = ctx.state
+    ugc = ctx.ugc
+    fema = ctx.fema
+    (category, threshold) = ctx.threshold.split(".", 1)
 
     params = {
         "wfo": wfo,
@@ -150,10 +129,10 @@ def plotter(ctx: dict):
         "overlap": int(overlap) / 100.0,
         "threshold": threshold,
         "category": category,
-        "day": ctx["day"],
+        "day": ctx.day,
         "ugc": ugc,
-        "sts": date(ctx["year"], 1, 1),
-        "outlook_type": ctx["outlook_type"].upper(),
+        "sts": date(ctx.year, 1, 1),
+        "outlook_type": ctx.outlook_type.upper(),
     }
     geomtable = "cwa"
     limiter = "g.wfo = :wfo"
@@ -229,10 +208,10 @@ def plotter(ctx: dict):
     df["doy"] = df["date"].dt.day_of_year
     df["year"] = df["date"].dt.year
 
-    tt = OUTLOOKS[ctx["threshold"]].split("(")[0].strip()
+    tt = OUTLOOKS[ctx.threshold].split("(")[0].strip()
     title = (
-        f"{'WPC' if ctx['outlook_type'] == 'E' else 'SPC'} Day "
-        f"{ctx['day']} {tt} Outlook"
+        f"{'WPC' if ctx.outlook_type == 'E' else 'SPC'} Day "
+        f"{ctx.day} {tt} Outlook"
     )
     verb = "Intersects" if overlap != "99" else "Engulfs"
     subtitle = (
@@ -247,7 +226,7 @@ def plotter(ctx: dict):
         subtitle = "Based on Unofficial IEM Archives, Contiguous US"
     elif opt == "fema":
         subtitle = f"{verb} FEMA Region {fema}"
-    if ctx["overlap"] not in ["0", "99"]:
+    if ctx.overlap not in ["0", "99"]:
         subtitle += f" with >= {overlap}% overlap"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax = fig.add_axes((0.08, 0.1, 0.58, 0.8))

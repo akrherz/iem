@@ -12,6 +12,7 @@ from datetime import UTC, datetime, timedelta
 from functools import partial
 from io import BytesIO
 from multiprocessing import Pool
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -22,6 +23,15 @@ from PIL import Image
 from pyiem.plot import MapPlot, ramp2df
 from pyiem.util import LOG, archive_fetch, utc
 
+from iemweb.autoplot.description import (
+    CSectorArg,
+    DateTimeArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "sector": "Plot by State / Sector",
     "cwa": "Plot by NWS CWA / WFO",
@@ -29,54 +39,48 @@ PDICT = {
 FONTSIZE = 32
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": False, "description": __doc__}
-    # Lame default to cut down on CI time :/
-    sts = utc() + timedelta(hours=10)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="w",
-            default="sector",
-            options=PDICT,
-            label="Plot for which domain type",
-        ),
-        dict(
-            type="csector",
-            name="sector",
-            default="IA",
-            label="Select state/sector",
-        ),
-        dict(
-            type="networkselect",
-            name="cwa",
-            default="DMX",
-            label="Select WFO / CWA:",
-            network="WFO",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=sts.strftime("%Y/%m/%d %H00"),
-            max=sts.strftime("%Y/%m/%d %H00"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[
+        str, SelectArg(options=PDICT, label="Plot for which domain type")
+    ] = "sector"
+    sector: Annotated[str, CSectorArg(label="Select state/sector")] = "IA"
+    cwa: Annotated[
+        str, NetworkSelectArg(label="Select WFO / CWA:", network="WFO")
+    ] = "DMX"
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
+            max=lambda: (utc() + timedelta(hours=10)).strftime(
+                "%Y/%m/%d %H00"
+            ),
             label="Plot Valid At (UTC Timestamp):",
             min="2014/01/01 0000",
+            default=lambda: (utc() + timedelta(hours=10)).strftime(
+                "%Y/%m/%d %H00"
+            ),
         ),
     ]
-    return desc
 
 
-def mp_factory(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=False
+    )
+
+
+def mp_factory(ctx: Params):
     """Make"""
-    if ctx["w"] == "sector":
-        sector = "state" if len(ctx["sector"]) == 2 else ctx["sector"]
-        state = ctx["sector"]
+    if ctx.w == "sector":
+        sector = "state" if len(ctx.sector) == 2 else ctx.sector
+        state = ctx.sector
         cwa = ""
     else:
         sector = "cwa"
         state = ""
-        cwa = ctx["cwa"]
+        cwa = ctx.cwa
     return MapPlot(
         apctx=ctx,
         sector=sector,
@@ -88,7 +92,7 @@ def mp_factory(ctx):
 
 
 def forecast2image(
-    ctx: dict, valid: datetime, fhour: int
+    ctx: Params, valid: datetime, fhour: int
 ) -> list[int, bytes | None]:
     """Overlay things."""
     ts = valid - timedelta(hours=fhour)
@@ -142,7 +146,7 @@ def forecast2image(
         clip_on=False,
         clevstride=5,
     )
-    if ctx["w"] != "sector" and ctx["sector"] != "conus":
+    if ctx.w != "sector" and ctx.sector != "conus":
         mp.drawcounties()
     buf = BytesIO()
     mp.fig.savefig(buf, format="png")
@@ -150,7 +154,7 @@ def forecast2image(
     return fhour, buf.getvalue()
 
 
-def add_obs(img, ctx, valid):
+def add_obs(img, ctx: Params, valid):
     """Plot the validation."""
     mp = mp_factory(ctx)
     mp.fig.text(
@@ -161,7 +165,7 @@ def add_obs(img, ctx, valid):
         bbox=dict(color="white"),
     )
     mp.overlay_nexrad(valid)
-    if ctx["w"] != "sector" and ctx["sector"] != "conus":
+    if ctx.w != "sector" and ctx.sector != "conus":
         mp.drawcounties()
     buf = BytesIO()
     mp.fig.savefig(buf, format="png")
@@ -172,9 +176,9 @@ def add_obs(img, ctx, valid):
     mp.close()
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=UTC)
+    valid = ctx.valid.replace(tzinfo=UTC)
     ramp = ramp2df("composite_n0q")
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,

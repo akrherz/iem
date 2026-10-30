@@ -6,6 +6,7 @@ in the future for interactive use!
 """
 
 from textwrap import wrap
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -18,6 +19,9 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS
 from pyiem.reference import Z_OVERLAY2
+
+from iemweb.autoplot.description import PlotDescription, TextArg
+from iemweb.autoplot.params import AutoplotParams
 
 ICONS = {
     "0": "tropicalstorm.gif",
@@ -63,18 +67,19 @@ ICONS = {
 PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "text",
-            "default": "202305080216-KDMX-NWUS53-LSRDMX",
-            "name": "pid",
-            "label": "Enter NWS Text Product Identifier",
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    pid: Annotated[str, TextArg(label="Enter NWS Text Product Identifier")] = (
+        "202305080216-KDMX-NWUS53-LSRDMX"
+    )
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def get_image(filename):
@@ -171,9 +176,9 @@ def get_df(table, product_id) -> gpd.GeoDataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    product_id = ctx["pid"]
+    product_id = ctx.pid
     if len(product_id) < 28:  # arb
         raise NoDataFound("Invalid product identifier")
     # Can we find data?

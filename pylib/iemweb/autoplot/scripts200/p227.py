@@ -3,6 +3,7 @@ This plot is not meant for interactive use, but a backend for
 NWEM plots.
 """
 
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -14,29 +15,33 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
 from pyiem.util import LOG
 
+from iemweb.autoplot.description import IntArg, PlotDescription, TextArg
+from iemweb.autoplot.params import AutoplotParams
+
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 WFOCONV = {"JSJ": "SJU"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 3600, "data": True}
-    desc["defaults"] = {"_r": "t"}
-    desc["arguments"] = [
-        dict(
-            type="text",
-            name="pid",
-            default="202302031255-KLWX-FZUS71-MWSLWX-RRA",
-            label="IEM generated up to 35 char product identifier:",
-        ),
-        dict(
-            type="int",
-            default=0,
-            name="segnum",
-            label="Product Segment Number (starts at 0):",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    pid: Annotated[
+        str, TextArg(label="IEM generated up to 35 char product identifier:")
+    ] = "202302031255-KLWX-FZUS71-MWSLWX-RRA"
+    segnum: Annotated[
+        int, IntArg(label="Product Segment Number (starts at 0):")
+    ] = 0
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        cache=3600,
+        data=True,
+        defaults={"_r": "t"},
+    )
 
 
 def get_text(product_id: str) -> str:
@@ -54,10 +59,10 @@ def get_text(product_id: str) -> str:
     return res
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    pid = ctx["pid"][:35]
-    segnum = ctx["segnum"]
+    pid = ctx.pid[:35]
+    segnum = ctx.segnum
     nt = NetworkTable("WFO")
 
     # Compute a population estimate

@@ -29,6 +29,7 @@ appear plotted on this map.
 """
 
 from datetime import timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -39,40 +40,41 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
 
+from iemweb.autoplot.description import IntArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {"realtime": "Realtime-ness", "latency": "Latency"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    mode: Annotated[
+        str, SelectArg(options=PDICT, label="Select Plot Mode:")
+    ] = "latency"
+    offset: Annotated[
+        int,
+        IntArg(
+            label="Prior number of minutes from now to produce map for "
+            "(lt 1440*2 minutes)"
+        ),
+    ] = 0
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
     uri = "https://mesonet.agron.iastate.edu/plotting/auto/plot/254"
-    return {
-        "description": __doc__.replace("%BASE%", uri),
-        "data": True,
-        "cache": 180,
-        "arguments": [
-            {
-                "type": "select",
-                "name": "mode",
-                "default": "latency",
-                "options": PDICT,
-                "label": "Select Plot Mode:",
-            },
-            {
-                "type": "int",
-                "name": "offset",
-                "default": 0,
-                "label": (
-                    "Prior number of minutes from now to produce map for "
-                    "(lt 1440*2 minutes)"
-                ),
-            },
-        ],
-    }
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__.replace("%BASE%", uri),
+        data=True,
+        cache=180,
+    )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ts = utc() - timedelta(minutes=ctx["offset"])
+    ts = utc() - timedelta(minutes=ctx.offset)
     nt = NetworkTable("NEXRAD")
     with get_sqlalchemy_conn("id3b") as conn:
         latency = pd.read_sql(
@@ -93,7 +95,7 @@ def plotter(ctx: dict):
     if latency.empty:
         raise NoDataFound("No Data Found.")
     latency = latency.drop(columns=["rank"]).sort_values(
-        ctx["mode"], ascending=True
+        ctx.mode, ascending=True
     )
     latency["latency"] = latency["latency"].dt.total_seconds() / 60.0
     latency["realtime"] = latency["realtime"].dt.total_seconds() / 60.0
@@ -107,7 +109,7 @@ def plotter(ctx: dict):
         latency.loc[latency[col] < 0, col] = 0
     mp = MapPlot(
         sector="nws",
-        title=f"IEM Estimated NEXRAD III {PDICT[ctx['mode']]} over NOAAPort",
+        title=f"IEM Estimated NEXRAD III {PDICT[ctx.mode]} over NOAAPort",
         subtitle=f"{ts:%H%MZ %d %b %Y} Based on NOAAPort N0B receipt.",
         apctx=ctx,
         nocaption=True,
@@ -120,10 +122,10 @@ def plotter(ctx: dict):
     ]
     cmap = ListedColormap(colors).with_extremes(under="white", over="red")
     levels = [0, 5, 15, 30, 60]
-    if ctx["mode"] == "realtime":
+    if ctx.mode == "realtime":
         levels = [0, 10, 15, 20, 60]
     norm = BoundaryNorm(levels, cmap.N)
-    latency["color"] = [cmap(norm(x)) for x in latency[ctx["mode"]].values]
+    latency["color"] = [cmap(norm(x)) for x in latency[ctx.mode].values]
 
     mp.plot_values(
         latency["lon"].to_list(),
@@ -141,7 +143,7 @@ def plotter(ctx: dict):
         cmap,
         norm,
         spacing="proportional",
-        title=f"{PDICT[ctx['mode']]} Minutes",
+        title=f"{PDICT[ctx.mode]} Minutes",
         extend="max",
     )
 

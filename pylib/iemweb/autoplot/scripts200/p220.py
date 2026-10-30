@@ -13,7 +13,8 @@ as the code stands now, you get the next day's outlook.
 option exists for downloading these outlooks in-bulk.</p>
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -26,6 +27,14 @@ from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    CSectorArg,
+    DateTimeArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.autoplot.scripts200.p201 import COLORS
 
 CENTRALTZ = ZoneInfo("America/Chicago")
@@ -111,56 +120,46 @@ ORDER by day ASC, priority ASC
 """
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 600
-    desc["arguments"] = [
-        dict(
-            type="select",
-            default="1C",
-            name="which",
-            options=PDICT2,
-            label="Select SPC/WPC Outlook Day and Type",
-        ),
-        dict(
-            type="select",
-            default="categorical",
-            name="cat",
-            options=PDICT3,
-            label="Select SPC/WPC Outlook Category",
-        ),
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (when applicable)",
-        ),
-        ARG_FEMA,
-        dict(
-            type="csector",
-            name="csector",
-            default="IA",
-            label="Select state/sector to plot",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=utc().strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    which: Annotated[
+        str,
+        SelectArg(options=PDICT2, label="Select SPC/WPC Outlook Day and Type"),
+    ] = "1C"
+    cat: Annotated[
+        str, SelectArg(options=PDICT3, label="Select SPC/WPC Outlook Category")
+    ] = "categorical"
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(network="WFO", label="Select WFO: (when applicable)"),
+    ] = "DMX"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "IA"
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
             label="Outlook Issuance/Valid Timestamp (UTC Timezone):",
             min="1987/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d %H%M"),
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        defaults={"_r": "t"},
+        cache=600,
+    )
 
 
 def outlook_search(valid, days, outlook_type):
@@ -217,11 +216,11 @@ def get_threshold_label(threshold, outlook_type) -> str:
     return threshold
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=UTC)
-    day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
-    category = ctx["cat"].upper()
+    valid = ctx.valid.replace(tzinfo=UTC)
+    day, outlook_type = int(ctx.which[0]), ctx.which[1]
+    category = ctx.cat.upper()
     # Ensure we don't have an incompatable combo
     if outlook_type == "E":
         category = "CATEGORICAL"
@@ -266,9 +265,9 @@ def plotter(ctx: dict):
     for col in ["updated", "product_issue", "issue", "expire"]:
         df[col] = df[col].dt.tz_localize(UTC)
     csector = ctx.pop("csector")
-    if ctx["t"] == "cwa":
+    if ctx.t == "cwa":
         sector = "cwa"
-    elif ctx["t"] == "fema":
+    elif ctx.t == "fema":
         sector = "fema_region"
     else:
         sector = "state" if len(csector) == 2 else csector
@@ -292,8 +291,8 @@ def plotter(ctx: dict):
         ),
         sector=sector,
         state=csector,
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
-        fema_region=ctx["fema"],
+        cwa=(ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:]),
+        fema_region=ctx.fema,
         nocaption=True,
         background="ne2",
     )

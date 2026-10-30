@@ -19,6 +19,7 @@ separate event.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -29,6 +30,14 @@ from pyiem.nws.vtec import VTEC_PHENOMENA, get_ps_string
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 AVG_YEAR1 = 2008
 LAST_YEAR = date.today().year
@@ -119,8 +128,8 @@ PHENOM_CONFIG = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
+def build_doc() -> str:
+    """Return the description with the VTEC codes of each category."""
     doc = __doc__ + "<p>VTEC Codes used for each category are:</p><ul>"
     for name, config in PHENOM_CONFIG.items():
         if name == "Other":
@@ -129,61 +138,51 @@ def get_description():
             f"{VTEC_PHENOMENA.get(p, p)} ({p})" for p in config["phenoms"]
         ]
         doc += f"<li>{name}: {', '.join(entries)}</li>"
-    doc += "</ul>"
-    desc = {"description": doc, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "which",
-            "default": "WY",
-            "label": "Select which VTEC significance to summarize",
-            "options": PDICT3,
-        },
-        dict(
-            type="select",
-            name="opt",
-            default="ugc",
-            options=PDICT,
-            label="How to summarize the data?",
+    return doc + "</ul>"
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    which: Annotated[
+        str,
+        SelectArg(
+            label="Select which VTEC significance to summarize", options=PDICT3
         ),
-        {
-            "type": "select",
-            "name": "how",
-            "default": "per_ugc",
-            "label": "How is an event counted?",
-            "options": PDICT2,
-        },
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
+    ] = "WY"
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to summarize the data?")
+    ] = "ugc"
+    how: Annotated[
+        str, SelectArg(label="How is an event counted?", options=PDICT2)
+    ] = "per_ugc"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAC169"
+    ugc2: Annotated[
+        str | None,
+        UgcArg(
+            label="Select Second Additional UGC Zone/County: (optional)",
+            default="IAZ048",
         ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        ARG_FEMA,
-        {
-            "type": "ugc",
-            "name": "ugc",
-            "default": "IAC169",
-            "label": "Select UGC Zone/County:",
-        },
-        {
-            "optional": True,
-            "type": "ugc",
-            "name": "ugc2",
-            "default": "IAZ048",
-            "label": "Select Second Additional UGC Zone/County: (optional)",
-        },
-        {
-            "optional": True,
-            "type": "ugc",
-            "name": "ugc3",
-            "default": "IAZ048",
-            "label": "Select Third Additional UGC Zone/County: (optional)",
-        },
-    ]
-    return desc
+    ] = None
+    ugc3: Annotated[
+        str | None,
+        UgcArg(
+            label="Select Third Additional UGC Zone/County: (optional)",
+            default="IAZ048",
+        ),
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=build_doc(), data=True, cache=86400
+    )
 
 
 def get_ugc_name(ugc: str) -> tuple[str, str]:
@@ -207,11 +206,11 @@ def cell_format(value: float) -> str:
     return f"{value:0.1f}"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    opt = ctx["opt"]
-    state = ctx["state"]
+    station = ctx.station
+    opt = ctx.opt
+    state = ctx.state
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
@@ -220,7 +219,7 @@ def plotter(ctx: dict):
     params = {
         "tzname": ctx["_nt"].sts[station]["tzname"],
         "first_year": AVG_YEAR1,
-        "sigs": list(ctx["which"]),
+        "sigs": list(ctx.which),
     }
     wfo_limiter = " and wfo = :wfo "
     params["wfo"] = station if len(station) == 3 else station[1:]
@@ -229,11 +228,11 @@ def plotter(ctx: dict):
         params["state"] = state
     elif opt == "fema":
         wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
+        params["states"] = fema_region2states(ctx.fema)
     elif opt == "ugc":
         wfo_limiter = " and ugc = ANY(:ugcs) "
         params["ugcs"] = [
-            ctx["ugc"],
+            ctx.ugc,
         ]
         for suffix in ["2", "3"]:
             if (ugc_val := ctx.get(f"ugc{suffix}")) is not None:
@@ -255,7 +254,7 @@ def plotter(ctx: dict):
                 ORDER by vtec_year asc, month asc
         """,
                 wfo_limiter=wfo_limiter,
-                eagg="" if ctx["how"] == "per_eventid" else "ugc,",
+                eagg="" if ctx.how == "per_eventid" else "ugc,",
             ),
             conn,
             params=params,
@@ -275,15 +274,15 @@ def plotter(ctx: dict):
     # Everything else is Other
     eventsdf["category"] = eventsdf["category"].fillna("Other")
 
-    title = f"NWS {ctx['_sname']}"
-    subtitle = PDICT2[ctx["how"]]
+    title = f"NWS {ctx.sname}"
+    subtitle = PDICT2[ctx.how]
     if opt == "state":
         title = (
             "NWS Issued for Counties/Zones for State of "
             f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
-        title = f"NWS Issued {PDICT3[ctx['which']]} by Month"
+        title = f"NWS Issued {PDICT3[ctx.which]} by Month"
         parts = []
         for suffix in ["", "2", "3"]:
             if (ugc := ctx.get(f"ugc{suffix}")) is not None:
@@ -291,7 +290,7 @@ def plotter(ctx: dict):
                 parts.append(f"[{ugc}] {name}")
         subtitle += f" For UGC: {'; '.join(parts)}"
     elif opt == "fema":
-        title = f"NWS Issued for FEMA Region {ctx['fema']}"
+        title = f"NWS Issued for FEMA Region {ctx.fema}"
     (fig, ax) = figure_axes(
         title=f"[{AVG_YEAR1}-{LAST_YEAR}] {title}",
         subtitle=subtitle,

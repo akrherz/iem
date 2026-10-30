@@ -14,6 +14,7 @@ inches.</p>
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 import seaborn as sns
@@ -22,6 +23,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "spi": "Standardized Precipitation Index",
@@ -34,39 +37,35 @@ PDICT2 = {
 XTICKS = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="spi",
-            options=PDICT,
-            label="Select which metric to plot:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select which metric to plot:")
+    ] = "spi"
+    c: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Which climatology to use for averages:"
         ),
-        dict(
-            type="select",
-            name="c",
-            default="ncei91",
-            options=PDICT2,
-            label="Which climatology to use for averages:",
-        ),
-        dict(
-            type="int",
-            name="days",
-            default=90,
-            label="Over how many trailing days to compute the metric?",
-        ),
-    ]
-    return desc
+    ] = "ncei91"
+    days: Annotated[
+        int, IntArg(label="Over how many trailing days to compute the metric?")
+    ] = 90
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -91,9 +90,9 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("Did not find any observations for station.")
-    days = ctx["days"]
+    days = ctx.days
     # If POR is selected, use it for the climatology
-    if ctx["c"] == "por":
+    if ctx.c == "por":
         climo = (
             df[["ob_precip", "sday"]]
             .groupby("sday")
@@ -119,9 +118,9 @@ def plotter(ctx: dict):
     df["doy"] = df.index.map(lambda x: x.timetuple().tm_yday)
 
     title = (
-        f"{ctx['_sname']}:: {days} Day {PDICT[varname]}\n"
+        f"{ctx.sname}:: {days} Day {PDICT[varname]}\n"
         "Heatmap of values by day of year\n"
-        f"Climatology: {PDICT2[ctx['c']]}"
+        f"Climatology: {PDICT2[ctx.c]}"
     )
 
     # Create the seaborn jointplot

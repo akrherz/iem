@@ -12,8 +12,10 @@ download from this page does not contain all available stations for a given
 state :/
 """
 
+import datetime as dt
 import sys
 from datetime import date, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
@@ -26,56 +28,53 @@ from pyiem.plot import MapPlot
 from pyiem.reference import Z_OVERLAY2, state_bounds
 from tqdm import tqdm
 
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "normal": "Normal Mode / Plot by State",
     "iadrought": "Special Iowa Drought Monitoring",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    dt = date.today() - timedelta(days=1)
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "mode",
-            "default": "normal",
-            "label": "Application Mode:",
-            "options": PDICT,
-        },
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=dt.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    mode: Annotated[
+        str, SelectArg(label="Application Mode:", options=PDICT)
+    ] = "normal"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Retroactive Date of Plot",
-        ),
-        dict(
-            type="int",
-            name="d1",
-            default=30,
-            label="Over how many trailing days to compute the metric?",
-        ),
-        dict(
-            type="int",
-            name="d2",
-            default=60,
-            label="Over how many trailing days to compute the metric?",
-        ),
-        dict(
-            type="int",
-            name="d3",
-            default=90,
-            label="Over how many trailing days to compute the metric?",
+            default=lambda: (date.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    d1: Annotated[
+        int, IntArg(label="Over how many trailing days to compute the metric?")
+    ] = 30
+    d2: Annotated[
+        int, IntArg(label="Over how many trailing days to compute the metric?")
+    ] = 60
+    d3: Annotated[
+        int, IntArg(label="Over how many trailing days to compute the metric?")
+    ] = 90
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def overlay_drought_regions(mp):
@@ -103,13 +102,13 @@ def overlay_drought_regions(mp):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"]
-    d1 = ctx["d1"]
-    d2 = ctx["d2"]
-    d3 = ctx["d3"]
-    dt = ctx["date"]
+    state = ctx.state
+    d1 = ctx.d1
+    d2 = ctx.d2
+    d3 = ctx.d3
+    dt = ctx.date
     params = {
         "d1": d1 - 1,
         "d2": d2 - 1,
@@ -131,7 +130,7 @@ def plotter(ctx: dict):
         for station, meta in progress:
             if not meta["online"]:
                 continue
-            if ctx["mode"] == "iadrought":
+            if ctx.mode == "iadrought":
                 if station[2] != "D":
                     continue
             else:
@@ -191,7 +190,7 @@ def plotter(ctx: dict):
         df, geometry=gpd.points_from_xy(df["lon"], df["lat"], crs="EPSG:4326")
     )
     st = "stations w/ 30+ years of data"
-    if ctx["mode"] == "iadrought":
+    if ctx.mode == "iadrought":
         st = "Iowa Drought Monitoring Regions"
     mp = MapPlot(
         title="Trailing Day Standardized Precipitation Index",
@@ -219,7 +218,7 @@ def plotter(ctx: dict):
     xoff = (x1 - x0) * 0.0075
     yoff = (y1 - y0) * 0.0125
     markersize = 60
-    if ctx["mode"] == "iadrought":
+    if ctx.mode == "iadrought":
         markersize = 180
         xoff *= 2
         yoff *= 2
@@ -251,7 +250,7 @@ def plotter(ctx: dict):
         zorder=Z_OVERLAY2 + 3,
         markersize=markersize,
     )
-    if ctx["mode"] == "iadrought":
+    if ctx.mode == "iadrought":
         overlay_drought_regions(mp)
 
     # Add the legend

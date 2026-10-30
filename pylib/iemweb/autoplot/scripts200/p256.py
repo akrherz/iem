@@ -46,12 +46,23 @@ $ cat RTPBOU.txt | dcshef
 </p>
 """
 
+import datetime as dt
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import StationAttributes as SA
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "state": "By State",
@@ -78,62 +89,53 @@ MAPTZ2SHEFTZ = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    return {
-        "description": __doc__,
-        "data": True,
-        "report": True,
-        "nopng": True,
-        "cache": 120,
-        "arguments": [
-            {
-                "type": "select",
-                "name": "by",
-                "default": "wfo",
-                "label": "Generate RTP for state or WFO:",
-                "options": PDICT,
-            },
-            {
-                "type": "state",
-                "name": "state",
-                "default": "IA",
-                "label": "Select State:",
-            },
-            {
-                "type": "networkselect",
-                "name": "wfo",
-                "default": "DMX",
-                "network": "WFO",
-                "label": "Select WFO (used to pick timezone for report):",
-            },
-            {
-                "type": "select",
-                "name": "report",
-                "default": "12z",
-                "label": "Select RTP Report Type:",
-                "options": PDICT2,
-            },
-            {
-                "type": "date",
-                "name": "date",
-                "default": f"{utc():%Y/%m/%d}",
-                "label": "Date of Interest:",
-            },
-        ],
-    }
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    by: Annotated[
+        str, SelectArg(label="Generate RTP for state or WFO:", options=PDICT)
+    ] = "wfo"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO",
+            label="Select WFO (used to pick timezone for report):",
+        ),
+    ] = "DMX"
+    report: Annotated[
+        str, SelectArg(label="Select RTP Report Type:", options=PDICT2)
+    ] = "12z"
+    date: Annotated[
+        dt.date,
+        DateArg(
+            label="Date of Interest:", default=lambda: f"{utc():%Y/%m/%d}"
+        ),
+    ]
 
 
-def get_asos(ctx: dict) -> pd.DataFrame:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        report=True,
+        nopng=True,
+        cache=120,
+    )
+
+
+def get_asos(ctx: Params) -> pd.DataFrame:
     """Figure out the data."""
     params = {
-        "date": ctx["date"],
-        "wfo": ctx["wfo"],
-        "state": ctx["state"],
+        "date": ctx.date,
+        "wfo": ctx.wfo,
+        "state": ctx.state,
         "attr": SA.SHEF_6HR_SRC,
     }
     limiter = " wfo = :wfo "
-    if ctx["by"] == "state":
+    if ctx.by == "state":
         limiter = " state = :state "
     with get_sqlalchemy_conn("mesosite") as conn:
         # Figure out which stations we care about
@@ -163,9 +165,9 @@ def get_asos(ctx: dict) -> pd.DataFrame:
             params=params,
         )
     # If we have any snow_src values, we should go fishing for that data
-    if stations["snow_src"].notnull().any() and ctx["date"].year >= 2002:
+    if stations["snow_src"].notnull().any() and ctx.date.year >= 2002:
         # 12z to 12z snow
-        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
+        ets = utc(ctx.date.year, ctx.date.month, ctx.date.day, 12)
         sts = ets - pd.Timedelta("24 hours")
         with get_sqlalchemy_conn("hads") as conn:
             snowdf = pd.read_sql(
@@ -203,7 +205,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
 
     with get_sqlalchemy_conn("asos") as conn:
         # 6z to 6z high
-        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 6)
+        ets = utc(ctx.date.year, ctx.date.month, ctx.date.day, 6)
         sts = ets - pd.Timedelta("24 hours")
         highsdf = pd.read_sql(
             sql_helper(
@@ -224,8 +226,8 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         )
         stations["high"] = highsdf["calc_max_tmpf"]
         # 0z to 12z low
-        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
-        sts = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 0)
+        ets = utc(ctx.date.year, ctx.date.month, ctx.date.day, 12)
+        sts = utc(ctx.date.year, ctx.date.month, ctx.date.day, 0)
         lowsdf = pd.read_sql(
             sql_helper(
                 """
@@ -245,7 +247,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         )
         stations["low"] = lowsdf["calc_min_tmpf"]
         # 12z to 12z precip
-        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
+        ets = utc(ctx.date.year, ctx.date.month, ctx.date.day, 12)
         sts = ets - pd.Timedelta("24 hours")
         precipdf = pd.read_sql(
             sql_helper(
@@ -273,15 +275,15 @@ def get_asos(ctx: dict) -> pd.DataFrame:
     return stations
 
 
-def get_obsdf(ctx: dict) -> pd.DataFrame:
+def get_obsdf(ctx: Params) -> pd.DataFrame:
     """Figure out the data."""
     params = {
-        "date": ctx["date"],
-        "wfo": ctx["wfo"],
-        "state": ctx["state"],
+        "date": ctx.date,
+        "wfo": ctx.wfo,
+        "state": ctx.state,
     }
     limiter = " and t.wfo = :wfo "
-    if ctx["by"] == "state":
+    if ctx.by == "state":
         limiter = " and t.state = :state "
     sql = sql_helper(
         """
@@ -298,9 +300,9 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
         obs = pd.read_sql(sql, conn, params=params)
     if not obs.empty:
         obs["coop_local_valid"] = obs["coop_valid"].dt.tz_convert(
-            ctx["_nt"].sts[ctx["wfo"]]["tzname"],
+            ctx["_nt"].sts[ctx.wfo]["tzname"],
         )
-        if ctx["report"] == "12z":
+        if ctx.report == "12z":
             # Require obs to be between 5 and 10 AM local time
             obs = obs[
                 (obs["coop_local_valid"].dt.hour >= 5)
@@ -321,15 +323,15 @@ def munge_cocorahs_id(sid: str) -> str:
     return munged
 
 
-def get_cocorahsdf(ctx: dict) -> pd.DataFrame:
+def get_cocorahsdf(ctx: Params) -> pd.DataFrame:
     """Figure out the data."""
     params = {
-        "date": ctx["date"],
-        "wfo": ctx["wfo"],
-        "state": ctx["state"],
+        "date": ctx.date,
+        "wfo": ctx.wfo,
+        "state": ctx.state,
     }
     limiter = " and t.wfo = :wfo "
-    if ctx["by"] == "state":
+    if ctx.by == "state":
         limiter = " and t.state = :state "
     sql = sql_helper(
         """
@@ -347,9 +349,9 @@ def get_cocorahsdf(ctx: dict) -> pd.DataFrame:
         # CoCoRaHS IDs are poison to SHEF, so we have to munge them
         obs["id"] = obs["id"].apply(munge_cocorahs_id)
         obs["cocorahs_local_valid"] = obs["obvalid"].dt.tz_convert(
-            ctx["_nt"].sts[ctx["wfo"]]["tzname"],
+            ctx["_nt"].sts[ctx.wfo]["tzname"],
         )
-        if ctx["report"] == "12z":
+        if ctx.report == "12z":
             # Require obs to be between 5 and 10 AM local time
             obs = obs[
                 (obs["cocorahs_local_valid"].dt.hour >= 5)
@@ -367,17 +369,17 @@ def pp(val, width, dec):
     return f"{val:.{dec}f}".rjust(width)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     obsdf = get_obsdf(ctx)
     asosdf = get_asos(ctx)
     cocorahsdf = get_cocorahsdf(ctx)
-    wfo = ctx["wfo"]
-    dt = ctx["date"]
+    wfo = ctx.wfo
+    dt = ctx.date
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     zc = MAPTZ2SHEFTZ[tzname]
     lnow = utc().astimezone(ZoneInfo(tzname))
-    pil = wfo if ctx["by"] == "wfo" else f"{ctx['state']} "
+    pil = wfo if ctx.by == "wfo" else f"{ctx.state} "
     report = (
         "000 \n"
         f"ASUS63 XIEM {utc():%d%H%M}\n"
