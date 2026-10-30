@@ -3,7 +3,7 @@
 called from RUN_MIDNIGHT.sh
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from io import StringIO
 
 import click
@@ -25,7 +25,7 @@ def do(ts: date):
     """Do a UTC date's worth of data"""
     pgconn = get_dbconn("hads")
     table = ts.strftime("raw%Y_%m")
-    sts = datetime(ts.year, ts.month, ts.day, tzinfo=timezone.utc)
+    sts = datetime(ts.year, ts.month, ts.day, tzinfo=UTC)
     ets = sts + timedelta(hours=24)
     with get_sqlalchemy_conn("hads") as conn:
         df = pd.read_sql(

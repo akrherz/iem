@@ -4,7 +4,7 @@ Called from `RUN_20_AFTER.sh` for current date.
 Called from `RUN_12Z.sh` for yesterday and a week ago.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -50,7 +50,7 @@ def run(valid: datetime):
     if df.empty:
         LOG.info("No data found for date: %s", valid.date())
         return
-    df["utc_valid"] = df["utc_valid"].dt.tz_localize(timezone.utc)
+    df["utc_valid"] = df["utc_valid"].dt.tz_localize(UTC)
     for station in nt.sts:
         iemid = nt.sts[station]["iemid"]
         tz = ZoneInfo(nt.sts[station]["tzname"])

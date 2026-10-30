@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import click
@@ -331,7 +331,7 @@ def process_features(features):
         props["valid"] = (
             datetime(1970, 1, 1)
             + timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         rows.append(props)
     return pd.DataFrame(rows).replace({9999: np.nan})
 

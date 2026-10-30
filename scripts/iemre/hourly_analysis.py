@@ -5,7 +5,7 @@ Run from RUN_10_AFTER.sh
 
 import os
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -343,7 +343,7 @@ def write_grid(valid, vname, grid, domain: str):
 )
 def main(valid: datetime, domain):
     """Go Main"""
-    grid_hour(valid.replace(tzinfo=timezone.utc), domain)
+    grid_hour(valid.replace(tzinfo=UTC), domain)
 
 
 if __name__ == "__main__":

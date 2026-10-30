@@ -10,7 +10,7 @@ import json
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -74,7 +74,7 @@ def cleanup():
 
 def is_realtime(gts):
     """Is this timestamp a realtime product"""
-    utcnow = datetime.now(timezone.utc)
+    utcnow = datetime.now(UTC)
     return utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H")
 
 
@@ -324,7 +324,7 @@ def doit(gts: datetime, hr: int):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """We are always explicitly called"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     for hr in [1, 24, 48, 72]:
         doit(valid, hr)
         # Also reprocess last hour and six hours ago

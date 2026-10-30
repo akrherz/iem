@@ -5,7 +5,7 @@ called from RUN_20AFTER.sh
 
 import os
 import warnings
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from subprocess import PIPE, Popen
 
 import numpy as np
@@ -104,7 +104,7 @@ def workflow(fn: str):
         LOG.info("Found %s current ASOS entries", len(currentdf.index))
 
     ds = xr.open_dataset(fn)
-    valid = pd.to_datetime(ds["timeObs"].to_numpy()).tz_localize(timezone.utc)
+    valid = pd.to_datetime(ds["timeObs"].to_numpy()).tz_localize(UTC)
     ids = ds["stationName"].values
     nc_tmpk = ds["temperature"].values
     nc_dwpk = ds["dewpoint"].values

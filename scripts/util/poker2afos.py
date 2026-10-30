@@ -4,7 +4,7 @@ import glob
 import os
 import re
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from pyiem.database import get_dbconn
 from pyiem.nws.product import TextProduct
@@ -442,7 +442,7 @@ XREF_SOURCE = {
 def process(order):
     """Process this timestamp"""
     cursor = PGCONN.cursor()
-    ts = datetime.strptime(order[:6], "%y%m%d").replace(tzinfo=timezone.utc)
+    ts = datetime.strptime(order[:6], "%y%m%d").replace(tzinfo=UTC)
     base = ts - timedelta(days=2)
     ceiling = ts + timedelta(days=2)
     subprocess.call(["tar", "-xzf", order])

@@ -4,7 +4,7 @@ ISU Soil Moisture Network.
 """
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -122,7 +122,7 @@ def make_inversion_timing(ctx):
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
     df = df.assign(
-        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(timezone.utc),
+        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(UTC),
         valid=lambda df_: df_.utc_valid.dt.tz_convert(CENTRAL),
         delta=lambda df_: (
             c2f(df_.tair_10_c_avg_qc) - c2f(df_.tair_15_c_avg_qc)

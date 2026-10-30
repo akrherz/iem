@@ -11,7 +11,7 @@ coverage should be good outside of the major gap on 10 August 2020 due
 to the derecho power outage.</p>
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
@@ -73,8 +73,8 @@ def get_description():
 def plotter(ctx: dict):
     """Go"""
     state = ctx["state"]
-    sts = ctx["sts"].replace(tzinfo=timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=UTC)
+    ets = ctx["ets"].replace(tzinfo=UTC)
     if (ets - sts).total_seconds() >= (32 * 86400):
         raise NoDataFound("Must pick period less than 32 days long")
 

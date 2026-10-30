@@ -37,7 +37,7 @@ https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=cocorahs
 """
 
 import json
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -119,7 +119,7 @@ def run_azos(ts: datetime):
             "features": [],
         }
     )
-    tstamp = ts1.astimezone(timezone.utc).strftime(ISO8601)
+    tstamp = ts1.astimezone(UTC).strftime(ISO8601)
     for row in cursor:
         res["features"].append(
             dict(
@@ -175,9 +175,7 @@ def run_coop(ts):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
-                    valid=row["coop_valid"]
-                    .astimezone(timezone.utc)
-                    .strftime(ISO8601),
+                    valid=row["coop_valid"].astimezone(UTC).strftime(ISO8601),
                     pday=p(row["pday"]),
                     snow=p(row["snow"], 1),
                     snowd=p(row["snowd"], 1),
@@ -227,9 +225,7 @@ def run_cocorahs(ts: datetime):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
-                    valid=row["obvalid"]
-                    .astimezone(timezone.utc)
-                    .strftime(ISO8601),
+                    valid=row["obvalid"].astimezone(UTC).strftime(ISO8601),
                     pday=p(row["pday"]),
                     snow=p(row["snow"], 1),
                     snowd=p(row["snowd"], 1),

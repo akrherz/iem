@@ -4,7 +4,7 @@ Run from RUN_5MIN.sh
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from pyiem.database import get_dbconn
@@ -42,13 +42,13 @@ def get_dbendts(cursor):
     cursor.execute("SELECT max(valid) from website_telemetry")
     ts = cursor.fetchone()[0]
     if ts is None:
-        ts = datetime.now(timezone.utc) - timedelta(hours=1)
-    return ts.astimezone(timezone.utc)
+        ts = datetime.now(UTC) - timedelta(hours=1)
+    return ts.astimezone(UTC)
 
 
 def find_and_save(cursor, dbendts: datetime):
     """Do work please"""
-    utcnow = datetime.now(timezone.utc)
+    utcnow = datetime.now(UTC)
     inserts = 0
     while dbendts < utcnow:
         fn = Path(f"/var/log/app/telemetry/{dbendts:%Y-%m-%d-%H}.log")

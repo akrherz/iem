@@ -8,7 +8,7 @@ NEXRAD base reflectivity.
 please be patient!
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from functools import partial
 from io import BytesIO
 from multiprocessing import Pool
@@ -174,7 +174,7 @@ def add_obs(img, ctx, valid):
 
 def plotter(ctx: dict):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
     ramp = ramp2df("composite_n0q")
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,

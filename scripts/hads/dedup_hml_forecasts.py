@@ -6,7 +6,7 @@ database.  So this attempts to de-dup them.
 Run from RUN_MIDNIGHT.sh for previous UTC date
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.database import get_dbconn
@@ -64,7 +64,7 @@ def workflow(ts: datetime):
 @click.option("--date", "dt", type=click.DateTime(), required=True)
 def main(dt: datetime):
     """Go Main Go"""
-    dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.replace(tzinfo=UTC)
     workflow(dt)
 
 

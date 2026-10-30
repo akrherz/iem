@@ -4,7 +4,7 @@ called from RUN_0Z.sh
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.util import archive_fetch, logger
@@ -37,7 +37,7 @@ def run(sts: datetime, ets: datetime):
 @click.option("--date", "dt", type=click.DateTime(), help="UTC Date")
 def main(dt: datetime):
     """Go Main Go"""
-    sts = dt.replace(tzinfo=timezone.utc)
+    sts = dt.replace(tzinfo=UTC)
     ets = sts + timedelta(hours=24)
     run(sts, ets)
 

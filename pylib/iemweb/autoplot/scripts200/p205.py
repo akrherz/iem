@@ -8,16 +8,20 @@ fields added to this tool.
 
 import calendar
 import itertools
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+if TYPE_CHECKING:
+    from datetime import datetime
 
-def get_description():
+
+def get_description() -> dict[str, bool | str | dict[str, str]]:
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
+    desc: dict[str, Any] = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -214,7 +218,7 @@ def plotter(ctx: dict):
             sql_helper(
                 """
     SELECT {cols}, extract(doy from day) as doy,
-    extract(month from day) as month from summary s JOIN stations t
+    extract(month from day)::int as month from summary s JOIN stations t
     ON (s.iemid = t.iemid) WHERE t.id = :station and t.network = :network""",
                 cols=" , ".join(params),
             ),
@@ -231,9 +235,11 @@ def plotter(ctx: dict):
         df.loc[df[col] < 1, "all_hit"] = 0
     gdf = df.groupby("doy").mean()
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    ab = "N/A" if ab is None else ab
-    title = f"{ctx['_sname']} ({ab.year}-) Daily Observed Frequency"
+    ab: datetime | None = ctx["_nt"].sts[station]["archive_begin"]
+    title = (
+        f"{ctx['_sname']} ({'n/a' if ab is None else ab.year}-) "
+        "Daily Observed Frequency"
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:
@@ -244,8 +250,8 @@ def plotter(ctx: dict):
         except StopIteration:
             color = "k"
         ax.plot(
-            gdf.index.values,
-            gdf[col].values * 100.0,
+            gdf.index.to_numpy(),
+            gdf[col].to_numpy() * 100.0,
             lw=2,
             label=labels[col],
             color=color,
@@ -262,13 +268,13 @@ def plotter(ctx: dict):
     monthly = df[["month", "all_hit"]].groupby("month").mean()
     xticklabels = []
     for month, row in monthly.iterrows():
-        abbr = calendar.month_abbr[int(month)]
+        abbr = calendar.month_abbr[int(str(month))]
         xticklabels.append(
             f"{abbr}\n{row['all_hit'] * 100:.1f}%",
         )
     ax.set_xticklabels(xticklabels, minor=True)
 
-    ax.set_position([0.1, 0.2, 0.75, 0.7])
+    ax.set_position((0.1, 0.2, 0.75, 0.7))
     ax.set_xlim(1, 365)
     ax.set_ylim(-2, 102)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
@@ -277,6 +283,6 @@ def plotter(ctx: dict):
     ax2 = ax.twinx()
     ax2.set_ylabel("Daily Frequency [%]")
     ax2.set_ylim(-2, 102)
-    ax2.set_position([0.1, 0.2, 0.75, 0.7])
+    ax2.set_position((0.1, 0.2, 0.75, 0.7))
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     return fig, gdf

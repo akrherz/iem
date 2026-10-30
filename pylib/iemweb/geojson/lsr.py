@@ -47,7 +47,7 @@ sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
 
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import geopandas as gpd
@@ -161,7 +161,7 @@ class Schema(CGIModel):
         if value.find("T") > 0 and len(value) >= 16:
             fmt = "%Y-%m-%dT%H:%M"
             value = value[:16]
-        return datetime.strptime(value, fmt).replace(tzinfo=timezone.utc)
+        return datetime.strptime(value, fmt).replace(tzinfo=UTC)
 
 
 def do_vtec(environ: dict) -> gpd.GeoDataFrame:

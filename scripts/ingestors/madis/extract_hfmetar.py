@@ -8,7 +8,7 @@ Run from RUN_59_AFTER.sh for current hour
 import os
 import sys
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -191,7 +191,7 @@ def process(ncfn):
         ts = datetime(1970, 1, 1) + timedelta(
             seconds=data["observationTime"][i]
         )
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
 
         mtr = f"{sid} {ts:%d%H%M}Z AUTO "
         network = xref.get(sid3, "ASOS")
@@ -289,7 +289,7 @@ def process(ncfn):
                 iem.data["peak_wind_gust"] = metar.wind_speed_peak.value("KT")
                 iem.data["peak_wind_drct"] = metar.wind_dir_peak.value()
                 iem.data["peak_wind_time"] = metar.peak_wind_time.replace(
-                    tzinfo=timezone.utc
+                    tzinfo=UTC
                 )
             if not iem.save(
                 icursor, force_current_log=True, skip_current=True

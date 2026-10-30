@@ -15,13 +15,13 @@ from pyiem.plot import MapPlot
 
 @click.command()
 @click.option("--year", type=int, help="Year to plot")
-def main(year: int):
+def main(year: int) -> None:
     """Hack"""
     now = datetime.now()
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
-    with get_sqlalchemy_conn("coop") as conn:
+    with get_sqlalchemy_conn("coop", rw=False) as conn:
         df = pd.read_sql(
             sql_helper("""
             SELECT station, avg(high) as avg_high, avg(low) as avg_low,
@@ -40,10 +40,11 @@ def main(year: int):
     lons = []
     vals = []
     labels = []
+    maxday = None
     for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
-        labels.append(sid[2:])
+        labels.append(str(sid)[2:])
         lats.append(nt.sts[sid]["lat"])
         lons.append(nt.sts[sid]["lon"])
         vals.append(row["avg_high"])
@@ -52,7 +53,7 @@ def main(year: int):
     # ---------- Plot the points
     mp = MapPlot(
         title=f"Average Daily High Temperature [F] ({year})",
-        subtitle="1 January - %s" % (maxday.strftime("%d %B"),),
+        subtitle=f"1 January - {maxday:%d %B}",
         axisbg="white",
     )
     mp.plot_values(
@@ -64,10 +65,7 @@ def main(year: int):
         labelcolor="tan",
         fmt="%.1f",
     )
-    pqstr = "plot m %s bogus %s/summary/avg_high.png png" % (
-        now.strftime("%Y%m%d%H%M"),
-        year,
-    )
+    pqstr = f"plot m {now:%Y%m%d%H%M} bogus {year}/summary/avg_high.png png"
     mp.postprocess(pqstr=pqstr)
     mp.close()
 
@@ -79,7 +77,7 @@ def main(year: int):
     for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
-        labels.append(sid[2:])
+        labels.append(str(sid)[2:])
         lats.append(nt.sts[sid]["lat"])
         lons.append(nt.sts[sid]["lon"])
         vals.append(row["avg_low"])
@@ -114,7 +112,7 @@ def main(year: int):
     for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
-        labels.append(sid[2:])
+        labels.append(str(sid)[2:])
         lats.append(nt.sts[sid]["lat"])
         lons.append(nt.sts[sid]["lon"])
         vals.append(row["avg_tmp"])

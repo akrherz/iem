@@ -6,14 +6,14 @@ import pathlib
 import sys
 import tempfile
 import traceback
-from datetime import timezone
+from datetime import UTC
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-import matplotlib as mpl
 import numpy as np
 import pandas as pd
 import rasterio
+from matplotlib.figure import Figure
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
 from pyiem.autoplot import get_autoplot_context
@@ -58,26 +58,27 @@ def format_geojson_response(gdf: pd.DataFrame, defaultcol: str) -> str:
     return json.dumps(jdict)
 
 
-def parser(cgistr: str) -> dict:
+def parser(cgistr: str) -> dict[str, str | list[str]]:
     """Convert a CGI string into a dict that gets passed to the plotting
     routine"""
-    # want predictable / stable URIs, generally.
-    data = {}
+    data: dict[str, str | list[str]] = {}
     # GIGO
     if cgistr.find("::::") > -1:
         raise IncompleteWebRequest("Too many semicolons")
+    # Forive a three colon sequence and tokenize by double colons
     for token in cgistr.replace(":::", ": ::").split("::"):
-        token2 = token.split(":")
+        token2 = [x.strip() for x in token.split(":")]
         if len(token2) != 2:
             continue
-        if token2[1] == " ":  # Undo hack above
-            token2[1] = ""
-        if token2[0] in data:
-            if isinstance(data[token2[0]], str):
-                data[token2[0]] = [data[token2[0]]]
-            data[token2[0]].append(token2[1])
+        varname, value = token2
+        if varname in data:
+            curval = data[varname]
+            if isinstance(curval, str):
+                data[varname] = [curval, value]
+            else:
+                curval.append(value)
         else:
-            data[token2[0]] = token2[1]
+            data[varname] = value
     return data
 
 
@@ -119,7 +120,7 @@ def get_response_headers(status, fmt):
 
 def error_image(message, fmt):
     """Create an error image"""
-    fig = mpl.figure.Figure(figsize=(8, 6))
+    fig = Figure(figsize=(8, 6))
     ax = fig.add_subplot(1, 1, 1)
     cleantext = str(message).replace("\t", "")
     msg = f"IEM Autoplot generation resulted in an error\n{cleantext}"
@@ -132,9 +133,9 @@ def error_image(message, fmt):
     return ram.read()
 
 
-def handle_error(exp, fmt, environ: dict):
+def handle_error(exp, fmt, environ: dict) -> bytes | str:
     """Handle errors"""
-    exc_type, exc_value, exc_traceback = sys.exc_info()
+    _exc_type, _exc_value, exc_traceback = sys.exc_info()
     tb = traceback.extract_tb(exc_traceback)[-1]
     if not isinstance(exp, UnknownStationException):
         error_log(
@@ -147,7 +148,6 @@ def handle_error(exp, fmt, environ: dict):
         IncompleteWebRequest | NoDataFound | UnknownStationException,
     ):
         traceback.print_exc()
-    del (exc_type, exc_value, exc_traceback, tb)
     if fmt in ["png", "svg", "pdf"]:
         return error_image(str(exp), fmt)
     if fmt == "js":
@@ -257,8 +257,8 @@ def workflow(mc, environ: dict, fmt: str):
     # p=number is the python backend code called by this framework
     scriptnum = int(environ["p"])
     try:
-        dpi = int(float(fdict.get("dpi", 100)))
-        fdict["dpi"] = max(min(dpi, 500), 50)
+        dpi = int(float(str(fdict.get("dpi", "100"))))
+        fdict["dpi"] = str(max(min(dpi, 500), 50))
     except (TypeError, ValueError, OverflowError) as exp:
         raise BadWebRequest("dpi must be a number") from exp
 
@@ -305,12 +305,12 @@ def workflow(mc, environ: dict, fmt: str):
     elif fmt in ["js", "geojson", "geotiff"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"]:
-        if isinstance(mixedobj, mpl.figure.Figure):
+        if isinstance(mixedobj, Figure):
             # if our content is a figure, then add some fancy metadata to plot
             if meta.get("plotmetadata", True):
                 plot_metadata(mixedobj, start_time, scriptnum)
             ram = BytesIO()
-            mixedobj.savefig(ram, format=fmt, dpi=fdict["dpi"])
+            mixedobj.savefig(ram, format=fmt, dpi=int(fdict["dpi"]))
             mixedobj.clear()
             ram.seek(0)
             content = ram.read()
@@ -335,8 +335,8 @@ def workflow(mc, environ: dict, fmt: str):
             dtz = df.index.tz
             # We could have timezone or zoneinfo :/
             if dtz is not None and dtz in [
-                ZoneInfo("UTC"),
-                timezone.utc,
+                ZoneInfo("UTC"),  # until everything gets converted...
+                UTC,
             ]:
                 df.index = df.index.strftime(ISO8601)
             else:
@@ -348,8 +348,8 @@ def workflow(mc, environ: dict, fmt: str):
                 dtz = df[column].dt.tz
                 # We could have timezone or zoneinfo :/
                 if dtz is not None and dtz in [
-                    ZoneInfo("UTC"),
-                    timezone.utc,
+                    UTC,
+                    UTC,
                 ]:
                     df[column] = df[column].dt.strftime(ISO8601)
                 else:
@@ -398,7 +398,7 @@ def workflow(mc, environ: dict, fmt: str):
         raise BadWebRequest("Memcache key is non-ASCII") from exp
     except Exception as exp:
         error_log(environ, f"Exception while writting key: {mckey} {exp}")
-    if isinstance(mixedobj, mpl.figure.Figure):
+    if isinstance(mixedobj, Figure):
         mixedobj.clear()
     # scripts/dbutil/mine_autoplot persists the log messages to the database.
     # Keep the URI bounded so the JSON payload stays below common syslog size
@@ -455,7 +455,7 @@ def application(environ, start_response):
     # Special case for when we are returning a javascript alert
     if fmt == "js" and status == HTTP400:
         start_response(HTTP200, get_response_headers(status, fmt))
-        return [output.encode("utf-8")]
+        return [output.encode("UTF-8")]
     # Figure out what our response headers should be
     start_response(status, get_response_headers(status, fmt))
     if isinstance(output, str):

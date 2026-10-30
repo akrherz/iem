@@ -12,7 +12,7 @@ RUN from RUN_40_AFTER.sh
 """
 
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -95,7 +95,7 @@ def run(ts, routes):
 def main(valid: datetime | None):
     """Main()"""
     if valid is not None:
-        now = valid.replace(tzinfo=timezone.utc)
+        now = valid.replace(tzinfo=UTC)
         routes = "a"
     else:
         now = utc() - timedelta(hours=1)

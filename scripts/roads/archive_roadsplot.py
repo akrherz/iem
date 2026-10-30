@@ -6,7 +6,7 @@ Called from RUN_5MIN.sh
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -50,7 +50,7 @@ def do(now: datetime):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     for offset in [0, 1440, 1440 + 720]:
         do(valid - timedelta(minutes=offset))
 

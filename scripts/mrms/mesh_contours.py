@@ -8,7 +8,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -127,7 +127,7 @@ def agg(sts, ets):
 def main(minutes: int, valid: datetime):
     """Go Main Go."""
     started = utc()
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     ets = valid
     sts = ets - timedelta(minutes=minutes)
     with tempfile.NamedTemporaryFile() as tmp:

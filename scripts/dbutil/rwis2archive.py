@@ -5,7 +5,7 @@ called from RUN_10MIN.sh with 9 minute process timeout
 """
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
@@ -25,7 +25,7 @@ def get_first_updated():
         sys.exit()
 
     dt = datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=timezone.utc)
+    return dt.replace(tzinfo=UTC)
 
 
 def process_traffic(first_updated, last_updated):
@@ -166,7 +166,7 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
     dupes = 0
     inserts = 0
     for i, row in enumerate(res.mappings()):
-        utc_valid = row["utc_valid"].replace(tzinfo=timezone.utc)
+        utc_valid = row["utc_valid"].replace(tzinfo=UTC)
         if chunk_valid is None or utc_valid >= chunk_valid:
             res2 = rconn.execute(
                 sql_helper("""

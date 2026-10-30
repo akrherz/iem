@@ -3,7 +3,7 @@ This autoplot is a bit of a catch-all for mapping event counts at a WFO or
 CWSU map unit.  These are events that do not have VTEC.
 """
 
-from datetime import timezone
+from datetime import UTC
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -51,8 +51,8 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    sts = ctx["sts"].replace(tzinfo=timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=UTC)
+    ets = ctx["ets"].replace(tzinfo=UTC)
     params = {}
     params["sts"] = sts
     params["ets"] = ets

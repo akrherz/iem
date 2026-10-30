@@ -98,7 +98,7 @@ but generates simple maps plotting events over a period of time.</p>
 away as sometimes it will take 3-5 minutes to generate a map :(
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
@@ -275,8 +275,8 @@ def get_raster(ctx: dict, conn: Connection | None = None):
     """polygon workflow"""
     if ctx["geo"] == "ugc":
         raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=timezone.utc)
-    ctx["edate"] = ctx["edate"].replace(tzinfo=timezone.utc)
+    ctx["sdate"] = ctx["sdate"].replace(tzinfo=UTC)
+    ctx["edate"] = ctx["edate"].replace(tzinfo=UTC)
     varname = ctx["v"]
     if varname == "events":
         raise NoDataFound("Sorry, not implemented for polygon summaries.")
@@ -550,8 +550,7 @@ def do_ugc(ctx: dict, conn: Connection | None = None):
         data = {}
         for row in res:
             days = int(
-                (edate - row[1].replace(tzinfo=timezone.utc)).total_seconds()
-                / 86400.0
+                (edate - row[1].replace(tzinfo=UTC)).total_seconds() / 86400.0
             )
             rows.append(
                 dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
@@ -820,8 +819,8 @@ def do_ugc(ctx: dict, conn: Connection | None = None):
 def plotter(ctx: dict):
     """Go"""
     # Covert datetime to UTC
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=timezone.utc)
-    ctx["edate"] = ctx["edate"].replace(tzinfo=timezone.utc)
+    ctx["sdate"] = ctx["sdate"].replace(tzinfo=UTC)
+    ctx["edate"] = ctx["edate"].replace(tzinfo=UTC)
     state = ctx["state"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]

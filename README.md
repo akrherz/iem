@@ -16,7 +16,7 @@ repositories found here and how the fit together.
 
 ## Requirements
 
-    - Python 3.10+ (CI tests with 3.14)
+    - Python 3.11+ (CI tests with 3.14)
     - PHP 8
 
 ## Deployment Notes

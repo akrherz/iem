@@ -7,7 +7,7 @@ filterwarnings = [
 
 [tool.ruff]
 line-length = 79
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
@@ -84,4 +84,10 @@ builtins-strict-checking = false
 ]
 "tests/**/*.py" = [
     "S101",  # assert
+]
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
 ]

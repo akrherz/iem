@@ -5,7 +5,7 @@ Run from RUN_10AFTER.sh
 
 import sys
 import warnings
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 import numpy as np
@@ -322,7 +322,7 @@ def main(year: int | None, station: str | None, valid: datetime | None):
     params = {}
     valid_limiter = ""
     if valid is not None:
-        valid = valid.replace(tzinfo=timezone.utc)
+        valid = valid.replace(tzinfo=UTC)
         params["valid"] = valid
         valid_limiter = " and valid = :valid"
     table = f"raob_profile_{year if valid is None else valid.year}"

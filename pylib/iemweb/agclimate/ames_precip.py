@@ -8,9 +8,9 @@ from pyiem.webutil import iemapp
 
 
 @iemapp()
-def application(_environ, start_response):
+def application(_environ, start_response) -> list[bytes]:
     """Go Main Go"""
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("iem", rw=False) as conn:
         amsi4 = pd.read_sql(
             sql_helper("""
         SELECT to_char(day + '16 hours'::interval,
@@ -23,7 +23,7 @@ def application(_environ, start_response):
             conn,
             index_col="valid",
         )
-    with get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("isuag", rw=False) as conn:
         df = pd.read_sql(
             sql_helper("""
         SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,

@@ -1,7 +1,7 @@
 """Consume a REST service of DOT Snowplow locations and data."""
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import requests
 from pyiem.database import get_dbconn
@@ -54,7 +54,7 @@ def workflow():
         if logdt is None:
             continue
         # Unsure why I do it this way, but alas
-        ts = datetime.fromtimestamp(logdt / 1000.0, tz=timezone.utc)
+        ts = datetime.fromtimestamp(logdt / 1000.0, tz=UTC)
         valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
         if valid > CEILING:
             continue

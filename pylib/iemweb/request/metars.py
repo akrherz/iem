@@ -19,7 +19,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
 
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from typing import Annotated
 
@@ -47,9 +47,7 @@ class Schema(CGIModel):
     @classmethod
     def parse_valid(cls, value):
         """Ensure valid is a valid datetime"""
-        return datetime.strptime(value, "%Y%m%d%H").replace(
-            tzinfo=timezone.utc
-        )
+        return datetime.strptime(value, "%Y%m%d%H").replace(tzinfo=UTC)
 
 
 def check_load(conn, environ: dict):

@@ -7,7 +7,7 @@ import pathlib
 import subprocess
 import tempfile
 import time
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 import click
 import numpy as np
@@ -191,7 +191,7 @@ def run(tmpdir, prod, sts):
 )
 def main(valid):
     """Run main()"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     for prod in ["n0r", "n0q"]:
         if valid < utc(2010, 11, 13) and prod == "n0q":
             continue

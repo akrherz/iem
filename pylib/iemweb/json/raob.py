@@ -30,7 +30,7 @@ ts=2024-03-24T12:00:00Z&pressure=500
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 import numpy as np
@@ -85,7 +85,7 @@ class Schema(CGIModel):
         if dt.year < 1946 or dt.year > utc().year:
             raise ValueError("Timestamp out of archive bounds.")
 
-        return dt.replace(tzinfo=timezone.utc)
+        return dt.replace(tzinfo=UTC)
 
     @field_validator("station", mode="before")
     @classmethod

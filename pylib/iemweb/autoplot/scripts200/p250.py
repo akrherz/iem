@@ -11,7 +11,7 @@ distribution of differences.
 """
 
 import calendar
-from datetime import date, timedelta, timezone
+from datetime import UTC, date, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -93,8 +93,8 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    sts = ctx["sts"].replace(tzinfo=timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=UTC)
+    ets = ctx["ets"].replace(tzinfo=UTC)
     station1 = ctx["zstation1"]
     station2 = ctx["zstation2"]
     varname = ctx["varname"]
@@ -118,7 +118,7 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No data found with initial query.")
-    df["utc_valid"] = df["utc_valid"].dt.tz_localize(timezone.utc)
+    df["utc_valid"] = df["utc_valid"].dt.tz_localize(UTC)
     tz = ZoneInfo(ctx["_nt1"].sts[station1]["tzname"] or "America/Chicago")
     df["local_valid"] = df["utc_valid"].dt.tz_convert(tz)
     df = df.pivot_table(

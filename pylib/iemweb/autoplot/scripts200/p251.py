@@ -3,7 +3,7 @@ The purpose of this autoplot is to generate a time series of NWS warning load
 with time for short fuse warnings.
 """
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -96,8 +96,8 @@ def getp(conn, phenomena, wfo, sts, ets):
 def plotter(ctx: dict):
     """Go"""
     wfo = ctx["wfo"]
-    sts = ctx["sts"].replace(tzinfo=timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=UTC)
+    ets = ctx["ets"].replace(tzinfo=UTC)
     if (ets - sts) > timedelta(days=4):
         raise IncompleteWebRequest("Sorry, period must be less than 96 hours.")
     ctx["_nt"].sts["_ALL"] = {

@@ -4,7 +4,7 @@ Called from soilm_ingest.py
 Called after ERA5Land ingest completes
 """
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import click
 import pandas as pd
@@ -159,7 +159,7 @@ def update_hourly(
     j = requests.get(uri, timeout=60).json()
     for entry in j["data"]:
         dt = datetime.strptime(entry["valid_utc"], "%Y-%m-%dT%H:%MZ").replace(
-            tzinfo=timezone.utc
+            tzinfo=UTC
         )
         t4_c = convert_value(entry["soil4t_f"], "degF", "degC")
         if pd.isna(t4_c):

@@ -5,7 +5,7 @@
 """
 
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -147,11 +147,11 @@ def workflow(valid: datetime, domain: str, force_copy: bool):
 def main(ts: datetime | None, ets: datetime | None, domain: str):
     """Go Main"""
     if ts is not None:
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
         workflow(ts, domain, True)
         return
     # Otherwise we are running for an explicit 12z to 12z period, copy only
-    ets = ets.replace(tzinfo=timezone.utc)
+    ets = ets.replace(tzinfo=UTC)
     now = ets - timedelta(hours=23)
     while now <= ets:
         workflow(now, domain, False)

@@ -11,7 +11,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pygrib
 import requests
@@ -35,7 +35,7 @@ def process_grib(grb):
         f1 = "0"
         f2 = fstr
     runtime = datetime.strptime(tokens[-1][-12:], "%Y%m%d%H%M").replace(
-        tzinfo=timezone.utc
+        tzinfo=UTC
     )
     if runtime.minute != 0:
         LOG.info("Skipping %s as it is not a top of the hour", dlname)

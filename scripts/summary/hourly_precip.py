@@ -6,7 +6,7 @@ the database.  This updates those totals.
 Called from RUN_10_AFTER.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
@@ -84,7 +84,7 @@ def main(valid: datetime | None):
     """Do things"""
     if valid:
         # Run for a custom hour
-        archive(valid.replace(tzinfo=timezone.utc))
+        archive(valid.replace(tzinfo=UTC))
     else:
         # We run for the last hour
         ts = utc() - timedelta(hours=1)

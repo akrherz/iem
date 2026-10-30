@@ -6,7 +6,7 @@
 called from RUN_MIDNIGHT.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.database import get_dbconn
@@ -52,7 +52,7 @@ def sample(cursor2, source, ts):
         if row[0] in pils:
             continue
         pils.append(row[0])
-        valid = row[1].astimezone(timezone.utc)
+        valid = row[1].astimezone(UTC)
         print(f" {BASE}={valid:%Y%m%d%H%M}-{source}-{row[2]}-{row[0]}")
 
 
@@ -87,7 +87,7 @@ def main(dt: datetime):
     pgconn = get_dbconn("afos")
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
-    dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.replace(tzinfo=UTC)
     LOG.info("running for %s", dt)
     look4(cursor, cursor2, dt, nt)
     check_vtec_dups(cursor, dt)

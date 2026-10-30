@@ -15,8 +15,8 @@ Changelog
 
 import json
 import os
+from datetime import UTC, datetime, timedelta
 from datetime import date as datetype
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -93,13 +93,11 @@ def workflow(
 
     tidx0 = hourly_offset(sts)
     tidx1 = hourly_offset(ets)
-    fns = [get_hourly_ncname(sts.astimezone(timezone.utc).year, domain)]
+    fns = [get_hourly_ncname(sts.astimezone(UTC).year, domain)]
     tslices = [slice(tidx0, tidx1 + 1)]
     if tidx1 < tidx0:
         # We are spanning years
-        fns.append(
-            get_hourly_ncname(ets.astimezone(timezone.utc).year, domain)
-        )
+        fns.append(get_hourly_ncname(ets.astimezone(UTC).year, domain))
         tslices.append(slice(0, tidx1 + 1))
         tslices[0] = slice(tidx0, None)
 
@@ -124,7 +122,7 @@ def workflow(
             vwnd = nc.variables["vwnd"][tslice, j, i]
             precip = nc.variables["p01m"][tslice, j, i] / 25.4
             for idx, _skyc in enumerate(skyc):
-                utcnow = now.astimezone(timezone.utc)
+                utcnow = now.astimezone(UTC)
                 res["data"].append(
                     {
                         "valid_utc": utcnow.strftime(ISO),

@@ -11,7 +11,7 @@ LOG = logger()
 
 def main():
     """Go Main Go."""
-    mesosite, mcursor = get_dbconnc("mesosite")
+    mesosite, mcursor = get_dbconnc("mesosite", rw=True)
     nt = NetworkTable("SCAN", only_online=False)
     resp = requests.get(
         "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations?"
@@ -63,11 +63,13 @@ def main():
                 meta["latitude"],
             ),
         )
-        mcursor.execute(
-            "INSERT into station_attributes(iemid, attr, value) "
-            "VALUES (%s, %s, %s)",
-            (mcursor.fetchone()[0], ATTRNAME, data_time_zone),
-        )
+        result = mcursor.fetchone()
+        if result:
+            mcursor.execute(
+                "INSERT into station_attributes(iemid, attr, value) "
+                "VALUES (%s, %s, %s)",
+                (result["iemid"], ATTRNAME, data_time_zone),
+            )
 
     mcursor.close()
     mesosite.commit()

@@ -20,7 +20,7 @@ web service that provides the raw values.</p>
 of county/zone based FFG guidance found in the FFG text products.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -53,7 +53,7 @@ PDICT3 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     desc["arguments"] = [
         dict(
             type="select",

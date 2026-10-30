@@ -5,7 +5,7 @@ NOTE: This is currently not used as process inbound dedups already, hopefully.
 see akrherz/pyWWA#316
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 from pyiem.database import get_dbconn
@@ -63,7 +63,7 @@ def workflow(valid):
 )
 def main(dt: datetime):
     """Go Main Go"""
-    valid = dt.replace(tzinfo=timezone.utc)
+    valid = dt.replace(tzinfo=UTC)
     workflow(valid)
 
 

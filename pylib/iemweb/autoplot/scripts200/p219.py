@@ -6,7 +6,7 @@ issuance stored in the database.
 """
 
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -92,7 +92,7 @@ def taf_search(station, valid, conn: Connection | None = None):
     )
     if res.rowcount == 0:
         return None
-    return res.fetchone()[0].replace(tzinfo=timezone.utc)
+    return res.fetchone()[0].replace(tzinfo=UTC)
 
 
 def compute_flight_condition(row):
@@ -138,7 +138,7 @@ def fetch(station: str, ts: datetime) -> pd.DataFrame:
 
 def plotter(ctx: dict):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=UTC)
     df = fetch(ctx["station"], valid)
     if df.empty:
         pgconn = get_dbconn("asos")

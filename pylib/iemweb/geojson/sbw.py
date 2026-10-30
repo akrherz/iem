@@ -48,7 +48,7 @@ https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
@@ -111,7 +111,7 @@ class Schema(CGIModel):
         if value.find("T") > 0 and len(value) >= 16:
             fmt = "%Y-%m-%dT%H:%M"
             value = value[:16]
-        return datetime.strptime(value, fmt).replace(tzinfo=timezone.utc)
+        return datetime.strptime(value, fmt).replace(tzinfo=UTC)
 
     @model_validator(mode="after")
     def ensure_some_timestamp(self):

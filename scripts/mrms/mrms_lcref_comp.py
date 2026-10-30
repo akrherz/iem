@@ -10,7 +10,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -174,7 +174,7 @@ def main(valid: datetime):
     """Go Main Go"""
     utcnow = utc()
     if valid is not None:
-        utcnow = valid.replace(tzinfo=timezone.utc)
+        utcnow = valid.replace(tzinfo=UTC)
         do(utcnow)
     else:
         # If our time is an odd time, run 3 minutes ago

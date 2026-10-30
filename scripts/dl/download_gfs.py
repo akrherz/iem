@@ -7,7 +7,7 @@ RUN from RUN_20_AFTER.sh
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import requests
@@ -99,7 +99,7 @@ def fetch(valid, hr):
 )
 def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     # script is called every hour, just short circuit the un-needed hours
     if valid.hour % 6 != 0:
         return

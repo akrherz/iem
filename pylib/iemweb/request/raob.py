@@ -17,9 +17,9 @@ Changelog
 Example Requests
 ----------------
 
-Provide the KOAX sounding info for July 2024
+Provide the _OAX (Omaha Area) sounding info for July 2024
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=KOAX&\
+https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=_OAX&\
 sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
@@ -32,6 +32,7 @@ from pydantic import Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
@@ -45,8 +46,22 @@ class Schema(CGIModel):
             description="Download CSV instead of displaying it",
         ),
     ] = False
-    sts: Annotated[datetime, Field(description="Start time in UTC")]
-    ets: Annotated[datetime, Field(description="End time in UTC")]
+    sts: Annotated[
+        datetime,
+        Field(
+            description="Start time in UTC",
+            ge=utc(1946),
+            le=utc(utc().year + 1, 12, 31),
+        ),
+    ]
+    ets: Annotated[
+        datetime,
+        Field(
+            description="End time in UTC",
+            ge=utc(1946),
+            le=utc(utc().year + 1, 12, 31),
+        ),
+    ]
     station: Annotated[
         str, Field(description="IEM Station Identifier", max_length=4)
     ] = "KOAX"

@@ -3,7 +3,7 @@
 called from RUN_10_AFTER.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -26,7 +26,7 @@ def run(ts):
 
     total = None
     while now <= ets:
-        gmt = now.astimezone(timezone.utc)
+        gmt = now.astimezone(UTC)
         if gmt > currenttime:
             break
         ppath = gmt.strftime("%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")

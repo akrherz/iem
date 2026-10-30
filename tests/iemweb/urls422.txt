@@ -48,7 +48,8 @@
 /cgi-bin/request/mos.py?sts=2020-01-01T12:00Z&model=NBS&station=KDSM
 /cgi-bin/request/nlaeflux.py?syear=2000&eyear=2001&smonth=1&emonth=2&sday=1&eday=2&station=trouble*
 /cgi-bin/request/other.py?station=AAA
-/cgi-bin/request/raob.py?station=_OAX&sts=2026-07-01T12:00&ets=2025-01-01T00:00
+/cgi-bin/request/raob.py?station=_OAX&sts=2025-07-01T12:00Z&ets=2024-01-01T00:00Z
+/cgi-bin/request/raob.py?station=_XXX&sts=2024-07-01T12:00Z&ets=2025-01-01T00:00Z
 /cgi-bin/request/raster2netcdf.py?dstr=201710251200&prod=bogus
 /cgi-bin/request/rwis.py?network=IA_RWIS&stations=_ALL&sts=2020-01-01&ets=2025-01-01
 /cgi-bin/request/rwis.py?network=IA_RWIS&stations=_ALL&sts=2020-01-01

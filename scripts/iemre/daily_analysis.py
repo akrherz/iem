@@ -10,7 +10,7 @@ This is tricky as some variables we can compute sooner than others.
 
 import subprocess
 import warnings
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import cast
 
 import click
@@ -118,8 +118,8 @@ def compute_daily_pairs(
         sts = noon_local.replace(hour=1 if noon_local.dst() else 0)
         ets = sts + timedelta(hours=23)
     # Logic below needs UTC
-    sts = sts.astimezone(timezone.utc)
-    ets = ets.astimezone(timezone.utc)
+    sts = sts.astimezone(UTC)
+    ets = ets.astimezone(UTC)
     LOG.info("Using %s to %s for %s[is_12z: %s]", sts, ets, domain, is_12z)
     pairs = [(sts, ets)]
     if sts.year != ets.year:

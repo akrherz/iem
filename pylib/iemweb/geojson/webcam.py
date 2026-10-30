@@ -26,7 +26,7 @@ https://mesonet.agron.iastate.edu/geojson/webcam.geojson
 """
 
 import json
-from datetime import timezone
+from datetime import UTC
 from typing import Annotated
 
 from pydantic import AwareDatetime, Field
@@ -98,7 +98,7 @@ def run(valid, network):
                 params,
             )
         for row in res.mappings():
-            cv = row["valid"].astimezone(timezone.utc)
+            cv = row["valid"].astimezone(UTC)
             url = (
                 "https://mesonet.agron.iastate.edu/archive/data/"
                 f"{cv:%Y/%m/%d}/camera/{row['cam']}/{row['cam']}_"

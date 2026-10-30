@@ -18,7 +18,7 @@ Run from RUN_20_AFTER.sh for previous hour and 24 hours ago
 """
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -207,7 +207,7 @@ def workflow(valid: datetime, conn: Connection | None = None):
 @click.option("--valid", type=click.DateTime(), required=True)
 def main(valid: datetime):
     """Do Something"""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     workflow(valid)
 
 

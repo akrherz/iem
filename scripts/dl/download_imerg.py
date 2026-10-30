@@ -21,7 +21,7 @@ import pathlib
 import subprocess
 import tempfile
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import numpy as np
@@ -102,7 +102,7 @@ def get_netcdf(valid, source) -> np.ndarray | None:
 @click.option("--realtime", is_flag=True, default=False)
 def main(valid: datetime, realtime: bool):
     """Go Main Go."""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     routes = "ac" if realtime else "a"
     # If we are within 30 days of the valid time
     if (utc() - valid).total_seconds() < (3_600 * 24 * 30):

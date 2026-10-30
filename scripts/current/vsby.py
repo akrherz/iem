@@ -1,6 +1,6 @@
 """Generate analysis of visibility."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 from pyiem.util import logger, utc, web2ldm
@@ -13,7 +13,7 @@ LOG = logger()
 def main(valid: datetime | None):
     """GO!"""
     if valid is not None:
-        valid = valid.replace(tzinfo=timezone.utc)
+        valid = valid.replace(tzinfo=UTC)
         routes = "a"
     else:
         valid = utc()

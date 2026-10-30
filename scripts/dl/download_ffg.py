@@ -6,7 +6,7 @@ Run from RUN_40_AFTER.sh
 import os
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import click
 import requests
@@ -57,7 +57,7 @@ def main(valid: datetime | None):
             LOG.info("Aborting as timestamp %s is not modulus 6", ts)
             return
     else:
-        ts = valid.replace(tzinfo=timezone.utc)
+        ts = valid.replace(tzinfo=UTC)
     # NOTE website no longer has 3 days worth of data, but two
     for offset in [0, 24, 36]:
         do(ts - timedelta(hours=offset))

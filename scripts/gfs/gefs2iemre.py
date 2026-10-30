@@ -7,7 +7,7 @@ Dedicated crontab entry
 
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import click
@@ -237,7 +237,7 @@ def compute_daily(
 )
 def main(valid: datetime):
     """Do the work."""
-    valid = valid.replace(tzinfo=timezone.utc)
+    valid = valid.replace(tzinfo=UTC)
     # Run every hour, filter those we don't run
     if valid.hour != 0:
         LOG.info("Skipping %s hour run, only 0z is processed", valid.hour)

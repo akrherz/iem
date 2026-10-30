@@ -5,7 +5,7 @@ https://data.cocorahs.org/cocorahs/Export/ExportManager.aspx
 Called from RUN_20MIN.sh
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
@@ -75,14 +75,14 @@ def main(conn, dt: datetime | None) -> None:
         valid = datetime.strptime(
             f"{row['ObservationDate']} {row['ObservationTime']}",
             "%Y-%m-%d %I:%M %p",
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         local_valid = valid.astimezone(tzinfo)
         if local_valid.year < 2000:
             LOG.info("Skipping %s %s as <2000", sid, local_valid)
             continue
         updated = datetime.strptime(
             row["DateTimeStamp"], "%Y-%m-%d %I:%M %p"
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         pday = safeP(row["TotalPrecipAmt"])
         snow = safeP(row["NewSnowDepth"])
         snow_swe = safeP(row["NewSnowSWE"])
