@@ -16,6 +16,7 @@ import rasterio
 from matplotlib.figure import Figure
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
+from pydantic import ValidationError
 from pyiem.autoplot import get_autoplot_context
 from pyiem.exceptions import (
     BadWebRequest,
@@ -36,6 +37,7 @@ from pymemcache.client import Client
 from pymemcache.exceptions import MemcacheIllegalInputError
 
 from iemweb.autoplot import import_script
+from iemweb.autoplot.description import describe
 
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all="ignore")
@@ -169,12 +171,18 @@ def get_res_by_fmt(p, fmt: str, fdict):
             f"Format {fmt} is not supported by this autoplot module"
         )
 
-    meta = mod.get_description()
+    meta = describe(mod)
     # When _gallery is set, inspect meta to see if it has something hardcoded
     if fdict.get("_gallery") is not None and meta.get("gallery") is not None:
         fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
-    ctx = get_autoplot_context(fdict, mod.get_description())
+    ctx = get_autoplot_context(fdict, meta)
+    # Modules defining a Params model get a typed context
+    if (params_cls := getattr(mod, "Params", None)) is not None:
+        try:
+            ctx = params_cls.model_validate(ctx)
+        except ValidationError as exp:
+            raise BadWebRequest(f"Invalid parameters: {exp}") from exp
     if fmt == "js":
         # Need to pass the container name
         ctx["_e"] = fdict.get("_e", "ap_container")

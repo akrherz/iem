@@ -12,15 +12,25 @@ wished to see added to this analysis, please
 
 import calendar
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "total_precip": "Total Precipitation",
@@ -96,72 +106,50 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    yesterday = today - timedelta(days=60)
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="threshold",
-            default="93",
-            label="Daily Temperature Threshold (when appropriate)",
-        ),
-        dict(
-            type="month",
-            name="month1",
-            default=yesterday.month,
-            label="Month 1 for Comparison",
-        ),
-        dict(
-            type="int",
-            name="num1",
-            default=2,
-            label="Number of Additional Months for Comparison 1",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="total_precip",
-            name="var1",
-            label="Comparison 1 Variable",
-        ),
-        dict(
-            type="month",
-            name="month2",
-            default=yesterday.month,
-            label="Month 2 for Comparison",
-        ),
-        dict(
-            type="int",
-            name="num2",
-            default=2,
-            label="Number of Additional Months for Comparison 2",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="avg_temp",
-            name="var2",
-            label="Comparison 2 Variable",
-        ),
-        {
-            "type": "year",
-            "default": yesterday.year,
-            "name": "year",
-            "label": "Year to Highlight on the Chart",
-        },
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "yes",
-            "name": "truncate",
-            "label": "Truncate Dataset",
-        },
-    ]
-    return desc
+def _default_date() -> date:
+    """Reference date used for dynamic widget defaults."""
+    return date.today() - timedelta(days=60)
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    threshold: Annotated[
+        int,
+        IntArg(label="Daily Temperature Threshold (when appropriate)"),
+    ] = 93
+    month1: Annotated[int, MonthArg(label="Month 1 for Comparison")] = Field(
+        default_factory=lambda: _default_date().month
+    )
+    num1: Annotated[
+        int, IntArg(label="Number of Additional Months for Comparison 1")
+    ] = 2
+    var1: Annotated[
+        str, SelectArg(options=PDICT, label="Comparison 1 Variable")
+    ] = "total_precip"
+    month2: Annotated[int, MonthArg(label="Month 2 for Comparison")] = Field(
+        default_factory=lambda: _default_date().month
+    )
+    num2: Annotated[
+        int, IntArg(label="Number of Additional Months for Comparison 2")
+    ] = 2
+    var2: Annotated[
+        str, SelectArg(options=PDICT, label="Comparison 2 Variable")
+    ] = "avg_temp"
+    year: Annotated[int, YearArg(label="Year to Highlight on the Chart")] = (
+        Field(default_factory=lambda: _default_date().year)
+    )
+    truncate: Annotated[
+        str, SelectArg(options=PDICT2, label="Truncate Dataset")
+    ] = "yes"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def compute_months_and_offsets(start: int, count: int) -> tuple[list, list]:
@@ -204,22 +192,22 @@ def combine(df: pd.DataFrame, months: list, offsets: list) -> pd.DataFrame:
     return yearlydf
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     today = date.today() + timedelta(days=1)
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    month1 = ctx["month1"]
-    varname1 = ctx["var1"]
-    num1 = min([12, ctx["num1"]])
-    month2 = ctx["month2"]
-    varname2 = ctx["var2"]
-    num2 = min([12, ctx["num2"]])
+    station = ctx.station
+    threshold = ctx.threshold
+    month1 = ctx.month1
+    varname1 = ctx.var1
+    num1 = min([12, ctx.num1])
+    month2 = ctx.month2
+    varname2 = ctx.var2
+    num2 = min([12, ctx.num2])
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     # Compute the monthly totals
     endts = today.replace(day=1)
-    if ctx["truncate"] == "no":
+    if ctx.truncate == "no":
         endts = today + timedelta(days=1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -267,7 +255,7 @@ def plotter(ctx: dict):
     if xdata.isna().all() or ydata.isna().all():
         raise NoDataFound("No Data Found.")
     title = (
-        f"{df.index.min()}-{df.index.max()} {ctx['_sname']}\n"
+        f"{df.index.min()}-{df.index.max()} {ctx.sname}\n"
         "Comparison of Monthly Periods, Quadrant Frequency Labelled"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -366,11 +354,11 @@ def plotter(ctx: dict):
     )
     for yr in df.sort_values("zscore", ascending=False).head(5).index:
         ax.text(xdata[yr], ydata[yr], f" {yr}")
-    if ctx["year"] in df.index:
-        ax.text(xdata[ctx["year"]], ydata[ctx["year"]], f" {ctx['year']}")
+    if ctx.year in df.index:
+        ax.text(xdata[ctx.year], ydata[ctx.year], f" {ctx.year}")
         ax.scatter(
-            xdata[ctx["year"]],
-            ydata[ctx["year"]],
+            xdata[ctx.year],
+            ydata[ctx.year],
             marker="s",
             facecolor="r",
             edgecolor="r",

@@ -23,41 +23,38 @@ import importlib
 from pyiem.exceptions import BadWebRequest
 from pyiem.reference import prodDefinitions
 
-ARG_IEMRE_DOMAIN = {
-    "type": "select",
-    "name": "domain",
-    "default": "conus",
-    "label": "Select IEMRE Analysis Domain (China/Europe/SA not complete):",
-    "options": {
+from iemweb.autoplot.description import (
+    FemaArg,
+    SelectArg,
+    StationArg,
+    ZStationArg,
+)
+
+ARG_IEMRE_DOMAIN = SelectArg(
+    name="domain",
+    default="conus",
+    label="Select IEMRE Analysis Domain (China/Europe/SA not complete):",
+    options={
         "conus": "Contiguous USA",
         "china": "China",
         "europe": "Europe",
         "sa": "South America",
     },
-    "alias": {
-        "": "conus",
-    },
-}
-ARG_STATION = {
-    "type": "station",
-    "name": "station",
-    "default": "IATAME",
-    "label": "Select Station (STC000? are climate district, ST0000 state avg)",
-    "network": "IACLIMATE",
-}
-ARG_ZSTATION = {
-    "type": "zstation",
-    "name": "zstation",
-    "default": "AMW",
-    "network": "IA_ASOS",
-    "label": "Select Station:",
-}
-ARG_FEMA = {
-    "type": "fema",
-    "name": "fema",
-    "default": "7",
-    "label": "Select FEMA Region:",
-}
+    alias={"": "conus"},
+)
+ARG_STATION = StationArg(
+    name="station",
+    default="IATAME",
+    label="Select Station (STC000? are climate district, ST0000 state avg)",
+    network="IACLIMATE",
+)
+ARG_ZSTATION = ZStationArg(
+    name="zstation",
+    default="AMW",
+    network="IA_ASOS",
+    label="Select Station:",
+)
+ARG_FEMA = FemaArg(name="fema", default="7", label="Select FEMA Region:")
 FEMA_REGIONS = {
     "1": "Region 1 {ME,NH,VT,MA,CT,RI}",
     "2": "Region 2 {NY,NJ,PR,VI}",

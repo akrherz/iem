@@ -6,6 +6,7 @@ of days prior to that date.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -14,53 +15,60 @@ from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    DateArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "yes": "Only Emergencies",
     "all": "All Events",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    desc["arguments"] = [
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="TO",
-            label="Select Watch/Warning Phenomena Type:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "TO"
+    significance: Annotated[
+        str,
+        SignificanceArg(label="Select Watch/Warning Significance Level:"),
+    ] = "W"
+    e: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="For TOR/FFW Warnings, plot emergencies?"
         ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="all",
-            label="For TOR/FFW Warnings, plot emergencies?",
-            name="e",
-        ),
-        dict(
-            type="date",
-            default=date.today().strftime("%Y/%m/%d"),
-            optional=True,
+    ] = "all"
+    edate: Annotated[
+        date | None,
+        DateArg(
             label="Retroactive Date of Plot:",
-            name="edate",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-    ]
-    return desc
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     bins = [0, 1, 14, 31, 91, 182, 273, 365, 730, 1460, 2920, 3800]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    edate = ctx.get("edate")
-    emerg_extra = " and is_emergency " if ctx["e"] == "yes" else ""
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    edate = ctx.edate
+    emerg_extra = " and is_emergency " if ctx.e == "yes" else ""
     with get_sqlalchemy_conn("postgis") as conn:
         if edate is not None:
             edate = utc(edate.year, edate.month, edate.day, 0, 0)
@@ -110,7 +118,7 @@ def plotter(ctx: dict):
     df = pd.DataFrame(rows)
     df = df.set_index("wfo")
 
-    ee = " (Emergency) " if ctx["e"] == "yes" else ""
+    ee = " (Emergency) " if ctx.e == "yes" else ""
     mp = MapPlot(
         sector="nws",
         axisbg="white",

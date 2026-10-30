@@ -20,7 +20,8 @@ positive.</p>
 issuance counts for a single Weather Forecast Offices.</p>
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,13 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
 
 from iemweb.autoplot import ensure_prodDefinitions_key_in_label
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "count": "Issuance Count",
@@ -43,59 +51,58 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 300, "data": True}
-    now = utc() + timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="pil",
-            default="AFD",
-            label="Select 3 Character Product ID (AWIPS ID / AFOS)",
+def _now() -> datetime:
+    """Tomorrow, so that the current UTC day is fully included."""
+    return utc() + timedelta(days=1)
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    pil: Annotated[
+        str,
+        SelectArg(
             options=ensure_prodDefinitions_key_in_label(),
+            label="Select 3 Character Product ID (AWIPS ID / AFOS)",
         ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT,
-            label="Statistic to Plot",
-            default="count",
-        ),
-        {
-            "type": "select",
-            "name": "w",
-            "options": PDICT2,
-            "label": "Summarize by:",
-            "default": "cwa",
-        },
-        dict(
-            type="datetime",
-            name="sts",
-            default=now.strftime("%Y/01/01 0000"),
+    ] = "AFD"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Statistic to Plot")
+    ] = "count"
+    w: Annotated[str, SelectArg(options=PDICT2, label="Summarize by:")] = "cwa"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
             label="Search archive starting at (UTC Timestamp):",
             min="2001/01/01 0000",
+            default=lambda: _now().strftime("%Y/01/01 0000"),
         ),
-        dict(
-            type="datetime",
-            name="ets",
-            default=now.strftime("%Y/%m/%d 0000"),
+    ]
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
             label="Search archive ending at (UTC Timestamp):",
             min="2001/01/01 0000",
-            max=now.strftime("%Y/%m/%d 2359"),
+            max=lambda: _now().strftime("%Y/%m/%d 2359"),
+            default=lambda: _now().strftime("%Y/%m/%d 0000"),
         ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=300, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    ctx["sts"] = ctx["sts"].replace(tzinfo=UTC)
-    ctx["ets"] = ctx["ets"].replace(tzinfo=UTC)
+    sts = ctx.sts.replace(tzinfo=UTC)
+    ets = min(ctx.ets.replace(tzinfo=UTC), utc())
     prod_defs = ensure_prodDefinitions_key_in_label()
-    pil = ctx["pil"][:3]
-    ctx["ets"] = min(ctx["ets"], utc())
+    pil = ctx.pil[:3]
 
     with get_sqlalchemy_conn("afos") as conn:
         df = pd.read_sql(
@@ -105,7 +112,7 @@ def plotter(ctx: dict):
     WHERE substr(pil, 1, 3) = :pil and entered >= :sts and entered < :ets
     GROUP by source, pil ORDER by source, pil ASC"""),
             conn,
-            params={"pil": pil, "sts": ctx["sts"], "ets": ctx["ets"]},
+            params={"pil": pil, "sts": sts, "ets": ets},
             index_col=None,
         )
     if df.empty:
@@ -113,18 +120,18 @@ def plotter(ctx: dict):
 
     data = {}
     subtitle = ""
-    if ctx["var"] == "count":
+    if ctx.var == "count":
         gdf = df.groupby("source").sum(numeric_only=True)  # dt makes no sense
         subtitle = f"Total: {gdf['count'].sum():,.0f}"
-    elif ctx["var"] == "last":
+    elif ctx.var == "last":
         gdf = df.groupby("source").max()
     else:  # first
         gdf = df.groupby("source").min()
     minval = 1
     maxval = gdf["count"].max()
-    if ctx["var"] in ["last", "first"]:
-        minval = gdf[ctx["var"]].min().year
-        maxval = gdf[ctx["var"]].max().year
+    if ctx.var in ["last", "first"]:
+        minval = gdf[ctx.var].min().year
+        maxval = gdf[ctx.var].max().year
     if (maxval - minval) < 10:
         bins = range(minval - 1, maxval + 2)
     else:
@@ -133,17 +140,17 @@ def plotter(ctx: dict):
         if source == "PABR":
             continue
         key = source[1:]
-        if ctx["var"] == "count":
+        if ctx.var == "count":
             data[key] = row["count"]
         else:
-            data[key] = row[ctx["var"]].year
+            data[key] = row[ctx.var].year
 
     mp = MapPlot(
         apctx=ctx,
-        title=f"NWS {PDICT[ctx['var']]} of {prod_defs.get(pil, pil)}",
+        title=f"NWS {PDICT[ctx.var]} of {prod_defs.get(pil, pil)}",
         subtitle=(
-            f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
-            f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
+            f"Plot valid between {sts:%d %b %Y %H:%M} UTC "
+            f"and {ets:%d %b %Y %H:%M} UTC, "
             f"based on unofficial IEM Archives.{subtitle}"
         ),
         sector="nws",
@@ -154,14 +161,14 @@ def plotter(ctx: dict):
         "cwsu": mp.fill_cwsu,
         "rfc": mp.fill_rfc,
     }
-    func[ctx["w"]](
+    func[ctx.w](
         data,
         ilabel=True,
         lblformat="%.0f",
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         extend="neither",
         bins=bins,
-        units="count" if ctx["var"] == "count" else "year",
+        units="count" if ctx.var == "count" else "year",
         labelbuffer=0,
     )
     return mp.fig, df

@@ -9,70 +9,70 @@ to graph at least two years worth of data to make this plot type work.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import lsr_events
 
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = date.today()
-    ltypes = list(lsr_events.keys())
-    ltypes.sort()
-    ev = dict(zip(ltypes, ltypes, strict=False))
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(
-            type="select",
-            name="ltype",
+def _ltype_options() -> dict[str, str]:
+    """LSR event types, sorted."""
+    return {k: k for k in sorted(lsr_events)}
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        NetworkSelectArg(network="WFO", all=True, label="Select WFO:"),
+    ] = "DMX"
+    ltype: Annotated[
+        list[str] | None,
+        SelectArg(
             multiple=True,
-            optional=True,
-            options=ev,
+            options=_ltype_options(),
             default="TORNADO",
             label="Select LSR Event Types: (optional)",
         ),
-        dict(
-            type="year",
-            name="year",
-            min=2006,
-            default=2006,
-            label="Start Year",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            min=2006,
-            default=today.year,
-            label="End Year (inclusive)",
-        ),
-    ]
-    return desc
+    ] = None
+    year: Annotated[int, YearArg(min=2006, label="Start Year")] = 2006
+    eyear: Annotated[int, YearArg(min=2006, label="End Year (inclusive)")] = (
+        Field(default_factory=lambda: date.today().year)
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     ctx["_nt"].sts["_ALL"] = dict(name="All WFOs")
-    station = ctx["station"][:4]
-    syear = ctx["year"]
-    eyear = ctx["eyear"]
+    station = ctx.station[:4]
+    syear = ctx.year
+    eyear = ctx.eyear
     if syear == eyear:
         syear = eyear - 1
-    # optional parameter, this could return null
-    ltype = ctx.get("ltype")
+    ltype = ctx.ltype
     params = {"wfo": station if len(station) == 3 else station[1:]}
     wfo_limiter = " and wfo = :wfo "
     if station == "_ALL":
