@@ -75,6 +75,7 @@ def main(state, station):
                 conn,
                 params=(nt.sts[nwsli]["iemid"], sts, ets),
                 index_col="day",
+                parse_dates=["day"],
             )
         obsdf = obsdf.reindex(pd.date_range(sts, ets))
         payload = {
@@ -115,7 +116,7 @@ def main(state, station):
                 data[col] = val
                 if hour is None:
                     hour = row[i + 1][1]
-            if not data or hour < 0:
+            if hour is None or not data or hour < 0:
                 continue
             valid = datetime(
                 dt.year,

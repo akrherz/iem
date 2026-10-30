@@ -29,6 +29,7 @@ def main(state):
             ),
             conn,
             index_col=None,
+            parse_dates=["day"],
         )
 
     for station, gdf in df.groupby("station"):
@@ -39,9 +40,8 @@ def main(state):
             continue
         # Make sure that our data archive starts on the first of a month
         minday = gdf["day"].min().replace(day=1)
-        missing = pd.date_range(minday, gdf["day"].max()).difference(
-            gdf["day"]
-        )
+        domain = pd.date_range(minday, gdf["day"].max())
+        missing = domain.difference(pd.DatetimeIndex(gdf["day"]))
         if missing.empty:
             continue
         LOG.warning(

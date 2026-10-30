@@ -118,6 +118,7 @@ def do(meta, acis_station, interactive):
             conn,
             params=(meta["iemid"],),
             index_col="day",
+            parse_dates=["day"],
         )
         obs["dbhas"] = True
     LOG.info("Loaded %s rows from IEM", len(obs.index))
@@ -155,7 +156,7 @@ def do(meta, acis_station, interactive):
                 (meta["iemid"], day),
             )
         cursor.execute(
-            f"UPDATE summary_{day.year} SET {','.join(work)} "
+            f"UPDATE summary_{day:%Y} SET {','.join(work)} "
             "WHERE iemid = %s and day = %s",
             (*args, meta["iemid"], day),
         )
@@ -169,8 +170,8 @@ def do(meta, acis_station, interactive):
         LOG.warning(
             "%s[%s %s] New:%s Updates H:%s L:%s P:%s",
             acis_station,
-            minday.date(),
-            maxday.date(),
+            minday,
+            maxday,
             inserts,
             *uu,
         )

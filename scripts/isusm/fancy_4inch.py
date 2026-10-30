@@ -46,7 +46,9 @@ def get_grib(now, fhour):
     return None
 
 
-def do_nam(valid: datetime):
+def do_nam(
+    valid: date,
+) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
     """Compute county level estimates based on NAM data"""
     # run 6z to 6z, close enough
     now = datetime(valid.year, valid.month, valid.day, 6)
@@ -93,7 +95,7 @@ def main(days: int):
     hlons, hlats, hvals = do_nam(ts)
     if hlons is None:
         return
-    nam = convert_value(hvals, "degK", "degF")
+    nam: np.ndarray = convert_value(hvals, "degK", "degF")
     window = np.ones((3, 3))
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
@@ -167,9 +169,11 @@ def main(days: int):
             conn,
             index_col=None,
         )
-    for i, row in cdf.iterrows():
-        x, y = get_idx(hlons, hlats, row["lon"], row["lat"])  # skipcq
-        cdf.at[i, "nam"] = nam[x, y]
+    nam_vals = []
+    for row in cdf.itertuples():
+        x, y = get_idx(hlons, hlats, row.lon, row.lat)
+        nam_vals.append(float(nam[x, y]))
+    cdf["nam"] = nam_vals
 
     mp = MapPlot(
         sector="iowa",
