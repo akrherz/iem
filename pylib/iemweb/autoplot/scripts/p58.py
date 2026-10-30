@@ -6,6 +6,7 @@ precipitation within one 24 hour period.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -13,27 +14,30 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, TextArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="text",
-            name="threshold",
-            default=50,
-            label="Percentage of Monthly Precipitation on One Day",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    threshold: Annotated[
+        str, TextArg(label="Percentage of Monthly Precipitation on One Day")
+    ] = "50"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = float(ctx["threshold"])
+    station = ctx.station
+    threshold = float(ctx.threshold)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -58,7 +62,7 @@ def plotter(ctx: dict):
     df["freq"] = df["hits"] / df["years"] * 100.0
 
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Frequency of one day having >= {threshold:.0f}% of that month's "
         "precip total"
     )

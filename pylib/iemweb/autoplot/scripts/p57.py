@@ -6,6 +6,7 @@ considered for the analysis, except for total precipitation.
 
 import calendar
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avg_temp": "Average Daily Temperature",
@@ -25,34 +28,30 @@ PDICT = {
 PDICT2 = {"min": "Minimum", "mean": "Climatology", "max": "Maximum"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            options=PDICT,
-            name="varname",
-            default="avg_temp",
-            label="Variable to Plot",
-        ),
-        dict(
-            type="select",
-            options=PDICT2,
-            name="agg",
-            default="max",
-            label="Aggregate Option",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    varname: Annotated[
+        str, SelectArg(options=PDICT, label="Variable to Plot")
+    ] = "avg_temp"
+    agg: Annotated[
+        str, SelectArg(options=PDICT2, label="Aggregate Option")
+    ] = "max"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["varname"]
-    agg = ctx["agg"]
+    station = ctx.station
+    varname = ctx.varname
+    agg = ctx.agg
 
     lastday = date.today()
     if varname == "total_precip" and agg == "max":
@@ -108,7 +107,7 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"{PDICT2[agg]} {PDICT[varname]} [{ab.year}-{lastday.year}]"
     )
     if col == "mean_total_precip":

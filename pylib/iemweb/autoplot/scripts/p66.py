@@ -17,6 +17,7 @@ vs surrounding days.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -24,6 +25,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "above": "At or Above (AOA) Threshold",
@@ -40,50 +48,39 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            options=PDICT2,
-            label="Select which daily variable",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="above",
-            options=PDICT,
-            label="Select direction",
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default="60",
-            label="Threshold (F or inch):",
-        ),
-        dict(type="int", name="days", default="7", label="Number of Days:"),
-        {
-            "type": "select",
-            "name": "scale",
-            "default": "100",
-            "label": "Scale Y-Axis:",
-            "options": PDICT3,
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT2, label="Select which daily variable")
+    ] = "high"
+    dir: Annotated[str, SelectArg(options=PDICT, label="Select direction")] = (
+        "above"
+    )
+    threshold: Annotated[float, FloatArg(label="Threshold (F or inch):")] = (
+        60.0
+    )
+    days: Annotated[int, IntArg(label="Number of Days:")] = 7
+    scale: Annotated[str, SelectArg(label="Scale Y-Axis:", options=PDICT3)] = (
+        "100"
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    days = ctx["days"]
-    threshold = ctx["threshold"]
-    varname = ctx["var"]
-    mydir = ctx["dir"]
+    station = ctx.station
+    days = ctx.days
+    threshold = ctx.threshold
+    varname = ctx.var
+    mydir = ctx.dir
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -135,14 +132,14 @@ def plotter(ctx: dict):
     label = "AOA" if mydir == "above" else "below"
     units = "inch" if varname == "precip" else "°F"
     title = (
-        f"{ctx['_sname']} [{syear}-{eyear}] ::"
+        f"{ctx.sname} [{syear}-{eyear}] ::"
         f"Frequency of {days} Consec Days "
         f"with {varname.capitalize()} {label} {threshold} {units}"
     )
     fig, ax = figure_axes(apctx=ctx, title=title)
     ax.set_position([0.1, 0.1, 0.7, 0.8])
     ax.set_ylabel("Frequency of Streak Including Day of Year [%]")
-    if ctx["scale"] == "100":
+    if ctx.scale == "100":
         ax.set_ylim(0, 100)
         ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)

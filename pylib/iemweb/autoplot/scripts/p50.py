@@ -9,12 +9,22 @@ available.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
@@ -25,70 +35,63 @@ PDICT3 = {
 FONTSIZE = 12
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 300}
-    today = datetime.today() + timedelta(days=1)
+class Params(AutoplotParams):
+    """Request parameters."""
 
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="_ALL",
-            label="Select WFO:",
-            all=True,
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "_ALL"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    opt: Annotated[
+        str,
+        SelectArg(label="Plot for WFO(all option) or State:", options=PDICT),
+    ] = "wfo"
+    p: Annotated[str, SelectArg(label="What to plot:", options=PDICT2)] = (
+        "percent"
+    )
+    agg: Annotated[
+        str,
+        SelectArg(
+            options=PDICT3, label="How should SVS updates be considered?"
         ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            label="Plot for WFO(all option) or State:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="p",
-            default="percent",
-            label="What to plot:",
-            options=PDICT2,
-        ),
-        dict(
-            type="select",
-            options=PDICT3,
-            default="issuance",
-            label="How should SVS updates be considered?",
-            name="agg",
-        ),
-        dict(
-            type="date",
-            name="date1",
-            optional=True,
-            default="2010/04/01",
+    ] = "issuance"
+    date1: Annotated[
+        date | None,
+        DateArg(
             label="Start Date Bounds (optional):",
             min="2010/04/01",
+            default="2010/04/01",
         ),
-        dict(
-            type="date",
-            name="date2",
-            optional=True,
-            default=today.strftime("%Y/%m/%d"),
+    ] = None
+    date2: Annotated[
+        date | None,
+        DateArg(
             label="End Date Bounds (optional):",
             min="2010/04/01",
-            max=today.strftime("%Y/%m/%d"),
+            max=lambda: (datetime.today() + timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
+            default=lambda: (datetime.today() + timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-    ]
-    return desc
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=300
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    opt = ctx["opt"]
-    station = ctx["station"]
-    state = ctx["state"]
+    opt = ctx.opt
+    station = ctx.station
+    state = ctx.state
     date1 = ctx.get("date1", date(2010, 4, 1))
     date2 = ctx.get("date2", date.today() + timedelta(days=1))
     params = {
@@ -100,7 +103,7 @@ def plotter(ctx: dict):
     if station == "_ALL":
         wfo_limiter = ""
     status_limiter = "and status = 'NEW'"
-    if ctx["agg"] == "max":
+    if ctx.agg == "max":
         status_limiter = ""
     sql = """
     WITH data as (
@@ -179,7 +182,7 @@ def plotter(ctx: dict):
         ax.text(
             x,
             y,
-            f"{val:.2f}" if ctx["p"] == "percent" else row["count"],
+            f"{val:.2f}" if ctx.p == "percent" else row["count"],
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -194,7 +197,7 @@ def plotter(ctx: dict):
         ax.text(
             x,
             y,
-            f"{val:.2f}" if ctx["p"] == "percent" else int(row["count"]),
+            f"{val:.2f}" if ctx.p == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -209,7 +212,7 @@ def plotter(ctx: dict):
         ax.text(
             x,
             y,
-            f"{val:.2f}" if ctx["p"] == "percent" else int(row["count"]),
+            f"{val:.2f}" if ctx.p == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -236,8 +239,8 @@ def plotter(ctx: dict):
     ax.xaxis.set_label_position("top")
     ax.tick_params(top=False, bottom=False, left=False, right=False)
     fig.suptitle(
-        f"{PDICT2[ctx['p']]} of NWS Wind/Hail Tags for Svr Tstorm Warn "
-        f"{PDICT3[ctx['agg']]}\n"
+        f"{PDICT2[ctx.p]} of NWS Wind/Hail Tags for Svr Tstorm Warn "
+        f"{PDICT3[ctx.agg]}\n"
         f"{minvalid:%-d %b %Y} through {maxvalid:%-d %b %Y}, "
         f"{df['count'].sum():.0f} warnings\n{supextra}"
         "Values larger than 10% in red"

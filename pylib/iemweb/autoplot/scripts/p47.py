@@ -8,6 +8,7 @@ the liquid equivalent did not include some liquid rainfall.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 import seaborn as sns
@@ -17,35 +18,33 @@ from pyiem.plot import figure
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import MonthArg, PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["defaults"] = {"_r": "86"}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "month",
-            "name": "month",
-            "default": "12",
-            "label": "Select Month:",
-        },
-        dict(
-            type="year",
-            name="year",
-            default=utc().year,
-            label="Select Year to Highlight:",
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[int, MonthArg(label="Select Month:")] = 12
+    year: Annotated[
+        int,
+        YearArg(label="Select Year to Highlight:", default=lambda: utc().year),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, defaults={"_r": "86"}
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
-    year = ctx["year"]
+    station = ctx.station
+    month = ctx.month
+    year = ctx.year
 
     with get_sqlalchemy_conn("coop") as conn:
         # beat month
@@ -66,7 +65,7 @@ def plotter(ctx: dict):
         x="precip", y="snow", data=df, s=50, color="tan"
     ).plot_joint(sns.kdeplot, n_levels=6)
     title = (
-        f"{ctx['_sname']} ({df.index.min()}-{df.index.max()})\n"
+        f"{ctx.sname} ({df.index.min()}-{df.index.max()})\n"
         f"{calendar.month_name[month]} Snowfall vs Precipitation Totals"
     )
     figure(title=title, apctx=ctx, fig=g.figure)

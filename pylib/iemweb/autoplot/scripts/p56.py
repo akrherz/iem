@@ -16,6 +16,7 @@ choices on if it thinks the climatology is bimodal or not.  Feedback welcome!
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem import reference
@@ -25,6 +26,15 @@ from pyiem.nws import vtec
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.mlib import unrectify_wfo
 
 OPT = {
@@ -48,59 +58,39 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT,
-            default="week",
-            label="Partition By:",
-            name="how",
-        ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "jan",
-            "label": "Start plot on given date:",
-            "name": "start",
-        },
-        dict(
-            type="select",
-            name="opt",
-            options=OPT,
-            default="wfo",
-            label="How to Spatially Group Statistics:",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State (if appropriate):",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO (if appropriate):",
-        ),
-        ARG_FEMA,
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="WC",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    how: Annotated[str, SelectArg(options=PDICT, label="Partition By:")] = (
+        "week"
+    )
+    start: Annotated[
+        str, SelectArg(options=PDICT2, label="Start plot on given date:")
+    ] = "jan"
+    opt: Annotated[
+        str, SelectArg(options=OPT, label="How to Spatially Group Statistics:")
+    ] = "wfo"
+    state: Annotated[str, StateArg(label="Select State (if appropriate):")] = (
+        "IA"
+    )
+    station: Annotated[
+        str,
+        NetworkSelectArg(network="WFO", label="Select WFO (if appropriate):"),
+    ] = "DMX"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "WC"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def compute_plot_climo(ax, df: pd.DataFrame):
@@ -163,13 +153,13 @@ def compute_plot_climo(ax, df: pd.DataFrame):
             return
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    opt = ctx["opt"]
-    state = ctx["state"][:2]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    station = ctx["station"][:4]
+    opt = ctx.opt
+    state = ctx.state[:2]
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    station = ctx.station[:4]
     params = {
         "ph": phenomena,
         "sig": significance,
@@ -184,11 +174,11 @@ def plotter(ctx: dict):
         limiter = " substr(ugc, 1, 2) = :state "
         params["state"] = state
     elif opt == "fema":
-        title = f"FEMA {FEMA_REGIONS[ctx['fema']]}"
+        title = f"FEMA {FEMA_REGIONS[ctx.fema]}"
         limiter = " substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
-    agg = f"extract({ctx['how']} from issue)"
-    if ctx["how"] == "week":
+        params["states"] = fema_region2states(ctx.fema)
+    agg = f"extract({ctx.how} from issue)"
+    if ctx.how == "week":
         agg = "(extract(doy from issue) / 7)::int"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -233,27 +223,27 @@ def plotter(ctx: dict):
         .copy()
     )
     # We need to fill in missing values
-    if ctx["how"] == "doy":
+    if ctx.how == "doy":
         gdf = gdf.reindex(range(1, 367), fill_value=0)
-    elif ctx["how"] == "week":
+    elif ctx.how == "week":
         gdf = gdf.reindex(range(53), fill_value=0)
-    elif ctx["how"] == "month":
+    elif ctx.how == "month":
         gdf = gdf.reindex(range(1, 13), fill_value=0)
     # Duplicate gdf so that we can plot centered on 1 July
     gdf2 = (
         gdf.reset_index()
-        .assign(datum=lambda x: x["datum"] + OFFSETS[ctx["how"]])
+        .assign(datum=lambda x: x["datum"] + OFFSETS[ctx.how])
         .set_index("datum")
     )
     gdf = pd.concat([gdf, gdf2])
-    df = df.rename(columns={"datum": ctx["how"]})
+    df = df.rename(columns={"datum": ctx.how})
     width = 0.8
     xticks = []
     xticklabels = []
-    if ctx["how"] == "week":
+    if ctx.how == "week":
         gdf.index = gdf.index.values * 7
         width = 6.5
-    if ctx["how"] in ["doy", "week"]:
+    if ctx.how in ["doy", "week"]:
         for i, dt in enumerate(pd.date_range("2000/1/1", "2001/12/31")):
             if dt.day == 1:
                 xticks.append(i + 1)
@@ -262,8 +252,8 @@ def plotter(ctx: dict):
         xticks = range(1, 25)
         xticklabels = calendar.month_abbr[1:] + calendar.month_abbr[1:]
 
-    if ctx["how"] == "week":
-        if ctx["start"] == "jul":
+    if ctx.how == "week":
+        if ctx.start == "jul":
             compute_plot_climo(ax[1], gdf.iloc[26:79])  # only send 1 year
         else:
             compute_plot_climo(ax[1], gdf.iloc[:53])  # only send 1 year
@@ -275,19 +265,19 @@ def plotter(ctx: dict):
     ax[1].bar(gdf.index.values, gdf["count"], width=width)
     ax[1].set_ylabel("Total Event Count")
     ax[1].grid()
-    ax[1].set_xlabel(f"Partitioned by {PDICT[ctx['how']]}")
+    ax[1].set_xlabel(f"Partitioned by {PDICT[ctx.how]}")
     ax[1].set_xticks(xticks)
     ax[1].set_xticklabels(xticklabels)
     # sharex is on
-    if ctx["start"] == "jul":
-        if ctx["how"] in ["doy", "week"]:
+    if ctx.start == "jul":
+        if ctx.how in ["doy", "week"]:
             ax[1].set_xlim(183, 183 + 365)
         else:
             ax[1].set_xlim(6.5, 18.5)
     else:
         ax[1].set_xlim(
-            0 if ctx["how"] == "month" else -6.5,
-            13 if ctx["how"] == "month" else 366,
+            0 if ctx.how == "month" else -6.5,
+            13 if ctx.how == "month" else 366,
         )
 
     return fig, df

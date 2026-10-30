@@ -7,6 +7,7 @@ This plot is based off of NWS CLI sites.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import pandas as pd
@@ -15,6 +16,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import SECTORS_NAME
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "precip": "Last Measurable Precipitation",
@@ -28,56 +38,47 @@ SECTORS = {
 SECTORS.update(SECTORS_NAME)
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which parameter:",
-            options=PDICT,
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=date.today().strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    var: Annotated[str, SelectArg(label="Which parameter:", options=PDICT)] = (
+        "high"
+    )
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="2010/01/01",
-        ),
-        dict(
-            type="select",
-            name="sector",
-            default="conus",
-            options=SECTORS,
-            label="Select Map Extent",
-        ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (used when plotting wfo)",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State: (used when plotting state)",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+    sector: Annotated[
+        str, SelectArg(options=SECTORS, label="Select Map Extent")
+    ] = "conus"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (used when plotting wfo)"
+        ),
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State: (used when plotting state)")
+    ] = "IA"
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def get_data(ctx: Params):
     """Build out our data."""
     ctx["nt"] = NetworkTable("NWSCLI")
-    varname = ctx["var"]
+    varname = ctx.var
 
-    today = ctx["sdate"]
+    today = ctx.sdate
     yesterday = today - timedelta(days=1)
     d180 = today - timedelta(days=180)
     with get_sqlalchemy_conn("iem", rw=False) as conn:
@@ -165,21 +166,21 @@ def get_data(ctx):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     get_data(ctx)
 
     title = (
-        f"Consecutive Days with {ctx['var'].capitalize()} "
+        f"Consecutive Days with {ctx.var.capitalize()} "
         "Temp above(+)/below(-) Average"
     )
-    if ctx["var"] == "precip":
+    if ctx.var == "precip":
         title = "Days Since Last Measurable Precipitation"
     mp = MapPlot(
         apctx=ctx,
-        sector=ctx["sector"],
-        state=ctx["state"],
-        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        sector=ctx.sector,
+        state=ctx.state,
+        cwa=(ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:]),
         axisbg="tan",
         statecolor="#EEEEEE",
         title=title,
@@ -193,8 +194,8 @@ def plotter(ctx: dict):
         df2["val"].to_list(),
         color=df2["color"].to_list(),
         labels=df2["label"].to_list(),
-        labeltextsize=(8 if ctx["sector"] != "state" else 12),
-        textsize=(12 if ctx["sector"] != "state" else 16),
+        labeltextsize=(8 if ctx.sector != "state" else 12),
+        textsize=(12 if ctx.sector != "state" else 16),
         labelbuffer=10,
     )
 

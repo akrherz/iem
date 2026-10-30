@@ -9,6 +9,7 @@ expect to set 365 records the first year, 183 the second, and so on...
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_dbconnc
@@ -16,20 +17,26 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
 
     sts = ctx["_nt"].sts[station]["archive_begin"]
     if sts is None:
@@ -92,7 +99,7 @@ def plotter(ctx: dict):
         )
     )
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         "Daily Records Set Per Year "
         f"{syear} sets record then accumulate ({syear + 1}-{eyear})\n"
         "events/year value is long term average, total events / "

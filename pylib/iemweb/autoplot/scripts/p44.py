@@ -26,7 +26,7 @@ plot, but allows for a user defined period to be selected.</p>
 import calendar
 import math
 from datetime import date
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import numpy as np
 import pandas as pd
@@ -38,6 +38,16 @@ from pyiem.nws import vtec
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.mlib import unrectify_wfo
 
 if TYPE_CHECKING:
@@ -61,105 +71,81 @@ PDICT4 = {"line": "Accumulated line plot", "bar": "Single bar plot per year"}
 PDICT5 = {"jan1": "January 1", "jul1": "July 1"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="plot",
-            options=PDICT4,
-            default="line",
-            label="Which plot type to produce?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    plot: Annotated[
+        str, SelectArg(options=PDICT4, label="Which plot type to produce?")
+    ] = "line"
+    opt: Annotated[
+        str, SelectArg(options=PDICT3, label="Plot for a WFO or a State?")
+    ] = "wfo"
+    station: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO (when appropriate):", all=True
         ),
-        dict(
-            type="select",
-            name="opt",
-            options=PDICT3,
-            default="wfo",
-            label="Plot for a WFO or a State?",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO (when appropriate):",
-            all=True,
-        ),
-        dict(
-            type="state",
-            default="IA",
-            name="state",
-            label="Select State (when appropriate):",
-        ),
-        ARG_FEMA,
-        dict(
-            type="select",
-            name="limit",
-            default="no",
-            label="End Date Limit to Plot:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="c",
-            default="svrtor",
-            label="Single or Combination of Products:",
-            options=PDICT2,
-        ),
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="TO",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=1986,
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State (when appropriate):")
+    ] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    limit: Annotated[
+        str, SelectArg(label="End Date Limit to Plot:", options=PDICT)
+    ] = "no"
+    c: Annotated[
+        str,
+        SelectArg(label="Single or Combination of Products:", options=PDICT2),
+    ] = "svrtor"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "TO"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+    syear: Annotated[
+        int,
+        YearArg(
             min=1986,
             label="Inclusive Start Year (if data is available) for plot:",
         ),
-        dict(
-            type="year",
-            name="eyear",
-            default=date.today().year,
+    ] = 1986
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1986,
             label="Inclusive End Year (if data is available) for plot:",
-        ),
-        dict(
-            type="select",
-            name="s",
-            default="jan1",
-            options=PDICT5,
-            label="Start date of the 'year' plotted",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    s: Annotated[
+        str,
+        SelectArg(options=PDICT5, label="Start date of the 'year' plotted"),
+    ] = "jan1"
 
 
-def plot_common(ctx, ax):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plot_common(ctx: Params, ax):
     """Common plot stuff."""
     ax.set_ylabel("Accumulated Count")
     ax.grid(True)
     ax.set_xlabel(ctx["xlabel"])
 
 
-def make_barplot(ctx, df):
+def make_barplot(ctx: Params, df):
     """Create a bar plot."""
     fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes((0.1, 0.1, 0.8, 0.8))
     df2 = (
         df.groupby("year")
         .sum(numeric_only=True)
-        .reindex(range(ctx["syear"], ctx["eyear"] + 1))
+        .reindex(range(ctx.syear, ctx.eyear + 1))
     )
     df2 = df2.fillna(0)
     ax.bar(df2.index.values, df2["count"])
@@ -173,14 +159,14 @@ def make_barplot(ctx, df):
             bbox={"color": "white", "boxstyle": "square,pad=0"},
             ha="center",
         )
-    ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)
+    ax.set_xlim(ctx.syear - 0.5, ctx.eyear + 0.5)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_ylim(top=top)
     plot_common(ctx, ax)
     return fig, df2
 
 
-def munge_df(ctx, df: pd.DataFrame):
+def munge_df(ctx: Params, df: pd.DataFrame):
     """Rectify an x-axis."""
     # Create sday
     df["sday"] = df["date"].dt.strftime("%m%d")
@@ -188,11 +174,11 @@ def munge_df(ctx, df: pd.DataFrame):
     df["month"] = df["date"].dt.month
 
     # Rectify the year, if we are starting on jul1
-    if ctx["s"] == "jul1":
+    if ctx.s == "jul1":
         df.loc[df["month"] < 7, "year"] = df["year"] - 1
 
     # Create a baseline for a common xaxis
-    month = 7 if ctx["s"] == "jul1" else 1
+    month = 7 if ctx.s == "jul1" else 1
     baseline = pd.to_datetime(
         {
             "year": df["year"].to_numpy(),
@@ -203,12 +189,12 @@ def munge_df(ctx, df: pd.DataFrame):
     df["xaxis"] = (df["date"] - baseline).dt.days
 
     # If not limiting, we are done
-    if ctx["limit"] == "no":
+    if ctx.limit == "no":
         return df
 
     today_sday = date.today().strftime("%m%d")
     # If year starts on jan1, easy
-    if ctx["s"] == "jan1":
+    if ctx.s == "jan1":
         return df[df["sday"] <= today_sday]
 
     if today_sday >= "0701":
@@ -217,25 +203,25 @@ def munge_df(ctx, df: pd.DataFrame):
     return df[(df["sday"] <= today_sday) | (df["sday"] >= "0701")]
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    combo = ctx["c"]
-    phenomena = ctx["phenomena"][:2]
-    significance = ctx["significance"][:1]
+    station = ctx.station
+    combo = ctx.c
+    phenomena = ctx.phenomena[:2]
+    significance = ctx.significance[:1]
     if phenomena in ["SV", "TO", "FF"] and significance == "W":
         pass
     else:
-        ctx["syear"] = max(ctx["syear"], 2005)
-    opt = ctx["opt"]
-    state = ctx["state"][:2]
-    eyear = ctx["eyear"]
+        ctx.syear = max(ctx.syear, 2005)
+    opt = ctx.opt
+    state = ctx.state[:2]
+    eyear = ctx.eyear
 
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
     if station not in ctx["_nt"].sts:
         raise NoDataFound("No Data Found.")
 
-    params = {"syear": ctx["syear"], "eyear": eyear}
+    params = {"syear": ctx.syear, "eyear": eyear}
     wfolimiter = " and wfo = :wfo "
     params["wfo"] = unrectify_wfo(station)
     if opt == "state":
@@ -245,7 +231,7 @@ def plotter(ctx: dict):
         wfolimiter = ""
     elif opt == "fema":
         wfolimiter = " and substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
+        params["states"] = fema_region2states(ctx.fema)
     eventlimiter = ""
     if combo == "svrtor":
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
@@ -321,22 +307,22 @@ def plotter(ctx: dict):
         _p = "Parishes" if state == "LA" else "Counties"
         ptitle = f"NWS Issued for {_p} in {reference.state_names[state]}"
     if opt == "fema":
-        ptitle = f"NWS Issued for FEMA Region {ctx['fema']}"
+        ptitle = f"NWS Issued for FEMA Region {ctx.fema}"
     ctx["xlabel"] = "all days plotted"
-    if ctx["limit"] == "yes":
-        mm = "January 1" if ctx["s"] == "jan1" else "July 1"
+    if ctx.limit == "yes":
+        mm = "January 1" if ctx.s == "jan1" else "July 1"
         ctx["xlabel"] = f"{mm} through {date.today():%B %-d}"
         ptitle = f"{ptitle} [{ctx['xlabel']}]"
-    if ctx["s"] == "jul1":
+    if ctx.s == "jul1":
         ctx["xlabel"] += " (Year for July 1 shown)"
     ctx["title"] = f"{ptitle}\n{title} Count"
 
-    if ctx["plot"] == "bar":
+    if ctx.plot == "bar":
         return make_barplot(ctx, df)
     fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes((0.05, 0.1, 0.65, 0.8))
     ann: list[Text] = []
-    for yr in range(ctx["syear"], eyear + 1):
+    for yr in range(ctx.syear, eyear + 1):
         df2 = df[df["year"] == yr]
         if len(df2.index) < 2:
             continue
@@ -392,7 +378,7 @@ def plotter(ctx: dict):
 
     ax.legend(loc=(1.07, 0), ncol=2, fontsize=10)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    if ctx["s"] == "jan1":
+    if ctx.s == "jan1":
         ax.set_xticklabels(calendar.month_abbr[1:])
     else:
         labels = calendar.month_abbr[7:] + calendar.month_abbr[1:7]

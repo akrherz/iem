@@ -9,12 +9,22 @@ for that month need to have sky cover reported.
 
 import calendar
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    HourArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -25,56 +35,51 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        {
-            "type": "select",
-            "name": "which",
-            "default": "single",
-            "label": "Plot Single or All Hours",
-            "options": PDICT,
-        },
-        dict(
-            type="hour", name="hour", label="Select Hour of Day:", default=12
-        ),
-        dict(
-            type="year",
-            name="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    which: Annotated[
+        str, SelectArg(label="Plot Single or All Hours", options=PDICT)
+    ] = "single"
+    hour: Annotated[int, HourArg(label="Select Hour of Day:")] = 12
+    year: Annotated[
+        int,
+        YearArg(
             label="Select Year to Compare by Month:",
-            default=today.year,
-        ),
-        dict(
-            type="month",
-            name="month",
-            label="Select Month to Compare by Year:",
-            default=today.month,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    month: Annotated[
+        int,
+        MonthArg(
+            label="Select Month to Compare by Year:",
+            default=lambda: date.today().month,
+        ),
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    hour = ctx["hour"]
-    year = ctx["year"]
-    month = ctx["month"]
+    station = ctx.zstation
+    hour = ctx.hour
+    year = ctx.year
+    month = ctx.month
     hr_limiter = (
         "and extract(hour from (valid at time zone :tzname) + "
         "'10 minutes'::interval ) = :hour"
     )
     tt = f"at {datetime(2000, 1, 1, hour, 0):%-I %p}"
-    if ctx["which"] == "all":
+    if ctx.which == "all":
         hr_limiter = ""
         tt = "for all hours of day"
     with get_sqlalchemy_conn("asos") as conn:
@@ -108,7 +113,7 @@ def plotter(ctx: dict):
     climo = df.groupby("month").sum()
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
-    title = f"({df['year'].min():.0f}-{datetime.now().year}) {ctx['_sname']}"
+    title = f"({df['year'].min():.0f}-{datetime.now().year}) {ctx.sname}"
     subtitle = f"Frequency of Overcast Cloud Observation {tt}"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax: list[Axes] = fig.subplots(2, 1)

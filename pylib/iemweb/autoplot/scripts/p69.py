@@ -12,6 +12,7 @@ do the combination of departures of both sides of average.</p>
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.figure import Figure
@@ -21,6 +22,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    StationArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -60,99 +69,88 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            default="high",
-            label="Which variable to plot?",
-        ),
-        dict(
-            type="select",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, StationArg(label="Select Station", network="IACLIMATE")
+    ] = "IA0000"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which variable to plot?")
+    ] = "high"
+    which: Annotated[
+        str,
+        SelectArg(
             options=PDICT3,
-            name="which",
-            default="above",
             label="How to compare against average along with magnitude below:",
         ),
-        dict(
-            type="select",
-            options=PDICT2,
-            name="unit",
-            default="degrees",
-            label="How to measure departure from average:",
+    ] = "above"
+    unit: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="How to measure departure from average:"
         ),
-        dict(
-            type="float",
-            name="mag",
-            default=0,
-            label="Magnitude of departure expressed with previous:",
+    ] = "degrees"
+    mag: Annotated[
+        float,
+        FloatArg(label="Magnitude of departure expressed with previous:"),
+    ] = 0
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    opt: Annotated[
+        str,
+        SelectArg(
+            label="Express days as percentage or number of", options=PDICT4
         ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+    ] = "percent"
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to highlight on chart",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="select",
-            name="opt",
-            default="percent",
-            label="Express days as percentage or number of",
-            options=PDICT4,
-        ),
-        {
-            "type": "year",
-            "default": date.today().year,
-            "name": "year",
-            "label": "Year to highlight on chart",
-        },
     ]
-    return desc
 
 
-def make_cartoon(fig: Figure, ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def make_cartoon(fig: Figure, ctx: Params):
     """Draw a cartoon to show what data range is being plotted."""
     ax = fig.add_axes((0.1, 0.8, 0.7, 0.04), frameon=False, yticks=[])
     ax.set_title("Green areas show values used in frequency", fontsize=10)
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
-    unit = "°F" if ctx["unit"] == "degrees" else " Sigma"
+    unit = "°F" if ctx.unit == "degrees" else " Sigma"
     ax.set_xticklabels(
         [
             "- Inf",
-            f"Avg -{abs(ctx['mag'])}{unit}",
+            f"Avg -{abs(ctx.mag)}{unit}",
             "Average",
-            f"Avg +{abs(ctx['mag'])}{unit}",
+            f"Avg +{abs(ctx.mag)}{unit}",
             "+ Inf",
         ]
     )
     box_colors = ["#fff", "#fff", "#fff", "#fff"]
     # Yuck, but here we go...
-    if ctx["which"] == "above":
+    if ctx.which == "above":
         box_colors[3] = "#aaffaa"
-        if ctx["mag"] < 0:
+        if ctx.mag < 0:
             box_colors[2] = "#aaffaa"
             box_colors[1] = "#aaffaa"
-    elif ctx["which"] == "below":
+    elif ctx.which == "below":
         box_colors[0] = "#aaffaa"
-        if ctx["mag"] > 0:
+        if ctx.mag > 0:
             box_colors[1] = "#aaffaa"
             box_colors[2] = "#aaffaa"
-    elif ctx["which"] == "abs_above":
+    elif ctx.which == "abs_above":
         box_colors[0] = "#aaffaa"
         box_colors[3] = "#aaffaa"
-    elif ctx["which"] == "abs_below":
+    elif ctx.which == "abs_below":
         box_colors[1] = "#aaffaa"
         box_colors[2] = "#aaffaa"
     ax.set_xlim(0, 1)
@@ -171,45 +169,45 @@ def make_cartoon(fig: Figure, ctx: dict):
         )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
-    month = ctx["month"]
+    station = ctx.station
+    varname = ctx.var
+    month = ctx.month
 
     yr = "year as yr"
     months = month2months(month)
     if month == "winter":
         yr = "case when month = 12 then year + 1 else year end as yr"
 
-    comp = ">=" if ctx["which"] in ("above", "abs_above") else "<"
+    comp = ">=" if ctx.which in ("above", "abs_above") else "<"
 
     # The degrees case
     high_sql = f"high {comp} (avg_high + :mag)"
     low_sql = f"low {comp} (avg_low + :mag)"
     avg_sql = f"(high+low)/2. {comp} (avg_temp + :mag)"
-    tt = f"{comp} {ctx['mag']}°F of Average"
+    tt = f"{comp} {ctx.mag}°F of Average"
     # The sigma case
-    if ctx["unit"] == "sigma":
+    if ctx.unit == "sigma":
         high_sql = f"high {comp} (avg_high + (stddev_high * :mag))"
         low_sql = f"low {comp} (avg_low + (stddev_low * :mag))"
         avg_sql = f"(high+low)/2. {comp} (avg_temp + (stddev_temp * :mag))"
-        tt = f"{comp} {ctx['mag']} Sigma of Average"
-    if ctx["which"].startswith("abs"):
+        tt = f"{comp} {ctx.mag} Sigma of Average"
+    if ctx.which.startswith("abs"):
         # Ensure magnitude makes sense in this case
-        ctx["mag"] = abs(ctx["mag"])
-        if ctx["unit"] == "sigma":
+        ctx.mag = abs(ctx.mag)
+        if ctx.unit == "sigma":
             high_sql = f"abs(high - avg_high) {comp} (stddev_high * :mag)"
             low_sql = f"abs(low - avg_low) {comp} (stddev_low * :mag)"
             avg_sql = (
                 f"abs((high+low)/2. - avg_temp) {comp} (stddev_temp * :mag)"
             )
-            tt = f"{comp} +/- {ctx['mag']} Sigma of Average"
+            tt = f"{comp} +/- {ctx.mag} Sigma of Average"
         else:  # degrees
             high_sql = f"abs(high - avg_high) {comp} :mag"
             low_sql = f"abs(low - avg_low) {comp} :mag"
             avg_sql = f"abs((high+low)/2. - avg_temp) {comp} :mag"
-            tt = f"{comp} +/- {ctx['mag']}°F of Average"
+            tt = f"{comp} +/- {ctx.mag}°F of Average"
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -235,7 +233,7 @@ def plotter(ctx: dict):
         GROUP by yr ORDER by yr ASC
         """,
                 yr=yr,
-                which=ctx["which"],
+                which=ctx.which,
                 high_sql=high_sql,
                 low_sql=low_sql,
                 avg_sql=avg_sql,
@@ -244,64 +242,62 @@ def plotter(ctx: dict):
             params={
                 "station": station,
                 "months": months,
-                "mag": ctx["mag"],
+                "mag": ctx.mag,
             },
             index_col="yr",
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    df["high_freq"] = (
-        df[f"high_{ctx['which']}"] / df["days"].astype("f") * 100.0
-    )
-    df["low_freq"] = df[f"low_{ctx['which']}"] / df["days"].astype("f") * 100.0
-    df["avg_freq"] = df[f"avg_{ctx['which']}"] / df["days"].astype("f") * 100.0
+    df["high_freq"] = df[f"high_{ctx.which}"] / df["days"].astype("f") * 100.0
+    df["low_freq"] = df[f"low_{ctx.which}"] / df["days"].astype("f") * 100.0
+    df["avg_freq"] = df[f"avg_{ctx.which}"] / df["days"].astype("f") * 100.0
 
     title = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"({df.index.values.min()}-{df.index.values.max()}) "
-        f"{PDICT4[ctx['opt']]} of Days "
+        f"{PDICT4[ctx.opt]} of Days "
         f"with {PDICT[varname]} {tt}"
     )
     subtitle = (
         f"(month={month.upper()}) Using Period of Record Simple Climatology"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    suffix = f"_{ctx['which']}" if ctx["opt"] == "number" else "_freq"
+    suffix = f"_{ctx.which}" if ctx.opt == "number" else "_freq"
     avgv = df[varname + suffix].mean()
 
     colorabove = "r"
     colorbelow = "b"
-    if ctx["which"] == "below":
+    if ctx.which == "below":
         colorabove, colorbelow = colorbelow, colorabove
     df["color"] = colorabove
     df.loc[df[varname + suffix] < avgv, "color"] = colorbelow
-    if ctx["year"] in df.index:
-        df.loc[ctx["year"], "color"] = "yellow"
+    if ctx.year in df.index:
+        df.loc[ctx.year, "color"] = "yellow"
     data = df[varname + suffix].values
     ax = barchart_with_top10(
         fig,
         df,
         f"{varname}{suffix}",
         color=df["color"],
-        table_col_title="Days" if ctx["opt"] == "number" else "Freq (%)",
+        table_col_title="Days" if ctx.opt == "number" else "Freq (%)",
     )
     pos = ax.get_position()
     ax.set_position((pos.x0, pos.y0, pos.width, pos.height - 0.15))
     make_cartoon(fig, ctx)
     ax.axhline(avgv, lw=2, color="k", zorder=2)
-    vv = f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}"
+    vv = f"Avg: {avgv:.1f}{'' if ctx.opt == 'number' else '%'}"
     ax.set_ylim(bottom=0)
     extra = ""
-    if ctx["year"] in df.index:
+    if ctx.year in df.index:
         extra = (
-            f" (highlighted year {ctx['year']} with value: "
-            f"{data[df.index.get_loc(ctx['year'])]:.1f}"
-            f"{'' if ctx['opt'] == 'number' else '%'})"
+            f" (highlighted year {ctx.year} with value: "
+            f"{data[df.index.get_loc(ctx.year)]:.1f}"
+            f"{'' if ctx.opt == 'number' else '%'})"
         )
     ax.set_xlabel(f"Year{extra}, {vv}")
     ax.set_ylabel(
-        "Frequency [%]" if ctx["opt"] == "percent" else "Number of Days"
+        "Frequency [%]" if ctx.opt == "percent" else "Number of Days"
     )
     ax.grid(True)
     return fig, df

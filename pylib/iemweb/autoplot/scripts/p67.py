@@ -6,6 +6,7 @@ and by month.
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import pandas as pd
@@ -13,36 +14,41 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="int",
-            name="threshold",
-            default=10,
-            label="Wind Speed Threshold (knots)",
-        ),
-        dict(type="month", name="month", default="3", label="Select Month:"),
-    ]
-    return desc
+from iemweb.autoplot.description import (
+    IntArg,
+    MonthArg,
+    PlotDescription,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 
-def plotter(ctx: dict):
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    threshold: Annotated[int, IntArg(label="Wind Speed Threshold (knots)")] = (
+        10
+    )
+    month: Annotated[int, MonthArg(label="Select Month:")] = 3
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
-    station = ctx["zstation"]
-    threshold = ctx["threshold"]
-    month = ctx["month"]
+    station = ctx.zstation
+    threshold = ctx.threshold
+    month = ctx.month
 
     cursor.execute(
         """
@@ -85,7 +91,7 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Frequency of {threshold}+ knot Wind Speeds by Temperature "
         f"for {calendar.month_name[month]} "
         f"({ab.year}-{datetime.now().year})\n"

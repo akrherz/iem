@@ -11,33 +11,40 @@ chart</a> with more details on VTEC and codes used in this graphic.
 image size at this time.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
 
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["defaults"] = {"_r": None}  # disables
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        )
-    ]
-    return desc
+from iemweb.autoplot.description import NetworkSelectArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def plotter(ctx: dict):
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=86400,
+        defaults={"_r": None},
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"][:4]
+    station = ctx.station[:4]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
     sqllim = "wfo = :wfo and " if station != "_ALL" else ""
