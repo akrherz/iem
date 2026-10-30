@@ -5,8 +5,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 from iemweb.c.tile import application as tile_app
-from iemweb.util import acquire_slot, month2months, release_slot
+from iemweb.util import (
+    acquire_slot,
+    month2months,
+    release_slot,
+    vtec_year_cache_control,
+)
+from pyiem.util import utc
 from werkzeug.test import Client
+
+
+def test_vtec_year_cache_control():
+    """Test that only prior year events are cacheable."""
+    year = utc().year
+    assert vtec_year_cache_control({"year": year - 1}) == 86400
+    assert vtec_year_cache_control({"year": year}) is None
 
 
 def test_tms_handler_failure():
