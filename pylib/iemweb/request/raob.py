@@ -10,8 +10,6 @@ Emits RAOB data in CSV format.
 Changelog
 ---------
 
-- 2026-10-29: The `sts` and `ets` parameters are updated to clarify that they
-  should be timezone aware.
 - 2026-08-13: A bug was corrected with the `sts` and `ets` timestamps not
   being assumed to be in UTC.
 - 2025-04-08: Migration to pydantic validation.
@@ -26,10 +24,11 @@ sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """
 
+from datetime import datetime
 from io import StringIO
 from typing import Annotated
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
 from pyiem.network import Table as NetworkTable
@@ -48,7 +47,7 @@ class Schema(CGIModel):
         ),
     ] = False
     sts: Annotated[
-        AwareDatetime,
+        datetime,
         Field(
             description="Start time in UTC",
             ge=utc(1946),
@@ -56,7 +55,7 @@ class Schema(CGIModel):
         ),
     ]
     ets: Annotated[
-        AwareDatetime,
+        datetime,
         Field(
             description="End time in UTC",
             ge=utc(1946),

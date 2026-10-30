@@ -218,7 +218,7 @@ def plotter(ctx: dict):
             sql_helper(
                 """
     SELECT {cols}, extract(doy from day) as doy,
-    extract(month from day) as month from summary s JOIN stations t
+    extract(month from day)::int as month from summary s JOIN stations t
     ON (s.iemid = t.iemid) WHERE t.id = :station and t.network = :network""",
                 cols=" , ".join(params),
             ),
