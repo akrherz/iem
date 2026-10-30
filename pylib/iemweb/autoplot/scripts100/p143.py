@@ -6,6 +6,7 @@ app provides a monthly total of the number of such SPS products.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,45 +16,44 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT,
-            label="How to summarize the data?",
-        ),
-        {
-            "type": "state",
-            "name": "state",
-            "default": "IA",
-            "label": "Select State:",
-        },
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to summarize the data?")
+    ] = "wfo"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Greens"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
     params = {}
@@ -61,18 +61,18 @@ def plotter(ctx: dict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
     geo_table = ""
-    title = f"NWS {ctx['_sname']} :: Polygon Special Weather Statements"
-    if ctx["opt"] == "state":
+    title = f"NWS {ctx.sname} :: Polygon Special Weather Statements"
+    if ctx.opt == "state":
         geo_table = ", states t"
         limiter = (
             " and ST_Intersects(t.the_geom, s.geom) and t.state_abbr = :state "
         )
-        params["state"] = ctx["state"]
+        params["state"] = ctx.state
         title = (
             "NWS Polygon Special Weather Statements intersecting "
-            f"{state_names[ctx['state']]} "
+            f"{state_names[ctx.state]} "
         )
 
     with get_sqlalchemy_conn("postgis") as conn:
@@ -110,7 +110,7 @@ def plotter(ctx: dict):
         linewidths=0.5,
         ax=ax,
         vmin=1,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         zorder=2,
     )
     # Add sums to RHS

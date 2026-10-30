@@ -1,6 +1,7 @@
 """Climodat consec days"""
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -8,20 +9,21 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {
-        "description": __doc__,
-        "data": True,
-        "report": True,
-        "nopng": True,
-    }
-    desc["arguments"] = [
-        ARG_STATION,
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True, nopng=True
+    )
 
 
 def wrap(cnt, s=None):
@@ -58,11 +60,11 @@ def contiguous_regions(condition):
     return idx
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    station = ctx["station"]
+    station = ctx.station
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
@@ -80,7 +82,7 @@ def plotter(ctx: dict):
         date.today().strftime("%d %b %Y"),
         bs,
         date.today(),
-        ctx["_sname"],
+        ctx.sname,
     )
     res += "#   %-27s %-27s  %-27s %-27s\n" % (
         " Low Cooler Than",

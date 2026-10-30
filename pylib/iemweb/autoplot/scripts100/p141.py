@@ -3,6 +3,7 @@
 import calendar
 import os
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from metpy.units import units
@@ -10,6 +11,9 @@ from pyiem.exceptions import NoDataFound
 from pyiem.meteorology import gdd
 from pyiem.plot import figure_axes
 from pyiem.util import c2f, mm2inch
+
+from iemweb.autoplot.description import PlotDescription, SelectArg, TextArg
+from iemweb.autoplot.params import AutoplotParams
 
 STATIONS = {
     "ames": "Central (Ames)",
@@ -31,27 +35,23 @@ PLOTS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="location",
-            default="ames",
-            label="Select Location:",
-            options=STATIONS,
-        ),
-        dict(
-            type="select",
-            name="ptype",
-            default="gdd",
-            label="Select Plot Type:",
-            options=PLOTS,
-        ),
-        dict(type="text", name="sdate", default="mar15", label="Start Date:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    location: Annotated[
+        str, SelectArg(label="Select Location:", options=STATIONS)
+    ] = "ames"
+    ptype: Annotated[
+        str, SelectArg(label="Select Plot Type:", options=PLOTS)
+    ] = "gdd"
+    sdate: Annotated[str, TextArg(label="Start Date:")] = "mar15"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def load(dirname, location, sdate):
@@ -109,11 +109,11 @@ def load(dirname, location, sdate):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    location = ctx["location"]
-    ptype = ctx["ptype"]
-    sdate = datetime.strptime(f"2000{ctx['sdate']}", "%Y%b%d")
+    location = ctx.location
+    ptype = ctx.ptype
+    sdate = datetime.strptime(f"2000{ctx.sdate}", "%Y%b%d")
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
     cdf = load("/opt/iem/scripts/yieldfx/baseline", location, sdate)
 

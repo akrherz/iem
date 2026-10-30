@@ -8,6 +8,7 @@ example, the 2009 <i>WYEAR</i> value represents the period between
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 import seaborn as sns
@@ -16,6 +17,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "precip": "Total Precipitation",
@@ -41,28 +49,28 @@ LABELS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    y20 = date.today().year - 19
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="precip",
-            label="Select variable:",
-            options=PDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(label="Select variable:", options=PDICT)] = (
+        "precip"
+    )
+    syear: Annotated[
+        int,
+        YearArg(
+            label="For plotting, year to start 20 years of plot",
+            default=lambda: date.today().year - 19,
         ),
-        {
-            "type": "year",
-            "name": "syear",
-            "default": y20,
-            "label": "For plotting, year to start 20 years of plot",
-        },
-        dict(type="cmap", name="cmap", default="plasma", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "plasma"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
 
 
 def myformat(val, precision):
@@ -85,10 +93,10 @@ def p(df, year, month, varname, precision):
     return fmt % val
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
 
     with get_sqlalchemy_conn("coop") as conn:
         # Prevent trace values from accumulating
@@ -117,7 +125,7 @@ def plotter(ctx: dict):
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
         f"-> {df['max_day'].max()}, "
         "WYEAR column is Water Year Oct 1 - Sep 30\n"
-        f"# Site Information: {ctx['_sname']}\n"
+        f"# Site Information: {ctx.sname}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         f"# {LABELS[varname]}\n"
@@ -202,7 +210,7 @@ def plotter(ctx: dict):
     y1 = int(ctx.get("syear", 1990))
 
     fig, ax = figure_axes(
-        title=f"{ctx['_sname']} {LABELS[varname]}",
+        title=f"{ctx.sname} {LABELS[varname]}",
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
@@ -221,7 +229,7 @@ def plotter(ctx: dict):
         fmt=FMT[varname],
         linewidths=0.5,
         ax=ax,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
     )
     ax.set_xticklabels(calendar.month_abbr[1:])
 

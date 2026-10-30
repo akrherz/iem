@@ -9,7 +9,8 @@ physical processes, the plot tends to cycle.  In economics, a classic
 comparable plot to this one is of suply vs demand.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,42 +19,47 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import DateArg, IntArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="date",
-            name="date1",
-            default=(today - timedelta(days=90)).strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    date1: Annotated[
+        date,
+        DateArg(
             label="Start Date:",
             min="1893/01/01",
-        ),
-        dict(
-            type="date",
-            name="date2",
-            default=today.strftime("%Y/%m/%d"),
-            label="End Date (inclusive):",
-            min="1893/01/01",
-        ),
-        dict(
-            type="int",
-            name="days",
-            default="14",
-            label="Number of Trailing Days to Use (X)",
-        ),
-        dict(
-            type="int",
-            name="days2",
-            default="7",
-            label="Interval to Compute Trailing Statistics (Y)",
+            default=lambda: (
+                datetime.today() - timedelta(days=1) - timedelta(days=90)
+            ).strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+    date2: Annotated[
+        date,
+        DateArg(
+            label="End Date (inclusive):",
+            min="1893/01/01",
+            default=lambda: (datetime.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
+        ),
+    ]
+    days: Annotated[
+        int, IntArg(label="Number of Trailing Days to Use (X)")
+    ] = 14
+    days2: Annotated[
+        int, IntArg(label="Interval to Compute Trailing Statistics (Y)")
+    ] = 7
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def get_color(val, cat):
@@ -67,21 +73,21 @@ def get_color(val, cat):
     return "r"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
-    station = ctx["station"]
-    days = ctx["days"]
-    days2 = ctx["days2"]
-    date1 = ctx["date1"]
-    date2 = ctx["date2"]
+    station = ctx.station
+    days = ctx.days
+    days2 = ctx.days2
+    date1 = ctx.date1
+    date2 = ctx.date2
     if date1 >= date2:
         raise NoDataFound("Start date must be before end date.")
 
     title = (
-        f"{ctx['_sname']} ({date1:%d %b %Y} - {date2:%d %b %Y})\n"
+        f"{ctx.sname} ({date1:%d %b %Y} - {date2:%d %b %Y})\n"
         f"{days} Day Trailing Departures plotted every {days2} days"
     )
 

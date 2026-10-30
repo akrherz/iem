@@ -8,12 +8,20 @@ condition reported.
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    HourArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {"CLR": "Clear (CLR)", "OVC": "Overcast (OVC)"}
@@ -38,48 +46,40 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    var: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Overcast or Clear Sky Conditions?"),
+    ] = "OVC"
+    hour: Annotated[
+        int | None,
+        HourArg(
+            label="Limit plot to local hour of day? (optional)", default=0
         ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="OVC",
-            options=PDICT,
-            label="Overcast or Clear Sky Conditions?",
-        ),
-        dict(
-            type="hour",
-            name="hour",
-            default=0,
-            optional=True,
-            label="Limit plot to local hour of day? (optional)",
-        ),
-    ]
-    return desc
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    month = ctx["month"]
-    varname = ctx["var"]
-    hour = ctx.get("hour")
+    station = ctx.zstation
+    month = ctx.month
+    varname = ctx.var
+    hour = ctx.hour
     months = month2months(month)
 
     hour_limiter = ""
@@ -129,7 +129,7 @@ def plotter(ctx: dict):
         hrlabel = ts.strftime("%-I %p")
     tt = "Overcast Clouds" if varname == "OVC" else "Clear Skies"
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Frequency of {tt} by Air Temp (month={month.upper()},hour={hrlabel})"
         f" ({df['min_valid'].min().year}-{df['max_valid'].max().year})\n"
         "(must have 10+ hourly observations at the given temperature)"

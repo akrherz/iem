@@ -14,12 +14,23 @@ to use a more user friendly start and end date.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 LOOKUP = {
     "avg_high_temp": "max_tmpf",
@@ -68,74 +79,68 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    sts = today - timedelta(days=14)
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="DSM",
-            label="Select Station",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="year",
-            default=1900,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(label="Select Station", network="IA_ASOS")
+    ] = "DSM"
+    syear: Annotated[
+        int,
+        YearArg(min=1900, label="Limit plot start year (if data exists) to:"),
+    ] = 1900
+    eyear: Annotated[
+        int | None,
+        YearArg(
             min=1900,
-            name="syear",
-            label="Limit plot start year (if data exists) to:",
+            label="Inclusive year to limit plot to (if data exists):",
+            default=lambda: (datetime.today() - timedelta(days=1)).year,
         ),
-        {
-            "type": "year",
-            "default": today.year,
-            "min": 1900,
-            "name": "eyear",
-            "label": "Inclusive year to limit plot to (if data exists):",
-            "optional": True,
-        },
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": f"{sts:%m%d}",
-            "label": "Inclusive Start Date of the Year",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": f"{today:%m%d}",
-            "label": "Inclusise End Date of the Year",
-        },
-        dict(
-            type="select",
-            name="varname",
-            default="avg_temp",
-            label="Variable to Compute:",
-            options=PDICT,
-        ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "name": "w",
-            "default": "none",
-            "label": "Use Threshold to Count Number of Days",
-        },
-        {
-            "type": "float",
-            "name": "thres",
-            "label": "Threshold (inch, F, MPH, %)",
-            "default": "1",
-        },
-        dict(
-            type="year",
-            name="year",
-            default=sts.year,
-            label="Year to Highlight in Chart:",
+    ] = None
+    sday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive Start Date of the Year",
+            default=lambda: f"{datetime.today() - timedelta(days=15):%m%d}",
         ),
     ]
-    return desc
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusise End Date of the Year",
+            default=lambda: f"{datetime.today() - timedelta(days=1):%m%d}",
+        ),
+    ]
+    varname: Annotated[
+        str, SelectArg(label="Variable to Compute:", options=PDICT)
+    ] = "avg_temp"
+    w: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Use Threshold to Count Number of Days"
+        ),
+    ] = "none"
+    thres: Annotated[float, FloatArg(label="Threshold (inch, F, MPH, %)")] = (
+        1.0
+    )
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to Highlight in Chart:",
+            default=lambda: (
+                (
+                    datetime.today() - timedelta(days=1) - timedelta(days=14)
+                ).year
+            ),
+        ),
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def nice(val):
@@ -159,16 +164,16 @@ def intfmt(val):
     return f"{val:.0f}"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["varname"]
-    year = ctx["year"]
+    station = ctx.station
+    varname = ctx.varname
+    year = ctx.year
     dtlimiter = (
         "(to_char(day, 'mmdd') >= :sday and to_char(day, 'mmdd') <= :eday)"
     )
     doff = "extract(year from day)"
-    if ctx["eday"] < ctx["sday"]:
+    if ctx.eday < ctx.sday:
         dtlimiter = (
             "(to_char(day, 'mmdd') >= :sday or to_char(day, 'mmdd') <= :eday)"
         )
@@ -176,10 +181,10 @@ def plotter(ctx: dict):
             "case when to_char(day, 'mmdd') <= :eday then "
             "(extract(year from day)::int - 1) else extract(year from day) end"
         )
-    threshold = ctx["thres"]
-    mydir = ">=" if ctx["w"] == "aoa" else "<"
+    threshold = ctx.thres
+    mydir = ">=" if ctx.w == "aoa" else "<"
     aggcol = LOOKUP.get(varname, varname)
-    dfcol = ctx["varname"] if ctx["w"] == "none" else "count_days"
+    dfcol = ctx.varname if ctx.w == "none" else "count_days"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -220,9 +225,9 @@ def plotter(ctx: dict):
             params={
                 "network": ctx["network"],
                 "station": station,
-                "sday": f"{ctx['sday']:%m%d}",
-                "eday": f"{ctx['eday']:%m%d}",
-                "start": date(ctx["syear"], 1, 1),
+                "sday": f"{ctx.sday:%m%d}",
+                "eday": f"{ctx.eday:%m%d}",
+                "start": date(ctx.syear, 1, 1),
                 "end": date(ctx.get("eyear", date.today().year), 12, 31),
                 "threshold": threshold,
             },
@@ -248,21 +253,21 @@ def plotter(ctx: dict):
     elif varname.find("rh") > -1:
         ylabel = "Relative Humidity [%]"
         units = "[%]"
-    if ctx["w"] != "none":
+    if ctx.w != "none":
         ylabel = "Days"
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"{PDICT.get(varname)} from "
-        f"{ctx['sday']:%d %b} through {ctx['eday']:%d %b}"
+        f"{ctx.sday:%d %b} through {ctx.eday:%d %b}"
     )
-    if ctx["w"] != "none":
-        tt = PDICT2[ctx["w"]].replace("Threshold", f"{ctx['thres']}")
+    if ctx.w != "none":
+        tt = PDICT2[ctx.w].replace("Threshold", f"{ctx.thres}")
         title = (
-            f"{ctx['_sname']}\n"
+            f"{ctx.sname}\n"
             f"{tt} {units} for {PDICT.get(varname)} "
-            f"from {ctx['sday']:%d %b} through {ctx['eday']:%d %b}"
+            f"from {ctx.sday:%d %b} through {ctx.eday:%d %b}"
         )
-    if ctx["w"] != "none":
+    if ctx.w != "none":
         title = title.replace("Average ", "")
     fig = figure(apctx=ctx, title=title)
     ax = [
@@ -270,8 +275,8 @@ def plotter(ctx: dict):
         fig.add_axes((0.07, 0.1, 0.78, 0.36)),
     ]
 
-    fmter = intfmt if ctx["w"] != "none" else nice
-    yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
+    fmter = intfmt if ctx.w != "none" else nice
+    yrfmter = intfmt if ctx.eday > ctx.sday else crossesjan1
 
     # Print top 10
     dy = 0.03

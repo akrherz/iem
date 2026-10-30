@@ -5,6 +5,7 @@ In most cases, you can access the raw data for these plots
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "max-high": "Maximum High",
@@ -38,48 +46,43 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    eyear = date.today().year
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="type",
-            default="max-high",
-            label="Which metric to plot?",
-            options=PDICT,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=-99,
-            label="Threshold (optional, specify when appropriate):",
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=1893,
-            label="Start Year of Plot: (inclusive)",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=eyear,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    type: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "max-high"
+    threshold: Annotated[
+        float,
+        FloatArg(label="Threshold (optional, specify when appropriate):"),
+    ] = -99
+    syear: Annotated[int, YearArg(label="Start Year of Plot: (inclusive)")] = (
+        1893
+    )
+    eyear: Annotated[
+        int,
+        YearArg(
             label="End Year of Plot: (inclusive)",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    ptype = ctx["type"]
-    syear = ctx["syear"]
-    eyear = ctx["eyear"]
+    station = ctx.station
+    threshold = ctx.threshold
+    ptype = ctx.type
+    syear = ctx.syear
+    eyear = ctx.eyear
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -123,7 +126,7 @@ def plotter(ctx: dict):
     df["range-hilo"] = df["max-high"] - df["min-low"]
 
     years = df.index.values
-    title = f"{ctx['_sname']} :: {min(years)}-{max(years)}\n{PDICT[ptype]}"
+    title = f"{ctx.sname} :: {min(years)}-{max(years)}\n{PDICT[ptype]}"
     if ptype.find("days") == 0:
         title += f" ({threshold})"
     (fig, ax) = figure_axes(title=title, apctx=ctx)

@@ -8,6 +8,7 @@ most frequent product.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,43 +17,46 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=2009,
-            label="Start Year (inclusive):",
-            min=2009,
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=date.today().year,
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    syear: Annotated[
+        int, YearArg(label="Start Year (inclusive):", min=2009)
+    ] = 2009
+    eyear: Annotated[
+        int,
+        YearArg(
             label="End Year (inclusive):",
             min=2009,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     ctx["_nt"].sts["_ALL"] = dict(name="ALL WFOs")
-    syear = ctx["syear"]
-    eyear = ctx["eyear"] + 1
-    station = ctx["station"][:4]
+    syear = ctx.syear
+    eyear = ctx.eyear + 1
+    station = ctx.station[:4]
     sts = date(syear, 1, 1)
     ets = date(eyear, 1, 1)
     params = {
@@ -114,7 +118,7 @@ def plotter(ctx: dict):
     fig.text(
         0.5,
         0.95,
-        f"{syear}-{_tt} NWS {ctx['_sname']} Watch/Warning/Advisory Totals",
+        f"{syear}-{_tt} NWS {ctx.sname} Watch/Warning/Advisory Totals",
         ha="center",
     )
     fig.text(

@@ -13,6 +13,7 @@ average feels like temperature.  This is why we can't have nice things.</p>
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -23,6 +24,15 @@ from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    SidArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "coldest_temp": "Coldest Average Temperature",
@@ -55,39 +65,37 @@ XREF = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "cache": 86400, "description": __doc__}
-    desc["arguments"] = [
-        dict(
-            type="sid",
-            include_climodat=True,
-            name="station",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        SidArg(
+            include_climodat=True, network="IA_ASOS", label="Select Station:"
         ),
-        dict(
-            type="select",
-            name="var",
-            default="coldest_temp",
-            label="Which Metric",
-            options=PDICT,
-        ),
-        dict(type="int", name="days", default=7, label="Over How Many Days?"),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "DSM"
+    var: Annotated[str, SelectArg(label="Which Metric", options=PDICT)] = (
+        "coldest_temp"
+    )
+    days: Annotated[int, IntArg(label="Over How Many Days?")] = 7
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def get_data(ctx: dict) -> pd.DataFrame:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_data(ctx: Params) -> pd.DataFrame:
     """Get the data"""
-    days = ctx["days"]
-    varname = ctx["var"]
+    days = ctx.days
+    varname = ctx.var
     offset = 6 if varname.startswith("coldest") else 0
     if varname == "driest":
         offset = 6
-    station = ctx["station"]
+    station = ctx.station
     if ctx["network"].endswith("CLIMATE"):
         table = "alldata"
         dbname = "coop"
@@ -210,16 +218,16 @@ def get_data(ctx: dict) -> pd.DataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    days = ctx["days"]
-    varname = ctx["var"]
+    days = ctx.days
+    varname = ctx.var
     df = get_data(ctx)
 
     # Don't plot zeros for precip
     if varname == "wettest":
         df = df[df["sum_precip"] > 0]
-    title = ctx["_sname"]
+    title = ctx.sname
     subtitle = PDICT.get(varname)
     if days == 1:
         subtitle = subtitle.replace("Average ", "")
@@ -228,7 +236,7 @@ def plotter(ctx: dict):
     ax = fig.add_axes((0.05, 0.3, 0.45, 0.54))
     lax = fig.add_axes((0.05, 0.1, 0.45, 0.2))
     cax = fig.add_axes((0.05, 0.875, 0.4, 0.02))
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     minval = df[XREF[varname]].min() - 1.0
     maxval = df[XREF[varname]].max() + 1.0
     if pd.isnull(minval) or pd.isnull(maxval):

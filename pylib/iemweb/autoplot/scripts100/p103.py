@@ -6,6 +6,7 @@ a newer colder low or warmer high for the season to date period.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -14,30 +15,32 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="season",
-            options=PDICT,
-            label="Select which half of year",
-            default="fall",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    season: Annotated[
+        str, SelectArg(options=PDICT, label="Select which half of year")
+    ] = "fall"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    season = ctx["season"]
+    station = ctx.station
+    season = ctx.season
 
     year = (
         "case when month > 6 then year + 1 else year end"
@@ -80,7 +83,7 @@ def plotter(ctx: dict):
     df2 = df[df["typ"] == season]
 
     tt = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
-    title = f"{ctx['_sname']} :: {tt} in Temperature"
+    title = f"{ctx.sname} :: {tt} in Temperature"
     fig = figure(title=title, apctx=ctx)
     x = 0.1
     ax = [

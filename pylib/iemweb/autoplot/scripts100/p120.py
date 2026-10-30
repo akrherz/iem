@@ -7,6 +7,7 @@ autoplot and presents the fall season values.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -15,39 +16,42 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(type="int", name="t1", default=32, label="First Threshold (°F)"),
-        dict(type="int", name="t2", default=28, label="Second Threshold (°F)"),
-        dict(type="int", name="t3", default=26, label="Third Threshold (°F)"),
-        dict(type="int", name="t4", default=22, label="Fourth Threshold (°F)"),
-        dict(
-            type="year",
-            name="syear",
-            min=1880,
-            label="Potential (if data exists) minimum year",
-            default=1880,
-        ),
-        dict(
-            type="year",
-            name="eyear",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    t1: Annotated[int, IntArg(label="First Threshold (°F)")] = 32
+    t2: Annotated[int, IntArg(label="Second Threshold (°F)")] = 28
+    t3: Annotated[int, IntArg(label="Third Threshold (°F)")] = 26
+    t4: Annotated[int, IntArg(label="Fourth Threshold (°F)")] = 22
+    syear: Annotated[
+        int, YearArg(min=1880, label="Potential (if data exists) minimum year")
+    ] = 1880
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1880,
             label="Potential (if data exists) exclusive maximum year",
-            default=date.today().year,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
+    station = ctx.station
+    thresholds = [ctx.t1, ctx.t2, ctx.t3, ctx.t4]
 
     df = pd.DataFrame(
         {
@@ -73,7 +77,7 @@ def plotter(ctx: dict):
                 GROUP by year
             """,
                 conn,
-                params=(base, station, ctx["syear"], ctx["eyear"]),
+                params=(base, station, ctx.syear, ctx.eyear),
                 index_col=None,
             )
         for _, row in df2.iterrows():
@@ -99,9 +103,9 @@ def plotter(ctx: dict):
  DOY Date    <%s  <%s  <%s  <%s
 """ % (
         date.today().strftime("%d %b %Y"),
-        max([bs, date(ctx["syear"], 1, 1)]),
-        min([date.today(), date(ctx["eyear"] - 1, 12, 31)]),
-        ctx["_sname"],
+        max([bs, date(ctx.syear, 1, 1)]),
+        min([date.today(), date(ctx.eyear - 1, 12, 31)]),
+        ctx.sname,
         thresholds[0] + 1,
         thresholds[1] + 1,
         thresholds[2] + 1,
@@ -127,8 +131,8 @@ def plotter(ctx: dict):
     subtitle = "%s %s (%s-%s)" % (
         station,
         ctx["_nt"].sts[station]["name"],
-        max([bs, date(ctx["syear"], 1, 1)]),
-        min([date.today(), date(ctx["eyear"] - 1, 12, 31)]),
+        max([bs, date(ctx.syear, 1, 1)]),
+        min([date.today(), date(ctx.eyear - 1, 12, 31)]),
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     for base in thresholds:

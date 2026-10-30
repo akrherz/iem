@@ -9,6 +9,7 @@ arbitrary, but interesting to look at!
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -18,37 +19,40 @@ from pyiem.plot import figure
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"spring": "Spring Season", "fall": "Fall Season"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="season",
-            default="spring",
-            options=PDICT,
-            label="Which Season to Highlight:",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=(date.today().year - 2),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    season: Annotated[
+        str, SelectArg(options=PDICT, label="Which Season to Highlight:")
+    ] = "spring"
+    year: Annotated[
+        int,
+        YearArg(
             label="Select Start Year (3 years plotted) for Top Panel:",
+            default=lambda: date.today().year - 2,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
-    season = ctx["season"]
+    station = ctx.station
+    year = ctx.year
+    season = ctx.season
 
     with get_sqlalchemy_conn("coop") as conn:
         # Have to do a redundant query to get the running values
@@ -118,7 +122,7 @@ def plotter(ctx: dict):
 
     df["fall_length"] = pd.to_numeric(df["fall_length"])
     fig = figure(
-        title=(f"{df.index[0]:.0f}-{df.index[-1]:.0f} {ctx['_sname']}"),
+        title=(f"{df.index[0]:.0f}-{df.index[-1]:.0f} {ctx.sname}"),
         subtitle="91 Day Average Temperatures",
         apctx=ctx,
     )

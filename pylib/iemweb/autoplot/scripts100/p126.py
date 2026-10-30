@@ -11,6 +11,7 @@ Tetens formula (Buck, 1981).
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import metpy.calc as mcalc
 import pandas as pd
@@ -18,6 +19,14 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "mixing_ratio": "Mixing Ratio [g/kg]",
@@ -30,47 +39,40 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year to Plot", default=lambda: date.today().year
         ),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Select Year to Plot",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="mixing_ratio",
-            label="Which Humidity Variable to Compute?",
-            options=PDICT,
-        ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "mean",
-            "label": "Which daily statistic to compute?",
-            "name": "agg",
-        },
     ]
-    return desc
+    var: Annotated[
+        str,
+        SelectArg(label="Which Humidity Variable to Compute?", options=PDICT),
+    ] = "mixing_ratio"
+    agg: Annotated[
+        str,
+        SelectArg(options=PDICT2, label="Which daily statistic to compute?"),
+    ] = "mean"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    varname = ctx["var"]
+    station = ctx.zstation
+    year = ctx.year
+    varname = ctx.var
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -129,7 +131,7 @@ def plotter(ctx: dict):
     daily = (
         df[["year", "doy", varname]]
         .groupby(["year", "doy"])
-        .agg(ctx["agg"])
+        .agg(ctx.agg)
         .reset_index()
     )
     if varname not in daily.columns:
@@ -139,12 +141,9 @@ def plotter(ctx: dict):
     dyear = df[df["year"] == year]
     df3 = dyear[["doy", varname]].groupby("doy").describe()
     # tricky
-    df3[varname, "diff"] = df3[varname, ctx["agg"]] - df2[varname, "mean"]
+    df3[varname, "diff"] = df3[varname, ctx.agg] - df2[varname, "mean"]
 
-    title = (
-        f"{ctx['_sname']}]:: Daily {PDICT2[ctx['agg']]} "
-        f"Surface {PDICT[varname]}"
-    )
+    title = f"{ctx.sname}]:: Daily {PDICT2[ctx.agg]} Surface {PDICT[varname]}"
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     multiplier = 1000.0 if varname == "mixing_ratio" else 10.0
@@ -162,8 +161,8 @@ def plotter(ctx: dict):
         label="Climatology",
     )
     ax[0].plot(
-        df3[varname, ctx["agg"]].index.values,
-        df3[varname, ctx["agg"]].values * multiplier,
+        df3[varname, ctx.agg].index.values,
+        df3[varname, ctx.agg].values * multiplier,
         color="r",
         label=f"{year}",
     )

@@ -6,6 +6,8 @@ above a threshold degrees for at least X number of hours.  It then plots any
 subsequent periods below 50 degrees for that year.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -13,6 +15,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value, utc
+
+from iemweb.autoplot.description import (
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 XREF = {
     "AEEI4": "A130209",
@@ -36,46 +45,33 @@ XREF = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="ISUSM",
-            default="BOOI4",
-            label="Select Station:",
-        ),
-        {
-            "type": "int",
-            "name": "threshold",
-            "default": 50,
-            "label": "Threshold Temperature (F)",
-        },
-        dict(
-            type="int",
-            name="hours1",
-            default=48,
-            label="Stretch of Hours Above Threshold",
-        ),
-        dict(
-            type="int",
-            name="hours2",
-            default=24,
-            label="Stretch of Hours Below Threshold",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="ISUSM", label="Select Station:")
+    ] = "BOOI4"
+    threshold: Annotated[int, IntArg(label="Threshold Temperature (F)")] = 50
+    hours1: Annotated[
+        int, IntArg(label="Stretch of Hours Above Threshold")
+    ] = 48
+    hours2: Annotated[
+        int, IntArg(label="Stretch of Hours Below Threshold")
+    ] = 24
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
+
+
+def plotter(ctx: Params):
     """Go"""
-    threshold = ctx["threshold"]
+    threshold = ctx.threshold
     threshold_c = convert_value(threshold, "degF", "degC")
-    hours1 = ctx["hours1"]
-    hours2 = ctx["hours2"]
-    station = ctx["station"]
+    hours1 = ctx.hours1
+    hours2 = ctx.hours2
+    station = ctx.station
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df2 = pd.read_sql(

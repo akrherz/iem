@@ -12,6 +12,7 @@ If you plot a statewide average, you get no USDM included.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -22,6 +23,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import LOG
+
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    StationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 UNITS = {"precip": "inch", "avgt": "°F", "high": "°F", "low": "°F"}
 PDICT = {
@@ -34,70 +44,46 @@ PDICT2 = {"diff": "Absolute Departure", "sigma": "Standard Deviation"}
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    sts = today - timedelta(days=720)
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
-        dict(
-            min=1,
-            type="int",
-            name="p1",
-            default=31,
-            label="First Period of Days",
-        ),
-        dict(
-            min=1,
-            type="int",
-            name="p2",
-            default=91,
-            label="Second Period of Days",
-        ),
-        dict(
-            min=1,
-            type="int",
-            name="p3",
-            default=365,
-            label="Third Period of Days",
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=sts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, StationArg(label="Select Station:", network="IACLIMATE")
+    ] = "IATAME"
+    p1: Annotated[int, IntArg(min=1, label="First Period of Days")] = 31
+    p2: Annotated[int, IntArg(min=1, label="Second Period of Days")] = 91
+    p3: Annotated[int, IntArg(min=1, label="Third Period of Days")] = 365
+    sdate: Annotated[
+        date,
+        DateArg(
             min="1893/01/01",
             label="Start Date of Plot",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            min="1893/01/01",
-            label="End Date of Plot",
-        ),
-        dict(
-            type="select",
-            name="pvar",
-            default="precip",
-            options=PDICT,
-            label="Which variable to plot?",
-        ),
-        dict(
-            type="select",
-            name="how",
-            default="diff",
-            options=PDICT2,
-            label="How to Express Departure?",
+            default=lambda: (date.today() - timedelta(days=720)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            min="1893/01/01",
+            label="End Date of Plot",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
+        ),
+    ]
+    pvar: Annotated[
+        str, SelectArg(options=PDICT, label="Which variable to plot?")
+    ] = "precip"
+    how: Annotated[
+        str, SelectArg(options=PDICT2, label="How to Express Departure?")
+    ] = "diff"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def underlay_usdm(axis: Axes, sts, ets, lon, lat):
@@ -146,16 +132,16 @@ def underlay_usdm(axis: Axes, sts, ets, lon, lat):
         )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    p1 = ctx["p1"]
-    p2 = ctx["p2"]
-    p3 = ctx["p3"]
-    pvar = ctx["pvar"]
-    sts = ctx["sdate"]
-    ets = ctx["edate"]
-    how = ctx["how"]
+    station = ctx.station
+    p1 = ctx.p1
+    p2 = ctx.p2
+    p3 = ctx.p3
+    pvar = ctx.pvar
+    sts = ctx.sdate
+    ets = ctx.edate
+    how = ctx.how
     maxdays = max([p1, p2, p3])
 
     with get_sqlalchemy_conn("coop") as conn:
@@ -274,7 +260,7 @@ def plotter(ctx: dict):
     fig.text(
         0.5,
         0.93,
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Trailing {p1}, {p2}, {p3} Day Departures & "
         "US Drought Monitor",
         ha="center",

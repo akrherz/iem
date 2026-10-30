@@ -3,12 +3,16 @@ This chart compares yearly summaries between two long term climate sites. Only
 years with similiar observation counts are used in this data presentation.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import PlotDescription, SelectArg, StationArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avg_high": "Average High Temperature",
@@ -22,40 +26,32 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            label="Select Variable to Plot",
-            default="avg_temp",
-        ),
-        dict(
-            type="station",
-            name="station1",
-            default="IATDSM",
-            label="Select First Station:",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="station",
-            name="station2",
-            default="IATAME",
-            label="Select Secont Station:",
-            network="IACLIMATE",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select Variable to Plot")
+    ] = "avg_temp"
+    station1: Annotated[
+        str, StationArg(label="Select First Station:", network="IACLIMATE")
+    ] = "IATDSM"
+    station2: Annotated[
+        str, StationArg(label="Select Secont Station:", network="IACLIMATE")
+    ] = "IATAME"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station1 = ctx["station1"].upper()
-    station2 = ctx["station2"].upper()
-    varname = ctx["var"]
+    station1 = ctx.station1.upper()
+    station2 = ctx.station2.upper()
+    varname = ctx.var
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(

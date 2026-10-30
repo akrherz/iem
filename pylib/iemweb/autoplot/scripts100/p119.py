@@ -19,7 +19,7 @@ autoplot and presents the spring season values.</p>
 """
 
 from datetime import date, datetime, timedelta
-from typing import Any
+from typing import Annotated, Any
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -29,6 +29,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "era5land_soilt4_avg": "ERA5Land 0-7cm Avg Soil Temp",
@@ -41,41 +43,37 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "select",
-            "name": "opt",
-            "default": "first_below",
-            "label": "Which metric to compute?",
-            "options": PDICT2,
-        },
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            default="low",
-            label="Select variable to summarize:",
-        ),
-        dict(type="int", name="t1", default=32, label="First Threshold (F)"),
-        dict(type="int", name="t2", default=28, label="Second Threshold (F)"),
-        dict(type="int", name="t3", default=26, label="Third Threshold (F)"),
-        dict(type="int", name="t4", default=22, label="Fourth Threshold (F)"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    opt: Annotated[
+        str, SelectArg(label="Which metric to compute?", options=PDICT2)
+    ] = "first_below"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select variable to summarize:")
+    ] = "low"
+    t1: Annotated[int, IntArg(label="First Threshold (F)")] = 32
+    t2: Annotated[int, IntArg(label="Second Threshold (F)")] = 28
+    t3: Annotated[int, IntArg(label="Third Threshold (F)")] = 26
+    t4: Annotated[int, IntArg(label="Fourth Threshold (F)")] = 22
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    opt = ctx["opt"]
-    station = ctx["station"]
+    opt = ctx.opt
+    station = ctx.station
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown metadata")
-    thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
+    thresholds = [ctx.t1, ctx.t2, ctx.t3, ctx.t4]
     # Ensure that thresholds are unique
     if len(thresholds) != len(set(thresholds)):
         raise NoDataFound("Thresholds need to be unique.")
@@ -110,7 +108,7 @@ def plotter(ctx: dict):
                 select
                 case when month > 7 then year + 1 else year end as winter,
                 {"min" if opt == "first_below" else "max"}(
-                case when {ctx["var"]} {comp}
+                case when {ctx.var} {comp}
                 %s then day else '{sent}'::date end) as date,
                 count(*) from alldata
                 WHERE station = %s and month = ANY(%s)
@@ -157,9 +155,9 @@ def plotter(ctx: dict):
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {bs} -> {date.today()}\n"
-        f"# Site Information: {ctx['_sname']}\n"
+        f"# Site Information: {ctx.sname}\n"
         "# Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
-        f"# {PDICT[ctx['var']]} exceedence probabilities\n"
+        f"# {PDICT[ctx.var]} exceedence probabilities\n"
         f"# {explainer}\n"
         f" DOY Date    {comp}{thresholds[0]}  {comp}{thresholds[1]}  "
         f"{comp}{thresholds[2]}  {comp}{thresholds[3]}\n"
@@ -190,10 +188,10 @@ def plotter(ctx: dict):
         maxdate = datetime(2001, 6, 1)
 
     byear = bs.year
-    if ctx["var"] == "era5land_soilt4_avg":
+    if ctx.var == "era5land_soilt4_avg":
         byear = max(1950, byear)
     title = ("Frequency of %s\n%s %s (%s-%s)") % (
-        PDICT2[opt].replace("Temperature", PDICT[ctx["var"]]),
+        PDICT2[opt].replace("Temperature", PDICT[ctx.var]),
         station,
         ctx["_nt"].sts[station]["name"],
         byear,

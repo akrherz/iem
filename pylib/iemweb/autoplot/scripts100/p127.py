@@ -6,6 +6,7 @@ days, the plotted day of year values are not an exact science.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
 from pyiem.util import LOG, utc
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
@@ -64,43 +74,39 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "nass": True}
-    desc["arguments"] = [
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="select",
-            name="short_desc",
-            default="CH",
-            options=PDICT,
-            label="Which Statistical Category?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    short_desc: Annotated[
+        str, SelectArg(options=PDICT, label="Which Statistical Category?")
+    ] = "CH"
+    w: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Plot trendline for given threshold value"
         ),
-        {
-            "type": "select",
-            "name": "w",
-            "default": "last",
-            "options": PDICT2,
-            "label": "Plot trendline for given threshold value",
-        },
-        {
-            "type": "int",
-            "name": "threshold",
-            "default": 50,
-            "label": "Threshold Value [% or days] when set above:",
-        },
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "last"
+    threshold: Annotated[
+        int, IntArg(label="Threshold Value [% or days] when set above:")
+    ] = 50
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, nass=True
+    )
 
 
 def plot_trendline(
-    fig: Figure, ctx: dict, data: np.ndarray, year0: int, lastyear: int
+    fig: Figure, ctx: Params, data: np.ndarray, year0: int, lastyear: int
 ):
     """Add the right hand side plot of trendline."""
     ax = fig.add_axes((0.55, 0.1, 0.4, 0.8))
-    threshold = ctx["threshold"]
-    if ctx["w"] == "last":
+    threshold = ctx.threshold
+    if ctx.w == "last":
         threshold = np.max(data[-1, :])
     years = []
     doys = []
@@ -127,7 +133,7 @@ def plot_trendline(
             yticks.append(doy)
     ax.set_yticks(yticks)
     ax.set_yticklabels(ylabels)
-    unit = "% Progress" if ctx["short_desc"] != "FD" else " days"
+    unit = "% Progress" if ctx.short_desc != "FD" else " days"
     ax.set_ylabel(f"Date of {threshold:.0f}{unit}")
     ax.grid(True)
 
@@ -186,10 +192,10 @@ def fill100(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values("week_ending", ascending=True)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"][:2]
-    short_desc = PDICT[ctx["short_desc"].upper()]
+    state = ctx.state[:2]
+    short_desc = PDICT[ctx.short_desc.upper()]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -211,14 +217,14 @@ def plotter(ctx: dict):
         # Need to fill out trailing weeks with 100s
         df = fill100(df)
     df["yeari"] = df["year"] - df["year"].min()
-    if ctx["short_desc"] == "FD":
+    if ctx.short_desc == "FD":
         df["num_value"] = df[["num_value", "year"]].groupby("year").cumsum()
 
     year0 = int(df["year"].min())
     lastyear = int(df["year"].max())
     tt = (
         f"{short_desc} Progress"
-        if ctx["short_desc"] != "FD"
+        if ctx.short_desc != "FD"
         else "Accumulated Days Suitable for Field Work"
     )
     title = f"{state_names[state]} {tt}"
@@ -256,8 +262,8 @@ def plotter(ctx: dict):
     plot_trendline(fig, ctx, data, year0, lastyear)
 
     dlast = np.max(data[-1, :])
-    if ctx["w"] == "thres":
-        dlast = ctx["threshold"]
+    if ctx.w == "thres":
+        dlast = ctx.threshold
     for year in range(year0, lastyear):
         try:
             idx = np.digitize([dlast], data[year - year0, :], right=True)
@@ -265,7 +271,7 @@ def plotter(ctx: dict):
         except ValueError:
             pass
 
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     res = ax.imshow(
         data,
         extent=[1, 367, lastyear + 0.5, year0 - 0.5],
@@ -280,7 +286,7 @@ def plotter(ctx: dict):
     # We need to compute the domain of this plot
     maxv = np.max(data, 0)
     minv = np.min(data, 0)
-    if ctx["short_desc"] == "FD":
+    if ctx.short_desc == "FD":
         ax.set_xlim(np.argmax(maxv > 0) - 7)
     else:
         ax.set_xlim(
@@ -290,8 +296,8 @@ def plotter(ctx: dict):
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
-    unit = "%" if ctx["short_desc"] != "FD" else " days"
-    if ctx["w"] == "thres":
+    unit = "%" if ctx.short_desc != "FD" else " days"
+    if ctx.w == "thres":
         ax.set_xlabel(f"X denotes value of {dlast:.1f}{unit}")
     else:
         lastweek = df["week_ending"].max()

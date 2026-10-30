@@ -8,11 +8,20 @@ in those instances.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "0": "Include calm observations",
@@ -21,44 +30,47 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    lyear = datetime.now().year
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="year",
-            name="season",
-            default=lyear if datetime.now().month < 6 else (lyear + 1),
-            max=lyear + 1,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    season: Annotated[
+        int,
+        YearArg(
+            max=lambda: datetime.now().year + 1,
             label="Select Season to Highlight",
+            default=lambda: (
+                datetime.now().year
+                if datetime.now().month < 6
+                else datetime.now().year + 1
+            ),
         ),
-        dict(
-            type="select",
-            name="wind",
-            default="0",
-            options=PDICT,
-            label="Include Calm Observations? (wind threshold)",
+    ]
+    wind: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Include Calm Observations? (wind threshold)"
         ),
-        dict(
-            type="select",
-            name="todate",
-            default="no",
+    ] = "0"
+    todate: Annotated[
+        str,
+        SelectArg(
             options={"no": "No", "yes": "Yes"},
             label="Only consider season to date period?",
         ),
-    ]
-    return desc
+    ] = "no"
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_highcharts(ctx: Params) -> str:
     """Do highcharts"""
     add_ctx(ctx)
     season = ""
@@ -66,7 +78,7 @@ def get_highcharts(ctx: dict) -> str:
         season = (
             """{
         name: '"""
-            + str(ctx["season"])
+            + str(ctx.season)
             + """',
         type: 'line',
         marker: {
@@ -197,10 +209,10 @@ Highcharts.chart('"""
     return res
 
 
-def add_ctx(ctx):
+def add_ctx(ctx: Params):
     """Get the data"""
-    station = ctx["zstation"]
-    sknt = ctx["wind"]
+    station = ctx.zstation
+    sknt = ctx.wind
     today = date.today()
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -222,7 +234,7 @@ def add_ctx(ctx):
     if df.empty:
         raise NoDataFound("No data found for initial query.")
     textra = ""
-    if ctx["todate"] == "yes":
+    if ctx.todate == "yes":
         sday = today.strftime("%m%d")
         textra = f"till {today:%-d %b}"
         if sday < "0801":
@@ -235,22 +247,22 @@ def add_ctx(ctx):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
     ctx["title"] = (
-        f"{ctx['_sname']}:: Wind Chill Hours {textra} "
+        f"{ctx.sname}:: Wind Chill Hours {textra} "
         f"({df['season'].min():.0f}-{df['season'].max():.0f})"
     )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
     ctx["dfdescribe"] = df2.iloc[:-1].describe()
-    ctx["season"] = int(ctx.get("season", datetime.now().year))
+    ctx.season = int(ctx.get("season", datetime.now().year))
     ctx["lines"] = {}
 
-    if ctx["season"] in ctx["df"].index.values:
-        s = ctx["df"].loc[[ctx["season"]]].transpose()
+    if ctx.season in ctx["df"].index.values:
+        s = ctx["df"].loc[[ctx.season]].transpose()
         s = s.dropna().astype("timedelta64[s]")
         ctx["lines"]["season"] = {
             "x": s.index.values[::-1],
-            "y": s[ctx["season"]].values[::-1].astype(int) / 24.0 / 3600.0,
+            "y": s[ctx.season].values[::-1].astype(int) / 24.0 / 3600.0,
             "c": "blue",
-            "label": f"{ctx['season']}",
+            "label": f"{ctx.season}",
         }
     lbls = ["25%", "mean", "75%", "max"]
     colors = ["g", "k", "r", "orange"]
@@ -270,7 +282,7 @@ def add_ctx(ctx):
     return ctx
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
 

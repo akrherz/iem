@@ -8,6 +8,7 @@ have been.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,26 +16,29 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+from iemweb.autoplot.description import CmapArg, PlotDescription, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def plotter(ctx: dict):
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
+    station = ctx.zstation
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             """
@@ -59,7 +63,7 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"({ab.year}-{date.today().year})\n"
         "Temperature Frequency During Precipitation by Week"
     )
@@ -82,7 +86,7 @@ def plotter(ctx: dict):
         (xedges - 1) * 7,
         yedges,
         H.transpose(),
-        cmap=get_cmap(ctx["cmap"]),
+        cmap=get_cmap(ctx.cmap),
     )
     fig.colorbar(res, label="Hours per week per year")
     ax.set_xticks(xticks)
