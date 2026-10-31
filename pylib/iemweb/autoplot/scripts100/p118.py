@@ -1,41 +1,39 @@
 """precip days per month"""
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"precip_days": "Precipitation Days", "snow_days": "Snowfall Days"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {
-        "description": __doc__,
-        "data": True,
-        "report": True,
-        "nopng": True,
-    }
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            options=PDICT,
-            default="precip_days",
-            label="Select Variable",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(options=PDICT, label="Select Variable")] = (
+        "precip_days"
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True, nopng=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(

@@ -5,50 +5,40 @@ round trip from below some threshold to above the second threshold.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, TextArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {
-        "description": __doc__,
-        "data": True,
-        "report": True,
-        "nopng": True,
-    }
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="text",
-            name="thres1",
-            default="26-38",
-            label="Threshold 1 (lower-upper) (F)",
-        ),
-        dict(
-            type="text",
-            name="thres2",
-            default="24-40",
-            label="Threshold 2 (lower-upper) (F)",
-        ),
-        dict(
-            type="text",
-            name="thres3",
-            default="20-44",
-            label="Threshold 3 (lower-upper) (F)",
-        ),
-        dict(
-            type="text",
-            name="thres4",
-            default="14-50",
-            label="Threshold 4 (lower-upper) (F)",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    thres1: Annotated[str, TextArg(label="Threshold 1 (lower-upper) (F)")] = (
+        "26-38"
+    )
+    thres2: Annotated[str, TextArg(label="Threshold 2 (lower-upper) (F)")] = (
+        "24-40"
+    )
+    thres3: Annotated[str, TextArg(label="Threshold 3 (lower-upper) (F)")] = (
+        "20-44"
+    )
+    thres4: Annotated[str, TextArg(label="Threshold 4 (lower-upper) (F)")] = (
+        "14-50"
+    )
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True, nopng=True
+    )
 
 
 def make(val):
@@ -56,15 +46,15 @@ def make(val):
     return [int(a) for a in val.split("-")]
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    station = ctx["station"]
-    thres1 = ctx["thres1"]
-    thres2 = ctx["thres2"]
-    thres3 = ctx["thres3"]
-    thres4 = ctx["thres4"]
+    station = ctx.station
+    thres1 = ctx.thres1
+    thres2 = ctx.thres2
+    thres3 = ctx.thres3
+    thres4 = ctx.thres4
     thres = [thres1, thres2, thres3, thres4]
 
     prs = [make(thres1), make(thres2), make(thres3), make(thres4)]

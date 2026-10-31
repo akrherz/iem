@@ -5,6 +5,7 @@ precipitation events within a given rainfall bin.
 
 from calendar import month_abbr
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 CWEEK = {
     1: "3/1-->3/7   ",
@@ -71,18 +74,22 @@ CWEEK = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        ARG_STATION,
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
 
     table = f"alldata_{station[:2].lower()}"
     with get_sqlalchemy_conn("coop") as conn:
@@ -145,7 +152,7 @@ def plotter(ctx: dict):
         f"# Report Generated: {today:%d %b %Y}\n"
         "# Climate Record: "
         f"{ctx['_nt'].sts[station]['archive_begin']} -> {today}\n"
-        f"# Site Information: {ctx['_sname']}\n"
+        f"# Site Information: {ctx.sname}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         "# Based on climoweek periods, this report summarizes liquid "
@@ -157,7 +164,7 @@ def plotter(ctx: dict):
         " WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     "
         "2.00    >2.01  DAYS\n"
     )
-    title = f"{ctx['_sname']}:: Precipitation Bin [inch] Frequency Histogram"
+    title = f"{ctx.sname}:: Precipitation Bin [inch] Frequency Histogram"
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes((0.1, 0.15, 0.8, 0.75))
     df["total"] = (

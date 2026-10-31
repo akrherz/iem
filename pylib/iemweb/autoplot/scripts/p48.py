@@ -9,6 +9,8 @@ zones, you may need to try twice to get the proper one selected.
 plots for a single WFO at a time.
 """
 
+from typing import Annotated
+
 import numpy as np
 import pandas as pd
 from pyiem.database import sql_helper, with_sqlalchemy_conn
@@ -17,49 +19,46 @@ from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot.description import (
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import MONTH_DICT, month2months
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAZ048",
-            label="Select UGC Zone/County:",
-        ),
-        {
-            "type": "select",
-            "name": "month",
-            "default": "year",
-            "label": "Limit to Month/Season:",
-            "options": MONTH_DICT,
-        },
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="WC",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAZ048"
+    month: Annotated[
+        str, SelectArg(label="Limit to Month/Season:", options=MONTH_DICT)
+    ] = "year"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "WC"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 @with_sqlalchemy_conn("postgis")
-def plotter(ctx: dict, conn: Connection):
+def plotter(ctx: Params, conn: Connection):
     """Go"""
-    ugc = ctx["ugc"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    month = ctx["month"]
+    ugc = ctx.ugc
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    month = ctx.month
     months = []
     month_limiter = ""
     if month != "year":

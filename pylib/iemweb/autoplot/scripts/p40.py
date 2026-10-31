@@ -9,6 +9,7 @@ that in reality.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,46 +19,47 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="month",
-            name="month",
-            label="Select Month:",
-            default=today.month,
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            name="ptype",
-            default="sky",
-            label="Available Plot Types",
-        ),
-        dict(
-            type="year",
-            name="year",
-            label="Select Year:",
-            default=today.year,
-            min=1970,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: date.today().month),
+    ]
+    ptype: Annotated[
+        str, SelectArg(options=PDICT, label="Available Plot Types")
+    ] = "sky"
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year:", min=1970, default=lambda: date.today().year
         ),
     ]
-    return desc
 
 
-def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def plot_sky(days: int, vsby, data: np.ndarray, ctx: Params, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
     # vsby plot
@@ -87,7 +89,7 @@ def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        f"{ctx['_sname']}:: {sts:%b %Y} "
+        f"{ctx.sname}:: {sts:%b %Y} "
         "Clouds & Visibility\nbased on ASOS METAR Cloud Amount ",
         ha="center",
         fontsize=14,
@@ -127,7 +129,7 @@ def plot_sky(days: int, vsby, data: np.ndarray, ctx, sts):
     return fig
 
 
-def plot_vsby(days, vsby, ctx, sts):
+def plot_vsby(days, vsby, ctx: Params, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
 
@@ -151,7 +153,7 @@ def plot_vsby(days, vsby, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        f"{ctx['_sname']}:: {sts:%b %Y} "
+        f"{ctx.sname}:: {sts:%b %Y} "
         "Visibility\nbased on hourly ASOS METAR Visibility Reports",
         ha="center",
         fontsize=14,
@@ -178,12 +180,12 @@ def plot_vsby(days, vsby, ctx, sts):
     return fig
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    month = ctx["month"]
-    ptype = ctx["ptype"]
+    station = ctx.zstation
+    year = ctx.year
+    month = ctx.month
+    ptype = ctx.ptype
 
     # Extract the range of forecasts for each day for approximately
     # the given month

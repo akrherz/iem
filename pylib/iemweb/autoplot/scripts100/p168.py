@@ -11,6 +11,7 @@ provides the latest date at a given temperature.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -19,20 +20,26 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    desc["arguments"] = [
-        ARG_STATION,
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     ab = ctx["_nt"].sts[station]["archive_begin"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -53,7 +60,7 @@ def plotter(ctx: dict):
 
     title = (
         "Most Recent & Latest Date of High Temperature\n"
-        f"{ctx['_sname']} ({ab.year}-{date.today().year})"
+        f"{ctx.sname} ({ab.year}-{date.today().year})"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     current = {

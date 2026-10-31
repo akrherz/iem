@@ -3,6 +3,8 @@ The number of days for a given season that are
 either above or below some temperature threshold.
 """
 
+from typing import Annotated
+
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -12,6 +14,13 @@ from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -28,53 +37,40 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="season",
-            default="winter",
-            label="Select Season:",
-            options=PDICT2,
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="below",
-            label="Threshold Direction:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="low",
-            label="Which Daily Variable:",
-            options=PDICT3,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=0,
-            label="Temperature (F) or Precip (in) Threshold:",
-        ),
-        dict(
-            type="year", name="year", default=1893, label="Start Year of Plot"
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    season: Annotated[
+        str, SelectArg(label="Select Season:", options=PDICT2)
+    ] = "winter"
+    dir: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=PDICT)
+    ] = "below"
+    var: Annotated[
+        str, SelectArg(label="Which Daily Variable:", options=PDICT3)
+    ] = "low"
+    threshold: Annotated[
+        float, FloatArg(label="Temperature (F) or Precip (in) Threshold:")
+    ] = 0
+    year: Annotated[int, YearArg(label="Start Year of Plot")] = 1893
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    season = ctx["season"]
-    direction = ctx["dir"]
-    varname = ctx["var"]
-    threshold = ctx["threshold"]
-    startyear = ctx["year"]
+    station = ctx.station
+    season = ctx.season
+    direction = ctx.dir
+    varname = ctx.var
+    threshold = ctx.threshold
+    startyear = ctx.year
 
     b = f"{varname} {'>=' if direction == 'above' else '<'} {threshold}"
 
@@ -103,7 +99,7 @@ def plotter(ctx: dict):
     df.index.name = "year"
     tt = "°F" if varname != "precip" else "inch"
     title = (
-        f"{ctx['_sname']} {df.index.min():.0f}-{df.index.max():.0f} "
+        f"{ctx.sname} {df.index.min():.0f}-{df.index.max():.0f} "
         "Number of Days\n"
         f"[{PDICT2[season]}] with {PDICT3[varname]} {PDICT[direction]} "
         f"{threshold}{tt}"

@@ -6,6 +6,7 @@ or fema region.
 """
 
 from datetime import date
+from typing import Annotated
 
 import matplotlib.ticker as ticker
 import pandas as pd
@@ -15,6 +16,13 @@ from pyiem.plot import figure
 from pyiem.reference import state_names
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "state": "View by State",
@@ -27,42 +35,34 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "w",
-            "default": "state",
-            "options": PDICT,
-            "label": "View by:",
-        },
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="networkselect",
-            name="cwa",
-            network="WFO",
-            default="DMX",
-            label="Select WFO (when appropriate):",
-            all=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[str, SelectArg(options=PDICT, label="View by:")] = "state"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    cwa: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO (when appropriate):", all=True
         ),
-        ARG_FEMA,
-        dict(
-            type="select",
-            name="limit",
-            default="ytd",
-            options=MDICT,
-            label="Time Limit of Plot",
-        ),
-    ]
-    return desc
+    ] = "DMX"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    limit: Annotated[
+        str, SelectArg(options=MDICT, label="Time Limit of Plot")
+    ] = "ytd"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"][:2].upper()
-    limit = ctx["limit"]
+    state = ctx.state[:2].upper()
+    limit = ctx.limit
 
     sqllimit = ""
     ets = "31 December"
@@ -89,24 +89,24 @@ def plotter(ctx: dict):
 
     params = {
         "state": state,
-        "fema": ctx["fema"],
-        "wfo": ctx["cwa"],
+        "fema": ctx.fema,
+        "wfo": ctx.cwa,
     }
-    if ctx["w"] == "state":
+    if ctx.w == "state":
         geomcol = "the_geom"
         table = "states"
         abbrsql = " s.state_abbr = :state "
         title = f"State of {state_names[state]}"
-    elif ctx["w"] == "cwa":
+    elif ctx.w == "cwa":
         geomcol = "the_geom"
         table = "cwa"
         abbrsql = " s.cwa = :wfo "
-        title = f"NWS Weather Forecast Office {ctx['_sname']}"
+        title = f"NWS Weather Forecast Office {ctx.sname}"
     else:  # fema
         geomcol = "geom"
         table = "fema_regions"
         abbrsql = " s.region = :fema "
-        title = f"FEMA Region {ctx['fema']}"
+        title = f"FEMA Region {ctx.fema}"
     # Get total issued
     with get_sqlalchemy_conn("postgis") as conn:
         odf = pd.read_sql(

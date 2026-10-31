@@ -6,44 +6,44 @@ a year.
 
 import calendar
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import MonthArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="month",
-            name="month",
-            default=today.month,
-            label="Select Month:",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="cold",
-            label="Select variable to plot:",
-            options=PDICT,
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: date.today().month),
     ]
-    return desc
+    dir: Annotated[
+        str, SelectArg(label="Select variable to plot:", options=PDICT)
+    ] = "cold"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
-    mydir = ctx["dir"]
+    station = ctx.station
+    month = ctx.month
+    mydir = ctx.dir
     ts = datetime(2000, month, 1)
     ets = ts + timedelta(days=35)
     ets = ets.replace(day=1)
@@ -82,7 +82,7 @@ def plotter(ctx: dict):
     # match suptitle for plot2
     ax[0].set_title(
         (
-            f"{ctx['_sname']}\n"
+            f"{ctx.sname}\n"
             f"Frequency of Day in {calendar.month_name[month]}\n"
             f"Having {lbl} High Temperature of {calendar.month_name[month]}"
         ),

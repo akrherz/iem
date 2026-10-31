@@ -12,6 +12,7 @@ point of the plot, they are droppped from the display.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
@@ -27,6 +28,17 @@ from pyiem.reference import state_names
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "yes": "Limit Plot to Year-to-Date",
@@ -45,73 +57,55 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT2,
-            label="What to summarize data by:",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(type="state", default="IA", name="state", label="Select State:"),
-        ARG_FEMA,
-        dict(
-            type="ugc",
-            name="ugc",
-            default="IAC169",
-            label="Select UGC Zone/County:",
-        ),
-        dict(
-            type="select",
-            name="limit",
-            default="no",
-            label="Date Limit to Plot:",
-            options=PDICT,
-        ),
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": "0101",
-            "label": "Start Date (if User Defined Period) [inclusive]:",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": "1231",
-            "label": "End Date (if User Defined Period) [inclusive]:",
-        },
-        {
-            "type": "select",
-            "name": "merge",
-            "default": "strict",
-            "label": "Apply special combination logic due to NWS changes:",
-            "options": PDICT3,
-        },
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="FF",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="What to summarize data by:")
+    ] = "wfo"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone/County:")] = "IAC169"
+    limit: Annotated[
+        str, SelectArg(label="Date Limit to Plot:", options=PDICT)
+    ] = "no"
+    sday: Annotated[
+        date,
+        SDayArg(
+            label="Start Date (if User Defined Period) [inclusive]:",
+            default="0101",
         ),
     ]
-    return desc
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="End Date (if User Defined Period) [inclusive]:",
+            default="1231",
+        ),
+    ]
+    merge: Annotated[
+        str,
+        SelectArg(
+            label="Apply special combination logic due to NWS changes:",
+            options=PDICT3,
+        ),
+    ] = "strict"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "FF"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 @with_sqlalchemy_conn("postgis")
@@ -128,14 +122,14 @@ def get_ugc_name(ugc, defaultwfo, conn: Connection | None = None):
     return res.fetchone()
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    limit = ctx["limit"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    opt = ctx["opt"]
-    state = ctx["state"]
+    station = ctx.station
+    limit = ctx.limit
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    opt = ctx.opt
+    state = ctx.state
 
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
@@ -152,17 +146,16 @@ def plotter(ctx: dict):
         tzname = ctx["_nt"].sts[station]["tzname"]
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
-        params["ugc"] = ctx["ugc"]
-        name, wfo = get_ugc_name(ctx["ugc"], station)
+        params["ugc"] = ctx.ugc
+        name, wfo = get_ugc_name(ctx.ugc, station)
         wfo = wfo[:3]  # some have multiple WFOs
         title1 = (
-            f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx['ugc']}] "
-            f"{name}"
+            f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx.ugc}] {name}"
         )
     elif opt == "fema":
         wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
-        title1 = f"FEMA Region {ctx['fema']} {FEMA_REGIONS[ctx['fema']]}"
+        params["states"] = fema_region2states(ctx.fema)
+        title1 = f"FEMA Region {ctx.fema} {FEMA_REGIONS[ctx.fema]}"
     else:
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
@@ -178,10 +171,10 @@ def plotter(ctx: dict):
             "extract(doy from 'TODAY'::date) "
         )
     elif limit.lower() == "udf":
-        params["sday"] = f"{ctx['sday']:%m%d}"
-        params["eday"] = f"{ctx['eday']:%m%d}"
-        title = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
-        if ctx["sday"] < ctx["eday"]:
+        params["sday"] = f"{ctx.sday:%m%d}"
+        params["eday"] = f"{ctx.eday:%m%d}"
+        title = f"{ctx.sday:%-d %b} thru {ctx.eday:%-d %b}"
+        if ctx.sday < ctx.eday:
             doy_limiter = (
                 " and to_char(issue at time zone :tzname, 'mmdd') >= :sday "
                 " and to_char(issue at time zone :tzname, 'mmdd') <= :eday "
@@ -210,7 +203,7 @@ def plotter(ctx: dict):
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance}) Count"
     )
-    if ctx["merge"] == "magic" and phenomena in ["XH", "EH"]:
+    if ctx.merge == "magic" and phenomena in ["XH", "EH"]:
         phsig_limiter = "phenomena = ANY(:ph) and significance = :sig"
         params["ph"] = ["XH", "EH"]
         subtitle = (

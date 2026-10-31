@@ -52,7 +52,7 @@ class Params(AutoplotParams):
     ] = 0
     n: Annotated[
         str,
-        SelectArg(label="Should a NEXRAD Mosaic by overlain:", options=PDICT3),
+        SelectArg(label="Should a NEXRAD Mosaic be overlain:", options=PDICT3),
     ] = "auto"
 
 

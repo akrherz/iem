@@ -13,6 +13,7 @@ of an hourly variable between two sites.</p>
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -20,47 +21,47 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "low": "Morning Low (midnight to 8 AM)",
     "high": "Afternoon High (noon to 8 PM)",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation1",
-            default="ALO",
-            network="IA_ASOS",
-            label="Select Station 1:",
-        ),
-        dict(
-            type="zstation",
-            name="zstation2",
-            default="OLZ",
-            network="IA_ASOS",
-            label="Select Station 2:",
-        ),
-        dict(
-            type="select",
-            name="varname",
-            default="low",
-            options=PDICT,
-            label="Select Comparison",
-        ),
-        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation1: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 1:")
+    ] = "ALO"
+    zstation2: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 2:")
+    ] = "OLZ"
+    varname: Annotated[
+        str, SelectArg(options=PDICT, label="Select Comparison")
+    ] = "low"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Greens"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station1 = ctx["zstation1"]
-    station2 = ctx["zstation2"]
-    varname = ctx["varname"]
+    station1 = ctx.zstation1
+    station2 = ctx.zstation2
+    varname = ctx.varname
 
     aggfunc = "min"
     tlimit = "0 and 8"
@@ -130,7 +131,7 @@ def plotter(ctx: dict):
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
     ax[0].pcolormesh(
-        (xedges - 1) * 7, yedges, H.transpose(), cmap=get_cmap(ctx["cmap"])
+        (xedges - 1) * 7, yedges, H.transpose(), cmap=get_cmap(ctx.cmap)
     )
     ax[0].set_xticks(xticks)
     ax[0].set_xticklabels(calendar.month_abbr[1:])
@@ -174,7 +175,7 @@ def plotter(ctx: dict):
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)
     ax[1].pcolormesh(
-        (xedges - 0.5), yedges, H.transpose(), cmap=get_cmap(ctx["cmap"])
+        (xedges - 0.5), yedges, H.transpose(), cmap=get_cmap(ctx.cmap)
     )
 
     y = []

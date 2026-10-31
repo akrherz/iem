@@ -10,6 +10,7 @@ you want used over this period of days.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -18,6 +19,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High Temp (°F)",
@@ -40,95 +49,80 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="syear",
-            default=1893,
-            min=1893,
-            label="Start year for plot",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=date.today().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    syear: Annotated[int, YearArg(min=1893, label="Start year for plot")] = (
+        1893
+    )
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1893,
             label="End year (inclusive) for plot",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="select",
-            name="var",
-            default="snow",
-            label="Select Variable:",
-            options=PDICT,
-        ),
-        dict(
-            type="int",
-            name="days",
-            default=1,
-            gt=0,
-            label="Number of Days to Look:",
-        ),
-        dict(
+    ]
+    var: Annotated[str, SelectArg(label="Select Variable:", options=PDICT)] = (
+        "snow"
+    )
+    days: Annotated[int, IntArg(gt=0, label="Number of Days to Look:")] = 1
+    f: Annotated[
+        str,
+        SelectArg(
             options=PDICT3,
-            type="select",
-            name="f",
-            default="avg",
             label="Statistical Aggregate Function over Number of Days",
         ),
-        dict(
-            type="select",
-            name="opt",
-            default="gte",
-            label="Threshold Requirement:",
-            options=PDICT2,
+    ] = "avg"
+    opt: Annotated[
+        str, SelectArg(label="Threshold Requirement:", options=PDICT2)
+    ] = "gte"
+    threshold: Annotated[float, FloatArg(label="Threshold:")] = 0.1
+    threshold2: Annotated[
+        float,
+        FloatArg(
+            label="Threshold2 (when range is selected) (inclusive value)"
         ),
-        dict(
-            type="float", name="threshold", default="0.1", label="Threshold:"
-        ),
-        {
-            "type": "float",
-            "name": "threshold2",
-            "default": 0.2,
-            "label": "Threshold2 (when range is selected) (inclusive value)",
-        },
-    ]
-    return desc
+    ] = 0.2
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    params = {"station": station, "syear": ctx["syear"], "eyear": ctx["eyear"]}
-    threshold = ctx["threshold"]
-    threshold2 = ctx["threshold2"]
+    station = ctx.station
+    params = {"station": station, "syear": ctx.syear, "eyear": ctx.eyear}
+    threshold = ctx.threshold
+    threshold2 = ctx.threshold2
     params["threshold"] = threshold
-    varname = ctx["var"]
-    if ctx["opt"] == "rng":
+    varname = ctx.var
+    if ctx.opt == "rng":
         if threshold > threshold2:
             threshold, threshold2 = threshold2, threshold
         params["threshold"] = threshold
         params["threshold2"] = threshold2
         sql = "val >= :threshold and val <= :threshold2"
         vv = (
-            PDICT2[ctx["opt"]]
+            PDICT2[ctx.opt]
             .replace("{threshold}", str(threshold))
             .replace("{threshold2}", str(threshold2))
         )
         subtitle = f"Frequency of {PDICT[varname]} {vv}"
     else:
-        sql = f"val::numeric {XREF[ctx['opt']]} :threshold"
-        vv = PDICT2[ctx["opt"]].replace("{threshold}", str(threshold))
+        sql = f"val::numeric {XREF[ctx.opt]} :threshold"
+        vv = PDICT2[ctx.opt].replace("{threshold}", str(threshold))
         subtitle = f"Frequency of {PDICT[varname]} {vv} "
     if varname in ["high", "low"]:
         params["threshold"] = int(threshold)
         params["threshold2"] = int(threshold2)
-    days = max(1, ctx["days"])
-    func = "avg" if days == 1 else ctx["f"]
+    days = max(1, ctx.days)
+    func = "avg" if days == 1 else ctx.f
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -162,7 +156,7 @@ def plotter(ctx: dict):
     df["freq"] = df["hits"] / df["total"] * 100.0
 
     title = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"({df['min_date'].min().year}-{df['max_date'].max().year})"
     )
     if days > 1:

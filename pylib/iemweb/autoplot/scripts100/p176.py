@@ -4,12 +4,16 @@ and low temperatures record beat the previously set record.  Ties are not
 presented on this plot.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"0": "Max Highs / Min Lows", "1": "Min Highs / Max Lows"}
 PDICT2 = {
@@ -19,34 +23,33 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="opt",
-            default="0",
-            options=PDICT,
-            label="Which metric to plot",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="Which metric to plot")
+    ] = "0"
+    w: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Compute records over which time interval"
         ),
-        dict(
-            type="select",
-            name="w",
-            default="daily",
-            options=PDICT2,
-            label="Compute records over which time interval",
-        ),
-    ]
-    return desc
+    ] = "daily"
 
 
-def add_context(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def add_context(ctx: Params):
     """Make the pandas Data Frame please"""
     pgconn, cursor = get_dbconnc("coop")
-    station = ctx["station"]
-    opt = ctx["opt"]
+    station = ctx.station
+    opt = ctx.opt
     cursor.execute(
         "SELECT day, sday, high, low from alldata WHERE station = %s "
         "and high is not null and low is not null ORDER by day ASC",
@@ -55,9 +58,9 @@ def add_context(ctx):
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
     aggint = "%m%d"
-    if ctx["w"] == "monthly":
+    if ctx.w == "monthly":
         aggint = "%m"
-    elif ctx["w"] == "yearly":
+    elif ctx.w == "yearly":
         aggint = "1"
     dates = pd.date_range("2000/01/01", "2000/12/31").strftime(aggint).unique()
     if opt == "0":
@@ -100,13 +103,13 @@ def add_context(ctx):
                     )
     pgconn.close()
     ctx["df"] = pd.DataFrame(rows)
-    ctx["title"] = f"{ctx['_sname']} :: {PDICT2[ctx['w']]} Margin"
+    ctx["title"] = f"{ctx.sname} :: {PDICT2[ctx.w]} Margin"
     ctx["subtitle"] = (
         f"By how much did a new record beat the previous {PDICT[opt]}"
     )
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Do highcharts option"""
     add_context(ctx)
     ctx["df"]["date"] = pd.to_datetime(ctx["df"]["date"])
@@ -124,8 +127,8 @@ def get_highcharts(ctx: dict) -> str:
         .rename(columns=rename)
         .to_json(orient="records", date_format="iso")
     )
-    a = "High" if ctx["opt"] == "0" else "Low"
-    b = "High" if ctx["opt"] == "1" else "Low"
+    a = "High" if ctx.opt == "0" else "Low"
+    b = "High" if ctx.opt == "1" else "Low"
     series = f"""{{
         data: {v},
         color: '#ff0000',
@@ -174,7 +177,7 @@ Highcharts.chart('"""
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
 

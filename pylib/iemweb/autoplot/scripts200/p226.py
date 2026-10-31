@@ -3,7 +3,8 @@ This plot is not meant for interactive use, but a backend for
 CWA plots.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -11,42 +12,47 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import Z_OVERLAY2
 
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 3600, "data": True}
-    desc["defaults"] = {"_r": "t"}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            network="CWSU",
-            default="ZMA",
-            name="cwsu",
-            label="Select CWSU:",
-        ),
-        dict(
-            type="int",
-            default=207,
-            name="num",
-            label="CWA Number:",
-        ),
-        dict(
-            type="datetime",
-            default="2023/02/03 1653",
-            name="issue",
-            label=(
-                "UTC Timestamp of the CWA Issuance "
-                "(or will search backwards < 1 day):"
-            ),
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    cwsu: Annotated[
+        str, NetworkSelectArg(network="CWSU", label="Select CWSU:")
+    ] = "ZMA"
+    num: Annotated[int, IntArg(label="CWA Number:")] = 207
+    issue: Annotated[
+        datetime,
+        DateTimeArg(
+            label="UTC Timestamp of the CWA Issuance "
+            "(or will search backwards < 1 day):",
             min="2015/12/31 0000",
+            default="2023/02/03 1653",
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        cache=3600,
+        data=True,
+        defaults={"_r": "t"},
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    num = ctx["num"]
+    num = ctx.num
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
@@ -57,10 +63,10 @@ def plotter(ctx: dict):
     issue > :sts and issue <= :ets ORDER by issue DESC LIMIT 1"""),
             conn,
             params={
-                "center": ctx["cwsu"],
+                "center": ctx.cwsu,
                 "num": num,
-                "sts": ctx["issue"] - timedelta(hours=24),
-                "ets": ctx["issue"],
+                "sts": ctx.issue - timedelta(hours=24),
+                "ets": ctx.issue,
             },
             index_col=None,
             geom_col="geom",
@@ -74,7 +80,7 @@ def plotter(ctx: dict):
     mp = MapPlot(
         apctx=ctx,
         title=(
-            f"{ctx['cwsu']} Center Weather Advisory (CWA) #{ctx['num']} "
+            f"{ctx.cwsu} Center Weather Advisory (CWA) #{ctx.num} "
             f"till {row['expire']:%Y-%m-%d %H:%M} UTC"
         ),
         subtitle=row["narrative"],

@@ -10,6 +10,7 @@ at 9 AM.  If you want statistics on when various alerts are active, try
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -21,6 +22,14 @@ from pyiem.reference import prodDefinitions
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ensure_prodDefinitions_key_in_label
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.mlib import rectify_wfo
 
 PDICT = {
@@ -40,81 +49,71 @@ LOOKUP = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="tzwhich",
-            default="local",
-            options=PDICT,
-            label="Which timezone to use for summary?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    tzwhich: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Which timezone to use for summary?"),
+    ] = "local"
+    wfo: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    agg: Annotated[
+        str,
+        SelectArg(
+            label="Plot single product or given combination:", options=PDICT2
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
+    ] = "single"
+    pil: Annotated[
+        str,
+        SelectArg(
+            label="Select 3 Character Product Identifier (PIL):",
+            options=ensure_prodDefinitions_key_in_label(),
         ),
-        {
-            "type": "select",
-            "name": "agg",
-            "default": "single",
-            "label": "Plot single product or given combination:",
-            "options": PDICT2,
-        },
-        {
-            "type": "select",
-            "name": "pil",
-            "default": "SVR",
-            "label": "Select 3 Character Product Identifier (PIL):",
-            "options": ensure_prodDefinitions_key_in_label(),
-        },
-        {
-            "type": "year",
-            "min": 1980,
-            "max": date.today().year,
-            "name": "syear",
-            "default": 2002,
-            "label": "Inclusive Start Year for Summary",
-        },
-        {
-            "type": "year",
-            "min": 1980,
-            "max": date.today().year,
-            "name": "eyear",
-            "default": date.today().year,
-            "label": "Inclusive End Year for Summary",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "jet",
-            "label": "Color Ramp",
-        },
+    ] = "SVR"
+    syear: Annotated[
+        int,
+        YearArg(
+            min=1980,
+            max=lambda: date.today().year,
+            label="Inclusive Start Year for Summary",
+        ),
+    ] = 2002
+    eyear: Annotated[
+        int,
+        YearArg(
+            min=1980,
+            max=lambda: date.today().year,
+            label="Inclusive End Year for Summary",
+            default=lambda: date.today().year,
+        ),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp")] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 @with_sqlalchemy_conn("afos")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    wfo = ctx["wfo"]
-    tzname = (
-        "UTC" if ctx["tzwhich"] == "utc" else ctx["_nt"].sts[wfo]["tzname"]
-    )
+    wfo = ctx.wfo
+    tzname = "UTC" if ctx.tzwhich == "utc" else ctx["_nt"].sts[wfo]["tzname"]
 
     params = {
         "source": rectify_wfo(wfo),
-        "sts": date(ctx["syear"], 1, 1),
-        "ets": date(ctx["eyear"], 12, 31),
+        "sts": date(ctx.syear, 1, 1),
+        "ets": date(ctx.eyear, 12, 31),
         "tzname": tzname,
         "pils": LOOKUP.get(
-            ctx["agg"],
+            ctx.agg,
             [
-                ctx["pil"],
+                ctx.pil,
             ],
         ),
     }
@@ -143,9 +142,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     ).reindex(range(24), columns=range(1, 54), fill_value=np.nan)
 
     label = (
-        prodDefinitions[ctx["pil"]]
-        if ctx["agg"] == "single"
-        else PDICT2[ctx["agg"]]
+        prodDefinitions[ctx.pil] if ctx.agg == "single" else PDICT2[ctx.agg]
     )
     title = f"Frequency of NWS {ctx['_nt'].sts[wfo]['name']} issued {label}"
     subtitle = (
@@ -163,7 +160,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         linewidths=0.5,
         ax=ax,
         vmin=1,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         zorder=2,
         square=False,
     )

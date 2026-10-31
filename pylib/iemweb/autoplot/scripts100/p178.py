@@ -21,6 +21,7 @@ of county/zone based FFG guidance found in the FFG text products.
 """
 
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -31,6 +32,16 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import SECTORS_NAME
 from pyiem.util import archive_fetch
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 HOURS = {
     "1": "One Hour",
@@ -50,84 +61,70 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    now = datetime.now(UTC)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (ignored if plotting state)"
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (ignored if plotting state)",
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State: (ignored if plotting wfo)")
+    ] = "IA"
+    hour: Annotated[
+        str, SelectArg(options=HOURS, label="Guidance Period:")
+    ] = "1"
+    ilabel: Annotated[
+        str,
+        SelectArg(
+            options=PDICT3, label="Overlay values / plot counties on map?"
         ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State: (ignored if plotting wfo)",
-        ),
-        dict(
-            type="select",
-            name="hour",
-            default="1",
-            options=HOURS,
-            label="Guidance Period:",
-        ),
-        dict(
-            type="select",
-            name="ilabel",
-            default="yes",
-            options=PDICT3,
-            label="Overlay values / plot counties on map?",
-        ),
-        dict(
-            type="datetime",
-            name="ts",
-            default=now.strftime("%Y/%m/%d %H%M"),
+    ] = "yes"
+    ts: Annotated[
+        datetime,
+        DateTimeArg(
             label="Valid Time (UTC Timezone):",
             min="2003/01/01 0000",
-        ),
-        dict(
-            type="cmap",
-            name="cmap",
-            default="gist_rainbow",
-            label="Color Ramp:",
+            default=lambda: datetime.now(UTC).strftime("%Y/%m/%d %H%M"),
         ),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "gist_rainbow"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    ts = ctx["ts"].replace(tzinfo=ZoneInfo("UTC"))
-    hour = int(ctx["hour"])
-    ilabel = ctx["ilabel"] == "yes"
+    ts = ctx.ts.replace(tzinfo=ZoneInfo("UTC"))
+    hour = int(ctx.hour)
+    ilabel = ctx.ilabel == "yes"
     plot = MapPlot(
         apctx=ctx,
-        sector=ctx["t"],
+        sector=ctx.t,
         continentalcolor="white",
-        state=ctx["state"],
-        cwa=ctx["wfo"],
+        state=ctx.state,
+        cwa=ctx.wfo,
         title=(
             f"NWS RFC {hour} Hour Flash Flood Guidance "
             f"on {ts:%-d %b %Y %H} UTC"
         ),
         subtitle=(
-            f"Estimated amount of {HOURS[ctx['hour']]} Rainfall "
+            f"Estimated amount of {HOURS[ctx.hour]} Rainfall "
             "needed for non-urban Flash Flooding to commence"
         ),
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     bins = [
         0.01,
         0.6,

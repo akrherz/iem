@@ -9,6 +9,7 @@ IEM.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -16,41 +17,46 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import MonthArg, PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="month",
-            name="month",
-            default=date.today().month,
-            label="Select Month:",
-        ),
-        dict(
-            type="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: date.today().month),
+    ]
+    syear: Annotated[
+        int,
+        YearArg(
             min=1850,
             label="Minimum Inclusive Year (if data exists) for IEM Average",
-            name="syear",
-            default=1850,
         ),
-        dict(
-            type="year",
+    ] = 1850
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1850,
             label="Maximum Inclusive Year (if data exists) for IEM Average",
-            name="eyear",
-            default=date.today().year,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
+    station = ctx.station
+    month = ctx.month
 
     ncei91 = ctx["_nt"].sts[station]["ncei91"]
     ncei81 = ctx["_nt"].sts[station]["ncdc81"]
@@ -97,8 +103,8 @@ def plotter(ctx: dict):
             params={
                 "station": station,
                 "month": month,
-                "syear": ctx["syear"],
-                "eyear": ctx["eyear"],
+                "syear": ctx.syear,
+                "eyear": ctx.eyear,
                 "ncei91": ctx["_nt"].sts[station]["ncei91"],
                 "ncei81": ctx["_nt"].sts[station]["ncdc81"],
                 "climate_site": ctx["_nt"].sts[station]["climate_site"],
@@ -109,7 +115,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found.")
 
     title = (
-        f"{ctx['_sname']} :: Daily "
+        f"{ctx.sname} :: Daily "
         f"Climate Comparison for {calendar.month_name[month]}"
     )
     fig = figure(

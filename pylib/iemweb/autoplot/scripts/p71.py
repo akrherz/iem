@@ -10,6 +10,7 @@ is computed by vector averaging of the wind speed and direction reports.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import pandas as pd
@@ -17,6 +18,15 @@ from matplotlib.axes import Axes
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure
 from pyiem.util import convert_value, drct2text
+
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    SidArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "KT": "knots",
@@ -32,38 +42,29 @@ XREF_UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="sid",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=datetime.now().year,
-            label="Select Year:",
-        ),
-        dict(
-            type="month",
-            name="month",
-            default=datetime.now().month,
-            label="Select Month:",
-        ),
-        dict(
-            type="select",
-            name="units",
-            default="MPH",
-            label="Wind Speed Units:",
-            options=PDICT,
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, SidArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    year: Annotated[
+        int, YearArg(label="Select Year:", default=lambda: datetime.now().year)
     ]
-    return desc
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: datetime.now().month),
+    ]
+    units: Annotated[
+        str, SelectArg(label="Wind Speed Units:", options=PDICT)
+    ] = "MPH"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def pprint(value: float) -> str:
@@ -87,12 +88,12 @@ def arrow(ax: Axes, x: float, y: float, drct: float):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    plot_units = ctx["units"]
-    year = ctx["year"]
-    month = ctx["month"]
+    station = ctx.zstation
+    plot_units = ctx.units
+    year = ctx.year
+    month = ctx.month
     sts = date(year, month, 1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
@@ -109,7 +110,7 @@ def plotter(ctx: dict):
             params={"iemid": ctx["_nt"].sts[station]["iemid"], "month": month},
             parse_dates=["day"],
         )
-    title = f"{ctx['_sname']}\n{sts:%b %Y} Daily Wind Speed and Direction"
+    title = f"{ctx.sname}\n{sts:%b %Y} Daily Wind Speed and Direction"
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes((0.1, 0.2, 0.8, 0.7))
 

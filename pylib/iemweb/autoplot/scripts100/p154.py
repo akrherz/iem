@@ -6,6 +6,7 @@ to be obtained.
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -14,6 +15,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
 
+from iemweb.autoplot.description import (
+    HourArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {"avg_tmpf": "Average Temperature"}
@@ -40,51 +48,40 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            options=MDICT,
-            label="Select Month/Season/All",
-        ),
-        dict(
-            type="hour",
-            name="hour",
-            default=20,
-            label="At Time (Local Timezone of Station):",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT,
-            default="avg_tmpf",
-            label="Which Variable to Plot",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    month: Annotated[
+        str, SelectArg(options=MDICT, label="Select Month/Season/All")
+    ] = "all"
+    hour: Annotated[
+        int, HourArg(label="At Time (Local Timezone of Station):")
+    ] = 20
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which Variable to Plot")
+    ] = "avg_tmpf"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     font0 = FontProperties()
     font0.set_family("monospace")
     font0.set_size(16)
 
-    varname = ctx["var"]
-    month = ctx["month"]
-    station = ctx["zstation"]
-    hour = ctx["hour"]
+    varname = ctx.var
+    month = ctx.month
+    station = ctx.zstation
+    hour = ctx.hour
     months = month2months(month)
 
     with get_sqlalchemy_conn("asos") as conn:
@@ -122,7 +119,7 @@ def plotter(ctx: dict):
     df2 = df[df["cnt"] > minfreq]
     lts = datetime(2000, 1, 1, int(hour), 0)
     title = (
-        f"{ctx['_sname']}:: {lts:%-I %p} Local "
+        f"{ctx.sname}:: {lts:%-I %p} Local "
         f"({df2.index.min()}-{df2.index.max()})"
     )
     subtitle = f"{PDICT[varname]} [{MDICT[month]}]"

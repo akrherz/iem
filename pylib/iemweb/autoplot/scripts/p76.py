@@ -16,6 +16,7 @@ to the same value.</p>
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import metpy.calc as mcalc
 import numpy as np
@@ -28,6 +29,14 @@ from pyiem.plot import figure_axes
 from pyiem.util import utc
 from scipy import stats
 
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -76,69 +85,52 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="DSM",
-            label="Select Station",
-            network="IA_ASOS",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(label="Select Station", network="IA_ASOS")
+    ] = "DSM"
+    season: Annotated[
+        str, SelectArg(label="Select Time Period:", options=MDICT)
+    ] = "winter"
+    varname: Annotated[
+        str, SelectArg(label="Metric to Plot:", options=PDICT)
+    ] = "dwpf"
+    agg: Annotated[
+        str,
+        SelectArg(
+            options=PDICT3, label="Daily aggregate to use in yearly statistics"
         ),
-        dict(
-            type="select",
-            name="season",
-            default="winter",
-            label="Select Time Period:",
-            options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="varname",
-            default="dwpf",
-            label="Metric to Plot:",
-            options=PDICT,
-        ),
-        {
-            "type": "select",
-            "options": PDICT3,
-            "default": "mean",
-            "label": "Daily aggregate to use in yearly statistics",
-            "name": "agg",
-        },
-        dict(
-            type="year", name="year", default=1893, label="Start Year of Plot"
-        ),
-        dict(
-            type="select",
-            name="w",
-            default="violin",
-            label="Select plot type",
-            options=PDICT2,
-        ),
-        dict(
-            type="text",
-            name="hours",
-            optional=True,
+    ] = "mean"
+    year: Annotated[int, YearArg(label="Start Year of Plot")] = 1893
+    w: Annotated[str, SelectArg(label="Select plot type", options=PDICT2)] = (
+        "violin"
+    )
+    hours: Annotated[
+        str | None,
+        TextArg(
+            label="Inclusive Local Hours (24-hour clock) "
+            "to Limit Analysis (0 thru 23) (optional)",
             default="0-23",
-            label=(
-                "Inclusive Local Hours (24-hour clock) "
-                "to Limit Analysis (0 thru 23) (optional)"
-            ),
         ),
-    ]
-    return desc
+    ] = None
 
 
-def run_calcs(df, ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def run_calcs(df, ctx: Params):
     """Do our maths."""
     # Convert sea level pressure to station pressure
     df["pressure"] = (
         mcalc.add_height_to_pressure(
             df["slp"].values * units("millibars"),
-            ctx["_nt"].sts[ctx["station"]]["elevation"] * units("m"),
+            ctx["_nt"].sts[ctx.station]["elevation"] * units("m"),
         )
         .to(units("millibar"))
         .m
@@ -176,28 +168,28 @@ def run_calcs(df, ctx):
     return df
 
 
-def get_data(ctx, startyear):
+def get_data(ctx: Params, startyear):
     """Get data"""
     today = datetime.now()
     lastyear = today.year
     deltadays = 0
-    months = month2months(ctx["season"])
-    if ctx["season"] == "water_year":
+    months = month2months(ctx.season)
+    if ctx.season == "water_year":
         deltadays = 92
         lastyear += 1
-    elif ctx["season"] == "spring":
+    elif ctx.season == "spring":
         if today.month > 5:
             lastyear += 1
-    elif ctx["season"] == "spring2":
+    elif ctx.season == "spring2":
         if today.month > 6:
             lastyear += 1
-    elif ctx["season"] == "fall":
+    elif ctx.season == "fall":
         if today.month > 11:
             lastyear += 1
-    elif ctx["season"] == "summer":
+    elif ctx.season == "summer":
         if today.month > 8:
             lastyear += 1
-    elif ctx["season"] == "winter":
+    elif ctx.season == "winter":
         deltadays = 33
         if today.month > 2:
             lastyear += 1
@@ -206,9 +198,9 @@ def get_data(ctx, startyear):
     if startyear >= lastyear:
         raise NoDataFound("Start year should be less than end year.")
     hours = list(range(24))
-    if ctx.get("hours"):
+    if ctx.hours:
         try:
-            tokens = [int(i.strip()) for i in ctx["hours"].split("-")]
+            tokens = [int(i.strip()) for i in ctx.hours.split("-")]
             hours = list(range(max(0, tokens[0]), min(23, tokens[1] + 1)))
         except ValueError as exp:
             raise Exception("malformed hour limiter, sorry.") from exp
@@ -238,8 +230,8 @@ def get_data(ctx, startyear):
             ),
             conn,
             params={
-                "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
-                "station": ctx["station"],
+                "tzname": ctx["_nt"].sts[ctx.station]["tzname"],
+                "station": ctx.station,
                 "months": months,
                 "hours": hours,
                 "days": deltadays,
@@ -252,12 +244,12 @@ def get_data(ctx, startyear):
     return df
 
 
-def make_plot(df: pd.DataFrame, ctx: dict):
+def make_plot(df: pd.DataFrame, ctx: Params):
     """Do the plotting"""
 
     means = (
         df.groupby("date")
-        .agg(ctx["agg"], numeric_only=True)
+        .agg(ctx.agg, numeric_only=True)
         .reset_index()
         .groupby("year")
         .mean(numeric_only=True)
@@ -271,16 +263,16 @@ def make_plot(df: pd.DataFrame, ctx: dict):
     if means.empty:
         raise NoDataFound("No data found.")
 
-    season = ctx["season"]
-    varname = ctx["varname"]
+    season = ctx.season
+    varname = ctx.varname
     h_slope, intercept, r_value, _, _ = stats.linregress(
         means.index.values, means[varname].values
     )
     avgv = means[varname].mean()
-    tt = "Distribution" if ctx["w"] == "violin" else "Averages"
+    tt = "Distribution" if ctx.w == "violin" else "Averages"
     title = (
-        f"{ctx['_sname']} ({means.index.min():.0f}-{means.index.max():.0f})\n"
-        f"{PDICT3[ctx['agg']]} Daily {PDICT[varname]} {tt} [{MDICT[season]}] "
+        f"{ctx.sname} ({means.index.min():.0f}-{means.index.max():.0f})\n"
+        f"{PDICT3[ctx.agg]} Daily {PDICT[varname]} {tt} [{MDICT[season]}] "
         f"{ctx.get('hour_limiter', '')} Avg: {avgv:.1f}, "
         f"slope: {(h_slope * 100.0):.2f} {UNITS[varname]}/century, "
         f"R$^2$={(r_value**2):.2f}"
@@ -291,7 +283,7 @@ def make_plot(df: pd.DataFrame, ctx: dict):
     ar = ["tmpf", "relh", "dwpf", "feel"]
     colorabove = "seagreen" if varname in ar else "lightsalmon"
     colorbelow = "lightsalmon" if varname in ar else "seagreen"
-    if ctx["w"] == "bar":
+    if ctx.w == "bar":
         cols = ax.bar(
             means.index.values,
             means[varname].values,
@@ -310,7 +302,7 @@ def make_plot(df: pd.DataFrame, ctx: dict):
     else:
         data = (
             df.groupby("date")
-            .agg(ctx["agg"], numeric_only=True)
+            .agg(ctx.agg, numeric_only=True)
             .reset_index()
             .groupby("year")[varname]
             .apply(list)
@@ -350,9 +342,9 @@ def make_plot(df: pd.DataFrame, ctx: dict):
     return fig, means
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    startyear = ctx["year"]
+    startyear = ctx.year
 
     df = get_data(ctx, startyear)
     df = run_calcs(df, ctx)

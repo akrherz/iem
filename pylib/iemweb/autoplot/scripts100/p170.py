@@ -25,11 +25,20 @@ hopefully allow more accurate statistics.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "RA": "All Rain Reports (RA)",
@@ -54,47 +63,40 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="year",
-            name="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    year: Annotated[
+        int,
+        YearArg(
             label="Year to Highlight:",
-            default=date.today().year,
             min=1973,
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="FG",
-            label="Present Weather Option:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="w",
-            default="day",
-            label="How to aggregate the data:",
-            options=PDICT2,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    var: Annotated[
+        str, SelectArg(label="Present Weather Option:", options=PDICT)
+    ] = "FG"
+    w: Annotated[
+        str, SelectArg(label="How to aggregate the data:", options=PDICT2)
+    ] = "day"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    pweather = ctx["var"]
+    station = ctx.zstation
+    year = ctx.year
+    pweather = ctx.var
     if pweather == "PSN":
         pweather = "+SN"
         PDICT["+SN"] = PDICT["PSN"]
@@ -112,7 +114,7 @@ def plotter(ctx: dict):
             "'-TS'::varchar, '+TSRA'::varchar, '+TSSN'::varchar,"
             "'-TSSN'::varchar, '-TSDZ'::varchar] && wxcodes"
         )
-    trunc = "day" if ctx["w"] == "day" else "hour"
+    trunc = "day" if ctx.w == "day" else "hour"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             f"""
@@ -133,11 +135,11 @@ def plotter(ctx: dict):
 
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
-    t1 = "Calendar Dates" if ctx["w"] == "day" else "Hourly Observations"
+    t1 = "Calendar Dates" if ctx.w == "day" else "Hourly Observations"
     t2 = pweather if pweather != "1" else "TS"
-    t3 = " with at least one hourly report" if ctx["w"] == "day" else ""
+    t3 = " with at least one hourly report" if ctx.w == "day" else ""
     title = (
-        f"{ctx['_sname']}:: {PDICT[pweather]} "
+        f"{ctx.sname}:: {PDICT[pweather]} "
         "Events\n"
         f"({syear}-{date.today().year}) Distinct {t1} with "
         f"'{t2}' Reported{t3}"
@@ -166,7 +168,7 @@ def plotter(ctx: dict):
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    t1 = "Days" if ctx["w"] == "day" else "Hours"
+    t1 = "Days" if ctx.w == "day" else "Hours"
     ax.set_ylabel(f"{t1} Per Month")
     ax.set_ylim(top=ax.get_ylim()[1] + 2)
     ax.legend(loc="best")

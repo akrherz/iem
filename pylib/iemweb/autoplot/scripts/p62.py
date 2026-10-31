@@ -7,6 +7,7 @@ database.
 
 import copy
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -17,43 +18,48 @@ from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today()
-    lyear = today.year if today.month > 8 else (today.year - 1)
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="syear",
-            default=1893,
-            min=1893,
-            label="Start Year (inclusive):",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=lyear,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    syear: Annotated[
+        int, YearArg(min=1893, label="Start Year (inclusive):")
+    ] = 1893
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1893,
             label="End Year (inclusive):",
+            default=lambda: (
+                datetime.today().year
+                if datetime.today().month > 8
+                else datetime.today().year - 1
+            ),
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadatab.")
-    syear = max([ctx["syear"], ab.year])
-    eyear = ctx["eyear"]
+    syear = max([ctx.syear, ab.year])
+    eyear = ctx.eyear
     sts = date(syear, 11, 1)
     ets = date(eyear + 1, 6, 1)
 
@@ -82,7 +88,7 @@ def plotter(ctx: dict):
 
     obs.mask = np.where(obs < 0, True, False)
 
-    title = f"{ctx['_sname']}\nDaily Snow Depth ({minyear}-{eyear}) [inches]"
+    title = f"{ctx.sname}\nDaily Snow Depth ({minyear}-{eyear}) [inches]"
     fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes((0.1, 0.1, 0.93, 0.8))
     ax.set_xticks((0, 29, 60, 91, 120, 151, 181))

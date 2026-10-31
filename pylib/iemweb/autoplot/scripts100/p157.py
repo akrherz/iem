@@ -10,13 +10,24 @@ values, as the smoothing is applied to the climatology and not the individual
 observations.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.axes import Axes
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"above": "Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -60,82 +71,61 @@ def xlabel_magic(ax: Axes, sday, eday):
     ax.set_xticklabels(xticklabels)
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="DSM",
-            label="Select Station",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(label="Select Station", network="IA_ASOS")
+    ] = "DSM"
+    year: Annotated[
+        int,
+        YearArg(
             label="Plot this year's observations:",
+            default=lambda: (datetime.today() - timedelta(days=1)).year,
         ),
-        {
-            "type": "year",
-            "name": "y2",
-            "default": today.year - 1,
-            "label": "Optionally, also plot this year's observations:",
-            "optional": True,
-        },
-        dict(
-            type="select",
-            name="var",
-            options=PDICT2,
-            default="max_rh",
-            label="Which Variable",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            options=PDICT,
-            default="above",
-            label="Threshold Direction",
-        ),
-        dict(
-            type="int",
-            name="thres",
-            default=95,
-            label="Threshold [%,°F] for Frequency",
-        ),
-        {
-            "type": "int",
-            "name": "smooth",
-            "default": 7,
-            "label": "Smoothing Window Size (days), 1 disables, max 60",
-        },
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": "0101",
-            "label": "Start Day of the Year for Plotting",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": "1231",
-            "label": "End Day of the Year for Plotting",
-        },
     ]
-    return desc
+    y2: Annotated[
+        int | None,
+        YearArg(
+            label="Optionally, also plot this year's observations:",
+            default=lambda: (datetime.today() - timedelta(days=1)).year - 1,
+        ),
+    ] = None
+    var: Annotated[str, SelectArg(options=PDICT2, label="Which Variable")] = (
+        "max_rh"
+    )
+    dir: Annotated[
+        str, SelectArg(options=PDICT, label="Threshold Direction")
+    ] = "above"
+    thres: Annotated[int, IntArg(label="Threshold [%,°F] for Frequency")] = 95
+    smooth: Annotated[
+        int, IntArg(label="Smoothing Window Size (days), 1 disables, max 60")
+    ] = 7
+    sday: Annotated[
+        date,
+        SDayArg(label="Start Day of the Year for Plotting", default="0101"),
+    ]
+    eday: Annotated[
+        date, SDayArg(label="End Day of the Year for Plotting", default="1231")
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["thres"]
-    mydir = ctx["dir"]
-    varname = ctx["var"]
-    smooth = ctx["smooth"]
-    sday = pd.to_datetime(ctx["sday"])
-    eday = pd.to_datetime(ctx["eday"])
+    station = ctx.station
+    threshold = ctx.thres
+    mydir = ctx.dir
+    varname = ctx.var
+    smooth = ctx.smooth
+    sday = pd.to_datetime(ctx.sday)
+    eday = pd.to_datetime(ctx.eday)
     if sday >= eday:
         raise ValueError("Plots crossing 1 Jan are not supported, yet")
     if smooth < 1 or smooth > 60:
@@ -181,7 +171,7 @@ def plotter(ctx: dict):
     if smooth > 1:
         ttitle = f" {smooth} Day Centered Smooth Applied"
     title = (
-        f"{ctx['_sname']} ({obsdf.index[0].year}-{obsdf.index[-1].year})\n"
+        f"{ctx.sname} ({obsdf.index[0].year}-{obsdf.index[-1].year})\n"
         f"{PDICT2[varname]} Climatology {ttitle}"
     )
     # Apply sday and eday filter to both dataframes
@@ -207,7 +197,7 @@ def plotter(ctx: dict):
         label="25-75 Percentile",
     )
     ax.plot(bydate.index, bydate["mean"], color="k", lw=2, label="Mean")
-    years = [ctx["year"], ctx.get("y2")]
+    years = [ctx.year, ctx.y2]
     for idx, year in enumerate(years):
         if year is None:
             continue

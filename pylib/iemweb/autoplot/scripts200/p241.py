@@ -11,7 +11,8 @@ low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -30,6 +31,15 @@ from pyiem.util import (
     utc,
 )
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "max": "Maximum",
     "min": "Minimum",
@@ -41,57 +51,47 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    sts = utc() - timedelta(hours=6)  # Save some CI time
-    ets = utc() - timedelta(hours=2)
-    desc["arguments"] = [
-        {
-            "type": "datetime",
-            "name": "sts",
-            "default": sts.strftime("%Y/%m/%d %H00"),
-            "label": "Start Timestamp (UTC):",
-            "min": "1986/01/01 0000",
-        },
-        {
-            "type": "datetime",
-            "name": "ets",
-            "default": ets.strftime("%Y/%m/%d %H00"),
-            "label": (
-                "End Timestamp [inclusive] (UTC), "
-                "interval must be less than 4 days"
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Start Timestamp (UTC):",
+            min="1986/01/01 0000",
+            default=lambda: (utc() - timedelta(hours=6)).strftime(
+                "%Y/%m/%d %H00"
             ),
-            "min": "1986/01/01 0000",
-        },
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "min",
-            "name": "w",
-            "label": "Which statistic to compute",
-        },
-        {
-            "type": "csector",
-            "name": "csector",
-            "default": "IA",
-            "label": "Select state/sector",
-        },
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "user",
-            "label": "Plotting mode (user defined color-ramp or freezing)",
-            "name": "mode",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "gnuplot2",
-            "label": "Color Ramp:",
-        },
+        ),
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Timestamp [inclusive] (UTC), "
+            "interval must be less than 4 days",
+            min="1986/01/01 0000",
+            default=lambda: (utc() - timedelta(hours=2)).strftime(
+                "%Y/%m/%d %H00"
+            ),
+        ),
+    ]
+    w: Annotated[
+        str, SelectArg(options=PDICT, label="Which statistic to compute")
+    ] = "min"
+    csector: Annotated[str, CSectorArg(label="Select state/sector")] = "IA"
+    mode: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="Plotting mode (user defined color-ramp or freezing)",
+        ),
+    ] = "user"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "gnuplot2"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
 
 
 def add_gridnav(res: dict, grb: pygrib.gribmessage):
@@ -112,12 +112,12 @@ def add_gridnav(res: dict, grb: pygrib.gribmessage):
     )
 
 
-def get_data(ctx):
+def get_data(ctx: Params):
     """Do the computation!"""
-    if ctx["csector"] in ["AK", "HI", "PR"]:
+    if ctx.csector in ["AK", "HI", "PR"]:
         raise NoDataFound("Sector not available for this plot.")
-    sts = ctx["sts"]
-    ets = ctx["ets"]
+    sts = ctx.sts
+    ets = ctx.ets
     ppath = (
         f"{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
         f"rtma2p5_ru.t{sts:%H%M}z.2dvaranl_ndfd.grb2"
@@ -127,7 +127,7 @@ def get_data(ctx):
     lons = None
     lats = None
     vals = None
-    func = np.minimum if ctx["w"] == "min" else np.maximum
+    func = np.minimum if ctx.w == "min" else np.maximum
     missing_count = 0
     total = 0
     mindt = None
@@ -136,7 +136,7 @@ def get_data(ctx):
         "affine": None,
         "crs": None,
     }
-    if ctx["w"] == "delta":
+    if ctx.w == "delta":
         mydir = f"{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
         ppath = mydir + (
             f"rtma2p5_ru.t{sts:%H%M}z.2dvaranl_ndfd.grb2"
@@ -219,22 +219,22 @@ def get_data(ctx):
     }
 
 
-def rectify_dates(ctx: dict):
+def rectify_dates(ctx: Params):
     """Work out some quirks."""
-    ctx["sts"] = ctx["sts"].replace(tzinfo=UTC)
-    ctx["ets"] = ctx["ets"].replace(tzinfo=UTC)
-    if (ctx["ets"] - ctx["sts"]) > timedelta(days=4):
-        ctx["ets"] = ctx["sts"] + timedelta(days=4)
+    ctx.sts = ctx.sts.replace(tzinfo=UTC)
+    ctx.ets = ctx.ets.replace(tzinfo=UTC)
+    if (ctx.ets - ctx.sts) > timedelta(days=4):
+        ctx.ets = ctx.sts + timedelta(days=4)
 
 
-def get_raster(ctx: dict):
+def get_raster(ctx: Params):
     """Generate what we need for a raster."""
     rectify_dates(ctx)
     res = get_data(ctx)
     return np.flipud(res["vals"]), res["affine"], res["crs"].crs
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     rectify_dates(ctx)
     res = get_data(ctx)
@@ -245,7 +245,7 @@ def plotter(ctx: dict):
         f"found between {localmindt:%Y-%m-%d %-I:%M %p} and "
         f"{localmaxdt:%Y-%m-%d %-I:%M %p}"
     )
-    if ctx["w"] == "delta":
+    if ctx.w == "delta":
         subtitle = (
             f"Change in Temperature from {localmindt:%Y-%m-%d %-I:%M %p} to "
             f"{localmaxdt:%Y-%m-%d %-I:%M %p}"
@@ -253,14 +253,14 @@ def plotter(ctx: dict):
     mp = MapPlot(
         apctx=ctx,
         title=(
-            f"NCEP RTMA{'-RU' if res['use_ru'] else ''} {PDICT[ctx['w']]} "
+            f"NCEP RTMA{'-RU' if res['use_ru'] else ''} {PDICT[ctx.w]} "
             "2m Air Temperature"
         ),
         subtitle=subtitle,
         stateborderwidth=3,
         nocaption=True,
     )
-    if ctx["mode"] == "fz" and ctx["w"] != "delta":
+    if ctx.mode == "fz" and ctx.w != "delta":
         # https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=8
         # <26, 26-28, 28-30, 30-32, 32-34, 34-36, >36
         colors = (
@@ -284,7 +284,7 @@ def plotter(ctx: dict):
         domain = res["vals"][y1:y2, x1:x2].filled(np.nan)
         ptile = np.nanpercentile(domain, [5, 95])
         bins = pretty_bins(ptile[0], ptile[1])
-        cmap = ctx["cmap"]
+        cmap = ctx.cmap
     mp.pcolormesh(
         res["lons"],
         res["lats"],
@@ -296,7 +296,7 @@ def plotter(ctx: dict):
         spacing="proportional",
         extend="both",
     )
-    if len(ctx["csector"]) == 2:
+    if len(ctx.csector) == 2:
         mp.drawcounties()
 
     return mp.fig

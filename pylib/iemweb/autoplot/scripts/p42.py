@@ -17,6 +17,7 @@ generally wish to see the top 10 longest streaks.</p>
 
 import operator
 from datetime import UTC, date, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -26,6 +27,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -62,66 +71,50 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    year_range = f"1900-{date.today().year}"
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="m",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-            oldname="month",
-        ),
-        dict(
-            type="text",
-            name="yrange",
-            default=year_range,
-            optional=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    m: Annotated[
+        str, SelectArg(label="Month Limiter", options=MDICT, oldname="month")
+    ] = "all"
+    yrange: Annotated[
+        str | None,
+        TextArg(
             label="Inclusive Range of Years to Include (optional)",
             pattern=r"^\d{4}\s*-\s*\d{4}$",
+            default=lambda: f"1900-{date.today().year}",
         ),
-        dict(
-            type="select",
-            name="dir",
-            default="above",
-            label="Threshold Direction:",
-            options=PDICT,
+    ] = None
+    dir: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=PDICT)
+    ] = "above"
+    var: Annotated[str, SelectArg(label="Which variable", options=PDICT2)] = (
+        "tmpf"
+    )
+    threshold: Annotated[
+        float,
+        FloatArg(
+            label="Temperature (F) / Pressure (mb) / Vis (mi) Threshold:"
         ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpf",
-            label="Which variable",
-            options=PDICT2,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=50,
-            label="Temperature (F) / Pressure (mb) / Vis (mi) Threshold:",
-        ),
-        dict(
-            optional=True,
-            type="float",
-            name="t2",
+    ] = 50
+    t2: Annotated[
+        float | None,
+        FloatArg(
+            label="Secondary Temperature (F) / Pressure (mb) / Vis (mi) "
+            "Threshold (for range queries)",
             default=60,
-            label=(
-                "Secondary Temperature (F) / Pressure (mb) / Vis (mi) "
-                "Threshold (for range queries)"
-            ),
         ),
-    ]
-    return desc
+    ] = None
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
 
 
 def plot(ax, xbase, valid: list, tmpf, lines: list, tzinfo) -> bool:
@@ -226,13 +219,13 @@ def compute_xlabels(ax, xbase):
 
 
 @with_sqlalchemy_conn("asos")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["zstation"]
-    threshold = ctx["threshold"]
-    mydir = ctx["dir"]
-    varname = ctx["var"]
-    month = ctx["m"]
+    station = ctx.zstation
+    threshold = ctx.threshold
+    mydir = ctx.dir
+    varname = ctx.var
+    month = ctx.m
 
     months = month2months(month)
 
@@ -250,7 +243,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     year_limiter = ""
     y1, y2 = None, None
     if "yrange" in ctx:
-        y1, y2 = ctx["yrange"].split("-")
+        y1, y2 = ctx.yrange.split("-")
         year_limiter = " and valid >= :yr1 and valid < :yr2 "
         params["yr1"] = date(int(y1), 1, 1)
         params["yr2"] = date(int(y2) + 1, 1, 1)
@@ -277,7 +270,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     title = (
         f"{y1 if y1 is not None else ab.year}-"
         f"{y2 if y2 is not None else datetime.now().year} "
-        f"{ctx['_sname']}"
+        f"{ctx.sname}"
     )
 
     valids = []
@@ -286,13 +279,13 @@ def plotter(ctx: dict, conn: Connection | None = None):
     # Figure out bounds check values
     lower = threshold
     upper = 9999
-    if ctx.get("t2") is None:
+    if ctx.t2 is None:
         if mydir in ["below", "aob"]:
             lower = -9999
             upper = threshold
         label = f"{mydir} {threshold}"
     else:
-        upper = ctx["t2"]
+        upper = ctx.t2
         if mydir in ["below", "aob"]:
             lower, upper = upper, lower
         label = (

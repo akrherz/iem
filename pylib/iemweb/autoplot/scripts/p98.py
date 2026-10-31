@@ -5,6 +5,7 @@ number labeled above each bar is the actual number of years.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "precip": "Daily Precipitation",
@@ -25,45 +33,36 @@ PDICT = {
 PDICT2 = {"above": "At or Above Threshold", "below": "Below Threshold"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(type="month", name="month", default=9, label="Which Month:"),
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which Variable:",
-            options=PDICT,
-        ),
-        dict(
-            type="text",
-            name="thres",
-            default="90",
-            label="Threshold (F or inch):",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="above",
-            label="Threshold Direction:",
-            options=PDICT2,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[int, MonthArg(label="Which Month:")] = 9
+    var: Annotated[str, SelectArg(label="Which Variable:", options=PDICT)] = (
+        "high"
+    )
+    thres: Annotated[str, TextArg(label="Threshold (F or inch):")] = "90"
+    dir: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=PDICT2)
+    ] = "above"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
-    month = ctx["month"]
-    threshold = float(ctx["thres"])
+    station = ctx.station
+    varname = ctx.var
+    month = ctx.month
+    threshold = float(ctx.thres)
     if PDICT.get(varname) is None:
         raise NoDataFound("No Data Found.")
-    drct = ctx["dir"]
+    drct = ctx.dir
     if PDICT2.get(drct) is None:
         raise NoDataFound("No Data Found.")
     operator = ">=" if drct == "above" else "<"
@@ -92,7 +91,7 @@ def plotter(ctx: dict):
 
     vv = df["hit"].sum() / float(df["total"].sum()) * len(df.index)
     title = (
-        f"{ctx['_sname']} :: {PDICT.get(varname)} {PDICT2.get(drct)} "
+        f"{ctx.sname} :: {PDICT.get(varname)} {PDICT2.get(drct)} "
         f"{threshold}\n"
         f"during {calendar.month_name[month]} "
         f"(Avg: {vv:.2f} days/year)"

@@ -6,6 +6,7 @@ service.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.patches import Rectangle
@@ -13,6 +14,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    DateArg,
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.autoplot.scripts200.p200 import ISSUANCE
 from iemweb.autoplot.scripts200.p220 import COLORS
 from iemweb.json.outlook_progression import dowork
@@ -29,39 +37,29 @@ LABELS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    now = utc()
-    desc["arguments"] = [
-        {
-            "type": "date",
-            "name": "valid",
-            "default": now.strftime("%Y/%m/%d"),
-            "label": "Date:",
-            "min": "1990/01/01",
-        },
-        {
-            "type": "select",
-            "name": "outlook_type",
-            "default": "C",
-            "label": "Outlook Type:",
-            "options": PDICT,
-        },
-        {
-            "type": "float",
-            "name": "lat",
-            "default": 42.0,
-            "label": "Enter Latitude (deg N):",
-        },
-        {
-            "type": "float",
-            "name": "lon",
-            "default": -95.0,
-            "label": "Enter Longitude (deg E):",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    valid: Annotated[
+        date,
+        DateArg(
+            label="Date:",
+            min="1990/01/01",
+            default=lambda: utc().strftime("%Y/%m/%d"),
+        ),
     ]
-    return desc
+    outlook_type: Annotated[
+        str, SelectArg(label="Outlook Type:", options=PDICT)
+    ] = "C"
+    lat: Annotated[float, FloatArg(label="Enter Latitude (deg N):")] = 42.0
+    lon: Annotated[float, FloatArg(label="Enter Longitude (deg E):")] = -95.0
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def compute_slots(outlook_type: str, valid: date) -> list:
@@ -77,23 +75,23 @@ def compute_slots(outlook_type: str, valid: date) -> list:
     return slots
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     outlooks = dowork(
-        ctx["outlook_type"],
-        ctx["valid"],
-        ctx["lon"],
-        ctx["lat"],
+        ctx.outlook_type,
+        ctx.valid,
+        ctx.lon,
+        ctx.lat,
     )
     if outlooks.empty:
         raise NoDataFound("No outlooks found for this point and date.")
 
     outlooks["product_issue"] = pd.to_datetime(outlooks["product_issue"])
     fig = figure(
-        title=(f"{LABELS[ctx['outlook_type']]} Progression"),
+        title=(f"{LABELS[ctx.outlook_type]} Progression"),
         subtitle=(
-            f"Lon: {ctx['lon']:.02f}E Lat: {ctx['lat']:.02f}N for "
-            f"{ctx['valid']:%-d %B %Y}"
+            f"Lon: {ctx.lon:.02f}E Lat: {ctx.lat:.02f}N for "
+            f"{ctx.valid:%-d %B %Y}"
         ),
     )
     ax = fig.add_axes((0.2, 0.1, 0.75, 0.8))
@@ -107,14 +105,14 @@ def plotter(ctx: dict):
     }
     ylabels = []
     ylocator = {}
-    slots = compute_slots(ctx["outlook_type"], ctx["valid"])
+    slots = compute_slots(ctx.outlook_type, ctx.valid)
     cigs = ["SIGN", "CIG1", "CIG2", "CIG3"]
     cig_hatching = {"SIGN": "/", "CIG1": "/", "CIG2": "\\", "CIG3": "x"}
     for (pissue, cat), df2 in outlooks.groupby(["product_issue", "category"]):
         row0 = df2[~df2["threshold"].isin(cigs)].iloc[0]
         if row0["cycle"] != -1:
             # Consume up slots as necessary
-            slotkey = f"{row0['day']}.{ctx['outlook_type']}.{row0['cycle']}"
+            slotkey = f"{row0['day']}.{ctx.outlook_type}.{row0['cycle']}"
             if slotkey in slots:
                 removeme = []
                 for index in range(slots.index(slotkey)):

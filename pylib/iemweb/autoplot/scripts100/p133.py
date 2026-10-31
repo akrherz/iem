@@ -5,7 +5,9 @@ season. The year convention is from July 1st through June 30th with the year
 value representing the starting year of the season.
 """
 
+import datetime as dt
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -13,35 +15,43 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import DateArg, PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="date",
-            name="date",
-            default="2015/12/25",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    date: Annotated[
+        dt.date,
+        DateArg(
             min="2015/01/01",
             label="Split Season by Date: (ignore the year)",
+            default="2015/12/25",
         ),
-        {
-            "type": "year",
-            "name": "year",
-            "default": date.today().year,
-            "label": "Highlight given year on the chart:",
-            "min": 1850,
-        },
     ]
-    return desc
+    year: Annotated[
+        int,
+        YearArg(
+            label="Highlight given year on the chart:",
+            min=1850,
+            default=lambda: date.today().year,
+        ),
+    ]
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_data(ctx: Params):
     """Get the data"""
-    station = ctx["station"]
-    dt = ctx["date"]
+    station = ctx.station
+    dt = ctx.date
     jul1 = date(dt.year if dt.month > 6 else dt.year - 1, 7, 1)
     offset = int((dt - jul1).days)
     with get_sqlalchemy_conn("coop") as conn:
@@ -69,13 +79,13 @@ def get_data(ctx):
     return df
 
 
-def get_highcharts(ctx: dict) -> dict:
+def get_highcharts(ctx: Params) -> dict:
     """Highcharts Output"""
-    dt = ctx["date"]
+    dt = ctx.date
     df = get_data(ctx)
 
     j = {}
-    j["title"] = {"text": f"{ctx['_sname']}:: Snowfall Totals"}
+    j["title"] = {"text": f"{ctx.sname}:: Snowfall Totals"}
     j["subtitle"] = {"text": f"Before and After {dt:%-d %B}"}
     j["xAxis"] = {
         "title": {"text": f"Snowfall Total [inch] before {dt:%-d %B}"},
@@ -127,16 +137,14 @@ def get_highcharts(ctx: dict) -> dict:
     return j
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    dt = ctx["date"]
+    dt = ctx.date
     df = get_data(ctx)
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    title = (
-        f"{ctx['_sname']}:: Snowfall Totals\nPrior to and after: {dt:%-d %B}"
-    )
+    title = f"{ctx.sname}:: Snowfall Totals\nPrior to and after: {dt:%-d %B}"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)
     ax.set_xlim(left=-0.1)
@@ -156,19 +164,19 @@ def plotter(ctx: dict):
         lw=2,
         label=f"After Avg: {df['after'].mean():.1f}",
     )
-    if ctx["year"] in df.index:
+    if ctx.year in df.index:
         ax.axvline(
-            df.at[ctx["year"], "before"],
+            df.at[ctx.year, "before"],
             color="g",
             lw=2,
             label=(
-                f"{ctx['year']}-{ctx['year'] + 1} "
-                f"Before: {df.at[ctx['year'], 'before']:.1f}, "
-                f"After: {df.at[ctx['year'], 'after']:.1f}"
+                f"{ctx.year}-{ctx.year + 1} "
+                f"Before: {df.at[ctx.year, 'before']:.1f}, "
+                f"After: {df.at[ctx.year, 'after']:.1f}"
             ),
         )
         ax.axhline(
-            df.at[ctx["year"], "after"],
+            df.at[ctx.year, "after"],
             color="g",
             lw=2,
         )

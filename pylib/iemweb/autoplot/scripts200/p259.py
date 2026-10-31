@@ -5,6 +5,8 @@ some IEM processing attempts to keep track of all this.  This is not an easy
 nor exact science.
 """
 
+from typing import Annotated
+
 import geopandas as gpd
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -12,42 +14,40 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import Z_OVERLAY2
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "yes": "Show the Fire Weather variant",
     "no": "Do not show the Fire Weather variant",
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "ugc",
-            "name": "ugc",
-            "default": "IAC169",
-            "label": "Select the UGC:",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "viridis",
-            "label": "Select a colormap",
-        },
-        {
-            "type": "select",
-            "name": "fire",
-            "default": "no",
-            "options": PDICT,
-            "label": "Show the Fire Weather variant?",
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    ugc: Annotated[str, UgcArg(label="Select the UGC:")] = "IAC169"
+    cmap: Annotated[str, CmapArg(label="Select a colormap")] = "viridis"
+    fire: Annotated[
+        str, SelectArg(options=PDICT, label="Show the Fire Weather variant?")
+    ] = "no"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sourceop = "=" if ctx["fire"] == "yes" else "!="
+    sourceop = "=" if ctx.fire == "yes" else "!="
     with get_sqlalchemy_conn("postgis") as pgconn:
         ugcdf = gpd.read_postgis(
             sql_helper(
@@ -58,7 +58,7 @@ def plotter(ctx: dict):
                 sourceop=sourceop,
             ),
             pgconn,
-            params={"ugc": ctx["ugc"]},
+            params={"ugc": ctx.ugc},
             parse_dates=["begin_ts", "end_ts"],
             geom_col="geom",
         )  # type: ignore
@@ -75,7 +75,7 @@ def plotter(ctx: dict):
         + ugcdf["wfo"]
         + "]"
     )
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     if len(ugcdf) == 1:
         ugcdf["color"] = [cmap(0.5)]
     else:
@@ -87,7 +87,7 @@ def plotter(ctx: dict):
     dx = bnds[2] - bnds[0]
     dy = bnds[3] - bnds[1]
     buffer = max(dx, dy) * 0.1
-    fxextra = ", Fire Weather variant shown" if ctx["fire"] == "yes" else ""
+    fxextra = ", Fire Weather variant shown" if ctx.fire == "yes" else ""
     mp = MapPlot(
         apctx=ctx,
         sector="spherical_mercator",
@@ -95,7 +95,7 @@ def plotter(ctx: dict):
         south=bnds[1] - buffer,
         east=bnds[2] - dx * 0.2 + buffer,
         north=bnds[3] + buffer,
-        title=f"UGC {ctx['ugc']} '{ugcdf.loc[0]['name']}'",
+        title=f"UGC {ctx.ugc} '{ugcdf.loc[0]['name']}'",
         subtitle=f"Found {len(ugcdf)} changes{fxextra}",
         axes_position=(0.02, 0.04, 0.62, 0.83),
         nocaption=True,

@@ -9,6 +9,8 @@ If the second variable picked is precip, snow, or snow depth, the lowest
 to look at.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -16,6 +18,13 @@ from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FilterVarArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High Temperature (°F)",
@@ -37,47 +46,47 @@ def format_value(varname, value):
     return f"{value:.1f}"
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "filtervar",
-            "options": PDICT,
-            "default": "snow",
-            "comp_default": "ge",
-            "t_default": 0.1,
-            "name": "var1",
-            "label": (
-                "Select dataset filter requirement.  The IEM database "
-                f"represents Trace values as {TRACE_VALUE}, so that is the "
-                "threshold you would want to use to account for those values. "
-            ),
-        },
-        {
-            "type": "int",
-            "ge": -365,
-            "le": 365,
-            "default": 1,
-            "name": "offset",
-            "label": (
-                "Select number of days offset from the filtered events "
-                "found with the previous setting (0 == same day):"
-            ),
-        },
-        {
-            "type": "select",
-            "default": "high",
-            "options": PDICT,
-            "name": "var2",
-            "label": "Variable after offset days to list top events for:",
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var1: Annotated[
+        str,
+        FilterVarArg(
+            options=PDICT,
+            comp_default="ge",
+            t_default=0.1,
+            label="Select dataset filter requirement.  The IEM database "
+            f"represents Trace values as {TRACE_VALUE}, so that is the "
+            "threshold you would want to use to account for those values. ",
+        ),
+    ] = "snow"
+    offset: Annotated[
+        int,
+        IntArg(
+            ge=-365,
+            le=365,
+            label="Select number of days offset from the filtered events "
+            "found with the previous setting (0 == same day):",
+        ),
+    ] = 1
+    var2: Annotated[
+        str,
+        SelectArg(
+            options=PDICT,
+            label="Variable after offset days to list top events for:",
+        ),
+    ] = "high"
 
 
-def get_obsdf(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_obsdf(ctx: Params):
     """Figure out our observations."""
     comps = {
         "ge": ">=",
@@ -88,7 +97,7 @@ def get_obsdf(ctx):
         "ne": "!=",
     }
     threshold = ctx["var1_t"]
-    if ctx["var1"] in ["high", "low"]:
+    if ctx.var1 in ["high", "low"]:
         threshold = int(threshold)
 
     with get_sqlalchemy_conn("coop") as conn:
@@ -106,16 +115,16 @@ def get_obsdf(ctx):
     select f.day, f.var1, s.day as day2, s.var2 from first f JOIN second s
     on (f.day = s.effective_day) ORDER by s.var2 DESC
             """,
-                var1=ctx["var1"],
-                var2=ctx["var2"],
-                offset=str(ctx["offset"]),
+                var1=ctx.var1,
+                var2=ctx.var2,
+                offset=str(ctx.offset),
                 comp=comps[ctx["var1_comp"]],
             ),
             conn,
             index_col="day",
             parse_dates=["day", "day2"],
             params={
-                "station": ctx["station"],
+                "station": ctx.station,
                 "threshold": threshold,
             },
         )
@@ -164,14 +173,14 @@ def make_table(ax, title, tabledf, var1: str, var2: str):
     return table
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_obsdf(ctx)
 
     fig = figure(
-        title=(f"{ctx['_sname']}:: Top 15 Events for {PDICT[ctx['var2']]}"),
+        title=(f"{ctx.sname}:: Top 15 Events for {PDICT[ctx.var2]}"),
         subtitle=(
-            f"on {ctx['offset']} day(s) from dates with {PDICT[ctx['var1']]} "
+            f"on {ctx.offset} day(s) from dates with {PDICT[ctx.var1]} "
             f"{ctx['var1_comp']} {ctx['var1_t']}"
         ),
         apctx=ctx,
@@ -181,18 +190,18 @@ def plotter(ctx: dict):
         leftax,
         "Top 15 Highest Values",
         df.head(15),
-        ctx["var1"],
-        ctx["var2"],
+        ctx.var1,
+        ctx.var2,
     )
 
-    if ctx["var2"] not in ["precip", "snow", "snowd"]:
+    if ctx.var2 not in ["precip", "snow", "snowd"]:
         rightax = fig.add_axes((0.52, 0.09, 0.46, 0.76))
         make_table(
             rightax,
             "Top 15 Lowest Values",
             df.sort_values("var2", ascending=True).head(15),
-            ctx["var1"],
-            ctx["var2"],
+            ctx.var1,
+            ctx.var2,
         )
 
     return fig, df

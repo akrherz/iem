@@ -7,6 +7,7 @@ maximum 24 hour period precip as reported by the once daily observatons
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,37 +16,39 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import FloatArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="float",
-            name="thres",
-            default=0.10,
-            label="Precipitation Threshold (inch)",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    thres: Annotated[
+        float, FloatArg(label="Precipitation Threshold (inch)")
+    ] = 0.1
+    trace: Annotated[
+        str,
+        SelectArg(
+            label='Include "trace" reports in the analysis?', options=PDICT
         ),
-        dict(
-            type="select",
-            name="trace",
-            default="no",
-            label='Include "trace" reports in the analysis?',
-            options=PDICT,
-        ),
-    ]
-    return desc
+    ] = "no"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["thres"]
-    use_trace = ctx["trace"] == "yes"
+    station = ctx.station
+    threshold = ctx.thres
+    use_trace = ctx.trace == "yes"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -86,7 +89,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = figure(title=f"{ctx['_sname']} :: Precipitation Metrics", apctx=ctx)
+    fig = figure(title=f"{ctx.sname} :: Precipitation Metrics", apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(np.arange(1, 366), df["d1"], c="r", label="No Rain")

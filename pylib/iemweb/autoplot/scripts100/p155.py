@@ -17,13 +17,23 @@ extremes for that date.</p>
 unfiltered events for further usage as you see fit.</p>
 """
 
-from datetime import datetime
+from datetime import date, datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    HourArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -93,94 +103,79 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="max_p01i",
-            label="Which Metric to Summarize",
-            options=METRICS,
-        ),
-        {
-            "type": "select",
-            "options": PDICT,
-            "name": "w",
-            "default": "all",
-            "label": "List All or Filter 1/Day",
-        },
-        dict(
-            type="float",
-            name="threshold",
-            default=100,
-            label="Set Threshold (where appropriate for metric above)",
-        ),
-        dict(
-            type="hour",
-            name="hour",
-            optional=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    var: Annotated[
+        str, SelectArg(label="Which Metric to Summarize", options=METRICS)
+    ] = "max_p01i"
+    w: Annotated[
+        str, SelectArg(options=PDICT, label="List All or Filter 1/Day")
+    ] = "all"
+    threshold: Annotated[
+        float,
+        FloatArg(label="Set Threshold (where appropriate for metric above)"),
+    ] = 100
+    hour: Annotated[
+        int | None,
+        HourArg(
             label="Limit Analysis to Given Local Timezone Hour (optional)",
             default=12,
         ),
-        dict(
-            type="sday",
-            name="sdate",
+    ] = None
+    sdate: Annotated[
+        date | None,
+        SDayArg(
+            label="Start date (inclusive) for explicit date period: "
+            "(optional)",
             default="0101",
-            optional=True,
-            label=(
-                "Start date (inclusive) for explicit date period: (optional)"
-            ),
         ),
-        dict(
-            type="sday",
-            name="edate",
-            default="1231",
-            optional=True,
+    ] = None
+    edate: Annotated[
+        date | None,
+        SDayArg(
             label="End date (inclusive) for explicit date period: (optional)",
+            default="1231",
         ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-    ]
-    return desc
+    ] = None
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    month = ctx["month"]
-    varname = ctx["var"]
+    station = ctx.zstation
+    month = ctx.month
+    varname = ctx.var
     tzname = ctx["_nt"].sts[station]["tzname"]
     params = {}
     params["station"] = station
     params["tzname"] = tzname
-    if ctx.get("sdate") and ctx.get("edate"):
-        op = "or" if ctx["sdate"] > ctx["edate"] else "and"
+    if ctx.sdate and ctx.edate:
+        op = "or" if ctx.sdate > ctx.edate else "and"
         date_limiter = (
             " and (to_char(valid at time zone :tzname, 'mmdd') >= :ssday "
             f" {op} to_char(valid at time zone :tzname, 'mmdd') <= :esday)"
         )
-        params["ssday"] = ctx["sdate"].strftime("%m%d")
-        params["esday"] = ctx["edate"].strftime("%m%d")
-        title2 = f"between {ctx['sdate']:%-d %b} and {ctx['edate']:%-d %b}"
-        if ctx["sdate"] == ctx["edate"]:
+        params["ssday"] = ctx.sdate.strftime("%m%d")
+        params["esday"] = ctx.edate.strftime("%m%d")
+        title2 = f"between {ctx.sdate:%-d %b} and {ctx.edate:%-d %b}"
+        if ctx.sdate == ctx.edate:
             date_limiter = (
                 "and to_char(valid at time zone :tzname, 'mmdd') = :ssday "
             )
-            title2 = f"on {ctx['sdate']:%-d %b}"
+            title2 = f"on {ctx.sdate:%-d %b}"
     else:
         months = month2months(month)
         date_limiter = (
@@ -189,13 +184,13 @@ def plotter(ctx: dict):
         )
         params["months"] = months
         title2 = MDICT[month]
-    if ctx.get("hour") is not None:
+    if ctx.hour is not None:
         date_limiter += (
             " and extract(hour from valid at time zone :tzname "
             "+ '10 minutes'::interval) = :hour "
         )
-        params["hour"] = ctx["hour"]
-        dt = datetime(2000, 1, 1, ctx["hour"])
+        params["hour"] = ctx.hour
+        dt = datetime(2000, 1, 1, ctx.hour)
         title2 += f" @{dt:%-I %p}"
     (agg, dbvar) = varname.split("_")
     # Special accounting for the peak_wind_gust column
@@ -279,7 +274,7 @@ def plotter(ctx: dict):
     lastval = -99
     ranks = []
     currentrank = 0
-    dtfmt = "%Y%m%d" if ctx["w"] == "one" else "%Y%m%d%H"
+    dtfmt = "%Y%m%d" if ctx.w == "one" else "%Y%m%d%H"
     for _, row in df.iterrows():
         key = row["valid"].strftime(dtfmt)
         if key in hours or pd.isnull(row[dbvar]):
@@ -301,10 +296,10 @@ def plotter(ctx: dict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = f"{ctx['_sname']} {titlelabel} 10 Events"
-    if ctx["w"] == "one":
+    title = f"{ctx.sname} {titlelabel} 10 Events"
+    if ctx.w == "one":
         title += " (Only 1 Ob per Day Shown)"
-    st = ctx.get("threshold") if agg in ["above", "below"] else ""
+    st = ctx.threshold if agg in ["above", "below"] else ""
     subtitle = (
         f"{METRICS[varname]} {st} ({title2}) ({ab.year}-{datetime.now().year})"
     )

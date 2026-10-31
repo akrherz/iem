@@ -6,12 +6,21 @@ year of the December month included in the period.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -54,58 +63,47 @@ METRICS = {
 DIRS = {"aoa": "At or Above", "below": "Below"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="max_dwpf",
-            label="Which Variable",
-            options=METRICS,
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="aoa",
-            label="Threshold Direction:",
-            options=DIRS,
-        ),
-        dict(type="float", name="thres", default=65, label="Threshold"),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    var: Annotated[str, SelectArg(label="Which Variable", options=METRICS)] = (
+        "max_dwpf"
+    )
+    dir: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=DIRS)
+    ] = "aoa"
+    thres: Annotated[float, FloatArg(label="Threshold")] = 65
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    year: Annotated[
+        int,
+        YearArg(
             min=1900,
-            default=date.today().year,
             label="Year to Highlight",
-            name="year",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def add_context(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def add_context(ctx: Params):
     """Do the processing work"""
 
-    station = ctx["zstation"]
-    month = ctx["month"]
-    varname = ctx["var"]
-    mydir = ctx["dir"]
-    threshold = ctx["thres"]
+    station = ctx.zstation
+    month = ctx.month
+    varname = ctx.var
+    mydir = ctx.dir
+    threshold = ctx.thres
 
     months = month2months(month)
 
@@ -143,15 +141,15 @@ def add_context(ctx):
             index_col="year",
         )
     ctx["title"] = "(%s) %s %s %.0f" % (
-        MDICT[ctx["month"]],
-        METRICS[ctx["var"]],
-        DIRS[ctx["dir"]],
-        ctx["thres"],
+        MDICT[ctx.month],
+        METRICS[ctx.var],
+        DIRS[ctx.dir],
+        ctx.thres,
     )
-    ctx["subtitle"] = ctx["_sname"]
+    ctx["subtitle"] = ctx.sname
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Highcharts output"""
     add_context(ctx)
     ctx["df"] = ctx["df"].reset_index()
@@ -175,7 +173,7 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
     df = ctx["df"]
@@ -187,10 +185,10 @@ def plotter(ctx: dict):
     ax.bar(
         df.index.values, df["count"], align="center", fc="green", ec="green"
     )
-    if ctx["year"] in df.index:
+    if ctx.year in df.index:
         ax.bar(
-            ctx["year"],
-            df.at[ctx["year"], "count"],
+            ctx.year,
+            df.at[ctx.year, "count"],
             align="center",
             fc="red",
             ec="red",

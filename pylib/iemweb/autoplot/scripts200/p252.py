@@ -7,6 +7,7 @@ is to search the period including 1 January.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,17 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    FloatArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
 PDICT2 = {
@@ -36,84 +48,64 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "var",
-            "default": "high",
-            "label": "Which variable to plot:",
-            "options": PDICT,
-        },
-        {
-            "type": "select",
-            "name": "w",
-            "default": "aoa",
-            "label": "Threshold Direction:",
-            "options": PDICT2,
-        },
-        dict(type="state", name="sector", default="IA", label="Select State:"),
-        dict(
-            type="select",
-            name="popt",
-            default="contour",
-            label="Plot Display Options:",
-            options=PDICT3,
-        ),
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": "0101",
-            "label": "Start Day (inclusive):",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": "1231",
-            "label": "End Day (inclusive):",
-        },
-        {
-            "type": "float",
-            "name": "threshold",
-            "default": 100,
-            "label": "Threshold Value:",
-        },
-        dict(
-            type="year",
-            default=1893,
-            optional=True,
-            name="syear",
-            label="Limit search to years after (inclusive):",
-        ),
-        dict(
-            type="year",
-            default=date.today().year,
-            optional=True,
-            name="eyear",
-            label="Limit search to years before (inclusive):",
-        ),
-        dict(type="cmap", name="cmap", default="BrBG", label="Color Ramp:"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    var: Annotated[
+        str, SelectArg(label="Which variable to plot:", options=PDICT)
+    ] = "high"
+    w: Annotated[
+        str, SelectArg(label="Threshold Direction:", options=PDICT2)
+    ] = "aoa"
+    sector: Annotated[str, StateArg(label="Select State:")] = "IA"
+    popt: Annotated[
+        str, SelectArg(label="Plot Display Options:", options=PDICT3)
+    ] = "contour"
+    sday: Annotated[
+        date, SDayArg(label="Start Day (inclusive):", default="0101")
     ]
-    return desc
+    eday: Annotated[
+        date, SDayArg(label="End Day (inclusive):", default="1231")
+    ]
+    threshold: Annotated[float, FloatArg(label="Threshold Value:")] = 100
+    syear: Annotated[
+        int | None,
+        YearArg(
+            label="Limit search to years after (inclusive):", default=1893
+        ),
+    ] = None
+    eyear: Annotated[
+        int | None,
+        YearArg(
+            label="Limit search to years before (inclusive):",
+            default=lambda: date.today().year,
+        ),
+    ] = None
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "BrBG"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sector = ctx["sector"]
+    sector = ctx.sector
     if len(sector) != 2:
         raise NoDataFound("Sorry, this app doesn't support multi-state plots.")
-    varname = ctx["var"]
-    threshold = ctx["threshold"]
+    varname = ctx.var
+    threshold = ctx.threshold
     if varname in ["high", "low"]:
         threshold = int(threshold)
     nt = NetworkTable(f"{sector}CLIMATE", only_online=False)
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", date.today().year)
-    comp = ">=" if ctx["w"] == "aoa" else "<"
+    comp = ">=" if ctx.w == "aoa" else "<"
     sday_limiter = "sday >= :sday and sday <= :eday"
-    if ctx["sday"] > ctx["eday"]:
+    if ctx.sday > ctx.eday:
         sday_limiter = "(sday >= :sday or sday <= :eday)"
     table = f"alldata_{sector.lower()}"
     sqlvarname = varname
@@ -147,8 +139,8 @@ def plotter(ctx: dict):
             conn,
             params={
                 "t": threshold,
-                "sday": ctx["sday"].strftime("%m%d"),
-                "eday": ctx["eday"].strftime("%m%d"),
+                "sday": ctx.sday.strftime("%m%d"),
+                "eday": ctx.eday.strftime("%m%d"),
                 "syear": syear,
                 "eyear": eyear,
             },
@@ -179,24 +171,24 @@ def plotter(ctx: dict):
     title = (
         f"Percent of Years with 1+ Days of {PDICT[varname]} "
         f"{comp} {threshold} {UNITS[varname]} between "
-        f"{ctx['sday']:%-d %b} and {ctx['eday']:%-d %b}"
+        f"{ctx.sday:%-d %b} and {ctx.eday:%-d %b}"
     )
     mp = MapPlot(
         apctx=ctx,
         sector="state",
-        state=ctx["sector"],
+        state=ctx.sector,
         continental_color="white",
         title=title,
         subtitle=subtitle,
         nocaption=True,
     )
-    if ctx["popt"] == "contour":
+    if ctx.popt == "contour":
         mp.contourf(
             df["lon"].to_numpy(),
             df["lat"].to_numpy(),
             df["frequency"].to_numpy(),
             np.arange(0, 101, 10),
-            cmap=ctx["cmap"],
+            cmap=ctx.cmap,
             extend="neither",
         )
     mp.plot_values(

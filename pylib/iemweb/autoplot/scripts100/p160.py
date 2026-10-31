@@ -16,7 +16,8 @@ hide and show the various lines.</p>
 easily download the raw data in bulk.</p>
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -26,6 +27,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 # Requested removal of bankfull
 STAGES = "action minor moderate major record".split()
@@ -43,47 +52,41 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    desc["arguments"] = [
-        dict(
-            type="text",
-            name="station",
-            default="GTTI4",
-            label="Enter 5 Char NWSLI Station Code (sorry):",
-        ),
-        dict(
-            type="datetime",
-            name="dt",
-            default=utc().strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, TextArg(label="Enter 5 Char NWSLI Station Code (sorry):")
+    ] = "GTTI4"
+    dt: Annotated[
+        datetime,
+        DateTimeArg(
             label="Time to center plot at (UTC Time Zone):",
             min="2013/01/01 0000",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=MDICT,
-            label="Which Variable to Plot:",
-            default="primary",
-        ),
-        dict(
-            type="select",
-            name="w",
-            options=PDICT,
-            label="What all to plot:",
-            default="both",
+            default=lambda: utc().strftime("%Y/%m/%d %H%M"),
         ),
     ]
-    return desc
+    var: Annotated[
+        str, SelectArg(options=MDICT, label="Which Variable to Plot:")
+    ] = "primary"
+    w: Annotated[str, SelectArg(options=PDICT, label="What all to plot:")] = (
+        "both"
+    )
 
 
-def add_context(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
+
+
+def add_context(ctx: Params):
     """Do the common work"""
 
-    ctx["station"] = ctx["station"].upper()[:8]
-    station = ctx["station"]
-    dt = ctx["dt"]
+    ctx.station = ctx.station.upper()[:8]
+    station = ctx.station
+    dt = ctx.dt
 
     # Attempt to get station information
     with get_sqlalchemy_conn("mesosite") as conn:
@@ -175,12 +178,12 @@ def add_context(ctx: dict):
             how="left",
             sort=False,
         )
-    ctx["title"] = f"[{ctx['station']}] {ctx['name']}"
-    ldt = ctx["dt"].replace(tzinfo=UTC).astimezone(ZoneInfo(ctx["tzname"]))
+    ctx["title"] = f"[{ctx.station}] {ctx['name']}"
+    ldt = ctx.dt.replace(tzinfo=UTC).astimezone(ZoneInfo(ctx["tzname"]))
     ctx["subtitle"] = f"+/- 72 hours around {ldt:%d %b %Y %-I:%M %p %Z}"
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """generate highcharts"""
     add_context(ctx)
     if "df" not in ctx:
@@ -197,7 +200,7 @@ def get_highcharts(ctx: dict) -> str:
                 .tz_convert(ZoneInfo(ctx["tzname"]))
                 .strftime("%-m/%-d %-I%p %Z")
             )
-            v = df2[["ticks", f"{ctx['var']}_value"]].to_json(
+            v = df2[["ticks", f"{ctx.var}_value"]].to_json(
                 orient="values", date_format="iso"
             )
             lines.append(
@@ -211,8 +214,8 @@ def get_highcharts(ctx: dict) -> str:
             )
     # Epoch milliseconds, independent of the index's datetime resolution
     ctx["odf"]["ticks"] = ctx["odf"].index.as_unit("ms").asi8
-    if ctx["var"] in ctx:
-        v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(
+    if ctx.var in ctx:
+        v = ctx["odf"][["ticks", ctx[ctx.var]]].to_json(
             orient="values", date_format="iso"
         )
         lines.append(
@@ -229,7 +232,7 @@ def get_highcharts(ctx: dict) -> str:
     series = ",".join(lines)
     lines = []
     scatter = []
-    if "[ft]" in ctx.get(ctx["var"], ""):
+    if "[ft]" in ctx.get(ctx.var, ""):
         for stage in STAGES:
             val = ctx[f"sigstage_{stage}"]
             if val is None:
@@ -278,7 +281,7 @@ Highcharts.chart('{containername}', {{
         type: 'datetime'
     }},
     yAxis: {{
-        title: {{text: '{ctx.get(ctx["var"], "primary")}'}},
+        title: {{text: '{ctx.get(ctx.var, "primary")}'}},
         plotLines: [{plotlines}]
     }},
     series: [{series}{scatterentries}]
@@ -299,7 +302,7 @@ $('<input type="checkbox" id="scaleY" checked="checked"> '+
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
     if "df" not in ctx or (ctx["df"].empty and ctx["odf"].empty):
@@ -307,7 +310,7 @@ def plotter(ctx: dict):
     df = ctx["df"]
     title = "\n".join([ctx["title"], ctx["subtitle"]])
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    if ctx["w"] in ["fx", "both"] and "id" in df.columns:
+    if ctx.w in ["fx", "both"] and "id" in df.columns:
         fxs = df["id"].unique()
         for fx in fxs:
             df2 = df[df["id"] == fx]
@@ -318,25 +321,25 @@ def plotter(ctx: dict):
             )
             ax.plot(
                 df2["valid"],
-                df2[f"{ctx['var']}_value"],
+                df2[f"{ctx.var}_value"],
                 zorder=2,
                 label=issued,
             )
     if (
-        ctx["w"] in ["obs", "both"]
+        ctx.w in ["obs", "both"]
         and not ctx["odf"].empty
-        and ctx["var"] in ctx
-        and ctx[ctx["var"]] in ctx["odf"].columns
+        and ctx.var in ctx
+        and ctx[ctx.var] in ctx["odf"].columns
     ):
         ax.plot(
             ctx["odf"].index.to_numpy(),
-            ctx["odf"][ctx[ctx["var"]]],
+            ctx["odf"][ctx[ctx.var]],
             lw=2,
             color="k",
             label="Obs",
             zorder=4,
         )
-        ax.set_ylabel(ctx[ctx["var"]])
+        ax.set_ylabel(ctx[ctx.var])
     ylim = ax.get_ylim()
     for stage in STAGES:
         val = ctx[f"sigstage_{stage}"]

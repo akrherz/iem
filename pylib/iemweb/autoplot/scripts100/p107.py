@@ -13,7 +13,8 @@ automated stations.
 data in order to be included within the plot.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,15 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avg_high_temp": "Average High Temperature",
@@ -69,68 +79,54 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = datetime.today() - timedelta(days=1)
-    sts = today - timedelta(days=14)
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": f"{sts:%m%d}",
-            "label": "Inclusive Start Date of the Year",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": f"{today:%m%d}",
-            "label": "Inclusise End Date of the Year",
-        },
-        dict(
-            optional=True,
-            type="int",
-            name="stop",
-            default="32",
-            label=(
-                "Stop accumulation once daily low (after 1 July) "
-                "below threshold (F) [overrides number of days above]"
-            ),
-        ),
-        dict(
-            type="select",
-            name="varname",
-            default="avg_temp",
-            label="Variable to Compute:",
-            options=PDICT,
-        ),
-        dict(
-            type="float",
-            name="thres",
-            default=-99,
-            label="Threshold (when appropriate):",
-        ),
-        dict(
-            type="int",
-            name="base",
-            default=50,
-            label="Growing Degree Day Base (F)",
-        ),
-        dict(
-            type="int",
-            name="ceil",
-            default=86,
-            label="Growing Degree Day Ceiling (F)",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Year to Highlight in Chart:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive Start Date of the Year",
+            default=lambda: f"{datetime.today() - timedelta(days=15):%m%d}",
         ),
     ]
-    return desc
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusise End Date of the Year",
+            default=lambda: f"{datetime.today() - timedelta(days=1):%m%d}",
+        ),
+    ]
+    stop: Annotated[
+        int | None,
+        IntArg(
+            label="Stop accumulation once daily low (after 1 July) "
+            "below threshold (F) [overrides number of days above]",
+            default="32",
+        ),
+    ] = None
+    varname: Annotated[
+        str, SelectArg(label="Variable to Compute:", options=PDICT)
+    ] = "avg_temp"
+    thres: Annotated[
+        float, FloatArg(label="Threshold (when appropriate):")
+    ] = -99
+    base: Annotated[int, IntArg(label="Growing Degree Day Base (F)")] = 50
+    ceil: Annotated[int, IntArg(label="Growing Degree Day Ceiling (F)")] = 86
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to Highlight in Chart:",
+            default=lambda: (datetime.today() - timedelta(days=1)).year,
+        ),
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def crossesjan1(val):
@@ -154,26 +150,26 @@ def nice(val):
     return f"{val:.2f}"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    gddbase = ctx["base"]
-    gddceil = ctx["ceil"]
-    varname = ctx["varname"]
-    year = ctx["year"]
-    threshold = ctx["thres"]
-    stop = ctx.get("stop")
+    station = ctx.station
+    gddbase = ctx.base
+    gddceil = ctx.ceil
+    varname = ctx.varname
+    year = ctx.year
+    threshold = ctx.thres
+    stop = ctx.stop
     params = {
         "gddbase": gddbase,
         "gddceil": gddceil,
         "t": threshold,
         "station": station,
-        "sday": ctx["sday"].strftime("%m%d"),
-        "eday": ctx["eday"].strftime("%m%d"),
+        "sday": ctx.sday.strftime("%m%d"),
+        "eday": ctx.eday.strftime("%m%d"),
     }
     dtlimiter = "(sday >= :sday and sday <= :eday)"
     doff = "year"
-    if ctx["eday"] < ctx["sday"]:
+    if ctx.eday < ctx.sday:
         dtlimiter = "(sday >= :sday or sday <= :eday)"
         doff = "case when sday <= :eday then year - 1 else year end"
     if stop is not None:
@@ -305,7 +301,7 @@ def plotter(ctx: dict):
     fmter = intfmt if varname.find("days") > -1 else nice
     if varname in ["min_low", "max_low", "min_high", "max_high"]:
         fmter = intfmt
-    yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
+    yrfmter = intfmt if ctx.eday > ctx.sday else crossesjan1
     if stop is None:
         # require at least 90% coverage
         df = df[df["count"] >= (df["count"].max() * 0.9)]
@@ -313,7 +309,7 @@ def plotter(ctx: dict):
         # Drop last row
         df = df.iloc[:-1]
         # drop any rows with a min date not equal to sts
-        mm = ctx["sday"].strftime("%m%d")
+        mm = ctx.sday.strftime("%m%d")
         df = df[df["min_day"].dt.strftime("%m%d") == mm]
     # require values , not nan
     df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
@@ -321,10 +317,10 @@ def plotter(ctx: dict):
     title = PDICT[varname].replace("(threshold)", str(threshold))
     title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
-        f"{title} from {ctx['sday']:%-d %B} "
+        f"{title} from {ctx.sday:%-d %B} "
     )
     if stop is None:
-        title += f"through {ctx['eday']:%-d %B}"
+        title += f"through {ctx.eday:%-d %B}"
     else:
         title += f"until first day after 1 July w/ Low < {stop}F"
     fig = figure(apctx=ctx, title=title)

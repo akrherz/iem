@@ -7,7 +7,9 @@ between 6 UTC to 6 UTC, which is Central Standard Time all year round.</p>
 variant of this plot.
 """
 
+import datetime as dt
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -19,6 +21,14 @@ from pyiem.iemre import get_grids
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "p01d_12z": "24 Hour Precipitation at 12 UTC",
@@ -47,50 +57,42 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        ARG_IEMRE_DOMAIN,
-        dict(
-            type="csector",
-            name="csector",
-            default="midwest",
-            label="Select state/sector to plot",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    domain: Annotated[str, ARG_IEMRE_DOMAIN] = "conus"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "midwest"
+    var: Annotated[
+        str, SelectArg(label="Select Plot Variable:", options=PDICT)
+    ] = "rsds"
+    ptype: Annotated[
+        str, SelectArg(label="Select Plot Type:", options=PDICT2)
+    ] = "c"
+    date: Annotated[
+        dt.date,
+        DateArg(
+            label="Date:",
+            min="1893/01/01",
+            max=lambda: (
+                datetime.today() - timedelta(days=1) + timedelta(days=4)
+            ).strftime("%Y/%m/%d"),
+            default=lambda: (datetime.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="select",
-            name="var",
-            default="rsds",
-            label="Select Plot Variable:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="ptype",
-            default="c",
-            label="Select Plot Type:",
-            options=PDICT2,
-        ),
-        {
-            "type": "date",
-            "name": "date",
-            "default": today.strftime("%Y/%m/%d"),
-            "label": "Date:",
-            "min": "1893/01/01",
-            "max": (today + timedelta(days=4)).strftime("%Y/%m/%d"),
-        },
-        {
-            "type": "select",
-            "name": "clip",
-            "default": "yes",
-            "label": "Clip Data Outside Plot Geography:",
-            "options": PDICT3,
-        },
-        dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]
-    return desc
+    clip: Annotated[
+        str,
+        SelectArg(label="Clip Data Outside Plot Geography:", options=PDICT3),
+    ] = "yes"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "magma"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
 
 
 def unit_convert(ds: xr.Dataset, varname: str) -> np.ndarray:
@@ -138,13 +140,13 @@ def unit_convert(ds: xr.Dataset, varname: str) -> np.ndarray:
     return data
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    domain = ctx["domain"]
+    domain = ctx.domain
     gridnav = get_nav("iemre", domain)
-    ptype = ctx["ptype"]
-    dt = ctx["date"]
-    varname = ctx["var"]
+    ptype = ctx.ptype
+    dt = ctx.date
+    varname = ctx.var
     mpargs = {
         "title": f"IEM Reanalysis of {PDICT.get(varname)} for {dt:%-d %b %Y}",
         "subtitle": "Data derived from various NOAA datasets",
@@ -153,7 +155,7 @@ def plotter(ctx: dict):
         "apctx": ctx,
     }
     if domain != "conus":
-        ctx["csector"] = "custom"
+        ctx.csector = "custom"
         mpargs["west"] = gridnav.left_edge
         mpargs["east"] = gridnav.right_edge
         mpargs["south"] = gridnav.bottom_edge
@@ -164,7 +166,7 @@ def plotter(ctx: dict):
     plot_units = ""
 
     ds = get_grids(dt, domain=domain)
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     data = np.ma.asarray(unit_convert(ds, varname))
     ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
     if pd.isna(ptiles).any():
@@ -215,7 +217,7 @@ def plotter(ctx: dict):
             ilabel=True,
             labelfmt="%.0f",
             cmap=cmap,
-            clip_on=ctx["clip"] == "yes",
+            clip_on=ctx.clip == "yes",
         )
     else:
         mp.imshow(
@@ -225,7 +227,7 @@ def plotter(ctx: dict):
             clevs=clevs,
             cmap=cmap,
             units=plot_units,
-            clip_on=ctx["clip"] == "yes",
+            clip_on=ctx.clip == "yes",
         )
 
     return mp.fig

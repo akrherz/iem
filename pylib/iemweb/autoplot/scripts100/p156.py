@@ -2,6 +2,7 @@
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -9,6 +10,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -61,87 +70,66 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "nass": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="w",
-            default="six",
-            options=PDICT,
-            label="How many states to plot:",
-        ),
-        dict(type="state", name="st1", default="IA", label="Select State #1:"),
-        dict(type="state", name="st2", default="IL", label="Select State #2:"),
-        dict(type="state", name="st3", default="MN", label="Select State #3:"),
-        dict(type="state", name="st4", default="WI", label="Select State #4:"),
-        dict(type="state", name="st5", default="MO", label="Select State #5:"),
-        dict(type="state", name="st6", default="IN", label="Select State #6:"),
-        dict(
-            type="select",
-            name="y",
-            default="all",
-            options=PDICT2,
-            label="How many years to plot:",
-        ),
-        dict(
-            type="year",
-            min=1981,
-            name="y1",
-            default=date.today().year,
-            label="Select Year #1",
-        ),
-        dict(
-            type="year",
-            min=1981,
-            name="y2",
-            optional=True,
-            default=2012,
-            label="Select Year #2",
-        ),
-        dict(
-            type="year",
-            min=1981,
-            name="y3",
-            optional=True,
-            default=2008,
-            label="Select Year #3",
-        ),
-        dict(
-            type="year",
-            min=1981,
-            name="y4",
-            optional=True,
-            default=1993,
-            label="Select Year #4",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="corn_poor_verypoor",
-            options=NASS_CROP_PROGRESS,
-            label="Which Crop Progress Report?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[
+        str, SelectArg(options=PDICT, label="How many states to plot:")
+    ] = "six"
+    st1: Annotated[str, StateArg(label="Select State #1:")] = "IA"
+    st2: Annotated[str, StateArg(label="Select State #2:")] = "IL"
+    st3: Annotated[str, StateArg(label="Select State #3:")] = "MN"
+    st4: Annotated[str, StateArg(label="Select State #4:")] = "WI"
+    st5: Annotated[str, StateArg(label="Select State #5:")] = "MO"
+    st6: Annotated[str, StateArg(label="Select State #6:")] = "IN"
+    y: Annotated[
+        str, SelectArg(options=PDICT2, label="How many years to plot:")
+    ] = "all"
+    y1: Annotated[
+        int,
+        YearArg(
+            min=1981, label="Select Year #1", default=lambda: date.today().year
         ),
     ]
-    return desc
+    y2: Annotated[
+        int | None, YearArg(min=1981, label="Select Year #2", default=2012)
+    ] = None
+    y3: Annotated[
+        int | None, YearArg(min=1981, label="Select Year #3", default=2008)
+    ] = None
+    y4: Annotated[
+        int | None, YearArg(min=1981, label="Select Year #4", default=1993)
+    ] = None
+    var: Annotated[
+        str,
+        SelectArg(
+            options=NASS_CROP_PROGRESS, label="Which Crop Progress Report?"
+        ),
+    ] = "corn_poor_verypoor"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, nass=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    st1 = ctx["st1"][:2]
-    st2 = ctx["st2"][:2]
-    st3 = ctx["st3"][:2]
-    st4 = ctx["st4"][:2]
-    st5 = ctx["st5"][:2]
-    st6 = ctx["st6"][:2]
-    y1 = ctx["y1"]
-    y2 = ctx.get("y2")
-    y3 = ctx.get("y3")
-    y4 = ctx.get("y4")
+    st1 = ctx.st1[:2]
+    st2 = ctx.st2[:2]
+    st3 = ctx.st3[:2]
+    st4 = ctx.st4[:2]
+    st5 = ctx.st5[:2]
+    st6 = ctx.st6[:2]
+    y1 = ctx.y1
+    y2 = ctx.y2
+    y3 = ctx.y3
+    y4 = ctx.y4
     years = [y1, y2, y3, y4]
     states = [st1, st2, st3, st4, st5, st6]
-    varname = ctx["var"]
+    varname = ctx.var
     desc = NASS_CROP_PROGRESS_LOOKUP[varname]
     if not isinstance(desc, list):
         desc = [
@@ -186,12 +174,12 @@ def plotter(ctx: dict):
     xpad = 0.03
     y0 = 0.07
     y1 = 0.51
-    if ctx["w"] == "one":
+    if ctx.w == "one":
         axes = [
             [fig.add_axes((x0, 0.12, 0.9, 0.75)), None, None],
             [None, None, None],
         ]
-    elif ctx["w"] == "two":
+    elif ctx.w == "two":
         axes = [
             [
                 fig.add_axes((x0, 0.12, 0.42, 0.75)),
@@ -228,7 +216,7 @@ def plotter(ctx: dict):
             colors = ["black", "green", "blue", "red"]
 
             for year, gdf in df2.groupby("year"):
-                if ctx["y"] != "all" and year not in years:
+                if ctx.y != "all" and year not in years:
                     continue
                 ax.plot(
                     gdf["doy"],
@@ -238,7 +226,7 @@ def plotter(ctx: dict):
                     zorder=5 if year in years else 3,
                     label=f"{year:.0f}" if year in years else None,
                 )
-            if row == 0 and col == 0 and ctx["w"] == "one":
+            if row == 0 and col == 0 and ctx.w == "one":
                 ax.legend(ncol=5, loc=(0.35, -0.1), prop=prop)
             if row == 0 and col == 1:
                 ax.legend(ncol=5, loc=(0.4, -0.25), prop=prop)

@@ -12,6 +12,7 @@ that hour.  For example, a 9:53 AM observation becomes the ob for 10 AM.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -20,6 +21,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import get_monofont
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -76,47 +84,36 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            options=MDICT,
-            label="Select Month/Season/All",
-        ),
-        dict(
-            type="sday",
-            optional=True,
-            name="sday",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    month: Annotated[
+        str, SelectArg(options=MDICT, label="Select Month/Season/All")
+    ] = "all"
+    sday: Annotated[
+        date | None,
+        SDayArg(
             label="Start Day of The Year (inclusive):",
-            default=f"{date.today():%m%d}",
+            default=lambda: f"{date.today():%m%d}",
         ),
-        dict(
-            type="sday",
-            optional=True,
-            name="eday",
-            label="End Day of The Year (inclusive):",
-            default="1231",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT,
-            default="max_dwpf",
-            label="Which Variable to Plot",
-        ),
-    ]
-    return desc
+    ] = None
+    eday: Annotated[
+        date | None,
+        SDayArg(label="End Day of The Year (inclusive):", default="1231"),
+    ] = None
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which Variable to Plot")
+    ] = "max_dwpf"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def rounder(row: dict, varname: str) -> str:
@@ -126,19 +123,19 @@ def rounder(row: dict, varname: str) -> str:
     return f"{row[varname]:3.0f}"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     font0 = get_monofont()
     font0.set_size(16)
     font1 = FontProperties()
     font1.set_size(16)
 
-    varname = ctx["var"]
+    varname = ctx.var
     varname2 = varname.split("_")[1]
     if varname2 in ["dwpf", "tmpf", "feel", "dd"]:
         varname2 = f"i{varname2}"
-    month = ctx["month"]
-    station = ctx["zstation"]
+    month = ctx.month
+    station = ctx.zstation
     months = month2months(month)
     params = {
         "tzname": ctx["_nt"].sts[station]["tzname"],
@@ -148,14 +145,14 @@ def plotter(ctx: dict):
     doylimiter = ""
     monlimiter = ""
     if "sday" in ctx and "eday" in ctx:
-        params["sday"] = f"{ctx['sday']:%m%d}"
-        params["eday"] = f"{ctx['eday']:%m%d}"
+        params["sday"] = f"{ctx.sday:%m%d}"
+        params["eday"] = f"{ctx.eday:%m%d}"
         op = "and" if params["sday"] < params["eday"] else "or"
         doylimiter = (
             f"and (to_char(valid at time zone :tzname, 'mmdd') >= :sday {op} "
             "to_char(valid at time zone :tzname, 'mmdd') <= :eday)"
         )
-        over = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+        over = f"{ctx.sday:%-d %b} thru {ctx.eday:%-d %b}"
     else:
         over = MDICT[month]
         if len(months) < 12:
@@ -218,7 +215,7 @@ def plotter(ctx: dict):
     if ab is None:
         raise NoDataFound("Unknown station metadata")
     title = (
-        f"{ctx['_sname']} ({ab.year}-{date.today().year})\n"
+        f"{ctx.sname} ({ab.year}-{date.today().year})\n"
         f"{PDICT[varname]} [{over}]"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

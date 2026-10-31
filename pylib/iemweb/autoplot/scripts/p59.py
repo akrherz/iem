@@ -7,6 +7,7 @@ download the raw data, it will not contain this smoothing.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,9 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import PlotDescription, SelectArg, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "mps": "Meters per Second",
@@ -36,32 +40,28 @@ def smooth(x):
     return pd.Series(x).rolling(7, min_periods=1).mean()
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="units",
-            default="mph",
-            label="Wind Speed Units:",
-            options=PDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    units: Annotated[
+        str, SelectArg(label="Wind Speed Units:", options=PDICT)
+    ] = "mph"
 
 
-def add_plot(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def add_plot(ctx: Params):
     """Do plotting."""
     title = (
-        f"{ctx['_sname']} :: Daily Average Component Wind Speed\n"
+        f"{ctx.sname} :: Daily Average Component Wind Speed\n"
         f"[{ctx['ab'].year}-{utc().year}] 7 day smooth "
         f"filter applied, {len(ctx['df'].index):.0f} obs found"
     )
@@ -87,7 +87,7 @@ def add_plot(ctx):
     ax.legend(ncol=2, fontsize=11, loc=(0.0, -0.25))
     ax.grid(True)
     ax.set_xlim(0, 366)
-    ax.set_ylabel(f"Average Wind Speed\n{PDICT.get(ctx['units'])}")
+    ax.set_ylabel(f"Average Wind Speed\n{PDICT.get(ctx.units)}")
 
     box = ax.get_position()
     ax.set_position(
@@ -105,14 +105,14 @@ def add_plot(ctx):
     ax.legend(loc="best")
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_ylabel(f"Average Wind Speed\n{PDICT[ctx['units']]}")
+    ax.set_ylabel(f"Average Wind Speed\n{PDICT[ctx.units]}")
     ax.grid(True)
     ax.set_xlim(0, 366)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    ctx["ab"] = ctx["_nt"].sts[ctx["station"]]["archive_begin"]
+    ctx["ab"] = ctx["_nt"].sts[ctx.station]["archive_begin"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -120,7 +120,7 @@ def plotter(ctx: dict):
             where station = :station and sknt >= 0 and drct >= 0
             and report_type = 3"""),
             conn,
-            params={"station": ctx["station"]},
+            params={"station": ctx.station},
             index_col=None,
         )
     if df.empty:
@@ -136,16 +136,16 @@ def plotter(ctx: dict):
     gdf = df.groupby(by="doy").mean()
     ctx["u"] = (
         (gdf["u"].to_numpy() * units("meter / second"))
-        .to(XREF_UNITS[ctx["units"]])
+        .to(XREF_UNITS[ctx.units])
         .m
     )
     ctx["v"] = (
         (gdf["v"].to_numpy() * units("meter / second"))
-        .to(XREF_UNITS[ctx["units"]])
+        .to(XREF_UNITS[ctx.units])
         .m
     )
     ctx["mag"] = (
-        (gdf["sknt"].to_numpy() * units("knot")).to(XREF_UNITS[ctx["units"]]).m
+        (gdf["sknt"].to_numpy() * units("knot")).to(XREF_UNITS[ctx.units]).m
     )
 
     df2 = pd.DataFrame(

@@ -68,7 +68,7 @@ class Params(AutoplotParams):
     dir: Annotated[
         str, SelectArg(options=PDICT, label="Select temperature direction")
     ] = "below"
-    threshold: Annotated[int, IntArg(label="hreshold (F or knots):")] = 32
+    threshold: Annotated[int, IntArg(label="Threshold (F or knots):")] = 32
 
 
 def get_description() -> PlotDescription:

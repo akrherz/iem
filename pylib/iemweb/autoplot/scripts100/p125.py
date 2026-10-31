@@ -11,6 +11,8 @@ example, a period between Dec 15 and Jan 15 will be computed.</p>
 """
 
 import calendar
+from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -18,6 +20,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON, SECTORS_NAME, Z_OVERLAY2
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -99,79 +109,61 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    sdate: Annotated[
+        date | None,
+        SDayArg(
+            label="Start Date of Inclusive Period (optional)", default="0101"
         ),
-        dict(
-            type="sday",
-            default="0101",
-            name="sdate",
-            optional=True,
-            label="Start Date of Inclusive Period (optional)",
+    ] = None
+    edate: Annotated[
+        date | None,
+        SDayArg(
+            label="End Date of Inclusive Period (optional)", default="1231"
         ),
-        dict(
-            type="sday",
-            default="1231",
-            name="edate",
-            optional=True,
-            label="End Date of Inclusive Period (optional)",
-        ),
-        dict(
-            type="select",
-            name="sector",
-            default="state",
-            options=PDICT,
-            label="Select Map Region",
-        ),
-        dict(
-            type="select",
-            name="src",
-            default="ncei_climate91",
+    ] = None
+    sector: Annotated[
+        str, SelectArg(options=PDICT, label="Select Map Region")
+    ] = "state"
+    src: Annotated[
+        str,
+        SelectArg(
             options=PDICT5,
-            label=(
-                "Select Climatology Source to Use (limits available variables)"
-            ),
+            label="Select Climatology Source to Use "
+            "(limits available variables)",
         ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State to Plot (when appropriate)",
-        ),
-        dict(
-            type="select",
-            name="opt",
-            options=PDICT2,
-            default="both",
-            label="Map Plot/Contour View Option",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT3,
-            default="total_precip",
-            label="Which Variable to Plot",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "ncei_climate91"
+    state: Annotated[
+        str, StateArg(label="Select State to Plot (when appropriate)")
+    ] = "IA"
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="Map Plot/Contour View Option")
+    ] = "both"
+    var: Annotated[
+        str, SelectArg(options=PDICT3, label="Which Variable to Plot")
+    ] = "total_precip"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"][:2]
-    varname = ctx["var"]
-    sector = ctx["sector"]
-    opt = ctx["opt"]
-    month = ctx["month"]
+    state = ctx.state[:2]
+    varname = ctx.var
+    sector = ctx.sector
+    opt = ctx.opt
+    month = ctx.month
     months = month2months(month)
 
     if len(months) == 1:
@@ -180,21 +172,21 @@ def plotter(ctx: dict):
         title = MDICT[month]
     params = {}
     dtlimiter = "extract(month from valid) = ANY(:months)"
-    if ctx.get("sdate") is not None and ctx.get("edate") is not None:
-        if ctx["sdate"] > ctx["edate"]:
+    if ctx.sdate is not None and ctx.edate is not None:
+        if ctx.sdate > ctx.edate:
             dtlimiter = "(valid >= :sdate or valid <= :edate)"
         else:
             dtlimiter = "valid >= :sdate and valid <= :edate"
-        params["sdate"] = ctx["sdate"]
-        params["edate"] = ctx["edate"]
-        title = f"{ctx['sdate']:%b %-d} thru {ctx['edate']:%b %d}"
+        params["sdate"] = ctx.sdate
+        params["edate"] = ctx.edate
+        title = f"{ctx.sdate:%b %-d} thru {ctx.edate:%b %d}"
 
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
         state=state,
         axisbg="white",
-        title=f"{PDICT5[ctx['src']]} {PDICT3[varname]} for {title}",
+        title=f"{PDICT5[ctx.src]} {PDICT3[varname]} for {title}",
         nocaption=True,
     )
     bnds = mp.panels[0].get_extent(crs=LATLON)
@@ -209,9 +201,9 @@ def plotter(ctx: dict):
     )
 
     joincol = "id"
-    if ctx["src"] == "ncdc_climate81":
+    if ctx.src == "ncdc_climate81":
         joincol = "ncdc81"
-    elif ctx["src"] == "ncei_climate91":
+    elif ctx.src == "ncei_climate91":
         joincol = "ncei91"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -248,7 +240,7 @@ def plotter(ctx: dict):
             """,
                 joincol=joincol,
                 dtlimiter=dtlimiter,
-                table=ctx["src"],
+                table=ctx.src,
             ),
             conn,
             params=params,
@@ -256,7 +248,7 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
-    df = df[pd.notna(df[varname]) & (df["max_years"] >= QUORUM[ctx["src"]])]
+    df = df[pd.notna(df[varname]) & (df["max_years"] >= QUORUM[ctx.src])]
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
     # Total hack for snow
@@ -275,7 +267,7 @@ def plotter(ctx: dict):
             df[varname].values,
             levels,
             units=UNITS.get(varname, "F"),
-            cmap=get_cmap(ctx["cmap"]),
+            cmap=get_cmap(ctx.cmap),
             extend="both",
             clip_on=False,
         )

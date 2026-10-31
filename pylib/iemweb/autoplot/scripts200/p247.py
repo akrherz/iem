@@ -28,8 +28,9 @@ Central Region NWS maintains a
 this app and provides a table of stats.</p>
 """
 
-from datetime import UTC
+from datetime import UTC, datetime
 from io import StringIO
+from typing import Annotated
 
 import geopandas as gpd
 import pandas as pd
@@ -41,6 +42,9 @@ from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import MapPlot
 from pyiem.reference import SECTORS_NAME, Z_OVERLAY2, state_names
 from pyiem.util import utc
+
+from iemweb.autoplot.description import DateTimeArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 # shared with 224
 PDICT = {
@@ -56,52 +60,47 @@ PDICT3 = {
     "no": "No. Do not show counties",
 }
 
+SECTORS = {**SECTORS_NAME, "nws": "NWS All", **state_names}
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["defaults"] = {"_r": None}  # disables
-    sectors = SECTORS_NAME.copy()
-    sectors["nws"] = "NWS All"
-    sectors.update(state_names)
-    desc["arguments"] = [
-        {
-            "type": "datetime",
-            "name": "valid",
-            "default": utc().strftime("%Y/%m/%d %H00"),
-            "label": "Valid Timestamp (UTC):",
-            "min": "1986/01/01 0000",
-        },
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "active",
-            "name": "opt",
-            "label": "How to consider if an event is active [see footnote]",
-        },
-        {
-            "type": "select",
-            "options": sectors,
-            "name": "csector",
-            "default": "nws",
-            "label": "Select state/sector",
-        },
-        {
-            "type": "select",
-            "options": PDICT2,
-            "name": "add",
-            "default": "none",
-            "label": "Include Statistics in Legend (slows down plot)",
-        },
-        {
-            "type": "select",
-            "options": PDICT3,
-            "name": "sc",
-            "default": "yes",
-            "label": "Show Counties",
-        },
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Valid Timestamp (UTC):",
+            min="1986/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d %H00"),
+        ),
     ]
-    return desc
+    opt: Annotated[
+        str,
+        SelectArg(
+            options=PDICT,
+            label="How to consider if an event is active [see footnote]",
+        ),
+    ] = "active"
+    csector: Annotated[
+        str, SelectArg(options=SECTORS, label="Select state/sector")
+    ] = "nws"
+    add: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="Include Statistics in Legend (slows down plot)",
+        ),
+    ] = "none"
+    sc: Annotated[str, SelectArg(options=PDICT3, label="Show Counties")] = (
+        "yes"
+    )
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", defaults={"_r": None}
+    )
 
 
 def plotsbw(mp, df: gpd.GeoDataFrame):
@@ -232,10 +231,10 @@ def plotdf(mp, df: gpd.GeoDataFrame):
             )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=UTC)
-    isscol = "issue" if ctx["opt"] == "within" else "product_issue"
+    valid = ctx.valid.replace(tzinfo=UTC)
+    isscol = "issue" if ctx.opt == "within" else "product_issue"
     with get_sqlalchemy_conn("postgis") as conn:
         ugcdf = gpd.read_postgis(
             sql_helper(
@@ -290,9 +289,9 @@ def plotter(ctx: dict):
     )
 
     if not ugcdf.empty:
-        if ctx["add"] == "stats" and valid > utc(2005, 10, 1):
+        if ctx.add == "stats" and valid > utc(2005, 10, 1):
             uri = (
-                f"http://iem.local/plotting/auto/plot/224/opt:{ctx['opt']}::"
+                f"http://iem.local/plotting/auto/plot/224/opt:{ctx.opt}::"
                 f"valid:{valid:%Y-%m-%d%%20%H%M}.csv"
             )
             with requests.Session() as client:
@@ -315,6 +314,6 @@ def plotter(ctx: dict):
         plotdf(mp, ugcdf)
         if not sbwdf.empty:
             plotsbw(mp, sbwdf)
-    if ctx["sc"] == "yes":
+    if ctx.sc == "yes":
         mp.drawcounties()
     return mp.fig

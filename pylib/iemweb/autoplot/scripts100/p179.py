@@ -11,7 +11,9 @@ provide current frequencies / probabilities of what could potentially
 happen this year.
 """
 
+import datetime as dt
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -21,52 +23,50 @@ from pyiem.plot import figure, get_cmap
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    IntArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="gddbase",
-            default=2300,
-            label="Growing Degree Days to Accumulate:",
-        ),
-        dict(
-            type="int",
-            name="base",
-            default=50,
-            label="Growing Degree Day Base (F)",
-        ),
-        dict(
-            type="int",
-            name="ceil",
-            default=86,
-            label="Growing Degree Day Ceiling (F)",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    gddbase: Annotated[
+        int, IntArg(label="Growing Degree Days to Accumulate:")
+    ] = 2300
+    base: Annotated[int, IntArg(label="Growing Degree Day Base (F)")] = 50
+    ceil: Annotated[int, IntArg(label="Growing Degree Day Ceiling (F)")] = 86
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Retroactive Date:",
             min="1893/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
-    gddbase = ctx["gddbase"]
-    base = ctx["base"]
-    ceil = ctx["ceil"]
-    today: date = ctx["date"]
+    station = ctx.station
+    gddbase = ctx.gddbase
+    base = ctx.base
+    ceil = ctx.ceil
+    today: date = ctx.date
     bs = ctx["_nt"].sts[station]["archive_begin"]
     byear = bs.year
     eyear = today.year + 1
@@ -133,14 +133,14 @@ def plotter(ctx: dict, conn: Connection | None = None):
     probs = np.where(probs < 0.1, -1, probs)
     scenario_probs = np.where(scenario_probs < 0.1, -1, scenario_probs)
     title = (
-        f"({byear}-{eyear - 1}) {ctx['_sname']}:: GDDs\n"
+        f"({byear}-{eyear - 1}) {ctx.sname}:: GDDs\n"
         f"Frequency [%] of reaching {gddbase:.0f} GDDs "
         f"({base:.0f}/{ceil:.0f}) prior to first freeze"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(1, 2, sharey=True)
 
-    cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
+    cmap = get_cmap(ctx.cmap).with_extremes(under="white")
     norm = mpcolors.BoundaryNorm(np.arange(0, 101, 5), cmap.N)
 
     ax[0].imshow(

@@ -4,6 +4,7 @@ values along with vector-averaged average wind direction.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from metpy.calc import wind_components, wind_direction
@@ -13,36 +14,35 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value, drct2text
 
+from iemweb.autoplot.description import PlotDescription, SelectArg, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
+
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
 UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            name="units",
-            default="mph",
-            options=UNITS,
-            label="Units of Average Wind Speed",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    units: Annotated[
+        str, SelectArg(options=UNITS, label="Units of Average Wind Speed")
+    ] = "mph"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    units = ctx["units"]
+    station = ctx.zstation
+    units = ctx.units
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             """
@@ -79,7 +79,7 @@ def plotter(ctx: dict):
     ).m
     maxval = grp[f"sped_{units}"].max()
     title = (
-        f"{ctx['_sname']} [{df['ts'].min().year}-{df['ts'].max().year}]\n"
+        f"{ctx.sname} [{df['ts'].min().year}-{df['ts'].max().year}]\n"
         "Monthly Average Wind Speed and Vector Average Direction"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

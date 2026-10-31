@@ -16,6 +16,7 @@ GDD Climatology.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -24,26 +25,34 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import DateArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
+from iemweb.autoplot.scripts.p9 import Params as ParamsP9
 from iemweb.autoplot.scripts.p9 import get_df
 from iemweb.json.climodat_dd import run as climodat_dd_run
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "date",
-            "default": f"{date.today() - timedelta(days=7):%Y/%m/%d}",
-            "name": "sdate",
-            "label": "Select start date to accumulate GDDs",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sdate: Annotated[
+        date,
+        DateArg(
+            label="Select start date to accumulate GDDs",
+            default=lambda: f"{date.today() - timedelta(days=7):%Y/%m/%d}",
+        ),
     ]
-    return desc
 
 
-def get_obsdf(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_obsdf(ctx: Params):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -58,14 +67,14 @@ def get_obsdf(ctx):
             index_col="day",
             parse_dates=["day"],
             params={
-                "station": ctx["station"],
-                "sts": ctx["sdate"],
+                "station": ctx.station,
+                "sts": ctx.sdate,
             },
         )
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_obsdf(ctx)
     # Account for morning obs
@@ -75,10 +84,10 @@ def plotter(ctx: dict):
         if cnt / len(df.index) > 0.5:
             is_morning = True
     # Sub-optimal need to actually have data.
-    edate = ctx["sdate"] + timedelta(days=7)
+    edate = ctx.sdate + timedelta(days=7)
     data = climodat_dd_run(
-        ctx["station"],
-        ctx["sdate"],
+        ctx.station,
+        ctx.sdate,
         edate,
         50,
         86,
@@ -103,17 +112,17 @@ def plotter(ctx: dict):
     df["sday"] = df.index.strftime("%m%d")
 
     climodf = get_df(
-        {
-            "station": ctx["station"],
-            "network": f"{ctx['station'][:2]}CLIMATE",
-            "year": 2023,
-            "sday": df.index.to_pydatetime()[0],
-            "eday": df.index.to_pydatetime()[-1],
-            "var": "gdd",
-            "base": 50,
-            "ceiling": 86,
-            "w": "ytd",
-        }
+        ParamsP9(
+            station=ctx.station,
+            network=f"{ctx.station[:2]}CLIMATE",
+            year=2023,
+            sday=df.index.to_pydatetime()[0],
+            eday=df.index.to_pydatetime()[-1],
+            var="gdd",
+            base=50,
+            ceiling=86,
+            w="ytd",
+        )
     )
     df = df.merge(climodf, left_on="sday", right_index=True)
 
@@ -122,7 +131,7 @@ def plotter(ctx: dict):
     fig = figure(
         title=(
             f"({df.index[0]:%-d %b %Y}-{df.index[-1]:%-d %b %Y}) "
-            f"{ctx['_sname']}:: Growing Degree Days (50/86)"
+            f"{ctx.sname}:: Growing Degree Days (50/86)"
         ),
         subtitle=(
             "Based on Observations, GFS Operational Forecast, "

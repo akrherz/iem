@@ -3,6 +3,7 @@ This chart presents the year that the present day climatology record resides.
 """
 
 import calendar
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -12,19 +13,25 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import CmapArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def magic(fig, ax, df, colname, title, ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def magic(fig, ax, df, colname, title, ctx: Params):
     """You can do magic"""
     df2 = df[df[colname] == 1]
 
@@ -39,7 +46,7 @@ def magic(fig, ax, df, colname, title, ctx):
     ylim = [df["year"].min() - 1, df["year"].max() + 1]
     year0 = ylim[0] - (ylim[0] % 10)
     year1 = ylim[1] + (10 - ylim[1] % 10)
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     norm = mpcolors.BoundaryNorm(np.arange(year0, year1 + 1, 10), cmap.N)
     ax.scatter(df2["doy"], df2["year"], color=cmap(norm(df2["year"].values)))
     ax.set_yticks(np.arange(year0, year1, 20))
@@ -59,9 +66,9 @@ def magic(fig, ax, df, colname, title, ctx):
     sideax.set_xlabel("Decade\nCount")
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -93,7 +100,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    title = f"{ctx['_sname']} Year of Daily Records, ties included"
+    title = f"{ctx.sname} Year of Daily Records, ties included"
     fig = figure(apctx=ctx, title=title)
     axwidth = 0.265
     x0 = 0.04

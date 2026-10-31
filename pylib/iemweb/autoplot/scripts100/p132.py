@@ -17,6 +17,7 @@ shown in the 'Which Metric to Summarize' option:
 
 import calendar
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -24,6 +25,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -65,48 +68,38 @@ TRANSLATION = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="total_precip",
-            label="Which Metric to Summarize",
-            options=METRICS,
-        ),
-        {
-            "type": "select",
-            "name": "period",
-            "default": "daily",
-            "label": "Period for Computation",
-            "options": PDICT,
-        },
-        dict(
-            type="int",
-            name="days",
-            default=1,
-            label="Over how many consecutive days (ignored for monthly)",
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(label="Which Metric to Summarize", options=METRICS)
+    ] = "total_precip"
+    period: Annotated[
+        str, SelectArg(label="Period for Computation", options=PDICT)
+    ] = "daily"
+    days: Annotated[
+        int,
+        IntArg(label="Over how many consecutive days (ignored for monthly)"),
+    ] = 1
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
 
 
-def get_dataframe(ctx: dict) -> pd.DataFrame:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_dataframe(ctx: Params) -> pd.DataFrame:
     """Figure out what we want from the database."""
-    varname = ctx["var"]
-    station = ctx["station"]
-    days = ctx["days"]
-    month = ctx["month"]
+    varname = ctx.var
+    station = ctx.station
+    days = ctx.days
+    month = ctx.month
     months = month2months(month)
     sorder = "ASC" if varname == "min_greatest_low" else "DESC"
     sql = """
@@ -131,7 +124,7 @@ def get_dataframe(ctx: dict) -> pd.DataFrame:
         ORDER by {varname} {sorder} LIMIT 10
     """
     yearagg = "year"
-    if ctx["period"] == "monthly":
+    if ctx.period == "monthly":
         if month == "winter":
             yearagg = "case when month = 12 then year + 1 else year end"
         sql = """
@@ -167,12 +160,12 @@ def get_dataframe(ctx: dict) -> pd.DataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
-    varname = ctx["var"]
-    days = ctx["days"]
+    station = ctx.station
+    month = ctx.month
+    varname = ctx.var
+    days = ctx.days
 
     df = get_dataframe(ctx)
     ylabels = []
@@ -182,7 +175,7 @@ def plotter(ctx: dict):
     for _, row in df.iterrows():
         # no strftime support for old days, so we hack at it
         lbl = fmt % (row[varname],)
-        if ctx["period"] == "monthly":
+        if ctx.period == "monthly":
             if row["start_date"].month == row["end_date"].month:
                 lbl += (
                     f" -- {calendar.month_abbr[row['end_date'].month]} "
@@ -226,10 +219,10 @@ def plotter(ctx: dict):
     tt = f"{METRICS[varname]} [days={days}]"
     if days == 1:
         tt = f"Single Day {TRANSLATION[varname]}"
-    title = f"{ctx['_sname']}:: Top 10 Events"
+    title = f"{ctx.sname}:: Top 10 Events"
     subtitle = f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.now().year})"
-    if ctx["period"] == "monthly":
-        title = f"{ctx['_sname']}:: Top 10 Monthly"
+    if ctx.period == "monthly":
+        title = f"{ctx.sname}:: Top 10 Monthly"
         subtitle = (
             f"{METRICS[varname]} ({MDICT[month]}) "
             f"({ab.year}-{datetime.now().year})"

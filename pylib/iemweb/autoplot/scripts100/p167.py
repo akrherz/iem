@@ -23,6 +23,7 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -34,41 +35,45 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="month",
-            name="month",
-            label="Select Month:",
-            default=today.month,
-        ),
-        dict(
-            type="year",
-            name="year",
-            label="Select Year:",
-            default=today.year,
-            min=1970,
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: date.today().month),
+    ]
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year:", min=1970, default=lambda: date.today().year
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    month = ctx["month"]
+    station = ctx.zstation
+    year = ctx.year
+    month = ctx.month
 
     tzname = ctx["_nt"].sts[station]["tzname"]
     tzinfo = ZoneInfo(tzname)
@@ -138,7 +143,7 @@ def plotter(ctx: dict):
 
     df["flstatus"] = conds
     title = (
-        f"{ctx['_sname']}:: {sts:%b %Y} Flight Category\n"
+        f"{ctx.sname}:: {sts:%b %Y} Flight Category\n"
         "based on Hourly METAR Cloud Amount/Level and Visibility Reports"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

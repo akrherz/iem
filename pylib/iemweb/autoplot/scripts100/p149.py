@@ -16,6 +16,7 @@ year's data.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -25,77 +26,73 @@ from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    sts = today - timedelta(days=180)
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(type="int", name="days", default=91, label="Number of Days #1"),
-        dict(
-            type="int",
-            name="days2",
-            default=0,
-            label="Number of Days #2 (0 disables)",
-        ),
-        dict(
-            type="int",
-            name="days3",
-            default=0,
-            label="Number of Days #3 (0 disables)",
-        ),
-        dict(
-            type="year",
-            name="year2",
-            default=2004,
-            optional=True,
-            label="Compare with year (optional):",
-        ),
-        dict(
-            type="year",
-            name="year3",
-            default=2012,
-            optional=True,
-            label="Compare with year (optional)",
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=sts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    days: Annotated[int, IntArg(label="Number of Days #1")] = 91
+    days2: Annotated[int, IntArg(label="Number of Days #2 (0 disables)")] = 0
+    days3: Annotated[int, IntArg(label="Number of Days #3 (0 disables)")] = 0
+    year2: Annotated[
+        int | None,
+        YearArg(label="Compare with year (optional):", default=2004),
+    ] = None
+    year3: Annotated[
+        int | None, YearArg(label="Compare with year (optional)", default=2012)
+    ] = None
+    sdate: Annotated[
+        date,
+        DateArg(
             min="1893/01/01",
             label="Start Date of Plot",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            min="1893/01/01",
-            label="End Date of Plot",
+            default=lambda: (date.today() - timedelta(days=180)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            min="1893/01/01",
+            label="End Date of Plot",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
+        ),
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    days = ctx["days"]
+    station = ctx.station
+    days = ctx.days
     if days < 1:
         raise IncompleteWebRequest("Days argument needs to be positive.")
-    days2 = ctx["days2"]
+    days2 = ctx.days2
     _days2 = days2 if days2 > 0 else 1
-    days3 = ctx["days3"]
+    days3 = ctx.days3
     _days3 = days3 if days3 > 0 else 1
-    sts = ctx["sdate"]
-    ets = ctx["edate"]
+    sts = ctx.sdate
+    ets = ctx.edate
     if ets < sts:
         sts, ets = ets, sts
     yrrange = ets.year - sts.year
-    year2 = ctx.get("year2")  # could be null!
-    year3 = ctx.get("year3")  # could be null!
+    year2 = ctx.year2  # could be null!
+    year3 = ctx.year3  # could be null!
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -148,7 +145,7 @@ def plotter(ctx: dict):
     df["aridity3"] = df["t3"] - df["p3"]
     title = "" if year2 is None else f"{days} Day"
     title = (
-        f"{ctx['_sname']} {title} Aridity Index\n"
+        f"{ctx.sname} {title} Aridity Index\n"
         "Std. High Temp Departure minus Std. Precip Departure"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

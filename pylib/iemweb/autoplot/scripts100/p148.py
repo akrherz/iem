@@ -7,7 +7,9 @@ prior to the holiday's inception.
 """
 
 import calendar
+import datetime as dt
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from dateutil.easter import easter as get_easter
@@ -19,6 +21,14 @@ from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "easter": "Easter (Western Church Dates)",
@@ -45,47 +55,40 @@ VARFORMAT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="date",
-            default="memorial",
-            options=PDICT,
-            label="Which date/holiday to plot?",
-        ),
-        dict(
-            type="sday",
-            name="thedate",
-            default="0101",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    date: Annotated[
+        str, SelectArg(options=PDICT, label="Which date/holiday to plot?")
+    ] = "memorial"
+    thedate: Annotated[
+        dt.date,
+        SDayArg(
             label="Same date each year to plot (when selected above):",
+            default="0101",
         ),
-        dict(
-            type="int",
-            optional=True,
-            name="offset",
-            default=1,
-            label="Number of offset days from chosen date (minus is before)",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which variable to plot?",
-            options=PDICT2,
-        ),
-        {
-            "type": "year",
-            "default": 1800,
-            "min": 1800,
-            "name": "syear",
-            "label": "Start year of plot (if data exists):",
-        },
     ]
-    return desc
+    offset: Annotated[
+        int | None,
+        IntArg(
+            label="Number of offset days from chosen date (minus is before)",
+            default=1,
+        ),
+    ] = None
+    var: Annotated[
+        str, SelectArg(label="Which variable to plot?", options=PDICT2)
+    ] = "high"
+    syear: Annotated[
+        int, YearArg(min=1800, label="Start year of plot (if data exists):")
+    ] = 1800
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def mlk():
@@ -157,13 +160,13 @@ def memorial_days():
     return days
 
 
-def add_context(ctx):
+def add_context(ctx: Params):
     """Do the dirty work"""
-    station = ctx["station"]
-    ctx["varname"] = ctx["var"]
-    thedate = ctx["thedate"]
-    dt = ctx["date"]
-    offset = ctx.get("offset")
+    station = ctx.station
+    ctx["varname"] = ctx.var
+    thedate = ctx.thedate
+    dt = ctx.date
+    offset = ctx.offset
     dtoff = None
     if offset is not None and -367 < offset < 367:
         dtoff = timedelta(days=offset)
@@ -217,10 +220,10 @@ def add_context(ctx):
             )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
-    ctx["title"] = f"{ctx['_sname']} :: Daily {PDICT2[ctx['varname']]}"
+    ctx["title"] = f"{ctx.sname} :: Daily {PDICT2[ctx['varname']]}"
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Generate javascript (Highcharts) variant"""
     add_context(ctx)
     ctx["df"] = ctx["df"].reset_index()
@@ -262,7 +265,7 @@ def get_highcharts(ctx: dict) -> str:
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_context(ctx)
 
@@ -285,7 +288,7 @@ def plotter(ctx: dict):
         va="center",
     )
     ax.grid(True)
-    xmin = max(ctx["syear"], ctx["df"].index.values.min() - 1)
+    xmin = max(ctx.syear, ctx["df"].index.values.min() - 1)
     ax.set_xlim(xmin, ctx["df"].index.values.max() + 1)
     ax.set_ylabel(PDICT2[ctx["varname"]])
     if ctx["varname"] not in ["precip", "snow", "snowd"]:

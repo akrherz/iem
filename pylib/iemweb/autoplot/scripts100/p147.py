@@ -4,10 +4,19 @@ first station having a higher value than the second station.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    StationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "precip": "Precipitation",
@@ -17,47 +26,36 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station1",
-            default="IATAME",
-            label="Select Station #1:",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="station",
-            name="station2",
-            default="IATDSM",
-            label="Select Station #2:",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="select",
-            name="pvar",
-            default="high",
-            options=PDICT,
-            label="Which variable to plot?",
-        ),
-        dict(
-            type="float",
-            name="mag",
-            default="1",
-            label="By how much warmer [F] or wetter [inch]",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station1: Annotated[
+        str, StationArg(label="Select Station #1:", network="IACLIMATE")
+    ] = "IATAME"
+    station2: Annotated[
+        str, StationArg(label="Select Station #2:", network="IACLIMATE")
+    ] = "IATDSM"
+    pvar: Annotated[
+        str, SelectArg(options=PDICT, label="Which variable to plot?")
+    ] = "high"
+    mag: Annotated[
+        float, FloatArg(label="By how much warmer [F] or wetter [inch]")
+    ] = 1.0
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station1 = ctx["station1"]
-    station2 = ctx["station2"]
-    mag = ctx["mag"]
-    pvar = ctx["pvar"]
+    station1 = ctx.station1
+    station2 = ctx.station2
+    mag = ctx.mag
+    pvar = ctx.pvar
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(

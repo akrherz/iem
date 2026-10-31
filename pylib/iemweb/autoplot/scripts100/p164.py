@@ -8,12 +8,16 @@ temperature for that date are omitted.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.artist import setp
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "high": "High Temperature",
@@ -23,42 +27,46 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    sts = date.today() - timedelta(days=45)
-    ets = date.today() - timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="date",
-            name="sts",
-            default=sts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sts: Annotated[
+        date,
+        DateArg(
             label="Select Start Date (inclusive)",
             min="2007/01/09",
-        ),
-        dict(
-            type="date",
-            name="ets",
-            default=ets.strftime("%Y/%m/%d"),
-            label="Select End Date (inclusive)",
-            min="2007/01/09",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            options=MDICT,
-            label="Which Metric to Plot",
+            default=lambda: (date.today() - timedelta(days=45)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    ets: Annotated[
+        date,
+        DateArg(
+            label="Select End Date (inclusive)",
+            min="2007/01/09",
+            default=lambda: (date.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
+        ),
+    ]
+    var: Annotated[
+        str, SelectArg(options=MDICT, label="Which Metric to Plot")
+    ] = "high"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sts = ctx["sts"]
-    ets = ctx["ets"]
-    varname = ctx["var"]
+    sts = ctx.sts
+    ets = ctx.ets
+    varname = ctx.var
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             """

@@ -12,6 +12,7 @@ forward.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -19,6 +20,16 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -44,84 +55,70 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["cache"] = 86400
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    var: Annotated[str, SelectArg(options=PDICT2, label="Which Variable:")] = (
+        "tmpf"
+    )
+    w: Annotated[
+        str, SelectArg(label="Which statistic to plot:", options=PDICT3)
+    ] = "freq"
+    threshold: Annotated[
+        float,
+        FloatArg(
+            label="[For Frequency Option] Threshold "
+            "(Temperature in F, RH in %, precip in inch)"
         ),
-        dict(
-            type="select",
-            name="var",
-            default="tmpf",
-            options=PDICT2,
-            label="Which Variable:",
+    ] = 32
+    direction: Annotated[
+        str,
+        SelectArg(
+            label="[For Frequency Option] Threshold direction:", options=PDICT
         ),
-        dict(
-            type="select",
-            name="w",
-            default="freq",
-            label="Which statistic to plot:",
-            options=PDICT3,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=32,
-            label=(
-                "[For Frequency Option] Threshold "
-                "(Temperature in F, RH in %, precip in inch)"
-            ),
-        ),
-        dict(
-            type="select",
-            name="direction",
-            default="below",
-            label="[For Frequency Option] Threshold direction:",
-            options=PDICT,
-        ),
-        dict(
-            optional=True,
-            type="date",
-            name="sdate",
-            default="1900/01/01",
+    ] = "below"
+    sdate: Annotated[
+        date | None,
+        DateArg(
             label="Inclusive Start Local Date (optional):",
+            default="1900/01/01",
         ),
-        dict(
-            optional=True,
-            type="date",
-            name="edate",
-            default=date.today().strftime("%Y/%m/%d"),
+    ] = None
+    edate: Annotated[
+        date | None,
+        DateArg(
             label="Exclusive End Local Date (optional):",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
-    ]
-    return desc
+    ] = None
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def get_df(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_df(ctx: Params):
     """Get the dataframe with data."""
-    station = ctx["zstation"]
-    threshold = ctx["threshold"]
-    direction = ctx["direction"]
-    varname = ctx["var"]
+    station = ctx.zstation
+    threshold = ctx.threshold
+    direction = ctx.direction
+    varname = ctx.var
     mydir = "<" if direction == "below" else ">="
     timelimiter = ""
     if station not in ctx["_nt"].sts:
         raise NoDataFound("Unknown station metadata.")
     tzname = ctx["_nt"].sts[station]["tzname"]
-    if ctx.get("sdate"):
-        timelimiter += (
-            f" and valid at time zone '{tzname}' >= '{ctx['sdate']}'"
-        )
-    if ctx.get("edate"):
-        timelimiter += f" and valid at time zone '{tzname}' < '{ctx['edate']}'"
+    if ctx.sdate:
+        timelimiter += f" and valid at time zone '{tzname}' >= '{ctx.sdate}'"
+    if ctx.edate:
+        timelimiter += f" and valid at time zone '{tzname}' < '{ctx.edate}'"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -176,23 +173,23 @@ def get_df(ctx):
         units = "miles"
     df2 = df[~df["min_valid"].isna()]
     title = f"{PDICT[direction]} {threshold}{units}"
-    if ctx["w"] != "freq":
-        title = PDICT3[ctx["w"]]
+    if ctx.w != "freq":
+        title = PDICT3[ctx.w]
     ctx["title"] = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Hourly {PDICT2[varname]} {title} "
         f"({df2['min_valid'].min():%-d %b %Y}-"
         f"{df2['max_valid'].max():%-d %b %Y})"
     )
-    ctx["units"] = "%" if ctx["w"] == "freq" else UNITS[ctx["var"]]
+    ctx["units"] = "%" if ctx.w == "freq" else UNITS[ctx.var]
     ctx["ylabel"] = f"{ctx['_nt'].sts[station]['tzname']} Timezone"
     return df
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Do highcharts."""
     df = get_df(ctx)
-    data = df[["week", "hour", ctx["w"]]].values.tolist()
+    data = df[["week", "hour", ctx.w]].values.tolist()
     xlabels = [
         f"{dt:%b %-d}"
         for dt in pd.date_range("2000/1/1", "2000/12/31", freq="7D")
@@ -246,7 +243,7 @@ def get_highcharts(ctx: dict) -> str:
         }},
         colorAxis: {{
             min: 0,
-            max: {df[ctx["w"]].max() + 1},
+            max: {df[ctx.w].max() + 1},
             minColor: '#FFFFFF',
             maxColor: Highcharts.getOptions().colors[0]
         }},
@@ -274,14 +271,14 @@ def get_highcharts(ctx: dict) -> str:
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     data = np.ones((24, 53), "f") * -1
     df = get_df(ctx)
-    if df[ctx["w"]].max() == 0:
+    if df[ctx.w].max() == 0:
         raise NoDataFound("No data found for query")
     for _, row in df.iterrows():
-        data[int(row["hour"]), int(row["week"])] = row[ctx["w"]]
+        data[int(row["hour"]), int(row["week"])] = row[ctx.w]
     data = np.ma.masked_where(data <= 0, data)
     sts = datetime(2012, 1, 1)
     xticks = []
@@ -290,13 +287,13 @@ def plotter(ctx: dict):
         xticks.append(ts.timetuple().tm_yday / 7.0)
 
     (fig, ax) = figure_axes(title=ctx["title"], apctx=ctx)
-    cmap = get_cmap(ctx["cmap"]).with_extremes(bad="white")
-    if ctx["w"] != "freq" and ctx["var"] == "relh":
+    cmap = get_cmap(ctx.cmap).with_extremes(bad="white")
+    if ctx.w != "freq" and ctx.var == "relh":
         bins = np.arange(0, 101, 5, dtype="f")
-    elif df[ctx["w"]].min() < 5 and df[ctx["w"]].max() > 95:
+    elif df[ctx.w].min() < 5 and df[ctx.w].max() > 95:
         bins = np.arange(0, 101, 10, dtype="f")
     else:
-        bins = pretty_bins(df[ctx["w"]].min(), df[ctx["w"]].max())
+        bins = pretty_bins(df[ctx.w].min(), df[ctx.w].max())
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
     res = ax.imshow(
         data,

@@ -5,6 +5,7 @@ ISU Soil Moisture Network.
 
 import re
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -29,6 +30,14 @@ from pyiem.util import (
     utc,
 )
 
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
@@ -51,43 +60,45 @@ PLOTTYPES = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["frontend"] = "/agclimate/smts.php"
-    ets = datetime.now().replace(minute=0)
-    sts = ets - timedelta(days=7)
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            default="BOOI4",
-            label="Select Station:",
-            network="ISUSM",
-        ),
-        dict(
-            type="select",
-            name="opt",
-            default="1",
-            options=PLOTTYPES,
-            label="Select Plot Type:",
-        ),
-        dict(
-            type="datetime",
-            name="sts",
-            default=sts.strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(label="Select Station:", network="ISUSM")
+    ] = "BOOI4"
+    opt: Annotated[
+        str, SelectArg(options=PLOTTYPES, label="Select Plot Type:")
+    ] = "1"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start Time (Central Time):",
             min="2012/01/01 0000",
-        ),
-        dict(
-            type="datetime",
-            name="ets",
-            default=ets.strftime("%Y/%m/%d %H%M"),
-            label="End Time (Central Time):",
-            min="2012/01/01 0000",
+            default=lambda: (
+                datetime.now().replace(minute=0) - timedelta(days=7)
+            ).strftime("%Y/%m/%d %H%M"),
         ),
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Time (Central Time):",
+            min="2012/01/01 0000",
+            default=lambda: (
+                datetime.now().replace(minute=0).strftime("%Y/%m/%d %H%M")
+            ),
+        ),
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        frontend="/agclimate/smts.php",
+    )
 
 
 def make_valid_subtitle(df: pd.DataFrame):
@@ -100,10 +111,10 @@ def make_valid_subtitle(df: pd.DataFrame):
     )
 
 
-def make_inversion_timing(ctx):
+def make_inversion_timing(ctx: Params):
     """Generate an inversion plot"""
     # Rectify the start date to midnight
-    ctx["sts"] = ctx["sts"].replace(hour=0, minute=0)
+    ctx.sts = ctx.sts.replace(hour=0, minute=0)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -114,9 +125,9 @@ def make_inversion_timing(ctx):
             """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
         )
     if df.empty:
@@ -129,13 +140,13 @@ def make_inversion_timing(ctx):
         ),
     )
 
-    grid = np.ones(((ctx["ets"] - ctx["sts"]).days + 1, 1440)) * np.nan
+    grid = np.ones(((ctx.ets - ctx.sts).days + 1, 1440)) * np.nan
     df["minute"] = df["valid"].dt.hour * 60 + df["valid"].dt.minute
     # F
     df["day"] = (df["valid"] - df["valid"].iloc[0]).dt.days
     for _, row in df.iterrows():
         grid[row["day"], row["minute"]] = float(row["delta"])
-    title = f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries"
+    title = f"ISUSM Station: {ctx.sname} :: Inversion Timeseries"
     subtitle = "10 Foot Air Temperature minus 1.5 Foot Air Temperature (F)"
     fig, ax = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     clevs = np.arange(-2, 2.1, 0.2)
@@ -155,10 +166,10 @@ def make_inversion_timing(ctx):
         ).split("|")
     )
     ax.grid(True)
-    ax.set_xlabel(f"{ctx['sts'].year} Local Time (US Central)")
+    ax.set_xlabel(f"{ctx.sts.year} Local Time (US Central)")
 
     def custom(x, _pos=None):
-        dt = ctx["sts"] + timedelta(days=x)
+        dt = ctx.sts + timedelta(days=x)
         return dt.strftime("%-d %b")
 
     ax.yaxis.set_major_formatter(custom)
@@ -166,7 +177,7 @@ def make_inversion_timing(ctx):
     return fig, df
 
 
-def make_inversion_plot(ctx):
+def make_inversion_plot(ctx: Params):
     """Generate an inversion plot"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -175,9 +186,9 @@ def make_inversion_plot(ctx):
         valid >= :sts and valid < :ets ORDER by valid ASC"""),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
         )
     if df.empty:
@@ -202,7 +213,7 @@ def make_inversion_plot(ctx):
     )
     ax.grid(True)
     ax.set_ylabel("Air Temperature °F")
-    ax.set_title(f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries")
+    ax.set_title(f"ISUSM Station: {ctx.sname} :: Inversion Timeseries")
     apply_xaxis_formatting(ax, ctx)
     ax.legend(loc="best", ncol=3, fontsize=10)
 
@@ -250,7 +261,7 @@ def make_inversion_plot(ctx):
     return fig, df
 
 
-def make_daily_pet_plot(ctx):
+def make_daily_pet_plot(ctx: Params):
     """Generate a daily PET plot"""
     with get_sqlalchemy_conn("isuag") as conn:
         res = conn.execute(
@@ -268,9 +279,9 @@ def make_daily_pet_plot(ctx):
         JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
         """),
             {
-                "station": ctx["station"],
-                "sts": ctx["sts"].date(),
-                "ets": ctx["ets"].date(),
+                "station": ctx.station,
+                "sts": ctx.sts.date(),
+                "ets": ctx.ets.date(),
             },
         )
         dates = []
@@ -286,7 +297,7 @@ def make_daily_pet_plot(ctx):
         raise NoDataFound("No Data Found!")
 
     title = (
-        f"ISUSM Station: {ctx['_sname']} Timeseries\n"
+        f"ISUSM Station: {ctx.sname} Timeseries\n"
         "Potential Evapotranspiration, Climatology from Ames 1986-2014"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -309,12 +320,12 @@ def make_daily_pet_plot(ctx):
     return fig, df
 
 
-def make_daily_rad_plot(ctx):
+def make_daily_rad_plot(ctx: Params):
     """Generate a daily radiation plot"""
     # Get clear sky theory
     theory = meteorology.clearsky_shortwave_irradiance_year(
-        ctx["_nt"].sts[ctx["station"]]["lat"],
-        ctx["_nt"].sts[ctx["station"]]["elevation"],
+        ctx["_nt"].sts[ctx.station]["lat"],
+        ctx["_nt"].sts[ctx.station]["elevation"],
     )
     maxes = pd.DataFrame({"tmax": theory, "jday": range(1, 366)})
 
@@ -327,9 +338,9 @@ def make_daily_rad_plot(ctx):
             """,
             conn,
             params=(
-                ctx["station"],
-                ctx["sts"].strftime("%Y-%m-%d"),
-                ctx["ets"].strftime("%Y-%m-%d"),
+                ctx.station,
+                ctx.sts.strftime("%Y-%m-%d"),
+                ctx.ets.strftime("%Y-%m-%d"),
             ),
             parse_dates="valid",
             index_col="valid",
@@ -344,9 +355,7 @@ def make_daily_rad_plot(ctx):
     df["jday"] = df["valid"].dt.strftime("%j").astype(int)
     df = df.join(maxes, on="jday", suffixes=("_", ""))
 
-    title = (
-        f"ISUSM Station: {ctx['_sname']} Timeseries\n Daily Solar Radiation"
-    )
+    title = f"ISUSM Station: {ctx.sname} Timeseries\n Daily Solar Radiation"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         df["valid"].to_numpy(),
@@ -374,7 +383,7 @@ def make_daily_rad_plot(ctx):
     return fig, df
 
 
-def make_daily_rainfall_soil_rh(ctx):
+def make_daily_rainfall_soil_rh(ctx: Params):
     """Give them what they want."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -386,16 +395,16 @@ def make_daily_rainfall_soil_rh(ctx):
             """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"].strftime("%Y-%m-%d"),
-                "ets": ctx["ets"].strftime("%Y-%m-%d"),
+                "station": ctx.station,
+                "sts": ctx.sts.strftime("%Y-%m-%d"),
+                "ets": ctx.ets.strftime("%Y-%m-%d"),
             },
             index_col="valid",
         )
     if df.empty:
         raise NoDataFound("No Data Found for Query")
 
-    title = f"ISUSM Station: {ctx['_sname']} Timeseries"
+    title = f"ISUSM Station: {ctx.sname} Timeseries"
     subtitle = "Daily Precipitation, 4 Inch Soil Temperature, and Avg RH"
 
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
@@ -445,7 +454,7 @@ def make_daily_rainfall_soil_rh(ctx):
     return fig, df
 
 
-def plot_daily_hilo_rainfall(ctx):
+def plot_daily_hilo_rainfall(ctx: Params):
     """Give them what they want."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -456,9 +465,9 @@ def plot_daily_hilo_rainfall(ctx):
             """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"].strftime("%Y-%m-%d"),
-                "ets": ctx["ets"].strftime("%Y-%m-%d"),
+                "station": ctx.station,
+                "sts": ctx.sts.strftime("%Y-%m-%d"),
+                "ets": ctx.ets.strftime("%Y-%m-%d"),
             },
             index_col="valid",
         )
@@ -468,7 +477,7 @@ def plot_daily_hilo_rainfall(ctx):
     df["high"] = c2f(df["tair_c_max_qc"].to_numpy())
     df["low"] = c2f(df["tair_c_min_qc"].to_numpy())
 
-    title = f"ISUSM Station: {ctx['_sname']} Timeseries"
+    title = f"ISUSM Station: {ctx.sname} Timeseries"
     subtitle = "Daily High/Low Temperature and Precipitation"
 
     fig, ax = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
@@ -535,7 +544,7 @@ def plot_daily_hilo_rainfall(ctx):
     return fig, df
 
 
-def make_daily_plot(ctx):
+def make_daily_plot(ctx: Params):
     """Generate a daily plot of max/min 4 inch soil temps"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -547,9 +556,9 @@ def make_daily_plot(ctx):
         """,
             conn,
             params=(
-                ctx["station"],
-                ctx["sts"].strftime("%Y-%m-%d 00:00"),
-                ctx["ets"].strftime("%Y-%m-%d 23:59"),
+                ctx.station,
+                ctx.sts.strftime("%Y-%m-%d 00:00"),
+                ctx.ets.strftime("%Y-%m-%d 23:59"),
             ),
             index_col="date",
         )
@@ -560,7 +569,7 @@ def make_daily_plot(ctx):
     maxs = c2f(df["max"].to_numpy())
     avgs = c2f(df["avg"].to_numpy())
     title = (
-        f"ISUSM Station: {ctx['_sname']} Timeseries\n"
+        f"ISUSM Station: {ctx.sname} Timeseries\n"
         "Daily Max/Min/Avg 4 inch Soil Temperatures"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -591,7 +600,7 @@ def make_daily_plot(ctx):
     return fig, df
 
 
-def make_hourly_plot(ctx, vname):
+def make_hourly_plot(ctx: Params, vname):
     """Generate a plot of battery"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -604,9 +613,9 @@ def make_hourly_plot(ctx, vname):
             ),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
         )
     title = "Battery Voltage"
@@ -614,7 +623,7 @@ def make_hourly_plot(ctx, vname):
     if vname == "encrh_avg":
         title = "Enclosure Relative Humidity"
         label = "Relative Humidity [%]"
-    title = f"ISUSM Station: {ctx['_sname']} Timeseries\n{title}"
+    title = f"ISUSM Station: {ctx.sname} Timeseries\n{title}"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.plot(df["valid"], df[vname])
     ax.grid(True)
@@ -623,7 +632,7 @@ def make_hourly_plot(ctx, vname):
     return fig, df
 
 
-def make_vsm_histogram_plot(ctx):
+def make_vsm_histogram_plot(ctx: Params):
     """Option 6"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -639,13 +648,13 @@ def make_vsm_histogram_plot(ctx):
             where station = %s and valid >= %s and valid < %s
         """,
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params=(ctx.station, ctx.sts, ctx.ets),
             index_col=None,
         )
     title = (
-        f"ISUSM Station: {ctx['_sname']} VWC Histogram\n"
-        f"For un-frozen condition between {ctx['sts']:%-d %b %Y} "
-        f"and {ctx['ets']:%-d %b %Y}"
+        f"ISUSM Station: {ctx.sname} VWC Histogram\n"
+        f"For un-frozen condition between {ctx.sts:%-d %b %Y} "
+        f"and {ctx.ets:%-d %b %Y}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(3, 1, sharex=True)
@@ -667,7 +676,7 @@ def make_vsm_histogram_plot(ctx):
     return fig, df
 
 
-def make_daily_water_change_plot(ctx):
+def make_daily_water_change_plot(ctx: Params):
     """Option 7"""
     # Get daily precip
     with get_sqlalchemy_conn("isuag") as conn:
@@ -679,9 +688,9 @@ def make_daily_water_change_plot(ctx):
                 """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"].date(),
-                "ets": ctx["ets"].date(),
+                "station": ctx.station,
+                "sts": ctx.sts.date(),
+                "ets": ctx.ets.date(),
             },
             index_col="valid",
             parse_dates="valid",
@@ -711,9 +720,9 @@ def make_daily_water_change_plot(ctx):
         """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col=None,
             parse_dates="valid",
@@ -731,9 +740,9 @@ def make_daily_water_change_plot(ctx):
     df["depth"] = df["v12"] * l1 + df["v24"] * l2 - (l1 + l2) * 0.1
 
     title = (
-        f'ISUSM Station: {ctx["_sname"]} :: Daily Soil (6-30") Water\n'
-        f"For un-frozen condition between {ctx['sts']:%-d %b %Y} and "
-        f"{ctx['ets']:%-d %b %Y}"
+        f'ISUSM Station: {ctx.sname} :: Daily Soil (6-30") Water\n'
+        f"For un-frozen condition between {ctx.sts:%-d %b %Y} and "
+        f"{ctx.ets:%-d %b %Y}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
@@ -762,7 +771,7 @@ def make_daily_water_change_plot(ctx):
     ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax[1].grid(True)
 
-    if (ctx["ets"] - ctx["sts"]).total_seconds() < (60 * 86400):
+    if (ctx.ets - ctx.sts).total_seconds() < (60 * 86400):
         ylim = ax[1].get_ylim()[1]
         # Attempt to place precip text above this plot
         pdf["pday"] = pdf["rain_in_tot_qc"].to_numpy()
@@ -788,7 +797,7 @@ def make_daily_water_change_plot(ctx):
     return fig, df
 
 
-def plot_sm(ctx: dict):
+def plot_sm(ctx: Params):
     """Just soil moisture."""
     with get_sqlalchemy_conn("isuag") as conn:
         # Find all columns in the sm_hourly table that have vwc in them
@@ -812,9 +821,9 @@ def plot_sm(ctx: dict):
             ),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col="valid",
         )
@@ -824,7 +833,7 @@ def plot_sm(ctx: dict):
 
     (fig, ax) = figure_axes(
         apctx=ctx,
-        title=f"{ctx['_sname']} Soil Moisture Time Series",
+        title=f"{ctx.sname} Soil Moisture Time Series",
         subtitle=make_valid_subtitle(df),
     )
 
@@ -909,7 +918,7 @@ def plot_sm(ctx: dict):
         loc="lower center",
         fontsize=9,
     )
-    days = (ctx["ets"] - ctx["sts"]).days
+    days = (ctx.ets - ctx.sts).days
     if days >= 3:
         interval = max(int(days / 7), 1)
         ax.xaxis.set_major_locator(
@@ -929,7 +938,7 @@ def plot_sm(ctx: dict):
     return fig, df
 
 
-def plot4iemre(ctx: dict, lon: float, lat: float):
+def plot4iemre(ctx: Params, lon: float, lat: float):
     """Four inch soil temperature diagnostic"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -940,9 +949,9 @@ def plot4iemre(ctx: dict, lon: float, lat: float):
             ),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col="valid",
         )
@@ -950,13 +959,13 @@ def plot4iemre(ctx: dict, lon: float, lat: float):
         raise NoDataFound("No Data Found for This Plot.")
 
     i, j = get_nav("IEMRE", "conus").find_ij(lon, lat)
-    with ncopen(get_hourly_ncname(ctx["sts"].year), timeout=300) as nc:
+    with ncopen(get_hourly_ncname(ctx.sts.year), timeout=300) as nc:
         times = nc.variables["time"][:]
-        time0 = utc(ctx["sts"].year, 1, 1)
+        time0 = utc(ctx.sts.year, 1, 1)
         vtimes = [time0 + timedelta(hours=int(t)) for t in times]
         t4 = convert_value(nc.variables["soil4t"][:, j, i], "degK", "degF")
 
-    title = f"ISUSM Station: {ctx['_sname']} :: Four inch soil temp diagnostic"
+    title = f"ISUSM Station: {ctx.sname} :: Four inch soil temp diagnostic"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     ax.plot(vtimes, t4, label="IEMRE Hourly")
@@ -975,21 +984,21 @@ def plot4iemre(ctx: dict, lon: float, lat: float):
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle="--", lw=2, color="tan")
     ax.set_ylabel("Temperature [°F]")
-    ax.set_xlim(ctx["sts"], ctx["ets"])
+    ax.set_xlim(ctx.sts, ctx.ets)
     ax.legend(ncol=3)
     ax.grid(True)
 
     return fig, df
 
 
-def plot2(ctx):
+def plot2(ctx: Params):
     """Just soil temps"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             "SELECT * from sm_hourly WHERE station = %s and "
             "valid BETWEEN %s and %s ORDER by valid ASC",
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params=(ctx.station, ctx.sts, ctx.ets),
             index_col="valid",
         )
     d12t = df["t12_c_avg_qc"]
@@ -998,7 +1007,7 @@ def plot2(ctx):
     d04t = df["t4_c_avg_qc"]
     valid = df.index.to_numpy()
 
-    title = f"ISUSM Station: {ctx['_sname']} :: Soil Temperature Timeseries"
+    title = f"ISUSM Station: {ctx.sname} :: Soil Temperature Timeseries"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.grid(True)
     svplotted = False
@@ -1032,7 +1041,7 @@ def plot2(ctx):
     return fig, df
 
 
-def plot_at(ctx: dict):
+def plot_at(ctx: Params):
     """One minute temperatures."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -1044,9 +1053,9 @@ def plot_at(ctx: dict):
             """),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col="valid",
         )
@@ -1062,7 +1071,7 @@ def plot_at(ctx: dict):
 
     fig = figure(
         apctx=ctx,
-        title=f"{ctx['_sname']}:: One Minute Interval Plot",
+        title=f"{ctx.sname}:: One Minute Interval Plot",
         subtitle=make_valid_subtitle(df),
     )
     axes: list[Axes] = fig.subplots(3, 1, sharex=True)
@@ -1140,11 +1149,11 @@ def plot_at(ctx: dict):
     return fig, df
 
 
-def plot_meteogram(ctx):
+def plot_meteogram(ctx: Params):
     """Do main plotting logic"""
     table = "sm_minute"
     barwidth = 1 / 1440.0
-    if (ctx["ets"] - ctx["sts"]) > timedelta(days=5):
+    if (ctx.ets - ctx.sts) > timedelta(days=5):
         table = "sm_hourly"
         barwidth = 1 / 24.0
     with get_sqlalchemy_conn("isuag") as conn:
@@ -1158,16 +1167,16 @@ def plot_meteogram(ctx):
             ),
             conn,
             params={
-                "station": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.station,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col="valid",
         )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     fig = figure(
-        title=f"ISUSM Station: {ctx['_sname']} Timeseries",
+        title=f"ISUSM Station: {ctx.sname} Timeseries",
         apctx=ctx,
     )
     axes = fig.subplots(2, 1, sharex=True)
@@ -1223,14 +1232,14 @@ def plot_meteogram(ctx):
     return fig, df
 
 
-def plot1(ctx):
+def plot1(ctx: Params):
     """Do main plotting logic"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             "SELECT * from sm_hourly WHERE "
             "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params=(ctx.station, ctx.sts, ctx.ets),
             index_col="valid",
         )
     if df.empty:
@@ -1248,7 +1257,7 @@ def plot1(ctx):
     valid = df.index
 
     fig = figure(
-        title=f"ISUSM Station: {ctx['_sname']} Timeseries",
+        title=f"ISUSM Station: {ctx.sname} Timeseries",
         apctx=ctx,
     )
     ax = fig.subplots(3, 1, sharex=True)
@@ -1347,9 +1356,9 @@ def plot1(ctx):
     return fig, df
 
 
-def apply_xaxis_formatting(ax: Axes, ctx: dict) -> None:
+def apply_xaxis_formatting(ax: Axes, ctx: Params) -> None:
     """Apply consistent x-axis formatting based on the time range."""
-    days = (ctx["ets"] - ctx["sts"]).days
+    days = (ctx.ets - ctx.sts).days
     if days >= 3:
         interval = max(int(days / 7), 1)
         ax.xaxis.set_major_locator(
@@ -1367,41 +1376,41 @@ def apply_xaxis_formatting(ax: Axes, ctx: dict) -> None:
         )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    if ctx["opt"] == "1":
+    if ctx.opt == "1":
         fig, df = plot1(ctx)
-    elif ctx["opt"] == "m":
+    elif ctx.opt == "m":
         fig, df = plot_meteogram(ctx)
-    elif ctx["opt"] == "2":
+    elif ctx.opt == "2":
         fig, df = plot2(ctx)
-    elif ctx["opt"] == "4iemre":
-        lon = ctx["_nt"].sts[ctx["station"]]["lon"]
-        lat = ctx["_nt"].sts[ctx["station"]]["lat"]
+    elif ctx.opt == "4iemre":
+        lon = ctx["_nt"].sts[ctx.station]["lon"]
+        lat = ctx["_nt"].sts[ctx.station]["lat"]
         fig, df = plot4iemre(ctx, lon, lat)
-    elif ctx["opt"] == "at":
+    elif ctx.opt == "at":
         fig, df = plot_at(ctx)
-    elif ctx["opt"] == "d":
+    elif ctx.opt == "d":
         fig, df = plot_daily_hilo_rainfall(ctx)
-    elif ctx["opt"] == "sm":
+    elif ctx.opt == "sm":
         fig, df = plot_sm(ctx)
-    elif ctx["opt"] == "3":
+    elif ctx.opt == "3":
         fig, df = make_daily_plot(ctx)
-    elif ctx["opt"] == "4":
+    elif ctx.opt == "4":
         fig, df = make_daily_rad_plot(ctx)
-    elif ctx["opt"] == "5":
+    elif ctx.opt == "5":
         fig, df = make_daily_pet_plot(ctx)
-    elif ctx["opt"] == "6":
+    elif ctx.opt == "6":
         fig, df = make_vsm_histogram_plot(ctx)
-    elif ctx["opt"] == "7":
+    elif ctx.opt == "7":
         fig, df = make_daily_water_change_plot(ctx)
-    elif ctx["opt"] == "8":
+    elif ctx.opt == "8":
         fig, df = make_hourly_plot(ctx, "battv_min_qc")
-    elif ctx["opt"] == "encrh":
+    elif ctx.opt == "encrh":
         fig, df = make_hourly_plot(ctx, "encrh_avg")
-    elif ctx["opt"] == "9":
+    elif ctx.opt == "9":
         fig, df = make_daily_rainfall_soil_rh(ctx)
-    elif ctx["opt"] == "10":
+    elif ctx.opt == "10":
         fig, df = make_inversion_plot(ctx)
     else:  # 11
         fig, df = make_inversion_timing(ctx)

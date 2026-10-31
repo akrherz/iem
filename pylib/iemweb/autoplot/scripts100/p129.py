@@ -8,6 +8,7 @@ for precipitation are computed with dry days omitted.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -15,6 +16,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import FloatArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High Temperature",
@@ -25,41 +28,34 @@ PDICT = {
 PDICT2 = {"above": "At or Above", "below": "Below"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT,
-            name="var",
-            label="Select Variable to Plot",
-            default="precip",
-        ),
-        dict(
-            type="select",
-            options=PDICT2,
-            name="dir",
-            label="Direction of Percentile",
-            default="above",
-        ),
-        dict(
-            type="float",
-            name="level",
-            default="2",
-            label="Daily Variable Level (inch or degrees F):",
-        ),
-        ARG_STATION,
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select Variable to Plot")
+    ] = "precip"
+    dir: Annotated[
+        str, SelectArg(options=PDICT2, label="Direction of Percentile")
+    ] = "above"
+    level: Annotated[
+        float, FloatArg(label="Daily Variable Level (inch or degrees F):")
+    ] = 2.0
+    station: Annotated[str, ARG_STATION] = "IATAME"
 
 
-def add_ctx(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def add_ctx(ctx: Params):
     """Get the context"""
-    station = ctx["station"].upper()
-    varname = ctx["var"]
-    level = ctx["level"]
-    mydir = ctx["dir"]
+    station = ctx.station.upper()
+    varname = ctx.var
+    level = ctx.level
+    mydir = ctx.dir
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
@@ -109,9 +105,9 @@ def add_ctx(ctx):
     df["rank"] = (df["count"] - df["hits"]) / df["count"] * 100.0
     df["avg_days"] = df["hits"] / years
     ctx["df"] = df
-    ctx["station"] = station
+    ctx.station = station
     ctx["mydir"] = mydir
-    ctx["level"] = level
+    ctx.level = level
     ctx["varname"] = varname
     units = "inch" if varname == "precip" else "F"
     ctx["title"] = ("Monthly Frequency of Daily %s %s %s+ %s") % (
@@ -120,11 +116,11 @@ def add_ctx(ctx):
         level,
         units,
     )
-    ctx["subtitle"] = f"for {ctx['_sname']} ({bs:%Y}-{date.today():%Y})"
+    ctx["subtitle"] = f"for {ctx.sname} ({bs:%Y}-{date.today():%Y})"
     return ctx
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Go"""
     add_ctx(ctx)
     containername = ctx["_e"]
@@ -179,7 +175,7 @@ s += '<br /><b>Avg Days per Month:</b> '+ this.points[1].y.toFixed(2);
     """
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
     (fig, ax) = figure_axes(

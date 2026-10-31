@@ -11,7 +11,8 @@ distribution of differences.
 """
 
 import calendar
-from datetime import UTC, date, timedelta
+from datetime import UTC, date, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -21,6 +22,16 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temperature (°F)",
@@ -35,69 +46,55 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation1",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station 1:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation1: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 1:")
+    ] = "AMW"
+    zstation2: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station 2:")
+    ] = "DSM"
+    varname: Annotated[
+        str, SelectArg(options=PDICT, label="Variable for Comparison")
+    ] = "tmpf"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Start Time (UTC):",
+            min="1900/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d 0000"),
         ),
-        dict(
-            type="zstation",
-            name="zstation2",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station 2:",
-        ),
-        dict(
-            type="select",
-            name="varname",
-            default="tmpf",
-            options=PDICT,
-            label="Variable for Comparison",
-        ),
-        {
-            "type": "datetime",
-            "name": "sts",
-            "default": utc().strftime("%Y/%m/%d 0000"),
-            "label": "Start Time (UTC):",
-            "min": "1900/01/01 0000",
-        },
-        {
-            "type": "datetime",
-            "name": "ets",
-            "default": utc().strftime("%Y/%m/%d 2300"),
-            "label": "End Time (UTC):",
-            "min": "1900/01/01 0000",
-            "max": utc().strftime("%Y/%m/%d 2359"),
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "Greens",
-            "label": "Color Map",
-        },
-        {
-            "type": "float",
-            "name": "diff",
-            "default": 0,
-            "label": "Difference Threshold for frequency heatmap",
-        },
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Time (UTC):",
+            min="1900/01/01 0000",
+            max=lambda: utc().strftime("%Y/%m/%d 2359"),
+            default=lambda: utc().strftime("%Y/%m/%d 2300"),
+        ),
+    ]
+    cmap: Annotated[str, CmapArg(label="Color Map")] = "Greens"
+    diff: Annotated[
+        float, FloatArg(label="Difference Threshold for frequency heatmap")
+    ] = 0
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sts = ctx["sts"].replace(tzinfo=UTC)
-    ets = ctx["ets"].replace(tzinfo=UTC)
-    station1 = ctx["zstation1"]
-    station2 = ctx["zstation2"]
-    varname = ctx["varname"]
+    sts = ctx.sts.replace(tzinfo=UTC)
+    ets = ctx.ets.replace(tzinfo=UTC)
+    station1 = ctx.zstation1
+    station2 = ctx.zstation2
+    varname = ctx.varname
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -189,7 +186,7 @@ def plotter(ctx: dict):
     # Plot the frequency of differences by week of year and hour of day
     df["hour"] = df.index.hour
     df["week"] = df.index.day_of_year // 7
-    df["hit"] = np.where(df["diff"] >= ctx["diff"], 1, 0)
+    df["hit"] = np.where(df["diff"] >= ctx.diff, 1, 0)
     freq = df[["week", "hour", "hit"]].groupby(["week", "hour"]).mean()
     freq = freq.unstack(level="hour")
     H = freq.values
@@ -199,11 +196,11 @@ def plotter(ctx: dict):
         aspect="auto",
         interpolation="nearest",
         extent=[0, 53, 0, 23],
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
     )
     fig.colorbar(res, ax=ax, label="Frequency [%]")
     units = PDICT[varname].split()[-1]
-    ax.set_title(f"Freq {station1}-{station2} > {ctx['diff']:.2f}{units}")
+    ax.set_title(f"Freq {station1}-{station2} > {ctx.diff:.2f}{units}")
     ax.set_ylabel(ctx["_nt1"].sts[station1]["tzname"])
     ax.set_xlabel("Week of Year")
     ax.set_xticks(range(0, 53, 5))

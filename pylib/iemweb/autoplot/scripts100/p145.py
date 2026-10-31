@@ -7,12 +7,21 @@ Soil Moisture Network.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 VARS = {
     "tsoil": "4 inch Soil Temperature",
@@ -41,43 +50,39 @@ XREF = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="ISUSM",
-            default="BOOI4",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            options=VARS,
-            default="tsoil",
-            name="var",
-            label="Which variable to plot:",
-        ),
-        dict(
-            type="year",
-            default=today.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="ISUSM", label="Select Station:")
+    ] = "BOOI4"
+    var: Annotated[
+        str, SelectArg(options=VARS, label="Which variable to plot:")
+    ] = "tsoil"
+    year: Annotated[
+        int,
+        YearArg(
             min=1988,
-            name="year",
             label="Year to Highlight",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     nt = NetworkTable("ISUSM", only_online=False)
     oldnt = NetworkTable("ISUAG", only_online=False)
-    station = ctx["station"]
-    highlightyear = ctx["year"]
-    varname = ctx["var"]
+    station = ctx.station
+    highlightyear = ctx.year
+    varname = ctx.var
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(

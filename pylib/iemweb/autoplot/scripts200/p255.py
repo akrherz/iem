@@ -15,6 +15,7 @@ year of the data represents the start year of the period that crosses 1 Jan.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -23,60 +24,57 @@ from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SDayArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "sday",
-            "default": "0501",
-            "name": "sday",
-            "label": "Select start date:",
-        },
-        {
-            "type": "sday",
-            "default": f"{date.today():%m%d}",
-            "name": "eday",
-            "label": "Select end date (inclusive):",
-        },
-        {
-            "type": "float",
-            "default": 1.0,
-            "name": "depth",
-            "label": "Depth of the bucket (inch):",
-        },
-        {
-            "type": "float",
-            "default": 1.0,
-            "name": "init",
-            "label": (
-                "Initial depth of the bucket (inch), must be less than depth "
-                "of bucket:"
-            ),
-        },
-        {
-            "type": "float",
-            "default": 0.15,
-            "name": "loss",
-            "label": "Daily rate of loss/leak (inch):",
-        },
-        {
-            "type": "year",
-            "default": date.today().year,
-            "name": "year",
-            "label": "Year to Highlight",
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sday: Annotated[date, SDayArg(label="Select start date:", default="0501")]
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Select end date (inclusive):",
+            default=lambda: f"{date.today():%m%d}",
+        ),
     ]
-    return desc
+    depth: Annotated[float, FloatArg(label="Depth of the bucket (inch):")] = (
+        1.0
+    )
+    init: Annotated[
+        float,
+        FloatArg(
+            label="Initial depth of the bucket (inch), must be less than "
+            "depth of bucket:"
+        ),
+    ] = 1.0
+    loss: Annotated[
+        float, FloatArg(label="Daily rate of loss/leak (inch):")
+    ] = 0.15
+    year: Annotated[
+        int,
+        YearArg(label="Year to Highlight", default=lambda: date.today().year),
+    ]
 
 
-def get_obsdf(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_obsdf(ctx: Params):
     """Figure out our observations."""
     limiter = "sday >= :sday and sday <= :eday"
-    if ctx["eday"] < ctx["sday"]:
+    if ctx.eday < ctx.sday:
         limiter = "(sday >= :sday or sday <= :eday) "
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -92,35 +90,35 @@ def get_obsdf(ctx):
             index_col="day",
             parse_dates=["day"],
             params={
-                "station": ctx["station"],
-                "sday": ctx["sday"].strftime("%m%d"),
-                "eday": ctx["eday"].strftime("%m%d"),
+                "station": ctx.station,
+                "sday": ctx.sday.strftime("%m%d"),
+                "eday": ctx.eday.strftime("%m%d"),
             },
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
     # See if we are crossing 1 Jan
-    if ctx["eday"] < ctx["sday"]:
+    if ctx.eday < ctx.sday:
         # Subtract 1 year from the year column where sday < eday
-        df.loc[df["sday"] <= ctx["eday"].strftime("%m%d"), "year"] = (
+        df.loc[df["sday"] <= ctx.eday.strftime("%m%d"), "year"] = (
             df["year"] - 1
         )
     # Check the first year to see if it starts on our sday
-    if df.index[0].strftime("%m%d") != ctx["sday"].strftime("%m%d"):
+    if df.index[0].strftime("%m%d") != ctx.sday.strftime("%m%d"):
         df = df[df["year"] > df.index[0].year]
-    if df.index[-1].strftime("%m%d") != ctx["eday"].strftime("%m%d"):
+    if df.index[-1].strftime("%m%d") != ctx.eday.strftime("%m%d"):
         df = df[df["year"] < df.index[-1].year]
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_obsdf(ctx)
 
-    depth = max(0, min(999, ctx["depth"]))
-    loss = max(0, ctx["loss"])
+    depth = max(0, min(999, ctx.depth))
+    loss = max(0, ctx.loss)
     for _year, gdf in df.groupby("year"):
-        bucket = min(ctx["init"], depth)
+        bucket = min(ctx.init, depth)
         for idx, row in gdf.iterrows():
             bucket += row["precip"] - loss
             if bucket < 0:
@@ -132,9 +130,9 @@ def plotter(ctx: dict):
     fig = figure(
         title=(
             f"({df.index[0].year}-{df.index[-1].year}) "
-            f"[{ctx['sday'].strftime('%b %-d')}-"
-            f"{ctx['eday'].strftime('%b %-d')}] "
-            f"{ctx['_sname']}:: Leaky Bucket Model"
+            f"[{ctx.sday.strftime('%b %-d')}-"
+            f"{ctx.eday.strftime('%b %-d')}] "
+            f"{ctx.sname}:: Leaky Bucket Model"
         ),
         subtitle=(
             f"Bucket Depth: {depth:.2f} inches, "
@@ -143,7 +141,7 @@ def plotter(ctx: dict):
         apctx=ctx,
     )
     # Plot the bucket depth for year of interest
-    thisyear = df[df["year"] == ctx["year"]]
+    thisyear = df[df["year"] == ctx.year]
     if thisyear.empty:
         raise NoDataFound("No data found for year of interest.")
     # Plot the bucket depth
@@ -151,7 +149,7 @@ def plotter(ctx: dict):
     ax.text(
         0.01,
         1.01,
-        f"Year Daily Timeseries: {ctx['year']}",
+        f"Year Daily Timeseries: {ctx.year}",
         transform=ax.transAxes,
         va="bottom",
         ha="left",

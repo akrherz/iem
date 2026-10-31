@@ -23,6 +23,7 @@ and duration of stretches of hot or cold weather.
 """
 
 from datetime import timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,14 @@ from pyiem.plot import figure
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION, get_monofont
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    TextArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
@@ -62,67 +71,51 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="month1",
-            default="12",
-            options=MDICT,
-            label="Select Month for x-axis:",
-        ),
-        dict(
-            type="text",
-            default="1893-1950",
-            name="p1",
-            optional=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month1: Annotated[
+        str, SelectArg(options=MDICT, label="Select Month for x-axis:")
+    ] = "12"
+    p1: Annotated[
+        str | None,
+        TextArg(
             label="Inclusive Period of Years for x-axis (Optional)",
+            default="1893-1950",
         ),
-        dict(
-            type="select",
-            name="month2",
-            default="7",
-            options=MDICT,
-            label="Select Month for y-axis:",
-        ),
-        dict(
-            type="text",
-            default="1950-2017",
-            name="p2",
-            optional=True,
+    ] = None
+    month2: Annotated[
+        str, SelectArg(options=MDICT, label="Select Month for y-axis:")
+    ] = "7"
+    p2: Annotated[
+        str | None,
+        TextArg(
             label="Inclusive Period of Years for y-axis (Optional)",
+            default="1950-2017",
         ),
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Variable to Compare",
-            options=PDICT,
-        ),
-        dict(
-            type="float",
-            label="x-axis Value to Highlight",
-            default=55,
-            name="highlight",
-        ),
-        dict(
-            type="int",
-            default="1",
-            name="days",
-            label="Evaluate over X number of days",
-        ),
-        dict(
-            type="select",
-            name="opt",
+    ] = None
+    var: Annotated[
+        str, SelectArg(label="Variable to Compare", options=PDICT)
+    ] = "high"
+    highlight: Annotated[
+        float, FloatArg(label="x-axis Value to Highlight")
+    ] = 55
+    days: Annotated[int, IntArg(label="Evaluate over X number of days")] = 1
+    opt: Annotated[
+        str,
+        SelectArg(
             options=ODICT,
-            default="max",
             label="When evaluation over multiple days, how to compute:",
         ),
-    ]
-    return desc
+    ] = "max"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def get_data(station, month, period, varname, days, opt):
@@ -201,17 +194,17 @@ def get_data(station, month, period, varname, days, opt):
     return mdata, y1, y2
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    month1 = ctx["month1"]
-    month2 = ctx["month2"]
-    highlight = ctx["highlight"]
-    varname = ctx["var"]
-    p1 = ctx.get("p1")
-    p2 = ctx.get("p2")
-    days = ctx["days"]
-    opt = ctx["opt"]
+    station = ctx.station
+    month1 = ctx.month1
+    month2 = ctx.month2
+    highlight = ctx.highlight
+    varname = ctx.var
+    p1 = ctx.p1
+    p2 = ctx.p2
+    days = ctx.days
+    opt = ctx.opt
 
     m1data, y1, y2 = get_data(station, month1, p1, varname, days, opt)
     m2data, y3, y4 = get_data(station, month2, p2, varname, days, opt)
@@ -260,7 +253,7 @@ def plotter(ctx: dict):
     if days > 1:
         t2 = f"{ODICT[opt]} {PDICT[varname]} over {days} days"
     fig.suptitle(
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"{MDICT[month2]} ({y1}-{y2}) vs {MDICT[month1]} ({y3}-{y4})\n{t2}"
     )
     ax.set_xlabel(f"{MDICT[month1]} ({y1}-{y2}) {PDICT[varname]} °F")

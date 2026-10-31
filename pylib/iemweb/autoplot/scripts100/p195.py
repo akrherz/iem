@@ -6,8 +6,10 @@ estimate (KDE) overlay.  You can optionally pick a date to highlight on the
 chart.  This date is a central time zone date.
 """
 
+import datetime as dt
 import json
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 import seaborn as sns
@@ -16,6 +18,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import convert_value
 
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -55,59 +64,48 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 600}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    date: Annotated[
+        dt.date | None,
+        DateArg(
             label="Optional Date to Highlight on Map:",
             min="2007/07/16",
-            max=today.strftime("%Y/%m/%d"),
-            optional=True,
+            max=lambda: date.today().strftime("%Y/%m/%d"),
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        {
-            "type": "select",
-            "name": "month",
-            "default": "all",
-            "label": "Month/Season Limit:",
-            "options": MDICT,
-        },
-        dict(
-            type="networkselect",
-            name="wfo",
-            default="DMX",
-            label="Select Forecast Office:",
-            network="WFO",
-        ),
-        dict(
-            type="select",
-            name="p",
-            default="TO",
-            options=PDICT,
-            label="Warning Type:",
-        ),
-        dict(
-            type="select",
-            name="limit",
-            default="NEW",
+    ] = None
+    month: Annotated[
+        str, SelectArg(label="Month/Season Limit:", options=MDICT)
+    ] = "all"
+    wfo: Annotated[
+        str, NetworkSelectArg(label="Select Forecast Office:", network="WFO")
+    ] = "DMX"
+    p: Annotated[str, SelectArg(options=PDICT, label="Warning Type:")] = "TO"
+    limit: Annotated[
+        str,
+        SelectArg(
             options=PDICT2,
             label="Include only issuance or also updated (SVS, etc):",
         ),
-    ]
-    return desc
+    ] = "NEW"
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=600
+    )
+
+
+def get_data(ctx: Params):
     """Do the data fetching portion of this autoplot's work."""
     statuslimit = "status = 'NEW'"
-    phenomena = ctx["p"]
-    wfo = ctx["wfo"]
+    phenomena = ctx.p
+    wfo = ctx.wfo
     title = "at Issuance"
-    if ctx["limit"] == "ANY":
+    if ctx.limit == "ANY":
         title = "at Issuance or Update"
         statuslimit = "status != 'CAN'"
     ps = [phenomena]
@@ -116,10 +114,10 @@ def get_data(ctx):
     month_limiter = ""
     months = []  # Unused in the all case
     month_title = ""
-    if ctx["month"] != "all":
+    if ctx.month != "all":
         month_limiter = "and extract(month from polygon_begin) = Any(:months)"
-        months = month2months(ctx["month"])
-        month_title = f" [Limited to: {MDICT[ctx['month']]}]"
+        months = month2months(ctx.month)
+        month_title = f" [Limited to: {MDICT[ctx.month]}]"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -152,11 +150,11 @@ def get_data(ctx):
     return df
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_highcharts(ctx: Params) -> str:
     """Do the highcharts scatter plot of the data."""
     df = get_data(ctx)
     df["datetxt"] = df["issue"].dt.strftime("%b %-d, %Y")
-    dt = ctx.get("date")
+    dt = ctx.date
     plotdf = df
     if dt:
         plotdf = df[df["issue"].dt.date != dt]
@@ -239,9 +237,9 @@ Highcharts.chart('"""
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    dt = ctx.get("date")
+    dt = ctx.date
     df = get_data(ctx)
     plotdf = df
     if dt is not None:

@@ -8,7 +8,7 @@ cover the observation point and within one hour of the warning.
 """
 
 from datetime import timedelta
-from typing import Any
+from typing import Annotated, Any
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -17,6 +17,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "svrtor": "Severe Thunderstorm + Tornado Warnings",
@@ -24,23 +26,27 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc: dict[str, Any] = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        dict(
-            type="select",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    w: Annotated[
+        str,
+        SelectArg(
             options=PDICT,
-            name="w",
             label="Select warning type(s) to accumulate precipitation during",
-            default="svrtor",
         ),
-    ]
-    return desc
+    ] = "svrtor"
 
 
-def get_data(ctx, meta):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_data(ctx: Params, meta):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
         obsdf = pd.read_sql(
@@ -59,7 +65,7 @@ def get_data(ctx, meta):
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
     phenomenas = ["TO", "SV"]
-    if ctx["w"] == "ffw":
+    if ctx.w == "ffw":
         phenomenas = [
             "FF",
         ]
@@ -124,17 +130,17 @@ def get_data(ctx, meta):
     return obsdf, df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    meta = ctx["_nt"].sts[ctx["zstation"]]
+    meta = ctx["_nt"].sts[ctx.zstation]
     if "HAS1MIN" not in meta["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
     obsdf, df = get_data(ctx, meta)
     label = "TOR or SVR"
-    if ctx["w"] == "ffw":
+    if ctx.w == "ffw":
         label = "Flash Flood"
     title = (
-        f"[{ctx['zstation']}] {meta['name']} Yearly "
+        f"[{ctx.zstation}] {meta['name']} Yearly "
         f"Airport Precipitation [{df.index.min():.0f}-{df.index.max():.0f}]\n"
         f"Contribution during, near, and outside of {label} warning "
         "using one minute interval precipitation"

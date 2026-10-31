@@ -8,6 +8,7 @@ year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -15,6 +16,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high_above": "High Temperature At or Above",
@@ -25,39 +33,36 @@ PDICT = {
 PDICT2 = {"jan1": "January 1", "jul1": "July 1"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high_above",
-            label="Which Metric",
-            options=PDICT,
-        ),
-        dict(type="int", name="threshold", default=32, label="Threshold (F)"),
-        dict(
-            type="select",
-            name="split",
-            default="jan1",
-            options=PDICT2,
-            label="Where to split the year?",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=date.today().year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(label="Which Metric", options=PDICT)] = (
+        "high_above"
+    )
+    threshold: Annotated[int, IntArg(label="Threshold (F)")] = 32
+    split: Annotated[
+        str, SelectArg(options=PDICT2, label="Where to split the year?")
+    ] = "jan1"
+    year: Annotated[
+        int,
+        YearArg(
             label="Year to Highlight in Chart",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def get_highcharts(ctx: dict) -> dict:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_highcharts(ctx: Params) -> dict:
     """Highcharts Output"""
-    varname = ctx["var"]
+    varname = ctx.var
     get_data(ctx)
     df = ctx["df"]
 
@@ -70,7 +75,7 @@ def get_highcharts(ctx: dict) -> dict:
     }
     j["title"] = {
         "text": (
-            f"{ctx['_sname']} {PDICT[varname]} {ctx.get('threshold', 32):.0f}F"
+            f"{ctx.sname} {PDICT[varname]} {ctx.get('threshold', 32):.0f}F"
         )
     }
     j["yAxis"] = {"title": {"text": "Accumulated Days"}, "startOnTick": False}
@@ -135,13 +140,13 @@ def get_highcharts(ctx: dict) -> dict:
     return j
 
 
-def get_data(ctx):
+def get_data(ctx: Params):
     """Get the data"""
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    varname = ctx["var"]
-    year = ctx["year"]
-    split = ctx["split"]
+    station = ctx.station
+    threshold = ctx.threshold
+    varname = ctx.var
+    year = ctx.year
+    split = ctx.split
     opp = " < " if varname.find("_below") > 0 else " >= "
     col = "high" if varname.find("high") == 0 else "low"
     # We need to do some magic to compute the start date, since we don't want
@@ -207,16 +212,16 @@ def get_data(ctx):
     ctx["obs"] = obs
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    threshold = ctx["threshold"]
-    varname = ctx["var"]
-    year = ctx["year"]
+    threshold = ctx.threshold
+    varname = ctx.var
+    year = ctx.year
     get_data(ctx)
     df = ctx["df"]
     obs = ctx["obs"]
 
-    title = f"{ctx['_sname']}\n{PDICT[varname]} {threshold:.0f}°F"
+    title = f"{ctx.sname}\n{PDICT[varname]} {threshold:.0f}°F"
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.1, 0.1, 0.7, 0.8])
@@ -272,9 +277,7 @@ def plotter(ctx: dict):
     xticks = []
     xticklabels = []
     for x in range(int(df.index.min()) - 1, int(df.index.max())):
-        ts = date(2000, 7 if ctx["split"] == "jul1" else 1, 1) + timedelta(
-            days=x
-        )
+        ts = date(2000, 7 if ctx.split == "jul1" else 1, 1) + timedelta(days=x)
         if ts.day == 1:
             xticks.append(x)
             xticklabels.append(ts.strftime("%b"))

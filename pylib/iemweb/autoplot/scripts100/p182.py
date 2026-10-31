@@ -9,8 +9,10 @@ how much of the rain on a given day fell on an area that needed it!  The
 areal coverage percentages are relative to the given state.
 """
 
+import datetime as dt
 import os
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -27,44 +29,49 @@ from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 from pyiem.util import mm2inch, ncopen
 
+from iemweb.autoplot.description import (
+    CSectorArg,
+    DateArg,
+    FloatArg,
+    IntArg,
+    PlotDescription,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    today = datetime.today() - timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="csector", name="sector", default="IA", label="Select Sector:"
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sector: Annotated[str, CSectorArg(label="Select Sector:")] = "IA"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Date:",
             min="2011/01/01",
-        ),
-        dict(
-            type="int",
-            name="trailing",
-            default=31,
-            label="Over how many trailing days to compute departures?",
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=0.1,
-            label="Date Precipitation Threshold (inch)",
+            default=lambda: (datetime.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    trailing: Annotated[
+        int, IntArg(label="Over how many trailing days to compute departures?")
+    ] = 31
+    threshold: Annotated[
+        float, FloatArg(label="Date Precipitation Threshold (inch)")
+    ] = 0.1
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
+
+
+def plotter(ctx: Params):
     """Go"""
-    dt = ctx["date"]
-    sector = ctx["sector"]
-    days = ctx["trailing"]
-    threshold = ctx["threshold"]
+    dt = ctx.date
+    sector = ctx.sector
+    days = ctx.trailing
+    threshold = ctx.threshold
     window_sts = dt - timedelta(days=days)
     if window_sts.year != dt.year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")

@@ -6,11 +6,22 @@ date below 32 degrees.  This analysis tends to be very noisy, so picking
 longer periods of time for each period will help some.
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"state": "State Level Maps (select state)"}
 PDICT.update(SECTORS_NAME)
@@ -26,76 +37,53 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="sector",
-            default="state",
-            options=PDICT,
-            label="Select Map Region",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State to Plot (when appropriate)",
-        ),
-        dict(
-            type="select",
-            name="opt",
-            options=PDICT2,
-            default="both",
-            label="Map Plot/Contour View Option",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT3,
-            default="season",
-            label="Variable to Plot",
-        ),
-        dict(
-            type="year",
-            name="p1syear",
-            default=1951,
-            label="Start Year (inclusive) of Period One:",
-        ),
-        dict(
-            type="year",
-            name="p1eyear",
-            default=1980,
-            label="End Year (inclusive) of Period One:",
-        ),
-        dict(
-            type="year",
-            name="p2syear",
-            default=1981,
-            label="Start Year (inclusive) of Period Two:",
-        ),
-        dict(
-            type="year",
-            name="p2eyear",
-            default=2010,
-            label="End Year (inclusive) of Period Two:",
-        ),
-        dict(type="cmap", name="cmap", default="seismic", label="Color Ramp:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    sector: Annotated[
+        str, SelectArg(options=PDICT, label="Select Map Region")
+    ] = "state"
+    state: Annotated[
+        str, StateArg(label="Select State to Plot (when appropriate)")
+    ] = "IA"
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="Map Plot/Contour View Option")
+    ] = "both"
+    var: Annotated[
+        str, SelectArg(options=PDICT3, label="Variable to Plot")
+    ] = "season"
+    p1syear: Annotated[
+        int, YearArg(label="Start Year (inclusive) of Period One:")
+    ] = 1951
+    p1eyear: Annotated[
+        int, YearArg(label="End Year (inclusive) of Period One:")
+    ] = 1980
+    p2syear: Annotated[
+        int, YearArg(label="Start Year (inclusive) of Period Two:")
+    ] = 1981
+    p2eyear: Annotated[
+        int, YearArg(label="End Year (inclusive) of Period Two:")
+    ] = 2010
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "seismic"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"][:2]
-    sector = ctx["sector"]
-    opt = ctx["opt"]
-    p1syear = ctx["p1syear"]
-    p1eyear = ctx["p1eyear"]
-    p2syear = ctx["p2syear"]
-    p2eyear = ctx["p2eyear"]
-    varname = ctx["var"]
+    state = ctx.state[:2]
+    sector = ctx.sector
+    opt = ctx.opt
+    p1syear = ctx.p1syear
+    p1eyear = ctx.p1eyear
+    p2syear = ctx.p2syear
+    p2eyear = ctx.p2eyear
+    varname = ctx.var
 
     table = "alldata"
     if sector == "state":
@@ -190,7 +178,7 @@ def plotter(ctx: dict):
             df["lat"].values,
             df[f"{varname}_delta"].values,
             levels,
-            cmap=get_cmap(ctx["cmap"]),
+            cmap=get_cmap(ctx.cmap),
             units="days",
         )
     if sector == "state":

@@ -6,6 +6,7 @@ years contained.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 import seaborn as sns
@@ -14,43 +15,45 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    y20 = date.today().year - 19
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            options=PDICT,
-            default="cdd",
-            name="var",
-            label="Select Variable",
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=y20,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(options=PDICT, label="Select Variable")] = (
+        "cdd"
+    )
+    syear: Annotated[
+        int,
+        YearArg(
             label="For plotting, year to start 20 years of plot",
+            default=lambda: date.today().year - 19,
         ),
-        {
-            "type": "int",
-            "name": "base",
-            "label": "CDD/HDD Base Temperature °F",
-            "default": 60,
-        },
     ]
-    return desc
+    base: Annotated[int, IntArg(label="CDD/HDD Base Temperature °F")] = 60
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -66,7 +69,7 @@ def plotter(ctx: dict):
             from alldata WHERE station = :station GROUP by year, month
         """),
             conn,
-            params={"station": station, "base": ctx["base"]},
+            params={"station": station, "base": ctx.base},
             index_col=None,
         )
     if df.empty:
@@ -81,7 +84,7 @@ def plotter(ctx: dict):
         f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
         f"-> {date.today()}\n"
-        f"# Site Information: {ctx['_sname']}\n"
+        f"# Site Information: {ctx.sname}\n"
         "# Contact Information: Daryl Herzmann "
         "akrherz@iastate.edu 515.294.5978\n"
         f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} (base=65) "
@@ -92,7 +95,7 @@ def plotter(ctx: dict):
 
     second = (
         f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} "
-        f"(base={ctx['base']}) "
+        f"(base={ctx.base}) "
         f"FOR STATION {station}\n"
         "YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    "
         "SEP    OCT    NOV    DEC\n"
@@ -133,7 +136,7 @@ def plotter(ctx: dict):
     title = f"[{station}] {ctx['_nt'].sts[station]['name']} ({y1}-{y1 + 20})"
     fig, ax = figure_axes(
         title=title,
-        subtitle=f"{PDICT[varname]} base={ctx['base']}°F",
+        subtitle=f"{PDICT[varname]} base={ctx.base}°F",
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]

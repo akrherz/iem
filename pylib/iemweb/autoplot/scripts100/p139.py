@@ -13,6 +13,7 @@ plot, but computes the change over arbitrary time windows.</p>
 """
 
 from datetime import UTC, date, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -21,6 +22,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import get_monofont
+from iemweb.autoplot.description import PlotDescription, SelectArg, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -46,33 +49,28 @@ MDICT = {
 PDICT = {"largest": "Largest", "smallest": "Smallest"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    v: Annotated[
+        str,
+        SelectArg(
+            label="Show largest or smallest differences?", options=PDICT
         ),
-        dict(
-            type="select",
-            name="v",
-            default="largest",
-            label="Show largest or smallest differences?",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
-        ),
-    ]
-    return desc
+    ] = "largest"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def plot_date(ax, i, dt: date, station, tz) -> bool:
@@ -120,15 +118,15 @@ def plot_date(ax, i, dt: date, station, tz) -> bool:
     return True
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     font0 = get_monofont()
     font0.set_size(16)
-    station = ctx["zstation"]
-    month = ctx["month"]
+    station = ctx.zstation
+    month = ctx.month
     months = month2months(month)
 
-    order = "DESC" if ctx["v"] == "largest" else "ASC"
+    order = "DESC" if ctx.v == "largest" else "ASC"
     with get_sqlalchemy_conn("iem") as conn:
         # Over-sample as we may get some DQ's due to lack of data
         df = pd.read_sql(
@@ -160,8 +158,8 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"] or "America/Chicago")
     title = (
-        f"{ctx['_sname']} ({ab.year}-{date.today().year})\n"
-        f"Top 10 {PDICT[ctx['v']]} Local Calendar Day "
+        f"{ctx.sname} ({ab.year}-{date.today().year})\n"
+        f"Top 10 {PDICT[ctx.v]} Local Calendar Day "
         f"[{month.capitalize()}] Temperature Differences"
     )
     fig = figure(title=title, apctx=ctx)

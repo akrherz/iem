@@ -14,7 +14,8 @@ like Flood Warnings are prime examples of this.
 plots for a single county/zone/parish at a time.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -22,6 +23,16 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -45,54 +56,45 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    tomorrow = utc() + timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:")
+    ] = "DMX"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "WC"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+    season: Annotated[
+        str, SelectArg(label="Select Time Period:", options=MDICT)
+    ] = "all"
+    sdate: Annotated[
+        date,
+        DateArg(
+            min="1986/01/01",
+            label="Potential Start Date (@00 UTC) Limit, if data exists",
+            default="1986/01/01",
         ),
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="WC",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-        dict(
-            type="select",
-            name="season",
-            default="all",
-            label="Select Time Period:",
-            options=MDICT,
-        ),
-        {
-            "type": "date",
-            "default": "1986/01/01",
-            "min": "1986/01/01",
-            "name": "sdate",
-            "label": "Potential Start Date (@00 UTC) Limit, if data exists",
-        },
-        {
-            "type": "date",
-            "default": f"{tomorrow:%Y/%m/%d}",
-            "max": f"{tomorrow:%Y/%m/%d}",
-            "min": "1986/01/01",
-            "name": "edate",
-            "label": "Potential End Date (@00 UTC) Limit, if data exists",
-        },
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            max=lambda: f"{utc() + timedelta(days=1):%Y/%m/%d}",
+            min="1986/01/01",
+            label="Potential End Date (@00 UTC) Limit, if data exists",
+            default=lambda: f"{utc() + timedelta(days=1):%Y/%m/%d}",
+        ),
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def get_data(conn, params):
@@ -142,30 +144,30 @@ def get_data(conn, params):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    wfo = ctx["station"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    if ctx["season"] == "all":
+    wfo = ctx.station
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    if ctx.season == "all":
         months = list(range(1, 13))
-    elif ctx["season"] == "spring":
+    elif ctx.season == "spring":
         months = [3, 4, 5]
-    elif ctx["season"] == "spring2":
+    elif ctx.season == "spring2":
         months = [4, 5, 6]
-    elif ctx["season"] == "fall":
+    elif ctx.season == "fall":
         months = [9, 10, 11]
-    elif ctx["season"] == "summer":
+    elif ctx.season == "summer":
         months = [6, 7, 8]
-    elif ctx["season"] == "winter":
+    elif ctx.season == "winter":
         months = [12, 1, 2]
     else:
-        ts = datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{ctx.season}-01", "%Y-%b-%d")
         months = [ts.month]
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     dfseason = None
-    sfcol = f"{ctx['season']}_frequency"
+    sfcol = f"{ctx.season}_frequency"
     with get_sqlalchemy_conn("postgis") as conn:
         dfall = get_data(
             conn,
@@ -175,13 +177,13 @@ def plotter(ctx: dict):
                 "significance": significance,
                 "wfo": wfo,
                 "months": None,
-                "sdate": ctx["sdate"],
-                "edate": ctx["edate"],
+                "sdate": ctx.sdate,
+                "edate": ctx.edate,
             },
         )
         if dfall.empty:
             raise NoDataFound("No Results Found")
-        if ctx["season"] != "all":
+        if ctx.season != "all":
             dfseason = get_data(
                 conn,
                 {
@@ -190,17 +192,17 @@ def plotter(ctx: dict):
                     "significance": significance,
                     "wfo": wfo,
                     "months": months,
-                    "sdate": ctx["sdate"],
-                    "edate": ctx["edate"],
+                    "sdate": ctx.sdate,
+                    "edate": ctx.edate,
                 },
             )
             dfall[sfcol] = dfseason["frequency"].fillna(0)
-            subtitle = f"All Year + {MDICT[ctx['season']]}"
+            subtitle = f"All Year + {MDICT[ctx.season]}"
         else:
             dfall[sfcol] = -1
             subtitle = "All Year"
     title = (
-        f"{ctx['_sname']} :: Time of Day Frequency of "
+        f"{ctx.sname} :: Time of Day Frequency of "
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance})"
     )
@@ -224,7 +226,7 @@ def plotter(ctx: dict):
             dfall.index.values,
             dfall[sfcol].to_numpy(),
             drawstyle="steps-pre",
-            label=MDICT[ctx["season"]],
+            label=MDICT[ctx.season],
             lw=2,
             color="b",
         )
@@ -264,8 +266,8 @@ def plotter(ctx: dict):
     )
     ax.set_xlabel(f"Timezone: {tzname} (Daylight or Standard)")
     ylabel = f"{dfall['total'].max():.0f} Overall"
-    if ctx["season"] != "all":
-        ylabel += f", {dfseason['total'].max()} {MDICT[ctx['season']]}"
+    if ctx.season != "all":
+        ylabel += f", {dfseason['total'].max()} {MDICT[ctx.season]}"
     ax.set_ylabel(f"Percentage [%] out of\n{ylabel} Events")
 
     return fig, dfall.drop(columns=["min_issue", "max_issue"])

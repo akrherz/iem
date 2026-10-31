@@ -7,6 +7,7 @@ will be from the start of the two year period that crosses 1 January.
 
 import operator
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import pandas as pd
 from matplotlib.axes import Axes
@@ -17,6 +18,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.json.climodat_stclimo import Schema
 from iemweb.json.climodat_stclimo import run as climodat_stclimo_run
 
@@ -28,65 +36,59 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="maxmin",
-            options=PDICT,
-            label="Which variable?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(options=PDICT, label="Which variable?")] = (
+        "maxmin"
+    )
+    year1: Annotated[
+        int | None,
+        YearArg(
+            label="Show observed values for year:",
+            default=lambda: date.today().year,
         ),
-        {
-            "type": "year",
-            "optional": True,
-            "name": "year1",
-            "default": date.today().year,
-            "label": "Show observed values for year:",
-        },
-        {
-            "type": "year",
-            "optional": True,
-            "name": "year2",
-            "default": date.today().year - 1,
-            "label": "Show observed values for year:",
-        },
-        {
-            "type": "sday",
-            "default": "0101",
-            "name": "sday",
-            "label": "Start Plot on Day of Year:",
-        },
-        {
-            "type": "sday",
-            "default": "1231",
-            "name": "eday",
-            "label": "End Plot on Day of Year:",
-        },
+    ] = None
+    year2: Annotated[
+        int | None,
+        YearArg(
+            label="Show observed values for year:",
+            default=lambda: date.today().year - 1,
+        ),
+    ] = None
+    sday: Annotated[
+        date, SDayArg(label="Start Plot on Day of Year:", default="0101")
     ]
-    return desc
+    eday: Annotated[
+        date, SDayArg(label="End Plot on Day of Year:", default="1231")
+    ]
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
 
 
 def do_year_overlay(
     df: pd.DataFrame,
-    ctx: dict,
+    ctx: Params,
     ax: Axes,
     pname: str,
     color: str,
     crosses_jan1: bool,
 ):
     """Overlay the observed data for the given years."""
-    plotvar: str = ctx["var"]
+    plotvar: str = ctx.var
     year = ctx.get(pname)
     if year is None:
         return
-    sts = date(year, ctx["sday"].month, ctx["sday"].day)
-    ets = date(year, ctx["eday"].month, ctx["eday"].day)
+    sts = date(year, ctx.sday.month, ctx.sday.day)
+    ets = date(year, ctx.eday.month, ctx.eday.day)
     if crosses_jan1:
-        ets = date(year + 1, ctx["eday"].month, ctx["eday"].day)
+        ets = date(year + 1, ctx.eday.month, ctx.eday.day)
 
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
@@ -98,14 +100,14 @@ def do_year_overlay(
             ),
             conn,
             parse_dates="day",
-            params={"station": ctx["station"], "sts": sts, "ets": ets},
+            params={"station": ctx.station, "sts": sts, "ets": ets},
         )
     if obs.empty:
         return
     obs["day"] = obs["day"].dt.date.map(lambda x: x.replace(year=2000))
     if crosses_jan1:
-        obs.loc[obs["day"] >= ctx["eday"], "day"] = obs.loc[
-            obs["day"] >= ctx["eday"], "day"
+        obs.loc[obs["day"] >= ctx.eday, "day"] = obs.loc[
+            obs["day"] >= ctx.eday, "day"
         ].map(lambda x: x.replace(year=1999))
     lbl = f"{year}-{year + 1}" if crosses_jan1 else f"{year}"
     if plotvar == "precip":
@@ -175,27 +177,27 @@ def do_year_overlay(
         )
 
 
-def generate_plot(ctx: dict, df: pd.DataFrame, bs: date, be: date) -> Figure:
+def generate_plot(ctx: Params, df: pd.DataFrame, bs: date, be: date) -> Figure:
     """Do the plotting work."""
-    plotvar: str = ctx["var"]
+    plotvar: str = ctx.var
 
-    title = f"{ctx['_sname']}:: {PDICT[plotvar]} Climatology"
+    title = f"{ctx.sname}:: {PDICT[plotvar]} Climatology"
     subtitle = f"Simple climatology over {bs.year}-{be.year}."
-    if ctx.get("year1") is not None:
-        subtitle += f" Observed {PDICT[plotvar]} for {ctx['year1']}"
-        if ctx.get("year2") is not None:
-            subtitle += f" and {ctx['year2']}"
+    if ctx.year1 is not None:
+        subtitle += f" Observed {PDICT[plotvar]} for {ctx.year1}"
+        if ctx.year2 is not None:
+            subtitle += f" and {ctx.year2}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes((0.08, 0.15, 0.9, 0.75))
     # Wants to cross 1 Jan on x-axis
-    crosses_jan1 = ctx["sday"] > ctx["eday"]
+    crosses_jan1 = ctx.sday > ctx.eday
     if crosses_jan1:
-        if ctx["eday"].month == 2 and ctx["eday"].day == 29:
-            ctx["eday"] = date(ctx["eday"].year, 2, 28)
-        dfnew = df.loc[pd.Timestamp(ctx["sday"]) :].copy()
+        if ctx.eday.month == 2 and ctx.eday.day == 29:
+            ctx.eday = date(ctx.eday.year, 2, 28)
+        dfnew = df.loc[pd.Timestamp(ctx.sday) :].copy()
         dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
-        df = pd.concat([dfnew, df.loc[: pd.Timestamp(ctx["sday"])]])
-        ctx["sday"] = ctx["sday"].replace(year=1999)
+        df = pd.concat([dfnew, df.loc[: pd.Timestamp(ctx.sday)]])
+        ctx.sday = ctx.sday.replace(year=1999)
 
     x = df.index.date
     if plotvar == "range":
@@ -287,23 +289,21 @@ def generate_plot(ctx: dict, df: pd.DataFrame, bs: date, be: date) -> Figure:
     ax.set_ylabel(
         "Precipitation [inch]" if plotvar == "precip" else "Temperature °F"
     )
-    ax.set_xlim(
-        ctx["sday"] - timedelta(days=1), ctx["eday"] + timedelta(days=1)
-    )
+    ax.set_xlim(ctx.sday - timedelta(days=1), ctx.eday + timedelta(days=1))
     days = 1
-    if ctx["eday"] - ctx["sday"] < timedelta(days=71):
+    if ctx.eday - ctx.sday < timedelta(days=71):
         days = [1, 8, 15, 22, 29]
-    elif ctx["eday"] - ctx["sday"] < timedelta(days=121):
+    elif ctx.eday - ctx.sday < timedelta(days=121):
         days = [1, 15]
     ax.xaxis.set_major_locator(DayLocator(bymonthday=days))
     ax.xaxis.set_major_formatter(DateFormatter("%b %-d"))
     return fig
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:

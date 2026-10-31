@@ -5,6 +5,7 @@ which variable is which in the combination plots.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -19,6 +20,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import (
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    SidArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "default": "Temperatures | Winds | Clouds + Vis",
@@ -52,35 +61,33 @@ def date_ticker(ax: Axes, mytz):
     ax.set_xticklabels(xticklabels)
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 360}
-    desc["defaults"] = {"_r": "88"}
-    d3 = date.today() - timedelta(days=2)
-    desc["arguments"] = [
-        dict(
-            type="sid",
-            label="Select IEM Tracked Station",
-            name="station",
-            default="AMW",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="date",
-            default=d3.strftime("%Y/%m/%d"),
-            name="sdate",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, SidArg(label="Select IEM Tracked Station", network="IA_ASOS")
+    ] = "AMW"
+    sdate: Annotated[
+        date | None,
+        DateArg(
             label="Start Date of Plot: (optional)",
-            optional=True,
+            default=lambda: (date.today() - timedelta(days=2)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="default",
-            label="Plot Type",
-            name="p",
-        ),
-    ]
-    return desc
+    ] = None
+    p: Annotated[str, SelectArg(options=PDICT, label="Plot Type")] = "default"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=360,
+        defaults={"_r": "88"},
+    )
 
 
 def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
@@ -139,7 +146,7 @@ def ceilingfunc(row: dict) -> float:
     return larr[pos] / 1000.0
 
 
-def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
+def plot_df(ctx: Params, df: pd.DataFrame, tzname: str) -> Figure:
     """Do some plotting."""
     df["time_delta"] = (
         df["utc_valid"] - df.shift(1)["utc_valid"]
@@ -149,7 +156,7 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 
     title = (
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Recent Time Series {pd.to_datetime(df.index.values[0]):%Y %b %-d} - "
         f"{pd.to_datetime(df.index.values[-1]):%Y %b %-d}"
     )
@@ -239,7 +246,7 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
 
     # _________ PLOT 3 ____
     ax = fig.add_axes((xalign, 0.1, xwidth, 0.25))
-    if ctx["p"] == "default":
+    if ctx.p == "default":
         ax2 = ax.twinx()
         ax2.scatter(
             df.index.values,
@@ -261,7 +268,7 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
         )
         ax.set_ylabel("Visibility [miles]")
         ax.set_ylim(0, 14)
-    elif ctx["p"] == "two":
+    elif ctx.p == "two":
         df2 = df[(df["alti"] > 20.0) & (df["alti"] < 40.0)]
         ax.grid(True)
         if not df2.empty:
@@ -279,10 +286,10 @@ def plot_df(ctx: dict, df: pd.DataFrame, tzname: str) -> Figure:
     return fig
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """This autoplot gets hit a lot, so we attempt to always generate."""
-    station = ctx["station"]
-    sdate = ctx.get("sdate")
+    station = ctx.station
+    sdate = ctx.sdate
 
     fig = None
     df = pd.DataFrame()
@@ -293,7 +300,7 @@ def plotter(ctx: dict):
             fig = plot_df(ctx, df, tzname)
     if fig is None:
         fig = figure(
-            title=f"{ctx['_sname']} Recent Time Series",
+            title=f"{ctx.sname} Recent Time Series",
             apctx=ctx,
         )
         fig.text(

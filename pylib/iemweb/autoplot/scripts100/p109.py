@@ -39,6 +39,7 @@ Most products go back to October 2005.</p>
 """
 
 from datetime import UTC, date, datetime, timedelta
+from typing import Annotated, Any
 
 import numpy as np
 import pandas as pd
@@ -46,6 +47,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+    VtecPsArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "count": "Event Count",
@@ -71,95 +81,89 @@ PDICT4 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["data"] = True
-    today = date.today()
-    jan1 = today.replace(month=1, day=1)
-    tomorrow = today + timedelta(days=1)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="by",
-            options=PDICT4,
-            default="wfo",
-            label="Aggregate Statistics:",
-        ),
-        dict(
-            type="datetime",
-            name="sdate",
-            default=jan1.strftime("%Y/%m/%d 0000"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    by: Annotated[
+        str, SelectArg(options=PDICT4, label="Aggregate Statistics:")
+    ] = "wfo"
+    sdate: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start Date / Time (UTC, inclusive):",
             min="2002/01/01 0000",
+            default=lambda: (
+                date.today().replace(month=1, day=1).strftime("%Y/%m/%d 0000")
+            ),
         ),
-        dict(
-            type="datetime",
-            name="edate",
-            default=today.strftime("%Y/%m/%d 2359"),
+    ]
+    edate: Annotated[
+        datetime,
+        DateTimeArg(
             label="End Date / Time (UTC):",
             min="2002/01/01 0000",
-            max=f"{tomorrow:%Y/%m/%d} 2359",
+            max=lambda: f"{date.today() + timedelta(days=1):%Y/%m/%d} 2359",
+            default=lambda: date.today().strftime("%Y/%m/%d 2359"),
         ),
-        dict(
-            type="select",
-            name="var",
-            default="count",
-            options=PDICT,
-            label="Which metric to plot:",
-        ),
-        dict(
-            type="select",
-            name="w",
-            default="set",
-            options=PDICT2,
-            label="Option to plot all or form set VTEC Events:",
-        ),
-        dict(
-            type="vtec_ps",
-            name="v1",
-            default="SV.W",
-            label="VTEC Phenomena and Significance 1",
-        ),
-        dict(
-            type="vtec_ps",
-            name="v2",
-            default="SV.W",
-            optional=True,
-            label="VTEC Phenomena and Significance 2",
-        ),
-        dict(
-            type="vtec_ps",
-            name="v3",
-            default="SV.W",
-            optional=True,
-            label="VTEC Phenomena and Significance 3",
-        ),
-        dict(
-            type="vtec_ps",
-            name="v4",
-            default="SV.W",
-            optional=True,
-            label="VTEC Phenomena and Significance 4",
-        ),
-        dict(
-            type="select",
-            name="e",
-            default="all",
-            label="Only plot Emergencies / PDS ?",
-            options=PDICT3,
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
-    return desc
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which metric to plot:")
+    ] = "count"
+    w: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Option to plot all or form set VTEC Events:"
+        ),
+    ] = "set"
+    v1: Annotated[
+        Any,
+        VtecPsArg(label="VTEC Phenomena and Significance 1", default="SV.W"),
+    ] = None
+    v2: Annotated[
+        Any,
+        VtecPsArg(
+            label="VTEC Phenomena and Significance 2",
+            optional=True,
+            default="SV.W",
+        ),
+    ] = None
+    v3: Annotated[
+        Any,
+        VtecPsArg(
+            label="VTEC Phenomena and Significance 3",
+            optional=True,
+            default="SV.W",
+        ),
+    ] = None
+    v4: Annotated[
+        Any,
+        VtecPsArg(
+            label="VTEC Phenomena and Significance 4",
+            optional=True,
+            default="SV.W",
+        ),
+    ] = None
+    e: Annotated[
+        str, SelectArg(label="Only plot Emergencies / PDS ?", options=PDICT3)
+    ] = "all"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_count_df(
+    ctx: Params, varname: str, pstr: str, sts: datetime, ets: datetime
+):
     """Oh boy, do complex things."""
     emerg_extra = ""
-    if ctx["e"] == "yes":
+    if ctx.e == "yes":
         emerg_extra = " and is_emergency "
-    elif ctx["e"] == "pds":
+    elif ctx.e == "pds":
         emerg_extra = " and is_pds "
     params = {}
     # Careful here, we could come in with varname == "count"
@@ -185,7 +189,7 @@ def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
         if pstr == " 1=1 ":
             params["sdate"] = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
+            if ctx.by == "state":
                 sql = """
                 with events as (
                     select distinct wfo, substr(ugc, 1, 2) as state,
@@ -247,7 +251,7 @@ def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
         df["count_standard"] = df["count_departure"] / df["count_std"]
     else:
         with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
+            if ctx.by == "state":
                 sql = """
                 with total as (
                 select distinct wfo, substr(ugc, 1, 2) as state,
@@ -354,15 +358,15 @@ def get_count_bins(df, varname):
     return bins
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    sts = ctx["sdate"].replace(tzinfo=UTC)
-    ets = ctx["edate"].replace(tzinfo=UTC)
+    sts = ctx.sdate.replace(tzinfo=UTC)
+    ets = ctx.edate.replace(tzinfo=UTC)
     p1 = ctx["phenomenav1"]
     p2 = ctx["phenomenav2"]
     p3 = ctx["phenomenav3"]
     p4 = ctx["phenomenav4"]
-    varname = ctx["var"]
+    varname = ctx.var
     phenomena = [p[:2] for p in [p1, p2, p3, p4] if p is not None]
     s1 = ctx["significancev1"]
     s2 = ctx["significancev2"]
@@ -381,18 +385,18 @@ def plotter(ctx: dict):
         title = "VTEC Unique Event"
     pstr = " or ".join(pstr)
     pstr = f"({pstr})"
-    if ctx["w"] == "all":
+    if ctx.w == "all":
         pstr = " 1=1 "
         subtitle = "All"
         title = "All VTEC Events"
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
 
     extend = "neither"
     emerg_extra = ""
-    if ctx["e"] == "yes":
+    if ctx.e == "yes":
         emerg_extra = " and is_emergency "
         title += " (Emergencies) "
-    elif ctx["e"] == "pds":
+    elif ctx.e == "pds":
         emerg_extra = " and is_pds "
         title += " (Particularly Dangerous Situation) "
     subtitle_extra = ""
@@ -405,7 +409,7 @@ def plotter(ctx: dict):
         if varname in ["count", "count_mean"]:
             extend = "max"
             # Can't do state as events are double counted
-            if ctx["by"] == "wfo":
+            if ctx.by == "wfo":
                 subtitle_extra = (
                     f" {df['count'].sum():,.0f} Events over "
                     f"{len(df.index):.0f} WFOs"
@@ -421,7 +425,7 @@ def plotter(ctx: dict):
         df2 = df[varname]
     elif varname == "days":
         with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
+            if ctx.by == "state":
                 sql = """
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
@@ -469,7 +473,7 @@ def plotter(ctx: dict):
     else:
         total_minutes = (ets - sts).total_seconds() / 60.0
         with get_sqlalchemy_conn("postgis") as conn:
-            if ctx["by"] == "state":
+            if ctx.by == "state":
                 sql = """
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
@@ -522,14 +526,14 @@ def plotter(ctx: dict):
         sector="nws",
         axisbg="white",
         nocaption=True,
-        title=f"{title} {PDICT[varname]} {PDICT4[ctx['by']]}",
+        title=f"{title} {PDICT[varname]} {PDICT4[ctx.by]}",
         subtitle=(
             f"Issued between {domain} UTC, "
             f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
             f"{subtitle_extra}"
         ),
     )
-    func = mp.fill_cwas if ctx["by"] == "wfo" else mp.fill_states
+    func = mp.fill_cwas if ctx.by == "wfo" else mp.fill_states
     if df2.empty:
         mp.fig.text(
             0.5,

@@ -13,6 +13,7 @@ produces monthly heatmaps.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 import pyiem.nws.vtec as vtec
@@ -22,6 +23,16 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+from iemweb.autoplot.description import (
+    IntArg,
+    NetworkSelectArg,
+    PhenomenaArg,
+    PlotDescription,
+    SelectArg,
+    SignificanceArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {
@@ -63,70 +74,46 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="opt",
-            default="wfo",
-            options=PDICT,
-            label="How to summarize the data?",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str, SelectArg(options=PDICT, label="How to summarize the data?")
+    ] = "wfo"
+    day: Annotated[
+        str, SelectArg(options=DDICT, label="Define what a day means")
+    ] = "cal"
+    days: Annotated[
+        int, IntArg(label="Number of Days to Summarize (1-31)", gt=1, lt=32)
+    ] = 1
+    month: Annotated[
+        str, SelectArg(label="Month(s) Limiter", options=MDICT)
+    ] = "all"
+    station: Annotated[
+        str, NetworkSelectArg(network="WFO", label="Select WFO:", all=True)
+    ] = "DMX"
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    c: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2,
+            label="Total by Selected Phenomena/Significance or Combo",
         ),
-        {
-            "type": "select",
-            "options": DDICT,
-            "default": "cal",
-            "label": "Define what a day means",
-            "name": "day",
-        },
-        {
-            "type": "int",
-            "name": "days",
-            "default": 1,
-            "label": "Number of Days to Summarize (1-31)",
-            "gt": 1,
-            "lt": 32,
-        },
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month(s) Limiter",
-            options=MDICT,
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-            all=True,
-        ),
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        ARG_FEMA,
-        {
-            "type": "select",
-            "options": PDICT2,
-            "name": "c",
-            "default": "single",
-            "label": "Total by Selected Phenomena/Significance or Combo",
-        },
-        dict(
-            type="phenomena",
-            name="phenomena",
-            default="FF",
-            label="Select Watch/Warning Phenomena Type:",
-        ),
-        dict(
-            type="significance",
-            name="significance",
-            default="W",
-            label="Select Watch/Warning Significance Level:",
-        ),
-    ]
-    return desc
+    ] = "single"
+    phenomena: Annotated[
+        str, PhenomenaArg(label="Select Watch/Warning Phenomena Type:")
+    ] = "FF"
+    significance: Annotated[
+        str, SignificanceArg(label="Select Watch/Warning Significance Level:")
+    ] = "W"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def compute_dates(months: list, dt: date, days: int):
@@ -145,21 +132,21 @@ def compute_dates(months: list, dt: date, days: int):
     return f"{sts:%d %b} - {ets:%d %b %Y}"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    phenomena = ctx["phenomena"]
-    significance = ctx["significance"]
-    opt = ctx["opt"]
+    station = ctx.station
+    phenomena = ctx.phenomena
+    significance = ctx.significance
+    opt = ctx.opt
     if opt == "all":
         opt = "wfo"
         station = "_ALL"
-    state = ctx["state"]
+    state = ctx.state
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
-    month = ctx["month"]
+    month = ctx.month
     months = month2months(month)
     params = {
         "ph": [
@@ -170,7 +157,7 @@ def plotter(ctx: dict):
     }
     offset = ""
     tt = "by Calendar Date"
-    if ctx["day"] == "12z":
+    if ctx.day == "12z":
         params["tzname"] = "UTC"
         offset = " - '12 hours'::interval "
         tt = "by 12z-12z Period"
@@ -178,13 +165,13 @@ def plotter(ctx: dict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
     elif opt == "fema":
         wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
-        params["states"] = fema_region2states(ctx["fema"])
+        params["states"] = fema_region2states(ctx.fema)
     if opt in ["bystate", "bywfo"]:
         wfo_limiter = ""
 
@@ -192,11 +179,11 @@ def plotter(ctx: dict):
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance})"
     )
-    if ctx["c"] == "svrtor":
+    if ctx.c == "svrtor":
         params["ph"] = ["SV", "TO"]
         params["sig"] = "W"
         subtitle = "Severe T'Storm + Tornado Warnings"
-    elif ctx["c"] == "svrtorffw":
+    elif ctx.c == "svrtorffw":
         params["ph"] = ["SV", "TO", "FF"]
         params["sig"] = "W"
         subtitle = "Svr T'Storm + Tornado + Flash Flood Warnings"
@@ -254,7 +241,7 @@ def plotter(ctx: dict):
             .sort_values(["count", "min_date"], ascending=False)
             .copy()
         )
-        if ctx["days"] > 1:
+        if ctx.days > 1:
             # We need to fill out the dataframe to include all dates
             # within the range of dates and all the states or offices
             # that are in the data
@@ -275,7 +262,7 @@ def plotter(ctx: dict):
                     )
                 )
                 .fillna(0)
-                .rolling(ctx["days"], min_periods=1)
+                .rolling(ctx.days, min_periods=1)
                 .sum()
                 .reset_index()
                 .sort_values(["count", "min_date"], ascending=False)
@@ -290,7 +277,7 @@ def plotter(ctx: dict):
             .sort_values(["count", "min_date"], ascending=False)
             .copy()
         )
-        if ctx["days"] > 1:
+        if ctx.days > 1:
             # We need to undo the sort and reindex to include all days
             df = (
                 df.set_index("min_date")
@@ -303,13 +290,13 @@ def plotter(ctx: dict):
                     )
                 )
                 .fillna(0)
-                .rolling(ctx["days"], min_periods=1)
+                .rolling(ctx.days, min_periods=1)
                 .sum()
                 .reset_index()
                 .sort_values(["count", "min_date"], ascending=False)
             )
 
-    title = f"NWS {ctx['_sname']}"
+    title = f"NWS {ctx.sname}"
     if opt == "state":
         title = (
             "NWS Issued for Counties/Zones for State of "
@@ -320,9 +307,9 @@ def plotter(ctx: dict):
     elif opt == "bywfo":
         title = "NWS Issued by WFO"
     elif opt == "fema":
-        title = f"NWS Issued by FEMA {FEMA_REGIONS[ctx['fema']]}"
-    if ctx["days"] > 1:
-        title += f" [{ctx['days']} Day Sum]"
+        title = f"NWS Issued by FEMA {FEMA_REGIONS[ctx.fema]}"
+    if ctx.days > 1:
+        title += f" [{ctx.days} Day Sum]"
     if month != "all":
         title += f" [{MDICT[month]}]"
     fig = figure(
@@ -351,10 +338,10 @@ def plotter(ctx: dict):
             rank += 1
         lastval = row["count"]
         md = f"{row['min_date']:%d %b %Y}"
-        if ctx["days"] > 1:
+        if ctx.days > 1:
             # Life choices here about what happens when the period crosses
             # a month boundary
-            md = compute_dates(months, row["min_date"], ctx["days"])
+            md = compute_dates(months, row["min_date"], ctx.days)
         if opt in ["bystate", "bywfo"]:
             extra = row[opt.replace("by", "")]
         labels.append(f"#{rank} {extra} {md} :: {row['count']:.0f}")

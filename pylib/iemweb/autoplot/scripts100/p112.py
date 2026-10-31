@@ -4,6 +4,7 @@ month and year.
 """
 
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -11,39 +12,31 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    return {
-        "description": __doc__,
-        "data": True,
-        "report": True,
-        "nopng": True,
-        "arguments": [
-            ARG_STATION,
-            dict(
-                type="int",
-                name="base",
-                default="52",
-                gt=-50,
-                lt=150,
-                label="Growing Degree Day Base (°F)",
-            ),
-            dict(
-                type="int",
-                name="ceil",
-                default="86",
-                gt=-50,
-                lt=150,
-                label="Growing Degree Day Ceiling (°F)",
-            ),
-        ],
-    }
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    base: Annotated[
+        int, IntArg(gt=-50, lt=150, label="Growing Degree Day Base (°F)")
+    ] = 52
+    ceil: Annotated[
+        int, IntArg(gt=-50, lt=150, label="Growing Degree Day Ceiling (°F)")
+    ] = 86
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True, nopng=True
+    )
 
 
 def modMonth(
-    stationID, db, monthly, mo1, mo2, mt1, mt2, ctx, gddbase, gddceil
+    stationID, db, monthly, mo1, mo2, mt1, mt2, ctx: Params, gddbase, gddceil
 ):
     """modMonth."""
     res = (
@@ -102,11 +95,11 @@ def modMonth(
     return res
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    gddbase = ctx["base"]
-    gddceil = ctx["ceil"]
+    station = ctx.station
+    gddbase = ctx.base
+    gddceil = ctx.ceil
     varname = f"gdd{gddbase}{gddceil}"
 
     with get_sqlalchemy_conn("coop") as conn:
@@ -146,7 +139,7 @@ def plotter(ctx: dict):
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: {date.today().strftime("%d %b %Y")}
 # Climate Record: {bs} -> {date.today()}
-# Site Information: {ctx["_sname"]}
+# Site Information: {ctx.sname}
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID {station}
 """

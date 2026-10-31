@@ -5,13 +5,22 @@ distributions are presented as "violins" with the width of the violin
 providing some insight into the population density at the given hour.
 """
 
+import datetime as dt
 from datetime import date
+from typing import Annotated
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import (
+    DateArg,
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -64,60 +73,50 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        {
-            "type": "select",
-            "name": "var",
-            "default": "tmpf",
-            "label": "Variable to Summarize by Hour",
-            "options": PDICT2,
-        },
-        dict(
-            type="select",
-            name="opt",
-            default="tmpf_above",
-            label="Daily Criterion with at least one ob?",
-            options=PDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    var: Annotated[
+        str, SelectArg(label="Variable to Summarize by Hour", options=PDICT2)
+    ] = "tmpf"
+    opt: Annotated[
+        str,
+        SelectArg(
+            label="Daily Criterion with at least one ob?", options=PDICT
         ),
-        {
-            "optional": True,
-            "type": "date",
-            "default": f"{date.today():%Y/%m/%d}",
-            "label": "Plot observations for this calendar date",
-            "name": "date",
-        },
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+    ] = "tmpf_above"
+    date: Annotated[
+        dt.date | None,
+        DateArg(
+            label="Plot observations for this calendar date",
+            default=lambda: f"{date.today():%Y/%m/%d}",
         ),
-        dict(
-            type="float",
-            name="threshold",
-            default="80",
-            label="Threshold (°F,knot,%,mile,inch):",
-        ),
-    ]
-    return desc
+    ] = None
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    threshold: Annotated[
+        float, FloatArg(label="Threshold (°F,knot,%,mile,inch):")
+    ] = 80.0
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    threshold = ctx["threshold"]
-    opt = ctx["opt"]
+    station = ctx.zstation
+    threshold = ctx.threshold
+    opt = ctx.opt
     dailyvar, dailydir = opt.split("_")
-    hourlyvar = ctx["var"]
+    hourlyvar = ctx.var
     if hourlyvar not in PDICT2:  # not possible, but alas
         raise NoDataFound(f"Invalid variable: {hourlyvar}")
-    month = ctx["month"]
-    mydate: date | None = ctx.get("date")
+    month = ctx.month
+    mydate: date | None = ctx.date
 
     months = month2months(month)
 
@@ -160,7 +159,7 @@ def plotter(ctx: dict):
                 mydate_obs[row[0].hour].append(row[1])
 
     title = (
-        f"{ctx['_sname']} :: Hourly {PDICT2[hourlyvar]} "
+        f"{ctx.sname} :: Hourly {PDICT2[hourlyvar]} "
         f"Distributions over ({month.capitalize()})"
     )
     subtitle = f"On Dates with at least one ob {PDICT[opt]} {threshold:.2f}"

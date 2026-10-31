@@ -14,6 +14,7 @@ at the state scale when normalized by area.
 
 import calendar
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,13 @@ from pyiem.reference import state_fips, state_names
 from scipy.interpolate import interp1d
 
 from iemweb import error_log
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -36,45 +44,41 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    thisyear = date.today().year
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "state",
-            "label": "How to Summarize",
-            "name": "w",
-        },
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="year",
-            name="syear",
-            min=2000,
-            default=2000,
-            label="Start year for plot",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            max=thisyear,
-            default=thisyear,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[str, SelectArg(options=PDICT, label="How to Summarize")] = (
+        "state"
+    )
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    syear: Annotated[int, YearArg(min=2000, label="Start year for plot")] = (
+        2000
+    )
+    eyear: Annotated[
+        int,
+        YearArg(
+            max=lambda: date.today().year,
             label="End year (inclusive) for plot",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"]
-    syear = ctx["syear"]
-    eyear = ctx["eyear"]
+    state = ctx.state
+    syear = ctx.syear
+    eyear = ctx.eyear
 
     url = SERVICE
-    if ctx["w"] == "state":
+    if ctx.w == "state":
         fips = ""
         for key, _state in state_fips.items():
             if _state == state:
@@ -107,7 +111,7 @@ def plotter(ctx: dict):
         df["D4"] * 5 + df["D3"] * 4 + df["D2"] * 3 + df["D1"] * 2 + df["D0"]
     )
     df["delta"] = df["score"].diff()
-    if ctx["w"] == "conus":
+    if ctx.w == "conus":
         df["delta"] = df["delta"] * 5
     df.iat[0, df.columns.get_loc("delta")] = 0
 
@@ -149,12 +153,12 @@ def plotter(ctx: dict):
     ax.set_xlabel(
         "curve height of 1 year is 1 effective drought category "
         "change over area of "
-        f"{state_names[state] if ctx['w'] == 'state' else '1/5 Contiguous US'}"
+        f"{state_names[state] if ctx.w == 'state' else '1/5 Contiguous US'}"
     )
     ax.set_ylabel(f"Year, thru {df.Date.max():%d %b %Y}")
     ax.set_title(
         f"{syear:.0f}-{eyear:.0f} US Drought Monitor Weekly Change for "
-        f"{state_names[state] if ctx['w'] == 'state' else 'Contiguous US'}\n"
+        f"{state_names[state] if ctx.w == 'state' else 'Contiguous US'}\n"
         "curve height represents change in intensity + coverage"
     )
 

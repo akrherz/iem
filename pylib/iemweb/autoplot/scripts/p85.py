@@ -7,6 +7,7 @@ consider the top of the hour reports.
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -14,6 +15,13 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "above": "At or Above",
@@ -54,50 +62,37 @@ CASTS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        dict(type="month", name="month", default=7, label="Month:"),
-        {
-            "type": "select",
-            "name": "varname",
-            "default": "tmpf",
-            "label": "Variable to Plot:",
-            "options": PDICT3,
-        },
-        dict(
-            type="float",
-            name="t",
-            default=80,
-            label="Threshold (units of variable):",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="above",
-            label="Threshold Option:",
-            options=PDICT,
-        ),
-        {
-            "type": "select",
-            "name": "scale",
-            "default": "100",
-            "label": "Scale X-Axis:",
-            "options": PDICT2,
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    month: Annotated[int, MonthArg(label="Month:")] = 7
+    varname: Annotated[
+        str, SelectArg(label="Variable to Plot:", options=PDICT3)
+    ] = "tmpf"
+    t: Annotated[float, FloatArg(label="Threshold (units of variable):")] = 80
+    dir: Annotated[
+        str, SelectArg(label="Threshold Option:", options=PDICT)
+    ] = "above"
+    scale: Annotated[str, SelectArg(label="Scale X-Axis:", options=PDICT2)] = (
+        "100"
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    month = int(ctx["month"])
-    thres = ctx["t"]
-    mydir = ctx["dir"]
-    varname = ctx["varname"]
+    station = ctx.zstation
+    month = int(ctx.month)
+    thres = ctx.t
+    mydir = ctx.dir
+    varname = ctx.varname
 
     tzname = ctx["_nt"].sts[station]["tzname"]
     with get_sqlalchemy_conn("asos") as conn:
@@ -144,7 +139,7 @@ def plotter(ctx: dict):
     hours = df.index.values
     title = (
         f"({df['min_valid'].min().year} - {df['max_valid'].max().year}) "
-        f"{ctx['_sname']}\n"
+        f"{ctx.sname}\n"
         f"Frequency of {calendar.month_name[month]} Hour, "
         f"{PDICT3[varname]} {PDICT[mydir]}: "
         f"{thres} {UNITS[varname]}"
@@ -175,7 +170,7 @@ def plotter(ctx: dict):
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels)
     ax.grid(True)
-    if ctx["scale"] == "100":
+    if ctx.scale == "100":
         ax.set_xlim(0, 100)
         ax.set_xticks([0, 5, 25, 50, 75, 95, 100])
     ax.set_xlabel(f"Frequency [%] (Hour Timezone: {tzname})")

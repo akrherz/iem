@@ -6,36 +6,39 @@ of the day to day changes in temperature.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which Daily Variable:",
-            options=PDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(label="Which Daily Variable:", options=PDICT)
+    ] = "high"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"][:10]
+    station = ctx.station
+    varname = ctx.var[:10]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -62,9 +65,7 @@ def plotter(ctx: dict):
             index_col="doy",
         )
 
-    title = (
-        f"{ctx['_sname']} :: Daily {PDICT.get(varname)} Standard Deviations"
-    )
+    title = f"{ctx.sname} :: Daily {PDICT.get(varname)} Standard Deviations"
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
     ax[0].plot(

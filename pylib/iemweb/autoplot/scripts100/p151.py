@@ -6,7 +6,8 @@ more useful for some users than this one.  <strong>This autoplot can be very
 slow when plotting more than a single state of data.</strong>
 """
 
-from typing import TYPE_CHECKING
+from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -15,10 +16,17 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME, Z_CLIP
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    FloatArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
-
-if TYPE_CHECKING:
-    from datetime import date
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -98,120 +106,90 @@ MDICT = {
 OPT1 = {"diff": "Plot Difference", "p1": "Just Plot Period One Values"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="month",
-            default="all",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    month: Annotated[
+        str,
+        SelectArg(
             options=MDICT,
             label="Show Monthly, Annual or Custom Defined Period Averages",
         ),
-        {
-            "type": "sday",
-            "default": "0101",
-            "name": "sday",
-            "label": "Inclusive Start Day (select custom period above)",
-        },
-        {
-            "type": "sday",
-            "default": "1231",
-            "name": "eday",
-            "label": "Inclusive End Day (select custom period above)",
-        },
-        dict(
-            type="select",
-            name="sector",
-            default="state",
-            options=PDICT,
-            label="Select Map Region",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State to Plot (when appropriate)",
-        ),
-        dict(
-            type="select",
-            name="opt",
-            options=PDICT2,
-            default="both",
-            label="Map Plot/Contour View Option",
-        ),
-        dict(
-            type="select",
-            name="var",
-            options=PDICT3,
-            default="total_precip",
-            label="Which Variable to Plot",
-        ),
-        dict(
-            type="select",
-            name="r",
-            options=PDICT4,
-            default="english",
-            label="Which Unit System to Use (GDD/SDD always english)",
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default=-99,
-            label="Enter threshold (where appropriate)",
-        ),
-        dict(
-            type="select",
-            options=OPT1,
-            default="diff",
-            name="opt1",
-            label="Period plotting option",
-        ),
-        dict(
-            type="year",
-            name="p1syear",
-            default=1951,
-            label="Start Year (inclusive) of Period One:",
-        ),
-        dict(
-            type="year",
-            name="p1eyear",
-            default=1980,
-            label="End Year (inclusive) of Period One:",
-        ),
-        dict(
-            type="year",
-            name="p2syear",
-            default=1981,
-            label="Start Year (inclusive) of Period Two:",
-        ),
-        dict(
-            type="year",
-            name="p2eyear",
-            default=2010,
-            label="End Year (inclusive) of Period Two:",
-        ),
-        dict(
-            type="cmap", name="cmap", default="seismic_r", label="Color Ramp:"
+    ] = "all"
+    sday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive Start Day (select custom period above)",
+            default="0101",
         ),
     ]
-    return desc
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive End Day (select custom period above)",
+            default="1231",
+        ),
+    ]
+    sector: Annotated[
+        str, SelectArg(options=PDICT, label="Select Map Region")
+    ] = "state"
+    state: Annotated[
+        str, StateArg(label="Select State to Plot (when appropriate)")
+    ] = "IA"
+    opt: Annotated[
+        str, SelectArg(options=PDICT2, label="Map Plot/Contour View Option")
+    ] = "both"
+    var: Annotated[
+        str, SelectArg(options=PDICT3, label="Which Variable to Plot")
+    ] = "total_precip"
+    r: Annotated[
+        str,
+        SelectArg(
+            options=PDICT4,
+            label="Which Unit System to Use (GDD/SDD always english)",
+        ),
+    ] = "english"
+    threshold: Annotated[
+        float, FloatArg(label="Enter threshold (where appropriate)")
+    ] = -99
+    opt1: Annotated[
+        str, SelectArg(options=OPT1, label="Period plotting option")
+    ] = "diff"
+    p1syear: Annotated[
+        int, YearArg(label="Start Year (inclusive) of Period One:")
+    ] = 1951
+    p1eyear: Annotated[
+        int, YearArg(label="End Year (inclusive) of Period One:")
+    ] = 1980
+    p2syear: Annotated[
+        int, YearArg(label="Start Year (inclusive) of Period Two:")
+    ] = 1981
+    p2eyear: Annotated[
+        int, YearArg(label="End Year (inclusive) of Period Two:")
+    ] = 2010
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "seismic_r"
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_data(ctx: Params):
     """Get the data, please."""
-    state = ctx["state"]
-    sector = ctx["sector"]
-    threshold = ctx["threshold"]
-    month = ctx["month"]
-    sday: date = ctx["sday"]
-    eday: date = ctx["eday"]
-    p1syear = ctx["p1syear"]
-    p1eyear = ctx["p1eyear"]
+    state = ctx.state
+    sector = ctx.sector
+    threshold = ctx.threshold
+    month = ctx.month
+    sday: date = ctx.sday
+    eday: date = ctx.eday
+    p1syear = ctx.p1syear
+    p1eyear = ctx.p1eyear
     p1years = p1eyear - p1syear + 1
-    p2syear = ctx["p2syear"]
-    p2eyear = ctx["p2eyear"]
+    p2syear = ctx.p2syear
+    p2eyear = ctx.p2eyear
     p2years = p2eyear - p2syear + 1
 
     datumsql = "year"
@@ -231,7 +209,7 @@ def get_data(ctx):
     hcol = "high"
     lcol = "low"
     pcol = "precip"
-    if ctx["r"] == "metric":
+    if ctx.r == "metric":
         hcol = "f2c(high)"
         lcol = "f2c(low)"
         pcol = "precip * 25.4"
@@ -296,8 +274,8 @@ def get_data(ctx):
         and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
         """,
                 datumsql=datumsql,
-                varname=ctx["var"],
-                sqlvar=sqlopts[ctx["var"]],
+                varname=ctx.var,
+                sqlvar=sqlopts[ctx.var],
                 table=table,
                 mlimiter=mlimiter,
             ),
@@ -318,47 +296,44 @@ def get_data(ctx):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df[ctx["var"]] = df[f"p2_{ctx['var']}"] - df[f"p1_{ctx['var']}"]
+    df[ctx.var] = df[f"p2_{ctx.var}"] - df[f"p1_{ctx.var}"]
     return df
 
 
-def geojson(ctx: dict):
+def geojson(ctx: Params):
     """Handle GeoJSON output."""
-    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
+    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx.var
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_data(ctx)
-    state = ctx["state"]
-    varname = ctx["var"]
-    sector = ctx["sector"]
-    threshold = ctx["threshold"]
-    opt = ctx["opt"]
-    month = ctx["month"]
-    p1syear = ctx["p1syear"]
-    p1eyear = ctx["p1eyear"]
-    p2syear = ctx["p2syear"]
-    p2eyear = ctx["p2eyear"]
-    opt1 = ctx["opt1"]
+    state = ctx.state
+    varname = ctx.var
+    sector = ctx.sector
+    threshold = ctx.threshold
+    opt = ctx.opt
+    month = ctx.month
+    p1syear = ctx.p1syear
+    p1eyear = ctx.p1eyear
+    p2syear = ctx.p2syear
+    p2eyear = ctx.p2eyear
+    opt1 = ctx.opt1
 
     column = varname
     if month == "custom":
-        title = (
-            f"({ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}) "
-            f"{PDICT3[varname]}"
-        )
+        title = f"({ctx.sday:%-d %b} thru {ctx.eday:%-d %b}) {PDICT3[varname]}"
     else:
         title = f"{MDICT[month]} {PDICT3[varname]}"
     title = title.replace("[Threshold]", f"{threshold:.1f}")
     # this works, for now
     tvar = "total_precip" if "precip" in varname else "avg_high"
-    title += f" {(MUNITS if ctx['r'] == 'metric' else UNITS)[tvar]}"
+    title += f" {(MUNITS if ctx.r == 'metric' else UNITS)[tvar]}"
     if opt1 == "p1":
         column = f"p1_{varname}"
         title = f"{p1syear:.0f}-{p1eyear:.0f} {title}"
     else:
-        tt = UNITS[varname] if ctx["r"] == "english" else MUNITS[varname]
+        tt = UNITS[varname] if ctx.r == "english" else MUNITS[varname]
         p1 = (
             f"{p1syear:.0f}-{p1eyear:.0f}"
             if p1syear != p1eyear
@@ -401,8 +376,8 @@ def plotter(ctx: dict):
             df2["lat"].values,
             df2[column].values,
             levels,
-            cmap=get_cmap(ctx["cmap"]),
-            units=UNITS[varname] if ctx["r"] == "english" else MUNITS[varname],
+            cmap=get_cmap(ctx.cmap),
+            units=UNITS[varname] if ctx.r == "english" else MUNITS[varname],
         )
     if sector == "state":
         mp.drawcounties()

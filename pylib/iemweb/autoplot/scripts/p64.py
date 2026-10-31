@@ -10,6 +10,7 @@ to be below 40°F. This is to help filter out hail events.</p>
 
 import calendar
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -21,6 +22,8 @@ from pyiem.reference import TRACE_VALUE
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, TextArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "first": "First Snowfall after 1 July",
@@ -30,33 +33,30 @@ XS = np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
 XS = np.concatenate([XS, XS + 366])
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="text",
-            name="threshold",
-            default="1",
-            label="First Snowfall Threshold (T for trace)",
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="last",
-            options=PDICT,
-            label="Which Variable to Plot?",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    threshold: Annotated[
+        str, TextArg(label="First Snowfall Threshold (T for trace)")
+    ] = "1"
+    dir: Annotated[
+        str, SelectArg(options=PDICT, label="Which Variable to Plot?")
+    ] = "last"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def get_data(ctx: dict, conn: Connection | None = None):
+def get_data(ctx: Params, conn: Connection | None = None):
     """Get some data please"""
-    station = ctx["station"]
-    t_in = ctx["threshold"]
+    station = ctx.station
+    t_in = ctx.threshold
     try:
         threshold = TRACE_VALUE if t_in in ["T", "t"] else float(t_in)
     except ValueError as exp:
@@ -96,7 +96,7 @@ def get_data(ctx: dict, conn: Connection | None = None):
         hits = np.where(np.array(snowfall) >= threshold)[0]
         if hits.size == 0:
             continue
-        idx = hits[0] if ctx["dir"] == "first" else hits[-1]
+        idx = hits[0] if ctx.dir == "first" else hits[-1]
         # Check that we have snowd for this index, if not, DQ
         if snowdepth[idx] < 0:
             continue
@@ -168,17 +168,17 @@ def plot_yearly_trend(fig, df):
     ax.legend(loc=(0.0, -0.15), ncol=2)
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_data(ctx)
-    t1 = "Last" if ctx["dir"] == "last" else "First"
+    t1 = "Last" if ctx.dir == "last" else "First"
     t2 = (
         "Trace+"
-        if ctx["threshold"] in ("T", "t")
-        else f"{float(ctx['threshold']):.2f}+ Inch"
+        if ctx.threshold in ("T", "t")
+        else f"{float(ctx.threshold):.2f}+ Inch"
     )
     title = (
-        f"{ctx['_sname']}:: {t1} {t2} Snowfall "
+        f"{ctx.sname}:: {t1} {t2} Snowfall "
         f"({df['year'].min()}-{df['year'].max()})\n"
         "(color is how long snow remained)"
     )
@@ -216,7 +216,7 @@ def plotter(ctx: dict):
     ax2.plot(ptile, np.arange(100), lw=2, color="k")
     ax2.set_ylabel(
         ("Frequency of %s Date (CDF) [%%] (black line)")
-        % ("Start" if ctx["dir"] == "first" else "Last",)
+        % ("Start" if ctx.dir == "first" else "Last",)
     )
     ax.set_ylabel("Snowfall [inch], Avg: %.1f inch" % (df["snowfall"].mean(),))
     p0 = Rectangle((0, 0), 1, 1, fc="purple")

@@ -6,12 +6,16 @@ requires the feels like temperature to be additive, so heat index
 greater than air temperature and wind chill less than air temperature.
 """
 
+from typing import Annotated
+
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot.description import PlotDescription, SelectArg, ZStationArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -39,42 +43,34 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="wcht",
-            label="Which variable to analyze?",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Limit plot by month/season",
-            options=MDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    var: Annotated[
+        str, SelectArg(label="Which variable to analyze?", options=PDICT)
+    ] = "wcht"
+    month: Annotated[
+        str, SelectArg(label="Limit plot by month/season", options=MDICT)
+    ] = "all"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    offset = 3 if ctx["month"] in ["all", "winter"] else 0
-    months = month2months(ctx["month"])
+    station = ctx.zstation
+    offset = 3 if ctx.month in ["all", "winter"] else 0
+    months = month2months(ctx.month)
 
-    additive = "feel < tmpf" if ctx["var"] == "wcht" else "feel > tmpf"
+    additive = "feel < tmpf" if ctx.var == "wcht" else "feel > tmpf"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -102,7 +98,7 @@ def plotter(ctx: dict):
     ys = []
     freq = []
     sz = float(len(df.index))
-    if ctx["var"] == "wcht":
+    if ctx.var == "wcht":
         col = "min_feel"
         for lev in range(int(df[col].max()), int(df[col].min()) - 1, -1):
             freq.append(len(df[df[col] < lev].index) / sz * 100.0)
@@ -115,22 +111,22 @@ def plotter(ctx: dict):
     ys = np.array(ys)
 
     title = (
-        f"{ctx['_sname']} ({df.index[0]:.0f}-{df.index[-1]:.0f})\n"
-        f"Frequency of Observed {PDICT[ctx['var']]} over {MDICT[ctx['month']]}"
+        f"{ctx.sname} ({df.index[0]:.0f}-{df.index[-1]:.0f})\n"
+        f"Frequency of Observed {PDICT[ctx.var]} over {MDICT[ctx.month]}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
 
-    color = "b" if ctx["var"] == "wcht" else "r"
+    color = "b" if ctx.var == "wcht" else "r"
     ax[0].barh(ys - 0.4, freq, ec=color, fc=color)
-    ax[0].set_ylabel(f"{PDICT[ctx['var']]} °F")
+    ax[0].set_ylabel(f"{PDICT[ctx.var]} °F")
     ax[0].set_xlabel("Frequency [%]")
     ax[0].set_xticks([0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100])
     ax[0].grid(True)
 
     ax[1].bar(df.index.values, df[col], fc=color, ec=color)
     ax[1].set_ylim(bottom=df[col].min() - 5)
-    ax[1].set_ylabel(f"{PDICT[ctx['var']]} °F")
+    ax[1].set_ylabel(f"{PDICT[ctx.var]} °F")
     ax[1].grid(True)
     if offset > 0:
         ax[1].set_xlabel("Year label for spring portion of season")

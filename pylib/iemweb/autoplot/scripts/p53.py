@@ -11,11 +11,20 @@ are accounted for or that it represents a true frequency of time.
 
 import calendar
 from datetime import datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temperature",
@@ -49,75 +58,61 @@ MDICT = {
     "no": "No, ignore missing / no reports",
 }
 
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    tu = "[F, inch, %, knots, mb]"
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="tmpf",
-            name="var",
-            label="Select variable to plot:",
-        ),
-        dict(
-            type="float",
-            name="t1",
-            default=0,
-            label=f"Threshold #1 (lowest) {tu}",
-        ),
-        dict(type="float", name="t2", default=32, label=f"Threshold #2 {tu}"),
-        dict(type="float", name="t3", default=50, label=f"Threshold #3 {tu}"),
-        dict(type="float", name="t4", default=70, label=f"Threshold #4 {tu}"),
-        dict(
-            type="float",
-            name="t5",
-            default=90,
-            label=f"Threshold #5 (highest) {tu}",
-        ),
-        {
-            "type": "select",
-            "name": "missing",
-            "default": "yes",
-            "label": "Account for missing / no reports in totals?",
-            "options": MDICT,
-        },
-    ]
-    return desc
+TU = "[F, inch, %, knots, mb]"
 
 
-def plotter(ctx: dict):
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "DSM"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select variable to plot:")
+    ] = "tmpf"
+    t1: Annotated[float, FloatArg(label=f"Threshold #1 (lowest) {TU}")] = 0
+    t2: Annotated[float, FloatArg(label=f"Threshold #2 {TU}")] = 32
+    t3: Annotated[float, FloatArg(label=f"Threshold #3 {TU}")] = 50
+    t4: Annotated[float, FloatArg(label=f"Threshold #4 {TU}")] = 70
+    t5: Annotated[float, FloatArg(label=f"Threshold #5 (highest) {TU}")] = 90
+    missing: Annotated[
+        str,
+        SelectArg(
+            label="Account for missing / no reports in totals?", options=MDICT
+        ),
+    ] = "yes"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     # Ensure that the thresholds are in order
-    arr = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"], ctx["t5"]]
+    arr = [ctx.t1, ctx.t2, ctx.t3, ctx.t4, ctx.t5]
     arr.sort()
-    if arr != [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"], ctx["t5"]]:
+    if arr != [ctx.t1, ctx.t2, ctx.t3, ctx.t4, ctx.t5]:
         raise NoDataFound("Thresholds must be in ascending order")
-    v = ctx["var"]
+    v = ctx.var
     cst = CAST.get(v, "float")
-    t1 = float(ctx["t1"]) if cst == "float" else int(ctx["t1"])
-    t2 = float(ctx["t2"]) if cst == "float" else int(ctx["t2"])
-    t3 = float(ctx["t3"]) if cst == "float" else int(ctx["t3"])
-    t4 = float(ctx["t4"]) if cst == "float" else int(ctx["t4"])
-    t5 = float(ctx["t5"]) if cst == "float" else int(ctx["t5"])
+    t1 = float(ctx.t1) if cst == "float" else int(ctx.t1)
+    t2 = float(ctx.t2) if cst == "float" else int(ctx.t2)
+    t3 = float(ctx.t3) if cst == "float" else int(ctx.t3)
+    t4 = float(ctx.t4) if cst == "float" else int(ctx.t4)
+    t5 = float(ctx.t5) if cst == "float" else int(ctx.t5)
     params = {
-        "station": ctx["zstation"],
+        "station": ctx.zstation,
         "t1": t1,
         "t2": t2,
         "t3": t3,
         "t4": t4,
         "t5": t5,
     }
-    mlim = f"and {v} is not null" if ctx["missing"] == "no" else ""
+    mlim = f"and {v} is not null" if ctx.missing == "no" else ""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -160,14 +155,14 @@ def plotter(ctx: dict):
 
     title = f"Hourly {PDICT[v]} {UNITS[v]} Frequencies "
     subtitle = (
-        f"{ctx['_sname']} "
+        f"{ctx.sname} "
         f"({df.iloc[0]['min_valid'].year}-{df.iloc[0]['max_valid'].year})"
     )
-    if ctx["missing"] == "no":
+    if ctx.missing == "no":
         subtitle += " [Missing/No Report Hours Ignored]"
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     x = df.index.values - 1
-    if ctx["missing"] == "yes":
+    if ctx.missing == "yes":
         val = df["dnull"].sum() / df["count"].sum() * 100.0
         ax.bar(
             x,

@@ -11,7 +11,8 @@ coverage should be good outside of the major gap on 10 August 2020 due
 to the derecho power outage.</p>
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
@@ -22,59 +23,63 @@ from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, Z_CLIP2, state_bounds
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateTimeArg,
+    PlotDescription,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 LL = (
     "https://www.vaisala.com/en/products/"
     "national-lightning-detection-network-nldn"
 )
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    t24 = utc() - timedelta(hours=24)
-    return {
-        "data": False,
-        "description": __doc__.replace("{LL}", LL),
-        "gallery": {
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    state: Annotated[
+        str, StateArg(label="Select CONUS-Only State:", contiguous=True)
+    ] = "IA"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Start Timestamp (UTC):",
+            min="2016/10/12 0000",
+            default=lambda: f"{utc() - timedelta(hours=24):%Y/%m/%d %H%M}",
+        ),
+    ]
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="End Timestamp (UTC):",
+            min="2016/10/12 0000",
+            default=lambda: f"{utc():%Y/%m/%d %H%M}",
+        ),
+    ]
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "inferno"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__.replace("{LL}", LL),
+        data=False,
+        gallery={
             "sts": "2024-05-21 1600",
             "ets": "2024-05-21 2300",
         },
-        "arguments": [
-            dict(
-                type="state",
-                name="state",
-                default="IA",
-                label="Select CONUS-Only State:",
-                contiguous=True,
-            ),
-            dict(
-                type="datetime",
-                default=f"{t24:%Y/%m/%d %H%M}",
-                name="sts",
-                label="Start Timestamp (UTC):",
-                min="2016/10/12 0000",
-            ),
-            dict(
-                type="datetime",
-                default=f"{utc():%Y/%m/%d %H%M}",
-                name="ets",
-                label="End Timestamp (UTC):",
-                min="2016/10/12 0000",
-            ),
-            dict(
-                type="cmap",
-                name="cmap",
-                default="inferno",
-                label="Color Ramp:",
-            ),
-        ],
-    }
+    )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    state = ctx["state"]
-    sts = ctx["sts"].replace(tzinfo=UTC)
-    ets = ctx["ets"].replace(tzinfo=UTC)
+    state = ctx.state
+    sts = ctx.sts.replace(tzinfo=UTC)
+    ets = ctx.ets.replace(tzinfo=UTC)
     if (ets - sts).total_seconds() >= (32 * 86400):
         raise NoDataFound("Must pick period less than 32 days long")
 
@@ -135,7 +140,7 @@ def plotter(ctx: dict):
         bins = pretty_bins(0, np.max(H))
         if bins[1] > 1:
             bins[0] = 1
-        cmap = get_cmap(ctx["cmap"]).with_extremes(under="white")
+        cmap = get_cmap(ctx.cmap).with_extremes(under="white")
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
         xx, yy = np.meshgrid(xedges, yedges)
         mp.panels[0].pcolormesh(

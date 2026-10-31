@@ -27,6 +27,7 @@ plot, but only considers a calendar day.</p>
 """
 
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -34,6 +35,14 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 MDICT = {"warm": "Rise", "cool": "Drop"}
@@ -69,57 +78,41 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "tmpf",
-            "label": "Select Variable",
-            "name": "v",
-        },
-        dict(type="int", name="hours", label="Number of Hours:", default=24),
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT2,
-        ),
-        dict(
-            type="select",
-            name="dir",
-            default="warm",
-            label="Direction:",
-            options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="how",
-            default="exact",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "AMW"
+    v: Annotated[str, SelectArg(options=PDICT2, label="Select Variable")] = (
+        "tmpf"
+    )
+    hours: Annotated[int, IntArg(label="Number of Hours:")] = 24
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT2)] = (
+        "all"
+    )
+    dir: Annotated[str, SelectArg(label="Direction:", options=MDICT)] = "warm"
+    how: Annotated[
+        str,
+        SelectArg(
             label="How to compute change over given time window:",
             options=PDICT,
         ),
-        {
-            "type": "year",
-            "name": "syear",
-            "default": 1900,
-            "min": 1900,
-            "label": (
-                "Exclude data prior to year (some sites have sus pre 1950)"
-            ),
-        },
-    ]
-    return desc
+    ] = "exact"
+    syear: Annotated[
+        int,
+        YearArg(
+            min=1900,
+            label="Exclude data prior to year (some sites have sus pre 1950)",
+        ),
+    ] = 1900
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
 
 
 def plot_event(ax, i, df, varname):
@@ -140,13 +133,13 @@ def plot_event(ax, i, df, varname):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    hours = ctx["hours"]
-    mydir = ctx["dir"]
-    month = ctx["month"]
-    varname = ctx["v"]
+    station = ctx.zstation
+    hours = ctx.hours
+    mydir = ctx.dir
+    month = ctx.month
+    varname = ctx.v
     if varname not in PDICT2:
         raise NoDataFound("Invalid varname")
 
@@ -168,7 +161,7 @@ def plotter(ctx: dict):
             conn,
             params={
                 "station": station,
-                "sts": datetime(ctx["syear"], 1, 1),
+                "sts": datetime(ctx.syear, 1, 1),
             },
             index_col="utc_valid",
         )
@@ -180,9 +173,9 @@ def plotter(ctx: dict):
         df = df[df["month"].isin(months)]
 
     # Create offset for exact aggregate
-    deltacol = f"{varname}_max" if ctx["dir"] == "warm" else f"{varname}_min"
-    compcol = f"{varname}_min" if ctx["dir"] == "warm" else f"{varname}_max"
-    if ctx["how"] == "exact":
+    deltacol = f"{varname}_max" if ctx.dir == "warm" else f"{varname}_min"
+    compcol = f"{varname}_min" if ctx.dir == "warm" else f"{varname}_max"
+    if ctx.how == "exact":
         df = df.reset_index()
         # Create timestamp to look for second tmpf value
         df["end_valid"] = df["utc_valid"] + timedelta(hours=hours)
@@ -200,7 +193,7 @@ def plotter(ctx: dict):
             .set_index("utc_valid")
         )
         # Careful here that our delta is the right sign
-        if ctx["dir"] == "warm":
+        if ctx.dir == "warm":
             df["delta"] = df[deltacol] - df[varname]
         else:
             df["delta"] = df[varname] - df[deltacol]
@@ -221,9 +214,9 @@ def plotter(ctx: dict):
             .copy()
         )
 
-    hlabel = "Over Exactly" if ctx["how"] == "exact" else "Within"
+    hlabel = "Over Exactly" if ctx.how == "exact" else "Within"
     title = (
-        f"{ctx['_sname']}:: Top 10 {PDICT2[varname]} {MDICT[mydir]}\n"
+        f"{ctx.sname}:: Top 10 {PDICT2[varname]} {MDICT[mydir]}\n"
         f"{hlabel} {hours} Hour Period ({df.index[-1]:%Y-%m-%d}-"
         f"{df.index[0]:%Y-%m-%d}) "
         f"[{MDICT2[month]}]"
@@ -251,7 +244,7 @@ def plotter(ctx: dict):
             continue
         used.append([sts, ets])
         event = df.loc[ets:sts].iloc[::-1]
-        if ctx["how"] == "over":
+        if ctx.how == "over":
             # Need to figure out first row with the ob we want
             entry = event[event[varname] == row[deltacol]]
             ets = entry.index[0].to_pydatetime()
