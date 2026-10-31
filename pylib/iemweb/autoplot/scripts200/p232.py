@@ -4,7 +4,8 @@ NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
 will limit which potential headlines events are overlaid on the chart.
 """
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -16,6 +17,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "BZ": "Blizzard Warning",
@@ -37,40 +47,40 @@ DOMAIN = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 600, "data": True}
-    desc["defaults"] = {"_r": "t"}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="mode",
-            default="BZ",
-            label="Customize plot for given NWS Headline:",
-            options=PDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    mode: Annotated[
+        str,
+        SelectArg(
+            label="Customize plot for given NWS Headline:", options=PDICT
         ),
-        dict(
-            type="zstation",
-            default="MCW",
-            network="IA_ASOS",
-            name="station",
-            label="Select station to plot:",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default="2022/12/21 1200",
+    ] = "BZ"
+    station: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select station to plot:")
+    ] = "MCW"
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
             label="Start time of plot (UTC):",
             min="2007/01/01 0000",
-        ),
-        dict(
-            type="int",
-            name="hours",
-            default="72",
-            label="Number of hours to plot observations for:",
+            default="2022/12/21 1200",
         ),
     ]
-    return desc
+    hours: Annotated[
+        int, IntArg(label="Number of hours to plot observations for:")
+    ] = 72
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        cache=600,
+        data=True,
+        defaults={"_r": "t"},
+    )
 
 
 def plot_column(ax: Axes, obs, col, ylabel):
@@ -149,16 +159,16 @@ def get_firewx_zone(lon: float, lat: float):
     return "IAZ001" if not row else row[0]
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    sts = ctx["valid"].replace(tzinfo=UTC)
-    station = ctx["station"]
+    sts = ctx.valid.replace(tzinfo=UTC)
+    station = ctx.station
     tzname = ctx["_nt"].sts[station]["tzname"]
-    ets = sts + timedelta(hours=ctx["hours"])
+    ets = sts + timedelta(hours=ctx.hours)
 
     # Find WaWa
     zone = ctx["_nt"].sts[station]["ugc_zone"]
-    if ctx["mode"] == "FW":
+    if ctx.mode == "FW":
         zone = get_firewx_zone(
             ctx["_nt"].sts[station]["lon"], ctx["_nt"].sts[station]["lat"]
         )
@@ -186,7 +196,7 @@ def plotter(ctx: dict):
     if not wwa.empty:
         wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(UTC)
         wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(UTC)
-        wwa = wwa[wwa["key"].isin(DOMAIN[ctx["mode"]])].reset_index()
+        wwa = wwa[wwa["key"].isin(DOMAIN[ctx.mode])].reset_index()
     # Find Obs
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
@@ -209,8 +219,8 @@ def plotter(ctx: dict):
     if obs.empty:
         raise NoDataFound("No observations found for the site/time")
 
-    title = f"{ctx['_sname']} :: Observations during NWS Headlines"
-    subtitle = f"Plot customized for {PDICT[ctx['mode']]}."
+    title = f"{ctx.sname} :: Observations during NWS Headlines"
+    subtitle = f"Plot customized for {PDICT[ctx.mode]}."
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     box1 = (0.1, 0.15, 0.82, 0.65)
     box2 = (0.1, 0.8, 0.82, 0.1)
@@ -219,7 +229,7 @@ def plotter(ctx: dict):
         box2 = (0.1, 0.7, 0.82, 0.2)
     ax = fig.add_axes(box1)
     top_ax = fig.add_axes(box2, frame_on=False)
-    if ctx["mode"] == "BZ":
+    if ctx.mode == "BZ":
         obs = obs[
             pd.notna(obs["max_wind"]) & pd.notna(obs["vsby"])
         ].reset_index()
@@ -233,10 +243,10 @@ def plotter(ctx: dict):
             ),
             ha="center",
         )
-    elif ctx["mode"] in ["WC", "HT"]:
+    elif ctx.mode in ["WC", "HT"]:
         obs = obs[pd.notna(obs["feel"])].reset_index()
         plot_column(ax, obs, "feel", "Feels Like Temperature [°F]")
-    elif ctx["mode"] == "FG":
+    elif ctx.mode == "FG":
         obs = obs[pd.notna(obs["vsby"])].reset_index()
         plot_column(ax, obs, "vsby", "Visibility [miles]")
         ax.axhline(0.25, linestyle="-.", color="b")
@@ -247,7 +257,7 @@ def plotter(ctx: dict):
             ha="left",
             color="b",
         )
-    elif ctx["mode"] in ["FW", "WI"]:
+    elif ctx.mode in ["FW", "WI"]:
         sknt = obs[pd.notna(obs["sknt"])].reset_index()
         ax.bar(
             sknt["utc_valid"],
@@ -264,7 +274,7 @@ def plotter(ctx: dict):
             color="b",
         )
         ax.set_ylabel("Sustained Winds + Gusts (Green) [MPH]", color="b")
-        if ctx["mode"] == "FW":
+        if ctx.mode == "FW":
             ax2 = ax.twinx()
             relh = obs[pd.notna(obs["relh"])]
             ax2.scatter(
@@ -323,7 +333,7 @@ def plotter(ctx: dict):
 
     byhour = (
         [6, 12, 18]
-        if ctx["hours"] < 73
+        if ctx.hours < 73
         else [
             12,
         ]

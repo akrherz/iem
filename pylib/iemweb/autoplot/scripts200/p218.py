@@ -9,9 +9,11 @@ information also provides the coldest high temperature and warmest low
 temperature, both of which are not found within the raw CLI text product.
 """
 
+import datetime as dt
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from math import pi
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -22,6 +24,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
+
+from iemweb.autoplot.description import (
+    DateArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 
@@ -45,35 +55,36 @@ class GaugeParams:
     subtitle: str = None
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 300}
-    desc["defaults"] = {"_r": "t"}
-    yest = date.today() - timedelta(days=1)
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "w",
-            "default": "set",
-            "label": "Date Selection Method:",
-            "options": PDICT,
-        },
-        dict(
-            type="networkselect",
-            name="station",
-            default="KDSM",
-            label="Select Station:",
-            network="NWSCLI",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=yest.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    w: Annotated[
+        str, SelectArg(label="Date Selection Method:", options=PDICT)
+    ] = "set"
+    station: Annotated[
+        str, NetworkSelectArg(label="Select Station:", network="NWSCLI")
+    ] = "KDSM"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="Select Date",
             min="2000/01/01",
+            default=lambda: (date.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=300,
+        defaults={"_r": "t"},
+    )
 
 
 def miss(val):
@@ -429,25 +440,25 @@ def build_params(clsite: str, dt: datetime):
     return hp, lp
 
 
-def get_data(ctx: dict):
+def get_data(ctx: Params):
     """Get the data."""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             "SELECT * from cli_data where station = %s and valid = %s",
             conn,
-            params=(ctx["station"], ctx["date"]),
+            params=(ctx.station, ctx.date),
             index_col=None,
         )
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    if ctx["w"] == "current":
-        ctx["date"] = date.today()
+    if ctx.w == "current":
+        ctx.date = date.today()
         df = get_data(ctx)
         if df.empty:
-            ctx["date"] -= timedelta(days=1)
+            ctx.date -= timedelta(days=1)
             df = get_data(ctx)
             if df.empty:
                 raise NoDataFound("No CLI data found for date/station.")
@@ -457,15 +468,12 @@ def plotter(ctx: dict):
         raise NoDataFound("No CLI data found for date/station.")
     # Build temperature gauge params
     highparams, lowparams = build_params(
-        ctx["_nt"].sts[ctx["station"]]["climate_site"],
-        ctx["date"],
+        ctx["_nt"].sts[ctx.station]["climate_site"],
+        ctx.date,
     )
     row = df.iloc[0]
     has_snow = pd.notna(row["snow"]) or pd.notna(row["snow_month"])
-    title = (
-        f"{ctx['date'].strftime('%-d %b %Y')} CLImate Report for "
-        f"{ctx['_sname']}"
-    )
+    title = f"{ctx.date.strftime('%-d %b %Y')} CLImate Report for {ctx.sname}"
     fig = figure(title=title, apctx=ctx, subtitle=highparams.subtitle)
 
     # High Temp

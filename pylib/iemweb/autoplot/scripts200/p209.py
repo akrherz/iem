@@ -6,6 +6,7 @@ the next value was 50%, the change in percentage points is 20.
 """
 
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -15,6 +16,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.reference import state_names
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "PCT PLANTED": "Planting",
@@ -29,49 +39,41 @@ PDICT = {
 PDICT2 = {"CORN": "Corn", "SOYBEANS": "Soybean"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 3600, "nass": True, "data": True}
-    today = datetime.today()
-    desc["arguments"] = [
-        dict(type="state", name="state", default="IA", label="Select State:"),
-        dict(
-            type="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+    syear: Annotated[int, YearArg(min=1979, label="Start Year for Plot:")] = (
+        1979
+    )
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1979,
-            name="syear",
-            default=1979,
-            label="Start Year for Plot:",
-        ),
-        dict(
-            type="year",
-            min=1979,
-            name="eyear",
-            default=today.year,
             label="End Year for Plot:",
+            default=lambda: datetime.today().year,
         ),
-        dict(
-            type="select",
-            name="unit_desc",
-            default="PCT PLANTED",
-            options=PDICT,
-            label="Which Operation?",
-        ),
-        dict(
-            type="select",
-            name="commodity_desc",
-            default="CORN",
-            options=PDICT2,
-            label="Which Crop?",
-        ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
-    return desc
+    unit_desc: Annotated[
+        str, SelectArg(options=PDICT, label="Which Operation?")
+    ] = "PCT PLANTED"
+    commodity_desc: Annotated[
+        str, SelectArg(options=PDICT2, label="Which Crop?")
+    ] = "CORN"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=3600, nass=True, data=True
+    )
+
+
+def get_data(ctx: Params):
     """The data we want and the data we need"""
-    unit_desc = ctx["unit_desc"].upper()
-    commodity_desc = ctx["commodity_desc"].upper()
+    unit_desc = ctx.unit_desc.upper()
+    commodity_desc = ctx.commodity_desc.upper()
 
     util_practice_desc = (
         "GRAIN"
@@ -81,10 +83,10 @@ def get_data(ctx):
     params = {
         "cd": commodity_desc,
         "ud": unit_desc,
-        "state": ctx["state"][:2],
+        "state": ctx.state[:2],
         "upd": util_practice_desc,
-        "syear": ctx["syear"],
-        "eyear": ctx["eyear"],
+        "syear": ctx.syear,
+        "eyear": ctx.eyear,
     }
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -110,11 +112,11 @@ def get_data(ctx):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     df = get_data(ctx)
 
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     maxval = df["delta"].max()
     if maxval > 50:
         bins = np.arange(0, 101, 10)
@@ -126,9 +128,9 @@ def plotter(ctx: dict):
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
     title = (
-        f"USDA NASS Weekly {ctx['unit_desc']} "
-        f"{PDICT2.get(ctx['commodity_desc'])} Progress for "
-        f"{state_names[ctx['state']]}, % {PDICT.get(ctx['unit_desc'])} over "
+        f"USDA NASS Weekly {ctx.unit_desc} "
+        f"{PDICT2.get(ctx.commodity_desc)} Progress for "
+        f"{state_names[ctx.state]}, % {PDICT.get(ctx.unit_desc)} over "
         "weekly periods"
     )
     subtitle = "yearly max labelled on left hand side"

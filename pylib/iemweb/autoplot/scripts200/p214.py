@@ -9,6 +9,7 @@ values, the presented timestamp is not of much use.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -16,6 +17,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_ZSTATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 VDICT = {
@@ -52,52 +55,42 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["highcharts"] = True
-    desc["arguments"] = [
-        ARG_ZSTATION,
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[str, ARG_ZSTATION] = "AMW"
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    x: Annotated[
+        str, SelectArg(label="X-Axis Categorical Variable", options=VDICT)
+    ] = "tmpf"
+    y: Annotated[
+        str, SelectArg(label="Y-Axis Variable to Summarize", options=VDICT)
+    ] = "p01i"
+    agg: Annotated[
+        str, SelectArg(label="How to Summarize Y-axis Variable", options=ADICT)
+    ] = "max"
+    syear: Annotated[
+        int,
+        YearArg(
+            minval=1920, label="Limit to Potential Start Year for the plot:"
         ),
-        dict(
-            type="select",
-            name="x",
-            default="tmpf",
-            label="X-Axis Categorical Variable",
-            options=VDICT,
-        ),
-        dict(
-            type="select",
-            name="y",
-            default="p01i",
-            label="Y-Axis Variable to Summarize",
-            options=VDICT,
-        ),
-        dict(
-            type="select",
-            name="agg",
-            default="max",
-            label="How to Summarize Y-axis Variable",
-            options=ADICT,
-        ),
-        dict(
-            type="year",
-            name="syear",
-            default=1920,
-            minval=1920,
-            label="Limit to Potential Start Year for the plot:",
-        ),
-    ]
-    return desc
+    ] = 1920
 
 
-def get_highcharts(ctx: dict) -> str:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=86400,
+        highcharts=True,
+    )
+
+
+def get_highcharts(ctx: Params) -> str:
     """Fancy plot."""
     add_data(ctx)
     df = ctx["df"]
@@ -152,13 +145,13 @@ Highcharts.chart('"""
     )
 
 
-def add_data(ctx):
+def add_data(ctx: Params):
     """Build out the context."""
-    station = ctx["zstation"]
-    month = ctx["month"]
-    agg = ctx["agg"]
-    x = ctx["x"]
-    y = ctx["y"]
+    station = ctx.zstation
+    month = ctx.month
+    agg = ctx.agg
+    x = ctx.x
+    y = ctx.y
     # belt and suspenders
     assert x in VDICT
     assert y in VDICT
@@ -166,7 +159,7 @@ def add_data(ctx):
     months = month2months(month)
 
     cast = "int" if x in ["tmpf", "dwpf", "feel"] else "real"
-    basets = date(ctx["syear"], 1, 1)
+    basets = date(ctx.syear, 1, 1)
     direction = "DESC" if agg == "max" else "ASC"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
@@ -202,9 +195,9 @@ def add_data(ctx):
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     minyear = ctx["df"]["utc_valid"].dt.year.min()
-    ctx["xlabel"] = VDICT[ctx["x"]]
-    ctx["ylabel"] = ADICT[ctx["agg"]] + " " + VDICT[ctx["y"]]
-    ctx["title"] = ctx["_sname"]
+    ctx["xlabel"] = VDICT[ctx.x]
+    ctx["ylabel"] = ADICT[ctx.agg] + " " + VDICT[ctx.y]
+    ctx["title"] = ctx.sname
     ctx["subtitle"] = ("%s %s by %s (month=%s) (%s-%s)") % (
         ADICT[agg],
         VDICT[y],
@@ -215,7 +208,7 @@ def add_data(ctx):
     )
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_data(ctx)
     df = ctx["df"]
@@ -225,5 +218,5 @@ def plotter(ctx: dict):
     ax.set_title(ctx["title"] + "\n" + ctx["subtitle"])
     ax.set_xlabel(ctx["xlabel"])
     ax.set_ylabel(ctx["ylabel"])
-    df = df.rename({"x": VDICT[ctx["x"]], "y": VDICT[ctx["y"]]}, axis=1)
+    df = df.rename({"x": VDICT[ctx.x], "y": VDICT[ctx.y]}, axis=1)
     return fig, df

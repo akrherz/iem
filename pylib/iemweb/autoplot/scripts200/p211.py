@@ -6,8 +6,8 @@ worth of data at this time.  Any reported 1 minute precipitation value
 over 0.50 inches is omitted as bad data.
 """
 
-from datetime import UTC, timedelta
-from typing import Any
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -19,6 +19,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes
 from pyiem.util import utc
 
+from iemweb.autoplot.description import (
+    DateTimeArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 PDICT = {
     "meteo": "Meteogram Style (Temp/Wind/Pressure)",
     "precip": "Precipitation Plot",
@@ -27,50 +35,53 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc: dict[str, Any] = {"data": True, "description": __doc__}
-    sts = utc() - timedelta(days=5)
-    desc["gallery"] = {
-        "sts": "2023-08-05 0600",
-        "ets": "2023-08-05 0930",
-        "zstation": "BRL",
-        "network": "IA_ASOS",
-    }
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="ptype",
-            options=PDICT,
-            default="precip",
-            label="Available Plot Type:",
-        ),
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="datetime",
-            name="sts",
-            default=sts.strftime("%Y/%m/%d 0000"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    ptype: Annotated[
+        str, SelectArg(options=PDICT, label="Available Plot Type:")
+    ] = "precip"
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    sts: Annotated[
+        datetime,
+        DateTimeArg(
             label="Search archive starting at (UTC Timestamp) (inclusive):",
             min="2000/01/01 0000",
-        ),
-        dict(
-            type="datetime",
-            name="ets",
-            default=sts.strftime("%Y/%m/%d 2359"),
-            label="Search archive ending at (UTC Timestamp) (exclusive):",
-            min="2000/01/01 0000",
+            default=lambda: (utc() - timedelta(days=5)).strftime(
+                "%Y/%m/%d 0000"
+            ),
         ),
     ]
-    return desc
+    ets: Annotated[
+        datetime,
+        DateTimeArg(
+            label="Search archive ending at (UTC Timestamp) (exclusive):",
+            min="2000/01/01 0000",
+            default=lambda: (utc() - timedelta(days=5)).strftime(
+                "%Y/%m/%d 2359"
+            ),
+        ),
+    ]
 
 
-def get_data(ctx):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        gallery={
+            "sts": "2023-08-05 0600",
+            "ets": "2023-08-05 0930",
+            "zstation": "BRL",
+            "network": "IA_ASOS",
+        },
+    )
+
+
+def get_data(ctx: Params):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
         df = pd.read_sql(
@@ -82,9 +93,9 @@ def get_data(ctx):
     and valid >= :sts and valid < :ets ORDER by valid ASC"""),
             conn,
             params={
-                "station": ctx["zstation"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "station": ctx.zstation,
+                "sts": ctx.sts,
+                "ets": ctx.ets,
             },
             index_col="valid",
         )
@@ -94,23 +105,21 @@ def get_data(ctx):
     df.index = pd.DatetimeIndex(df.index).tz_localize(UTC)
     # Complete the dataframe for the time period of interest
     df = df.reindex(
-        pd.date_range(
-            ctx["sts"], ctx["ets"] - timedelta(minutes=1), freq="1min"
-        )
+        pd.date_range(ctx.sts, ctx.ets - timedelta(minutes=1), freq="1min")
     )
     df.index.name = "utc_valid"
     df = df.reset_index()
     # Create a local valid time column
-    ctx["tz"] = ZoneInfo(ctx["_nt"].sts[ctx["zstation"]]["tzname"])
+    ctx["tz"] = ZoneInfo(ctx["_nt"].sts[ctx.zstation]["tzname"])
     df["local_valid"] = df["utc_valid"].dt.tz_convert(ctx["tz"])
     df["oprecip"] = df["precip"]
     df["precip"] = df["precip"].fillna(0)
     return df
 
 
-def do_xaxis(ctx, ax, show_label=True):
+def do_xaxis(ctx: Params, ax, show_label=True):
     """Make a sensible xaxis."""
-    timerange = ctx["ets"] - ctx["sts"]
+    timerange = ctx.ets - ctx.sts
     if timerange > timedelta(days=1):
         fmt = "%-m/%-d\n%-I %p"
     else:
@@ -120,7 +129,7 @@ def do_xaxis(ctx, ax, show_label=True):
         ax.set_xlabel(f"Plot Timezone: {ctx['tz']}")
 
 
-def make_wind_plot(ctx, ptype):
+def make_wind_plot(ctx: Params, ptype):
     """Generate a wind plot, please."""
     df = ctx["df"]
     gust = pd.to_numeric(df["gust_sknt"])
@@ -130,7 +139,7 @@ def make_wind_plot(ctx, ptype):
         gust = masked_array(gust, units("knots")).to(units("miles per hour")).m
         sknt = masked_array(sknt, units("knots")).to(units("miles per hour")).m
         unit = "mph"
-    title = f"{get_ttitle(df)} {ctx['_sname']}"
+    title = f"{get_ttitle(df)} {ctx.sname}"
     subtitle = (
         "One Minute Interval Wind Speed + Direction, "
         f"{df['sknt'].isna().sum()} missing minutes,"
@@ -176,7 +185,7 @@ def get_ttitle(df):
     return title
 
 
-def make_precip_plot(ctx):
+def make_precip_plot(ctx: Params):
     """Generate a precip plot, please."""
     df: pd.DataFrame = ctx["df"]
     # Accumulate the precipitation
@@ -188,7 +197,7 @@ def make_precip_plot(ctx):
         f"{df['precip_accum'].max():.2f} inches total plotted, "
         f"{df['oprecip'].isna().sum()} missing minutes"
     )
-    title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Rainfall"
+    title = f"{get_ttitle(df)} {ctx.sname} :: One Minute Rainfall"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.set_position((0.06, 0.1, 0.81, 0.78))
 
@@ -264,10 +273,10 @@ def make_precip_plot(ctx):
     return fig
 
 
-def make_meteo_plot(ctx):
+def make_meteo_plot(ctx: Params):
     """Generate a meteogram plot, please."""
     df: pd.DataFrame = ctx["df"]
-    title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Meteogram"
+    title = f"{get_ttitle(df)} {ctx.sname} :: One Minute Meteogram"
     fig = figure(apctx=ctx, title=title)
 
     axheight = 0.22
@@ -358,23 +367,23 @@ def make_meteo_plot(ctx):
     return fig
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    if "HAS1MIN" not in ctx["_nt"].sts[ctx["zstation"]]["attributes"]:
+    if "HAS1MIN" not in ctx["_nt"].sts[ctx.zstation]["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
     # Make timestamps tzaware
     for col in ["sts", "ets"]:
         ctx[col] = ctx[col].replace(tzinfo=UTC)
-    if (ctx["ets"] - ctx["sts"]) > timedelta(days=5):
+    if (ctx.ets - ctx.sts) > timedelta(days=5):
         raise NoDataFound("Too much data requested, only < 5 days supported.")
     ctx["df"] = get_data(ctx)
 
-    if ctx["ptype"] == "precip":
+    if ctx.ptype == "precip":
         fig = make_precip_plot(ctx)
-    elif ctx["ptype"] == "meteo":
+    elif ctx.ptype == "meteo":
         fig = make_meteo_plot(ctx)
     else:  # wind windkt
-        fig = make_wind_plot(ctx, ctx["ptype"])
+        fig = make_wind_plot(ctx, ctx.ptype)
     # Need to drop timezone for excel output
     for col in ["utc_valid", "local_valid"]:
         ctx["df"][col] = ctx["df"][col].dt.tz_localize(None)

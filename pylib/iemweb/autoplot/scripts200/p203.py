@@ -6,9 +6,11 @@ UTC date.
 plot's resolution.
 """
 
+import datetime as dt
 import os
 from datetime import date, timedelta
 from io import StringIO
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.image as mpimage
@@ -19,6 +21,8 @@ from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.util import utc
 
+from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.mlib import rectify_wfo
 
 PDICT = {
@@ -34,50 +38,45 @@ PDICT2 = {
 COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {
-        "description": __doc__,
-        "data": True,
-        "text": True,
-        "defaults": {"_r": None},
-        "cache": 600,
-        "plotmetadata": False,
-        "gallery": {
-            "date": "2024-05-05",  # pick a date with not too many
-        },
-    }
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT2,
-            default="W",
-            name="typ",
-            label="Which warning types to plot?",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="W",
-            name="sort",
-            label="How to sort plotted polygons:",
-        ),
-        dict(
-            type="date",
-            default=today.strftime("%Y/%m/%d"),
-            name="date",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    typ: Annotated[
+        str, SelectArg(options=PDICT2, label="Which warning types to plot?")
+    ] = "W"
+    sort: Annotated[
+        str, SelectArg(options=PDICT, label="How to sort plotted polygons:")
+    ] = "W"
+    date: Annotated[
+        dt.date,
+        DateArg(
             label="UTC Date to Plot Polygons for:",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        text=True,
+        defaults={"_r": None},
+        cache=600,
+        plotmetadata=False,
+        gallery={
+            "date": "2024-05-05",  # pick a date with not too many
+        },
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    typ = ctx["typ"]
-    sort = ctx["sort"]
-    dt = ctx["date"]
+    typ = ctx.typ
+    sort = ctx.sort
+    dt = ctx.date
 
     sts = utc(dt.year, dt.month, dt.day)
     ets = sts + timedelta(hours=24)

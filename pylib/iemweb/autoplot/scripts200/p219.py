@@ -7,6 +7,7 @@ issuance stored in the database.
 
 import time
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -26,6 +27,9 @@ from pyiem.plot import figure
 from pyiem.util import LOG, utc
 from sqlalchemy.engine import Connection
 
+from iemweb.autoplot.description import DateTimeArg, PlotDescription, TextArg
+from iemweb.autoplot.params import AutoplotParams
+
 VIS = "visibility"
 TEXTARGS = {
     "fontsize": 12,
@@ -37,26 +41,29 @@ TEXTARGS = {
 PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["defaults"] = {"_r": "t"}
-    desc["arguments"] = [
-        dict(
-            type="text",
-            default="KDSM",
-            name="station",
-            label="Select station to plot:",
-        ),
-        dict(
-            type="datetime",
-            name="valid",
-            default=utc().strftime("%Y/%m/%d %H%M"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, TextArg(label="Select station to plot:")] = "KDSM"
+    valid: Annotated[
+        datetime,
+        DateTimeArg(
             label="TAF Issuance/Valid Timestamp (UTC Timezone):",
             min="1995/01/01 0000",
+            default=lambda: utc().strftime("%Y/%m/%d %H%M"),
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params,
+        description=__doc__ or "",
+        data=True,
+        cache=86400,
+        defaults={"_r": "t"},
+    )
 
 
 def get_text(product_id: str):
@@ -136,17 +143,17 @@ def fetch(station: str, ts: datetime) -> pd.DataFrame:
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=UTC)
-    df = fetch(ctx["station"], valid)
+    valid = ctx.valid.replace(tzinfo=UTC)
+    df = fetch(ctx.station, valid)
     if df.empty:
         pgconn = get_dbconn("asos")
-        valid = taf_search(ctx["station"], valid)
+        valid = taf_search(ctx.station, valid)
         pgconn.close()
         if valid is None:
             raise NoDataFound("TAF data was not found!")
-        df = fetch(ctx["station"], valid)
+        df = fetch(ctx.station, valid)
     # prevent all nan from becoming an object
     df = df.fillna(np.nan).infer_objects()
     df["next_valid"] = (
@@ -155,7 +162,7 @@ def plotter(ctx: dict):
     product_id = df.iloc[0]["product_id"]
     amd = "Amended " if df.iloc[0]["is_amendment"] else ""
     title = (
-        f"{ctx['station']} {amd}Terminal Aerodome Forecast by NWS "
+        f"{ctx.station} {amd}Terminal Aerodome Forecast by NWS "
         f"{product_id[14:17]}\n"
         f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )

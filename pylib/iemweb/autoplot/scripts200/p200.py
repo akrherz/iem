@@ -29,8 +29,8 @@ grid.  If this causes you heartburn, please let me know.</p>
 chart of days per year by WFO, state.</p>
 """
 
-from datetime import timedelta
-from typing import TYPE_CHECKING
+from datetime import date, timedelta
+from typing import TYPE_CHECKING, Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -43,6 +43,17 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    FloatArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 if TYPE_CHECKING:
@@ -201,124 +212,91 @@ GRIDNORTH = 54.51
 GRIDSOUTH = 19.47
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="month",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    month: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = (
+        "all"
+    )
+    p: Annotated[
+        str, SelectArg(options=ISSUANCE, label="Select SPC Product Issuance")
+    ] = "3.C.8"
+    level: Annotated[
+        str, SelectArg(options=OUTLOOKS, label="Select outlook level:")
+    ] = "CATEGORICAL.SLGT"
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    station: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (ignored if plotting state)"
         ),
-        dict(
-            type="select",
-            name="p",
-            default="3.C.8",  # day 1 is too slow to default to :(
-            options=ISSUANCE,
-            label="Select SPC Product Issuance",
+    ] = "DMX"
+    csector: Annotated[
+        str, CSectorArg(label="Select state/sector to plot")
+    ] = "conus"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    drawc: Annotated[
+        str,
+        SelectArg(options=PDICT5, label="Plot County/Parish borders on maps?"),
+    ] = "no"
+    w: Annotated[
+        str, SelectArg(options=PDICT2, label="Which metric to plot?")
+    ] = "avg"
+    sdate: Annotated[
+        date,
+        DateArg(
+            label="Limit plot to start date (2002 is start):",
+            min="2002/01/01",
+            default="2002/01/01",
         ),
-        dict(
-            type="select",
-            name="level",
-            default="CATEGORICAL.SLGT",
-            options=OUTLOOKS,
-            label="Select outlook level:",
-        ),
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
-        ),
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (ignored if plotting state)",
-        ),
-        dict(
-            type="csector",
-            name="csector",
-            default="conus",
-            label="Select state/sector to plot",
-        ),
-        ARG_FEMA,
-        dict(
-            type="select",
-            name="drawc",
-            default="no",
-            options=PDICT5,
-            label="Plot County/Parish borders on maps?",
-        ),
-        dict(
-            type="select",
-            name="w",
-            default="avg",
-            options=PDICT2,
-            label="Which metric to plot?",
-        ),
-        {
-            "type": "date",
-            "name": "sdate",
-            "label": "Limit plot to start date (2002 is start):",
-            "min": "2002/01/01",
-            "default": "2002/01/01",
-        },
-        dict(
-            optional=True,
-            type="date",
-            name="edate",
+    ]
+    edate: Annotated[
+        date | None,
+        DateArg(
             label="Optionally limit plot to this end date:",
             min="2002/01/01",
-            default=utc().strftime("%Y/%m/%d"),
+            default=lambda: utc().strftime("%Y/%m/%d"),
         ),
-        {
-            "type": "sday",
-            "default": "0101",
-            "optional": True,
-            "label": (
-                "Limit plot to the inclusive start day of the year.  If this "
-                "value is greater than end date, plot will run over winter / "
-                "Jan 1."
-            ),
-            "name": "sday",
-        },
-        {
-            "type": "sday",
-            "default": "1231",
-            "optional": True,
-            "label": (
-                "Limit plot to the inclusive end day of the year.  If this "
-                "value is less than start date, plot will run over winter / "
-                "Jan 1."
-            ),
-            "name": "eday",
-        },
-        {
-            "type": "float",
-            "default": "-1",
-            "label": "Hardcode max value for color ramp, -1 disables",
-            "name": "max",
-        },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "jet",
-            "label": "Color Ramp:",
-        },
-    ]
-    return desc
+    ] = None
+    sday: Annotated[
+        date | None,
+        SDayArg(
+            label="Limit plot to the inclusive start day of the year.  "
+            "If this "
+            "value is greater than end date, plot will run over winter / "
+            "Jan 1.",
+            default="0101",
+        ),
+    ] = None
+    eday: Annotated[
+        date | None,
+        SDayArg(
+            label="Limit plot to the inclusive end day of the year.  If this "
+            "value is less than start date, plot will run over winter / "
+            "Jan 1.",
+            default="1231",
+        ),
+    ] = None
+    max: Annotated[
+        float, FloatArg(label="Hardcode max value for color ramp, -1 disables")
+    ] = -1.0
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "jet"
 
 
-def get_raster(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400
+    )
+
+
+def get_raster(ctx: Params):
     """Compute the raster."""
-    level = ctx["level"]
-    p = ctx["p"]
-    month = ctx["month"]
+    level = ctx.level
+    p = ctx.p
+    month = ctx.month
 
     months = month2months(month)
 
@@ -334,7 +312,7 @@ def get_raster(ctx: dict):
         "t": level.split(".", 1)[1],
         "cat": level.split(".")[0],
         "months": months,
-        "sdate": ctx["sdate"],
+        "sdate": ctx.sdate,
         "edate": ctx.get("edate", utc() + timedelta(days=2)),
         "west": GRIDWEST,
         "south": GRIDSOUTH,
@@ -347,9 +325,9 @@ def get_raster(ctx: dict):
     if hour != "A":
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
-    if ctx.get("sday") and ctx.get("eday"):
-        params["sday"] = f"{ctx['sday']:%m%d}"
-        params["eday"] = f"{ctx['eday']:%m%d}"
+    if ctx.sday and ctx.eday:
+        params["sday"] = f"{ctx.sday:%m%d}"
+        params["eday"] = f"{ctx.eday:%m%d}"
         hour_limiter = (
             " and to_char(issue at time zone 'UTC', 'MMDD') >= :sday and "
             "to_char(issue at time zone 'UTC', 'MMDD') <= :eday "
@@ -402,7 +380,7 @@ def get_raster(ctx: dict):
         grid[nav.mask] = 0.0
         jslice = slice(nav.y0, nav.y0 + nav.ysz)
         islice = slice(nav.x0, nav.x0 + nav.xsz)
-        if ctx["w"] == "lastyear":
+        if ctx.w == "lastyear":
             raster[jslice, islice] = np.max(
                 [raster[jslice, islice], grid * df.loc[i]["year"]],
                 axis=0,
@@ -411,7 +389,7 @@ def get_raster(ctx: dict):
             raster[jslice, islice] += grid
 
     years = (utc() - df["min_issue"].min()).total_seconds() / 365.25 / 86400.0
-    if ctx["w"] == "avg":
+    if ctx.w == "avg":
         raster = raster / years
 
     ctx["df"] = df
@@ -419,18 +397,18 @@ def get_raster(ctx: dict):
     return raster, affine, 4326
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     raster, affine, _crs = get_raster(ctx)
     df: pd.DataFrame = ctx["df"]
-    station = ctx["station"][:4]
-    level = ctx["level"]
-    t = ctx["t"]
-    p = ctx["p"]
-    month = ctx["month"]
+    station = ctx.station[:4]
+    level = ctx.level
+    t = ctx.t
+    p = ctx.p
+    month = ctx.month
     sday_extra = ""
-    if ctx.get("sday") and ctx.get("eday"):
-        sday_extra = f" [{ctx['sday']:%b %-d} to {ctx['eday']:%b %-d} only]"
+    if ctx.sday and ctx.eday:
+        sday_extra = f" [{ctx.sday:%b %-d} to {ctx.eday:%b %-d} only]"
     subtitle = (
         f"Found {len(df.index)} events for CONUS "
         f"between {df['min_issue'].min():%d %b %Y} and "
@@ -445,7 +423,7 @@ def plotter(ctx: dict):
         )
     elif t == "fema":
         sector = "fema_region"
-        subtitle = f"Plotted for FEMA Region {ctx['fema']}. {subtitle}"
+        subtitle = f"Plotted for FEMA Region {ctx.fema}. {subtitle}"
     else:
         sector = "state" if len(csector) == 2 else csector
 
@@ -453,7 +431,7 @@ def plotter(ctx: dict):
         apctx=ctx,
         sector=sector,
         state=csector,
-        fema_region=ctx["fema"],
+        fema_region=ctx.fema,
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
         title=(
@@ -461,31 +439,31 @@ def plotter(ctx: dict):
             f"Outlook [{MDICT[month]}] of at least "
             f"{OUTLOOKS[level].split('(')[0].strip()}"
         ),
-        subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
+        subtitle=f"{PDICT2[ctx.w]}, {subtitle}",
         nocaption=True,
     )
     if np.nanmax(raster) == 0:
         raise NoDataFound("No Data Found")
-    if ctx["w"] == "lastyear":
+    if ctx.w == "lastyear":
         if np.ma.max(raster) < 1:
             raster = np.where(raster < 1, np.nan, raster)
             rng = range(2022, 2024)
         else:
             raster = np.where(raster < 1, np.nan, raster)
             rng = range(int(np.nanmin(raster)), int(np.nanmax(raster)) + 2)
-    elif ctx["w"] == "count":
-        maxval = ctx["max"] if ctx["max"] > 1 else (np.nanmax(raster) + 1)
+    elif ctx.w == "count":
+        maxval = ctx.max if ctx.max > 1 else (np.nanmax(raster) + 1)
         raster = np.where(raster < 1, np.nan, raster)
         rng = np.unique(np.linspace(1, maxval, 10, dtype=int))
     else:
         maxval = max(
-            ctx["max"] if ctx["max"] > 0 else (np.nanmax(raster) + 1),
+            ctx.max if ctx.max > 0 else (np.nanmax(raster) + 1),
             0.02,
         )
         rng = pretty_bins(0, maxval)
         rng[0] = 0.01
 
-    cmap = get_cmap(ctx["cmap"]).with_extremes(
+    cmap = get_cmap(ctx.cmap).with_extremes(
         bad="white", under="white", over="black"
     )
     mp.imshow(
@@ -495,10 +473,10 @@ def plotter(ctx: dict):
         clevs=rng,
         cmap=cmap,
         clip_on=False,
-        units=UNITS[ctx["w"]],
-        extend="both" if ctx["w"] != "lastyear" else "neither",  # dragons
+        units=UNITS[ctx.w],
+        extend="both" if ctx.w != "lastyear" else "neither",  # dragons
     )
-    if ctx["drawc"] == "yes":
+    if ctx.drawc == "yes":
         mp.drawcounties()
 
     return mp.fig

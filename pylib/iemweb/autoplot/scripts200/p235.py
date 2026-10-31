@@ -7,6 +7,7 @@ for all Weather Forecast Offices.</p>
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,36 +17,48 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import prodDefinitions
 
+from iemweb.autoplot.description import (
+    CmapArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400}
-    desc["arguments"] = [
-        dict(
-            type="networkselect",
-            name="station",
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        NetworkSelectArg(
             network=["WFO", "NCEP", "RFC", "NWS"],
-            default="DMX",
             label="Select Issuance Center:",
             all=True,
         ),
-        dict(
-            type="select",
-            name="pil",
-            default="AFD",
+    ] = "DMX"
+    pil: Annotated[
+        str,
+        SelectArg(
             label="Select 3 Character Product ID (AWIPS ID / AFOS)",
             options=prodDefinitions,
             showvalue=True,
         ),
-        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
-    ]
-    return desc
+    ] = "AFD"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "Greens"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    pil = ctx["pil"]
+    station = ctx.station
+    pil = ctx.pil
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
     center = station
     if len(station) == 3:
@@ -56,7 +69,7 @@ def plotter(ctx: dict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
-        ctx["_sname"] = "All Offices"
+        ctx.sname = "All Offices"
 
     with get_sqlalchemy_conn("afos") as conn:
         ss = "pil = :pil" if len(pil) > 3 else "substr(pil, 1, 3) = :pil"
@@ -88,7 +101,7 @@ def plotter(ctx: dict):
         columns=range(1, 13),
     )
 
-    title = f"NWS {ctx['_sname']} :: {prodDefinitions[pil]} [{pil}]"
+    title = f"NWS {ctx.sname} :: {prodDefinitions[pil]} [{pil}]"
     subtitle = (
         "Number of issued text products by year and month. "
         f"({df['min_entered'].min():%d %b %Y}-"
@@ -102,7 +115,7 @@ def plotter(ctx: dict):
         linewidths=0.5,
         ax=ax,
         vmin=1,
-        cmap=ctx["cmap"],
+        cmap=ctx.cmap,
         zorder=2,
     )
     # Add sums to RHS

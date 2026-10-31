@@ -8,6 +8,7 @@ icing (/IC), turbulence (/TB), icing or turbulence and all reports.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -15,6 +16,9 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
+
+from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 # select distinct '"'||ident||'": "['||ident||'] '||name||'",' from airspaces
 # where type_code in ('AKZONE', 'ARTCC');
@@ -69,48 +73,51 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"cache": 86400, "description": __doc__, "data": True}
-    today = date.today() + timedelta(days=1)
-    t365 = today - timedelta(days=365)
+class Params(AutoplotParams):
+    """Request parameters."""
 
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="ident",
-            options=PDICT,
-            default="ZMP",
-            label="Select ARTCC/Alaska Zone:",
-            all=True,  # One-off problem with _ALL
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=t365.strftime("%Y/%m/%d"),
+    ident: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Select ARTCC/Alaska Zone:", all=True),
+    ] = "ZMP"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start UTC Date (inclusive):",
             min="2003/03/01",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
-            label="End UTC Date (inclusive):",
-            min="2003/03/01",
+            default=lambda: (
+                date.today() + timedelta(days=1) - timedelta(days=365)
+            ).strftime("%Y/%m/%d"),
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            label="End UTC Date (inclusive):",
+            min="2003/03/01",
+            default=lambda: (date.today() + timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
+        ),
+    ]
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
+    sdate = ctx.sdate
+    edate = ctx.edate
     limiter = (
         ", airspaces a WHERE ST_Intersects(p.geom, a.geom) and "
         "a.ident = :ident and a.type_code in ('AKZONE', 'ARTCC') and "
     )
-    if ctx["ident"] == "_ALL":
+    if ctx.ident == "_ALL":
         limiter = " WHERE "
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -132,7 +139,7 @@ def plotter(ctx: dict):
             ),
             conn,
             params={
-                "ident": ctx["ident"],
+                "ident": ctx.ident,
                 "sts": utc(sdate.year, sdate.month, sdate.day),
                 "ets": utc(edate.year, edate.month, edate.day, 23, 59),
             },
@@ -142,9 +149,9 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("Failed to find any PIREPs for query.")
     df = df.reindex(pd.date_range(sdate, edate)).fillna(0)
-    tt = "ARTCC" if len(ctx["ident"]) == 3 else "Alaska"
-    title = f"{PDICT[ctx['ident']]} {tt}"
-    if ctx["ident"] == "_ALL":
+    tt = "ARTCC" if len(ctx.ident) == 3 else "Alaska"
+    title = f"{PDICT[ctx.ident]} {tt}"
+    if ctx.ident == "_ALL":
         title = "All US + Canada"
     fig = figure(
         title=(

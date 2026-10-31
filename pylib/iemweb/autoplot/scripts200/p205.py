@@ -8,150 +8,158 @@ fields added to this tool.
 
 import calendar
 import itertools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    TextArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-def get_description() -> dict[str, bool | str | dict[str, str]]:
-    """Return a dict describing how to call this plotter"""
-    desc: dict[str, Any] = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="DSM",
-            label="Select Station",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="int",
-            name="max_tmpf_above",
-            default=90,
-            optional=True,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(label="Select Station", network="IA_ASOS")
+    ] = "DSM"
+    max_tmpf_above: Annotated[
+        int | None,
+        IntArg(
             ge=-100,
             le=150,
             label="Daily Max Temperature Above (threshold F): [optional]",
+            default=90,
         ),
-        dict(
-            type="text",
-            name="max_tmpf_range",
-            default="70 to 79",
-            optional=True,
+    ] = None
+    max_tmpf_range: Annotated[
+        str | None,
+        TextArg(
             label="Daily Max Temperature Inclusive Range (deg F): [optional]",
+            default="70 to 79",
         ),
-        dict(
-            type="int",
-            name="min_tmpf_below",
-            default=70,
-            optional=True,
+    ] = None
+    min_tmpf_below: Annotated[
+        int | None,
+        IntArg(
             ge=-100,
             le=150,
             label="Daily Min Temperature Below (threshold F): [optional]",
+            default=70,
         ),
-        dict(
-            type="int",
-            name="max_feel_above",
-            default=90,
-            optional=True,
+    ] = None
+    max_feel_above: Annotated[
+        int | None,
+        IntArg(
             ge=-100,
             le=150,
             label="Daily Max Feels Like Temp Above (threshold F): [optional]",
+            default=90,
         ),
-        dict(
-            type="int",
-            name="min_feel_below",
-            default=0,
-            optional=True,
+    ] = None
+    min_feel_below: Annotated[
+        int | None,
+        IntArg(
             ge=-100,
             le=150,
             label="Daily Min Feels Like Temp Below (threshold F): [optional]",
+            default=0,
         ),
-        dict(
-            type="int",
-            name="max_dwpf_below",
-            default=50,
-            optional=True,
+    ] = None
+    max_dwpf_below: Annotated[
+        int | None,
+        IntArg(
             ge=-70,
             le=100,
             label="Daily Maximum Dewpoint Below (threshold F): [optional]",
+            default=50,
         ),
-        dict(
-            type="int",
-            name="max_dwpf_above",
-            default=70,
-            optional=True,
+    ] = None
+    max_dwpf_above: Annotated[
+        int | None,
+        IntArg(
             ge=-70,
             le=100,
             label="Daily Maximum Dewpoint Above (threshold F): [optional]",
+            default=70,
         ),
-        dict(
-            type="int",
-            name="max_rh_below",
-            default=50,
-            optional=True,
+    ] = None
+    max_rh_below: Annotated[
+        int | None,
+        IntArg(
             ge=0,
             le=100,
             label="Daily Maximum Relative Humidity Below (%): [optional]",
+            default=50,
         ),
-        dict(
-            type="int",
-            name="avg_smph_below",
-            default=10,
-            optional=True,
+    ] = None
+    avg_smph_below: Annotated[
+        int | None,
+        IntArg(
             ge=0,
             le=150,
             label="Daily Average Wind Speed Below (threshold MPH): [optional]",
+            default=10,
         ),
-        {
-            "type": "int",
-            "name": "max_smph_above",
-            "default": 50,
-            "optional": True,
-            "ge": 0,
-            "le": 150,
-            "label": "Daily Max Wind Speed Above (threshold MPH): [optional]",
-        },
-        {
-            "type": "int",
-            "name": "max_smph_below",
-            "default": 50,
-            "optional": True,
-            "ge": 0,
-            "le": 150,
-            "label": "Daily Max Wind Speed Below (threshold MPH): [optional]",
-        },
-        {
-            "type": "int",
-            "name": "max_gust_above",
-            "default": 50,
-            "optional": True,
-            "ge": 0,
-            "le": 150,
-            "label": "Daily Max Wind Gust Above (threshold MPH): [optional]",
-        },
-        {
-            "type": "int",
-            "name": "max_gust_below",
-            "default": 50,
-            "optional": True,
-            "ge": 0,
-            "le": 150,
-            "label": "Daily Max Wind Gust Below (threshold MPH): [optional]",
-        },
-    ]
-    return desc
+    ] = None
+    max_smph_above: Annotated[
+        int | None,
+        IntArg(
+            ge=0,
+            le=150,
+            label="Daily Max Wind Speed Above (threshold MPH): [optional]",
+            default=50,
+        ),
+    ] = None
+    max_smph_below: Annotated[
+        int | None,
+        IntArg(
+            ge=0,
+            le=150,
+            label="Daily Max Wind Speed Below (threshold MPH): [optional]",
+            default=50,
+        ),
+    ] = None
+    max_gust_above: Annotated[
+        int | None,
+        IntArg(
+            ge=0,
+            le=150,
+            label="Daily Max Wind Gust Above (threshold MPH): [optional]",
+            default=50,
+        ),
+    ] = None
+    max_gust_below: Annotated[
+        int | None,
+        IntArg(
+            ge=0,
+            le=150,
+            label="Daily Max Wind Gust Below (threshold MPH): [optional]",
+            default=50,
+        ),
+    ] = None
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     params = []
     labels = {"all_hit": "All Combined"}
     for ez in (
@@ -168,48 +176,48 @@ def plotter(ctx: dict):
             f"case when {col} {op} {val:.0f} then 1 else 0 end as {ez}_hit"
         )
         labels[f"{ez}_hit"] = f"{col} {op} {val:.0f} {units}"
-    if ctx.get("max_tmpf_range"):
+    if ctx.max_tmpf_range:
         tokens = [
-            int(i) for i in ctx["max_tmpf_range"].replace("+", " ").split("to")
+            int(i) for i in ctx.max_tmpf_range.replace("+", " ").split("to")
         ]
         params.append(
             f"case when max_tmpf::int >= {tokens[0]} and "
             f"max_tmpf::int <= {tokens[1]} then 1 else 0 end as tmpf_hit"
         )
         labels["tmpf_hit"] = f"High Temp {tokens[0]:.0f}F - {tokens[1]:.0f}F"
-    if ctx.get("avg_smph_below") is not None:
+    if ctx.avg_smph_below is not None:
         params.append(
-            f"case when avg_sknt * 1.15 < {ctx['avg_smph_below']:.0f} "
+            f"case when avg_sknt * 1.15 < {ctx.avg_smph_below:.0f} "
             "then 1 else 0 end as smph_hit"
         )
-        labels["smph_hit"] = f"Avg Wind < {ctx['avg_smph_below']:.0f}MPH"
-    if ctx.get("max_gust_above") is not None:
+        labels["smph_hit"] = f"Avg Wind < {ctx.avg_smph_below:.0f}MPH"
+    if ctx.max_gust_above is not None:
         params.append(
-            f"case when max_gust * 1.15 > {ctx['max_gust_above']:.0f} "
+            f"case when max_gust * 1.15 > {ctx.max_gust_above:.0f} "
             "then 1 else 0 end as gust_hit"
         )
-        labels["gust_hit"] = f"Wind Gust > {ctx['max_gust_above']:.0f}MPH"
-    elif ctx.get("max_gust_below") is not None:
+        labels["gust_hit"] = f"Wind Gust > {ctx.max_gust_above:.0f}MPH"
+    elif ctx.max_gust_below is not None:
         params.append(
-            f"case when max_gust * 1.15 < {ctx['max_gust_below']:.0f} "
+            f"case when max_gust * 1.15 < {ctx.max_gust_below:.0f} "
             "then 1 else 0 end as gust_hit"
         )
-        labels["gust_hit"] = f"Wind Gust < {ctx['max_gust_below']:.0f}MPH"
-    if ctx.get("max_smph_above") is not None:
+        labels["gust_hit"] = f"Wind Gust < {ctx.max_gust_below:.0f}MPH"
+    if ctx.max_smph_above is not None:
         params.append(
-            f"case when max_sknt * 1.15 > {ctx['max_smph_above']:.0f} "
+            f"case when max_sknt * 1.15 > {ctx.max_smph_above:.0f} "
             "then 1 else 0 end as max_smph_hit"
         )
         labels["max_smph_hit"] = (
-            f"Max Wind Speed > {ctx['max_smph_above']:.0f}MPH"
+            f"Max Wind Speed > {ctx.max_smph_above:.0f}MPH"
         )
-    elif ctx.get("max_smph_below"):
+    elif ctx.max_smph_below:
         params.append(
-            f"case when max_sknt * 1.15 < {ctx['max_smph_below']:.0f} "
+            f"case when max_sknt * 1.15 < {ctx.max_smph_below:.0f} "
             "then 1 else 0 end as max_smph_hit"
         )
         labels["max_smph_hit"] = (
-            f"Max Wind Speed < {ctx['max_smph_below']:.0f}MPH"
+            f"Max Wind Speed < {ctx.max_smph_below:.0f}MPH"
         )
     if not params:
         raise NoDataFound("Please select some options for plotting.")
@@ -237,7 +245,7 @@ def plotter(ctx: dict):
 
     ab: datetime | None = ctx["_nt"].sts[station]["archive_begin"]
     title = (
-        f"{ctx['_sname']} ({'n/a' if ab is None else ab.year}-) "
+        f"{ctx.sname} ({'n/a' if ab is None else ab.year}-) "
         "Daily Observed Frequency"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

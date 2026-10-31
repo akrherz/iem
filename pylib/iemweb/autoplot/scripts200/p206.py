@@ -1,6 +1,7 @@
 """Generates analysis maps of ASOS station data for a given date."""
 
-from datetime import datetime
+from datetime import date, datetime
+from typing import Annotated
 
 import geopandas as gpd
 import numpy as np
@@ -11,6 +12,16 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.autoplot.description import (
+    CmapArg,
+    DateArg,
+    FloatArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
@@ -49,78 +60,68 @@ PDICT3 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 600}
-    now = datetime.now()
-    desc["arguments"] = [
-        dict(
-            type="select",
-            name="t",
-            default="state",
-            options=PDICT,
-            label="Select plot extent type:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    t: Annotated[
+        str, SelectArg(options=PDICT, label="Select plot extent type:")
+    ] = "state"
+    wfo: Annotated[
+        str,
+        NetworkSelectArg(
+            network="WFO", label="Select WFO: (ignored if plotting state)"
         ),
-        dict(
-            type="networkselect",
-            name="wfo",
-            network="WFO",
-            default="DMX",
-            label="Select WFO: (ignored if plotting state)",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State: (ignored if plotting wfo)",
-        ),
-        ARG_FEMA,
-        dict(
-            type="select",
-            name="v",
-            default="max_gust",
-            options=PDICT2,
-            label="Select statistic to plot:",
-        ),
-        dict(
-            type="select",
-            name="p",
-            default="both",
+    ] = "DMX"
+    state: Annotated[
+        str, StateArg(label="Select State: (ignored if plotting wfo)")
+    ] = "IA"
+    fema: Annotated[str, ARG_FEMA] = "7"
+    v: Annotated[
+        str, SelectArg(options=PDICT2, label="Select statistic to plot:")
+    ] = "max_gust"
+    p: Annotated[
+        str,
+        SelectArg(
             options=PDICT3,
             label="Plot or Countour values (for non interactive map):",
         ),
-        dict(
-            type="float",
-            name="above",
-            optional=True,
-            default=9999,
-            label="Remove any plotted values above threshold:",
+    ] = "both"
+    above: Annotated[
+        float | None,
+        FloatArg(
+            label="Remove any plotted values above threshold:", default=9999
         ),
-        dict(
-            type="float",
-            name="below",
-            optional=True,
-            default=-9999,
-            label="Remove any plotted values below threshold:",
+    ] = None
+    below: Annotated[
+        float | None,
+        FloatArg(
+            label="Remove any plotted values below threshold:", default=-9999
         ),
-        dict(
-            type="date",
-            name="day",
-            default=now.strftime("%Y/%m/%d"),
+    ] = None
+    day: Annotated[
+        date,
+        DateArg(
             label="Date",
             min="1926/01/01",
+            default=lambda: datetime.now().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="viridis", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "viridis"
 
 
-def get_df(ctx, buf=1.0) -> pd.DataFrame:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=600
+    )
+
+
+def get_df(ctx: Params, buf=1.0) -> pd.DataFrame:
     """Figure out what data we need to fetch here"""
-    if ctx["t"] == "state":
-        bnds = reference.state_bounds[ctx["state"]]
-        ctx["title"] = reference.state_names[ctx["state"]]
-    elif ctx["t"] == "conus":
+    if ctx.t == "state":
+        bnds = reference.state_bounds[ctx.state]
+        ctx["title"] = reference.state_names[ctx.state]
+    elif ctx.t == "conus":
         bnds = [
             reference.CONUS_WEST,
             reference.CONUS_SOUTH,
@@ -128,14 +129,14 @@ def get_df(ctx, buf=1.0) -> pd.DataFrame:
             reference.CONUS_NORTH,
         ]
         ctx["title"] = "Contiguous US"
-    elif ctx["t"] == "fema":
-        bnds = reference.fema_region_bounds[int(ctx["fema"])]
-        ctx["title"] = f"FEMA Region {ctx['fema']}"
+    elif ctx.t == "fema":
+        bnds = reference.fema_region_bounds[int(ctx.fema)]
+        ctx["title"] = f"FEMA Region {ctx.fema}"
     else:
-        bnds = reference.wfo_bounds[ctx["wfo"]]
-        ctx["title"] = f"NWS CWA {ctx['_sname']}"
+        bnds = reference.wfo_bounds[ctx.wfo]
+        ctx["title"] = f"NWS CWA {ctx.sname}"
     params = {
-        "dt": ctx["day"],
+        "dt": ctx.day,
         "west": bnds[0] - buf,
         "south": bnds[1] - buf,
         "east": bnds[2] + buf,
@@ -166,39 +167,39 @@ def get_df(ctx, buf=1.0) -> pd.DataFrame:
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    return df[pd.notnull(df[ctx["v"]])]
+    return df[pd.notnull(df[ctx.v])]
 
 
-def geojson(ctx: dict):
+def geojson(ctx: Params):
     """GeoJSON Content."""
-    return (get_df(ctx).drop(columns=["lat", "lon", "day"])), ctx["v"]
+    return (get_df(ctx).drop(columns=["lat", "lon", "day"])), ctx.v
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    varname = ctx["v"]
+    varname = ctx.v
 
     df = get_df(ctx)
     if df.empty:
         raise NoDataFound("No data was found for your query")
-    sector = "state" if ctx["t"] == "state" else "cwa"
-    if ctx["t"] == "conus":
+    sector = "state" if ctx.t == "state" else "cwa"
+    if ctx.t == "conus":
         sector = "conus"
-    elif ctx["t"] == "fema":
+    elif ctx.t == "fema":
         sector = "fema_region"
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
-        state=ctx["state"],
-        fema_region=ctx["fema"],
-        cwa=ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:],
+        state=ctx.state,
+        fema_region=ctx.fema,
+        cwa=ctx.wfo if len(ctx.wfo) == 3 else ctx.wfo[1:],
         axisbg="white",
-        title=f"{PDICT2[ctx['v']]} for {ctx['title']} on {ctx['day']}",
+        title=f"{PDICT2[ctx.v]} for {ctx['title']} on {ctx.day}",
         nocaption=True,
         titlefontsize=16,
     )
     ramp = None
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     extend = "both"
     if varname in ["max_gust", "max_sknt"]:
         extend = "max"
@@ -206,17 +207,17 @@ def plotter(ctx: dict):
         ramp = np.append(ramp, np.arange(40, 80, 10))
         ramp = np.append(ramp, np.arange(80, 120, 20))
     # Data QC, cough
-    if ctx.get("above") is not None:
-        df = df.loc[df[varname] < ctx["above"]]
-    if ctx.get("below") is not None:
-        df = df.loc[df[varname] > ctx["below"]]
+    if ctx.above is not None:
+        df = df.loc[df[varname] < ctx.above]
+    if ctx.below is not None:
+        df = df.loc[df[varname] > ctx.below]
     if df.empty:
         raise NoDataFound("No data was found for your query")
     # with QC done, we compute ramps
     if ramp is None:
         ramp = pretty_bins(df[varname].min() - 1, df[varname].max() + 5)
 
-    if ctx["p"] == "both":
+    if ctx.p == "both":
         mp.contourf(
             df["lon"].values,
             df["lat"].values,
@@ -227,12 +228,12 @@ def plotter(ctx: dict):
             spacing="proportional",
             extend=extend,
         )
-    if ctx["t"] == "conus":
+    if ctx.t == "conus":
         df2 = df[df["country"] == "US"]
-    elif ctx["t"] == "state":
-        df2 = df[df[ctx["t"]] == ctx[ctx["t"]]]
-    elif ctx["t"] == "cwa":
-        df2 = df[df["wfo"] == ctx["wfo"]]
+    elif ctx.t == "state":
+        df2 = df[df[ctx.t] == ctx[ctx.t]]
+    elif ctx.t == "cwa":
+        df2 = df[df["wfo"] == ctx.wfo]
     else:  # FEMA
         df2 = df
 
@@ -242,11 +243,11 @@ def plotter(ctx: dict):
         df2[varname].values,
         "%.1f" if varname in ["max_gust", "max_sknt"] else "%.0f",
         labelbuffer=3,
-        labels=df2["station"].values if ctx["p"] == "plot2" else None,
+        labels=df2["station"].values if ctx.p == "plot2" else None,
     )
-    if ctx["t"] not in ["conus", "fema"]:
+    if ctx.t not in ["conus", "fema"]:
         mp.drawcounties()
-    if ctx["t"] == "cwa":
+    if ctx.t == "cwa":
         mp.draw_cwas()
 
     return mp.fig, df.drop(
