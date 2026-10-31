@@ -146,7 +146,7 @@ def plotter(ctx: Params):
         raise NoDataFound("Failed to find climatology")
     baseyear = int(climo.index.values[0].year)
     years = (datetime.now().year - baseyear) + 1
-    xlen = int((edate - sdate).days) + 1  # In case of leap day
+    xlen = (edate - sdate).days + 1  # In case of leap day
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
@@ -234,6 +234,9 @@ def plotter(ctx: Params):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     fig = figure(apctx=ctx)
+    ax2 = None
+    ax3 = None
+    ax4 = None
     if whichplots == "all":
         ax1 = fig.add_axes((0.1, 0.7, 0.8, 0.2))
         ax2 = fig.add_axes(
@@ -292,7 +295,7 @@ def plotter(ctx: Params):
             )
         # Get cumulated precip
         p = x["oprecip"].cumsum()
-        if whichplots in ["all", "precip"]:
+        if whichplots in ["all", "precip"] and ax3:
             ax3.plot(
                 range(len(p.index)),
                 p.values,
@@ -302,7 +305,7 @@ def plotter(ctx: Params):
                 label=f"{yearlabel}",
             )
         p = x["osdd86"].cumsum()
-        if whichplots in ["all", "sdd"]:
+        if whichplots in ["all", "sdd"] and ax4:
             ax4.plot(
                 range(len(p.index)),
                 p.values,
@@ -313,7 +316,7 @@ def plotter(ctx: Params):
             )
 
         p = x["osrad"].cumsum()
-        if whichplots == "srad":
+        if whichplots == "srad" and ax3:
             ax3.plot(
                 range(len(p.index)),
                 p.values,
@@ -326,7 +329,7 @@ def plotter(ctx: Params):
         # Plot Climatology
         if wantedyears.index(year) == 0:
             x = df.loc[sts:ets, "c" + glabel].cumsum()
-            if whichplots in ["all", "gdd"]:
+            if whichplots in ["all", "gdd"] and ax1:
                 ax1.plot(
                     range(len(x.index)),
                     x.values,
@@ -336,7 +339,7 @@ def plotter(ctx: Params):
                     zorder=5,
                 )
             x = df.loc[sts:ets, "cprecip"].cumsum()
-            if whichplots in ["all", "precip"]:
+            if whichplots in ["all", "precip"] and ax3:
                 ax3.plot(
                     range(len(x.index)),
                     x.values,
@@ -346,7 +349,7 @@ def plotter(ctx: Params):
                     zorder=5,
                 )
             x = df.loc[sts:ets, "csdd86"].cumsum()
-            if whichplots in ["all", "sdd"]:
+            if whichplots in ["all", "sdd"] and ax4:
                 ax4.plot(
                     range(len(x.index)),
                     x.values,
@@ -356,7 +359,7 @@ def plotter(ctx: Params):
                     zorder=5,
                 )
             x = df.loc[sts:ets, "csrad"].cumsum()
-            if whichplots == "srad":
+            if whichplots == "srad" and ax3:
                 ax3.plot(
                     range(len(x.index)),
                     x.values,
@@ -367,7 +370,7 @@ def plotter(ctx: Params):
                 )
 
         x = df.loc[sts:ets, glabel + "_diff"].cumsum()
-        if whichplots in ["all", "gdd"]:
+        if whichplots in ["all", "gdd"] and ax2:
             ax2.plot(
                 range(len(x.index)),
                 x.values,
@@ -378,17 +381,17 @@ def plotter(ctx: Params):
 
     xmin = np.nanmin(acc, 0)
     xmax = np.nanmax(acc, 0)
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax1.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax1.grid(True)
         ax2.grid(True)
     xmin = np.nanmin(pacc, 0)
     xmax = np.nanmax(pacc, 0)
-    if whichplots in ["all", "precip"]:
+    if whichplots in ["all", "precip"] and ax3:
         ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax3.set_ylabel("Precipitation [inch]")
         ax3.grid(True)
-    if whichplots == "srad":
+    if whichplots == "srad" and ax3:
         xmin = np.nanmin(radacc, 0)
         xmax = np.nanmax(radacc, 0)
         ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
@@ -396,12 +399,12 @@ def plotter(ctx: Params):
         ax3.grid(True)
     xmin = np.nanmin(sacc, 0)
     xmax = np.nanmax(sacc, 0)
-    if whichplots in ["all", "sdd"]:
+    if whichplots in ["all", "sdd"] and ax4:
         ax4.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax4.set_ylabel("SDD Base 86 °F")
         ax4.grid(True)
 
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax1.set_ylabel(f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} °F")
 
         ax1.text(
@@ -442,7 +445,7 @@ def plotter(ctx: Params):
             xticklabels.append(now.strftime("%-d %b"))
         now += timedelta(days=1)
         i += 1
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax2.set_xticks(xticks)
         ax2.set_xticklabels(xticklabels)
         ax1.legend(loc=2, prop={"size": 12})
@@ -451,17 +454,17 @@ def plotter(ctx: Params):
             label.set_visible(False)
 
         ax1.set_xlim(0, xlen + 1)
-    if whichplots in ["all", "precip"]:
+    if whichplots in ["all", "precip"] and ax3:
         ax3.set_xticks(xticks)
         ax3.set_xticklabels(xticklabels)
         ax3.legend(loc=2, prop={"size": 10})
         ax3.set_xlim(0, xlen + 1)
-    if whichplots == "srad":
+    if whichplots == "srad" and ax3:
         ax3.set_xticks(xticks)
         ax3.set_xticklabels(xticklabels)
         ax3.legend(loc=2, prop={"size": 10})
         ax3.set_xlim(0, xlen + 1)
-    if whichplots in ["all", "sdd"]:
+    if whichplots in ["all", "sdd"] and ax4:
         ax4.set_xticks(xticks)
         ax4.set_xticklabels(xticklabels)
         ax4.legend(loc=2, prop={"size": 10})

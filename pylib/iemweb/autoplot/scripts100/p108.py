@@ -8,6 +8,7 @@ site.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated, Any
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "all": "Show All Three Plots",
@@ -25,84 +34,77 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    if today.month < 5:
-        today = today.replace(year=today.year - 1, month=10, day=1)
-    sts = today.replace(month=5, day=1)
+def _get_dt():
+    """helper."""
+    return (
+        date.today().replace(year=date.today().year - 1, month=10, day=1)
+        if date.today().month < 5
+        else date.today()
+    ).strftime("%Y/%m/%d")
 
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="date",
-            name="sdate",
-            max=f"{date.today():%Y}/12/31",  # careful
-            default=sts.strftime("%Y/%m/%d"),
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    sdate: Annotated[
+        date,
+        DateArg(
+            max=lambda: f"{date.today():%Y}/12/31",
             label="Start Date (inclusive):",
             min="1893/01/01",
-        ),
-        dict(
-            type="date",
-            name="edate",
-            default=f"{today:%Y/%m/%d}",
-            max=f"{date.today():%Y}/12/31",  # careful
-            label=(
-                "End Date (inclusive): [Setting to future date will increase "
-                "the x-axis to show more climatology]"
+            default=lambda: (
+                (
+                    date.today().replace(
+                        year=date.today().year - 1, month=10, day=1
+                    )
+                    if date.today().month < 5
+                    else date.today()
+                )
+                .replace(month=5, day=1)
+                .strftime("%Y/%m/%d")
             ),
-            min="1893/01/01",
-        ),
-        dict(
-            type="int",
-            name="base",
-            default="50",
-            label="Growing Degree Day Base (°F)",
-        ),
-        dict(
-            type="int",
-            name="ceil",
-            default="86",
-            label="Growing Degree Day Ceiling (°F)",
-        ),
-        dict(
-            type="year",
-            name="year2",
-            default=1893,
-            optional=True,
-            label="Compare with year (optional):",
-        ),
-        dict(
-            type="year",
-            name="year3",
-            default=1893,
-            optional=True,
-            label="Compare with year (optional)",
-        ),
-        dict(
-            type="year",
-            name="year4",
-            default=1893,
-            optional=True,
-            label="Compare with year (optional)",
-        ),
-        dict(
-            type="select",
-            name="which",
-            default="all",
-            options=PDICT,
-            label="Which Charts to Show in Plot",
         ),
     ]
-    return desc
+    edate: Annotated[
+        date,
+        DateArg(
+            max=lambda: f"{date.today():%Y}/12/31",
+            label="End Date (inclusive): [Setting to future date will"
+            " increase the x-axis to show more climatology]",
+            min="1893/01/01",
+            default=lambda: f"{_get_dt()}",
+        ),
+    ]
+    base: Annotated[int, IntArg(label="Growing Degree Day Base (°F)")] = 50
+    ceil: Annotated[int, IntArg(label="Growing Degree Day Ceiling (°F)")] = 86
+    year2: Annotated[
+        int | None,
+        YearArg(label="Compare with year (optional):", default=1893),
+    ] = None
+    year3: Annotated[
+        int | None, YearArg(label="Compare with year (optional)", default=1893)
+    ] = None
+    year4: Annotated[
+        int | None, YearArg(label="Compare with year (optional)", default=1893)
+    ] = None
+    which: Annotated[
+        str, SelectArg(options=PDICT, label="Which Charts to Show in Plot")
+    ] = "all"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    sdate: date = ctx["sdate"]
-    edate: date = ctx["edate"]
+    station = ctx.station
+    sdate: date = ctx.sdate
+    edate: date = ctx.edate
     if edate < sdate:
         sdate, edate = edate, sdate
     if f"{sdate:%m%d}" == "0229":
@@ -112,14 +114,18 @@ def plotter(ctx: dict):
     year4 = ctx.get("year4", 0)
     wantedyears = [sdate.year, year2, year3, year4]
     yearcolors = ["r", "g", "b", "purple"]
-    gddbase = ctx["base"]
-    gddceil = ctx["ceil"]
-    whichplots = ctx["which"]
+    gddbase = ctx.base
+    gddceil = ctx.ceil
+    whichplots = ctx.which
     glabel = f"gdd{gddbase}{gddceil}"
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-
+    params: dict[str, Any] = {
+        "station": station,
+        "gddbase": gddbase,
+        "gddceil": gddceil,
+    }
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -139,23 +145,19 @@ def plotter(ctx: dict):
                 glabel=glabel,
             ),
             conn,
-            params={
-                "station": station,
-                "gddbase": gddbase,
-                "gddceil": gddceil,
-            },
-            parse_dates="day",
+            params=params,
+            parse_dates=["day"],
             index_col="day",
         )
     if df.empty:
         raise NoDataFound("No data found for this station!")
     # Trim the first year, if it does not start on sdate
     if df.index[0].strftime("%m%d") != sdate.strftime("%m%d"):
-        df = df[df.index.year > df.index[0].year]
+        df = df[pd.DatetimeIndex(df.index).year > df.index[0].year]
     df["precip_diff"] = df["oprecip"] - df["cprecip"]
     df[f"{glabel}_diff"] = df[f"o{glabel}"] - df[f"c{glabel}"]
 
-    xlen = int((edate - sdate).days) + 1  # In case of leap day
+    xlen = (edate - sdate).days + 1  # In case of leap day
     years = (datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
@@ -163,6 +165,9 @@ def plotter(ctx: dict):
     pacc[:] = np.nan
     sacc = np.zeros((years, xlen))
     sacc[:] = np.nan
+    ax2 = None
+    ax3 = None
+    ax4 = None
     if whichplots == "all":
         fig = figure(figsize=(9, 12), apctx=ctx)
         ax1 = fig.add_axes((0.1, 0.7, 0.8, 0.2))
@@ -220,7 +225,7 @@ def plotter(ctx: dict):
         yearlabel = sts.year
         if sts.year != ets.year:
             yearlabel = f"{sts.year}-{ets.year}"
-        if whichplots in ["gdd", "all"]:
+        if whichplots in ["gdd", "all"] and ax1:
             ax1.plot(
                 range(len(x.index)),
                 df.loc[slc, f"o{glabel}"].cumsum().values,
@@ -231,7 +236,7 @@ def plotter(ctx: dict):
             )
         # Get cumulated precip
         p = df.loc[slc, "oprecip"].cumsum()
-        if whichplots in ["all", "precip"]:
+        if whichplots in ["all", "precip"] and ax3:
             ax3.plot(
                 range(len(p.index)),
                 p.values,
@@ -241,7 +246,7 @@ def plotter(ctx: dict):
                 label=f"{yearlabel}",
             )
         p = df.loc[slc, "osdd86"].cumsum()
-        if whichplots in ["all", "sdd"]:
+        if whichplots in ["all", "sdd"] and ax4:
             ax4.plot(
                 range(len(p.index)),
                 p.values,
@@ -267,7 +272,7 @@ def plotter(ctx: dict):
                     zorder=5,
                 )
             x = df.loc[cslc, "cprecip"].cumsum()
-            if whichplots in ["all", "precip"]:
+            if whichplots in ["all", "precip"] and ax3:
                 ax3.plot(
                     range(len(x.index)),
                     x.values,
@@ -277,7 +282,7 @@ def plotter(ctx: dict):
                     zorder=5,
                 )
             x = df.loc[cslc, "csdd86"].cumsum()
-            if whichplots in ["all", "sdd"]:
+            if whichplots in ["all", "sdd"] and ax4:
                 ax4.plot(
                     range(len(x.index)),
                     x.values,
@@ -288,7 +293,7 @@ def plotter(ctx: dict):
                 )
 
         x = df.loc[slc, glabel + "_diff"].cumsum()
-        if whichplots in ["all", "gdd"]:
+        if whichplots in ["all", "gdd"] and ax2:
             ax2.plot(
                 range(len(x.index)),
                 x.values,
@@ -299,24 +304,24 @@ def plotter(ctx: dict):
 
     xmin = np.nanmin(acc, 0)
     xmax = np.nanmax(acc, 0)
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax1.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax1.grid(True)
         ax2.grid(True)
     xmin = np.nanmin(pacc, 0)
     xmax = np.nanmax(pacc, 0)
-    if whichplots in ["all", "precip"]:
+    if whichplots in ["all", "precip"] and ax3:
         ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax3.set_ylabel("Precipitation [inch]", fontsize=16)
         ax3.grid(True)
     xmin = np.nanmin(sacc, 0)
     xmax = np.nanmax(sacc, 0)
-    if whichplots in ["all", "sdd"]:
+    if whichplots in ["all", "sdd"] and ax4:
         ax4.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
         ax4.set_ylabel("SDD Base 86 °F", fontsize=16)
         ax4.grid(True)
 
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax1.set_ylabel(
             f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} °F",
             fontsize=16,
@@ -353,7 +358,7 @@ def plotter(ctx: dict):
             xticklabels.append(now.strftime("%-d\n%b"))
         now += timedelta(days=1)
         i += 1
-    if whichplots in ["all", "gdd"]:
+    if whichplots in ["all", "gdd"] and ax1 and ax2:
         ax2.set_xticks(xticks)
         ax2.set_xticklabels(xticklabels)
         ax1.legend(loc=2, prop={"size": 12})
@@ -362,12 +367,12 @@ def plotter(ctx: dict):
             label.set_visible(False)
 
         ax1.set_xlim(0, xlen + 1)
-    if whichplots in ["all", "precip"]:
+    if whichplots in ["all", "precip"] and ax3:
         ax3.set_xticks(xticks)
         ax3.set_xticklabels(xticklabels)
         ax3.legend(loc=2, prop={"size": 10})
         ax3.set_xlim(0, xlen + 1)
-    if whichplots in ["all", "sdd"]:
+    if whichplots in ["all", "sdd"] and ax4:
         ax4.set_xticks(xticks)
         ax4.set_xticklabels(xticklabels)
         ax4.legend(loc=2, prop={"size": 10})

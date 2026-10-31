@@ -13,12 +13,21 @@ December within the three year period.
 """
 
 from datetime import date
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy.stats import linregress
+
+from iemweb.autoplot.description import (
+    PlotDescription,
+    SelectArg,
+    StationArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 BOOLS = {
     "yes": "Yes, fit linear regression",
@@ -160,7 +169,7 @@ def yearly_plot(ctx):
     """
     Make a yearly plot of something
     """
-    if ctx["plot_type"] == "frost_free":
+    if ctx.plot_type == "frost_free":
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
                 sql_helper("""
@@ -177,15 +186,15 @@ def yearly_plot(ctx):
             """),
                 conn,
                 params={
-                    "station": ctx["station"],
-                    "fyear": ctx["first_year"],
-                    "lyear": ctx["last_year"],
+                    "station": ctx.station,
+                    "fyear": ctx.first_year,
+                    "lyear": ctx.last_year,
                 },
             )
     else:
-        off = META[ctx["plot_type"]]["valid_offset"]
-        func = META[ctx["plot_type"]]["func"]
-        bnds = META[ctx["plot_type"]]["month_bounds"]
+        off = META[ctx.plot_type]["valid_offset"]
+        func = META[ctx.plot_type]["func"]
+        bnds = META[ctx.plot_type]["month_bounds"]
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
                 sql_helper(
@@ -198,30 +207,30 @@ def yearly_plot(ctx):
                     bnds=bnds,
                 ),
                 conn,
-                params={"station": ctx["station"]},
+                params={"station": ctx.station},
             )
-    df = df[(df["yr"] >= ctx["first_year"]) & (df["yr"] <= ctx["last_year"])]
+    df = df[(df["yr"] >= ctx.first_year) & (df["yr"] <= ctx.last_year)]
     if df.empty:
         raise NoDataFound("no data found, sorry")
 
     title = (
-        f"{ctx['_sname']}\n"
-        f"{META[ctx['plot_type']].get('title', 'TITLE')} "
+        f"{ctx.sname}\n"
+        f"{META[ctx.plot_type].get('title', 'TITLE')} "
         f"({df['yr'].min():.0f} - {df['yr'].max():.0f})\n"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     ax.plot(df["yr"].values, df["data"].values, "bo-")
-    ax.set_xlabel(META[ctx["plot_type"]].get("xlabel", "XLABEL"))
-    ax.set_ylabel(META[ctx["plot_type"]].get("ylabel", "YLABEL"))
-    ax.set_xlim(ctx["first_year"] - 1, ctx["last_year"] + 1)
+    ax.set_xlabel(META[ctx.plot_type].get("xlabel", "XLABEL"))
+    ax.set_ylabel(META[ctx.plot_type].get("ylabel", "YLABEL"))
+    ax.set_xlim(ctx.first_year - 1, ctx.last_year + 1)
     miny = df["data"].min()
     maxy = df["data"].max()
     ax.set_ylim(miny - ((maxy - miny) / 10.0), maxy + ((maxy - miny) / 10.0))
     ax.grid(True)
 
-    if ctx["linregress"] == "yes":
-        (slope, intercept, r_value, _p_value, _std_err) = linregress(
-            df["yr"].values, df["data"].values
+    if ctx.linregress == "yes":
+        (slope, intercept, r_value, _p_value, _std_err, _) = linregress(
+            df["yr"].to_numpy(), df["data"].to_numpy()
         )
         ax.plot(
             df["yr"].values,
@@ -229,7 +238,7 @@ def yearly_plot(ctx):
             color="#CC6633",
         )
         ax.text(
-            ctx["first_year"],
+            ctx.first_year,
             maxy,
             f"$R^2$={(r_value**2):.2f}",
             color="#CC6633",
@@ -239,52 +248,38 @@ def yearly_plot(ctx):
     return fig, df
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    pdict = {}
-    for varname, item in META.items():
-        pdict[varname] = item["title"]
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
-        dict(
-            type="select",
-            options=pdict,
-            default="frost_free",
-            label="Which metric to compute",
-            name="plot_type",
-        ),
-        dict(
-            type="year",
-            default=1951,
-            name="first_year",
-            label="First Year to Plot",
-        ),
-        dict(
-            type="year",
-            default=(today.year - 1),
-            name="last_year",
-            label="Last Year to Plot",
-        ),
-        dict(
-            type="select",
-            options=BOOLS,
-            name="linregress",
-            default="no",
-            label="Plot Regression?",
+PDICT = {varname: item["title"] for varname, item in META.items()}
+
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, StationArg(label="Select Station:", network="IACLIMATE")
+    ] = "IATAME"
+    plot_type: Annotated[
+        str, SelectArg(options=PDICT, label="Which metric to compute")
+    ] = "frost_free"
+    first_year: Annotated[int, YearArg(label="First Year to Plot")] = 1951
+    last_year: Annotated[
+        int,
+        YearArg(
+            label="Last Year to Plot", default=lambda: date.today().year - 1
         ),
     ]
-    return desc
+    linregress: Annotated[
+        str, SelectArg(options=BOOLS, label="Plot Regression?")
+    ] = "no"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     fig, df = yearly_plot(ctx)
 
