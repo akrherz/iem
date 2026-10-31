@@ -27,6 +27,7 @@ from pyiem.plot import figure
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.description import DateArg, PlotDescription
 from iemweb.autoplot.params import AutoplotParams
+from iemweb.autoplot.scripts.p9 import Params as ParamsP9
 from iemweb.autoplot.scripts.p9 import get_df
 from iemweb.json.climodat_dd import run as climodat_dd_run
 
@@ -111,17 +112,17 @@ def plotter(ctx: Params):
     df["sday"] = df.index.strftime("%m%d")
 
     climodf = get_df(
-        {
-            "station": ctx.station,
-            "network": f"{ctx.station[:2]}CLIMATE",
-            "year": 2023,
-            "sday": df.index.to_pydatetime()[0],
-            "eday": df.index.to_pydatetime()[-1],
-            "var": "gdd",
-            "base": 50,
-            "ceiling": 86,
-            "w": "ytd",
-        }
+        ParamsP9(
+            station=ctx.station,
+            network=f"{ctx.station[:2]}CLIMATE",
+            year=2023,
+            sday=df.index.to_pydatetime()[0],
+            eday=df.index.to_pydatetime()[-1],
+            var="gdd",
+            base=50,
+            ceiling=86,
+            w="ytd",
+        )
     )
     df = df.merge(climodf, left_on="sday", right_index=True)
 

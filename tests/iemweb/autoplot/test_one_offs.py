@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 import responses
-from iemweb.autoplot.scripts200.p221 import forecast2image
+from iemweb.autoplot.scripts200.p221 import Params, forecast2image
 from pyiem.plot import get_cmap
 from pyiem.util import utc
 
@@ -15,8 +15,9 @@ def test_forecast2image():
         "w": "cwa",
         "cwa": "DMX",
         "sector": "IA",
+        "valid": utc(2025, 9, 12, 11),
     }
-    fhour, buf = forecast2image(environ, utc(2025, 9, 12, 11), 1)
+    fhour, buf = forecast2image(Params(**environ), utc(2025, 9, 12, 11), 1)
     assert fhour == 1
     assert buf
 

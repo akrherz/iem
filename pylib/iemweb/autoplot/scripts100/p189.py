@@ -229,7 +229,7 @@ def yearly_plot(ctx):
     ax.grid(True)
 
     if ctx.linregress == "yes":
-        (slope, intercept, r_value, _p_value, _std_err, _) = linregress(
+        (slope, intercept, r_value, *_args) = linregress(
             df["yr"].to_numpy(), df["data"].to_numpy()
         )
         ax.plot(
