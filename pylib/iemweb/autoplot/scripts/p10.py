@@ -7,6 +7,7 @@ simple linear trend line is placed on both dates.
 
 import calendar
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,13 @@ from scipy import stats
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    FloatArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "above": "First Spring/Last Fall Temperature Above (>=) Threshold",
@@ -32,36 +40,27 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="direction",
-            default="below",
-            label="Threshold Direction",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            name="varname",
-            default="low",
-            label="Daily Variable to plot?",
-            options=PDICT2,
-        ),
-        dict(
-            type="float",
-            name="threshold",
-            default="32",
-            label="Enter Threshold (°F or Inches):",
-        ),
-        dict(
-            type="year", name="year", default=1893, label="Start Year of Plot"
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    direction: Annotated[
+        str, SelectArg(label="Threshold Direction", options=PDICT)
+    ] = "below"
+    varname: Annotated[
+        str, SelectArg(label="Daily Variable to plot?", options=PDICT2)
+    ] = "low"
+    threshold: Annotated[
+        float, FloatArg(label="Enter Threshold (°F or Inches):")
+    ] = 32.0
+    year: Annotated[int, YearArg(label="Start Year of Plot")] = 1893
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, report=True
+    )
 
 
 def print_top10(ax: Axes, df: pd.DataFrame):
@@ -106,13 +105,13 @@ def print_top10(ax: Axes, df: pd.DataFrame):
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    direction = ctx["direction"]
-    varname = ctx["varname"]
-    startyear = ctx["year"]
+    station = ctx.station
+    threshold = ctx.threshold
+    direction = ctx.direction
+    varname = ctx.varname
+    startyear = ctx.year
 
     if direction == "below":
         sql = """select year,
@@ -188,7 +187,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         f"# Report Generated: {today:%d %b %Y}\n"
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
         f"-> {today}\n"
-        f"# Site Information: {ctx['_sname']}\n"
+        f"# Site Information: {ctx.sname}\n"
         "# Contact Information: Daryl Herzmann "
         "akrherz@iastate.edu 515.294.5978\n"
         f"# LENGTH OF SEASON FOR STATION NUMBER  {station}   "
@@ -221,7 +220,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     )
     units = "°F" if not varname.startswith("snow") else "inch"
     (fig, ax) = figure_axes(
-        title=ctx["_sname"], subtitle=f"{title} {threshold}{units}", apctx=ctx
+        title=ctx.sname, subtitle=f"{title} {threshold}{units}", apctx=ctx
     )
     ax.set_position([0.08, 0.1, 0.6, 0.8])
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)

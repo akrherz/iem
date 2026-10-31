@@ -6,6 +6,7 @@ The vertical highlighted stripes on the plot are just the weekend dates.
 
 import warnings
 from datetime import date, timedelta
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -16,6 +17,15 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
+
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {
     "temps": "High/Low Temperature",
@@ -25,47 +35,43 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 300}
-    today = date.today()
-    mo = today.month
-    yr = today.year
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="station",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(type="month", name="month", default=mo, label="Select Month"),
-        dict(
-            type="year",
-            name="year",
-            default=yr,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    month: Annotated[
+        int, MonthArg(label="Select Month", default=lambda: date.today().month)
+    ]
+    year: Annotated[
+        int,
+        YearArg(
             label="Select Year",
             min=1850,
-            max=today.year,
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="temps",
-            label="Select Plot Type:",
-            name="p",
+            max=lambda: date.today().year,
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+    p: Annotated[str, SelectArg(options=PDICT, label="Select Plot Type:")] = (
+        "temps"
+    )
 
 
-def common(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=300
+    )
+
+
+def common(ctx: Params):
     """Do things common to both plots."""
-    station = ctx["station"]
-    year = ctx["year"]
+    station = ctx.station
+    year = ctx.year
     if not ctx["network"].endswith("CLIMATE") and year < 1900:
         raise BadWebRequest("No data available for year before 1900.")
-    month = ctx["month"]
+    month = ctx.month
 
     sts = date(year, month, 1)
     ets = sts + timedelta(days=35)
@@ -114,7 +120,7 @@ def common(ctx: dict):
                 "NCEI 1991-2020 Climate Site: "
                 f"{ctx['_nt'].sts[station]['ncei91']}"
             )
-    if ctx["p"] in ("dwpf", "feel"):
+    if ctx.p in ("dwpf", "feel"):
         subtitle = "Climatology is a simple 7 day smoothed POR average"
     # Get the normals
     with get_sqlalchemy_conn("coop") as conn:
@@ -136,7 +142,7 @@ def common(ctx: dict):
     if "accum_pday" not in df.columns:
         df["accum_pday"] = 0
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
-    title = f"{ctx['_sname']} :: {PDICT[ctx['p']]} for {sts:%b %Y}\n{subtitle}"
+    title = f"{ctx.sname} :: {PDICT[ctx.p]} for {sts:%b %Y}\n{subtitle}"
     (ctx["fig"], ax) = figure_axes(title=title, apctx=ctx)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
@@ -154,7 +160,7 @@ def common(ctx: dict):
     ctx["df"] = df
 
 
-def do_precip_plot(ctx: dict) -> bool:
+def do_precip_plot(ctx: Params) -> bool:
     """Make the precipitation plot."""
     hasdata = False
     ax = ctx["fig"].gca()
@@ -207,7 +213,7 @@ def do_precip_plot(ctx: dict) -> bool:
     return hasdata
 
 
-def do_temperature_plot(ctx: dict) -> bool:
+def do_temperature_plot(ctx: Params) -> bool:
     """Make the temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]
@@ -293,7 +299,7 @@ def do_temperature_plot(ctx: dict) -> bool:
     return hasdata
 
 
-def do_dwpf_plot(ctx: dict) -> bool:
+def do_dwpf_plot(ctx: Params) -> bool:
     """Make the dew point temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]
@@ -314,30 +320,30 @@ def do_dwpf_plot(ctx: dict) -> bool:
             conn,
             params={
                 "network": ctx["network"],
-                "station": ctx["station"],
-                "month": ctx["month"],
+                "station": ctx.station,
+                "month": ctx.month,
             },
             index_col="day_of_month",
         )
         if not climodf.empty:
             # Smooth the data 7 days
-            climodf[f"climo_max_{ctx['p']}"] = (
-                climodf[f"climo_max_{ctx['p']}"]
+            climodf[f"climo_max_{ctx.p}"] = (
+                climodf[f"climo_max_{ctx.p}"]
                 .rolling(7, min_periods=1)
                 .mean()
                 .round(1)
             )
-            climodf[f"climo_min_{ctx['p']}"] = (
-                climodf[f"climo_min_{ctx['p']}"]
+            climodf[f"climo_min_{ctx.p}"] = (
+                climodf[f"climo_min_{ctx.p}"]
                 .rolling(7, min_periods=1)
                 .mean()
                 .round(1)
             )
-    if climodf[f"climo_max_{ctx['p']}"].notnull().any():
+    if climodf[f"climo_max_{ctx.p}"].notnull().any():
         hasdata = True
         ax.plot(
             climodf.index.values,
-            climodf[f"climo_max_{ctx['p']}"].values,
+            climodf[f"climo_max_{ctx.p}"].values,
             zorder=3,
             marker="o",
             color="pink",
@@ -345,31 +351,29 @@ def do_dwpf_plot(ctx: dict) -> bool:
         )
         ax.plot(
             climodf.index.values,
-            climodf[f"climo_min_{ctx['p']}"].values,
+            climodf[f"climo_min_{ctx.p}"].values,
             zorder=3,
             marker="o",
             color="skyblue",
             label="Climate Low",
         )
-    if f"max_{ctx['p']}" in df.columns and not all(
-        pd.isnull(df[f"max_{ctx['p']}"])
-    ):
+    if f"max_{ctx.p}" in df.columns and not all(pd.isnull(df[f"max_{ctx.p}"])):
         hasdata = True
         ax.bar(
             df.index.values - 0.3,
-            df[f"max_{ctx['p']}"].values,
+            df[f"max_{ctx.p}"].values,
             fc="r",
             ec="k",
             width=0.3,
             linewidth=0.6,
             label="Ob High",
         )
-        if f"min_{ctx['p']}" in df.columns and not all(
-            pd.isnull(df[f"min_{ctx['p']}"])
+        if f"min_{ctx.p}" in df.columns and not all(
+            pd.isnull(df[f"min_{ctx.p}"])
         ):
             ax.bar(
                 df.index.values,
-                df[f"min_{ctx['p']}"].values,
+                df[f"min_{ctx.p}"].values,
                 fc="b",
                 ec="k",
                 width=0.3,
@@ -381,16 +385,12 @@ def do_dwpf_plot(ctx: dict) -> bool:
         ax.set_ylim(0, 1)
 
     i = 0
-    if f"max_{ctx['p']}" in df.columns and not all(
-        pd.isnull(df[f"max_{ctx['p']}"])
-    ):
+    if f"max_{ctx.p}" in df.columns and not all(pd.isnull(df[f"max_{ctx.p}"])):
         for _, row in df.iterrows():
-            if pd.isna(row[f"max_{ctx['p']}"]) or pd.isna(
-                row[f"min_{ctx['p']}"]
-            ):
+            if pd.isna(row[f"max_{ctx.p}"]) or pd.isna(row[f"min_{ctx.p}"]):
                 i += 1
                 continue
-            col = row[f"max_{ctx['p']}"]
+            col = row[f"max_{ctx.p}"]
             txt = ax.text(
                 i + 1 - 0.15,
                 col + 0.5,
@@ -402,7 +402,7 @@ def do_dwpf_plot(ctx: dict) -> bool:
             txt.set_path_effects(
                 [PathEffects.withStroke(linewidth=2, foreground="w")]
             )
-            col = row[f"min_{ctx['p']}"]
+            col = row[f"min_{ctx.p}"]
             txt = ax.text(
                 i + 1 + 0.15,
                 col + 0.5,
@@ -415,33 +415,33 @@ def do_dwpf_plot(ctx: dict) -> bool:
                 [PathEffects.withStroke(linewidth=2, foreground="w")]
             )
             i += 1
-        if df[f"min_{ctx['p']}"].notnull().any():
+        if df[f"min_{ctx.p}"].notnull().any():
             ax.set_ylim(
                 np.nanmin(
                     [
-                        climodf[f"climo_min_{ctx['p']}"].min(),
-                        df[f"min_{ctx['p']}"].min(),
+                        climodf[f"climo_min_{ctx.p}"].min(),
+                        df[f"min_{ctx.p}"].min(),
                     ]
                 )
                 - 5,
                 np.nanmax(
                     [
-                        climodf[f"climo_max_{ctx['p']}"].max(),
-                        df[f"max_{ctx['p']}"].max(),
+                        climodf[f"climo_max_{ctx.p}"].max(),
+                        df[f"max_{ctx.p}"].max(),
                     ]
                 )
                 + 5,
             )
-    ax.set_ylabel(f"{PDICT[ctx['p']]} °F")
+    ax.set_ylabel(f"{PDICT[ctx.p]} °F")
     return hasdata
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     common(ctx)
-    if ctx["p"] == "precip":
+    if ctx.p == "precip":
         hasdata = do_precip_plot(ctx)
-    elif ctx["p"] in ("dwpf", "feel"):
+    elif ctx.p in ("dwpf", "feel"):
         hasdata = do_dwpf_plot(ctx)
     else:
         hasdata = do_temperature_plot(ctx)

@@ -20,6 +20,7 @@ this example evaluates to a jump of 20 degrees.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -28,6 +29,13 @@ from pyiem.plot import figure_axes
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "month": "Aggregate by Month",
@@ -62,122 +70,93 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    syear: Annotated[int, YearArg(min=1893, label="Start Year for Plot:")] = (
+        1893
+    )
+    eyear: Annotated[
+        int,
+        YearArg(
             min=1893,
-            default=1893,
-            label="Start Year for Plot:",
-            name="syear",
-        ),
-        dict(
-            type="year",
-            min=1893,
-            default=date.today().year,
             label="End Year for Plot:",
-            name="eyear",
+            default=lambda: date.today().year,
         ),
-        dict(
-            type="select",
-            name="month",
-            default="year",
-            label="Month/Season",
-            options=MDICT,
-        ),
-        dict(
-            type="select",
-            name="how",
-            default="two",
-            label="Analyze two or three periods?",
-            options=PDICT4,
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            label="Which variable to analyze:",
-            options=PDICT3,
-        ),
-        dict(
-            type="int",
-            name="days",
-            default="4",
-            label="Number of Trailing Days (excludes 'today'):",
-        ),
-        dict(
-            type="select",
-            default="max",
-            name="stat",
-            options=PDICT2,
-            label="Trailing Days Aggregation Function:",
-        ),
-        dict(
-            optional=True,
-            type="int",
-            name="thres",
+    ]
+    month: Annotated[str, SelectArg(label="Month/Season", options=MDICT)] = (
+        "year"
+    )
+    how: Annotated[
+        str, SelectArg(label="Analyze two or three periods?", options=PDICT4)
+    ] = "two"
+    var: Annotated[
+        str, SelectArg(label="Which variable to analyze:", options=PDICT3)
+    ] = "high"
+    days: Annotated[
+        int, IntArg(label="Number of Trailing Days (excludes 'today'):")
+    ] = 4
+    stat: Annotated[
+        str,
+        SelectArg(options=PDICT2, label="Trailing Days Aggregation Function:"),
+    ] = "max"
+    thres: Annotated[
+        int | None,
+        IntArg(
             label="Threshold temperature for trailing period (At or Above)",
             default=70,
         ),
-        dict(
-            type="int",
-            name="mdays",
-            default="1",
-            label="Number of Days in Middle Period (includes 'today'):",
-        ),
-        dict(
-            type="select",
-            default="min",
-            name="mstat",
-            options=PDICT2,
-            label="Middle Days Aggregation Function:",
-        ),
-        dict(
-            type="int",
-            name="fdays",
-            default=1,
+    ] = None
+    mdays: Annotated[
+        int,
+        IntArg(label="Number of Days in Middle Period (includes 'today'):"),
+    ] = 1
+    mstat: Annotated[
+        str,
+        SelectArg(options=PDICT2, label="Middle Days Aggregation Function:"),
+    ] = "min"
+    fdays: Annotated[
+        int,
+        IntArg(
             label="Number of Days in Forward Period (following middle):",
             ge=1,
             le=366,
         ),
-        dict(
-            type="select",
-            default="min",
-            name="fstat",
-            options=PDICT2,
-            label="Forward Days Aggregation Function:",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="week",
-            name="agg",
-            label="How to Aggregate the data?",
-        ),
-    ]
-    return desc
+    ] = 1
+    fstat: Annotated[
+        str,
+        SelectArg(options=PDICT2, label="Forward Days Aggregation Function:"),
+    ] = "min"
+    agg: Annotated[
+        str, SelectArg(options=PDICT, label="How to Aggregate the data?")
+    ] = "week"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    days = int(ctx["days"])
-    fdays = max(1, ctx["fdays"])
-    mdays = int(ctx["mdays"])
-    syear = int(ctx["syear"])
-    eyear = int(ctx["eyear"])
-    agg = ctx["agg"]
+    station = ctx.station
+    days = int(ctx.days)
+    fdays = max(1, ctx.fdays)
+    mdays = int(ctx.mdays)
+    syear = int(ctx.syear)
+    eyear = int(ctx.eyear)
+    agg = ctx.agg
     # belt and suspenders
     assert agg in PDICT
-    assert ctx["fstat"] in PDICT2
-    assert ctx["mstat"] in PDICT2
-    assert ctx["stat"] in PDICT2
-    assert ctx["var"] in PDICT3
+    assert ctx.fstat in PDICT2
+    assert ctx.mstat in PDICT2
+    assert ctx.stat in PDICT2
+    assert ctx.var in PDICT3
 
-    month = ctx["month"]
+    month = ctx.month
     months = list(range(1, 13))
     if month == "fall":
         months = [9, 10, 11]
@@ -207,10 +186,10 @@ def plotter(ctx: dict):
         SELECT * from data WHERE month = ANY(:months) and year >= :syear
             and year <= :eyear ORDER by day ASC
         """,
-                fstat=ctx["fstat"],
-                mstat=ctx["mstat"],
-                stat=ctx["stat"],
-                varname=ctx["var"],
+                fstat=ctx.fstat,
+                mstat=ctx.mstat,
+                stat=ctx.stat,
+                varname=ctx.var,
             ),
             conn,
             params={
@@ -226,17 +205,17 @@ def plotter(ctx: dict):
         )
     if obs.empty:
         raise NoDataFound("No Data Found.")
-    if ctx.get("thres") is not None:
-        obs = obs[obs["trailing_stat"] >= ctx["thres"]]
+    if ctx.thres is not None:
+        obs = obs[obs["trailing_stat"] >= ctx.thres]
         if obs.empty:
             raise NoDataFound("Failed to find events with trailing threshold")
     else:
-        ctx["thres"] = None
+        ctx.thres = None
 
     # We have daily observations above in the form of obs
     obs["two"] = obs["middle_stat"] - obs["trailing_stat"]
     obs["three"] = obs["middle_stat"] - obs["forward_stat"]
-    if ctx["how"] == "three":
+    if ctx.how == "three":
         up = obs[(obs["two"] >= 0) & (obs["three"] >= 0)]
         obs["change"] = up[["two", "three"]].min(axis=1)
         down = obs[(obs["two"] < 0) & (obs["three"] < 0)]
@@ -249,26 +228,26 @@ def plotter(ctx: dict):
         raise NoDataFound("No Data Found after grouping by agg")
     extreme = max([df["max"].max(), 0 - df["min"].min()]) + 10
     title = (
-        f"Backward ({PDICT2[ctx['stat']]}) {days:.0f} Days and Forward "
-        f"({PDICT2[ctx['mstat']]}) {mdays:.0f} Inclusive Days"
+        f"Backward ({PDICT2[ctx.stat]}) {days:.0f} Days and Forward "
+        f"({PDICT2[ctx.mstat]}) {mdays:.0f} Inclusive Days"
     )
-    if ctx["how"] == "three":
+    if ctx.how == "three":
         title = (
-            f"Back ({PDICT2[ctx['stat']]}) {days:.0f}d, Middle "
-            f"({PDICT2[ctx['mstat']]}) {mdays:.0f}d, Forward "
-            f"({PDICT2[ctx['fstat']]}) {fdays:.0f}d"
+            f"Back ({PDICT2[ctx.stat]}) {days:.0f}d, Middle "
+            f"({PDICT2[ctx.mstat]}) {mdays:.0f}d, Forward "
+            f"({PDICT2[ctx.fstat]}) {fdays:.0f}d"
         )
     subtitle = (
         ""
-        if ctx["thres"] is None
-        else f"\nBack Threshold of at least {ctx['thres']:.0f} °F"
+        if ctx.thres is None
+        else f"\nBack Threshold of at least {ctx.thres:.0f} °F"
     )
     tt = syear
     if ctx["_nt"].sts[station]["archive_begin"] is not None:
         tt = max([ctx["_nt"].sts[station]["archive_begin"].year, syear])
     title = (
-        f"{ctx['_sname']} ({tt:.0f}-{eyear:.0f}) Max Change in "
-        f"{PDICT3[ctx['var']].replace('Temperature', 'Temp')} "
+        f"{ctx.sname} ({tt:.0f}-{eyear:.0f}) Max Change in "
+        f"{PDICT3[ctx.var].replace('Temperature', 'Temp')} "
         f"{PDICT[agg].replace('Aggregate', 'Agg')} ({MDICT[month]})\n"
         f"{title}{subtitle}"
     )
@@ -333,7 +312,7 @@ def plotter(ctx: dict):
     ax.text(
         xloc,
         extreme - 5,
-        f"Maximum Jump in {PDICT3[ctx['var']]} (avg: {df['max'].mean():.1f})",
+        f"Maximum Jump in {PDICT3[ctx.var]} (avg: {df['max'].mean():.1f})",
         color="red",
         va="center",
         ha="center",
@@ -342,7 +321,7 @@ def plotter(ctx: dict):
     ax.text(
         xloc,
         0 - extreme + 5,
-        f"Maximum (Negative) Dip in {PDICT3[ctx['var']]} "
+        f"Maximum (Negative) Dip in {PDICT3[ctx.var]} "
         f"(avg: {df['min'].mean():.1f})",
         color="blue",
         va="center",

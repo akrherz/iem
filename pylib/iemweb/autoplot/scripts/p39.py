@@ -7,8 +7,10 @@ for the future.  This autoplot is not an exact science as leap days and other
 calendar quirks can make an off-by-one situation with the data comparisons.
 """
 
+import datetime as dt
 from calendar import month_name, monthrange
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -18,6 +20,14 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DateArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "manual": "Select comparison month/year manually",
@@ -34,73 +44,68 @@ VDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    today = date.today()
-    lastmonth = (today.replace(day=1)) - timedelta(days=25)
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "select",
-            "name": "which",
-            "default": "month",
-            "label": "Scenario Type",
-            "options": PDICT2,
-        },
-        {
-            "type": "select",
-            "options": VDICT,
-            "name": "var",
-            "label": "Variable to Plot",
-            "default": "avg_temp",
-        },
-        {
-            "type": "select",
-            "name": "compare",
-            "default": "manual",
-            "label": "How to compare?",
-            "options": PDICT,
-        },
-        dict(
-            type="year",
-            name="year",
-            default=lastmonth.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    which: Annotated[str, SelectArg(label="Scenario Type", options=PDICT2)] = (
+        "month"
+    )
+    var: Annotated[str, SelectArg(options=VDICT, label="Variable to Plot")] = (
+        "avg_temp"
+    )
+    compare: Annotated[
+        str, SelectArg(label="How to compare?", options=PDICT)
+    ] = "manual"
+    year: Annotated[
+        int,
+        YearArg(
             min=1800,
             label="Select Year to Compare With:",
-        ),
-        dict(
-            type="month",
-            name="month",
-            default=lastmonth.month,
-            label="Select Month to Compare With:",
-        ),
-        dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
-            min="1893/01/01",
-            label="Effective Date (Can not be Feb 29th, sorry).",
+            default=lambda: (
+                (date.today().replace(day=1) - timedelta(days=25)).year
+            ),
         ),
     ]
-    return desc
+    month: Annotated[
+        int,
+        MonthArg(
+            label="Select Month to Compare With:",
+            default=lambda: (
+                (date.today().replace(day=1) - timedelta(days=25)).month
+            ),
+        ),
+    ]
+    date: Annotated[
+        dt.date,
+        DateArg(
+            min="1893/01/01",
+            label="Effective Date (Can not be Feb 29th, sorry).",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
+        ),
+    ]
 
 
-def compute_comparison(ctx: dict, cursor):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(Params, description=__doc__ or "")
+
+
+def compute_comparison(ctx: Params, cursor):
     """Figure out what the user wants."""
-    year = ctx["year"]
-    month = ctx["month"]
-    compare = ctx["compare"]
+    year = ctx.year
+    month = ctx.month
+    compare = ctx.compare
     if compare == "manual":
         return year, month
-    station = ctx["station"]
-    effective_date = ctx["date"]
+    station = ctx.station
+    effective_date = ctx.date
     valid_condition = (
         "high is not null and low is not null"
         if compare == "high"
         else "precip is not null"
     )
-    month_limit = "" if ctx["which"] == "year" else "and month = :month"
+    month_limit = "" if ctx.which == "year" else "and month = :month"
     res = cursor.execute(
         sql_helper(
             """
@@ -112,7 +117,7 @@ def compute_comparison(ctx: dict, cursor):
         ORDER by {varname} {mydir} LIMIT 1
         """,
             mydir="desc" if compare == "high" else "asc",
-            varname=ctx["var"],
+            varname=ctx.var,
             valid_condition=valid_condition,
             month_limit=month_limit,
         ),
@@ -125,39 +130,39 @@ def compute_comparison(ctx: dict, cursor):
     row = res.fetchone()
     if row is None:
         raise NoDataFound("Failed to dynamically compute comparison year")
-    return row[0], 1 if ctx["which"] == "year" else effective_date.month
+    return row[0], 1 if ctx.which == "year" else effective_date.month
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
     # This is when scenarios are used to construct the to date stats
-    scenario_start_date: date = ctx["date"]
+    scenario_start_date: date = ctx.date
     if scenario_start_date.strftime("%m%d") == "0229":
         raise NoDataFound("Leap day data is not supported.")
-    station = ctx["station"]
+    station = ctx.station
     # Figure out the comparison year and month based on the context
     comparison_year, comparison_month = compute_comparison(ctx, conn)
 
     # These are inclusive start and end dates used for data loading.
     sts = date(
         scenario_start_date.year,
-        1 if ctx["which"] == "year" else scenario_start_date.month,
+        1 if ctx.which == "year" else scenario_start_date.month,
         1,
     )
     inclusive_ets = date(
         scenario_start_date.year,
-        12 if ctx["which"] == "year" else scenario_start_date.month,
+        12 if ctx.which == "year" else scenario_start_date.month,
         monthrange(
             scenario_start_date.year,
-            12 if ctx["which"] == "year" else scenario_start_date.month,
+            12 if ctx.which == "year" else scenario_start_date.month,
         )[1],
     )
     month_limiter = "and month = :month"
-    if ctx["which"] == "year":
+    if ctx.which == "year":
         month_limiter = ""
 
-    col = "t" if ctx["var"] == "avg_temp" else "p"
+    col = "t" if ctx.var == "avg_temp" else "p"
 
     # comparison to beat
     res = conn.execute(
@@ -243,7 +248,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     data.mask = data < -98
     cumstat = np.ma.zeros(np.shape(data))
     comparison_cumstat = []
-    func = np.nanmean if ctx["var"] == "avg_temp" else np.nansum
+    func = np.nanmean if ctx.var == "avg_temp" else np.nansum
     for i in range(days):
         cumstat[:, i] = func(data[:, : i + 1], 1)
         comparison_cumstat.append(func(comparison_obs[: i + 1]))
@@ -254,11 +259,11 @@ def plotter(ctx: dict, conn: Connection | None = None):
     for yr in range(years):
         if cumstat[yr, -1] > comparison_cumstat[-1]:
             beats += 1
-    title = f"{ctx['_sname']} Historical Scenarios"
+    title = f"{ctx.sname} Historical Scenarios"
     freq = beats / float(years) * 100.0
     edate = scenario_start_date - timedelta(days=1)
     labelbeats = f"{comparison_year}"
-    if ctx["which"] == "month":
+    if ctx.which == "month":
         labelbeats += f" {month_name[comparison_month]}"
     subtitle = (
         f"Obs:{sts:%b %-d}-{edate:%b %-d} {scenario_start_date:%Y} + "
@@ -274,7 +279,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     for yr in range(years):
         ax.plot(xaxis, cumstat[yr, :], zorder=1, color="tan")
 
-    units = "°F" if ctx["var"] == "avg_temp" else "in"
+    units = "°F" if ctx.var == "avg_temp" else "in"
     if observed:
         observed_cum = [func(observed[: i + 1]) for i in range(len(observed))]
         ax.plot(
@@ -289,7 +294,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
         func(comparison_obs[: i + 1]) for i in range(len(comparison_obs))
     ]
     complabel = (
-        "" if ctx["which"] == "year" else f" {month_name[comparison_month]}"
+        "" if ctx.which == "year" else f" {month_name[comparison_month]}"
     )
     if comparison_cum:
         # This ensures the plot looks OK, alas, undefined param space if these
@@ -313,13 +318,13 @@ def plotter(ctx: dict, conn: Connection | None = None):
         label_day_of_months = [1]
     xlabels = []
     xticks = []
-    for dt in pd.date_range(start=sts, periods=days):
-        if dt.day in label_day_of_months:
-            xlabels.append(f"{dt:%b %-d}")
-            xticks.append(dt)
+    for dt_ in pd.date_range(start=sts, periods=days):
+        if dt_.day in label_day_of_months:
+            xlabels.append(f"{dt_:%b %-d}")
+            xticks.append(dt_)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
-    ax.set_ylabel(f"To Date {VDICT[ctx['var']]} {units}")
+    ax.set_ylabel(f"To Date {VDICT[ctx.var]} {units}")
     ax.set_xlabel("Date")
     ax.grid(True)
     ax.legend(loc="best", fontsize=10)

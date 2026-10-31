@@ -5,11 +5,21 @@ climatology is based on the 1991-2020 period from NCEI.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import centered_bins, get_cmap
 from pyiem.plot.geoplot import MapPlot
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High temperature",
@@ -18,50 +28,49 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    threeweeks = today - timedelta(days=21)
-    desc["arguments"] = [
-        dict(
-            type="csector",
-            default="conus",
-            name="csector",
-            label="Geographical extent to plot:",
-        ),
-        dict(
-            type="date",
-            name="date1",
-            default=threeweeks.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    csector: Annotated[
+        str, CSectorArg(label="Geographical extent to plot:")
+    ] = "conus"
+    date1: Annotated[
+        date,
+        DateArg(
             label="From Date (ignore year):",
             min="2014/01/01",
-            max=f"{today.year + 1}/12/31",
-        ),  # Comes back to python as yyyy-mm-dd
-        dict(
-            type="date",
-            name="date2",
-            default=today.strftime("%Y/%m/%d"),
+            max=lambda: f"{date.today().year + 1}/12/31",
+            default=lambda: (date.today() - timedelta(days=21)).strftime(
+                "%Y/%m/%d"
+            ),
+        ),
+    ]
+    date2: Annotated[
+        date,
+        DateArg(
             label="To Date (ignore year):",
             min="2014/01/01",
-            max=f"{today.year + 1}/12/31",
-        ),  # Comes back to python as yyyy-mm-dd
-        dict(
-            type="select",
-            name="varname",
-            default="high",
-            label="Which metric to plot?",
-            options=PDICT,
+            max=lambda: f"{date.today().year + 1}/12/31",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="RdBu_r", label="Color Ramp:"),
     ]
-    return desc
+    varname: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "high"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdBu_r"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    date1 = ctx["date1"]
-    date2 = ctx["date2"]
+    date1 = ctx.date1
+    date2 = ctx.date2
     if date2 < date1:
         days = int((date1 - date2).days)
     else:
@@ -69,7 +78,7 @@ def plotter(ctx: dict):
     date1 = date1.replace(year=2000)
     date2 = date2.replace(year=2000)
 
-    varname = ctx["varname"]
+    varname = ctx.varname
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -112,7 +121,7 @@ def plotter(ctx: dict):
                 df["lat"].values,
                 df[varname].values,
                 centered_bins(rng, bins=10),
-                cmap=get_cmap(ctx["cmap"]),
+                cmap=get_cmap(ctx.cmap),
                 units="inch" if varname == "precip" else "°F",
             )
 

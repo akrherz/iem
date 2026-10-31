@@ -4,6 +4,7 @@ warmest 91 day period each year.
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -15,36 +16,33 @@ from pyiem.plot import centered_bins, figure_axes, get_cmap
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import CmapArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"end_summer": "End of Summer", "start_summer": "Start of Summer"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="which",
-            default="end_summer",
-            label="Which value to plot:",
-            options=PDICT,
-        ),
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "RdYlGn",
-            "label": "Color Ramp:",
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    which: Annotated[
+        str, SelectArg(label="Which value to plot:", options=PDICT)
+    ] = "end_summer"
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "RdYlGn"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    which = ctx["which"]
-    station = ctx["station"]
+    which = ctx.which
+    station = ctx.station
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -77,12 +75,12 @@ def plotter(ctx: dict):
 
     t1 = "End" if which == "end_summer" else "Start"
     title = (
-        f"{ctx['_sname']} :: {PDICT.get(which)}\n"
+        f"{ctx.sname} :: {PDICT.get(which)}\n"
         f"{t1} Date of Warmest (Avg Temp) 91 Day Period"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
-    cmap = get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx.cmap)
     bins = centered_bins(df["departure"].abs().max())
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
     ax.scatter(

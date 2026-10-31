@@ -5,6 +5,7 @@ climatology for the location.
 """
 
 import calendar
+from typing import Annotated
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -12,38 +13,38 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import IntArg, PlotDescription
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="int",
-            name="min",
-            default="-5",
-            label="Lower Bound (F) of Temperature Range",
-        ),
-        dict(
-            type="int",
-            name="max",
-            default="5",
-            label="Upper Bound (F) of Temperature Range",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    min: Annotated[
+        int, IntArg(label="Lower Bound (F) of Temperature Range")
+    ] = -5
+    max: Annotated[
+        int, IntArg(label="Upper Bound (F) of Temperature Range")
+    ] = 5
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    minv = ctx["min"]
-    maxv = ctx["max"]
+    minv = ctx.min
+    maxv = ctx.max
     if minv > maxv:
         minv, maxv = maxv, minv
-    station = ctx["station"]
+    station = ctx.station
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             sql_helper("""
@@ -77,7 +78,7 @@ def plotter(ctx: dict):
     hvals = df["high_freq"].rolling(7, min_periods=1).mean().values
     lvals = df["low_freq"].rolling(7, min_periods=1).mean().values
     title = (
-        f"{ctx['_sname']}\nFreq of Temp between {minv}°F and {maxv}°F "
+        f"{ctx.sname}\nFreq of Temp between {minv}°F and {maxv}°F "
         "of NCEI-81 Average"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

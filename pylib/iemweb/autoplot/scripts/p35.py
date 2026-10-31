@@ -9,12 +9,22 @@ is then normalized by the number of years of data available.
 
 import calendar
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "tmpf": "Air Temp (F)",
@@ -26,41 +36,34 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 86400, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="select",
-            options=PDICT,
-            default="tmpf",
-            name="var",
-            label="Select Variable",
-        ),
-        dict(type="int", name="hours", default=24, label="Hours:"),
-        dict(
-            type="float",
-            name="interval",
-            default=1,
-            label="Histogram Binning Width (unit of variable)",
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    var: Annotated[str, SelectArg(options=PDICT, label="Select Variable")] = (
+        "tmpf"
+    )
+    hours: Annotated[int, IntArg(label="Hours:")] = 24
+    interval: Annotated[
+        float, FloatArg(label="Histogram Binning Width (unit of variable)")
+    ] = 1
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=86400, data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    hours = ctx["hours"]
-    interval = ctx["interval"]
-    varname = ctx["var"]
+    station = ctx.zstation
+    hours = ctx.hours
+    interval = ctx.interval
+    varname = ctx.var
     if interval > 10 or interval < 0.1:
         raise NoDataFound(
             "Invalid interval provided, positive number less than 10"
@@ -122,7 +125,7 @@ def plotter(ctx: dict):
     hist.mask = np.where(hist < (1.0 / years / 7.0 / 24.0), True, False)
 
     title = (
-        f"{ctx['_sname']} ({obs['valid'].min():%Y}-"
+        f"{ctx.sname} ({obs['valid'].min():%Y}-"
         f"{obs['valid'].max():%Y}):: Histogram"
     )
     subtitle = (

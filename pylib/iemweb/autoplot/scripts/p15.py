@@ -4,6 +4,7 @@ day to day changes in high or low temperature summarized by month.
 """
 
 import calendar
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -14,38 +15,39 @@ from pyiem.plot import figure_axes
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="varname",
-            default="high",
-            label="Which metric to plot?",
-            options=PDICT,
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=utc().year,
-            label="Year to Highlight",
-            min=1893,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    varname: Annotated[
+        str, SelectArg(label="Which metric to plot?", options=PDICT)
+    ] = "high"
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to Highlight", min=1893, default=lambda: utc().year
         ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["varname"]
-    year = ctx["year"]
+    station = ctx.station
+    varname = ctx.varname
+    year = ctx.year
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -79,7 +81,7 @@ def plotter(ctx: dict):
     nochange2 = gyear[f"{varname}_unch"]
     decrease2 = gyear[f"{varname}_lower"]
 
-    title = f"{ctx['_sname']}\nDay to Day {varname.title()} Temperature Change"
+    title = f"{ctx.sname}\nDay to Day {varname.title()} Temperature Change"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     total = decrease + nochange + increase

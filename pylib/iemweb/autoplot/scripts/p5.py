@@ -5,6 +5,7 @@ recent occurence is shown.
 """
 
 import calendar
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,8 @@ from pyiem.plot import figure
 from pyiem.util import utc
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "min_range": "Minimum Daily High to Low Temperature Range",
@@ -27,26 +30,26 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"data": True, "description": __doc__}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="min_range",
-            label="Select Variable",
-            options=PDICT,
-        ),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[str, SelectArg(label="Select Variable", options=PDICT)] = (
+        "min_range"
+    )
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    varname = ctx["var"]
+    station = ctx.station
+    varname = ctx.var
 
     tokens = varname.split("_")
     orderer = "(high - low)"
@@ -109,7 +112,7 @@ def plotter(ctx: dict):
     if ctx["_nt"].sts[station]["archive_begin"] is not None:
         syear = ctx["_nt"].sts[station]["archive_begin"].year
     eyear = utc().year
-    title = f"{ctx['_sname']} ({syear}-{eyear})\n{PDICT[varname]} by Month"
+    title = f"{ctx.sname} ({syear}-{eyear})\n{PDICT[varname]} by Month"
 
     fig = figure(title=title, apctx=ctx)
 

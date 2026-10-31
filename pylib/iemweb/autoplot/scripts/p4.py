@@ -9,6 +9,7 @@ states.
 
 import os
 from datetime import date, timedelta
+from typing import Annotated
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -23,45 +24,47 @@ from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
 from pyiem.util import ncopen
 
+from iemweb.autoplot.description import (
+    FloatArg,
+    IntArg,
+    PlotDescription,
+    StateArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Select Year",
-            min=1893,
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year", min=1893, default=lambda: date.today().year
         ),
-        dict(
-            type="float",
-            name="threshold",
-            default="1.0",
-            label="Precipitation Threshold [inch]",
-        ),
-        dict(
-            type="int", name="period", default="7", label="Over Period of Days"
-        ),
-        {
-            "type": "state",
-            "name": "state",
-            "default": "IA",
-            "label": "For Contiguous US State Only:",
-            "contiguous": True,
-        },
     ]
-    return desc
+    threshold: Annotated[
+        float, FloatArg(label="Precipitation Threshold [inch]")
+    ] = 1.0
+    period: Annotated[int, IntArg(label="Over Period of Days")] = 7
+    state: Annotated[
+        str, StateArg(label="For Contiguous US State Only:", contiguous=True)
+    ] = "IA"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    year = ctx["year"]
-    threshold = ctx["threshold"]
-    period = ctx["period"]
-    state = ctx["state"]
+    year = ctx.year
+    threshold = ctx.threshold
+    period = ctx.period
+    state = ctx.state
 
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.read_postgis(

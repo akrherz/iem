@@ -7,6 +7,7 @@ departures can be explained by these differences in precipitation bins.
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -16,29 +17,35 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=datetime.now().year,
-            label="Year to Highlight:",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(
+            label="Year to Highlight:", default=lambda: datetime.now().year
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     today = datetime.now()
-    year = ctx["year"]
+    year = ctx.year
     jdaylimit = 367
     if year == today.year:
         jdaylimit = today.timetuple().tm_yday
@@ -142,7 +149,7 @@ def plotter(ctx: dict, conn: Connection | None = None):
     addl = ""
     if jdaylimit < 367:
         addl = f" thru {today:%-d %b}"
-    title = f"{ctx['_sname']} [{minyear}-{endyear - 1}]"
+    title = f"{ctx.sname} [{minyear}-{endyear - 1}]"
     subtitle = f"Daily Precipitation Contributions{addl}"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 

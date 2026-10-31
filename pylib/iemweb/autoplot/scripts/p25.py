@@ -7,6 +7,7 @@ population statistics.
 """
 
 from datetime import datetime
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,14 @@ from pyiem.plot import figure_axes
 from scipy.stats import norm
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    DayArg,
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "state": "Plot for a Specific State",
@@ -24,32 +33,36 @@ PDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "opt",
-            "default": "state",
-            "label": "Plot all stations in state or single station:",
-            "options": PDICT,
-        },
-        dict(type="state", name="state", default="IA", label="Which state?"),
-        ARG_STATION,
-        dict(type="month", name="month", default="10", label="Select Month:"),
-        dict(type="day", name="day", default="7", label="Select Day:"),
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    opt: Annotated[
+        str,
+        SelectArg(
+            label="Plot all stations in state or single station:",
+            options=PDICT,
+        ),
+    ] = "state"
+    state: Annotated[str, StateArg(label="Which state?")] = "IA"
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    month: Annotated[int, MonthArg(label="Select Month:")] = 10
+    day: Annotated[int, DayArg(label="Select Day:")] = 7
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    month = ctx["month"]
-    day = ctx["day"]
+    month = ctx.month
+    day = ctx.day
     ts = datetime(2000, month, day)
-    if ctx["opt"] == "station":
-        title = f"{ctx['_sname']} {ts:%d %B} Temperature Distribution"
+    if ctx.opt == "station":
+        title = f"{ctx.sname} {ts:%d %B} Temperature Distribution"
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
                 sql_helper("""SELECT high, low from alldata
@@ -58,12 +71,12 @@ def plotter(ctx: dict):
                 """),
                 conn,
                 params={
-                    "station": ctx["station"],
+                    "station": ctx.station,
                     "sday": f"{month:02.0f}{day:02.0f}",
                 },
             )
     else:
-        state = ctx["state"][:2]
+        state = ctx.state[:2]
         title = (
             f"{reference.state_names[state]} {ts:%d %B} "
             "Temperature Distribution"

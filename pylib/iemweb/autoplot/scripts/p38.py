@@ -12,6 +12,7 @@ the MERRAv2/NARR lag by about a month, and the ERA5 Land lags by 8-9 days.
 import calendar
 import itertools
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg, YearArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "best": "Use ERA5 Land, then HRRR",
@@ -36,42 +39,45 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            options=PDICT,
-            default="best",
-            name="var",
-            label="Select Radiation Source for Timeseries",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str,
+        SelectArg(
+            options=PDICT, label="Select Radiation Source for Timeseries"
         ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "default": "era5land_srad",
-            "name": "climo",
-            "label": "Select Radiation Source for Climatology",
-        },
-        {
-            "type": "year",
-            "name": "year",
-            "default": date.today().year,
-            "min": 1951,
-            "label": "Select Year to Plot:",
-        },
+    ] = "best"
+    climo: Annotated[
+        str,
+        SelectArg(
+            options=PDICT2, label="Select Radiation Source for Climatology"
+        ),
+    ] = "era5land_srad"
+    year: Annotated[
+        int,
+        YearArg(
+            min=1951,
+            label="Select Year to Plot:",
+            default=lambda: date.today().year,
+        ),
     ]
-    return desc
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
-    varname = ctx["var"]
-    climo = ctx["climo"]
+    station = ctx.station
+    year = ctx.year
+    varname = ctx.var
+    climo = ctx.climo
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -112,7 +118,7 @@ def plotter(ctx: dict):
         df = df.drop("0229")
 
     title = (
-        f"{ctx['_sname']}:: {year} Daily Solar Radiation\n"
+        f"{ctx.sname}:: {year} Daily Solar Radiation\n"
         f"{PDICT2[climo]} Climatology"
     )
     fig = figure(apctx=ctx, title=title)

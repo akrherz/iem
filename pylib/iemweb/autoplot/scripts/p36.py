@@ -5,6 +5,7 @@ being warmer/wetter than another month for that calendar year.
 
 import calendar
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -15,6 +16,8 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high": "High Temperature Warmer",
@@ -34,37 +37,33 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        {
-            "type": "select",
-            "name": "var",
-            "default": "avg",
-            "options": PDICT,
-            "label": "Which Variable to Compare",
-        },
-        {
-            "type": "select",
-            "name": "inc",
-            "default": "no",
-            "options": PDICT2,
-            "label": "Include Current Month?",
-        },
-    ]
-    return desc
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which Variable to Compare")
+    ] = "avg"
+    inc: Annotated[
+        str, SelectArg(options=PDICT2, label="Include Current Month?")
+    ] = "no"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection = None):
+def plotter(ctx: Params, conn: Connection = None):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
 
-    varname = ctx["var"]
+    varname = ctx.var
     last_date = date.today().replace(day=1)
-    if ctx["inc"] == "yes":
+    if ctx.inc == "yes":
         last_date = date.today()
 
     res = conn.execute(
@@ -115,7 +114,7 @@ def plotter(ctx: dict, conn: Connection = None):
             )
     df = pd.DataFrame(rows)
 
-    subtitle = f"{ctx['_sname']} [{baseyear}-]"
+    subtitle = f"{ctx.sname} [{baseyear}-]"
     title = f"Years that Month with {PDICT[varname]} than other Month"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))

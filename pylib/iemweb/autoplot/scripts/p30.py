@@ -7,6 +7,7 @@ The black lines represent the simple averages of the data.
 
 import calendar
 from datetime import date
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -17,44 +18,47 @@ from pyiem.plot import figure
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["defaults"] = {"_r": "96"}
-    today = date.today()
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="opt",
-            default="monthly",
-            options=PDICT,
-            label="Plot a Single Month or Entire Year?",
-        ),
-        dict(
-            type="month",
-            name="month",
-            default=today.month,
-            label="Month to Plot:",
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=today.year,
-            label="Year to Highlight:",
-        ),
-        dict(
-            type="year",
-            name="eyear",
-            default=today.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    opt: Annotated[
+        str,
+        SelectArg(options=PDICT, label="Plot a Single Month or Entire Year?"),
+    ] = "monthly"
+    month: Annotated[
+        int,
+        MonthArg(label="Month to Plot:", default=lambda: date.today().month),
+    ]
+    year: Annotated[
+        int,
+        YearArg(label="Year to Highlight:", default=lambda: date.today().year),
+    ]
+    eyear: Annotated[
+        int,
+        YearArg(
             label="Last Year to Plot (inclusive):",
+            default=lambda: date.today().year,
         ),
     ]
-    return desc
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, defaults={"_r": "96"}
+    )
 
 
 def plot_trailing(ax: Axes, df: pd.DataFrame, colname: str):
@@ -81,18 +85,18 @@ def plot_trailing(ax: Axes, df: pd.DataFrame, colname: str):
 
 
 @with_sqlalchemy_conn("coop")
-def plotter(ctx: dict, conn: Connection | None = None):
+def plotter(ctx: Params, conn: Connection | None = None):
     """Go"""
-    station = ctx["station"]
-    month = ctx["month"]
-    year = ctx["year"]
+    station = ctx.station
+    month = ctx.month
+    year = ctx.year
     params = {
         "station": station,
         "month": month,
-        "eyear": ctx["eyear"],
+        "eyear": ctx.eyear,
     }
 
-    if ctx["opt"] == "monthly":
+    if ctx.opt == "monthly":
         df = pd.read_sql(
             sql_helper("""
         SELECT year,  max(high) as max_high,  min(low) as min_low
@@ -122,8 +126,8 @@ def plotter(ctx: dict, conn: Connection | None = None):
         raise NoDataFound("No Data Found.")
     df["rng"] = df["max_high"] - df["min_low"]
 
-    tt = calendar.month_name[month] if ctx["opt"] == "monthly" else "Yearly"
-    title = f"{ctx['_sname']}\n{tt} Temperature Range (Max High - Min Low)"
+    tt = calendar.month_name[month] if ctx.opt == "monthly" else "Yearly"
+    title = f"{ctx.sname}\n{tt} Temperature Range (Max High - Min Low)"
     fig = figure(title=title, apctx=ctx)
     ax: list[Axes] = fig.subplots(3, 1, sharex=True)
     ax[0].scatter(df.index.values, df["max_high"].values)

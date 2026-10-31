@@ -9,6 +9,7 @@ variable you selected for plotting.
 """
 
 from datetime import date
+from typing import Annotated
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
@@ -19,6 +20,15 @@ from pyiem.plot import figure_axes, get_cmap
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchart_with_top10
+from iemweb.autoplot.description import (
+    CmapArg,
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "avg": "Daily Average Temperature (F)",
@@ -40,70 +50,48 @@ OPTDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=date.today().year,
-            label="Year to Plot:",
-        ),
-        {
-            "type": "sday",
-            "name": "sday",
-            "default": "0101",
-            "label": "Inclusive Start Day of Year to Plot:",
-        },
-        {
-            "type": "sday",
-            "name": "eday",
-            "default": "1231",
-            "label": "Inclusive End Day of Year to Plot:",
-        },
-        {
-            "type": "year",
-            "optional": True,
-            "name": "y2",
-            "default": date.today().year - 1,
-            "label": "Additional Year to Plot (supported for some plots):",
-        },
-        dict(
-            type="select",
-            name="var",
-            default="high",
-            options=PDICT,
-            label="Select Variable to Plot",
-        ),
-        dict(
-            type="int",
-            name="gddbase",
-            default=50,
-            label="Growing Degree Day Base (F)",
-        ),
-        dict(
-            type="int",
-            name="gddceil",
-            default=86,
-            label="Growing Degree Day Ceiling (F)",
-        ),
-        dict(
-            type="select",
-            name="how",
-            default="diff",
-            options=OPTDICT,
-            label="How to express the difference",
-        ),
-        dict(
-            type="cmap",
-            name="cmap",
-            default="jet",
-            label="Color ramp to use for percentile plot",
-        ),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int, YearArg(label="Year to Plot:", default=lambda: date.today().year)
     ]
-    return desc
+    sday: Annotated[
+        date,
+        SDayArg(label="Inclusive Start Day of Year to Plot:", default="0101"),
+    ]
+    eday: Annotated[
+        date,
+        SDayArg(label="Inclusive End Day of Year to Plot:", default="1231"),
+    ]
+    y2: Annotated[
+        int | None,
+        YearArg(
+            label="Additional Year to Plot (supported for some plots):",
+            default=lambda: date.today().year - 1,
+        ),
+    ] = None
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Select Variable to Plot")
+    ] = "high"
+    gddbase: Annotated[int, IntArg(label="Growing Degree Day Base (F)")] = 50
+    gddceil: Annotated[int, IntArg(label="Growing Degree Day Ceiling (F)")] = (
+        86
+    )
+    how: Annotated[
+        str, SelectArg(options=OPTDICT, label="How to express the difference")
+    ] = "diff"
+    cmap: Annotated[
+        str, CmapArg(label="Color ramp to use for percentile plot")
+    ] = "jet"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def plot_valrange(yeardf, year, varname, y2, ax, df):
@@ -149,12 +137,12 @@ def plot_valrange(yeardf, year, varname, y2, ax, df):
     ax.set_ylabel(PDICT[varname])
 
 
-def plot_others(yeardf, year, varname, how, ctx, fig, ax):
+def plot_others(yeardf, year, varname, how, ctx: Params, fig, ax):
     """Plot the other types of data."""
     values = yeardf[year][f"{varname}_{how}"].values
     if how == "ptile" and "cmap" in ctx:
         bins = range(0, 101, 10)
-        cmap = get_cmap(ctx["cmap"])
+        cmap = get_cmap(ctx.cmap)
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
         colors = cmap(norm(values))
         ax.bar(
@@ -231,21 +219,21 @@ def plot_others(yeardf, year, varname, how, ctx, fig, ax):
         ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure")
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    year = ctx["year"]
-    varname = ctx["var"]
-    how = ctx["how"]
-    gddbase = ctx["gddbase"]
-    gddceil = ctx["gddceil"]
+    station = ctx.station
+    year = ctx.year
+    varname = ctx.var
+    how = ctx.how
+    gddbase = ctx.gddbase
+    gddceil = ctx.gddceil
 
     params = {
         "station": station,
         "gddbase": gddbase,
         "gddceil": gddceil,
-        "sday": f"{ctx['sday']:%m%d}",
-        "eday": f"{ctx['eday']:%m%d}",
+        "sday": f"{ctx.sday:%m%d}",
+        "eday": f"{ctx.eday:%m%d}",
     }
     sqlvarname = "high" if varname in ["avg", "gdd"] else varname
     if varname == "era5land_soilm1m_sw":
@@ -280,7 +268,7 @@ def plotter(ctx: dict):
         .agg(["mean", "std", "min", "max"])
     )
     climo.columns = climo.columns.droplevel()
-    y2 = ctx.get("y2")
+    y2 = ctx.y2
     for yr in [year, y2]:
         if yr is None:
             continue
@@ -316,7 +304,7 @@ def plotter(ctx: dict):
     tt = "Departure" if how != "ptile" else "Percentile"
     if how == "valrange":
         tt = ""
-    title = f"{ctx['_sname']}:: Year {year} Daily {PDICT[varname]} {tt}"
+    title = f"{ctx.sname}:: Year {year} Daily {PDICT[varname]} {tt}"
     d2 = yeardf[year].loc[yeardf[year][varname].notna(), "day"]
     subtitle = f"{year} data till {d2.max():%-d %b %Y}"
     if varname.startswith("era5land_soilm"):

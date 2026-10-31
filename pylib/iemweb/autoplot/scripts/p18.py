@@ -6,12 +6,22 @@ filled bar for each day plotted when Air Temperature is selected.
 """
 
 from datetime import UTC, date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    SelectArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 MDICT = {
     "tmpf": "Air Temperature",
@@ -31,42 +41,40 @@ UNITS = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    ts = date.today() - timedelta(days=365)
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="AMW",
-            network="IA_ASOS",
-            label="Select Station:",
-        ),
-        dict(
-            type="date",
-            name="sdate",
-            default=ts.strftime("%Y/%m/%d"),
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(network="IA_ASOS", label="Select Station:")
+    ] = "AMW"
+    sdate: Annotated[
+        date,
+        DateArg(
             label="Start Date of Plot:",
             min="1951/01/01",
-        ),
-        dict(type="int", name="days", default="365", label="Days to Plot"),
-        dict(
-            type="select",
-            name="var",
-            options=MDICT,
-            default="tmpf",
-            label="Variable to Plot",
+            default=lambda: (date.today() - timedelta(days=365)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    days: Annotated[int, IntArg(label="Days to Plot")] = 365
+    var: Annotated[str, SelectArg(options=MDICT, label="Variable to Plot")] = (
+        "tmpf"
+    )
 
 
-def get_highcharts(ctx: dict) -> dict:
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
+
+
+def get_highcharts(ctx: Params) -> dict:
     """Highcharts output"""
     add_ctx(ctx)
     ranges = []
-    now = ctx["sdate"]
+    now = ctx.sdate
     oneday = timedelta(days=1)
     while ctx["climo"] and (now - oneday) <= ctx["edate"]:
         ranges.append(
@@ -79,15 +87,15 @@ def get_highcharts(ctx: dict) -> dict:
         now += oneday
 
     j = {}
-    j["title"] = dict(text=f"{ctx['_sname']} Time Series")
+    j["title"] = dict(text=f"{ctx.sname} Time Series")
     j["xAxis"] = dict(type="datetime")
     j["yAxis"] = dict(
-        title=dict(text="%s %s" % (MDICT[ctx["var"]], UNITS[ctx["var"]]))
+        title=dict(text="%s %s" % (MDICT[ctx.var], UNITS[ctx.var]))
     )
     j["tooltip"] = {
         "crosshairs": True,
         "shared": True,
-        "valueSuffix": f" {UNITS[ctx['var']]}",
+        "valueSuffix": f" {UNITS[ctx.var]}",
     }
     j["legend"] = {}
     j["time"] = {"useUTC": False}
@@ -96,7 +104,7 @@ def get_highcharts(ctx: dict) -> dict:
     j["plotOptions"] = {"line": {"turboThreshold": 0}}
     j["series"] = [
         {
-            "name": MDICT[ctx["var"]],
+            "name": MDICT[ctx.var],
             "data": list(
                 zip(
                     ctx["df"].ticks.values.tolist(),
@@ -123,7 +131,7 @@ def get_highcharts(ctx: dict) -> dict:
                 "zIndex": 0,
             }
         )
-    if ctx["var"] in ["tmpf", "dwpf"]:
+    if ctx.var in ["tmpf", "dwpf"]:
         j["yAxis"]["plotLines"] = [
             {
                 "value": 32,
@@ -137,19 +145,19 @@ def get_highcharts(ctx: dict) -> dict:
     return j
 
 
-def add_ctx(ctx: dict):
+def add_ctx(ctx: Params):
     """Get data common to both methods"""
-    ctx["station"] = ctx["zstation"]
-    sdate = ctx["sdate"]
-    days = ctx["days"]
+    ctx["station"] = ctx.zstation
+    sdate = ctx.sdate
+    days = ctx.days
     ctx["edate"] = sdate + timedelta(days=days)
     today = date.today()
     if ctx["edate"] > today:
         ctx["edate"] = today
-        ctx["days"] = (ctx["edate"] - sdate).days
+        ctx.days = (ctx["edate"] - sdate).days
 
     ctx["climo"] = {}
-    if ctx["var"] == "tmpf":
+    if ctx.var == "tmpf":
         with get_sqlalchemy_conn("coop") as conn:
             res = conn.execute(
                 sql_helper("""
@@ -161,8 +169,8 @@ def add_ctx(ctx: dict):
                 ctx["climo"][row["valid"].strftime("%m%d")] = dict(
                     high=row["high"], low=row["low"]
                 )
-    col = "tmpf::int" if ctx["var"] == "tmpf" else ctx["var"]
-    col = "dwpf::int" if ctx["var"] == "dwpf" else col
+    col = "tmpf::int" if ctx.var == "tmpf" else ctx.var
+    col = "dwpf::int" if ctx.var == "dwpf" else col
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
             sql_helper(
@@ -173,7 +181,7 @@ def add_ctx(ctx: dict):
     and {varname} is not null and report_type != 1
     ORDER by valid ASC""",
                 col=col,
-                varname=ctx["var"],
+                varname=ctx.var,
             ),
             conn,
             params={
@@ -187,19 +195,19 @@ def add_ctx(ctx: dict):
         raise NoDataFound("No data found.")
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
     add_ctx(ctx)
     title = (
-        f"{ctx['_sname']}\n"
-        f"{MDICT[ctx['var']]} Timeseries {ctx['sdate']:%d %b %Y} - "
+        f"{ctx.sname}\n"
+        f"{MDICT[ctx.var]} Timeseries {ctx.sdate:%d %b %Y} - "
         f"{ctx['edate']:%d %b %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     xticks = []
     xticklabels = []
-    now = ctx["sdate"]
+    now = ctx.sdate
     cdates = []
     chighs = []
     clows = []
@@ -208,7 +216,7 @@ def plotter(ctx: dict):
         cdates.append(now)
         chighs.append(ctx["climo"][now.strftime("%m%d")]["high"])
         clows.append(ctx["climo"][now.strftime("%m%d")]["low"])
-        if now.day == 1 or (now.day % 12 == 0 and ctx["days"] < 180):
+        if now.day == 1 or (now.day % 12 == 0 and ctx.days < 180):
             xticks.append(now)
             fmt = "%-d"
             if now.day == 1:
@@ -217,7 +225,7 @@ def plotter(ctx: dict):
 
         now += oneday
     while (now - oneday) <= ctx["edate"]:
-        if now.day == 1 or (now.day % 12 == 0 and ctx["days"] < 180):
+        if now.day == 1 or (now.day % 12 == 0 and ctx.days < 180):
             xticks.append(now)
             fmt = "%-d"
             if now.day == 1:
@@ -246,10 +254,10 @@ def plotter(ctx: dict):
         .tz_localize(None)
     )
     ax.plot(x.values, ctx["df"]["datum"], color="r", label="Hourly Obs")
-    ax.set_ylabel(f"{MDICT[ctx['var']]} {UNITS[ctx['var']]}")
+    ax.set_ylabel(f"{MDICT[ctx.var]} {UNITS[ctx.var]}")
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    ax.set_xlim(ctx["sdate"], ctx["edate"] + oneday)
+    ax.set_xlim(ctx.sdate, ctx["edate"] + oneday)
     ax.set_ylim(top=ctx["df"].datum.max() + 15.0)
     ax.legend(loc=2, ncol=2)
     ax.axhline(32, linestyle="-.")

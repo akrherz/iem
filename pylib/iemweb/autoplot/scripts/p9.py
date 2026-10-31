@@ -5,6 +5,7 @@ Feb 29 is not considered for this analysis.
 """
 
 from datetime import date, datetime
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -14,6 +15,14 @@ from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.description import (
+    IntArg,
+    PlotDescription,
+    SDayArg,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "cdd": "Cooling Degree Days",
@@ -27,68 +36,51 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    thisyear = date.today().year
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="year",
-            name="year",
-            default=thisyear,
-            min=1893,
-            label="Select Year:",
-        ),
-        {
-            "type": "sday",
-            "default": "0101",
-            "name": "sday",
-            "label": "Start Day of the Year for Plot",
-        },
-        {
-            "type": "sday",
-            "default": "1231",
-            "name": "eday",
-            "label": "Inclusive End Day of the Year for Plot",
-        },
-        dict(
-            type="select",
-            options=PDICT,
-            default="gdd",
-            name="var",
-            label="Which variable to plot:",
-        ),
-        {
-            "type": "select",
-            "options": PDICT2,
-            "label": "Plot Daily or YTD Accumulated?",
-            "name": "w",
-            "default": "daily",
-        },
-        dict(
-            type="int",
-            name="base",
-            default="50",
-            label="Enter CDD/GDD/HDD Base (°F):",
-        ),
-        dict(
-            type="int",
-            name="ceiling",
-            default="86",
-            label="Enter GDD Ceiling / SDD Base (°F):",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    year: Annotated[
+        int,
+        YearArg(
+            min=1893, label="Select Year:", default=lambda: date.today().year
         ),
     ]
-    return desc
+    sday: Annotated[
+        date, SDayArg(label="Start Day of the Year for Plot", default="0101")
+    ]
+    eday: Annotated[
+        date,
+        SDayArg(
+            label="Inclusive End Day of the Year for Plot", default="1231"
+        ),
+    ]
+    var: Annotated[
+        str, SelectArg(options=PDICT, label="Which variable to plot:")
+    ] = "gdd"
+    w: Annotated[
+        str, SelectArg(options=PDICT2, label="Plot Daily or YTD Accumulated?")
+    ] = "daily"
+    base: Annotated[int, IntArg(label="Enter CDD/GDD/HDD Base (°F):")] = 50
+    ceiling: Annotated[
+        int, IntArg(label="Enter GDD Ceiling / SDD Base (°F):")
+    ] = 86
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 @with_sqlalchemy_conn("coop")
-def get_df(ctx: dict, conn: Connection | None = None) -> pd.DataFrame:
+def get_df(ctx: Params, conn: Connection | None = None) -> pd.DataFrame:
     """Compute things."""
-    varname = ctx["var"]
-    base = ctx["base"]
-    ceiling = ctx["ceiling"]
-    year = ctx["year"]
+    varname = ctx.var
+    base = ctx.base
+    ceiling = ctx.ceiling
+    year = ctx.year
     glabel = f"{varname}{base}{ceiling}"
 
     gfunc = "gddxx(:base, :ceil, high, low)"
@@ -108,16 +100,16 @@ def get_df(ctx: dict, conn: Connection | None = None) -> pd.DataFrame:
         ),
         conn,
         params={
-            "sid": ctx["station"],
-            "sday": f"{ctx['sday']:%m%d}",
-            "eday": f"{ctx['eday']:%m%d}",
-            "base": ctx["base"],
-            "ceil": ctx["ceiling"],
+            "sid": ctx.station,
+            "sday": f"{ctx.sday:%m%d}",
+            "eday": f"{ctx.eday:%m%d}",
+            "base": ctx.base,
+            "ceil": ctx.ceiling,
         },
     )
     if obsdf.empty:
         raise NoDataFound("No data Found.")
-    if ctx["w"] == "ytd":
+    if ctx.w == "ytd":
         obsdf["accum"] = obsdf[["year", glabel]].groupby("year").cumsum()
         glabel = "accum"
 
@@ -137,14 +129,14 @@ def get_df(ctx: dict, conn: Connection | None = None) -> pd.DataFrame:
     return retdf
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
+    station = ctx.station
     thisyear = datetime.now().year
-    year = ctx["year"]
-    base = ctx["base"]
-    ceiling = ctx["ceiling"]
-    varname = ctx["var"]
+    year = ctx.year
+    base = ctx.base
+    ceiling = ctx.ceiling
+    varname = ctx.var
     glabel = f"{varname}{base}{ceiling}"
     retdf = get_df(ctx)
 
@@ -159,11 +151,11 @@ def plotter(ctx: dict):
     elif varname == "sdd":
         title = f"base={ceiling}"
 
-    if ctx["w"] == "ytd":
+    if ctx.w == "ytd":
         glabel = "accum"
-    tt = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+    tt = f"{ctx.sday:%-d %b} thru {ctx.eday:%-d %b}"
     title = (
-        f"({syear}-{thisyear}) [{tt}] {ctx['_sname']}\n"
+        f"({syear}-{thisyear}) [{tt}] {ctx.sname}\n"
         f"{year} {PDICT[varname]} ({title})"
     )
     # avoid leap year
@@ -205,10 +197,10 @@ def plotter(ctx: dict):
         label="25-75 Percentile",
     )
     ax.set_xlim(xaxis.values[0], xaxis.values[-1])
-    if varname == "gdd" and ctx["w"] == "daily":
+    if varname == "gdd" and ctx.w == "daily":
         ax.set_ylim(-0.25, 40)
     ax.grid(True)
-    ax.set_ylabel(f"{PDICT2[ctx['w']]} °F")
+    ax.set_ylabel(f"{PDICT2[ctx.w]} °F")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-d %b"),
     )

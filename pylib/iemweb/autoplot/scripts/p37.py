@@ -16,6 +16,7 @@ for this dataset.</p>
 """
 
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -24,6 +25,15 @@ from matplotlib.ticker import AutoMinorLocator, MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+
+from iemweb.autoplot.description import (
+    MonthArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+    ZStationArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "NAM": "NAM (9 Dec 2008 - current)",
@@ -120,47 +130,35 @@ SQL_OB = """
     """
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = date.today()
-    desc["arguments"] = [
-        dict(
-            type="zstation",
-            name="zstation",
-            default="DSM",
-            label="Select Station:",
-            network="IA_ASOS",
-        ),
-        dict(
-            type="month",
-            name="month",
-            label="Select Month:",
-            default=today.month,
-        ),
-        dict(
-            type="year",
-            name="year",
-            label="Select Year:",
-            default=today.year,
-            min=2000,
-        ),
-        dict(
-            type="select",
-            name="model",
-            default="NAM",
-            label="Select MOS Model:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            options=PDICT2,
-            default="t",
-            label="Which MOS variable to plot:",
-            name="var",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    zstation: Annotated[
+        str, ZStationArg(label="Select Station:", network="IA_ASOS")
+    ] = "DSM"
+    month: Annotated[
+        int,
+        MonthArg(label="Select Month:", default=lambda: date.today().month),
+    ]
+    year: Annotated[
+        int,
+        YearArg(
+            label="Select Year:", min=2000, default=lambda: date.today().year
         ),
     ]
-    return desc
+    model: Annotated[
+        str, SelectArg(label="Select MOS Model:", options=PDICT)
+    ] = "NAM"
+    var: Annotated[
+        str, SelectArg(options=PDICT2, label="Which MOS variable to plot:")
+    ] = "t"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=3600
+    )
 
 
 def plot_others(varname, ax, mosdata, month1, month, obs):
@@ -310,12 +308,12 @@ def plot_temps(ax, mosdata, month1, month, obs, model):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["zstation"]
-    year = ctx["year"]
-    month = ctx["month"]
-    model = ctx["model"]
+    station = ctx.zstation
+    year = ctx.year
+    month = ctx.month
+    model = ctx.model
 
     # Extract the range of forecasts for each day for approximately
     # the given month
@@ -323,12 +321,12 @@ def plotter(ctx: dict):
     sts = month1 - timedelta(days=10)
     ets = month1 + timedelta(days=32)
     station4 = f"K{station}" if len(station) == 3 else station
-    is_temp = ctx["var"] == "t"
+    is_temp = ctx.var == "t"
     params = {"station": station4, "sts": sts, "ets": ets, "model": model}
     mosdata = {}
     with get_sqlalchemy_conn("mos") as conn:
         res = conn.execute(
-            sql_helper(T_SQL if is_temp else SQL.replace("RPL", ctx["var"])),
+            sql_helper(T_SQL if is_temp else SQL.replace("RPL", ctx.var)),
             params,
         )
         for row in res.mappings():
@@ -367,7 +365,7 @@ def plotter(ctx: dict):
                 sql_helper(
                     T_SQL_OB
                     if is_temp
-                    else SQL_OB.replace("RPL", LOOKUP[ctx["var"]])
+                    else SQL_OB.replace("RPL", LOOKUP[ctx.var])
                 ),
                 params,
             )
@@ -382,7 +380,7 @@ def plotter(ctx: dict):
 
     mlabel = PDICT[model][: PDICT[model].find(" (")]
     title = (
-        f"{ctx['_sname']} :: {PDICT2[ctx['var']]}\n"
+        f"{ctx.sname} :: {PDICT2[ctx.var]}\n"
         f"{mlabel} Forecast MOS Range for {month1:%B %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -390,7 +388,7 @@ def plotter(ctx: dict):
     if is_temp:
         df = plot_temps(ax, mosdata, month1, month, obs, model)
     else:
-        df = plot_others(ctx["var"], ax, mosdata, month1, month, obs)
+        df = plot_others(ctx.var, ax, mosdata, month1, month, obs)
     ax.set_xlabel(f"Day of {month1:%B %Y}")
 
     # Shrink current axis's height by 10% on the bottom

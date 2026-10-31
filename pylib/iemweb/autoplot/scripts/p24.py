@@ -19,6 +19,7 @@ the near future.</p>
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -26,6 +27,16 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import state_names
+
+from iemweb.autoplot.description import (
+    CmapArg,
+    CSectorArg,
+    DateArg,
+    PlotDescription,
+    SelectArg,
+    YearArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "aridity": "Aridity Index",
@@ -70,80 +81,68 @@ MDICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = date.today()
-    lmonth = today - timedelta(days=28)
-    desc["arguments"] = [
-        dict(
-            type="select",
-            options=PDICT3,
-            default="cd",
-            name="which",
-            label="Plot Climate Districts or States:",
-        ),
-        dict(
-            type="csector",
-            name="csector",
-            default="midwest",
-            label="Area to Plot:",
-        ),
-        dict(
-            type="select",
-            name="var",
-            default="precip",
-            label="Select Variable",
-            options=PDICT,
-        ),
-        {
-            "type": "select",
-            "options": PDICT4,
-            "default": "rank",
-            "name": "w",
-            "label": "Select aggregate to plot",
-        },
-        dict(
-            type="select",
-            name="p",
-            default="month",
-            label="Plotting Period",
-            options=PDICT2,
-        ),
-        dict(
-            type="year",
-            name="year",
-            default=lmonth.year,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    which: Annotated[
+        str,
+        SelectArg(options=PDICT3, label="Plot Climate Districts or States:"),
+    ] = "cd"
+    csector: Annotated[str, CSectorArg(label="Area to Plot:")] = "midwest"
+    var: Annotated[str, SelectArg(label="Select Variable", options=PDICT)] = (
+        "precip"
+    )
+    w: Annotated[
+        str, SelectArg(options=PDICT4, label="Select aggregate to plot")
+    ] = "rank"
+    p: Annotated[str, SelectArg(label="Plotting Period", options=PDICT2)] = (
+        "month"
+    )
+    year: Annotated[
+        int,
+        YearArg(
             label="[Option 1] Select Year:",
             min=1893,
+            default=lambda: (date.today() - timedelta(days=28)).year,
         ),
-        dict(
-            type="select",
-            name="month",
-            default=lmonth.month,
+    ]
+    month: Annotated[
+        int | str,
+        SelectArg(
             label="[Option 1] Month Limiter",
             options=MDICT,
+            default=lambda: (date.today() - timedelta(days=28)).month,
         ),
-        dict(
-            type="date",
-            name="sdate",
-            default=lmonth.strftime("%Y/%m/%d"),
+    ]
+    sdate: Annotated[
+        date,
+        DateArg(
             label="[Option 2] Start Date",
             min="1893/01/01",
+            default=lambda: (date.today() - timedelta(days=28)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="date",
-            name="edate",
-            default=today.strftime("%Y/%m/%d"),
+    ]
+    edate: Annotated[
+        date,
+        DateArg(
             label="[Option 2] End Date (inclusive)",
             min="1893/01/01",
+            default=lambda: date.today().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="BrBG_r", label="Color Ramp:"),
     ]
-    return desc
+    cmap: Annotated[str, CmapArg(label="Color Ramp:")] = "BrBG_r"
 
 
-def get_daily_data(ctx, sdate, edate):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def get_daily_data(ctx: Params, sdate, edate):
     """Do the data work"""
     edate = min([edate, date.today()])
     if edate <= sdate:
@@ -158,7 +157,7 @@ def get_daily_data(ctx, sdate, edate):
         "year": edate.year,
         "sdate": sdate.strftime("%m%d"),
         "edate": edate.strftime("%m%d"),
-        "csector": ctx["csector"],
+        "csector": ctx.csector,
     }
     yearcond = "false"
     if edate.year != sdate.year:
@@ -168,9 +167,9 @@ def get_daily_data(ctx, sdate, edate):
         sday = " sday >= :sdate and sday <= :edate "
 
     table = "alldata"
-    if len(ctx["csector"]) == 2 and ctx["which"] != "st":
-        table = f"alldata_{ctx['csector'].lower()}"
-    if ctx["which"] == "st":
+    if len(ctx.csector) == 2 and ctx.which != "st":
+        table = f"alldata_{ctx.csector.lower()}"
+    if ctx.which == "st":
         params["stations"] = [f"{st}0000" for st in state_names]
     else:
         params["stations"] = [
@@ -244,14 +243,14 @@ def get_daily_data(ctx, sdate, edate):
     ctx["label"] = f"{dl} ~7 AM till {edate:%-d %b %Y} ~7 AM"
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    if ctx["p"] == "day":
-        get_daily_data(ctx, ctx["sdate"], ctx["edate"])
+    if ctx.p == "day":
+        get_daily_data(ctx, ctx.sdate, ctx.edate)
     else:
         oneday = timedelta(days=1)
-        year = ctx["year"]
-        month = ctx["month"]
+        year = ctx.year
+        month = ctx.month
         if month == "fall":
             sts = date(year, 9, 1)
             ets = date(year, 11, 30)
@@ -279,52 +278,51 @@ def plotter(ctx: dict):
     subtitle = "Based on IEM Estimates"
     title = "Ranks "
     units = ""
-    if ctx["var"] == "aridity":
+    if ctx.var == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
         title = ""
-        if ctx["w"] == "dep":
+        if ctx.w == "dep":
             raise NoDataFound("Aridity does not have departures")
-    elif ctx["w"] == "dep":
+    elif ctx.w == "dep":
         title = "Departure "
-        if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
+        if ctx.var in ["high", "low", "avgt", "sdd86"]:
             units = "degrees F"
-        elif ctx["var"] == "precip":
+        elif ctx.var == "precip":
             units = "inch"
-    elif ctx["w"] == "val":
+    elif ctx.w == "val":
         title = ""
-        if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
+        if ctx.var in ["high", "low", "avgt", "sdd86"]:
             units = "degrees F"
-        elif ctx["var"] == "precip":
+        elif ctx.var == "precip":
             units = "inch"
-    elif ctx["w"] == "rank":
+    elif ctx.w == "rank":
         subtitle += (
             ", 1 is "
-            f"{'wettest' if ctx['var'] == 'precip' else 'hottest'} out of "
+            f"{'wettest' if ctx.var == 'precip' else 'hottest'} out of "
             f"{ctx['years']} total years (1893-{ctx['lastyear']})"
         )
-    if ctx["w"] == "rank":
+    if ctx.w == "rank":
         units = ""
     mp = MapPlot(
         apctx=ctx,
         continentalcolor="white",
         title=(
-            f"{ctx['label']} {PDICT[ctx['var']]} {title}"
-            f"by {PDICT3[ctx['which']]}"
+            f"{ctx['label']} {PDICT[ctx.var]} {title}by {PDICT3[ctx.which]}"
         ),
         subtitle=subtitle,
         titlefontsize=14,
         nocaption=True,
     )
-    cmap = get_cmap(ctx["cmap"])
-    pvar = f"{ctx['var']}_{ctx['w']}"
+    cmap = get_cmap(ctx.cmap)
+    pvar = f"{ctx.var}_{ctx.w}"
     fmt = "%.2f"
-    if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
+    if ctx.var in ["high", "low", "avgt", "sdd86"]:
         fmt = "%.1f"
-    if ctx["var"] == "aridity":
+    if ctx.var == "aridity":
         bins = np.arange(-4, 4.1, 1)
-        pvar = ctx["var"]
+        pvar = ctx.var
         fmt = "%.1f"
-    elif ctx["w"] == "rank":
+    elif ctx.w == "rank":
         bins = [
             1,
             5,
@@ -338,7 +336,7 @@ def plotter(ctx: dict):
             ctx["years"],
         ]
         fmt = "%.0f"
-    elif ctx["w"] == "val":
+    elif ctx.w == "val":
         bins = pretty_bins(ctx["df"][pvar].min(), ctx["df"][pvar].max())
     else:  # dep
         bins = centered_bins(ctx["df"][pvar].abs().max())
@@ -349,9 +347,9 @@ def plotter(ctx: dict):
         "bins": bins,
         "cmap": cmap,
         "units": units,
-        "extend": "both" if ctx["w"] != "rank" else "max",
+        "extend": "both" if ctx.w != "rank" else "max",
     }
-    if ctx["which"] == "st":
+    if ctx.which == "st":
         ctx["df"].index = ctx["df"].index.str.slice(0, 2)
         mp.fill_states(
             ctx["df"][pvar],

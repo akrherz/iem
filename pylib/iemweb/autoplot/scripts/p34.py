@@ -5,6 +5,7 @@ days above or below some threshold for high or low temperature.
 
 import calendar
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
 
 from iemweb.autoplot import ARG_STATION, get_monofont
+from iemweb.autoplot.description import IntArg, PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "high_over": "High Temperature At or Above",
@@ -34,40 +37,32 @@ ADICT = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        ARG_STATION,
-        dict(
-            type="select",
-            name="var",
-            default="high_under",
-            label="Which Streak to Compute:",
-            options=PDICT,
-        ),
-        dict(
-            type="select",
-            options=TDICT,
-            default="threshold",
-            name="which",
-            label="Which baseline to compare against?",
-        ),
-        dict(
-            type="select",
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[str, ARG_STATION] = "IATAME"
+    var: Annotated[
+        str, SelectArg(label="Which Streak to Compute:", options=PDICT)
+    ] = "high_under"
+    which: Annotated[
+        str,
+        SelectArg(options=TDICT, label="Which baseline to compare against?"),
+    ] = "threshold"
+    climo: Annotated[
+        str,
+        SelectArg(
             options=ADICT,
-            default="por",
             label="For Climatology Comparison, which climatolog to use?",
-            name="climo",
         ),
-        dict(
-            type="int",
-            name="threshold",
-            default=32,
-            label="Temperature Threshold:",
-        ),
-    ]
-    return desc
+    ] = "por"
+    threshold: Annotated[int, IntArg(label="Temperature Threshold:")] = 32
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def greater_than_or_equal(one, two):
@@ -80,20 +75,20 @@ def less_than(one, two):
     return one < two
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    threshold = ctx["threshold"]
-    varname = ctx["var"]
+    station = ctx.station
+    threshold = ctx.threshold
+    varname = ctx.var
 
     # Get averages
-    if ctx["climo"] == "por":
+    if ctx.climo == "por":
         cltable = "climate"
         clstation = station
-    elif ctx["climo"] == "1951":
+    elif ctx.climo == "1951":
         cltable = "climate51"
         clstation = station
-    elif ctx["climo"] == "ncei81":
+    elif ctx.climo == "ncei81":
         cltable = "ncdc_climate81"
         clstation = ctx["_nt"].sts[station]["ncdc81"]
     else:  # ncei91
@@ -130,7 +125,7 @@ def plotter(ctx: dict):
     col = varname.replace("_over", "").replace("_under", "")
     myfunc = greater_than_or_equal if varname.find("over") > 0 else less_than
     compcol = "threshold"
-    if ctx["which"] == "average":
+    if ctx.which == "average":
         compcol = f"climo_{col}"
     streaks = []
     running = 0
@@ -171,10 +166,10 @@ def plotter(ctx: dict):
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
     ttitle = f"{threshold}°F"
-    if ctx["which"] == "average":
-        ttitle = f"Average ({ADICT[ctx['climo']]})"
+    if ctx.which == "average":
+        ttitle = f"Average ({ADICT[ctx.climo]})"
     title = (
-        f"{ctx['_sname']} ({obs.index[0]:%Y %b %d}-"
+        f"{ctx.sname} ({obs.index[0]:%Y %b %d}-"
         f"{obs.index[-1]:%Y %b %d})\n"
         f"Maximum Straight Days with {PDICT[varname]} {ttitle}"
     )
