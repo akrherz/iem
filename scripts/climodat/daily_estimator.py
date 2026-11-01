@@ -289,7 +289,7 @@ def merge_obs(df: pd.DataFrame, state, ts):
     obs.loc[obs[["high", "low"]].isna().any(axis=1), ("high", "low")] = np.nan
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     # Join the obs back onto the main dataframe
-    df = df.join(obs, how="left", on="tracks", rsuffix="_obs")
+    df = df.join(obs, how="left", on="tracks", suffixes=("", "_obs"))
     # We do not estimate snow or snowd, so we can just copy over
     for col in ["snow", "snowd"]:
         take = df[f"{col}_obs"].notna() & (df[f"{col}_obs"] != df[col])

@@ -131,13 +131,13 @@ def main(days: int):
 
     df["ticket"] = False
     for stid in df.index:
-        df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
+        df.loc[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
         x, y = get_idx(  # skipcq
             hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"]
         )
-        df.at[stid, "nam"] = nam[x, y]
-        df.at[stid, "lat"] = nt.sts[stid]["lat"]
-        df.at[stid, "lon"] = nt.sts[stid]["lon"]
+        df.loc[stid, "nam"] = nam[x, y]
+        df.loc[stid, "lat"] = nt.sts[stid]["lat"]
+        df.loc[stid, "lon"] = nt.sts[stid]["lon"]
     df = df[~df["ticket"]]
     df["diff"] = df["ob"] - df["nam"]
     bias = df["diff"].mean()
@@ -154,8 +154,8 @@ def main(days: int):
             ts.strftime("%Y%m%d"),
             station,
             std,
-            df.at[station, "ob"],
-            df.at[station, "nam"],
+            df.loc[station, "ob"],
+            df.loc[station, "nam"],
         )
         df = df.drop(station)
 
