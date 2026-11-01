@@ -13,17 +13,29 @@ there is no hallow area, these are events that went into effect immediately
 at issuance.  For example, Severe Thunderstorm Warnings are all this way.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
 from matplotlib.patches import Rectangle
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
+
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    NetworkSelectArg,
+    PlotDescription,
+    SelectArg,
+    UgcArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
     "wfo": "NWS Forecast Office",
@@ -35,49 +47,32 @@ PDICT2 = {
 }
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "cache": 600, "data": True}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "for",
-            "default": "wfo",
-            "label": "Plot for:",
-            "options": PDICT,
-        },
-        dict(
-            type="networkselect",
-            name="station",
-            network="WFO",
-            default="DMX",
-            label="Select WFO:",
-        ),
-        {
-            "type": "ugc",
-            "name": "ugc",
-            "label": "Select UGC Zone:",
-            "default": "IAC169",
-        },
-        dict(
-            type="date",
-            name="sdate",
-            default="2015/01/01",
-            label="Start Date:",
-            min="2005/10/01",
-        ),
-        dict(
-            type="int", name="days", default=10, label="Number of Days in Plot"
-        ),
-        {
-            "type": "select",
-            "name": "labele",
-            "default": "yes",
-            "label": "Label Event ID?",
-            "options": PDICT2,
-        },
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    for_: Annotated[str, SelectArg(label="Plot for:", options=PDICT)] = Field(
+        default="wfo", alias="for"
+    )
+    station: Annotated[
+        str,
+        NetworkSelectArg(network="WFO", label="Select WFO:", default="DMX"),
+    ] = "DMX"
+    ugc: Annotated[str, UgcArg(label="Select UGC Zone:")] = "IAC169"
+    sdate: Annotated[
+        date,
+        DateArg(label="Start Date:", default="2015/01/01", min="2005/10/01"),
     ]
-    return desc
+    days: Annotated[int, IntArg(label="Number of Days in Plot")] = 10
+    labele: Annotated[
+        str, SelectArg(label="Label Event ID?", options=PDICT2)
+    ] = "yes"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", cache=600, data=True
+    )
 
 
 def make_key(fig):
@@ -156,30 +151,28 @@ def compute_ugcs(ugc, valid):
     return list(set(ugcs)), name
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    station = ctx["station"]
-    sts = ctx["sdate"]
+    station = ctx.station
+    sts = ctx.sdate
     if station not in ctx["_nt"].sts:
         raise NoDataFound("Invalid WFO provided.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     sts = datetime(sts.year, sts.month, sts.day, tzinfo=tz)
-    days = ctx["days"]
+    days = ctx.days
 
     ets = sts + timedelta(days=days)
     params = {
         "wfo": station if len(station) == 3 else station[1:],
         "sts": sts,
         "ets": ets,
-        "ugcs": [
-            ctx["ugc"],
-        ],
+        "ugcs": [ctx.ugc],
     }
     title = f"NWS {ctx['_nt'].sts[station]['name']} issued "
     limiter = "wfo = :wfo"
-    if ctx["for"] == "ugc":
+    if ctx.for_ == "ugc":
         limiter = "ugc = ANY(:ugcs)"
-        params["ugcs"], name = compute_ugcs(ctx["ugc"], sts)
+        params["ugcs"], name = compute_ugcs(ctx.ugc, sts)
         title = f"NWS issued for {name} [{', '.join(params['ugcs'])}] "
     date_cols = ["minproductissue", "minissue", "maxexpire", "maxinitexpire"]
     with get_sqlalchemy_conn("postgis") as conn:

@@ -290,10 +290,11 @@ class PlotDescription:
         """Build a description with ``arguments`` derived from a params model.
 
         Each field annotated with an :class:`Arg` instance becomes a widget.
-        The field name becomes the widget name and the field default (or
-        ``default_factory`` result) the widget default.  A field defaulting
-        to ``None`` is an optional widget, which keeps the widget default
-        given on the :class:`Arg` (what the form shows when enabled).
+        The field alias, when present, becomes its widget name; otherwise the
+        field name is used.  The field default (or ``default_factory`` result)
+        becomes the widget default.  A field defaulting to ``None`` is an
+        optional widget, which keeps the widget default given on the
+        :class:`Arg` (what the form shows when enabled).
         """
         args: list[Arg | dict[str, Any]] = []
         for name, fld in model.model_fields.items():
@@ -310,7 +311,12 @@ class PlotDescription:
             if callable(default):
                 default = default()
             args.append(
-                replace(tmpl, name=name, default=default, optional=optional)
+                replace(
+                    tmpl,
+                    name=fld.alias or name,
+                    default=default,
+                    optional=optional,
+                )
             )
         return cls(arguments=args, **kwargs)
 
