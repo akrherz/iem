@@ -5,12 +5,16 @@ with its "Climdiv" dataset.  This autoplot creates comparisons between the two.
 <p>Variances shown are problems with IEM's database/processing, not NCEI!
 """
 
+from typing import Annotated
+
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_properties
 
+from iemweb.autoplot.description import PlotDescription, SelectArg
+from iemweb.autoplot.params import AutoplotParams
 from iemweb.util import month2months
 
 PDICT = {
@@ -54,37 +58,31 @@ def fill_sdict():
         SDICT[row[0]] = f"[{row[0]}] {row[1]}"
 
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    fill_sdict()
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "options": SDICT,
-            "name": "station",
-            "default": "IA0000",
-            "label": "Select statewide/climate district to compare:",
-        },
-        dict(
-            type="select",
-            name="m",
-            default="all",
-            label="Month Limiter",
-            options=MDICT,
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    station: Annotated[
+        str,
+        SelectArg(
+            options=SDICT,
+            label="Select statewide/climate district to compare:",
         ),
-        {
-            "type": "select",
-            "options": PDICT,
-            "default": "sum_precip",
-            "label": "Which variable",
-            "name": "varname",
-        },
-    ]
-    return desc
+    ] = "IA0000"
+    m: Annotated[str, SelectArg(label="Month Limiter", options=MDICT)] = "all"
+    varname: Annotated[
+        str, SelectArg(label="Which variable", options=PDICT)
+    ] = "sum_precip"
 
 
-def plotter(ctx: dict):
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    fill_sdict()
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True, cache=86400
+    )
+
+
+def plotter(ctx: Params):
     """Go"""
     fill_sdict()
     procdate = get_properties().get("ncei.climdiv.procdate", "20230101")

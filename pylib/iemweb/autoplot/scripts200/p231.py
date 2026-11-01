@@ -9,46 +9,56 @@ are colorized as green for improvements and red for degradations.
 """
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import state_names
 
+from iemweb.autoplot.description import (
+    DateArg,
+    IntArg,
+    PlotDescription,
+    StateArg,
+)
+from iemweb.autoplot.params import AutoplotParams
 
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
-    today = date.today() - timedelta(days=1)
-    lastweek = today - timedelta(days=7)
-    desc["arguments"] = [
-        dict(
-            type="date",
-            name="from",
-            default=f"{lastweek:%Y/%m/%d}",
+
+class Params(AutoplotParams):
+    """Request parameters."""
+
+    from_: Annotated[
+        date,
+        DateArg(
             label="Evaluate change from this starting date:",
+            default=lambda: (date.today() - timedelta(days=8)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
-        dict(
-            type="date",
-            name="on",
-            default=f"{today:%Y/%m/%d}",
+    ] = Field(alias="from")
+    on: Annotated[
+        date,
+        DateArg(
             label="Evaluate change to this ending date:",
-        ),
-        dict(
-            type="int",
-            name="days",
-            default=60,
-            label="Compute SPI over how many trailing days",
-        ),
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select State:",
+            default=lambda: (date.today() - timedelta(days=1)).strftime(
+                "%Y/%m/%d"
+            ),
         ),
     ]
-    return desc
+    days: Annotated[
+        int, IntArg(label="Compute SPI over how many trailing days")
+    ] = 60
+    state: Annotated[str, StateArg(label="Select State:")] = "IA"
+
+
+def get_description() -> PlotDescription:
+    """Return a description of how to call this plotter."""
+    return PlotDescription.from_model(
+        Params, description=__doc__ or "", data=True
+    )
 
 
 def compute(state, sdate, edate, days):
@@ -102,11 +112,11 @@ def compute(state, sdate, edate, days):
     return df
 
 
-def plotter(ctx: dict):
+def plotter(ctx: Params):
     """Go"""
-    df = compute(ctx["state"], ctx["from"], ctx["on"], ctx["days"])
-    startdf = df[df["sday"] == f"{ctx['from']:%m%d}"].set_index("station")
-    enddf = df[df["sday"] == f"{ctx['on']:%m%d}"].set_index("station")
+    df = compute(ctx.state, ctx.from_, ctx.on, ctx.days)
+    startdf = df[df["sday"] == f"{ctx.from_:%m%d}"].set_index("station")
+    enddf = df[df["sday"] == f"{ctx.on:%m%d}"].set_index("station")
     if startdf.empty or enddf.empty:
         raise NoDataFound("No data available for given date.")
     df = startdf.join(enddf, how="inner", suffixes=("_start", "_end"))
