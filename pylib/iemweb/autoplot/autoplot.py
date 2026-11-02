@@ -191,7 +191,7 @@ def handle_error(exp, fmt, environ: dict) -> bytes | str:
     return str(exp)
 
 
-def get_res_by_fmt(p, fmt: str, fdict):
+def get_res_by_fmt(p: int, fmt: str, fdict: dict):
     """Do the work of actually calling things"""
     mod = import_script(p)
     # Ensure fmt and autoplot module jive
@@ -207,7 +207,8 @@ def get_res_by_fmt(p, fmt: str, fdict):
 
     meta = describe(mod)
     # When _gallery is set, inspect meta to see if it has something hardcoded
-    if fdict.get("_gallery") is not None and meta.get("gallery") is not None:
+    gallery = fdict.pop("_gallery", None)
+    if gallery is not None and meta.get("gallery") is not None:
         fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
     ctx = get_autoplot_context(fdict, meta)

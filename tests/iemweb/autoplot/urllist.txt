@@ -9,6 +9,7 @@
 5/network:IACLIMATE::station:IATAME::var:max_snow::_r:43::dpi:100.png
 6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 6/state:IA::eyear:2023::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
+7/_gallery:1.png
 7/network:IACLIMATE::station:IATAME::year:2024::gdd1:1135::gdd2:1660::gddbase:50::gddceil:86::cmap:jet::_r:t::dpi:100.png
 9/network:IACLIMATE::station:IATAME::year:2020::sday:0101::eday:1231::var:sdd::w:ytd::base:50::ceiling:86::_r:43::dpi:100.png
 10/network:IACLIMATE::station:IATAME::direction:above2::varname:low::threshold:32::year:1893::_r:t::dpi:100.png
