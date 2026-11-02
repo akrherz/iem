@@ -48,7 +48,6 @@ WARxxx    Retrieve union of Tornado (TOR), Severe T'storm (SVR)
         <pre>
 PIL       Description             Product ID for Des Moines
 MAVxxx    GFS MOS Guidance         MAVDSM
-METxxx    NAM MOS Guidance         METDSM
 MEXxxx    GFSX MOS Guidance        MEXDSM
 NBExxx    National Blend E         NBEDSM
 NBHxxx    National Blend H         NBHDSM
