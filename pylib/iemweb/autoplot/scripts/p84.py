@@ -196,6 +196,8 @@ def get_ugc_bounds(ctx: Params, sector):
     if cursor.rowcount == 0:
         return sector, "", 0, 0, 0, 0
     row = cursor.fetchone()
+    if row is None:
+        raise ValueError(f"No UGC found for {ctx.ugc}")
     conn.close()
     b = 0.15  # arb
     return (
@@ -274,6 +276,7 @@ def set_gridinfo(ctx: Params):
     if not os.path.isfile(ctx["ncfn"]):
         raise NoDataFound("No data found.")
     affin = NAV_XREF[ctx.src].affine
+    p01d = None
     with util.ncopen(ctx["ncfn"]) as nc:
         x0, y0, x1, y1 = util.grid_bounds(
             nc.variables["lon"][:],

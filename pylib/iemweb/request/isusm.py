@@ -57,6 +57,7 @@ import re
 import warnings
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Annotated, Any
 
 import numpy as np
 import pandas as pd
@@ -66,7 +67,12 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.util import convert_value
-from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
+from pyiem.web.fields import (
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    STATION_LIST_FIELD,
+    TZ_FIELD,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 # Cull a fragmentation warning from pandas due to our hacky things
@@ -82,82 +88,88 @@ DELIMITERS = {"comma": ",", "tab": "\t"}
 class Schema(CGIModel):
     """See how we are called..."""
 
-    chillbase: float = Field(
-        default=32, description="Chill Hours Base Temperature [degF]"
+    chillbase: Annotated[
+        float, Field(description="Chill Hours Base Temperature [degF]")
+    ] = 32.0
+    chillceil: Annotated[
+        float, Field(description="Chill Hours Ceiling Temperature [degF]")
+    ] = 45.0
+    delim: Annotated[
+        str,
+        Field(description="Delimiter", default="comma", pattern="comma|tab"),
+    ] = "comma"
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
+    format: Annotated[
+        str,
+        Field(
+            description="Output Format",
+            pattern="csv|comma|excel|tab",
+        ),
+    ] = "csv"
+    missing: Annotated[
+        str,
+        Field(
+            description="Missing Value Indicator",
+            pattern="^-99|M|$",
+        ),
+    ] = "-99"
+    qcflags: Annotated[
+        bool,
+        Field(
+            description="Include QC Flag Values",
+        ),
+    ] = False
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
     )
-    chillceil: float = Field(
-        default=45, description="Chill Hours Ceiling Temperature [degF]"
-    )
-    delim: str = Field(
-        description="Delimiter", default="comma", pattern="comma|tab"
-    )
-    ets: AwareDatetime = Field(default=None, description="End Time")
-    format: str = Field(
-        default="csv",
-        description="Output Format",
-        pattern="csv|comma|excel|tab",
-    )
-    missing: str = Field(
-        default="-99",
-        description="Missing Value Indicator",
-        pattern="^-99|M|$",
-    )
-    qcflags: bool = Field(
-        default=False,
-        description="Include QC Flag Values",
-    )
-    sts: AwareDatetime = Field(default=None, description="Start Time")
-    mode: str = Field(
-        default="hourly",
-        description="Data Mode",
-        pattern="hourly|daily|inversion",
-    )
+    mode: Annotated[
+        str,
+        Field(
+            description="Data Mode",
+            pattern="hourly|daily|inversion",
+        ),
+    ] = "hourly"
     station: STATION_LIST_FIELD
-    timeres: str = Field(
-        default="hourly",
-        description="Time Resolution for hourly request",
-        pattern="hourly|minute",
-    )
-    todisk: str = Field(
-        default="no", description="Download to Disk", pattern="yes|no"
-    )
+    timeres: Annotated[
+        str,
+        Field(
+            description="Time Resolution for hourly request",
+            pattern="hourly|minute",
+        ),
+    ] = "hourly"
+    todisk: Annotated[
+        str, Field(description="Download to Disk", pattern="yes|no")
+    ] = "no"
     tz: TZ_FIELD = "America/Chicago"
-    vars: ListOrCSVType = Field(
-        default=None, description="Variables to include in output"
-    )
-    year1: int = Field(
-        default=None, description="Start year if sts is not provided"
-    )
-    month1: int = Field(
-        default=None, description="Start month if sts is not provided"
-    )
-    day1: int = Field(
-        default=None, description="Start day if sts is not provided"
-    )
-    hour1: int = Field(
-        default=0, description="Start hour if sts is not provided"
-    )
-    minute1: int = Field(
-        default=0, description="Start minute if sts is not provided"
-    )
-    year2: int = Field(
-        default=None, description="End year if ets is not provided"
-    )
-    month2: int = Field(
-        default=None, description="End month if ets is not provided"
-    )
-    day2: int = Field(
-        default=None, description="End day if ets is not provided"
-    )
-    hour2: int = Field(
-        default=0, description="End hour if ets is not provided"
-    )
-    minute2: int = Field(
-        default=0, description="End minute if ets is not provided"
-    )
+    vars: Annotated[
+        ListOrCSVType | None,
+        Field(description="Variables to include in output"),
+    ] = None
+    year1: Annotated[
+        int | None, Field(description="Start year if sts is not provided")
+    ] = None
+    month1: Annotated[
+        int | None, Field(description="Start month if sts is not provided")
+    ] = None
+    day1: Annotated[
+        int | None, Field(description="Start day if sts is not provided")
+    ] = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: Annotated[
+        int | None, Field(description="End year if ets is not provided")
+    ] = None
+    month2: Annotated[
+        int | None, Field(description="End month if ets is not provided")
+    ] = None
+    day2: Annotated[
+        int | None, Field(description="End day if ets is not provided")
+    ] = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
-def fetch_daily(environ: dict, cols: list):
+def fetch_daily(environ: dict, cols: list[str]):
     """Return a fetching of daily data"""
     stations: list = environ["station"]
 
@@ -192,6 +204,13 @@ def fetch_daily(environ: dict, cols: list):
                     if environ["qcflags"]:
                         cols.append(f"sv_{c2}{depth}_f")
 
+    params: dict[str, Any] = {
+        "sts": environ["sts"].date(),
+        "ets": environ["ets"].date(),
+        "stations": stations,
+        "chillbase": convert_value(environ["chillbase"], "degF", "degC"),
+        "chillceil": convert_value(environ["chillceil"], "degF", "degC"),
+    }
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -246,17 +265,7 @@ def fetch_daily(environ: dict, cols: list):
     """
             ),
             conn,
-            params={
-                "sts": environ["sts"].date(),
-                "ets": environ["ets"].date(),
-                "stations": stations,
-                "chillbase": convert_value(
-                    environ["chillbase"], "degF", "degC"
-                ),
-                "chillceil": convert_value(
-                    environ["chillceil"], "degF", "degC"
-                ),
-            },
+            params=params,
             index_col=None,
         )
     if df.empty:
@@ -327,11 +336,12 @@ def fetch_daily(environ: dict, cols: list):
         cols.remove("sv")
     else:
         for col in list(cols):
-            if col.startswith("sv_r"):
-                df[col] = convert_value(df[f"{col}_qc"].values, "degC", "degF")
+            lookup_col = f"{col}_qc"
+            if col.startswith("sv_r") and lookup_col in df.columns:
+                df[col] = convert_value(df[lookup_col].values, "degC", "degF")
                 cols.remove(col)
-            elif col.startswith("sv_vwc"):
-                df[col] = df[f"{col}_qc"]
+            elif col.startswith("sv_vwc") and lookup_col in df.columns:
+                df[col] = df[lookup_col]
                 cols.remove(col)
 
     # Convert solar radiation to J/m2
@@ -345,7 +355,7 @@ def fetch_daily(environ: dict, cols: list):
         df["et"] = convert_value(df["et"], "mm", "inch")
 
     overwrite = (
-        "bp_mb lwmv_1 lwmv_2 lwmdry_1_tot lwmcon_1_tot lwmwet_1_tot "
+        "lwmv_1 lwmv_2 lwmdry_1_tot lwmcon_1_tot lwmwet_1_tot "
         "lwmdry_2_tot lwmcon_2_tot lwmwet_2_tot bpres_avg"
     ).split()
     for col in overwrite:
