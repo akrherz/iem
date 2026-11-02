@@ -1,4 +1,8 @@
-"""Our mod_wsgi frontend to autoplot generation"""
+"""The frontend to autoplot content generation.
+
+Typically called as a Rewrite from Apache.
+
+"""
 
 import json
 import os
@@ -6,8 +10,10 @@ import pathlib
 import sys
 import tempfile
 import traceback
+from collections.abc import Callable
 from datetime import UTC
 from io import BytesIO
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -16,7 +22,7 @@ import rasterio
 from matplotlib.figure import Figure
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
-from pydantic import ValidationError
+from pydantic import Field, ValidationError, field_validator
 from pyiem.autoplot import get_autoplot_context
 from pyiem.exceptions import (
     BadWebRequest,
@@ -28,6 +34,7 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import (
     TELEMETRY,
+    CGIModel,
     emit_to_sidedoor,
     error_log,
     iemapp,
@@ -48,6 +55,33 @@ HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
 HTTP422 = "422 Unprocessable Entity"
 HTTP500 = "500 Internal Server Error"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    fmt: Annotated[str, Field(description="The desired return format.")] = (
+        "png"
+    )
+    p: Annotated[
+        int,
+        Field(description="Autoplot number", ge=1, le=999),
+    ]
+    q: Annotated[str, Field(description="Encoded URI parameters.")] = ""
+
+    @field_validator("q", mode="before")
+    @classmethod
+    def forgive_things_with_q(cls, value: str):
+        """Forgive some things found in the wild."""
+        if "network:WFO::wfo:PHEB" in value:
+            value = value.replace("network:WFO", "network:NWS")
+        if "network:WFO::wfo:NHC" in value:
+            value = value.replace("network:WFO", "network:NCEP")
+        if "network:WFO::wfo:PAAQ" in value:
+            value = value.replace("network:WFO", "network:NWS")
+        if "network:AWOS" in value:
+            value = value.replace("network:AWOS", "network:IA_ASOS")
+        return value
 
 
 def format_geojson_response(gdf: pd.DataFrame, defaultcol: str) -> str:
@@ -237,7 +271,7 @@ def plot_metadata(fig, start_time, p):
     )
 
 
-def get_mckey(scriptnum, fdict: dict, fmt: str):
+def get_mckey(scriptnum: int, fdict: dict, fmt: str) -> str:
     """Figure out what our memcache key should be."""
     vals = []
     for key in fdict:
@@ -257,36 +291,45 @@ def get_mckey(scriptnum, fdict: dict, fmt: str):
     return mckey
 
 
-def workflow(mc, environ: dict, fmt: str):
-    """we need to return a status and content"""
-    # q is the full query string that was rewritten to use by apache
-    q = environ.get("q", "")
-    fdict = parser(q)
-    # p=number is the python backend code called by this framework
-    scriptnum = int(environ["p"])
+def rectify_dpi(fdict: dict):
+    """Ensure that the dpi is in good shape."""
     try:
         dpi = int(float(str(fdict.get("dpi", "100"))))
         fdict["dpi"] = str(max(min(dpi, 500), 50))
     except (TypeError, ValueError, OverflowError) as exp:
-        raise BadWebRequest("dpi must be a number") from exp
+        raise BadWebRequest("dpi must be a number between 50 and 500") from exp
 
-    # memcache keys can not have spaces
-    mckey = get_mckey(scriptnum, fdict, fmt)
-    if len(mckey) < 250:
-        try:
-            # Don't fetch memcache when we have _cb set for an inbound CGI
-            res = mc.get(mckey) if fdict.get("_cb") is None else None
-        except MemcacheIllegalInputError as exp:
-            raise BadWebRequest("Memcache key is invalid") from exp
-        if res:
-            return HTTP200, res
+
+def check_memcache(mc, mckey: str, forced: bool) -> str | None:
+    """Check memcache for the given key."""
+    if len(mckey) >= 250 or not forced:
+        return None
+    try:
+        res = mc.get(mckey)
+    except MemcacheIllegalInputError as exp:
+        raise BadWebRequest("Memcache key is invalid") from exp
+    return res
+
+
+def workflow(mc, environ: dict, query: Schema) -> tuple[str, bytes | str]:
+    """we need to return a status and content"""
+    # q is the full query string that was rewritten to use by apache
+    fdict = parser(query.q)
+    # Compute dpi
+    rectify_dpi(fdict)
+    # Compute memcache key for this request
+    mckey = get_mckey(query.p, fdict, query.fmt)
+    # Check memcache for this request
+    res = check_memcache(mc, mckey, fdict.get("_cb") is None)
+    if res:
+        return HTTP200, res
     # memcache failed to save us work, so work we do!
     start_time = utc()
     # res should be a 3 length tuple
     try:
-        res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
+        res, meta = get_res_by_fmt(query.p, query.fmt, fdict)
     except (IncompleteWebRequest, NoDataFound, UnknownStationException) as exp:
-        return HTTP400, handle_error(exp, fmt, environ)
+        return HTTP400, handle_error(exp, query.fmt, environ)
     except BadWebRequest as exp:
         raise BadWebRequest("") from exp
     except Exception as exp:
@@ -303,28 +346,28 @@ def workflow(mc, environ: dict, fmt: str):
             )
         )
         # Everything else should be considered fatal
-        return HTTP500, handle_error(exp, fmt, environ)
+        return HTTP500, handle_error(exp, query.fmt, environ)
 
     [mixedobj, df, report] = res
     # Our output content
     content = ""
-    if fmt == "js" and isinstance(mixedobj, dict):
+    if query.fmt == "js" and isinstance(mixedobj, dict):
         content = f'Highcharts.chart("ap_container", {json.dumps(mixedobj)});'
-    elif fmt in ["js", "geojson", "geotiff"]:
+    elif query.fmt in ["js", "geojson", "geotiff"]:
         content = mixedobj
-    elif fmt in ["svg", "png", "pdf"]:
+    elif query.fmt in ["svg", "png", "pdf"]:
         if isinstance(mixedobj, Figure):
             # if our content is a figure, then add some fancy metadata to plot
             if meta.get("plotmetadata", True):
-                plot_metadata(mixedobj, start_time, scriptnum)
+                plot_metadata(mixedobj, start_time, query.p)
             ram = BytesIO()
-            mixedobj.savefig(ram, format=fmt, dpi=int(fdict["dpi"]))
+            mixedobj.savefig(ram, format=query.fmt, dpi=int(str(fdict["dpi"])))
             mixedobj.clear()
             ram.seek(0)
             content = ram.read()
         elif isinstance(mixedobj, Image.Image):
             ram = BytesIO()
-            mixedobj.save(ram, fmt)
+            mixedobj.save(ram, query.fmt)
             ram.seek(0)
             content = ram.read()
 
@@ -332,12 +375,13 @@ def workflow(mc, environ: dict, fmt: str):
             return (
                 HTTP400,
                 error_image(
-                    ("plot requested but backend does not support plots"), fmt
+                    ("plot requested but backend does not support plots"),
+                    query.fmt,
                 ),
             )
-    elif fmt == "txt" and report is not None:
+    elif query.fmt == "txt" and report is not None:
         content = report
-    elif fmt in ["csv", "txt", "xlsx"] and df is not None:
+    elif query.fmt in ["csv", "txt", "xlsx"] and df is not None:
         # If the index is a datetime object, we need to convert it to a string
         if isdt(df.index):
             dtz = df.index.tz
@@ -363,9 +407,9 @@ def workflow(mc, environ: dict, fmt: str):
                 else:
                     df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        if fmt in ["csv", "txt"]:  # Meh on the txt here
+        if query.fmt in ["csv", "txt"]:  # Meh on the txt here
             content = df.to_csv(index=(df.index.name is not None), header=True)
-        elif fmt == "xlsx":
+        elif query.fmt == "xlsx":
             # Can't write to ram buffer yet, unimplmented upstream
             (_, tmpfn) = tempfile.mkstemp()
             df.index.name = None
@@ -377,7 +421,7 @@ def workflow(mc, environ: dict, fmt: str):
     else:
         error_log(
             environ,
-            f"Undefined edge case: fmt: {fmt} "
+            f"Undefined edge case: fmt: {query.fmt} "
             f"uri: {environ.get('REQUEST_URI')}",
         )
         return HTTP422, "Undefined edge case encountered"
@@ -417,7 +461,7 @@ def workflow(mc, environ: dict, fmt: str):
         + AUTOPLOT_TIMING
         + json.dumps(
             {
-                "appid": scriptnum,
+                "appid": query.p,
                 "timing": round((utc() - start_time).total_seconds(), 3),
                 "uri": mckey[:AUTOPLOT_TIMING_URI_MAXLEN],
                 "cache": dur,
@@ -431,41 +475,26 @@ def workflow(mc, environ: dict, fmt: str):
     return HTTP200, content
 
 
-@iemapp(parse_times=False, allowed_as_list=["ltype"])
-def application(environ, start_response):
+@iemapp(schema=Schema, parse_times=False, allowed_as_list=["ltype"])
+def application(environ: dict, start_response: Callable) -> str | bytes:
     """Our Application!"""
-    if "p" not in environ:
-        raise IncompleteWebRequest("GET parameter p is missing.")
-    # Parse the request that was sent our way
-    # HACK
-    qstr = environ.get("q", "")
-    if qstr.find("network:WFO::wfo:PHEB") > -1:
-        environ["q"] = qstr.replace("network:WFO", "network:NWS")
-    if qstr.find("network:WFO::wfo:NHC") > -1:
-        environ["q"] = qstr.replace("network:WFO", "network:NCEP")
-    if qstr.find("network:WFO::wfo:PAAQ") > -1:
-        environ["q"] = qstr.replace("network:WFO", "network:NWS")
-    if qstr.find("network:AWOS") > -1:
-        environ["q"] = qstr.replace("network:AWOS", "network:IA_ASOS")
-    # Figure out the format that was requested from us, default to png
-    fmt = environ.get("fmt", "png")[:7]
+    query: Schema = environ["_cgimodel_schema"]
     mc = Client("iem-memcached:11211")
     try:
         # do the work!
-        status, output = workflow(mc, environ, fmt)
+        status, output = workflow(mc, environ, query)
     except BadWebRequest as exp:
         raise BadWebRequest("") from exp
     except Exception as exp:
         status = HTTP500
-        output = handle_error(exp, fmt, environ)
+        output = handle_error(exp, query.fmt, environ)
     finally:
         mc.close()
     # Special case for when we are returning a javascript alert
-    if fmt == "js" and status == HTTP400:
-        start_response(HTTP200, get_response_headers(status, fmt))
-        return [output.encode("UTF-8")]
-    # Figure out what our response headers should be
-    start_response(status, get_response_headers(status, fmt))
-    if isinstance(output, str):
-        output = output.encode("UTF-8")
-    return [output]
+    if query.fmt == "js" and status == HTTP400:
+        start_response(HTTP200, get_response_headers(status, query.fmt))
+    else:
+        # Figure out what our response headers should be
+        start_response(status, get_response_headers(status, query.fmt))
+    # iemapp rectifies this
+    return output
