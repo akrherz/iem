@@ -184,6 +184,7 @@ def plotter(ctx: Params):
     )
 
     ax[2].set_xlabel(f"Day of {calendar.month_name[month]}")
-    ax[2].set_xlim(0.5, len(x) + 0.5)
+    for ax_ in ax:
+        ax_.set_xlim(0.5, len(x) + 0.5)
 
     return fig, df
