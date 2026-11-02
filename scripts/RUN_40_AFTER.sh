@@ -8,7 +8,6 @@ IFSHR="$(date -u --date '1 hour' +'%H')"
 cd dl || exit 1
 python download_ffg.py &
 (python download_hrrr_rad.py ; python download_hrrr_tsoil.py) &
-python download_nam.py --valid="$(date -u --date '3 hours ago' +'%Y-%m-%dT%H'):00:00" &
 
 cd ../rtma || exit 1
 python wind_power.py &
