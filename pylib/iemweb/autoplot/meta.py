@@ -5,26 +5,14 @@ interface.
 
 """
 
-import json
 from contextlib import suppress
-from typing import Annotated
 
-from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import FIGSIZES_NAMES
-from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
 from iemweb.autoplot.description import describe
-
-
-class Schema(CGIModel):
-    """See how we are called."""
-
-    p: Annotated[
-        int, Field(description="The autoplot index", ge=0, le=1000)
-    ] = 0
 
 
 def get_timing(pidx: int) -> float:
@@ -56,52 +44,37 @@ def find_title(pidx: int) -> str:
 def get_metadict(pidx: int) -> dict:
     """Do what needs to be done for JSON requests."""
     if pidx == 0:
-        data = autoplot_data
-    else:
-        timing = -1
-        with suppress(Exception):
-            timing = get_timing(pidx)
-        mod = import_script(pidx)
-        data = describe(mod)
-        data["title"] = find_title(pidx)
-        defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
-        data["maptable"] = hasattr(mod, "geojson")
-        data["highcharts"] = hasattr(mod, "get_highcharts")
-        data["raster"] = hasattr(mod, "get_raster")
-        data["timing[secs]"] = timing
+        return autoplot_data
 
-        # Setting to None disables
-        if "_r" not in defaults or defaults["_r"] is not None:
-            data["arguments"].append(
-                dict(
-                    type="select",
-                    options=FIGSIZES_NAMES,
-                    name="_r",
-                    default=defaults.get("_r", "t"),
-                    label="Image Pixel Size @100 DPI",
-                )
-            )
+    timing = -1
+    with suppress(Exception):
+        timing = get_timing(pidx)
+    mod = import_script(pidx)
+    data = describe(mod)
+    data["title"] = find_title(pidx)
+    defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
+    data["maptable"] = hasattr(mod, "geojson")
+    data["highcharts"] = hasattr(mod, "get_highcharts")
+    data["raster"] = hasattr(mod, "get_raster")
+    data["timing[secs]"] = timing
+
+    # Setting to None disables
+    if "_r" not in defaults or defaults["_r"] is not None:
         data["arguments"].append(
-            dict(
-                type="int",
-                name="dpi",
-                default=defaults.get("dpi", "100"),
-                label="Image Resolution (DPI) (50 to 500)",
-            )
+            {
+                "type": "select",
+                "options": FIGSIZES_NAMES,
+                "name": "_r",
+                "default": defaults.get("_r", "t"),
+                "label": "Image Pixel Size @100 DPI",
+            }
         )
+    data["arguments"].append(
+        {
+            "type": "int",
+            "name": "dpi",
+            "default": defaults.get("dpi", "100"),
+            "label": "Image Resolution (DPI) (50 to 500)",
+        }
+    )
     return data
-
-
-@iemapp(
-    help=__doc__,
-    schema=Schema,
-    memcachekey=lambda x: f"/autoplot/meta?p={x['p']}",
-    memcacheexpire=300,
-)
-def application(environ, start_response):
-    """Our Application!"""
-    pidx = environ["p"]
-    output = get_metadict(pidx)
-
-    start_response("200 OK", [("Content-type", "application/json")])
-    return json.dumps(output)
