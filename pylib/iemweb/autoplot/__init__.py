@@ -83,7 +83,7 @@ def ensure_prodDefinitions_key_in_label() -> dict[str, str]:
     return prodDefinitions_copy
 
 
-def fema_region2states(region: str) -> tuple:
+def fema_region2states(region: str) -> list[str]:
     """Convert string region code to list of states."""
     label = FEMA_REGIONS[region]
     return label.split("{")[1][:-1].split(",")

@@ -2,6 +2,7 @@
 
 from matplotlib.figure import Figure
 from matplotlib.table import table
+from matplotlib.transforms import Bbox
 from pandas import DataFrame
 
 
@@ -62,7 +63,7 @@ def barchart_with_top10(
 
     axpos = ax.get_position()
     tableax = fig.add_axes(
-        [axpos.x1 + 0.02, axpos.y0, 0.96 - axpos.x1, axpos.y1 - axpos.y0],
+        (axpos.x1 + 0.02, axpos.y0, 0.96 - axpos.x1, axpos.y1 - axpos.y0),
         frame_on=False,
         xticks=[],
         yticks=[],
@@ -74,10 +75,10 @@ def barchart_with_top10(
         cellText=cell_text,
         colLabels=[
             "Rank",
-            data.index.name,
+            str(data.index.name),
             kwargs.get("table_col_title", column),
         ],
-        bbox=[0, 0.5, 1, 0.45],
+        bbox=Bbox([(0.0, 0.50), (1.0, 0.95)]),
         edges="horizontal",
     )
     top10_table.auto_set_font_size(False)
@@ -95,10 +96,10 @@ def barchart_with_top10(
         cellText=cell_text,
         colLabels=[
             "Rank",
-            data.index.name,
+            str(data.index.name),
             kwargs.get("table_col_title", column),
         ],
-        bbox=[0, 0, 1, 0.45],
+        bbox=Bbox([(0.0, 0.0), (1.0, 0.45)]),
         edges="horizontal",
     )
     bottom10_table.auto_set_font_size(False)

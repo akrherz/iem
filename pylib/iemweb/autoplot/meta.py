@@ -29,6 +29,7 @@ class Schema(CGIModel):
 
 def get_timing(pidx: int) -> float:
     """Return an average plot generation time for this app"""
+    timing = -1.0
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
             sql_helper(
@@ -37,7 +38,9 @@ def get_timing(pidx: int) -> float:
             ),
             {"id": pidx},
         )
-        timing = res.fetchone()[0]
+        row = res.fetchone()
+        if row is not None:
+            timing = row[0]
     return timing if timing is not None else -1
 
 

@@ -8,8 +8,10 @@ import math
 import os
 import pathlib
 import re
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from html import unescape
+from typing import Any
 from urllib.parse import quote, unquote
 from zoneinfo import ZoneInfo
 
@@ -487,13 +489,16 @@ def get_cookie_value(arg, cookies):
 def get_timing(apid: int) -> int:
     """Get a timing sample."""
     pgconn, cursor = get_dbconnc("mesosite", rw=False)
+    timing = -1
     try:
         cursor.execute(
             "SELECT avg(timing)::int from autoplot_timing where appid = %s "
             "and valid > (now() - '7 days'::interval)",
             (apid,),
         )
-        timing = cursor.fetchone()["avg"]
+        row = cursor.fetchone()
+        if row:
+            timing = row["avg"]
     finally:
         pgconn.close()
     return timing if timing is not None else -1
@@ -505,13 +510,13 @@ def compute_dat_label(attribs: dict) -> str:
     wfo = attribs.get("wfo", "")
     efscale = attribs.get("efscale", "")
     try:
-        length = float(attribs.get("length"))
+        length = float(attribs.get("length", 0))
     except (OverflowError, TypeError, ValueError):
         length = 0.0
     if not math.isfinite(length):
         length = 0.0
     try:
-        starttime = float(attribs.get("starttime"))
+        starttime = float(attribs.get("starttime", "NaN"))
         if not math.isfinite(starttime):
             raise ValueError("non-finite starttime")
         sts = pd.Timestamp(starttime / 1000, unit="s", tz="UTC")
@@ -592,7 +597,7 @@ def numeric_handler(value: str, arg: dict) -> tuple[str, str]:
     ):
         value = arg["default"]
 
-    return str(value), (
+    return value, (
         f'<input type="text" name="{arg["name"]}" size="60" value="{value}">'
     )
 
@@ -999,7 +1004,7 @@ plot type.</p>
     """
     with get_sqlalchemy_conn("mesosite") as conn:
         extra = ""
-        params = {"appurl": f"q={apid}(&|$)"}
+        params: dict[str, Any] = {"appurl": f"q={apid}(&|$)"}
         if res["frontend"]:
             extra = " or strpos(appurl, :fe) = 1"
             params["fe"] = res["frontend"]
@@ -1015,7 +1020,9 @@ plot type.</p>
             ),
             conn,
             params=params,
-            parse_dates="dt",
+            parse_dates=[
+                "dt",
+            ],
             index_col="dt",
         )
     for dt, row in df.iterrows():
@@ -1260,7 +1267,7 @@ def remove_all_cookies(headers, cookiestr):
 
 
 @iemapp(parse_times=False, allowed_as_list=["ltype"])
-def application(environ: dict, start_response: callable) -> list[bytes]:
+def application(environ: dict, start_response: Callable) -> list[bytes]:
     """mod-wsgi handler."""
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]
