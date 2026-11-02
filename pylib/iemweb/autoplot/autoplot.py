@@ -212,12 +212,11 @@ def get_res_by_fmt(p: int, fmt: str, fdict: dict):
         fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
     ctx = get_autoplot_context(fdict, meta)
-    # Modules defining a Params model get a typed context
-    if (params_cls := getattr(mod, "Params", None)) is not None:
-        try:
-            ctx = params_cls.model_validate(ctx)
-        except ValidationError as exp:
-            raise BadWebRequest(f"Invalid parameters: {exp}") from exp
+    # Pivot context into typed Params model
+    try:
+        ctx = mod.Params.model_validate(ctx)
+    except ValidationError as exp:
+        raise BadWebRequest(f"Invalid parameters: {exp}") from exp
     if fmt == "js":
         # Need to pass the container name
         ctx["_e"] = fdict.get("_e", "ap_container")
