@@ -56,8 +56,6 @@ dependencies:
   - openpyxl
   # due to join suffixes usage
   - pandas>=3.1
-  # mod-wsgi
-  - paste
   # PIL
   - pillow
   # for downstream installs

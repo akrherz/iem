@@ -17,7 +17,6 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
-from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
@@ -26,6 +25,7 @@ from pyiem.reference import SECTORS_NAME, state_names, ugc_state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, html_escape, utc
 from pyiem.webutil import ensure_list, iemapp
+from werkzeug.wrappers import Request
 
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
@@ -1269,7 +1269,8 @@ def remove_all_cookies(headers, cookiestr):
 @iemapp(parse_times=False, allowed_as_list=["ltype"])
 def application(environ: dict, start_response: Callable) -> list[bytes]:
     """mod-wsgi handler."""
-    cookies = get_cookie_dict(environ)
+    # Just use cookie processing attm
+    cookies = Request(environ).cookies
     headers = [("Content-type", "text/html")]
     # invalid cookies may invalidate the entire cookie parsing
     # https://bugs.python.org/issue41945
