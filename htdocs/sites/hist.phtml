@@ -6,7 +6,6 @@ define("TEMPLATE", "sites.phtml");
 // sites calls throttle
 require_once "../../include/sites.php";
 require_once "../../include/forms.php";
-require_once "../../include/mlib.php";
 require_once "../../include/myview.php";
 
 $ctx = get_sites_context();
@@ -28,314 +27,31 @@ $t->iemselect2 = true;
 
 /* Get vars */
 $dt = dt_from_cgi_ymd();
-$day = intval($dt->format("d"));
-$month = intval($dt->format("m"));
-$year = intval($dt->format("Y"));
 $mode = get_str404('mode', 'monthly');
-$sortvar = get_str404('sortvar', 'id');
-
 
 // Don't allow dates into the future
 if ($dt->format("Y") > gmdate("Y")) {
     $dt = new DateTimeImmutable(gmdate("Y-m-d"));
 }
-if ($sortvar == 'station') {
-    $sortvar = 'id';
-}
+$day = intval($dt->format("d"));
+$month = intval($dt->format("m"));
+$year = intval($dt->format("Y"));
 
-$dateStr = $dt->format("Y-m-d");
 $nicedate = $dt->format("d M Y");
 $nicemonthdate = $dt->format("M Y");
-$htmlout = "";
 
-/**
- * Print a monthly calendar with links to daily observations.
- *
- * @param int $year The year of the month to print.
- * @param int $month The month to print.
- * @param array $db The database of daily observations.
- * @param string $thisApp The URL of the current application for navigation links.
- * @param string $dailyApp The URL of the daily observations application.
- * @return string The HTML of the monthly calendar.
- */
-function printMonth($year, $month, $db, $thisApp, $dailyApp)
-{
-
-    $sts = mktime(8, 0, 0, $month, 1, $year);
-    $ets = mktime(10, 0, 0, $month + 1, 0, $year);  // CST concerns
-
-    $lastMonth = $sts - 5 * 86400; // 5 days earlier
-    $nextMonth = $ets + 5 * 86400; // 5 days later
-
-    $lurl = $thisApp . sprintf("&year=%s&month=%s", date("Y", $lastMonth), date("m", $lastMonth));
-    $lstr = date("M Y", $lastMonth);
-    $nurl = $thisApp . sprintf("&year=%s&month=%s", date("Y", $nextMonth), date("m", $nextMonth));
-    $nstr = date("M Y", $nextMonth);
-
-    // Get the day of the week of the first day this month
-    $first_dow = intval(date("w", $sts));
-
-    $title = date("M Y", $sts);
-    $s = <<<EOM
-<table class="table table-bordered">
-<tr><td><a href="{$lurl}">{$lstr}</a></td><th colspan="5">{$title}</th>
-    <td><a href="{$nurl}">{$nstr}</a></td></tr>
-<tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
-    <th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
-EOM;
-
-    // Handle the first week
-    $now = $sts;
-    $s .= "<tr>";
-    for ($i = 0; $i < $first_dow; $i++) {
-        $secs = $now - (86400 * ($first_dow - $i));
-        $s .= '<td valign="top" bgcolor="#EEEEEE">';
-        $s .= "<b>" . date("d", $secs) . "</b>";
-        $s .= '</td>';
-    }
-    for ($i = $first_dow; $i < 7; $i++) {
-        $key = date("Ymd", $now);
-
-        $s .= '<td valign="top">';
-        $s .= "<b><a href=\"" . $dailyApp . date("d", $now) . "\">" . date("d", $now) . "</a></b>";
-        if (isset($db[$key]["cv"])) {
-            $s .= sprintf(" (@%s)", $db[$key]['cv']);
-        }
-        $s .= sprintf("<br />%s</td>", $db[$key]["content"] ?? '');
-        $now = $now + 86400;
-    }
-    $s .= "</tr>";
-
-    // Handle the rest of the weeks
-    while ($now <= $ets) {
-        $s .= "<tr>\n";
-        for ($i = 0; $i < 7; $i++) {
-            $key = date("Ymd", $now);
-            if ($now < $ets) {
-                $s .= '<td valign="top">';
-                $s .= "<b><a href=\"" . $dailyApp . date("d", $now) . "\">" . date("d", $now) . "</a></b>";
-            } else {
-                $s .= '<td bgcolor="#EEEEEE" valign="top">';
-                $s .= "<b>" . date("d", $now) . "</b>";
-            }
-            if (isset($db[$key]["cv"])) {
-                $s .= sprintf(" (@%s)", $db[$key]['cv']);
-            }
-            if (isset($db[$key]["content"])) {
-                $s .= "<br />" . $db[$key]["content"] . "</td>";
-            }
-            $now = $now + 86400;
-        } // End of week
-        $s .= "</tr>\n";
-    }
-
-    $s .= "</table>";
-    return $s;
-} // End of printMonth
-
-if ($mode == "monthly") {
-    $arr = array(
-        "network" => $network,
-        "station" => $station,
-        "month" => $month,
-        "year" => $year,
-    );
-} else {
-    $arr = array(
-        "network" => $network,
-        "date" => sprintf("%s-%02.0f-%02.0f", $year, $month, $day),
-    );
-}
-$wsuri = sprintf("/api/1/daily.json?%s", http_build_query($arr));
-$wsuri_csv = sprintf("/api/1/daily.txt?%s", http_build_query($arr));
-$jobj = iemws_json("daily.json", $arr);
-
-if ($jobj === FALSE){
-    $htmlout = "<p>No data was found for this request.</p>";
-}
-else if ($mode == "monthly") {
-    $t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
-    $db = array();
-    foreach ($jobj["data"] as $bogus => $row) {
-        $dvalid = date("Ymd", strtotime($row["date"] . " 12:00"));
-        $str = "";
-        if (! is_null($row["max_tmpf"])){
-            $str .= "High: " . $row["max_tmpf"];
-            if ($row["tmpf_est"]) $str .= "(E)";
-        }
-
-        if (! is_null($row["min_tmpf"])) {
-            $str .= "<br>Low: " . $row["min_tmpf"];
-            if ($row["tmpf_est"]) $str .= "(E)";
-        }
-
-        if ($row["precip"] < 0.01 && $row["precip"] > 0) {
-            $str .= "<br>Precip: Trace ";
-        } elseif (is_null($row["precip"])) {
-            $str .= "<br />Precip: M";
-        } else {
-            $str .= "<br>Precip: " . sprintf("%.2f", $row["precip"]);
-        }
-        if (array_key_exists("precip_est", $row) && $row["precip_est"]) $str .= "(E)";
-
-        if (array_key_exists("max_rstage", $row) && !is_null($row["max_rstage"]) && $row["max_rstage"] >= 0) {
-            $str .= "<br>Max Stage[ft]: " . sprintf("%.2f", $row["max_rstage"]);
-        }
-
-        if (!is_null($row["snow"]) && $row["snow"] >= 0) {
-            $str .= "<br>Snow: " . snow2str($row["snow"]);
-        }
-
-        if (!is_null($row["snowd"]) && $row["snowd"] >= 0) {
-            $str .= "<br>Snow Depth: " . snow2str($row["snowd"]);
-        }
-        if (isset($row["avg_sknt"])) {
-            $str .= sprintf(
-                "<br />Avg Wind: %s @ %.1f",
-                drct2txt($row["vector_avg_drct"]),
-                $row["avg_sknt"] * 1.15
-            );
-        }
-
-        if (!is_null($row["max_gust"]) && !is_null($row["max_gust_localts"]) && strlen($row["max_gust_localts"]) > 0) {
-            $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
-            $gs = date("g:i A", $gtim);
-            $g = round($row["max_gust"] * 1.15, 0);
-            if (is_null($row["max_drct"])) {
-                $str .= "<br>Gust: " . $g . " (" . $gs . ")";
-            } else {
-                $str .= "<br>Gust:<br> " . drct2txt($row["max_drct"]) . " @ " . $g .
-                    "<br>(" . $gs . ")";
-            }
-        }
-
-        if (!is_null($row["min_rh"])) {
-            $str .= sprintf(
-                "<br />RH%% Min/Max: %.0f-%.0f",
-                $row["min_rh"],
-                $row["max_rh"]
-            );
-        }
-
-        if (!is_null($row["min_feel"])) {
-            $str .= sprintf(
-                "<br />Feel Min/Max: %.0f to %.0f",
-                $row["min_feel"],
-                $row["max_feel"]
-            );
-        }
-        $db[$dvalid] = array("content" => $str, "cv" => $row["temp_hour"]);
-    } /* End of for */
-
-    $htmlout = printMonth(
-        $year,
-        $month,
-        $db,
-        "/sites/hist.phtml?network=$network&station=$station",
-        "/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day="
-    );
-
-    $htmlout .= <<<EOM
-
- <p>The data presented here provided by <a href="/api/">IEM API</a>
- webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
- exists as well.</p>
-
- <h3>Daily High/Low Plot</h3>
-<img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png" class="img-fluid">
-<br /><strong>Description:</strong> This chart of the monthly temperature data.
-The bars are the observations and the dots are climatology.
-
-<h3>Daily Rainfall</h3>
-<img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" class="img-fluid">
-<br /><strong>Description:</strong> This chart is of daily precipitation for the month.
-The red line would be an average month while the blue line and bars are observations.
-
-<h3>Daily Average Wind Speeds</h3>
-<img src="/plotting/auto/plot/71/network:{$network}::zstation:{$station}::year:{$year}::month:{$month}::units:MPH::dpi:100.png" class="img-fluid"></p>
-<br /><strong>Description:</strong> This chart is of the daily average wind speeds.
-EOM;
-} else {
-    $t->title = sprintf("%s Network Summary for %s", $network, $nicedate);
-    // We want a table of obs for one day!
-    $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
-    $htmlout = <<<EOM
-
-<p>This table lists out IEM computed daily summary values for this network.
-These values are derived from available observations and specialized summary
-products that some of the observation sites produce.  The time zone reported
-for the peak winds are hopefully the local valid time
-(<strong>{$metadata["tzname"]}</strong>) at the site. There
-is a <a href="/request/daily.phtml?network={$network}">download interface</a> for most of this
-summary information.</p>
-
-<table class="table table-striped table-bordered" id="thetable">
-<thead>
-<tr>
-<th>ID:</th>
-<th>Location:</th>
-<th>High:</th>
-<th>Low:</th>
-<th>Min Feels Like[F]:</th>
-<th>Max Feels Like [F]:</th>
-<th>Min Dew Point [F]:</th>
-<th>Max Dew Point [F]:</th>
-<th>Rainfall:</th>
-<th>Peak Gust:</th>
-<th>Time of Gust:</th>
-<th>Snowfall:</th>
-<th>Snow Depth:</th>
-</tr>
-</thead>
-EOM;
-    foreach ($jobj["data"] as $bogus => $row) {
-        if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
-        if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
-        $label = $row["name"];
-        if ($row["temp_hour"]) {
-            $label .= sprintf(" (@ %s)", $row["temp_hour"]);
-        }
-        $htmlout .= "<tr><td>" . $row['station'] . "</td>
-          <td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=" . $row["station"] . "\">{$label}</a></td>";
-
-        $te = (array_key_exists("tmpf_est", $row) && $row["tmpf_est"] )? "(E)" : "";
-        $htmlout .= "<td>" . $row["max_tmpf"] . " {$te}</td>";
-
-        $htmlout .= "<td>" . $row["min_tmpf"] . " {$te}</td>";
-        $htmlout .= "<td>" . $row["min_feel"] . "</td>";
-        $htmlout .= "<td>" . $row["max_feel"] . "</td>";
-
-        $htmlout .= "<td>" . $row["min_dwpf"] . "</td>";
-        $htmlout .= "<td>" . $row["max_dwpf"] . "</td>";
-
-        $pe = (array_key_exists("precip_est", $row) && $row["precip_est"] ) ? "(E)" : "";
-        $htmlout .= "<td>" . precip2str($row["precip"]) . " {$pe}</td>";
-
-        if (array_key_exists("max_gust", $row) && !is_null($row["max_gust"]) && $row["max_gust_localts"] != "") {
-            $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
-            $gs = date("g:i A", $gtim);
-            $g = round($row["max_gust"] * 1.15, 0);
-
-            if (is_null($row["max_drct"])) {
-                $htmlout .= "<td>" . $g . "</td><td>" . $gs . "</td>";
-            } else {
-                $htmlout .= "<td>" . drct2txt($row["max_drct"]) . " @ " . $g .
-                    "</td><td>" . $gs . "</td>";
-            }
-        } else {
-            $htmlout .= "<td></td><td></td>";
-        }
-        $htmlout .= "<td>" . snow2str($row["snow"]) . "</td><td>" . snow2str($row["snowd"]) . "</td>";
-
-        $htmlout .= "</tr>";
-    } /* End of for loop */
-    $htmlout .= "</table>\n";
-}
-$htmlout .= <<< EOM
-  <p>The data presented here provided by <a href="/api/">IEM API</a>
-  webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
-  exists as well.</p>
-EOM;
+$t->title = $mode == "monthly"
+    ? sprintf("%s Data Calendar for %s", $station, $nicemonthdate)
+    : sprintf("%s Network Summary for %s", $network, $nicedate);
+$mountpoint = sprintf(
+    '<div id="hist-app" role="status" aria-live="polite" data-mode="%s" data-network="%s" data-station="%s" data-year="%s" data-month="%s" data-day="%s">Loading data...</div>',
+    htmlspecialchars($mode, ENT_QUOTES, 'UTF-8'),
+    htmlspecialchars($network, ENT_QUOTES, 'UTF-8'),
+    htmlspecialchars($station, ENT_QUOTES, 'UTF-8'),
+    $year,
+    $month,
+    $day
+);
 
 $content = <<<EOM
 <div class="hidden-print">
@@ -370,16 +86,22 @@ EOM;
   {$ys} {$ms} {$ds}
   <input type="submit" value="Switch Date"></form>
   </div>
+<p>This table lists out IEM computed daily summary values. These values are
+derived from available observations and specialized summary products that
+some observation sites produce. Peak wind timestamps are hopefully in the
+local valid time (<strong>{$metadata["tzname"]}</strong>) at the site. There
+is a <a href="/request/daily.phtml?network={$network}">download interface</a>
+for most of this summary information.</p>
 EOM;
 }
 
-$content .= $htmlout;
+$content .= $mountpoint;
 $t->content = $content;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_bootstrap5.min.css" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script src="hist.module.js" type="module"></script>
+<script src="hist.module.js?v=2" type="module"></script>
 EOM;
 $t->render(TEMPLATE);
