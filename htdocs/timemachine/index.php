@@ -10,7 +10,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script type="text/javascript" src="index.js?v=3"></script>
+<script type="text/javascript" src="index.js?v=4"></script>
 EOM;
 
 $t->content = <<<EOM

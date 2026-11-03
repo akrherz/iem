@@ -329,21 +329,16 @@ function refresh() {
  * This function will convert that into a hash link
  */
 function translateHashLink() {
-    // get the hash link
-    const tokens = window.location.href.split("#");
-    if (tokens.length !== 2) {
+    const match = window.location.hash.match(/^#(\d+)\.(\d{8}|\d{12})$/);
+    if (!match) {
         return;
     }
-    const tokens2 = tokens[1].split(".");
-    if (tokens2.length !== 2) {
-        return;
-    }
-    const product = escapeHTML(tokens2[0]);
-    const timestamp = escapeHTML(tokens2[1]);
-    // Set the URL without updating the history using query params
+    // Hash values take precedence over any existing query params, and the
+    // hash is dropped so it can not override later navigation on reload.
     const url = new URL(window.location.href);
-    url.searchParams.set('product', product);
-    url.searchParams.set('timestamp', timestamp);
+    url.searchParams.set('product', match[1]);
+    url.searchParams.set('timestamp', match[2]);
+    url.hash = '';
     window.history.replaceState({}, '', url);
 }
 
