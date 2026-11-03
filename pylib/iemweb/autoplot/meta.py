@@ -116,7 +116,10 @@ def get_scriptmod_and_meta(pidx: int) -> tuple[ModuleType, dict]:
 def application(environ: dict, start_response: Callable):
     """NOTE: This is used by PHP scripts internally."""
     pidx = environ["p"]
-    _, output = get_scriptmod_and_meta(pidx)
+    if pidx == 0:
+        output = autoplot_data
+    else:
+        _, output = get_scriptmod_and_meta(pidx)
     payload = json.dumps(output)
     start_response("200 OK", [("Content-type", "application/json")])
     return payload
