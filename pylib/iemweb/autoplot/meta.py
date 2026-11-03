@@ -6,14 +6,27 @@ interface.
 """
 
 import importlib
+import json
+from collections.abc import Callable
 from types import ModuleType
+from typing import Annotated
 
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.reference import FIGSIZES_NAMES
+from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.description import describe
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    p: Annotated[
+        int, Field(description="The autoplot index", ge=0, le=1000)
+    ] = 0
 
 
 def get_timing(pidx: int) -> float:
@@ -92,3 +105,18 @@ def get_scriptmod_and_meta(pidx: int) -> tuple[ModuleType, dict]:
         }
     )
     return mod, data
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=lambda x: f"/autoplot/meta?p={x['p']}",
+    memcacheexpire=300,
+)
+def application(environ: dict, start_response: Callable):
+    """NOTE: This is used by PHP scripts internally."""
+    pidx = environ["p"]
+    _, output = get_scriptmod_and_meta(pidx)
+    payload = json.dumps(output)
+    start_response("200 OK", [("Content-type", "application/json")])
+    return payload
