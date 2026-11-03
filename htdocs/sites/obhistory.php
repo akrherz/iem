@@ -1,4 +1,5 @@
 <?php
+die();
 // This app apparently is an AI bot playground, so this setting causes the
 // downstream throttle to be more aggressive
 define("THROTTLE_APP", "sites/obhistory");

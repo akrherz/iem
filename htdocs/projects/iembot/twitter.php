@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 102);
 require_once "../../../include/myview.php";
@@ -14,6 +13,9 @@ by X.  Please see this <a href="https://devcommunity.x.com/t/please-x-again-have
 EOM;
 $t->render("single.phtml");
 die();
+
+// fails with memcached down
+session_start();
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 
