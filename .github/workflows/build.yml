@@ -22,22 +22,22 @@ jobs:
           - PYTHON_VERSION: "3.14"
             MEMCACHE_ON: "YES"
             WITH_TEST_DATA: "test_data"
-            TEST_WEB: "YES"
+            UPLOAD_CODECOV: "YES"
           # This ensures memcache being off does not fail us
           - PYTHON_VERSION: "3.14"
             MEMCACHE_ON: "NO"
             WITH_TEST_DATA: "test_data"
-            TEST_WEB: "YES"
+            UPLOAD_CODECOV: "NO"
           # This smoke tests things without a database with data
           - PYTHON_VERSION: "3.14"
             MEMCACHE_ON: "YES"
             WITH_TEST_DATA: "no_test_data"
-            TEST_WEB: "YES"
+            UPLOAD_CODECOV: "NO"
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
       WITH_TEST_DATA: ${{ matrix.WITH_TEST_DATA }}
-      TEST_WEB: ${{ matrix.TEST_WEB }}
       MEMCACHE_ON: ${{ matrix.MEMCACHE_ON }}
+      UPLOAD_CODECOV: ${{ matrix.UPLOAD_CODECOV }}
     steps:
     - uses: actions/checkout@v7
 
@@ -108,7 +108,6 @@ jobs:
       run: bash .github/setupdata.sh
 
     - name: IEM TileCache Backend
-      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         nohup bash deployment/start_tc_wsgi.sh > /tmp/iem-tilecache.log 2>&1 &
         echo $! > /tmp/iem-tilecache.pid
@@ -126,7 +125,6 @@ jobs:
 
 
     - name: Configure Webfarm Server
-      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
@@ -140,47 +138,44 @@ jobs:
         sudo systemctl status apache2.service -l
 
     - name: Run IEM Production checks
-      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
         SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py
 
     - name: Run mod_wsgi smoke test
-      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: pytest -n 4 tests/test_mod_wsgi.py
 
     - name: Test PHP webscripts
-      if: ${{ matrix.TEST_WEB == 'YES' }}
       run: pytest -n 4 tests/test_php.py
 
     # - name: Setup upterm session
-    #  if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
+    #  if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
     #  uses: owenthereal/action-upterm@v1
     #  with:
     #    limit-access-to-actor: true
 
     - name: Run IEMWeb Python Check
-      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
+      if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
       run: |
         export PYTHONPATH=/opt/iem/pylib
         python -m pytest --mpl --cov=iemweb --durations=10 -n 4 -W error::FutureWarning tests/iemweb/
         python -m coverage xml
 
     - name: Upload to Codecov
-      if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_TEST_DATA == 'test_data' }}
+      if: ${{ matrix.UPLOAD_CODECOV == 'YES' }}
       uses: codecov/codecov-action@v7
       with:
         files: coverage.xml
         fail_ci_if_error: true
 
     - name: View Apache Logs
-      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
+      if: ${{ failure() }}
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
 
     - name: View TileCache Logs
-      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
+      if: ${{ failure() }}
       run: |
         if [ -f /tmp/iem-tilecache.pid ]; then
           ps -fp "$(cat /tmp/iem-tilecache.pid)" || true
@@ -190,6 +185,6 @@ jobs:
         fi
 
     - name: View PHP-FPM Logs
-      if: ${{ failure() && matrix.TEST_WEB == 'YES' }}
+      if: ${{ failure() }}
       run: |
         sudo cat /var/log/php*-fpm.log
