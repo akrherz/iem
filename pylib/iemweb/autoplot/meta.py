@@ -6,7 +6,6 @@ interface.
 """
 
 import importlib
-from contextlib import suppress
 from types import ModuleType
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
@@ -60,9 +59,10 @@ def import_script(p: int) -> ModuleType:
 
 def get_scriptmod_and_meta(pidx: int) -> tuple[ModuleType, dict]:
     """Do what needs to be done for JSON requests."""
-    timing = -1
-    with suppress(Exception):
+    try:
         timing = get_timing(pidx)
+    except Exception:
+        timing = -1
     mod = import_script(pidx)
     data = describe(mod)
     data["title"] = find_title(pidx)

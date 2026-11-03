@@ -884,9 +884,12 @@ def generate_form(
     if apid == 0:
         return res
     scriptmod, meta = get_scriptmod_and_meta(apid)
-    # Keep repeated keys (multiple selects) as lists, others as scalars
+    # Arguments declared multiple stay lists, others collapse to a scalar
+    multi = {
+        arg["name"] for arg in meta["arguments"] if arg.get("multiple", False)
+    }
     data = {
-        key: vals if len(vals) > 1 else vals[0]
+        key: vals if key in multi or len(vals) > 1 else vals[0]
         for key, vals in request.args.to_dict(flat=False).items()
     }
     try:
