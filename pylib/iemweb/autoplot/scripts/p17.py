@@ -76,7 +76,7 @@ def common(ctx: Params):
     sts = date(year, month, 1)
     ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
-    days = int((ets - sts).days)
+    days = (ets - sts).days
     weekends = []
     now = sts
     while now < ets:
@@ -94,6 +94,8 @@ def common(ctx: Params):
             },
             timeout=15,
         )
+        if resp.status_code == 429:
+            raise BadWebRequest("Too many requests to the API service.")
         resp.raise_for_status()
     except Exception as exp:
         raise NoDataFound("Unable to fetch data from API service.") from exp
@@ -145,11 +147,11 @@ def common(ctx: Params):
     title = f"{ctx.sname} :: {PDICT[ctx.p]} for {sts:%b %Y}\n{subtitle}"
     (ctx["fig"], ax) = figure_axes(title=title, apctx=ctx)
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
+    ax.set_position((box.x0, box.y0, box.width, box.height * 0.94))
 
     for day in weekends:
         rect = Rectangle(
-            [day - 0.5, -100], 1, 300, facecolor="#EEEEEE", edgecolor="None"
+            (day - 0.5, -100), 1, 300, facecolor="#EEEEEE", edgecolor="None"
         )
         ax.add_patch(rect)
     ax.set_xlim(0.5, days + 0.5)
