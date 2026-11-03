@@ -23,10 +23,18 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from iemweb.autoplot.description import Arg, SDayArg
+from iemweb.autoplot.description import Arg, DateArg, SDayArg
 
 _SLASH_DATE = re.compile(r"^\d{4}/\d{2}/\d{2}")
 _HHMM = re.compile(r" (\d{2})(\d{2})$")
+
+
+def _iso_datestr(val: Any) -> Any:
+    """Widgets use yyyy/mm/dd and hhmm, pydantic wants yyyy-mm-dd and hh:mm."""
+    if isinstance(val, str) and _SLASH_DATE.match(val):
+        val = val.replace("/", "-", 2)
+        val = _HHMM.sub(r" \1:\2", val)
+    return val
 
 
 class AutoplotParams(BaseModel):
@@ -63,12 +71,12 @@ class AutoplotParams(BaseModel):
                 if arg is not None and arg.default is not None:
                     dflt = arg.default
                     dflt = dflt() if callable(dflt) else dflt
-                    if isinstance(dflt, str) and _SLASH_DATE.match(dflt):
-                        # Widget defaults use yyyy/mm/dd, pydantic wants -
-                        dflt = dflt.replace("/", "-", 2)
-                        # and hh:mm, not hhmm
-                        dflt = _HHMM.sub(r" \1:\2", dflt)
-                    data[name] = dflt
+                    data[name] = _iso_datestr(dflt)
+                    continue
+            if key_in is not None and any(
+                isinstance(m, DateArg) for m in fld.metadata
+            ):
+                data[key_in] = _iso_datestr(data[key_in])
         for name, fld in cls.model_fields.items():
             if not any(isinstance(m, SDayArg) for m in fld.metadata):
                 continue
