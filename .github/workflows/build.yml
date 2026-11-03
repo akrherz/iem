@@ -13,22 +13,31 @@ jobs:
       run:
         # Ensures environment gets sourced right
         shell: bash -l -e {0}
-    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_TEST_DATA }}) Test Web (${{ matrix.TEST_WEB }})
+    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_TEST_DATA }}) Test Web (${{ matrix.TEST_WEB }}) Memcache (${{ matrix.MEMCACHE_ON }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.14"]
-        WITH_TEST_DATA: ["test_data", "no_test_data"]
-        TEST_WEB: ["YES", "NO"]
-        exclude:
-          # This combination is not all that useful
+        include:
+          # This is generally production configuration
           - PYTHON_VERSION: "3.14"
-            TEST_WEB: "NO"
+            MEMCACHE_ON: "YES"
+            WITH_TEST_DATA: "test_data"
+            TEST_WEB: "YES"
+          # This ensures memcache being off does not fail us
+          - PYTHON_VERSION: "3.14"
+            MEMCACHE_ON: "NO"
+            WITH_TEST_DATA: "test_data"
+            TEST_WEB: "YES"
+          # This smoke tests things without a database with data
+          - PYTHON_VERSION: "3.14"
+            MEMCACHE_ON: "YES"
             WITH_TEST_DATA: "no_test_data"
+            TEST_WEB: "YES"
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
       WITH_TEST_DATA: ${{ matrix.WITH_TEST_DATA }}
       TEST_WEB: ${{ matrix.TEST_WEB }}
+      MEMCACHE_ON: ${{ matrix.MEMCACHE_ON }}
     steps:
     - uses: actions/checkout@v7
 
@@ -74,6 +83,7 @@ jobs:
 
     # Required for all matrix jobs
     - name: Run Memcached container
+      if: ${{ matrix.MEMCACHE_ON == 'YES' }}
       run: |
         docker run -d --name iem_memcached -p 11211:11211 memcached:1.6.9
 
