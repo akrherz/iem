@@ -13,7 +13,7 @@ jobs:
       run:
         # Ensures environment gets sourced right
         shell: bash -l -e {0}
-    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_TEST_DATA }}) Test Web (${{ matrix.TEST_WEB }}) Memcache (${{ matrix.MEMCACHE_ON }})
+    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_TEST_DATA }}) Memcache (${{ matrix.MEMCACHE_ON }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
