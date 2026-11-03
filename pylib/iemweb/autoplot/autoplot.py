@@ -308,6 +308,8 @@ def check_memcache(mc, mckey: str, forced: bool) -> str | None:
         res = mc.get(mckey)
     except MemcacheIllegalInputError as exp:
         raise BadWebRequest("Memcache key is invalid") from exp
+    except Exception:
+        res = None
     return res
 
 
@@ -430,16 +432,20 @@ def workflow(mc, environ: dict, query: Schema) -> tuple[str, bytes | str]:
     try:
         # we have a 10 MB limit within memcache, so don't write objects bigger
         if len(content) < 9.5 * 1024 * 1024:
-            # Default encoding is ascii for text
-            mc.set(
-                mckey.encode("ascii"),
-                (
-                    content
-                    if isinstance(content, bytes)
-                    else content.encode("utf-8")
-                ),
-                dur,
-            )
+            try:
+                # Default encoding is ascii for text
+                mc.set(
+                    mckey.encode("ascii"),
+                    (
+                        content
+                        if isinstance(content, bytes)
+                        else content.encode("utf-8")
+                    ),
+                    dur,
+                )
+            except Exception:
+                # Do not care
+                pass
         else:
             error_log(
                 environ,

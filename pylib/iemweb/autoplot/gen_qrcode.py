@@ -69,14 +69,21 @@ def application(environ: dict, start_response):
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]
     mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
+    try:
+        res = mc.get(mckey)
+    except Exception:
+        res = None
     if not res:
         img = qrcode.make(uri)
         bio = BytesIO()
         img.save(bio, "PNG")
         res = bio.getvalue()
         bio.close()
+    try:
         mc.set(mckey, res, 0)
+    except Exception:
+        pass
     mc.close()
+
     start_response(HTTP200, response_headers)
     return [res]
