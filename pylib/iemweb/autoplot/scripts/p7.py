@@ -58,7 +58,7 @@ def get_description() -> PlotDescription:
         description=__doc__ or "",
         data=True,
         gallery={
-            "year": 2023,
+            "year": "2023",
         },
     )
 

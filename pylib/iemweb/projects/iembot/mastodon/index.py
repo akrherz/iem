@@ -5,11 +5,11 @@ Configure iembot for mastodon, gasp.
 import cryptocode
 import mastodon
 import requests
-from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_properties
 from pyiem.webutil import iemapp
+from werkzeug.wrappers import Request
 
 PRIVKEY = get_properties().get("mod_wsgi.privkey", "")
 APP = "https://mesonet.agron.iastate.edu/projects/iembot/mastodon"
@@ -275,7 +275,7 @@ def reload_bot():
 @iemapp()
 def application(environ: dict, start_response: callable):
     """mod-wsgi handler."""
-    cookies = get_cookie_dict(environ)
+    cookies = Request(environ).cookies
     headers = [("Content-type", "text/html")]
     res = {"content": HEADER}
 

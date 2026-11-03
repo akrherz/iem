@@ -56,7 +56,7 @@ dependencies:
   - openpyxl
   # due to join suffixes usage
   - pandas>=3.1
-  # mod-wsgi
+  # pyiem needs this, but is installed with no-deps
   - paste
   # PIL
   - pillow

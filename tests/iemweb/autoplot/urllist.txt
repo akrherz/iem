@@ -9,6 +9,7 @@
 5/network:IACLIMATE::station:IATAME::var:max_snow::_r:43::dpi:100.png
 6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 6/state:IA::eyear:2023::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
+7/_gallery:1.png
 7/network:IACLIMATE::station:IATAME::year:2024::gdd1:1135::gdd2:1660::gddbase:50::gddceil:86::cmap:jet::_r:t::dpi:100.png
 9/network:IACLIMATE::station:IATAME::year:2020::sday:0101::eday:1231::var:sdd::w:ytd::base:50::ceiling:86::_r:43::dpi:100.png
 10/network:IACLIMATE::station:IATAME::direction:above2::varname:low::threshold:32::year:1893::_r:t::dpi:100.png
@@ -125,7 +126,11 @@
 70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 70/opt:fema::network:WFO::station:DMX::state:IA::fema:7::phenomena:SV::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100::_cb:1.png
 71/network:IA_ASOS::zstation:AMW::year:2020::month:7::units:MPH::dpi:100::_cb:1.png
+71/network:AWOS::zstation:AMW::year:2020::month:7::units:MPH::dpi:100::_cb:1.png
 72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
+72/network:WFO::station:PHEB::phenomena:TO::significance:W::season:jul.png
+72/network:WFO::station:PAAQ::phenomena:TO::significance:W::season:jul.png
+72/network:WFO::station:NHC::phenomena:TO::significance:W::season:jul.png
 72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
 72/network:WFO::station:OAX::phenomena:TO::significance:W::season:spring2::_r:43::dpi:100.png
 73/opt:fema::network:WFO::station:DMX::state:IA::fema:7::ugc:IAC169::limit:no::sday:0101::eday:1231::phenomena:FF::significance:W::_r:t::dpi:100::_cb:1.png

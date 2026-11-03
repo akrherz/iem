@@ -17,9 +17,24 @@ is lenient (bad values fall back to defaults), the model then validates and
 types its output.
 """
 
+import re
+from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from iemweb.autoplot.description import Arg, DateArg, SDayArg
+
+_SLASH_DATE = re.compile(r"^\d{4}/\d{2}/\d{2}")
+_HHMM = re.compile(r" (\d{2})(\d{2})$")
+
+
+def _iso_datestr(val: Any) -> Any:
+    """Widgets use yyyy/mm/dd and hhmm, pydantic wants yyyy-mm-dd and hh:mm."""
+    if isinstance(val, str) and _SLASH_DATE.match(val):
+        val = val.replace("/", "-", 2)
+        val = _HHMM.sub(r" \1:\2", val)
+    return val
 
 
 class AutoplotParams(BaseModel):
@@ -34,6 +49,50 @@ class AutoplotParams(BaseModel):
 
     dpi: int | None = None
     sname: str | None = Field(default=None, alias="_sname")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _prepare_input(cls, data: Any) -> Any:
+        """Apply widget defaults, then convert sday values to dates.
+
+        A required field (no model default) falls back to its widget default
+        when absent, so the script can be called with no arguments.  An
+        ``mmdd`` (or legacy ``yyyy-mm-dd``) sday becomes a date in 2000.
+        """
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)
+        for name, fld in cls.model_fields.items():
+            key_in = next((k for k in (name, fld.alias) if k in data), None)
+            if key_in is None and fld.is_required():
+                arg = next(
+                    (m for m in fld.metadata if isinstance(m, Arg)), None
+                )
+                if arg is not None and arg.default is not None:
+                    dflt = arg.default
+                    dflt = dflt() if callable(dflt) else dflt
+                    data[name] = _iso_datestr(dflt)
+                    continue
+            if key_in is not None and any(
+                isinstance(m, DateArg) for m in fld.metadata
+            ):
+                data[key_in] = _iso_datestr(data[key_in])
+        for name, fld in cls.model_fields.items():
+            if not any(isinstance(m, SDayArg) for m in fld.metadata):
+                continue
+            for key in (name, fld.alias):
+                val = data.get(key)
+                if not isinstance(val, str):
+                    continue
+                try:
+                    if "-" in val:
+                        data[key] = datetime.strptime(val[:10], "%Y-%m-%d")
+                    else:
+                        data[key] = datetime.strptime(f"2000{val}", "%Y%m%d")
+                    data[key] = data[key].date()
+                except ValueError:
+                    pass  # let pydantic report the bad value
+        return data
 
     @classmethod
     def _field_name(cls, key: str) -> str | None:

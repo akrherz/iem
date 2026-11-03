@@ -6,7 +6,7 @@ from datetime import date
 from typing import Annotated
 
 import pytest
-from iemweb.autoplot import ARG_STATION, import_script
+from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.description import (
     IntArg,
     PlotDescription,
@@ -15,6 +15,7 @@ from iemweb.autoplot.description import (
     describe,
     normalize,
 )
+from iemweb.autoplot.meta import import_script
 from iemweb.autoplot.params import AutoplotParams
 from pydantic import Field
 from pyiem.autoplot import get_autoplot_context
@@ -117,7 +118,11 @@ def test_p1_params_roundtrip():
 )
 def test_all_scripts_describe(fn):
     """Every autoplot normalizes to a dict with plain-dict arguments."""
-    pidx = int(re.search(r"p(\d+)\.py", fn).group(1))
+    m = re.search(r"p(\d+)\.py", fn)
+    pidx = None
+    if m:
+        pidx = int(m.group(1))
+    assert pidx is not None
     res = describe(import_script(pidx))
     assert isinstance(res["description"], str)
     assert all(isinstance(a, dict) for a in res["arguments"])

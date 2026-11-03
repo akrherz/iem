@@ -211,7 +211,7 @@ def get_description() -> PlotDescription:
         cache=60,
         gallery={
             "endts": "2024-01-10 1300",
-            "hours": 24,
+            "hours": "24",
         },
     )
 

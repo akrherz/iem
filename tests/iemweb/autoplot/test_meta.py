@@ -1,6 +1,6 @@
 """Test the metadata service."""
 
-from iemweb.autoplot.meta import find_title, get_metadict, get_timing
+from iemweb.autoplot.meta import find_title, get_timing
 
 
 def test_find_title():
@@ -12,5 +12,3 @@ def test_simple():
     """Test the API."""
     res = get_timing(0)
     assert res == -1
-    get_metadict(0)
-    get_metadict(90)

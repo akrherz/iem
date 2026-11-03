@@ -7,7 +7,7 @@ relative humidity value is computed.
 """
 
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Any
 
 import matplotlib.ticker as mticker
 import metpy.calc as mcalc
@@ -78,6 +78,11 @@ def plotter(ctx: Params):
     month = ctx.month
     months = month2months(month)
     on_date: date | None = ctx.on
+    params: dict[str, Any] = {
+        "station": station,
+        "months": months,
+        "tzname": ctx["_nt"].sts[station]["tzname"],
+    }
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -93,11 +98,7 @@ def plotter(ctx: Params):
         """
             ),
             conn,
-            params={
-                "station": station,
-                "months": months,
-                "tzname": ctx["_nt"].sts[station]["tzname"],
-            },
+            params=params,
             parse_dates=[
                 "date",
             ],
@@ -133,7 +134,7 @@ def plotter(ctx: Params):
     ptiles = (
         df[["dwpf", "t"]]
         .groupby("t")
-        .quantile([0, 0.05, 0.25, 0.75, 0.95, 1])
+        .quantile(pd.Series([0, 0.05, 0.25, 0.75, 0.95, 1]))
         .reset_index()
         .rename(columns={"level_1": "ptile"})
     )
@@ -145,13 +146,22 @@ def plotter(ctx: Params):
         .m
     )
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    title = (
+        f"{ctx.sname}:: Average Dew Point by Wind Direction "
+        f"(month={month.upper()}) "
+    )
+    subtitle = (
+        f"[{max([1973, ab.year])}-{datetime.now().year}] "
+        "(must have 3+ hourly obs >= 3 knots at given direction)"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     ymax = ptiles[ptiles["ptile"] == 1]
     ymin = ptiles[ptiles["ptile"] == 0]
     ax.fill_between(
-        ymin["t"].values,
-        ymin["dwpf"].values,
-        ymax["dwpf"].values,
+        ymin["t"].to_numpy(),
+        ymin["dwpf"].to_numpy(),
+        ymax["dwpf"].to_numpy(),
         ec="brown",
         fc="tan",
         label="Range",
@@ -160,9 +170,9 @@ def plotter(ctx: Params):
     ymax2 = ptiles[ptiles["ptile"] == 0.95]
     ymin2 = ptiles[ptiles["ptile"] == 0.05]
     ax.fill_between(
-        ymin2["t"].values,
-        ymin2["dwpf"].values,
-        ymax2["dwpf"].values,
+        ymin2["t"].to_numpy(),
+        ymin2["dwpf"].to_numpy(),
+        ymax2["dwpf"].to_numpy(),
         ec="blue",
         fc="lightblue",
         label="5th - 95th",
@@ -171,17 +181,17 @@ def plotter(ctx: Params):
     ymax2 = ptiles[ptiles["ptile"] == 0.75]
     ymin2 = ptiles[ptiles["ptile"] == 0.25]
     ax.fill_between(
-        ymin2["t"].values,
-        ymin2["dwpf"].values,
-        ymax2["dwpf"].values,
+        ymin2["t"].to_numpy(),
+        ymin2["dwpf"].to_numpy(),
+        ymax2["dwpf"].to_numpy(),
         label="25th - 75th",
         ec="red",
         fc="pink",
         step="mid",
     )
     ax.plot(
-        means.index.values,
-        means["dwpf"].values,
+        means.index.to_numpy(),
+        means["dwpf"].to_numpy(),
         color="k",
         lw=3,
         label="Mean",
@@ -200,18 +210,6 @@ def plotter(ctx: Params):
             )
     ax.legend(ncol=5)
     ax.grid(True, zorder=11)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    titles = [
-        f"{ctx.sname}:: ",
-        (
-            f"Average Dew Point by Wind Direction (month={month.upper()}) "
-            f"({max([1973, ab.year])}-{datetime.now().year})"
-        ),
-        "(must have 3+ hourly obs >= 3 knots at given direction)",
-    ]
-    ax.set_title("\n".join(titles), size=10)
 
     ax.set_ylabel("Dew Point [°F]")
     ax.set_ylim(ymin["dwpf"].min() - 10, ymax["dwpf"].max() + 10)

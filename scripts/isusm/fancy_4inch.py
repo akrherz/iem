@@ -3,17 +3,19 @@
 Called from run_plots.sh
 """
 
+import os
 from datetime import date, datetime, timedelta
 
 import click
 import numpy as np
 import pandas as pd
 import pygrib
+import requests
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
-from pyiem.util import archive_fetch, c2f, convert_value, logger
+from pyiem.util import c2f, convert_value, logger
 from scipy.signal import convolve2d
 
 LOG = logger()
@@ -25,52 +27,85 @@ def get_idx(lons, lats, lon, lat):
     return np.unravel_index(dist.argmin(), dist.shape)
 
 
-def get_grib(now, fhour):
+def get_grib(valid: datetime, fhour: int):
     """Find the desired grib within the grib messages"""
-    ppath = now.strftime(
-        f"%Y/%m/%d/model/nam/%H/nam.t%Hz.conusnest.hiresf0{fhour}.tm00.grib2"
+    idxfn = (
+        "https://noaa-rrfs-ops-pds.s3.amazonaws.com/"
+        f"rrfs.{valid:%Y%m%d}/{valid:%H}/"
+        f"rrfs.t{valid:%H}z.2dfld.13km.f{fhour:03.0f}.na.grib2.idx"
     )
-    with archive_fetch(ppath) as gribfn:
-        if gribfn is None:
-            LOG.warning("NAM missing: %s", ppath)
-            return None
-        grbs = pygrib.open(gribfn)
-        try:
-            gs = grbs.select(shortName="st")
-        except ValueError:
-            LOG.warning("failed to find st in %s", gribfn)
-            return None
-        for g in gs:
-            if str(g).find("levels 0.0-0.1 m") > 0:
-                return g
-    return None
+    resp = requests.get(idxfn, timeout=60)
+    if resp.status_code != 200:
+        LOG.info("Download %s failed, returning None", idxfn)
+        return None
+
+    offsets = []
+    for line in resp.text.splitlines():
+        tokens = line.split(":")
+        if offsets:
+            offsets.append(int(tokens[1]) - 1)
+            break
+        if ":TSOIL:0.01-0.01 m below ground" in line:
+            offsets.append(int(tokens[1]))
+
+    if len(offsets) < 2:
+        LOG.info("Failed to parse offsets from %s", idxfn)
+        return None
+
+    gribfn = idxfn.removesuffix(".idx")
+    resp = requests.get(
+        gribfn,
+        headers={"Range": f"bytes={offsets[0]}-{offsets[1]}"},
+        timeout=60,
+    )
+    if resp.status_code != 206:
+        LOG.info("Download %s failed, returning None", gribfn)
+        return None
+
+    with open("tmp.grib", "wb") as fh:
+        fh.write(resp.content)
+    with pygrib.open("tmp.grib") as grbs:  # type: ignore
+        g = grbs[1]
+    os.unlink("tmp.grib")
+    return g
 
 
-def do_nam(
-    valid: date,
-) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
-    """Compute county level estimates based on NAM data"""
+def do_rrfs(valid: date):
+    """Compute county level estimates based on RRFS data"""
     # run 6z to 6z, close enough
-    now = datetime(valid.year, valid.month, valid.day, 6)
+    model_runtime = datetime(valid.year, valid.month, valid.day, 6)
     lats = None
     lons = None
     count = 0
     grib = None
     data = None
-    for offset in [0, 6, 12, 18]:
-        runtime = now + timedelta(hours=offset)
-        for fhour in range(6):
-            grib = get_grib(runtime, fhour)
-            if grib is None:
-                continue
-            if lats is None:
-                lats, lons = grib.latlons()
-                data = np.zeros(np.shape(lats))
-    if grib is None or lats is None or data is None:
-        LOG.warning("Failed to find NAM data for %s", valid)
+    for fhour in [6, 12, 18, 24]:
+        grib = get_grib(model_runtime, fhour)
+        if grib is None:
+            continue
+        if lats is None:
+            lats, lons = grib.latlons()
+            LOG.info("lons ranges %s to %s", lons.min(), lons.max())
+            data = np.zeros(np.shape(lats))
+        values = grib.values.filled(np.nan)
+        LOG.info(
+            "Fhour %s ranges from %s to %s",
+            fhour,
+            np.nanmin(values),
+            np.nanmax(values),
+        )
+        data += values
+        count += 1
+    if count < 2 or data is None:
+        LOG.warning("Failed to find RRFS data for %s", valid)
         return None, None, None
-    data += grib.values
-    count += 1
+    LOG.info("Found %s grib files", count)
+    result = data / float(count)
+    LOG.info(
+        "Resulting grid ranges from %s to %s",
+        np.nanmin(result),
+        np.nanmax(result),
+    )
     return lons, lats, data / float(count)
 
 
@@ -92,12 +127,15 @@ def main(days: int):
     nt = Table("ISUSM")
     qdict = loadqc()
     ts = date.today() - timedelta(days=days)
-    hlons, hlats, hvals = do_nam(ts)
+    hlons, hlats, hvals = do_rrfs(ts)
     if hlons is None:
+        LOG.warning("Exiting as no RRFS data found for %s", ts)
         return
-    nam: np.ndarray = convert_value(hvals, "degK", "degF")
+    rrfs: np.ndarray = convert_value(hvals, "degK", "degF")
     window = np.ones((3, 3))
-    nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
+    rrfs = convolve2d(
+        rrfs, window / window.sum(), mode="same", boundary="symm"
+    )
 
     # Query out the data
     with get_sqlalchemy_conn("isuag", rw=False) as conn:
@@ -135,19 +173,19 @@ def main(days: int):
         x, y = get_idx(  # skipcq
             hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"]
         )
-        df.loc[stid, "nam"] = nam[x, y]
+        df.loc[stid, "rrfs"] = rrfs[x, y]
         df.loc[stid, "lat"] = nt.sts[stid]["lat"]
         df.loc[stid, "lon"] = nt.sts[stid]["lon"]
     df = df[~df["ticket"]]
-    df["diff"] = df["ob"] - df["nam"]
+    df["diff"] = df["ob"] - df["rrfs"]
     bias = df["diff"].mean()
-    nam = nam + bias
+    rrfs = rrfs + bias
     LOG.info("NAM bias correction of: %.2fF applied", bias)
     # apply nam bias to sampled data
-    df["nam"] += bias
-    df["diff"] = df["ob"] - df["nam"]
+    df["rrfs"] += bias
+    df["diff"] = df["ob"] - df["rrfs"]
     # we are going to require data be within 1 SD of sampled or 5 deg
-    std = max(5.0, df["nam"].std())
+    std = max(5.0, df["rrfs"].std())
     for station in df[df["diff"].abs() > std].index.values:
         LOG.info(
             "%s QC'd %s out std: %.2f, ob:%.1f nam:%.1f",
@@ -155,7 +193,7 @@ def main(days: int):
             station,
             std,
             df.loc[station, "ob"],
-            df.loc[station, "nam"],
+            df.loc[station, "rrfs"],
         )
         df = df.drop(station)
 
@@ -172,7 +210,7 @@ def main(days: int):
     nam_vals = []
     for row in cdf.itertuples():
         x, y = get_idx(hlons, hlats, row.lon, row.lat)
-        nam_vals.append(float(nam[x, y]))
+        nam_vals.append(float(rrfs[x, y]))
     cdf["nam"] = nam_vals
 
     mp = MapPlot(
@@ -180,14 +218,15 @@ def main(days: int):
         title=f"{ts:%b %d, %Y} Avg [(Hi+Lo)/2] Daily 4 inch Depth Soil Temp",
         subtitle=(
             "County est. based on bias adj. "
-            "NWS NAM Model (black numbers), "
+            "NWS RRFS Model (black numbers), "
             "ISUSM network observations (red numbers)"
         ),
     )
+    LOG.info("Raw %s to %s", np.nanmin(rrfs), np.nanmax(rrfs))
     mp.pcolormesh(
         hlons,
         hlats,
-        nam,
+        rrfs,
         np.arange(10, 101, 5),
         cmap=get_cmap("jet"),
         units="°F",
@@ -195,7 +234,7 @@ def main(days: int):
     mp.plot_values(
         df["lon"],
         df["lat"],
-        df["ob"].values,
+        df["ob"].to_numpy(),
         fmt="%.0f",
         color="r",
         labelbuffer=5,
@@ -203,7 +242,7 @@ def main(days: int):
     mp.plot_values(
         cdf["lon"],
         cdf["lat"],
-        cdf["nam"].values,
+        cdf["nam"].to_numpy(),
         fmt="%.0f",
         textsize=11,
         labelbuffer=5,

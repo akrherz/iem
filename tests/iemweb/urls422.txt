@@ -10,6 +10,7 @@
 /autoplot/index.py?_wait=no&q=15&year=2019&varname=high&station=IATDSM&network=scnr
 /autoplot/index.py?_wait=no&q=-15
 /autoplot/index.py?q=928
+/autoplot/autoplot.py?q=23&year=a
 /autoplot/index.py?_wait=no&q=54&network1=IA_ASOS&zstation1=ALO&network2=iaASOS&zstation2=OLZ
 /cgi-bin/request/gis/watchwarn.py?timeopt=1
 /cgi-bin/request/gis/watchwarn.py?timeopt=1&year1=2025&month1=1&day1=1

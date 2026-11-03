@@ -26,7 +26,7 @@ local research and makes it available for others to use as well.</p>
 <tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
 <tr><th>GFS LAMP (abbr LAV) [0, 6, 12, 18]</th><td>12 Jul 2020</td><td>--Realtime--</td></tr>
 <tr><th>GFS Extended (abbr MEX)</th><td>12 Jul 2020</td><td>--Realtime--</td></tr>
-<tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
+<tr><th>NAM</th><td>9 Dec 2008</td><td>3 Nov 2026 12 UTC</td></tr>
 <tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>25 Feb 2020</td></tr>
 <tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>5 May 2026</td></tr>
 <tr><th>NBE [1, 7, 13, 19z]</th><td>23 Jul 2020</td><td>5 May 2026</td></tr>
