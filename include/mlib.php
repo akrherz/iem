@@ -7,7 +7,8 @@
  * @param int $precision The number of decimal places to round to (default is 2)
  * @return string A string representation of the precipitation value, with special handling for null and empty
  */
-function precip2str($val, $precision=2) {
+function precip2str($val, $precision = 2)
+{
     // null returns missing value
     if (is_null($val) || $val === "") {
         return "M";
@@ -38,7 +39,8 @@ function precip2str($val, $precision=2) {
  * @param float|string|null $val The snow value, which can be a float, string, or null
  * @return string A string representation of the snow value, with special handling for null and empty
  */
-function snow2str($val) {
+function snow2str($val)
+{
     return precip2str($val, 1);
 }
 
@@ -51,7 +53,8 @@ function snow2str($val) {
  * @return DateTimeImmutable The corresponding DateTimeImmutable object in UTC
  * @throws Exception If the date string is invalid or represents a future time
  */
-function dstr2dt($dstr, $minute_modulo = 5) {
+function dstr2dt($dstr, $minute_modulo = 5)
+{
     if (is_null($dstr)) {
         http_response_code(422);
         die("Invalid date format");
@@ -92,8 +95,9 @@ function dstr2dt($dstr, $minute_modulo = 5) {
  * @param string $wfo3 the 3 character WFO identifier
  * @return string the 4 character WFO identifier
  */
-function rectify_wfo($wfo3){
-    $xref = Array(
+function rectify_wfo($wfo3)
+{
+    $xref = array(
         "AFC" => "PAFC",
         "AJK" => "PAJK",
         "AFG" => "PAFG",
@@ -102,7 +106,7 @@ function rectify_wfo($wfo3){
         "SJU" => "TJSJ",
         "JSJ" => "TJSJ",
     );
-    if (array_key_exists($wfo3, $xref)){
+    if (array_key_exists($wfo3, $xref)) {
         return $xref[$wfo3];
     };
     return sprintf("K%s", $wfo3);
@@ -113,18 +117,20 @@ function rectify_wfo($wfo3){
  * @param string $wfo the 4 character WFO identifier
  * @return string the 3 character WFO identifier
  */
-function unrectify_wfo($wfo){
-    if (strlen($wfo) == 4){
+function unrectify_wfo($wfo)
+{
+    if (strlen($wfo) == 4) {
         $wfo = substr($wfo, 1, 3);
     }
-    if ($wfo == "SJU"){
+    if ($wfo == "SJU") {
         return "JSJ";
     }
     return $wfo;
 }
 
 
-function getClientIp() {
+function getClientIp()
+{
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $ipArray = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
         // Likely want the last IP in the list
@@ -164,7 +170,8 @@ function printTags($tokens)
  * @param int $prec The precision to round to
  * @return mixed The rounded value or the original value if it's null or a string
  */
-function myround($val, $prec){
+function myround($val, $prec)
+{
     if (is_null($val)) return "";
     if (is_string($val)) return $val;
     return round($val, $prec);
@@ -178,7 +185,8 @@ function myround($val, $prec){
  * @param array $args The arguments to be passed to the service
  * @return array The decoded JSON response if all goes well.
  */
-function require_json_response($url, $args) {
+function require_json_response($url, $args)
+{
     // Everything is method get at the moment
     $cgi = http_build_query($args);
     if (strpos($url, "/") === 0) {
@@ -194,13 +202,15 @@ function require_json_response($url, $args) {
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $res = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($res === FALSE || $http_status != 200) {
-            openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
-            syslog(LOG_WARNING, "iemws fail[$i] $http_status ".
-                "from:" . $_SERVER["REQUEST_URI"] .
-                ' remote: ' . getClientIp() .
-                ' to: ' . $uri);
-            closelog();
+        if ($res === FALSE) {
+            if ($http_status != 200 && $http_status != 429) {
+                openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+                syslog(LOG_WARNING, "iemws fail[$i] $http_status " .
+                    "from:" . $_SERVER["REQUEST_URI"] .
+                    ' remote: ' . getClientIp() .
+                    ' to: ' . $uri);
+                closelog();
+            }
             sleep(3);
             continue;
         }
@@ -238,8 +248,8 @@ function require_json_response($url, $args) {
  */
 function iemws_json($endpoint, $args)
 {
-     $uri = "http://iem-web-services.agron.iastate.edu:8080/{$endpoint}";
-     return require_json_response($uri, $args);
+    $uri = "http://iem-web-services.agron.iastate.edu:8080/{$endpoint}";
+    return require_json_response($uri, $args);
 }
 
 // Make sure a page is HTTPS when called
