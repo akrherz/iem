@@ -5,13 +5,15 @@ interface.
 
 """
 
+import importlib
 from contextlib import suppress
+from types import ModuleType
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.exceptions import BadWebRequest
 from pyiem.reference import FIGSIZES_NAMES
 
 from iemweb.autoplot import data as autoplot_data
-from iemweb.autoplot import import_script
 from iemweb.autoplot.description import describe
 
 
@@ -41,11 +43,23 @@ def find_title(pidx: int) -> str:
     return "Autoplot Title Unset?"
 
 
-def get_metadict(pidx: int) -> dict:
-    """Do what needs to be done for JSON requests."""
-    if pidx == 0:
-        return autoplot_data
+def import_script(p: int) -> ModuleType:
+    """Import the script for the given product ID"""
+    s = ""
+    if p >= 200:
+        s = "200"
+    elif p >= 100:
+        s = "100"
+    # We used to reload the module here each time, but in local dev we are
+    # cycling the mod_wsgi process every request and in prod, \_o_/
+    try:
+        return importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    except ModuleNotFoundError as exp:
+        raise BadWebRequest("Invalid autoplot id") from exp
 
+
+def get_scriptmod_and_meta(pidx: int) -> tuple[ModuleType, dict]:
+    """Do what needs to be done for JSON requests."""
     timing = -1
     with suppress(Exception):
         timing = get_timing(pidx)
@@ -77,4 +91,4 @@ def get_metadict(pidx: int) -> dict:
             "label": "Image Resolution (DPI) (50 to 500)",
         }
     )
-    return data
+    return mod, data

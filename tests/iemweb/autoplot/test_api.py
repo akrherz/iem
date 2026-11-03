@@ -1,13 +1,11 @@
 """Excerise the imports."""
 
-import json
-
 import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.autoplot import application as autoplot_app
 from iemweb.autoplot.autoplot import parser
 from iemweb.autoplot.index import application as index_app
-from iemweb.autoplot.meta import application as meta_app
+from iemweb.autoplot.meta import get_scriptmod_and_meta
 from pyiem.exceptions import IncompleteWebRequest
 from werkzeug.test import Client
 
@@ -44,8 +42,7 @@ def test_autoplot_calls_index(apid: str):
 @pytest.mark.parametrize("apid", list(genmod()))
 def test_autoplot_calls_via_frontend(apid: str):
     """Just import things."""
-    c = Client(meta_app)
-    meta = json.loads(c.get(f"?p={apid}").data.decode("utf-8"))
+    _mod, meta = get_scriptmod_and_meta(int(apid))
     fmts = ["png"]
     if meta["highcharts"]:
         fmts.append("js")

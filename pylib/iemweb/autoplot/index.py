@@ -11,12 +11,13 @@ import re
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from html import unescape
-from typing import Any
+from typing import Annotated, Any
 from urllib.parse import quote, unquote
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
+from pydantic import Field, ValidationError
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
@@ -24,12 +25,14 @@ from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names, ugc_state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, html_escape, utc
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ensure_list, iemapp
 from werkzeug.wrappers import Request
 
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
-from iemweb.autoplot.meta import get_metadict
+from iemweb.autoplot.meta import get_scriptmod_and_meta
+from iemweb.autoplot.params import AutoplotParams
+from iemweb.autoplot.reference import CMAPS
 
 sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
@@ -45,111 +48,15 @@ HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
-CMAPS = {
-    "Perceptually Uniform Sequential": [
-        "viridis",
-        "plasma",
-        "inferno",
-        "magma",
-        "cividis",
-    ],
-    "Sequential": [
-        "Greys",
-        "Purples",
-        "Blues",
-        "Greens",
-        "Oranges",
-        "Reds",
-        "YlOrBr",
-        "YlOrRd",
-        "OrRd",
-        "PuRd",
-        "RdPu",
-        "BuPu",
-        "GnBu",
-        "PuBu",
-        "YlGnBu",
-        "PuBuGn",
-        "BuGn",
-        "YlGn",
-    ],
-    "Sequential (2)": [
-        "binary",
-        "gist_yarg",
-        "gist_gray",
-        "gray",
-        "bone",
-        "pink",
-        "spring",
-        "summer",
-        "autumn",
-        "winter",
-        "cool",
-        "Wistia",
-        "hot",
-        "afmhot",
-        "gist_heat",
-        "copper",
-    ],
-    "Diverging": [
-        "PiYG",
-        "PRGn",
-        "BrBG",
-        "PuOr",
-        "RdGy",
-        "RdBu",
-        "RdYlBu",
-        "RdYlGn",
-        "Spectral",
-        "coolwarm",
-        "bwr",
-        "seismic",
-        "berlin",
-        "managua",
-        "vanimo",
-    ],
-    "Cyclic": [
-        "twilight",
-        "twilight_shifted",
-        "hsv",
-    ],
-    "Qualitative": [
-        "Pastel1",
-        "Pastel2",
-        "Paired",
-        "Accent",
-        "Dark2",
-        "Set1",
-        "Set2",
-        "Set3",
-        "tab10",
-        "tab20",
-        "tab20b",
-        "tab20c",
-    ],
-    "Miscellaneous": [
-        "flag",
-        "prism",
-        "ocean",
-        "gist_earth",
-        "terrain",
-        "gist_stern",
-        "gnuplot",
-        "gnuplot2",
-        "CMRmap",
-        "cubehelix",
-        "brg",
-        "gist_rainbow",
-        "rainbow",
-        "jet",
-        "turbo",
-        "nipy_spectral",
-        "gist_ncar",
-    ],
-}
 
 
-def map_select_widget(network, name):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    q: Annotated[int, Field(description="Autoplot number", ge=0, le=1_000)] = 0
+
+
+def map_select_widget(network: str, name: str) -> str:
     """Generate the HTML for a wiz bang popup."""
     return f"""
 &nbsp; <button type="button" id="button_{network}_{name}" data-state="0"
@@ -166,13 +73,13 @@ aria-label="Show map for {network} {name}">Show Map</button>
 """
 
 
-def filtervar_handler(fdict: dict, arg: dict, res: dict) -> str:
+def filtervar_handler(request: Request, arg: dict, res: dict) -> str:
     """Handle the UI and processing for filtervar type."""
     form_name = arg["name"]
-    value = fdict.get(form_name, arg["default"])
+    value = request.args.get(form_name, arg["default"])
     comp_name = f"{form_name}_comp"
     t_name = f"{form_name}_t"
-    comp_value = fdict.get(comp_name, arg.get("comp_default", "ge"))
+    comp_value = request.args.get(comp_name, arg.get("comp_default", "ge"))
     comp_opts = {
         "ge": "Greater than or equal to",
         "gt": "Greater than",
@@ -183,7 +90,7 @@ def filtervar_handler(fdict: dict, arg: dict, res: dict) -> str:
     }
     if comp_value not in comp_opts:
         comp_value = arg.get("comp_default", "ge")
-    t_value = float(fdict.get(t_name, arg.get("t_default", 0)))
+    t_value = float(request.args.get(t_name, arg.get("t_default", 0)))
     res["pltvars"].append(f"{comp_name}:{comp_value}")
     res["pltvars"].append(f"{t_name}:{t_value}")
 
@@ -205,10 +112,10 @@ def networkselect_handler(value: str, arg: dict, res: dict) -> str:
         value,
         arg["name"],
         select_all=arg.get("all", False),
-    ) + map_select_widget(arg["network"], arg["name"])
+    ) + map_select_widget(str(arg["network"]), arg["name"])
 
 
-def station_handler(value, arg: dict, fdict, res, typ: str):
+def station_handler(value, arg: dict, request: Request, res, typ: str):
     """Generate HTML."""
     networks = {}
     netlim = ""
@@ -233,7 +140,7 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
         networkcgi += arg["name"][-1]
     # get the default network set with this autoplot
     network = arg.get("network", "IA_ASOS")
-    network = html_escape(fdict.get(networkcgi, network))
+    network = html_escape(request.args.get(networkcgi, network))
     if not NETWORK_RE.match(network):
         raise BadWebRequest("Invalid network provided")
     netselect = make_select(
@@ -267,30 +174,30 @@ def ugc_select(formname: str, state: str, ugc: str) -> str:
     return make_select(formname, ugc, ar, cssclass="iemselect2")
 
 
-def ugc_handler(name: str, value: str, fdict: dict):
+def ugc_handler(name: str, value: str, request: Request):
     """Handle selection of UGCs."""
     privfield = f"_{name}_state"
-    state = fdict.get(privfield, "IA")[:2]
+    state = request.args.get(privfield, "IA")[:2]
     state_select = make_select(
         privfield, state, ugc_state_names, jscallback="onNetworkChange"
     )
     return f"{state_select} {ugc_select(name, state, value)}"
 
 
-def vtec_ps_handler(fdict, arg):
+def vtec_ps_handler(request: Request, arg):
     """Handle VTEC Phenomena + Significance."""
     suffix = arg["name"]
     default_p, default_s = arg["default"].split(".")
-    value = html_escape(fdict.get(f"phenomena{suffix}", default_p))
+    value = html_escape(request.args.get(f"phenomena{suffix}", default_p))
     s = make_select(f"phenomena{suffix}", value, VTEC_PHENOMENA)
-    value = html_escape(fdict.get(f"significance{suffix}", default_s))
+    value = html_escape(request.args.get(f"significance{suffix}", default_s))
     s += make_select(f"significance{suffix}", value, VTEC_SIGNIFICANCE)
     return s
 
 
-def cmap_handler(fdict: dict, value: str, arg: dict, res: dict) -> str:
+def cmap_handler(request: Request, value: str, arg: dict, res: dict) -> str:
     """Our fancy pants cmap handler."""
-    reverse_on = fdict.get(f"{arg['name']}_r", "off") == "on"
+    reverse_on = request.args.get(f"{arg['name']}_r", "off") == "on"
     if value.endswith("_r"):
         value = value.replace("_r", "")
         reverse_on = True
@@ -341,11 +248,13 @@ def sday_handler(value: str, arg: dict):
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "0101")
     vmax = arg.get("max", "1231")
-    # account for legacy URLs that had dates here
-    if value.find("/") > -1:
+    # validated Params hand us a date (year 2000), legacy URLs had yyyy-mm-dd
+    if re.match(r"^\d{4}-\d{2}-\d{2}", value):
+        value = f"{value[5:7]}{value[8:10]}"
+    elif value.find("/") > -1:
         value = f"{value[5:7]}{value[8:10]}"
     if not SDAY_RE.match(value):
-        raise BadWebRequest("Invalid sdate format")
+        raise BadWebRequest(f"Invalid sdate format {value}")
 
     return (
         f'<input type="text" id="{dpname}" autocomplete="off" class="apfp" '
@@ -392,9 +301,12 @@ def datetime_handler(value: str, arg: dict) -> str:
             raise BadWebRequest("Invalid datetime value")
         dt = val.replace("-", "/").replace(":", "").split()
         datepart = dt[0]
-        timepart = dt[1] if len(dt) > 1 else "0000"
+        # Validated Params stringify as HH:MM:SS, only HHMM is wanted
+        timepart = dt[1][:4] if len(dt) > 1 else "0000"
         if not DATETIME_RE.match(f"{datepart} {timepart}"):
-            raise BadWebRequest("Invalid datetime format")
+            raise BadWebRequest(
+                f"Invalid datetime format {datepart} {timepart}"
+            )
         y, m, d = [int(x) for x in datepart.split("/")]
         h, mi = int(timepart[:2]), int(timepart[2:])
         return f"{y:04d}-{m:02d}-{d:02d} {h:02d}{mi:02d}"
@@ -409,15 +321,15 @@ def datetime_handler(value: str, arg: dict) -> str:
     )
 
 
-def add_to_plotvars(value, fdict, arg, res):
+def add_to_plotvars(value, request: Request, arg, res):
     """Add to our plotvars."""
     if value == "":
         return
     if arg["type"] == "vtec_ps":
         suffix = arg["name"]
-        value = fdict.get(f"phenomena{suffix}", "SV")
+        value = request.args.get(f"phenomena{suffix}", "SV")
         res["pltvars"].append(f"phenomena{suffix}:{value}")
-        value = fdict.get(f"significance{suffix}", "W")
+        value = request.args.get(f"significance{suffix}", "W")
         res["pltvars"].append(f"significance{suffix}:{value}")
         return
     if arg["type"] == "cmap":
@@ -526,10 +438,10 @@ def compute_dat_label(attribs: dict) -> str:
     return f"{wfo} {efscale} {event_id} {stime} {length:.0f} miles"
 
 
-def dat_handler(fdict: dict, res: dict) -> str:
+def dat_handler(request: Request, res: dict) -> str:
     """Generate the Damage Assessment Tool form."""
-    dt = fdict.get("dat", "2024/05/21")
-    gid = fdict.get("datglobalid", "")
+    dt = request.args.get("dat", "2024/05/21")
+    gid = request.args.get("datglobalid", "")
     # Ensure that gid looks like a guid
     if not DAT_GID_RE.fullmatch(gid):
         gid = "{495DE596-B299-41FE-9C90-13C87E43FE0B}"
@@ -602,9 +514,9 @@ def numeric_handler(value: str, arg: dict) -> tuple[str, str]:
     )
 
 
-def determine_format(fdict: dict, meta: dict) -> str:
+def determine_format(request: Request, meta: dict) -> str:
     """Figure out the format for this request."""
-    fmt = fdict.get("_fmt")
+    fmt = request.args.get("_fmt")
     if fmt is None:
         if meta.get("highcharts", False):
             fmt = "js"
@@ -617,15 +529,22 @@ def determine_format(fdict: dict, meta: dict) -> str:
 
 
 def process_arguments(
-    fdict: dict, meta: dict, cookies: dict, headers: dict, res: dict
+    params: AutoplotParams,
+    request: Request,
+    meta: dict,
+    headers: list[tuple[str, str]],
+    res: dict,
 ) -> str:
     """Figure out the arguments."""
     formhtml = ""
     for arg in meta["arguments"]:
         form = ""
-        value = fdict.get(arg["name"], get_cookie_value(arg, cookies))
         if arg.get("multiple", False):
-            value = ensure_list(fdict, arg["name"])
+            value = ensure_list(params, arg["name"])
+        else:
+            value = params.get(
+                arg["name"], get_cookie_value(arg, request.cookies)
+            )
         if isinstance(value, str):
             value = html_escape(value)
             # Avoid situation of the Cookie having _ALL set and this form
@@ -635,30 +554,30 @@ def process_arguments(
         if value is None:
             value = str(arg["default"])
         if arg["type"] in ["zstation", "sid", "station"]:
-            form = station_handler(value, arg, fdict, res, arg["type"])
+            form = station_handler(value, arg, request, res, arg["type"])
         elif arg["type"] == "ugc":
-            form = ugc_handler(arg["name"], value, fdict)
+            form = ugc_handler(arg["name"], str(value), request)
         elif arg["type"] == "networkselect":
-            set_cookie_networkselect(cookies, headers, arg, value)
-            form = networkselect_handler(value, arg, res)
+            set_cookie_networkselect(request.cookies, headers, arg, value)
+            form = networkselect_handler(str(value), arg, res)
         elif arg["type"] == "filtervar":
-            form = filtervar_handler(fdict, arg, res)
+            form = filtervar_handler(request, arg, res)
         elif arg["type"] == "phenomena":
             form = make_select(arg["name"], value, VTEC_PHENOMENA)
         elif arg["type"] == "significance":
             form = make_select(arg["name"], value, VTEC_SIGNIFICANCE)
         elif arg["type"] == "vtec_ps":
-            form = vtec_ps_handler(fdict, arg)
+            form = vtec_ps_handler(request, arg)
         elif arg["type"] == "state":
             sn = state_names if arg.get("contiguous") is None else sn_contig
             if value not in sn:
                 value = "IA"
             form = make_select(arg["name"], value, sn)
         elif arg["type"] == "csector":
-            set_cookie(cookies, headers, arg["name"], value)
+            set_cookie(request.cookies, headers, arg["name"], value)
             form = make_select(arg["name"], value, CSECTORS, showvalue=False)
         elif arg["type"] == "cmap":
-            form = cmap_handler(fdict, value, arg, res)
+            form = cmap_handler(request, str(value), arg, res)
         elif arg["type"] == "fema":
             form = make_select(arg["name"], value, FEMA_REGIONS)
         elif arg["type"] == "text":
@@ -668,10 +587,10 @@ def process_arguments(
                 f'value="{value}">'
             )
         elif arg["type"] in ["int", "float"]:
-            value, form = numeric_handler(value, arg)
+            value, form = numeric_handler(str(value), arg)
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
             try:
-                form = datetypes_handler(arg, int(value))
+                form = datetypes_handler(arg, int(str(value)))
             except ValueError as exp:
                 raise BadWebRequest("Invalid value provided") from exp
         elif arg["type"] == "select":
@@ -683,16 +602,16 @@ def process_arguments(
                 showvalue=arg.get("showvalue", False),
             )
         elif arg["type"] == "datetime":
-            form = datetime_handler(value, arg)
+            form = datetime_handler(str(value), arg)
         elif arg["type"] == "date":
-            form = date_handler(value, arg)
+            form = date_handler(str(value), arg)
         elif arg["type"] == "sday":
-            form = sday_handler(value, arg)
+            form = sday_handler(str(value), arg)
         elif arg["type"] == "dat":
-            form = dat_handler(fdict, res)
+            form = dat_handler(request, res)
         # Handle the fun that is having it be optional
         if arg.get("optional", False):
-            opton = fdict.get(f"_opt_{arg['name']}") == "on"
+            opton = request.args.get(f"_opt_{arg['name']}") == "on"
             # prepend
             form = (
                 '<input class="optcontrol" '
@@ -702,9 +621,9 @@ def process_arguments(
                 f'{"block" if opton else "none"};">{form}</div>'
             )
             if opton:
-                add_to_plotvars(value, fdict, arg, res)
+                add_to_plotvars(value, request, arg, res)
         else:
-            add_to_plotvars(value, fdict, arg, res)
+            add_to_plotvars(value, request, arg, res)
         formhtml += (
             f'<div class="row align-items-center apdiv">'
             f'<div class="col-sm-4">'
@@ -816,7 +735,7 @@ height="700px">
 
 
 def add_boilerplate_to_res(
-    fmt: str, meta: dict, res: dict, apid: str, formhtml: str
+    fmt: str, meta: dict, res: dict, apid: int, formhtml: str
 ) -> None:
     """Add form items that are boilerplate."""
     imguri = html_escape(res["imguri"])
@@ -944,7 +863,9 @@ def add_boilerplate_to_res(
     """
 
 
-def generate_form(apid, fdict: dict, headers, cookies) -> dict:
+def generate_form(
+    apid: int, request: Request, headers: list[tuple[str, str]]
+) -> dict:
     """Generate out the form, oh boy!"""
     res = {
         "title": "IEM Autoplot",
@@ -962,10 +883,17 @@ def generate_form(apid, fdict: dict, headers, cookies) -> dict:
     }
     if apid == 0:
         return res
-    # This should be instant, but the other end may be doing a thread
-    # restart, which takes a bit of time.
-    meta = get_metadict(int(apid))
-    fmt = determine_format(fdict, meta)
+    scriptmod, meta = get_scriptmod_and_meta(apid)
+    # Keep repeated keys (multiple selects) as lists, others as scalars
+    data = {
+        key: vals if len(vals) > 1 else vals[0]
+        for key, vals in request.args.to_dict(flat=False).items()
+    }
+    try:
+        params = scriptmod.Params.model_validate(data)
+    except ValidationError as exp:
+        raise BadWebRequest(f"Invalid parameters: {exp}") from exp
+    fmt = determine_format(request, meta)
     res["title"] = f"{apid}. {meta['title']}"
     res["frontend"] = meta.get("frontend")
     if meta.get("description"):
@@ -980,18 +908,18 @@ def generate_form(apid, fdict: dict, headers, cookies) -> dict:
         This presentation is not endorsed nor certified by USDA.
 </div></p>
         """
-    formhtml = process_arguments(fdict, meta, cookies, headers, res)
-    if fdict.get("_cb", "") == "1":
+    formhtml = process_arguments(params, request, meta, headers, res)
+    if request.args.get("_cb", "") == "1":
         res["pltvars"].append("_cb:1")
     res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
-    if fdict.get("_wait", "") != "yes":
-        add_content_to_res(fmt, int(apid), res)
+    if request.args.get("_wait", "") != "yes":
+        add_content_to_res(fmt, apid, res)
 
     add_boilerplate_to_res(fmt, meta, res, apid, formhtml)
     return res
 
 
-def features_for_id(res, apid):
+def features_for_id(res: dict, apid: int):
     """List out features for this given plotid."""
     if apid < 1:
         return ""
@@ -1120,15 +1048,9 @@ box above.</p>
     """
 
 
-def generate(fdict: dict, headers, cookies):
+def generate(apid: int, request: Request, headers):
     """Return a dict of things for the template engine."""
-    try:
-        apid = int(fdict.get("q", 0))
-    except ValueError:
-        apid = 0
-    if apid < 0 or apid > 1_000:  # arb
-        raise BadWebRequest("Invalid plot id")
-    res = generate_form(apid, fdict, headers, cookies)
+    res = generate_form(apid, request, headers)
     content = f"""
 <div class="row">
     <div class="col-12">
@@ -1254,28 +1176,14 @@ def generate(fdict: dict, headers, cookies):
     }
 
 
-def remove_all_cookies(headers, cookiestr):
-    """Unset things that should have not gotten set."""
-    for token in cookiestr.split(";"):
-        meat = token if token.find("=") == -1 else token[: token.find("=")]
-        headers.append(
-            (
-                "Set-Cookie",
-                f"={meat.strip()}; Path=/plotting/auto/; Max-Age=-1",
-            )
-        )
-
-
-@iemapp(parse_times=False, allowed_as_list=["ltype"])
-def application(environ: dict, start_response: Callable) -> list[bytes]:
+@iemapp(parse_times=False, schema=Schema, allowed_as_list=["ltype"])
+def application(environ: dict, start_response: Callable) -> bytes:
     """mod-wsgi handler."""
-    # Just use cookie processing attm
-    cookies = Request(environ).cookies
+    request = Request(environ)
     headers = [("Content-type", "text/html")]
-    # invalid cookies may invalidate the entire cookie parsing
-    # https://bugs.python.org/issue41945
-    if not cookies and environ.get("HTTP_COOKIE", "") != "":
-        remove_all_cookies(headers, environ["HTTP_COOKIE"])
-    tdict = generate(environ, headers, cookies)
+    query: Schema = environ["_cgimodel_schema"]
+    tdict = generate(query.q, request, headers)
+    payload = TEMPLATE.render(tdict).encode("utf-8")
     start_response("200 OK", headers)
-    return [TEMPLATE.render(tdict).encode("utf-8")]
+    # iemapp rectifies this response for mod_wsgi
+    return payload

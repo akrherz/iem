@@ -18,7 +18,13 @@ from iemweb.autoplot.index import (
     set_cookie,
 )
 from pyiem.exceptions import BadWebRequest
-from werkzeug.test import Client
+from werkzeug.test import Client, EnvironBuilder
+from werkzeug.wrappers import Request
+
+
+def _request(query: str = "") -> Request:
+    """Build a werkzeug Request."""
+    return Request(EnvironBuilder(query_string=query).get_environ())
 
 
 def get_test_urls():
@@ -80,7 +86,7 @@ def test_plotvars_use_unescaped_scalar_values():
     res = {"pltvars": []}
     add_to_plotvars(
         "A&amp;B &quot;quote&quot; &#x27;",
-        {},
+        _request(),
         {"type": "text", "name": "label"},
         res,
     )
@@ -90,7 +96,9 @@ def test_plotvars_use_unescaped_scalar_values():
 def test_multiple_plotvars_preserve_entity_text():
     """Multiple values bypass scalar form escaping."""
     res = {"pltvars": []}
-    add_to_plotvars(["A&amp;B"], {}, {"type": "text", "name": "label"}, res)
+    add_to_plotvars(
+        ["A&amp;B"], _request(), {"type": "text", "name": "label"}, res
+    )
     assert res["pltvars"] == ["label:A&amp;B"]
 
 
@@ -151,7 +159,7 @@ def test_dat_options_escape_api_fields(monkeypatch):
             return Response()
 
     monkeypatch.setattr("iemweb.autoplot.index.requests.Session", Session)
-    form = dat_handler({}, {"pltvars": []})
+    form = dat_handler(_request(), {"pltvars": []})
 
     assert "<script>alert(1)</script>" not in form
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in form
@@ -174,7 +182,7 @@ def test_dat_request_errors_are_reported_as_bad_requests(monkeypatch):
     monkeypatch.setattr("iemweb.autoplot.index.requests.Session", Session)
 
     with pytest.raises(BadWebRequest, match="Unable to load DAT events"):
-        dat_handler({}, {"pltvars": []})
+        dat_handler(_request(), {"pltvars": []})
 
 
 def test_dat_handler_does_not_hide_programming_errors(monkeypatch):
@@ -193,7 +201,7 @@ def test_dat_handler_does_not_hide_programming_errors(monkeypatch):
     monkeypatch.setattr("iemweb.autoplot.index.requests.Session", Session)
 
     with pytest.raises(RuntimeError, match="unexpected failure"):
-        dat_handler({}, {"pltvars": []})
+        dat_handler(_request(), {"pltvars": []})
 
 
 @pytest.mark.parametrize(

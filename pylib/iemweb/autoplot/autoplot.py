@@ -43,8 +43,8 @@ from pyiem.webutil import (
 from pymemcache.client import Client
 from pymemcache.exceptions import MemcacheIllegalInputError
 
-from iemweb.autoplot import import_script
 from iemweb.autoplot.description import describe
+from iemweb.autoplot.meta import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all="ignore")
