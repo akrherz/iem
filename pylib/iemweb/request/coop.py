@@ -208,18 +208,18 @@ def f2c(val):
     return (val * DEGF).to(DEGC).m
 
 
-def get_tablename(stations: list[str]):
+def get_tablename(stations: list[str]) -> str:
     """Figure out the table that has the data for these stations"""
     states = []
     for sid in stations:
-        if sid[:2] not in states and sid[:2].lower() in state_names:
+        if sid[:2] not in states and sid[:2] in state_names:
             states.append(sid[:2])
     if len(states) == 1:
         return f"alldata_{states[0]}"
     return "alldata"
 
 
-def get_stationtable(stations):
+def get_stationtable(stations: list[str]) -> NetworkTable:
     """Figure out our station table!"""
     states = []
     networks = []
@@ -243,7 +243,7 @@ def do_apsim(cursor, ctx):
     if len(ctx["stations"]) > 1:
         return (
             "ERROR: APSIM output is only permitted for one station at a time."
-        ).encode("ascii")
+        )
 
     station = ctx["stations"][0]
     network = f"{station[:2]}CLIMATE"
@@ -373,7 +373,7 @@ def do_apsim(cursor, ctx):
                 )
             )
             now += timedelta(days=1)
-    return sio.getvalue().encode("ascii")
+    return sio.getvalue()
 
 
 def do_century(cursor, ctx):
@@ -390,7 +390,7 @@ def do_century(cursor, ctx):
         return (
             "ERROR: Century output is only "
             "permitted for one station at a time."
-        ).encode("ascii")
+        )
 
     station = ctx["stations"][0]
     nt = NetworkTable(f"{station[:2]}CLIMATE", only_online=False)
@@ -473,7 +473,7 @@ def do_century(cursor, ctx):
                     data[year][12][idx],
                 )
             )
-    return sio.getvalue().encode("ascii")
+    return sio.getvalue()
 
 
 def do_daycent(cursor, ctx):
@@ -495,7 +495,7 @@ def do_daycent(cursor, ctx):
         return (
             "ERROR: Daycent output is only "
             "permitted for one station at a time."
-        ).encode("ascii")
+        )
 
     extra = {}
     thisyear = ctx["ets"].year
@@ -567,14 +567,12 @@ def do_daycent(cursor, ctx):
                 )
             )
             now += timedelta(days=1)
-    return sio.getvalue().encode("ascii")
+    return sio.getvalue()
 
 
 def do_simple(cursor, ctx):
     """Generate Simple output"""
-
     table = get_tablename(ctx["stations"])
-
     nt = get_stationtable(ctx["stations"])
     thisyear = ctx["ets"].year
 
@@ -687,7 +685,7 @@ def do_simple(cursor, ctx):
         dc["doy"] = "%.0f" % (dc["doy"],)
         res = [str(dc[n]) for n in cols if n in dc]
         sio.write((d.join(res)).replace("None", "M") + "\r\n")
-    return sio.getvalue().encode("ascii")
+    return sio.getvalue()
 
 
 def do_salus(cursor, ctx):
@@ -699,7 +697,7 @@ def do_salus(cursor, ctx):
     if len(ctx["stations"]) > 1:
         return (
             "ERROR: SALUS output is only permitted for one station at a time."
-        ).encode("ascii")
+        )
 
     scenario_year = 2030
     asts = date(2030, 1, 1)
@@ -758,7 +756,7 @@ def do_salus(cursor, ctx):
                 i + 2,
             )
         )
-    return sio.getvalue().encode("ascii")
+    return sio.getvalue()
 
 
 def do_dndc(cursor, ctx):
@@ -988,4 +986,4 @@ def application(environ, start_response):
         res = do_simple(cursor, ctx)
     cursor.close()
     conn.close()
-    return [res]
+    return res

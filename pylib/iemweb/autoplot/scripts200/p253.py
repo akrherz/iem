@@ -21,7 +21,7 @@ tornado track with the lead time in minutes.</p>
 """
 
 from datetime import UTC, timedelta
-from typing import Annotated
+from typing import Annotated, Any
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -73,7 +73,7 @@ def plot_points(mp, pts):
         pos.to_crs(mp.panels[0].crs).plot(
             ax=mp.panels[0].ax,
             aspect=None,
-            fc=pos["color"],
+            fc=pos["color"].to_list(),
             ec="k",
             zorder=11,
         )
@@ -206,8 +206,14 @@ def plotter(ctx: Params):
     track_sts = trackgdf.iloc[0]["starttime"]
     track_ets = trackgdf.iloc[0]["endtime"]
     # Get the warning polygons
+    params: dict[str, Any] = {
+        "year": trackgdf.iloc[0]["starttime"].year,
+        "sts": track_sts,
+        "ets": track_ets,
+        "geom": trackgdf.iloc[0]["geometry"].wkt,
+    }
     with get_sqlalchemy_conn("postgis") as conn:
-        tow = gpd.read_postgis(
+        tow = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             SELECT wfo, eventid, phenomena, significance,
@@ -221,14 +227,9 @@ def plotter(ctx: Params):
             """
             ),
             conn,
-            params={
-                "year": trackgdf.iloc[0]["starttime"].year,
-                "sts": track_sts,
-                "ets": track_ets,
-                "geom": trackgdf.iloc[0]["geometry"].wkt,
-            },
+            params=params,
             geom_col="geom",
-        )  # type: ignore
+        )
     if not tow.empty:
         for col in ["utc_issue", "utc_expire"]:
             tow[col] = tow[col].dt.tz_localize(UTC)
@@ -270,14 +271,14 @@ def plotter(ctx: Params):
         # Find ones that overlap in time first
         dol = ol[(ol["utc_issue"] <= valid) & (ol["utc_expire"] >= valid)]
         if not dol.empty:
-            pts.at[idx, "lead"] = (
+            pts.loc[idx, "lead"] = (  # type: ignore
                 valid - dol.iloc[0].utc_issue
             ).total_seconds() / 60.0
             continue
         # Look for the next warning after this time
         dol = ol[ol["utc_issue"] > valid]
         if not dol.empty:
-            pts.at[idx, "lead"] = (
+            pts.loc[idx, "lead"] = (  # type: ignore
                 valid - dol.iloc[0].utc_issue
             ).total_seconds() / 60.0
     pts["color"] = pts["lead"].apply(

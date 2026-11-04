@@ -11,7 +11,7 @@ observations.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Any
 
 import pandas as pd
 from matplotlib.axes import Axes
@@ -67,7 +67,7 @@ def xlabel_magic(ax: Axes, sday, eday):
     if not xticks:
         xticks = [sday, eday]
         xticklabels = [sday.strftime("%-d %b"), eday.strftime("%-d %b")]
-    ax.set_xticks(xticks)
+    ax.set_xticks(xticks)  # type: ignore
     ax.set_xticklabels(xticklabels)
 
 
@@ -127,11 +127,15 @@ def plotter(ctx: Params):
     sday = pd.to_datetime(ctx.sday)
     eday = pd.to_datetime(ctx.eday)
     if sday >= eday:
-        raise ValueError("Plots crossing 1 Jan are not supported, yet")
+        raise NoDataFound("Plots crossing 1 Jan are not supported, yet")
     if smooth < 1 or smooth > 60:
         raise ValueError("Invalid smoothing window size, must be 1-60")
 
     op = ">=" if mydir == "above" else "<"
+    params: dict[str, Any] = {
+        "threshold": threshold,
+        "iemid": ctx["_nt"].sts[station]["iemid"],
+    }
     with get_sqlalchemy_conn("iem") as conn:
         obsdf = pd.read_sql(
             sql_helper(
@@ -145,12 +149,11 @@ def plotter(ctx: Params):
                 op=op,
             ),
             conn,
-            params={
-                "threshold": threshold,
-                "iemid": ctx["_nt"].sts[station]["iemid"],
-            },
+            params=params,
             index_col="day",
-            parse_dates="day",
+            parse_dates=[
+                "day",
+            ],
         )
     if obsdf.empty:
         raise NoDataFound("No Data Found.")
@@ -234,7 +237,7 @@ def plotter(ctx: Params):
     bydate["threshold_exceed_freq"] = probs["threshold_exceed"]
     ax2.plot(
         probs.index,
-        probs["threshold_exceed"].values * 100.0,
+        probs["threshold_exceed"].to_numpy() * 100.0,
         lw=2,
     )
     ax2.set_ylabel(
