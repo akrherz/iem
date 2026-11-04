@@ -66,8 +66,8 @@ def find_and_save(cursor, dbendts: datetime):
                         """
                         insert into website_telemetry
                         (valid, timing, status_code,
-                        client_addr, app, request_uri, vhost)
-                        values (%s, %s, %s, %s, %s, %s, %s)
+                        client_addr, app, request_uri, vhost, xff, http_agent)
+                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             telemetry.valid,
@@ -77,6 +77,8 @@ def find_and_save(cursor, dbendts: datetime):
                             telemetry.app,
                             telemetry.request_uri,
                             telemetry.vhost,
+                            telemetry.xff,
+                            telemetry.http_agent,
                         ),
                     )
                     inserts += 1
