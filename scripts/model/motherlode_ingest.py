@@ -27,25 +27,19 @@ BASE_URL2 = (
     "https://thredds-test.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
 )
 URLS = {
-    "NAM": (
-        "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"
-    ),
     "GFS": "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
     "RAP": "RAP/CONUS_13km/RR_CONUS_13km_%Y%m%d_%H00.grib2/GC",
 }
 VLOOKUP = {
     "sbcape": {
-        "NAM": "Convective_available_potential_energy_surface",
         "GFS": "Convective_available_potential_energy_surface",
         "RAP": "Convective_available_potential_energy_surface",
     },
     "sbcin": {
-        "NAM": "Convective_inhibition_surface",
         "GFS": "Convective_inhibition_surface",
         "RAP": "Convective_inhibition_surface",
     },
     "pwater": {
-        "NAM": "Precipitable_water_entire_atmosphere_single_layer",
         "GFS": "Precipitable_water_entire_atmosphere_single_layer",
         "RAP": "Precipitable_water_entire_atmosphere_single_layer",
     },
@@ -188,11 +182,10 @@ def main(valid: datetime):
     with get_sqlalchemy_conn("mos") as conn:
         if valid.hour % 6 == 0:
             ts = valid - timedelta(hours=6)
-            for model in ["GFS", "NAM"]:
-                run_model(conn, model, ts)
-                conn.commit()
-                check_and_run(conn, model, ts - timedelta(days=7))
-                conn.commit()
+            run_model(conn, "GFS", ts)
+            conn.commit()
+            check_and_run(conn, "GFS", ts - timedelta(days=7))
+            conn.commit()
 
         ts = valid - timedelta(hours=2)
         run_model(conn, "RAP", ts)

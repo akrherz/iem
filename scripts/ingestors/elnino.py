@@ -41,8 +41,8 @@ def main():
             continue
         print(f"Found ElNino3.4! {dt} {anom34}")
         # Add entry to current dataframe
-        current.at[dt, "anom_34"] = anom34
-        current.at[dt, "soi_3m"] = None
+        current.loc[dt, "anom_34"] = anom34
+        current.loc[dt, "soi_3m"] = None
         mcursor.execute(
             "INSERT into elnino(monthdate, anom_34) values (%s, %s)",
             (dt, anom34),

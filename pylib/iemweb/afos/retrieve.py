@@ -113,7 +113,7 @@ fmt=text&sdate=2024-01-01T00:00Z&edate=2025-12-31T23:59Z&limit=1&order=asc
 import re
 import zipfile
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from io import BytesIO, StringIO
 from typing import Annotated, Any
 
@@ -187,6 +187,8 @@ class Schema(CGIModel):
                 "This value is exclusive."
             ),
             default_factory=lambda: utc() + timedelta(days=1),
+            ge=utc(1982),
+            le=utc(utc().year + 1, 12, 31),
         ),
     ]
     fmt: Annotated[
@@ -247,8 +249,11 @@ class Schema(CGIModel):
                 "The starting timestamp in UTC to limit the database search. "
                 "This value is inclusive."
             ),
+            default_factory=lambda: utc(1982),
+            ge=utc(1982),
+            le=utc(utc().year + 1, 12, 31),
         ),
-    ] = utc(1980)
+    ]
     order: Annotated[
         str,
         Field(
@@ -300,21 +305,11 @@ class Schema(CGIModel):
     @model_validator(mode="after")
     def rectify_model(self):
         """Apply some business logic to what the user provided.."""
-        newsdate = (
-            self.sdate.replace(tzinfo=UTC)
-            if self.sdate.tzinfo is None
-            else self.sdate.astimezone(UTC)
-        )
-        newedate = (
-            self.edate.replace(tzinfo=UTC)
-            if self.edate.tzinfo is None
-            else self.edate.astimezone(UTC)
-        )
-        if newedate < newsdate:
-            newsdate, newedate = newedate, newsdate
-        # Avoid recursion
-        object.__setattr__(self, "sdate", newsdate)
-        object.__setattr__(self, "edate", newedate)
+        if self.edate < self.sdate:
+            newsdate, newedate = self.edate, self.sdate
+            # Avoid recursion
+            object.__setattr__(self, "sdate", newsdate)
+            object.__setattr__(self, "edate", newedate)
         return self
 
 
@@ -488,6 +483,7 @@ def text_handler(rows: list[tuple], afd_logic: re.Pattern | None) -> str:
     content_type=get_ct,
     parse_times=False,
     ip_throttle_secs=get_ip_throttle_secs,
+    default_tz="UTC",
 )
 def application(environ: dict, start_response: Callable):
     """Process the request."""
