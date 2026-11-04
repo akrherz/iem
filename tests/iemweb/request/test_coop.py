@@ -33,7 +33,7 @@ def test_simple(dbcursor):
         "delim": "comma",
     }
     res = do_simple(dbcursor, ctx)
-    assert len(res.decode("ascii").strip().split("\n")) == (366 + 6)
+    assert len(str(res).strip().split("\n")) == (366 + 6)
     for f in [
         do_apsim,
         do_century,

@@ -215,7 +215,7 @@ def get_tablename(stations: list[str]) -> str:
         if sid[:2] not in states and sid[:2] in state_names:
             states.append(sid[:2])
     if len(states) == 1:
-        return f"alldata_{states[0]}"
+        return f"alldata_{states[0].lower()}"
     return "alldata"
 
 
@@ -968,7 +968,6 @@ def application(environ, start_response):
         )
 
     conn, cursor = get_dbconnc("coop")
-    start_response("200 OK", headers)
     # OK, now we fret
     if "daycent" in ctx["myvars"]:
         res = do_daycent(cursor, ctx)
@@ -986,4 +985,5 @@ def application(environ, start_response):
         res = do_simple(cursor, ctx)
     cursor.close()
     conn.close()
+    start_response("200 OK", headers)
     return res
