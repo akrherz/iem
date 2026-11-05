@@ -25,14 +25,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from iemweb.autoplot.description import Arg, DateArg, SDayArg
 
-_SLASH_DATE = re.compile(r"^\d{4}/\d{2}/\d{2}")
+_SLASH_DATE = re.compile(r"^\d{4}[/-]\d{2}[/-]\d{2}")
 _HHMM = re.compile(r" (\d{2})(\d{2})$")
 
 
 def _iso_datestr(val: Any) -> Any:
     """Widgets use yyyy/mm/dd and hhmm, pydantic wants yyyy-mm-dd and hh:mm."""
     if isinstance(val, str) and _SLASH_DATE.match(val):
-        val = val.replace("/", "-", 2)
+        val = val.replace("/", "-")
         val = _HHMM.sub(r" \1:\2", val)
     return val
 
