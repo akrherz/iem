@@ -289,27 +289,19 @@ def date_handler(value: str, arg: dict) -> str:
 
 
 def datetime_handler(value: str, arg: dict) -> str:
-    """Handler for datetime instances."""
+    """Handler for datetime input.
+
+    value has already been roundtripped through pydantic, so it should be
+    safe at this point. The arg provided strings should be safe already by
+    the programmer of the autoplot.
+    """
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
     vmin = arg.get("min", "1893/01/01 0000")
 
-    # Convert to flatpickr format: Y/m/d H:i
-    def _to_fp(val):
-        # Accepts 'YYYY/MM/DD HHmm' or 'YYYY-MM-DD HHmm'
-        if val is None or val == "":
-            raise BadWebRequest("Invalid datetime value")
-        dt = val.replace("-", "/").replace(":", "").split()
-        datepart = dt[0]
-        # Validated Params stringify as HH:MM:SS, only HHMM is wanted
-        timepart = dt[1][:4] if len(dt) > 1 else "0000"
-        if not DATETIME_RE.match(f"{datepart} {timepart}"):
-            raise BadWebRequest(
-                f"Invalid datetime format {datepart} {timepart}"
-            )
-        y, m, d = [int(x) for x in datepart.split("/")]
-        h, mi = int(timepart[:2]), int(timepart[2:])
-        return f"{y:04d}-{m:02d}-{d:02d} {h:02d}{mi:02d}"
+    def _to_fp(val: str):
+        """Convert to flatpickr format: Y/m/d Hi."""
+        return val.replace("-", "/").replace(":", "")
 
     return (
         f'<input type="text" name="{arg["name"]}" id="{dpname}" class="apfp" '
