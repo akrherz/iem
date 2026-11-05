@@ -24,6 +24,9 @@ def parse_timing_line(line: str):
                 payload["appid"],
                 payload["timing"],
                 payload["uri"],
+                payload.get("client_addr", ""),
+                payload.get("http_agent", ""),
+                payload.get("xff", ""),
             )
         except (KeyError, TypeError, ValueError):
             # Producer bounds payload size, but syslog truncation can still
@@ -67,7 +70,7 @@ def find_and_save(cursor, dbendts):
             parsed = parse_timing_line(line)
             if parsed is None:
                 continue
-            (appid, timing, uri) = parsed
+            (appid, timing, uri, client_addr, http_agent, xff) = parsed
             try:
                 valid = datetime.strptime(
                     f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"
@@ -81,9 +84,19 @@ def find_and_save(cursor, dbendts):
             hostname = line.split()[3]
             cursor.execute(
                 "INSERT into autoplot_timing "
-                "(appid, valid, timing, uri, hostname) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                (appid, valid, timing, uri, hostname),
+                "(appid, valid, timing, uri, hostname, "
+                "client_addr, http_agent, xff) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    appid,
+                    valid,
+                    timing,
+                    uri,
+                    hostname,
+                    client_addr,
+                    http_agent,
+                    xff,
+                ),
             )
             inserts += 1
     # Don't complain during the early morning hours
