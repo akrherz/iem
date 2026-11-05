@@ -10,11 +10,12 @@ from pyiem.exceptions import IncompleteWebRequest
 from werkzeug.test import Client
 
 
-def genmod():
+def genmod() -> list[int]:
     """Generate modules to test against."""
+    res: list[int] = []
     for plot in autoplot_data["plots"]:
-        for entry in plot["options"]:
-            yield f"{entry['id']}"
+        res.extend(int(entry["id"]) for entry in plot["options"])
+    return res
 
 
 def test_fourcolons():
@@ -31,18 +32,18 @@ def test_threecolons():
     assert res["year"] == "2025"
 
 
-@pytest.mark.parametrize("apid", list(genmod()))
-def test_autoplot_calls_index(apid: str):
+@pytest.mark.parametrize("apid", genmod())
+def test_autoplot_calls_index(apid: int):
     """Test the HTML generation via the User frontdoor."""
     c = Client(index_app)
     resp = c.get(f"?q={apid}")
     assert resp.status_code == 200
 
 
-@pytest.mark.parametrize("apid", list(genmod()))
-def test_autoplot_calls_via_frontend(apid: str):
+@pytest.mark.parametrize("apid", genmod())
+def test_autoplot_calls_via_frontend(apid: int):
     """Just import things."""
-    _mod, meta = get_scriptmod_and_meta(int(apid))
+    _mod, meta = get_scriptmod_and_meta(apid)
     fmts = ["png"]
     if meta["highcharts"]:
         fmts.append("js")
@@ -57,7 +58,6 @@ def test_autoplot_calls_via_frontend(apid: str):
         res = c.get(f"?p={apid}&fmt={fmt}&q=_cb:1")
         # Crude check that numpy arrays are not being str rendered
         if fmt == "js":
-            print(res.text)
-            assert res.text.find("np.") == -1
+            assert "np." not in res.text
         # 400 is Rumsfeld's knowns
         assert res.status_code in [200, 400]

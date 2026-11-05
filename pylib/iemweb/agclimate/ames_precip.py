@@ -8,7 +8,7 @@ from pyiem.webutil import iemapp
 
 
 @iemapp()
-def application(_environ, start_response) -> list[bytes]:
+def application(_environ, start_response) -> str:
     """Go Main Go"""
     with get_sqlalchemy_conn("iem", rw=False) as conn:
         amsi4 = pd.read_sql(
@@ -68,7 +68,7 @@ def application(_environ, start_response) -> list[bytes]:
             float_format="{:.2f}".format,
             index=False,
         )
-    sio.seek(0)
     headers = [("Content-type", "text/html")]
+    payload = sio.getvalue()
     start_response("200 OK", headers)
-    return [sio.getvalue().encode("ascii")]
+    return payload

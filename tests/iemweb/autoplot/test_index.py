@@ -27,18 +27,20 @@ def _request(query: str = "") -> Request:
     return Request(EnvironBuilder(query_string=query).get_environ())
 
 
-def get_test_urls():
+def get_test_urls() -> list[str]:
     """yield a list of URLs to test."""
     listfn = Path(__file__).parent / "urllist_index.txt"
+    res = []
     with open(listfn) as fh:
         for line_in in fh:
             line = line_in.strip()
             if line == "" or line.startswith("#"):
                 continue
-            yield line
+            res.append(line)
+    return res
 
 
-@pytest.mark.parametrize("url", list(get_test_urls()))
+@pytest.mark.parametrize("url", get_test_urls())
 def test_urls(url):
     """Run the test."""
     c = Client(application)

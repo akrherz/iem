@@ -30,7 +30,7 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.htmlgen import make_select
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import archive_fetch, utc
-from pyiem.web.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD
+from pyiem.web.fields import DAY_OF_MONTH_FIELD, MONTH_FIELD, YEAR_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
 LOG = logging.getLogger(__name__)
@@ -57,13 +57,7 @@ class MyModel(CGIModel):
     ] = None
     day: DAY_OF_MONTH_FIELD = utc().day
     month: MONTH_FIELD = utc().month
-    year: Annotated[
-        int,
-        Field(
-            title="Year",
-            description="Year",
-        ),
-    ] = utc().year
+    year: YEAR_FIELD = utc().year
 
 
 HEADER = """
@@ -124,7 +118,7 @@ def generate_ui(key, valid: datetime, res):
         res["content"] += "<p>Failed to find any archived files.</p>"
 
 
-def workflow(key, tmpdir, ts: datetime | None):
+def workflow(key, tmpdir, ts: str | None):
     """Go ts."""
     meta = SOURCES[key]
     if ts is None:
@@ -142,7 +136,7 @@ def workflow(key, tmpdir, ts: datetime | None):
             valid = datetime.strptime(ts, "%Y%m%d%H%M")
         except Exception as exp:
             raise IncompleteWebRequest("Invalid ts provided") from exp
-    ppath = valid.strftime(meta["re"])
+    ppath = valid.strftime(str(meta["re"]))
     with archive_fetch(ppath) as testfn:
         if testfn is None:
             raise FileNotFoundError(f"Failed to find {ppath} for service.")
@@ -155,7 +149,8 @@ def workflow(key, tmpdir, ts: datetime | None):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         ) as cmd:
-            cmd.stdout.read()
+            if cmd.stdout:
+                cmd.stdout.read()
     with open(f"{tmpdir}/test.tiff", "rb") as fh:  # skipcq
         return fh.read()
 
@@ -224,5 +219,6 @@ def application(environ, start_response):
     for key in SOURCES:
         generate_ui(key, valid, res)
 
+    payload = TEMPLATE.render(res)
     start_response("200 OK", headers)
-    return [TEMPLATE.render(res).encode("utf-8")]
+    return payload

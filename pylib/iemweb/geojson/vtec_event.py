@@ -291,4 +291,4 @@ def application(environ, start_response):
             res = run(query)
 
     start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
-    return res.encode("ascii")
+    return res
