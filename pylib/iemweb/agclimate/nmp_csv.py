@@ -202,7 +202,8 @@ def do_output(sio):
 def application(_environ, start_response):
     """Do Something"""
     headers = [("Content-type", "text/csv;header=present")]
-    start_response("200 OK", headers)
     sio = StringIO()
     do_output(sio)
-    return [sio.getvalue().encode("ascii")]
+    payload = sio.getvalue()
+    start_response("200 OK", headers)
+    return payload

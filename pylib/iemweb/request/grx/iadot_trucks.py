@@ -72,5 +72,6 @@ Font: 1, 11, 1, "Courier New"
 )
 def application(_environ, start_response):
     """Go Main Go"""
+    payload = produce_content()
     start_response("200 OK", [("Content-type", "text/plain")])
-    return produce_content()
+    return payload

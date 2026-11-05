@@ -454,13 +454,14 @@ def dat_handler(request: Request, res: dict) -> str:
         "geometryType=esriGeometryPolyline&"
         f"time={sts:%s}000%2C{ets:%s}000"
     )
+    datjson = {}
     try:
         with requests.Session() as client:
             resp = client.get(url, timeout=30)
             resp.raise_for_status()
             datjson = resp.json()
     except (requests.RequestException, ValueError) as exp:
-        raise BadWebRequest("Unable to load DAT events.") from exp
+        LOG.info("Dat request or json processing failed: %s", exp)
     for feat in datjson.get("features", []):
         _globalid = feat["attributes"]["globalid"]
         globalid = html_escape(_globalid)

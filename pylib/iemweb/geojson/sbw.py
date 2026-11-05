@@ -82,24 +82,30 @@ class Schema(CGIModel):
             ge=utc(1986, 1, 1),
         ),
     ] = None
-    ts: AwareDatetime = Field(
-        default=None,
-        description=(
-            "If sts and ets are not provided, this is the timestamp to "
-            "request data for."
+    ts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "If sts and ets are not provided, this is the timestamp to "
+                "request data for."
+            ),
+            ge=utc(1986, 1, 1),
         ),
-        ge=utc(1986, 1, 1),
-    )
-    wfo: str = Field(
-        default=None,
-        description="Optional WFO identifier",
-        max_length=3,
-        min_length=3,
-    )
-    wfos: ListOrCSVType = Field(
-        default=None,
-        description="Optional list of WFOs to limit the results to",
-    )
+    ] = None
+    wfo: Annotated[
+        str | None,
+        Field(
+            description="Optional WFO identifier",
+            max_length=3,
+            min_length=3,
+        ),
+    ] = None
+    wfos: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="Optional list of WFOs to limit the results to",
+        ),
+    ] = None
 
     @field_validator("sts", "ets", mode="before")
     @classmethod
@@ -329,4 +335,4 @@ def application(environ, start_response):
     headers = [("Content-type", get_ct(environ))]
     res = run(query)
     start_response("200 OK", headers)
-    return res.encode("utf-8")
+    return res

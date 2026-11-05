@@ -52,7 +52,7 @@ class Schema(CGIModel):
 def run(query: Schema) -> str:
     """Do great things"""
     with get_sqlalchemy_conn("postgis") as conn:
-        borderdf = gpd.read_postgis(
+        borderdf = gpd.read_postgis(  # type: ignore
             sql_helper("""
             WITH stormbased as (
                 SELECT geom from sbw where vtec_year = :year and wfo = :wfo
@@ -104,7 +104,6 @@ def get_mckey(environ: dict) -> str:
 def application(environ, start_response):
     """Main()"""
     query: Schema = environ["_cgimodel_schema"]
-    res = run(query).encode("ascii")
-
+    res = run(query)
     start_response("200 OK", [("Content-Type", "application/vnd.geo+json")])
     return res
