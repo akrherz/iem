@@ -26,14 +26,12 @@ cd /mnt/webalizer/tmp || exit 1
 # Step 1, bring all these log files back to roost and delete them remotely
 for MACH in "${MACHINES[@]}"
 do
-    scp -q "root@${MACH}:/mesonet/www/logs/*-${yyyymmddhh}" .
+    scp -q "mesonet@${MACH}:/mesonet/www/logs/*-${yyyymmddhh}" .
     for filename in *-"${yyyymmddhh}"
     do
         [[ -f "$filename" ]] || continue
         mv -- "$filename" "${filename}-${MACH}"
     done
-    # shellcheck disable=SC2029
-    ssh "root@${MACH}" "rm -f /mesonet/www/logs/*-${yyyymmddhh}"
 done
 
 # Step 2: Merge the log files together
@@ -68,12 +66,11 @@ rsync -a --exclude '*webalizer*db' /mnt/webalizer/usage/. /mesonet/share/usage/
 for PREF in "${PREFIXES[@]}"
 do
     mv -- "combined-${PREF}.log" "${PREF}-${yyyymmddhh}.log"
-    gzip -- "${PREF}-${yyyymmddhh}.log"
 done
 
 # Step 6, mv files to local cache
 mkdir -p "../save/${yyyy}/${mm}"
-archives=(*-"${yyyymmddhh}".log.gz)
+archives=(*-"${yyyymmddhh}".log)
 if ((${#archives[@]})); then
     mv -- "${archives[@]}" "../save/${yyyy}/${mm}/"
 fi
