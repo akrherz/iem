@@ -225,6 +225,7 @@ Ext.onReady(() => {
                     ['KCCI', 'KCCI-TV Des Moines'],
                     ['KCRG', 'KCRG-TV Cedar Rapids'],
                     ['KELO', 'KELO-TV Sioux Falls'],
+                    ['WOI', 'WOI-TV Des Moines'],
                     ['MCFC', 'McLaughlin Family of Companies']]
                 }),
                 listeners: {

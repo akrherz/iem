@@ -11,7 +11,7 @@ function get_cameras()
     // Cache for later usage
     static $cameras = null;
     if (is_null($cameras)) {
-        $cached_cameras = cacheable("php/cameras.inc.php", 43200)(function () {
+        $cached_cameras = cacheable("php/cameras.inc.php/v2", 43200)(function () {
             $mesosite = iemdb("mesosite");
             $rs = pg_query($mesosite, "SELECT *, ST_x(geom) as lon, " .
                 "ST_y(geom) as lat from webcams ORDER by name ASC");

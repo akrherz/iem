@@ -62,7 +62,7 @@ def run(valid, network):
     """Actually do the hard work of getting the current SPS in geojson"""
     networks = [network]
     if network == "TV":
-        networks = ["KCRG", "KCCI", "KELO", "ISUC", "MCFC"]
+        networks = ["KCRG", "KCCI", "KELO", "ISUC", "MCFC", "WOI"]
     params = {"networks": networks, "valid": valid}
     data = json_response_dict(
         {
