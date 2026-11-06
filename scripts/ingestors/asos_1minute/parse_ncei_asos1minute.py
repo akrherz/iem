@@ -16,6 +16,7 @@ import sys
 import tarfile
 from datetime import datetime, timedelta
 from io import StringIO
+from pathlib import Path
 
 import click
 import pandas as pd
@@ -115,7 +116,7 @@ def make_int(s, minval, maxval):
     return None
 
 
-def p1_parser(line, metadata):
+def p1_parser(line, metadata) -> dict | None:
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
@@ -341,16 +342,21 @@ def init_dataframes(
         dl_archive(df, dt)
         return [df]
     res = []
-    months = [dt]
+    if dt is None:
+        LOG.warning("dt should not be None here...")
+        return res
+    # NCEI Hidden files are named after the month they have data for and
+    # processing date update
+    data_for_months = [dt]
     if dt.day < 7:
-        months.insert(0, dt - timedelta(days=9))
-    for mdt in months:
+        data_for_months.insert(0, dt - timedelta(days=9))
+    for data_month in data_for_months:
         df["archive_end"] = DT1980
         df["fn5"] = ""
         df["fn6"] = ""
-        merge_archive_end(df, mdt)
+        merge_archive_end(df, data_month)
         for page in [1, 2]:
-            dl_realtime(df, dt, mdt, page)
+            dl_realtime(df, dt, data_month, page)
         res.append(df.copy())
     set_property("asos.1min.end", dt.strftime("%Y-%m-%d"))
 
@@ -374,17 +380,19 @@ def merge_archive_end(df, dt):
     df["archive_end"] = df["archive_end"].fillna(DT1980).infer_objects()
 
 
-def dl_realtime(df, dt, mdt, page):
+def dl_realtime(df, dt, data_month: datetime, page):
     """Download and stage the 'real-time' processing."""
     # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
-    tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
+    tmpfn = f"asos-1min-pg{page}_d{data_month:%Y%m}_c{dt:%Y%m%d}.tar.gz"
     if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
         uri = f"{HIDDENURL}/{tmpfn}"
         with requests.get(uri, stream=True, timeout=60) as resp:
             if resp.status_code != 200:
-                loglvl = LOG.info if dt.month != mdt.month else LOG.warning
+                loglvl = (
+                    LOG.info if dt.month != data_month.month else LOG.warning
+                )
                 loglvl("Got HTTP %s for %s", resp.status_code, uri)
-                sys.exit(2)
+                return
             with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
@@ -401,17 +409,22 @@ def dl_realtime(df, dt, mdt, page):
                 LOG.warning("Unknown station %s, FIXME!", station)
                 continue
             f = tar.extractfile(tarinfo.name)
-            pathlib.Path(f"{TMPDIR}/{tarinfo.name}").write_bytes(f.read())
-            # sick
-            df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
+            if f:
+                pathlib.Path(f"{TMPDIR}/{tarinfo.name}").write_bytes(f.read())
+                # sick
+                df.loc[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
 
 
-def cleanup(df):
+def cleanup(df: pd.DataFrame):
     """Pickup after ourselves."""
     for _station, row in df.iterrows():
         for page in [5, 6]:
             fn = row[f"fn{page}"]
-            if not pd.isnull(fn) and fn.startswith(TMPDIR):
+            if (
+                not pd.isnull(fn)
+                and fn.startswith(TMPDIR)
+                and Path(fn).exists()
+            ):
                 os.unlink(fn)
     # Cleanup tmp folder
     subprocess.call(["tmpwatch", "200", TMPDIR])
@@ -473,6 +486,7 @@ def test_parser():
         p1_examples = fh.readlines()
     for i, ex in enumerate(p1_examples):
         res = p1_parser(ex, metadata)
+        assert res is not None
         if i == 0:
             assert abs(float(res["vis1_coeff"]) - 0.109) < 0.01
         if i == 22:
@@ -481,11 +495,11 @@ def test_parser():
             assert abs(float(res["drct"]) - 305.0) < 0.01
         if i in [26, 27]:
             assert res.get("drct") is None
-        assert res is not None
     with open("p2_examples.txt", encoding="utf-8") as fh:
         p2_examples = fh.readlines()
     for i, ex in enumerate(p2_examples):
         res = p2_parser(ex, metadata)
+        assert res is not None
         if i == 0:
             assert abs(res["tmpf"] - 29.0) < 0.01
             assert abs(res["dwpf"] - 23.0) < 0.01
@@ -495,4 +509,3 @@ def test_parser():
             assert abs(res["precip"] - 0.03) < 0.01
         if i == 28:
             assert abs(res["dwpf"] - -2) < 0.01
-        assert res is not None
