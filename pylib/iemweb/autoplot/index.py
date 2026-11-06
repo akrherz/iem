@@ -461,7 +461,7 @@ def dat_handler(request: Request, res: dict) -> str:
             resp.raise_for_status()
             datjson = resp.json()
     except (requests.RequestException, ValueError) as exp:
-        LOG.info("Dat request or json processing failed: %s", exp)
+        LOG.warning("Dat request or json processing failed: %s", exp)
     for feat in datjson.get("features", []):
         _globalid = feat["attributes"]["globalid"]
         globalid = html_escape(_globalid)
