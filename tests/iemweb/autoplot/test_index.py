@@ -168,7 +168,7 @@ def test_dat_options_escape_api_fields(monkeypatch):
     assert "&quot; onfocus=&quot;alert(1)" in form
 
 
-def test_dat_request_errors_are_reported_as_bad_requests(monkeypatch):
+def test_dat_request_errors_are_logged(monkeypatch, caplog):
     """Expected external service failures become a client-facing error."""
 
     class Session:
@@ -183,8 +183,8 @@ def test_dat_request_errors_are_reported_as_bad_requests(monkeypatch):
 
     monkeypatch.setattr("iemweb.autoplot.index.requests.Session", Session)
 
-    with pytest.raises(BadWebRequest, match="Unable to load DAT events"):
-        dat_handler(_request(), {"pltvars": []})
+    dat_handler(_request(), {"pltvars": []})
+    assert "Dat request or json processing failed" in caplog.text
 
 
 def test_dat_handler_does_not_hide_programming_errors(monkeypatch):
