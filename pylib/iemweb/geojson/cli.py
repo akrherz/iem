@@ -32,6 +32,7 @@ https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
 
 import csv
 import io
+from collections.abc import Callable
 from datetime import date
 from typing import Annotated
 
@@ -275,7 +276,7 @@ def get_mckey(environ: dict) -> str:
     memcachekey=get_mckey,
     memcacheexpire=600,  # Excessive usage
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """see how we are called"""
     query: Schema = environ["_cgimodel_schema"]
 

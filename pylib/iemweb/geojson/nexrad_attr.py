@@ -43,7 +43,7 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.web.fields import CALLBACK_FIELD
@@ -68,13 +68,13 @@ class Schema(CGIModel):
         datetime | None,
         Field(
             description="The timestamp to request data for, in UTC.",
-            ge=datetime(2000, 1, 1),
+            ge=utc(2000, 1, 1),
+            le=utc(utc().year + 1, 12, 31),
         ),
     ] = None
 
 
-@with_sqlalchemy_conn("radar")
-def run(valid, fmt, conn: Connection = None):
+def run(valid, fmt, conn: Connection):
     """Actually do the hard work of getting the geojson"""
 
     if valid is None:
@@ -198,12 +198,14 @@ def get_mckey(environ):
     content_type=get_ct,
     memcachekey=get_mckey,
     memcacheexpire=60,
+    default_tz="UTC",
 )
 def application(environ, start_response):
     """Do Something"""
     fmt = environ["fmt"]
     headers = [("Content-type", get_ct(environ))]
 
-    res = run(environ["valid"], fmt)
+    with get_sqlalchemy_conn("radar") as conn:
+        res = run(environ["valid"], fmt, conn)
     start_response("200 OK", headers)
     return res.encode("ascii")

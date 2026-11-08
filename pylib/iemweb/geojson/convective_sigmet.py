@@ -38,7 +38,7 @@ from datetime import timedelta
 from typing import Annotated
 
 from pydantic import AwareDatetime, Field, model_validator
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.web.fields import CALLBACK_FIELD
@@ -88,8 +88,7 @@ class Schema(CGIModel):
         return self
 
 
-@with_sqlalchemy_conn("postgis")
-def run(environ: dict, conn: Connection = None) -> str:
+def run(environ: dict, conn: Connection) -> str:
     """Actually do the hard work of getting the current SBW in geojson"""
     # Database index only on issue, so we make a safe assumption
     timefilter = (
@@ -145,6 +144,7 @@ def run(environ: dict, conn: Connection = None) -> str:
 )
 def application(environ, start_response):
     """Do Something"""
-    res = run(environ).encode("ascii")
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = run(environ, conn)
     start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res
