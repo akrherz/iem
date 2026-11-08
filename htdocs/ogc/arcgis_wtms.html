@@ -4,32 +4,30 @@
 <!-- Credit to Derek Swingley http://jsfiddle.net/MR76J/ -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=7">
-    <!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples
       on iOS devices-->
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
     <title>Nexrad from Iowa Environmental Mesonet</title>
     <link rel="stylesheet" href="//js.arcgis.com/3.3/js/esri/css/esri.css">
     <style>
       html, body, #map {
-        height: 100%; width: 100%; margin: 0; padding: 0; 
+        height: 100%; width: 100%; margin: 0; padding: 0;
       }
     </style>
 
     <script src="//js.arcgis.com/3.3/"></script>
     <script>
       var map;
-    
+
       require(["esri/map", "esri/layers/WebTiledLayer"],
         function() {
           map = new esri.Map("map", {
             basemap: "gray",
             center: [ -100, 40 ],
-            zoom: 4 
+            zoom: 4
           });
-          var subs = [ "mesonet", "mesonet1", "mesonet2", "mesonet3" ];
-          var nexrad = new esri.layers.WebTiledLayer("http://${subDomain}.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q/${level}/${col}/${row}.png", {
+          var nexrad = new esri.layers.WebTiledLayer("https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q/${level}/${col}/${row}.png", {
             id: "nexrad",
-            subDomains: subs
           });
           map.addLayer(nexrad);
         }

@@ -7,10 +7,6 @@
 Include /opt/iemwebfarm/config/vhost_common.conf
 
 ServerName mesonet.agron.iastate.edu
-ServerAlias www.mesonet.agron.iastate.edu
-ServerAlias mesonet1.agron.iastate.edu
-ServerAlias mesonet2.agron.iastate.edu
-ServerAlias mesonet3.agron.iastate.edu
 ServerAlias iem.local
 ServerAdmin akrherz@iastate.edu
 DocumentRoot /opt/iem/htdocs

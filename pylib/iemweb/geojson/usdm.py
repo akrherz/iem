@@ -57,7 +57,7 @@ class Schema(CGIModel):
     ] = None
 
 
-def rectify_date(dt: dateobj):
+def rectify_date(dt: dateobj) -> dateobj | None:
     """Convert this tstamp into something we can actually use
 
     if '', use max valid from database
@@ -68,8 +68,8 @@ def rectify_date(dt: dateobj):
         with get_sqlalchemy_conn("postgis") as conn:
             # Go get the latest USDM stored in the database!
             res = conn.execute(sql_helper("SELECT max(valid) from usdm"))
-            res = res.fetchone()[0]
-        return res
+            row = res.fetchone()
+        return None if row is None else row[0]
 
     offset = (dt.weekday() - 1) % 7
     return dt - timedelta(days=offset)

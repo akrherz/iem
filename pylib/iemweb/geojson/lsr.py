@@ -144,9 +144,9 @@ class Schema(CGIModel):
         if any(x is not None for x in vals):
             if not all(x is not None for x in vals):
                 raise ValueError("Incomplete spatial bounds provided")
-            if self.east <= self.west:
+            if self.east <= self.west:  # type: ignore
                 raise ValueError("East is less than West")
-            if self.north <= self.south:
+            if self.north <= self.south:  # type: ignore
                 raise ValueError("North is less than South")
         return self
 
@@ -167,7 +167,7 @@ class Schema(CGIModel):
 def do_vtec(environ: dict) -> gpd.GeoDataFrame:
     """Actually do the hard work of getting the current SBW in geojson"""
     with get_sqlalchemy_conn("postgis") as conn:
-        lsrdf = gpd.read_postgis(
+        lsrdf = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             SELECT l.wfo, l.type,
@@ -193,14 +193,14 @@ def do_vtec(environ: dict) -> gpd.GeoDataFrame:
                 "significance": environ["significance"],
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     return lsrdf
 
 
 def do_states(environ: dict) -> gpd.GeoDataFrame:
     """Actually do the hard work of getting the current SBW in geojson"""
     with get_sqlalchemy_conn("postgis") as conn:
-        lsrdf = gpd.read_postgis(
+        lsrdf = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             SELECT distinct l.wfo, l.type,
@@ -223,7 +223,7 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
                 "sts": environ["sts"],
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     return lsrdf
 
 
@@ -238,7 +238,7 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
             "4326), geom) "
         )
     with get_sqlalchemy_conn("postgis") as conn:
-        lsrdf = gpd.read_postgis(
+        lsrdf = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             SELECT distinct wfo, type, magnitude as magf,
@@ -256,7 +256,7 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
             conn,
             params=environ,
             geom_col="geom",
-        )  # type: ignore
+        )
     return lsrdf
 
 
