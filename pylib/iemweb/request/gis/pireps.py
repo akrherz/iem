@@ -35,6 +35,7 @@ sts=2024-07-31T00:00:00Z&ets=2024-08-01T00:00:00Z&artcc=ZMP&fmt=shp
 """
 
 import zipfile
+from collections.abc import Callable
 from datetime import timedelta
 from io import BytesIO, StringIO
 from typing import Annotated
@@ -58,10 +59,13 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    artcc: ListOrCSVType = Field(
-        default_factory=list,
-        description="The ARTCC to limit the query to, use _ALL for all",
-    )
+    artcc: Annotated[
+        ListOrCSVType,
+        Field(
+            default_factory=list,
+            description="The ARTCC to limit the query to, use _ALL for all",
+        ),
+    ]
     ets: Annotated[
         AwareDatetime | None, Field(description="The end time of the query")
     ] = None
@@ -99,7 +103,7 @@ class Schema(CGIModel):
     minute2: MINUTE_FIELD = 0
 
 
-def run(query: Schema, start_response: callable):
+def run(query: Schema, start_response: Callable):
     """Go run!"""
     artcc_sql = ""
     if "_ALL" not in query.artcc and query.artcc:
@@ -119,18 +123,18 @@ def run(query: Schema, start_response: callable):
             "ST_Distance(geom::geometry, ST_Point(:lon, :lat, 4326) "
             ") <= :distance and "
         )
-    else:
+    elif query.ets and query.sts:
         if (query.ets - query.sts).days > 120:
             query.ets = query.sts + timedelta(days=120)
     sql = """
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
-        substr(replace(aircraft_type, ',', ' '), 0, 40),
-        substr(replace(report, ',', ' '), 0, 255),
-        substr(trim(substring(replace(report, ',', ' '),
-            '/IC([^/]*)/?')), 0, 255) as icing,
-        substr(trim(substring(replace(report, ',', ' '),
-            '/TB([^/]*)/?')), 0, 255) as turb,
+        trim(substr(replace(aircraft_type, ',', ' '), 0, 40)),
+        trim(substr(replace(report, ',', ' '), 0, 255)),
+        trim(substr(trim(substring(replace(report, ',', ' '),
+            '/IC([^/]*)/?')), 0, 255)) as icing,
+        trim(substr(trim(substring(replace(report, ',', ' '),
+            '/TB([^/]*)/?')), 0, 255)) as turb,
         coalesce(artcc, '') as artcc, product_id, flight_level,
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
@@ -201,9 +205,9 @@ def run(query: Schema, start_response: callable):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
     query: Schema = environ["_cgimodel_schema"]
     if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET start/end time parameters missing.")
-    return [run(query, start_response)]
+    return run(query, start_response)
