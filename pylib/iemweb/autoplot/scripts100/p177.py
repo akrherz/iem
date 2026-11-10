@@ -331,18 +331,20 @@ def make_daily_rad_plot(ctx: Params):
 
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT valid, slrkj_tot_qc / 1000. as rad from sm_daily
-            where station = %s and valid >= %s and valid <= %s
+            where station = :station and valid >= :sts and valid <= :ets
             ORDER by valid ASC
-            """,
+            """),
             conn,
-            params=(
-                ctx.station,
-                ctx.sts.strftime("%Y-%m-%d"),
-                ctx.ets.strftime("%Y-%m-%d"),
-            ),
-            parse_dates="valid",
+            params={
+                "station": ctx.station,
+                "sts": ctx.sts.date(),
+                "ets": ctx.ets.date(),
+            },
+            parse_dates=[
+                "valid",
+            ],
             index_col="valid",
         )
     if df.empty:
@@ -353,7 +355,7 @@ def make_daily_rad_plot(ctx: Params):
         .rename(columns={"index": "valid"})
     )
     df["jday"] = df["valid"].dt.strftime("%j").astype(int)
-    df = df.join(maxes, on="jday", suffixes=("_", ""))
+    df = df.join(maxes, on="jday", suffixes=("_", ""))  # type: ignore
 
     title = f"ISUSM Station: {ctx.sname} Timeseries\n Daily Solar Radiation"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -693,7 +695,9 @@ def make_daily_water_change_plot(ctx: Params):
                 "ets": ctx.ets.date(),
             },
             index_col="valid",
-            parse_dates="valid",
+            parse_dates=[
+                "valid",
+            ],
         )
 
         df = pd.read_sql(
@@ -725,7 +729,9 @@ def make_daily_water_change_plot(ctx: Params):
                 "ets": ctx.ets,
             },
             index_col=None,
-            parse_dates="valid",
+            parse_dates=[
+                "valid",
+            ],
         )
     if pdf.empty or df.empty:
         raise NoDataFound("No Data Found for Query")
@@ -911,7 +917,7 @@ def plot_sm(ctx: Params):
     rhs.set_xlim(0, xmax)
 
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
+    ax.set_position((box.x0, box.y0, box.width, box.height * 0.94))
     ax.legend(
         bbox_to_anchor=(0.5, 1.0),
         ncol=7,
@@ -970,12 +976,12 @@ def plot4iemre(ctx: Params, lon: float, lat: float):
 
     ax.plot(vtimes, t4, label="IEMRE Hourly")
     ax.plot(
-        df.index.to_pydatetime(),
+        df.index.to_pydatetime(),  # type: ignore
         c2f(df["t4_c_avg_qc"].to_numpy()),
         label="ISUSM QC",
     )
     ax.plot(
-        df.index.to_pydatetime(),
+        df.index.to_pydatetime(),  # type: ignore
         c2f(df["t4_c_avg"].to_numpy()),
         label="ISUSM Obs",
     )
@@ -984,7 +990,7 @@ def plot4iemre(ctx: Params, lon: float, lat: float):
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle="--", lw=2, color="tan")
     ax.set_ylabel("Temperature [°F]")
-    ax.set_xlim(ctx.sts, ctx.ets)
+    ax.set_xlim(ctx.sts, ctx.ets)  # type: ignore
     ax.legend(ncol=3)
     ax.grid(True)
 
@@ -1027,7 +1033,7 @@ def plot2(ctx: Params):
     if not svplotted and not d50t.isnull().all():
         ax.plot(valid, c2f(d50t), linewidth=2, color="black", label="50 inch")
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
+    ax.set_position((box.x0, box.y0, box.width, box.height * 0.94))
     ax.legend(
         bbox_to_anchor=(0.5, 1.0),
         ncol=10,

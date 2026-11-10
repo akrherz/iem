@@ -14,7 +14,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
-from pyiem.util import LOG, utc
+from pyiem.util import LOG, get_properties, utc
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot.description import (
@@ -39,6 +39,7 @@ PDICT3 = {
     "auto": "Let autoplot decide when to include NEXRAD overlay",
     "off": "No NEXRAD Mosaic Please",
 }
+IBURL = get_properties()["internal.baseurl"]
 
 
 class Params(AutoplotParams):
@@ -81,7 +82,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
 
     # Compute a population estimate
     popyear = min(max([prodyear - prodyear % 5, 2000]), 2020)
-    df: pd.DataFrame = gpd.read_postgis(
+    df: pd.DataFrame = gpd.read_postgis(  # type: ignore
         sql_helper(
             """
             with geopop as (
@@ -102,7 +103,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
         params={"pid": pid, "segnum": segnum},
         index_col=None,
         geom_col="geom",
-    )  # type: ignore
+    )
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
     row = df.iloc[0]
@@ -119,7 +120,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
         for source in ["z", "fz", "mz"]:
-            ugcdf: pd.DataFrame = gpd.read_postgis(
+            ugcdf: pd.DataFrame = gpd.read_postgis(  # type: ignore
                 sql_helper(
                     """
                     SELECT simple_geom, ugc, {gpwcol}
@@ -137,7 +138,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
                     "source": source,
                 },
                 geom_col="simple_geom",
-            )  # type: ignore
+            )
             if not ugcdf.empty:
                 if source == "fz":
                     is_fwx = True
@@ -174,10 +175,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
 
     # Plot text on the page, hehe
     try:
-        resp = requests.get(
-            f"http://mesonet.agron.iastate.edu/api/1/nwstext/{pid}",
-            timeout=10,
-        )
+        resp = requests.get(f"{IBURL}/api/1/nwstext/{pid}", timeout=10)
         resp.raise_for_status()
         report = resp.text
     except Exception as exp:
@@ -215,7 +213,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
         if val is None:
             continue
         msg.append(f"{col.replace('_', ' ')}: {val} {UNITS.get(col)}")
-    if msg:
+    if msg and mp.ax:
         mp.ax.text(
             0.01,
             0.95,

@@ -32,6 +32,7 @@ import requests
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from pyiem.util import get_properties
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
@@ -44,6 +45,7 @@ PDICT = {
     "rank": "Rank (1=wettest)",
     "spi": "Standardized Precip Index [sigma]",
 }
+IBURL = get_properties()["internal.baseurl"]
 
 
 class Params(AutoplotParams):
@@ -104,7 +106,7 @@ def add_ctx(ctx: Params, conn=None):
     sts = dt - timedelta(days=14)
     try:
         resp = requests.get(
-            "http://mesonet.agron.iastate.edu/api/1/usdm_bypoint.json",
+            f"{IBURL}/api/1/usdm_bypoint.json",
             params={
                 "sdate": sts.strftime("%Y-%m-%d"),
                 "edate": dt.strftime("%Y-%m-%d"),

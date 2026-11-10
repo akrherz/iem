@@ -154,7 +154,8 @@ def plotter(ctx: Params):
             "select name from ugcs where ugc = %s and end_ts is null",
             (ugc,),
         )
-        ugcname = cursor.fetchone()["name"]
+        ugcrow = cursor.fetchone()
+        ugcname = "Unknown" if ugcrow is None else ugcrow["name"]
         cursor.close()
         pgconn.close()
     overlapsql = ""
@@ -179,7 +180,9 @@ def plotter(ctx: Params):
                 conn,
                 params=params,
                 index_col=None,
-                parse_dates="date",
+                parse_dates=[
+                    "date",
+                ],
             )
 
         else:
@@ -201,7 +204,9 @@ def plotter(ctx: Params):
                 conn,
                 params=params,
                 index_col=None,
-                parse_dates="date",
+                parse_dates=[
+                    "date",
+                ],
             )
     if df.empty:
         raise NoDataFound("No data found for query")

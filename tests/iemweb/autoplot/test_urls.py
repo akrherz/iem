@@ -10,6 +10,7 @@ from werkzeug.test import Client
 def get_test_urls():
     """yield a list of URLs to test."""
     listfn = pathlib.Path(__file__).parent / "urllist.txt"
+    res = []
     with open(listfn, encoding="ascii") as fh:
         for line_in in fh:
             line = line_in.strip()
@@ -19,10 +20,11 @@ def get_test_urls():
             # 199/opt:1::date:2024-07-24::_r:t::dpi:100.png
             num, qstr = line.split("/", maxsplit=1)
             qstr, fmt = qstr.rsplit(".", 1)
-            yield f"/?p={num}&q={qstr}&fmt={fmt}"
+            res.append(f"/?p={num}&q={qstr}&fmt={fmt}")
+    return res
 
 
-@pytest.mark.parametrize("url", list(get_test_urls()))
+@pytest.mark.parametrize("url", get_test_urls())
 def test_urls(url: str):
     """Run the test."""
     c = Client(application)

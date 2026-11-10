@@ -13,13 +13,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
-from pyiem.util import LOG
+from pyiem.util import LOG, get_properties
 
 from iemweb.autoplot.description import IntArg, PlotDescription, TextArg
 from iemweb.autoplot.params import AutoplotParams
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 WFOCONV = {"JSJ": "SJU"}
+IBURL = get_properties()["internal.baseurl"]
 
 
 class Params(AutoplotParams):
@@ -47,7 +48,7 @@ def get_description() -> PlotDescription:
 def get_text(product_id: str) -> str:
     """get the raw text."""
     res = "Text Unavailable, Sorry."
-    uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
+    uri = f"{IBURL}/api/1/nwstext/{product_id}"
     try:
         resp = requests.get(uri, timeout=5)
         resp.raise_for_status()
@@ -68,7 +69,7 @@ def plotter(ctx: Params):
     # Compute a population estimate
     popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
                 with geopop as (
@@ -87,7 +88,7 @@ def plotter(ctx: Params):
             params={"pid": pid, "segnum": segnum},
             index_col=None,
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         raise NoDataFound("NWEM Event was not found, sorry.")
     row = df.iloc[0]

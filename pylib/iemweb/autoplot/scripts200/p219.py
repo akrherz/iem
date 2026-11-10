@@ -17,19 +17,18 @@ from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
 from pyiem.database import (
-    get_dbconn,
     get_sqlalchemy_conn,
     sql_helper,
-    with_sqlalchemy_conn,
 )
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import LOG, utc
+from pyiem.util import LOG, get_properties, utc
 from sqlalchemy.engine import Connection
 
 from iemweb.autoplot.description import DateTimeArg, PlotDescription, TextArg
 from iemweb.autoplot.params import AutoplotParams
 
+IBURL = get_properties()["internal.baseurl"]
 VIS = "visibility"
 TEXTARGS = {
     "fontsize": 12,
@@ -69,11 +68,16 @@ def get_description() -> PlotDescription:
 def get_text(product_id: str):
     """get the raw text."""
     text = "Text Unavailable, Sorry."
-    uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
+    uri = f"{IBURL}/api/1/nwstext/{product_id}"
     # Allow for some time for the product to show up in AFOS
     for attempt in range(2):
         try:
             resp = requests.get(uri, timeout=5)
+            if resp.status_code == 404:
+                if attempt == 0:
+                    time.sleep(10)
+                    continue
+                return text
             resp.raise_for_status()
             text = resp.content.decode("ascii", "ignore").replace("\001", "")
             text = "\n".join(text.replace("\r", "").split("\n")[5:])
@@ -81,13 +85,11 @@ def get_text(product_id: str):
         except Exception as exp:
             if attempt > 0:
                 LOG.warning(exp)
-            time.sleep(10)
 
     return text
 
 
-@with_sqlalchemy_conn("asos")
-def taf_search(station, valid, conn: Connection | None = None):
+def taf_search(station, valid, conn: Connection) -> datetime | None:
     """Go look for a nearest in time TAF."""
     res = conn.execute(
         sql_helper(
@@ -97,9 +99,8 @@ def taf_search(station, valid, conn: Connection | None = None):
         ),
         {"station": station, "sts": valid - timedelta(hours=24), "ets": valid},
     )
-    if res.rowcount == 0:
-        return None
-    return res.fetchone()[0].replace(tzinfo=UTC)
+    row = res.fetchone()
+    return None if row is None else row[0].replace(tzinfo=UTC)
 
 
 def compute_flight_condition(row):
@@ -148,9 +149,8 @@ def plotter(ctx: Params):
     valid = ctx.valid.replace(tzinfo=UTC)
     df = fetch(ctx.station, valid)
     if df.empty:
-        pgconn = get_dbconn("asos")
-        valid = taf_search(ctx.station, valid)
-        pgconn.close()
+        with get_sqlalchemy_conn("asos") as conn:
+            valid = taf_search(ctx.station, valid, conn)
         if valid is None:
             raise NoDataFound("TAF data was not found!")
         df = fetch(ctx.station, valid)

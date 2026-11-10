@@ -68,7 +68,9 @@ def plotter(ctx: Params):
             conn,
             params={"station": station},
             index_col="year",
-            parse_dates="day",
+            parse_dates=[
+                "day",
+            ],
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
