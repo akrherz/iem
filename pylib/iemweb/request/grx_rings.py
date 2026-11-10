@@ -142,7 +142,6 @@ def application(environ, start_response):
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}"),
     ]
-    start_response("200 OK", headers)
 
     # Things for the user to theoretically input:
     loc = html_escape(environ["loc"])
@@ -177,4 +176,5 @@ def application(environ, start_response):
         for x, y in zip(X, Y, strict=False):
             sio.write(f" {y}, {x}\n")
         sio.write("End:\n\n")
-    return [sio.getvalue().encode("utf-8")]
+    start_response("200 OK", headers)
+    return sio.getvalue()

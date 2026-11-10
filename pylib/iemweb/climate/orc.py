@@ -14,6 +14,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/climate/orc.py
 
 """
 
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from io import StringIO
 
@@ -59,7 +60,7 @@ def cdd(db, hi="high", lo="low"):
 
 
 @iemapp(help=__doc__)
-def application(_environ: dict, start_response: callable):
+def application(_environ: dict, start_response: Callable):
     """Go Main Go"""
     COOP = get_dbconn("coop")
     ccursor = COOP.cursor()
@@ -120,8 +121,6 @@ def application(_environ: dict, start_response: callable):
         row = acursor.fetchone()
         awind = row[1]
 
-    headers = [("Content-type", "text/plain")]
-    start_response("200 OK", headers)
     sio = StringIO()
     sio.write("  Orange City Climate Summary\n")
     sio.write("%15s %6s %6s\n" % ("DATE", "HIGH", "LOW"))
@@ -177,4 +176,5 @@ Summary Information [%s - %s]
             awind,
         )
     )
-    return [sio.getvalue().encode("ascii")]
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return sio.getvalue()

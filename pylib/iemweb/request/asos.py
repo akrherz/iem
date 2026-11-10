@@ -487,7 +487,7 @@ def build_querycols(form):
 
 
 def toobusy(pgconn, environ, name):
-    """Check internal logging..."""
+    """Check internal logging."""
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT pid from pg_stat_activity where query ~* %s",

@@ -17,9 +17,10 @@ from typing import Annotated
 import requests
 from PIL import Image, ImageDraw
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import LOG, get_properties
 from pyiem.webutil import CGIModel, iemapp
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from sqlalchemy.engine import Connection
 
 
@@ -31,8 +32,7 @@ class MySchema(CGIModel):
     ] = "KCCI-027"
 
 
-@with_sqlalchemy_conn("mesosite")
-def fetch(cid: str, conn: Connection | None = None):
+def fetch(cid: str, conn: Connection):
     """Do work to get the content"""
     # Get camera metadata
     res = conn.execute(
@@ -62,13 +62,13 @@ def fetch(cid: str, conn: Connection | None = None):
         meta["port"],
     )
     ham = (
-        requests.auth.HTTPBasicAuth
+        HTTPBasicAuth
         if cid
         in [
             "KCRG-010",
             "KCCI-027",
         ]
-        else requests.auth.HTTPDigestAuth
+        else HTTPDigestAuth
     )
     try:
         resp = requests.get(uri, auth=ham(user, passwd), timeout=15)
@@ -98,7 +98,8 @@ def fetch(cid: str, conn: Connection | None = None):
 )
 def application(environ, start_response):
     """Do Fun Things"""
-    imagedata = fetch(environ["id"])
+    with get_sqlalchemy_conn("mesosite") as conn:
+        imagedata = fetch(environ["id"], conn)
     if imagedata is None:
         image = Image.new("RGB", (640, 480))
         draw = ImageDraw.Draw(image)

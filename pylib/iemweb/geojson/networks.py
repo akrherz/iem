@@ -22,7 +22,7 @@ https://mesonet.agron.iastate.edu/geojson/networks.py
 
 import json
 
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
@@ -36,8 +36,7 @@ class Schema(CGIModel):
     callback: CALLBACK_FIELD = None
 
 
-@with_sqlalchemy_conn("mesosite")
-def run(conn: Connection = None):
+def run(conn: Connection):
     """Actually do the hard work of getting the current SBW in geojson"""
     res = conn.execute(
         sql_helper(
@@ -74,6 +73,7 @@ def run(conn: Connection = None):
 )
 def application(_environ, start_response):
     """Do Something"""
-    res = run()
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = run(conn)
     start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
-    return res.encode("ascii")
+    return res

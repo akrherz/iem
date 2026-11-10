@@ -42,6 +42,7 @@ https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -63,7 +64,7 @@ class Schema(CGIModel):
 
     callback: CALLBACK_FIELD = None
     has_attribute: Annotated[
-        str, Field(description="Station Attribute to filter on")
+        str | None, Field(description="Station Attribute to filter on")
     ] = None
     network: NETWORK_FIELD = "IA_ASOS"
     only_online: Annotated[
@@ -182,7 +183,7 @@ def get_mckey(environ: dict) -> str:
     help=__doc__,
     schema=Schema,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Main Workflow"""
     query: Schema = environ["_cgimodel_schema"]
 

@@ -192,4 +192,4 @@ def application(environ, start_response):
         res = generate_res(conn, query)
 
     start_response("200 OK", headers)
-    return res.encode("utf-8", "ignore")
+    return res

@@ -13,7 +13,7 @@ https://mesonet.agron.iastate.edu/geojson/winter_roads.geojson
 
 import json
 
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
@@ -27,8 +27,7 @@ class Schema(CGIModel):
     callback: CALLBACK_FIELD = None
 
 
-@with_sqlalchemy_conn("postgis")
-def run(conn: Connection | None = None) -> str:
+def run(conn: Connection) -> str:
     """Actually do the hard work of getting the current SBW in geojson"""
 
     res = conn.execute(
@@ -69,6 +68,7 @@ def run(conn: Connection | None = None) -> str:
 )
 def application(_environ, start_response):
     """Main Workflow"""
-    res = run()
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = run(conn)
     start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

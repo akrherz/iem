@@ -27,12 +27,20 @@ station=ETTI4,MCAI4&var=ws_s&var=ws_nw&z=10&z=2&agg=avg\
 
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.web.fields import TZ_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    TZ_FIELD,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -43,44 +51,59 @@ TOWERIDS = {0: "ETTI4", 1: "MCAI4"}
 class Schema(CGIModel):
     """See how we are called."""
 
-    agg: ListOrCSVType = Field(
-        default=["avg"],
-        description="Aggregation method to use",
-    )
-    format: str = Field(
-        default="excel",
-        description="The format of the response",
-        pattern="^(excel|tdf|comma)$",
-    )
-    ets: AwareDatetime = Field(
-        default=None,
-        description="End of the period of interest",
-    )
-    sts: AwareDatetime = Field(
-        default=None,
-        description="Start of the period of interest",
-    )
+    agg: Annotated[
+        ListOrCSVType,
+        Field(
+            default_factory=lambda: ["avg"],
+            description="Aggregation method to use",
+        ),
+    ]
+    format: Annotated[
+        str,
+        Field(
+            description="The format of the response",
+            pattern="^(excel|tdf|comma)$",
+        ),
+    ] = "excel"
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="End of the period of interest",
+        ),
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="Start of the period of interest",
+        ),
+    ] = None
     station: ListOrCSVType = Field(..., description="Station(s) to query")
-    var: ListOrCSVType = Field(
-        ...,
-        description="Variable(s) to query",
-    )
-    window: int = Field(
-        default=1,
-        description="Window size for aggregation",
-        ge=1,
-        le=1440,
-    )
-    z: ListOrCSVType = Field(..., description="Height(s) to query")
+    var: Annotated[
+        ListOrCSVType,
+        Field(
+            description="Variable(s) to query",
+        ),
+    ]
+    window: Annotated[
+        int,
+        Field(
+            description="Window size for aggregation",
+            ge=1,
+            le=1440,
+        ),
+    ] = 1
+    z: Annotated[ListOrCSVType, Field(description="Height(s) to query")]
     tz: TZ_FIELD = "Etc/UTC"
-    year1: int = Field(None, description="Start Year, if sts not provided")
-    month1: int = Field(None, description="Start Month, if sts not provided")
-    day1: int = Field(None, description="Start Day, if sts not provided")
-    hour1: int = Field(None, description="Start Hour, if sts not provided")
-    year2: int = Field(None, description="End Year, if ets not provided")
-    month2: int = Field(None, description="End Month, if ets not provided")
-    day2: int = Field(None, description="End Day, if ets not provided")
-    hour2: int = Field(None, description="End Hour, if ets not provided")
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def get_stations(environ):
@@ -181,4 +204,4 @@ def application(environ, start_response):
         ("Content-disposition", "attachment; Filename=talltowers.xlsx"),
     ]
     start_response("200 OK", headers)
-    return [bio.getvalue()]
+    return bio.getvalue()
