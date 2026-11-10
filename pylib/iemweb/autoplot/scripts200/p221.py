@@ -93,7 +93,7 @@ def mp_factory(ctx: Params):
 
 def forecast2image(
     ctx: Params, valid: datetime, fhour: int
-) -> list[int, bytes | None]:
+) -> tuple[int, bytes | None]:
     """Overlay things."""
     ts = valid - timedelta(hours=fhour)
     if ts >= utc():
@@ -103,7 +103,7 @@ def forecast2image(
         if gribfn is None:
             return fhour, None
         try:
-            with pygrib.open(gribfn) as grbs:
+            with pygrib.open(gribfn) as grbs:  # type: ignore
                 grb = grbs.select(
                     shortName="refd", level=1000, forecastTime=fhour * 60
                 )[0]
@@ -141,7 +141,7 @@ def forecast2image(
         ref,
         affine=aff,
         crs=pparams,
-        clevs=range(-30, 96, 4),
+        clevs=list(range(-30, 96, 4)),
         cmap=ctx["cmap"],
         clip_on=False,
         clevstride=5,

@@ -12,10 +12,6 @@ Get a RTMA grid as a GeoTIFF
 https://mesonet.agron.iastate.edu/GIS/tiff/index.py?\
 service=rtma&ts=202509090000
 
-Return the most recent 5km FFG as a GeoTIFF
-
-https://mesonet.agron.iastate.edu/GIS/tiff/index.py?service=5kmffg
-
 """
 
 import logging
