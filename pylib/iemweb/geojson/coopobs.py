@@ -28,7 +28,7 @@ from datetime import UTC, date
 from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
@@ -60,8 +60,7 @@ def p(val, precision=2):
     return round(val, precision)
 
 
-@with_sqlalchemy_conn("iem")
-def run(dt: date, conn: Connection | None = None):
+def run(dt: date, conn: Connection):
     """Actually do the hard work of getting the current SPS in geojson"""
 
     res = conn.execute(
@@ -126,6 +125,7 @@ def application(environ, start_response):
     """Do Workflow"""
     dt: date = environ["valid"]
 
-    res = run(dt)
+    with get_sqlalchemy_conn("iem") as conn:
+        res = run(dt, conn)
     start_response("200 OK", [("Content-type", "application/vnd.geo+json")])
     return res

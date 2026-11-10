@@ -50,10 +50,11 @@ import json
 from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import get_dbconnc
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 from iemweb.util import get_ct, json_response_dict
 
@@ -84,9 +85,8 @@ def trace(val):
     return val
 
 
-def get_data(q):
+def get_data(q, conn: Connection):
     """Get the data for this query"""
-    pgconn, cursor = get_dbconnc("iem")
     data = json_response_dict({"type": "FeatureCollection", "features": []})
 
     # Fetch the values
@@ -114,16 +114,21 @@ def get_data(q):
         wheresql = "raw ~* ' PWINO'"
     else:
         return json.dumps(data, ensure_ascii=False)
-    cursor.execute(
-        f"""
+    res = conn.execute(
+        sql_helper(
+            """
     select id, network, name, st_x(geom) as lon, st_y(geom) as lat,
     valid at time zone 'UTC' as utc_valid, {datasql} as data, raw
     from current_log c JOIN stations t on (c.iemid = t.iemid)
     WHERE network ~* 'ASOS' {countrysql}
     and {wheresql} ORDER by valid DESC
-    """
+    """,
+            datasql=datasql,
+            wheresql=wheresql,
+            countrysql=countrysql,
+        )
     )
-    for i, row in enumerate(cursor):
+    for i, row in enumerate(res.mappings()):
         data["features"].append(
             {
                 "type": "Feature",
@@ -142,7 +147,6 @@ def get_data(q):
                 },
             }
         )
-    pgconn.close()
     return json.dumps(data)
 
 
@@ -156,6 +160,7 @@ def get_data(q):
 def application(environ, start_response):
     """see how we are called"""
     headers = [("Content-type", get_ct(environ))]
-    res = get_data(environ["q"])
+    with get_sqlalchemy_conn("iem") as conn:
+        res = get_data(environ["q"], conn)
     start_response("200 OK", headers)
-    return res.encode("utf-8")
+    return res

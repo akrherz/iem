@@ -104,4 +104,4 @@ def application(environ, start_response):
     station = environ["station"]
     payload = fetcher(station, environ["sts"], environ["ets"])
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [payload]
+    return payload

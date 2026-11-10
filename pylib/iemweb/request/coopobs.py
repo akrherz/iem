@@ -40,13 +40,15 @@ network=IA_COOP&stations=AESI4&sts=2024-10-22&ets=2024-10-22&what=download\
 
 from datetime import date
 from io import StringIO
+from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
+    MONTH_FIELD_OPTIONAL,
     NETWORK_FIELD,
     STATION_LIST_FIELD,
 )
@@ -56,42 +58,46 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    delim: str = Field(
-        "comma",
-        description=(
-            "The delimiter to use in the output file.  "
-            "Options: comma, tab, space"
+    delim: Annotated[
+        str,
+        Field(
+            description=(
+                "The delimiter to use in the output file.  "
+                "Options: comma, tab, space"
+            ),
+            pattern="^(comma|tab|space)$",
         ),
-        pattern="^(comma|tab|space)$",
-    )
+    ] = "comma"
     network: NETWORK_FIELD
     stations: STATION_LIST_FIELD
     what: str = Field("view", description="The type of output to generate.")
-    sts: date = Field(
-        None,
-        description="The starting date for the data request.",
-    )
-    ets: date = Field(
-        None,
-        description="The ending date for the data request.",
-    )
-    year1: int = Field(
-        None,
-        description="The starting year for the data request.",
-    )
-    month1: int = Field(
-        None,
-        description="The starting month for the data request.",
-    )
+    sts: Annotated[
+        date | None,
+        Field(
+            description="The starting date for the data request.",
+        ),
+    ] = None
+    ets: Annotated[
+        date | None,
+        Field(
+            description="The ending date for the data request.",
+        ),
+    ] = None
+    year1: Annotated[
+        int | None,
+        Field(
+            description="The starting year for the data request.",
+        ),
+    ] = None
+    month1: MONTH_FIELD_OPTIONAL = None
     day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
-    year2: int = Field(
-        None,
-        description="The ending year for the data request.",
-    )
-    month2: int = Field(
-        None,
-        description="The ending month for the data request.",
-    )
+    year2: Annotated[
+        int | None,
+        Field(
+            description="The ending year for the data request.",
+        ),
+    ] = None
+    month2: MONTH_FIELD_OPTIONAL = None
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
@@ -105,8 +111,7 @@ def get_cgi_stations(environ):
     return reqlist
 
 
-@with_sqlalchemy_conn("iem")
-def do_simple(ctx, conn=None):
+def do_simple(ctx, conn):
     """Generate Simple output"""
     res = conn.execute(
         sql_helper(
@@ -170,6 +175,7 @@ def application(environ, start_response):
             ("Content-Disposition", "attachment; filename=coop.txt")
         )
 
+    with get_sqlalchemy_conn("iem") as conn:
+        res = do_simple(environ, conn)
     start_response("200 OK", headers)
-    res = do_simple(environ)
-    return [res]
+    return res

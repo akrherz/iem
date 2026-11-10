@@ -20,11 +20,20 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station=AMW\
 """
 
 from io import StringIO
+from typing import Annotated
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    STATION_LIST_FIELD,
+    TZ_FIELD,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 SAMPLING = {
@@ -40,39 +49,49 @@ DELIM = {"space": " ", "comma": ",", "tab": "\t", ",": ","}
 class Schema(CGIModel):
     """See how we are called."""
 
-    delim: str = Field(
-        "comma",
-        description="Delimiter to use in output",
-        pattern="^(comma|space|tab|,)$",
-    )
-    ets: AwareDatetime = Field(None, description="End timestamp for data")
-    gis: bool = Field(
-        False, description="Include Lat/Lon information in output"
-    )
-    sample: str = Field(
-        "1min",
-        description="Sampling period for data",
-        pattern="^(1min|5min|10min|20min|1hour)$",
-    )
+    delim: Annotated[
+        str,
+        Field(
+            description="Delimiter to use in output",
+            pattern="^(comma|space|tab|,)$",
+        ),
+    ] = "comma"
+    ets: Annotated[
+        AwareDatetime | None, Field(description="End timestamp for data")
+    ] = None
+    gis: Annotated[
+        bool, Field(description="Include Lat/Lon information in output")
+    ] = False
+    sample: Annotated[
+        str,
+        Field(
+            description="Sampling period for data",
+            pattern="^(1min|5min|10min|20min|1hour)$",
+        ),
+    ] = "1min"
     station: STATION_LIST_FIELD
-    sts: AwareDatetime = Field(None, description="Start timestamp for data")
+    sts: Annotated[
+        AwareDatetime | None, Field(description="Start timestamp for data")
+    ] = None
     tz: TZ_FIELD = "UTC"
-    vars: ListOrCSVType = Field(
-        None, description="Variable(s) to request data for"
-    )
-    what: str = Field(
-        "dl", description="Output format", pattern="^(download|view)$"
-    )
-    year1: int = Field(None, description="Start year for data")
-    month1: int = Field(None, description="Start month for data")
-    day1: int = Field(None, description="Start day for data")
-    hour1: int = Field(0, description="Start hour for data")
-    minute1: int = Field(0, description="Start minute for data")
-    year2: int = Field(None, description="End year for data")
-    month2: int = Field(None, description="End month for data")
-    day2: int = Field(None, description="End day for data")
-    hour2: int = Field(0, description="End hour for data")
-    minute2: int = Field(0, description="End minute for data")
+    vars: Annotated[
+        ListOrCSVType | None,
+        Field(description="Variable(s) to request data for"),
+    ] = None
+    what: Annotated[
+        str,
+        Field(description="Output format", pattern="^(download|view)$"),
+    ] = "dl"
+    year1: YEAR_FIELD_OPTIONAL
+    month1: MONTH_FIELD_OPTIONAL
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL
+    month2: MONTH_FIELD_OPTIONAL
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def get_station_metadata(stations) -> dict:

@@ -96,7 +96,6 @@ def application(environ, start_response):
             },
         )
 
-        start_response("200 OK", [("Content-type", "text/plain")])
         data = "Timestamp,Longitude,Latitude,Soil_Moisture,Optical_Depth\n"
         for row in res:
             data += (
@@ -104,4 +103,5 @@ def application(environ, start_response):
                 f"{environ['lon']},{environ['lat']},"
                 f"{row[1]},{row[2]}\n"
             )
-        return [data.encode("ascii")]
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return data

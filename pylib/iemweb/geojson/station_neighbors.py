@@ -26,6 +26,7 @@ station=AMW&network=IA_ASOS&distance=25
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -159,7 +160,7 @@ def get_mckey(environ) -> str:
     help=__doc__,
     schema=Schema,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Main Workflow"""
     headers = [("Content-type", get_ct(environ))]
     with get_sqlalchemy_conn("mesosite") as conn:

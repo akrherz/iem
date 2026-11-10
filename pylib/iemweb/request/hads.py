@@ -57,13 +57,21 @@ threshold=10.81&thresholdvar=RG
 
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.web.fields import NETWORK_FIELD_OPTIONAL
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    NETWORK_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
@@ -73,73 +81,48 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class Schema(CGIModel):
     """See how we are called."""
 
-    delim: str = Field(
-        "comma",
-        description="Delimiter for output",
-        pattern="^(comma|space|tab)$",
-    )
-    ets: AwareDatetime = Field(None, description="End Time for request")
-    network: NETWORK_FIELD_OPTIONAL = None
-    stations: ListOrCSVType = Field(..., description="Station Identifier(s)")
-    sts: AwareDatetime = Field(None, description="Start Time for request")
-    threshold: float | None = Field(
-        None, description="Threshold Value for Searching"
-    )
-    thresholdvar: str = Field(
-        None,
-        description="Threshold Variable for Searching",
-        pattern="^(RG|PCP)$",
-    )
-    what: str = Field(
-        "dl", description="Output format", pattern="^(dl|txt|html|excel)$"
-    )
-    year: int = Field(
-        None,
-        description=(
-            "Legacy year value when this service only supported 1 year at a "
-            "time."
+    delim: Annotated[
+        str,
+        Field(
+            description="Delimiter for output",
+            pattern="^(comma|space|tab)$",
         ),
-    )
-    year1: int | None = Field(
-        None,
-        description="Start year for request, when sts not set.",
-    )
-    year2: int | None = Field(
-        None,
-        description="End year for request, when ets not set.",
-    )
-    month1: int = Field(
-        None,
-        description="Start month for request, when sts not set.",
-    )
-    month2: int = Field(
-        None,
-        description="End month for request, when ets not set.",
-    )
-    day1: int = Field(
-        None,
-        description="Start day for request, when sts not set.",
-    )
-    day2: int = Field(
-        None,
-        description="End day for request, when ets not set.",
-    )
-    hour1: int = Field(
-        0,
-        description="Start hour for request, when sts not set.",
-    )
-    hour2: int = Field(
-        0,
-        description="End hour for request, when ets not set.",
-    )
-    minute1: int = Field(
-        0,
-        description="Start minute for request, when sts not set.",
-    )
-    minute2: int = Field(
-        0,
-        description="End minute for request, when ets not set.",
-    )
+    ] = "comma"
+    ets: Annotated[
+        AwareDatetime | None, Field(description="End Time for request")
+    ] = None
+    network: NETWORK_FIELD_OPTIONAL = None
+    stations: Annotated[
+        ListOrCSVType, Field(description="Station Identifier(s)")
+    ]
+    sts: Annotated[
+        AwareDatetime | None, Field(description="Start Time for request")
+    ] = None
+    threshold: Annotated[
+        float | None, Field(description="Threshold Value for Searching")
+    ] = None
+    thresholdvar: Annotated[
+        str | None,
+        Field(
+            description="Threshold Variable for Searching",
+            pattern="^(RG|PCP)$",
+        ),
+    ] = None
+    what: Annotated[
+        str,
+        Field(description="Output format", pattern="^(dl|txt|html|excel)$"),
+    ] = "dl"
+    year: YEAR_FIELD_OPTIONAL = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
     @field_validator("threshold", mode="before")
     @classmethod
@@ -158,7 +141,7 @@ def threshold_search(table: pd.DataFrame, threshold, thresholdvar: str):
     maxrunning = -99
     maxvalid = None
     res = []
-    for (station, valid), row in table.iterrows():
+    for [station, valid], row in table.iterrows():  # type: ignore
         val = row[searchfor]
         if val > threshold and not above:
             res.append(
@@ -236,7 +219,7 @@ def application(environ, start_response):
         df = pd.read_sql(sql, conn, params=params)
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Error, no results found for query!"]
+        return "Error, no results found for query!"
     table = df.pivot_table(
         values="value", columns=["key"], index=["station", "utc_valid"]
     )
@@ -246,17 +229,17 @@ def application(environ, start_response):
     ):
         if len(stations) > 1:
             start_response("200 OK", [("Content-type", "text/plain")])
-            return [b"Can not do threshold search for more than one station"]
+            return "Can not do threshold search for more than one station"
         table = threshold_search(
             table, environ["threshold"], environ["thresholdvar"]
         )
 
     if environ["what"] == "html":
         headers = [("Content-type", "text/html")]
-        start_response("200 OK", headers)
         sio = StringIO()
         table.to_html(sio)
-        return [sio.getvalue().encode("utf-8")]
+        start_response("200 OK", headers)
+        return sio.getvalue()
     if environ["what"] == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
@@ -267,13 +250,13 @@ def application(environ, start_response):
             ("Content-Disposition", "attachment; filename=hads.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [bio.getvalue()]
+        return bio.getvalue()
     # The default for what = dl and txt
     sio = StringIO()
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", "attachment; filename=hads.txt"),
     ]
-    start_response("200 OK", headers)
     table.to_csv(sio, sep=delimiter)
-    return [sio.getvalue().encode("utf-8")]
+    start_response("200 OK", headers)
+    return sio.getvalue()

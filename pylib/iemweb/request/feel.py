@@ -23,8 +23,12 @@ from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    MONTH_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
@@ -46,44 +50,27 @@ class Schema(CGIModel):
             description="End Time",
         ),
     ] = None
-    year1: int = Field(
-        None,
-        ge=2013,
-        description="Start Year",
-    )
-    month1: int = Field(
-        None,
-        ge=1,
-        le=12,
-        description="Start Month",
-    )
-    day1: int = Field(
-        None,
-        ge=1,
-        le=31,
-        description="Start Day",
-    )
-    year2: int = Field(
-        None,
-        ge=2013,
-        description="End Year",
-    )
-    month2: int = Field(
-        None,
-        ge=1,
-        le=12,
-        description="End Month",
-    )
-    day2: int = Field(
-        None,
-        ge=1,
-        le=31,
-        description="End Day",
-    )
+    year1: Annotated[
+        int | None,
+        Field(
+            ge=2013,
+            description="Start Year",
+        ),
+    ] = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    year2: Annotated[
+        int | None,
+        Field(
+            ge=2013,
+            description="End Year",
+        ),
+    ] = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
 
 
-@with_sqlalchemy_conn("other")
-def run(sts, ets, start_response, conn: Connection = None):
+def run(sts, ets, conn: Connection):
     """Get data!"""
     params = {"sts": sts, "ets": ets}
     sql = (
@@ -109,11 +96,6 @@ def run(sts, ets, start_response, conn: Connection = None):
         df.to_excel(writer, sheet_name="Daily Data", index=False)
         df2.to_excel(writer, sheet_name="Hourly Data", index=False)
 
-    headers = [
-        ("Content-type", EXL),
-        ("Content-disposition", "attachment;Filename=feel.xlsx"),
-    ]
-    start_response("200 OK", headers)
     return bio.getvalue()
 
 
@@ -122,5 +104,12 @@ def application(environ, start_response):
     """Get stuff"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("GET parameters for start time missing")
+    headers = [
+        ("Content-type", EXL),
+        ("Content-disposition", "attachment;Filename=feel.xlsx"),
+    ]
 
-    return [run(environ["sts"], environ["ets"], start_response)]
+    with get_sqlalchemy_conn("other") as conn:
+        payload = run(environ["sts"], environ["ets"], conn)
+    start_response("200 OK", headers)
+    return payload

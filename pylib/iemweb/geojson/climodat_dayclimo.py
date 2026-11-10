@@ -182,4 +182,4 @@ def application(environ, start_response):
         res = run(conn, network, month, day, syear, eyear)
 
     start_response("200 OK", headers)
-    return res.encode("ascii")
+    return res
