@@ -45,14 +45,14 @@ PDICT = {
 class GaugeParams:
     """Simple."""
 
-    minval: float = None
-    maxval: float = None
-    avgval: float = None
-    stddev: float = None
-    ptiles: list = None
-    calc_min_high_years: list = None
-    calc_max_low_years: list = None
-    subtitle: str = None
+    minval: float | None = None
+    maxval: float | None = None
+    avgval: float | None = None
+    stddev: float | None = None
+    ptiles: list | None = None
+    calc_min_high_years: list | None = None
+    calc_max_low_years: list | None = None
+    subtitle: str | None = None
 
 
 class Params(AutoplotParams):
