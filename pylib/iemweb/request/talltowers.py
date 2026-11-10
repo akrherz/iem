@@ -94,14 +94,14 @@ class Schema(CGIModel):
     ] = 1
     z: Annotated[ListOrCSVType, Field(description="Height(s) to query")]
     tz: TZ_FIELD = "Etc/UTC"
-    year1: YEAR_FIELD_OPTIONAL
-    month1: MONTH_FIELD_OPTIONAL
-    day1: DAY_OF_MONTH_FIELD_OPTIONAL
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour1: HOUR_FIELD = 0
     minute1: MINUTE_FIELD = 0
-    year2: YEAR_FIELD_OPTIONAL
-    month2: MONTH_FIELD_OPTIONAL
-    day2: DAY_OF_MONTH_FIELD_OPTIONAL
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
 
