@@ -22,17 +22,18 @@ interactive chart version.
 </ul>
 """
 
-import datetime as dt
-from datetime import date, datetime, timedelta
+from datetime import date as dateobj
+from datetime import datetime, timedelta
 from typing import Annotated
 
 import numpy as np
 import pandas as pd
 import requests
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_properties
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.description import DateArg, PlotDescription, SelectArg
@@ -56,11 +57,11 @@ class Params(AutoplotParams):
         str, SelectArg(options=PDICT, label="Interative Chart Variable:")
     ] = "rank"
     date: Annotated[
-        dt.date,
+        dateobj,
         DateArg(
             label="To Date:",
             min="1894/01/01",
-            default=lambda: date.today().strftime("%Y/%m/%d"),
+            default=lambda: dateobj.today().strftime("%Y/%m/%d"),
         ),
     ]
 
@@ -72,12 +73,9 @@ def get_description() -> PlotDescription:
     )
 
 
-@with_sqlalchemy_conn("coop")
-def add_ctx(ctx: Params, conn=None):
+def add_ctx(ctx: Params, conn: Connection):
     """Get the plotting context"""
     station = ctx.station
-    dt: date = ctx.date
-    opt = ctx.opt
 
     res = conn.execute(
         sql_helper("""
@@ -103,13 +101,13 @@ def add_ctx(ctx: Params, conn=None):
         data[int(row["year"] - baseyear - 1), int(row["doy"]) + 366] = row[
             "precip"
         ]
-    sts = dt - timedelta(days=14)
+    sts = ctx.date - timedelta(days=14)
     try:
         resp = requests.get(
             f"{IBURL}/api/1/usdm_bypoint.json",
             params={
                 "sdate": sts.strftime("%Y-%m-%d"),
-                "edate": dt.strftime("%Y-%m-%d"),
+                "edate": ctx.date.strftime("%Y-%m-%d"),
                 "lon": ctx["_nt"].sts[station]["lon"],
                 "lat": ctx["_nt"].sts[station]["lat"],
             },
@@ -127,11 +125,11 @@ def add_ctx(ctx: Params, conn=None):
         ts = datetime.strptime(lastrow["valid"], "%Y-%m-%d")
         dclass = f"{cat} on {ts:%-d %b %Y}"
 
-    _doy = dt.replace(year=2000).timetuple().tm_yday
+    _doy = ctx.date.replace(year=2000).timetuple().tm_yday
     xticks = []
     xticklabels = []
     for i in range(-360, 1, 60):
-        ts = dt + timedelta(days=i)
+        ts = ctx.date + timedelta(days=i)
         xticks.append(i)
         xticklabels.append(ts.strftime("%b %-d\n'%y"))
     ranks = []
@@ -142,7 +140,7 @@ def add_ctx(ctx: Params, conn=None):
     avgs = []
     spi = []
     ptile = []
-    myyear = dt.year - baseyear - 1
+    myyear = ctx.date.year - baseyear - 1
     for days in range(1, 366):
         idx0 = _doy + 366 - days
         idx1 = _doy + 366
@@ -163,14 +161,14 @@ def add_ctx(ctx: Params, conn=None):
         percentages.append(thisyear / avgs[-1] * 100)
         spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
-    ctx["sdate"] = dt - timedelta(days=360)
+    ctx["sdate"] = ctx.date - timedelta(days=360)
     ctx["title"] = f"[{baseyear + 2}-{datetime.now().year}] {ctx.sname}"
     ctx["subtitle"] = (
-        f"{PDICT[opt]} from given x-axis date until {dt:%-d %b %Y}, "
+        f"{PDICT[ctx.opt]} from given x-axis date until {ctx.date:%-d %b %Y}, "
         f"US Drought Monitor: {dclass}"
     )
     ctx["subtitle2"] = (
-        f"From given x-axis date until {dt:%-d %b %Y}, "
+        f"From given x-axis date until {ctx.date:%-d %b %Y}, "
         f"US Drought Monitor: {dclass}"
     )
 
@@ -179,13 +177,13 @@ def add_ctx(ctx: Params, conn=None):
     ctx["percentages"] = percentages
     ctx["spi"] = spi
     ctx["percentiles"] = ptile
-    if opt == "per":
+    if ctx.opt == "per":
         ctx["y2"] = ctx["percentages"]
-    elif opt == "dep":
+    elif ctx.opt == "dep":
         ctx["y2"] = ctx["departures"]
-    elif opt == "spi":
+    elif ctx.opt == "spi":
         ctx["y2"] = ctx["spi"]
-    elif opt == "ptile":
+    elif ctx.opt == "ptile":
         ctx["y2"] = ctx["percentiles"]
     else:
         ctx["y2"] = ctx["ranks"]
@@ -195,12 +193,13 @@ def add_ctx(ctx: Params, conn=None):
     ctx["xticks"] = xticks
     ctx["xticklabels"] = xticklabels
     ctx.station = station
-    ctx["y2label"] = PDICT[opt]
+    ctx["y2label"] = PDICT[ctx.opt]
 
 
 def get_highcharts(ctx: Params) -> str:
     """Go"""
-    add_ctx(ctx)
+    with get_sqlalchemy_conn("coop") as conn:
+        add_ctx(ctx, conn)
     dstart = "Date.UTC(%s, %s, %s)" % (
         ctx["sdate"].year,
         ctx["sdate"].month - 1,
@@ -306,7 +305,8 @@ Highcharts.chart('"""
 
 def plotter(ctx: Params):
     """Go"""
-    add_ctx(ctx)
+    with get_sqlalchemy_conn("coop") as conn:
+        add_ctx(ctx, conn)
 
     fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"], apctx=ctx)
     width = 0.26

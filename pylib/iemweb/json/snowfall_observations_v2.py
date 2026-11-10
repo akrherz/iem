@@ -61,7 +61,7 @@ def dowork(wfo: str) -> str:
             tidx = f"{localdt:%m/%d: %-I %p}"
             time_columns.append(tidx)  # Track insertion order
             service = (
-                f"{IBURL}api/1/nws/snowfall_6hour.json"
+                f"{IBURL}/api/1/nws/snowfall_6hour.json"
                 f"?valid={now:%Y-%m-%dT%H}:00&wfo={wfo}"
             )
             try:
@@ -73,7 +73,7 @@ def dowork(wfo: str) -> str:
                     # right time. Try 5 Z too
                     m1 = now - timedelta(hours=1)
                     service = (
-                        f"{IBURL}api/1/nws/snowfall_6hour.json?"
+                        f"{IBURL}/api/1/nws/snowfall_6hour.json?"
                         f"valid={m1:%Y-%m-%dT%H}:00&wfo={wfo}"
                     )
                     resp = requests.get(service, timeout=15)
