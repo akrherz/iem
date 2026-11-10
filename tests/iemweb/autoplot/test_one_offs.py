@@ -9,14 +9,16 @@ from pyiem.util import utc
 
 def test_forecast2image():
     """Walk before we run."""
+    # Note that this requires the 11 UTC file
+    valid = utc(2025, 9, 12, 12)
     environ = {
         "cmap": "jet",
         "w": "cwa",
         "cwa": "DMX",
         "sector": "IA",
-        "valid": utc(2025, 9, 12, 11),
+        "valid": valid,
     }
-    fhour, buf = forecast2image(Params(**environ), utc(2025, 9, 12, 11), 1)
+    fhour, buf = forecast2image(Params(**environ), valid, 1)
     assert fhour == 1
     assert buf
 
