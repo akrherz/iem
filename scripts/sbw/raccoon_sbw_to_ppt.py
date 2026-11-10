@@ -26,7 +26,7 @@ from odf.style import (
 )
 from odf.text import P
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
-from pyiem.util import logger, utc
+from pyiem.util import get_properties, logger, utc
 
 os.putenv("DISPLAY", "localhost:1")
 
@@ -35,6 +35,7 @@ __REV__ = "12Oct2024"
 TMPDIR = "/mesonet/tmp"
 SUPER_RES = datetime(2010, 3, 1)
 N0B_SWITCH = datetime(2022, 5, 16)
+IBURL = get_properties()["internal.baseurl"]
 
 
 def test_job():
@@ -269,7 +270,7 @@ def do_job(job):
         )
 
         url = (
-            "http://iem.local/GIS/radmap.php?"
+            f"{IBURL}/GIS/radmap.php?"
             "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw"
             "&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr"
             f"&lsrbuffer=15&vtec={job['sts']:%Y}.O.NEW.K{job['wfo']}."
@@ -333,7 +334,7 @@ def do_job(job):
                     n0qn0r = "N0B"
             zz = now + timedelta(minutes=15)
             url = (
-                "http://iem.local/GIS/radmap.php?layers[]=ridge&"
+                f"{IBURL}/GIS/radmap.php?layers[]=ridge&"
                 f"ridge_product={n0qn0r}&ridge_radar={job['radar']}&"
                 "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
                 f"layers[]=lsrs&ts2={zz:%Y%m%d%H%M}&vtec="

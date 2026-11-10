@@ -7,9 +7,10 @@ import click
 import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger
+from pyiem.util import get_properties, logger
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 def check_date(dt):
@@ -32,7 +33,7 @@ def check_date(dt):
         ob = row[1]
         # Go fetch me the IEMRE value!
         uri = (
-            f"http://iem.local/iemre/daily/{dt:%Y-%m-%d}/"
+            f"{IBURL}/iemre/daily/{dt:%Y-%m-%d}/"
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
@@ -97,7 +98,7 @@ def fix_nulls():
                 continue
             # Go fetch me the IEMRE value!
             uri = (
-                f"http://iem.local/iemre/daily/{v1:%Y-%m-%d}/"
+                f"{IBURL}/iemre/daily/{v1:%Y-%m-%d}/"
                 f"{nt.sts[station]['lat']:.2f}/"
                 f"{nt.sts[station]['lon']:.2f}/json"
             )

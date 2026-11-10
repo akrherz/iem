@@ -17,9 +17,10 @@ import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import logger, utc
+from pyiem.util import get_properties, logger, utc
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 def print_debugging(station):
@@ -45,7 +46,7 @@ def get_hdf(nt, dt):
         # service provides UTC dates, so we need to request two days
         for ldate in [dt, dt + timedelta(days=1)]:
             uri = (
-                "http://iem.local/json/stage4/"
+                f"{IBURL}/json/stage4/"
                 f"{nt.sts[station]['lon']:.2f}/"
                 f"{nt.sts[station]['lat']:.2f}/{ldate:%Y-%m-%d}"
             )

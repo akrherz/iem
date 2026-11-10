@@ -24,7 +24,7 @@ from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names, ugc_state_names
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import LOG, html_escape, utc
+from pyiem.util import LOG, get_properties, html_escape, utc
 from pyiem.webutil import CGIModel, ensure_list, iemapp
 from werkzeug.wrappers import Request
 
@@ -635,9 +635,12 @@ def add_content_to_res(fmt: str, apid: int, res: dict):
     """Add content to the response based on the format specified by `fmt`."""
     imguri = html_escape(res["imguri"])
     if fmt == "text":
+        iburl = get_properties().get(
+            "internal.baseurl", "http://mesonet.agron.iastate.edu"
+        )
         try:
             resp = requests.get(
-                f"http://iem.local{res['imguri']}.txt",
+                f"{iburl}{res['imguri']}.txt",
                 timeout=300,
             )
             resp.raise_for_status()

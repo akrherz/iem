@@ -8,14 +8,15 @@ import subprocess
 import tempfile
 
 import requests
-from pyiem.util import logger
+from pyiem.util import get_properties, logger
 
 LOG = logger()
 
 
 def main():
     """Go Main Go."""
-    uri = "http://iem.local/agclimate/isusm.csv"
+    iburl = get_properties()["internal.baseurl"]
+    uri = f"{iburl}/agclimate/isusm.csv"
     try:
         resp = requests.get(uri, timeout=30)
         resp.raise_for_status()

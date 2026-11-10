@@ -1,5 +1,5 @@
 dstr=$(date --date '1 day ago' +'%Y-%m-%d')
-WEBHOST="iem.local"
+WEBHOST="mesonet.agron.iastate.edu"
 PQI="pqinsert"
 URI="http://${WEBHOST}/plotting/auto/plot/199"
 

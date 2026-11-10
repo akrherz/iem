@@ -5,15 +5,16 @@ Called from RUN_SUMMARY.sh
 
 from datetime import datetime
 
-from pyiem.util import logger, web2ldm
+from pyiem.util import get_properties, logger, web2ldm
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 def run(gddbase, now, fn):
     """Generate the plot"""
     url = (
-        "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
+        f"{IBURL}/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:gdd_sum::gddbase:{gddbase}::gddceil:86::"
         f"date1:{now.strftime('%Y-05-01')}::usdm:no::"
         f"date2:{now.strftime('%Y-%m-%d')}::p:contour::cmap:RdBu_r::c:yes"

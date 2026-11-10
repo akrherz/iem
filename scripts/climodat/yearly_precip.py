@@ -15,7 +15,8 @@ LOG = logger()
 def main(year: int):
     """Do Work."""
     url = (
-        "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
+        "http://mesonet.agron.iastate.edu"
+        "/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:precip_sum::date1:{year}-01-01::usdm:no::"
         f"date2:{year}-12-31::p:contour::cmap:YlGnBu::c:yes"
         ".png"

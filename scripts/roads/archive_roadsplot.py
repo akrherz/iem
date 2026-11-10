@@ -11,9 +11,10 @@ from zoneinfo import ZoneInfo
 
 import click
 import requests
-from pyiem.util import archive_fetch, logger, utc
+from pyiem.util import archive_fetch, get_properties, logger, utc
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 def do(now: datetime):
@@ -27,11 +28,11 @@ def do(now: datetime):
 
     # CAREFUL, web takes valid in CST/CDT
     service = now.astimezone(ZoneInfo("America/Chicago")).strftime(
-        "http://iem.local/roads/iem.php?valid=%Y-%m-%d%%20%H:%M"
+        f"{IBURL}/roads/iem.php?valid=%Y-%m-%d%%20%H:%M"
     )
     routes = "ac" if (utc() - now) < timedelta(minutes=10) else "a"
     if routes == "ac":
-        service = "http://iem.local/roads/iem.php"
+        service = f"{IBURL}/roads/iem.php"
 
     resp = requests.get(service, timeout=60)
     resp.raise_for_status()

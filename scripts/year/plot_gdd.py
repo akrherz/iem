@@ -3,9 +3,10 @@
 from datetime import date, timedelta
 
 import click
-from pyiem.util import logger, web2ldm
+from pyiem.util import get_properties, logger, web2ldm
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 @click.command()
@@ -16,7 +17,7 @@ def main(gddbase):
     jan1 = now.replace(month=1, day=1)
 
     url = (
-        "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
+        f"{IBURL}/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:gdd_sum::gddbase:{gddbase}::gddceil:86::"
         f"date1:{jan1.strftime('%Y-%m-%d')}::usdm:no::_cb:1::"
         f"date2:{now.strftime('%Y-%m-%d')}::p:contour::cmap:RdBu_r::c:yes"

@@ -123,6 +123,11 @@ jobs:
           sleep 1
         done
 
+    - name: Set mesonet in /etc/hosts
+      # Run at this step because some previous steps may have "cheated" and
+      # fetched test data from prod.  This is standard darly hackery.
+      run: |
+        echo "127.0.0.1 mesonet.agron.iastate.edu" | sudo tee -a /etc/hosts > /dev/null
 
     - name: Configure Webfarm Server
       run: |
@@ -140,7 +145,7 @@ jobs:
     - name: Run IEM Production checks
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
-        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py
+        SERVICE=http://mesonet.agron.iastate.edu pytest -n 4 .ipc/tests/test_*.py
 
     - name: Run mod_wsgi smoke test
       run: pytest -n 4 tests/test_mod_wsgi.py

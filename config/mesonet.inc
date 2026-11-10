@@ -157,9 +157,6 @@ Alias /tmp /var/webtmp
 </Directory>
 
 <Proxy "http://127.0.0.1:9081/*">
-    # The backend doesn't really care about the hostname attm
-    ProxyPreserveHost Off
-    RequestHeader set "Host" "iem.local"
     # Attempt to reduce random proxy noise
     ProxySet connectiontimeout=5 timeout=55 retry=0 disablereuse=On
 </Proxy>

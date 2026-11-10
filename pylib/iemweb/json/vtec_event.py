@@ -48,7 +48,7 @@ import requests
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
-from pyiem.util import LOG
+from pyiem.util import LOG, get_properties
 from pyiem.web.fields import (
     CALLBACK_FIELD,
     VTEC_ETN_FIELD,
@@ -130,6 +130,9 @@ def run(environ: dict) -> str:
     # Get a list of unique product_ids
     product_ids = df["product_ids"].explode().dropna().unique().tolist()
     product_ids.sort()
+    iburl = get_properties().get(
+        "internal.baseurl", "http://mesonet.agron.iastate.edu"
+    )
     if product_ids:
         report = None
         valid = datetime.strptime(product_ids[0][:12], "%Y%m%d%H%M").strftime(
@@ -137,13 +140,8 @@ def run(environ: dict) -> str:
         )
         if environ["include_text"]:
             try:
-                # This request is outside this repo, so no need for internal
-                # API routing
                 resp = requests.get(
-                    (
-                        "http://mesonet.agron.iastate.edu/"
-                        f"api/1/nwstext/{product_ids[0]}"
-                    ),
+                    (f"{iburl}/api/1/nwstext/{product_ids[0]}"),
                     timeout=5,
                 )
                 resp.raise_for_status()
@@ -164,7 +162,7 @@ def run(environ: dict) -> str:
             report = ""
             if environ["include_text"]:
                 resp = requests.get(
-                    f"http://iem.local/api/1/nwstext/{product_id}", timeout=5
+                    f"{iburl}/api/1/nwstext/{product_id}", timeout=5
                 )
                 resp.raise_for_status()
                 report = resp.text

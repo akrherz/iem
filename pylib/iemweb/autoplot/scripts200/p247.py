@@ -41,7 +41,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import MapPlot
 from pyiem.reference import SECTORS_NAME, Z_OVERLAY2, state_names
-from pyiem.util import utc
+from pyiem.util import get_properties, utc
 
 from iemweb.autoplot.description import DateTimeArg, PlotDescription, SelectArg
 from iemweb.autoplot.params import AutoplotParams
@@ -236,7 +236,7 @@ def plotter(ctx: Params):
     valid = ctx.valid.replace(tzinfo=UTC)
     isscol = "issue" if ctx.opt == "within" else "product_issue"
     with get_sqlalchemy_conn("postgis") as conn:
-        ugcdf = gpd.read_postgis(
+        ugcdf = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             select w.ugc, simple_geom, phenomena, significance,
@@ -252,8 +252,8 @@ def plotter(ctx: Params):
             conn,
             params={"valid": valid},
             geom_col="simple_geom",
-        )  # type: ignore
-        sbwdf = gpd.read_postgis(
+        )
+        sbwdf = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             select geom, phenomena, significance,
@@ -267,7 +267,7 @@ def plotter(ctx: Params):
             conn,
             params={"valid": valid},
             geom_col="geom",
-        )  # type: ignore
+        )
     mp = MapPlot(
         apctx=ctx,
         nocaption=True,
@@ -290,8 +290,11 @@ def plotter(ctx: Params):
 
     if not ugcdf.empty:
         if ctx.add == "stats" and valid > utc(2005, 10, 1):
+            iburl = get_properties().get(
+                "internal.baseurl", "http://mesonet.agron.iastate.edu"
+            )
             uri = (
-                f"http://iem.local/plotting/auto/plot/224/opt:{ctx.opt}::"
+                f"{iburl}/plotting/auto/plot/224/opt:{ctx.opt}::"
                 f"valid:{valid:%Y-%m-%d%%20%H%M}.csv"
             )
             with requests.Session() as client:

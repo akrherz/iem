@@ -10,7 +10,7 @@ date_default_timezone_set('America/Chicago');
 
 class IEMConfig{
     // How internal code finds a webserver to make calls to
-    const INTERNAL_BASEURL = "http://iem.local";  // no trail slash
+    const INTERNAL_BASEURL = "http://mesonet.agron.iastate.edu";  // no trail slash
     // How we document references to this server to the outside world
     const EXTERNAL_BASEURL = "https://mesonet.agron.iastate.edu"; // no trail slash
     // Bing Maps API Key

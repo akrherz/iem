@@ -14,11 +14,12 @@ import numpy as np
 import requests
 from osgeo import gdal, gdalconst
 from pyiem.database import get_dbconn
-from pyiem.util import archive_fetch, logger, utc
+from pyiem.util import archive_fetch, get_properties, logger, utc
 
 gdal.UseExceptions()
 LOG = logger()
-URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
+IBURL = get_properties()["internal.baseurl"]
+URLBASE = f"{IBURL}/GIS/radmap.php?width=1280&height=720&"
 
 
 def get_colortable(prod):
