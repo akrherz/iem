@@ -9,9 +9,9 @@ information also provides the coldest high temperature and warmest low
 temperature, both of which are not found within the raw CLI text product.
 """
 
-import datetime as dt
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date as dateobj
+from datetime import timedelta
 from math import pi
 from typing import Annotated
 
@@ -45,14 +45,14 @@ PDICT = {
 class GaugeParams:
     """Simple."""
 
-    minval: float = None
-    maxval: float = None
-    avgval: float = None
-    stddev: float = None
-    ptiles: list = None
-    calc_min_high_years: list = None
-    calc_max_low_years: list = None
-    subtitle: str = None
+    minval: float | None = None
+    maxval: float | None = None
+    avgval: float | None = None
+    stddev: float | None = None
+    ptiles: list | None = None
+    calc_min_high_years: list | None = None
+    calc_max_low_years: list | None = None
+    subtitle: str | None = None
 
 
 class Params(AutoplotParams):
@@ -65,11 +65,11 @@ class Params(AutoplotParams):
         str, NetworkSelectArg(label="Select Station:", network="NWSCLI")
     ] = "KDSM"
     date: Annotated[
-        dt.date,
+        dateobj,
         DateArg(
             label="Select Date",
             min="2000/01/01",
-            default=lambda: (date.today() - timedelta(days=1)).strftime(
+            default=lambda: (dateobj.today() - timedelta(days=1)).strftime(
                 "%Y/%m/%d"
             ),
         ),
@@ -96,7 +96,7 @@ def miss(val):
     return val
 
 
-def gauge(ax: Axes, row: dict, col: str, params: GaugeParams):
+def gauge(ax: Axes, row: pd.Series, col: str, params: GaugeParams):
     """Make the gauge plot."""
     # Override database values with what the CLI has
     if col == "high":
@@ -109,6 +109,17 @@ def gauge(ax: Axes, row: dict, col: str, params: GaugeParams):
             params.minval = float(row["low_record"])
         if pd.notna(row["low_normal"]):
             params.avgval = row["low_normal"]
+
+    if (
+        params.avgval is None
+        or params.stddev is None
+        or params.maxval is None
+        or params.minval is None
+        or params.ptiles is None
+        or params.calc_max_low_years is None
+        or params.calc_min_high_years is None
+    ):
+        return
 
     # Polar coordinates, so 0 is maxval and pi is minval
     colors = ["#BE0000", "#E48900", "#B6EB7A", "#0F4CBB", "#1B262C"]
@@ -230,7 +241,7 @@ def gauge(ax: Axes, row: dict, col: str, params: GaugeParams):
         "Avg:\n" + f"{miss(row[f'{col}_normal'])}°F",
         ha="center",
     )
-    ax.set_rorigin(-4.5)
+    ax.set_rorigin(-4.5)  # type: ignore
     ax.set_yticks([])
     ax.arrow(
         theta,
@@ -399,7 +410,7 @@ def precip(fig, row, col):
     ax.set_yticks([])
 
 
-def build_params(clsite: str, dt: datetime):
+def build_params(clsite: str, dt: dateobj):
     """Figure out some metrics"""
     hp = GaugeParams()
     lp = GaugeParams()
@@ -455,7 +466,7 @@ def get_data(ctx: Params):
 def plotter(ctx: Params):
     """Go"""
     if ctx.w == "current":
-        ctx.date = date.today()
+        ctx.date = dateobj.today()
         df = get_data(ctx)
         if df.empty:
             ctx.date -= timedelta(days=1)

@@ -216,6 +216,7 @@ if (pg_num_rows($rs) > 1) {
 }
 $extratools = "";
 $img = "";
+$basets = null;
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($i == 0) {
         $basets = strtotime($row["mytime"]);

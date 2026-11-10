@@ -90,12 +90,6 @@ def main(host):
     os.rename(tmpfn, "/etc/hosts")
     os.chmod("/etc/hosts", 0o644)
 
-    if host == "test":
-        print(
-            "docker run -d -p 172.16.171.1:5432:5432 "
-            "ghcr.io/akrherz/iem_database:test_data"
-        )
-
 
 if __name__ == "__main__":
     main()

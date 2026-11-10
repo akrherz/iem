@@ -119,7 +119,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
-        for source in ["z", "fz", "mz"]:
+        for source in ["z", "fz", "mz", "c"]:
             ugcdf: pd.DataFrame = gpd.read_postgis(  # type: ignore
                 sql_helper(
                     """
