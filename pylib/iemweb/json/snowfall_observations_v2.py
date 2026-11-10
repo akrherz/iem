@@ -31,9 +31,11 @@ import pandas as pd
 import requests
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import LOG, utc
+from pyiem.util import LOG, get_properties, utc
 from pyiem.web.fields import CALLBACK_FIELD, WFO3_FIELD
 from pyiem.webutil import CGIModel, iemapp
+
+IBURL = get_properties()["internal.baseurl"]
 
 
 class Schema(CGIModel):
@@ -43,7 +45,7 @@ class Schema(CGIModel):
     wfo: WFO3_FIELD = "DVN"
 
 
-def dowork(wfo: str) -> list:
+def dowork(wfo: str) -> str:
     """Actually do stuff"""
     nt = NetworkTable("WFO")
     if wfo not in nt.sts:
@@ -59,9 +61,8 @@ def dowork(wfo: str) -> list:
             tidx = f"{localdt:%m/%d: %-I %p}"
             time_columns.append(tidx)  # Track insertion order
             service = (
-                "http://mesonet.agron.iastate.edu/"
-                f"api/1/nws/snowfall_6hour.json?valid={now:%Y-%m-%dT%H}:00"
-                f"&wfo={wfo}"
+                f"{IBURL}/api/1/nws/snowfall_6hour.json"
+                f"?valid={now:%Y-%m-%dT%H}:00&wfo={wfo}"
             )
             try:
                 resp = requests.get(service, timeout=15)
@@ -72,8 +73,7 @@ def dowork(wfo: str) -> list:
                     # right time. Try 5 Z too
                     m1 = now - timedelta(hours=1)
                     service = (
-                        "http://mesonet.agron.iastate.edu/"
-                        "api/1/nws/snowfall_6hour.json?"
+                        f"{IBURL}/api/1/nws/snowfall_6hour.json?"
                         f"valid={m1:%Y-%m-%dT%H}:00&wfo={wfo}"
                     )
                     resp = requests.get(service, timeout=15)
@@ -124,6 +124,7 @@ def dowork(wfo: str) -> list:
     help=__doc__,
     memcachekey=lambda env: f"/snowfall_observations_v2/{env['wfo']}",
     memcacheexpire=300,
+    cache_control=300,
     schema=Schema,
 )
 def application(environ, start_response):

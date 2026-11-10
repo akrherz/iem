@@ -16,6 +16,7 @@ from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest, NoDataFound
 from pyiem.plot import figure_axes
+from pyiem.util import get_properties
 
 from iemweb.autoplot.description import (
     MonthArg,
@@ -33,6 +34,7 @@ PDICT = {
     "feel": "Feels Like Temperature",
     "precip": "Precipitation",
 }
+IBURL = get_properties()["internal.baseurl"]
 
 
 class Params(AutoplotParams):
@@ -85,7 +87,7 @@ def common(ctx: Params):
         now += timedelta(days=1)
     try:
         resp = requests.get(
-            "http://mesonet.agron.iastate.edu/api/1/daily.json",
+            f"{IBURL}/api/1/daily.json",
             params={
                 "station": station,
                 "network": ctx["network"],

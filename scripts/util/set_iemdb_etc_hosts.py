@@ -1,4 +1,8 @@
-"""A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
+"""Util script for /etc/hosts munging.
+
+- Sets the various iemdb-*.local aliases to find the various databases.
+- Sets `mesonet.agron.iastate.edu` to localhost in the case of testing.
+"""
 
 import os
 import pathlib
@@ -75,6 +79,9 @@ def main(host):
         if host == "test":
             ip = "172.16.171.1"  # docker iem_database container
         result.append(f"{ip} iemdb{dbname}.local")
+    if host == "test":
+        print("Setting 127.0.0.1 entry for mesonet FQDN")
+        result.append("127.0.0.1 mesonet.agron.iastate.edu")
     print(f"added {len(LOOKUP)} entries")
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, ("\n".join(result)).encode("ascii"))
