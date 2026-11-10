@@ -53,7 +53,7 @@ def do(url, fn):
 
 def main():
     """Go Main Go."""
-    ap207 = "http://iem.local/plotting/auto/plot/207"
+    ap207 = "http://mesonet.agron.iastate.edu/plotting/auto/plot/207"
     url = f"{ap207}/t:state::csector:IA::p:both::hours:12::sz:25.png"
     do(url, "lsr_snowfall.png")
 

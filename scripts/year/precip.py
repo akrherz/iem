@@ -13,6 +13,9 @@ import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
+from pyiem.util import get_properties
+
+IBURL = get_properties()["internal.baseurl"]
 
 
 def main():
@@ -59,7 +62,7 @@ def main():
     # ----------------------------------
     # - Departures
     service = (
-        "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
+        f"{IBURL}/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:precip_departdate1:{ts.year}-01-01::usdm:no::"
         f"date2:{ts:%Y-%m-%d}::p:contour::cmap:RdYlBu::c:yes::"
         "ct:ncei_climate91::_r:43::_cb:1.png"

@@ -3,9 +3,10 @@
 import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, logger
+from pyiem.util import convert_value, get_properties, logger
 
 LOG = logger()
+IBURL = get_properties()["internal.baseurl"]
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
         date = row[1]
         # Go fetch me the IEMRE value!
         uri = (
-            "http://mesonet.agron.iastate.edu/iemre/daily/"
+            f"{IBURL}/iemre/daily/"
             f"{date:%Y-%m-%d}/{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )

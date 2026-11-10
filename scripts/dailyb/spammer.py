@@ -148,7 +148,8 @@ def cowreport() -> tuple[str, str]:
     begints = midutc.strftime("%Y-%m-%dT%H:%M")
     endts = (midutc + timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M")
     api = (
-        f"http://iem.local/api/1/cow.json?begints={begints}&endts={endts}&"
+        "http://mesonet.agron.iastate.edu"
+        f"/api/1/cow.json?begints={begints}&endts={endts}&"
         "phenomena=SV&phenomena=TO&lsrtype=SV&lsrtype=TO"
     )
     try:

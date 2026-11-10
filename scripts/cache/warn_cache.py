@@ -8,11 +8,12 @@ This is a cron job from RUN_2AM.sh
 
 import click
 import requests
-from pyiem.util import logger, utc
+from pyiem.util import get_properties, logger, utc
 
 LOG = logger()
 FINAL = "/mesonet/share/pickup/wwa/"
-URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
+IBURL = get_properties()["internal.baseurl"]
+URL = f"{IBURL}/cgi-bin/request/gis/watchwarn.py"
 
 
 def get_uri(uri: str, localfn: str):

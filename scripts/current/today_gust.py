@@ -13,7 +13,8 @@ def main():
     now = datetime.now()
 
     service = (
-        "http://iem.local/plotting/auto/plot/206/t:state::network:WFO"
+        "http://mesonet.agron.iastate.edu"
+        "/plotting/auto/plot/206/t:state::network:WFO"
         f"::wfo:DMX::state:IA::v:max_gust::p:both::day:{now:%Y-%m-%d}::"
         "cmap:gist_stern_r::_cb:1.png"
     )

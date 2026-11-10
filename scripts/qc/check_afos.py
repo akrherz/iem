@@ -11,12 +11,13 @@ from datetime import UTC, datetime, timedelta
 import click
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger
+from pyiem.util import get_properties, logger
 
 LOG = logger()
 
 KNOWN = ["PANC", "PHBK"]
-BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
+EBURL = get_properties()["external.baseurl"]
+BASE = f"{EBURL}/p.php?pid"
 
 
 def check_vtec_dups(cursor, ts):
