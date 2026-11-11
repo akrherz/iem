@@ -91,10 +91,11 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 
 import tempfile
 import zlib
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from io import BytesIO
 from stat import S_IFREG
-from typing import Annotated
+from typing import Annotated, Any
 from xml.sax.saxutils import escape as xml_escape
 
 import fiona
@@ -104,7 +105,13 @@ from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.util import utc
-from pyiem.web.fields import VTEC_YEAR_FIELD_OPTIONAL
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    VTEC_YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
@@ -127,13 +134,15 @@ class Schema(CGIModel):
             ),
         ),
     ] = "shapefile"
-    at: AwareDatetime = Field(
-        default=None,
-        description=(
-            "The timestamp to use when ``timeopt=2``, which the service "
-            "provides events valid at the specified time."
+    at: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "The timestamp to use when ``timeopt=2``, which the service "
+                "provides events valid at the specified time."
+            ),
         ),
-    )
+    ] = None
     addsvs: Annotated[
         bool,
         Field(
@@ -188,17 +197,24 @@ class Schema(CGIModel):
             "significance.",
         ),
     ] = False
-    location_group: str = Field(
-        default="wfo",
-        pattern="^(wfo|states)$",
-        description="The location group to use, either wfo or states.",
-    )
-    phenomena: ListOrCSVType = Field(
-        default=["TO"],
-        description="The two character VTEC phenomena(s) to include. If you "
-        "provide more than one value, the length must correspond and align "
-        "with the ``significance`` parameter.",
-    )
+    location_group: Annotated[
+        str,
+        Field(
+            pattern="^(wfo|states)$",
+            description="The location group to use, either wfo or states.",
+        ),
+    ] = "wfo"
+    phenomena: Annotated[
+        ListOrCSVType,
+        Field(
+            default_factory=lambda: ["TO"],
+            description="""
+            The two character VTEC phenomena(s) to include. If you
+            provide more than one value, the length must correspond and align
+            with the ``significance`` parameter.
+            """,
+        ),
+    ]
     simple: Annotated[
         bool,
         Field(
@@ -206,141 +222,73 @@ class Schema(CGIModel):
             "counties/zones.",
         ),
     ] = True
-    significance: ListOrCSVType = Field(
-        default=["W"],
-        description="The one character VTEC significance to include, if you "
-        "provide more than one value, the length must correspond "
-        "and align with the ``phenomena`` parameter.",
-    )
-    states: ListOrCSVType = Field(
-        default=None, description="List of states to include data for."
-    )
-    sts: AwareDatetime = Field(
-        default=None,
-        description="The start timestamp in UTC. The format is ISO8601, e.g. "
-        "2010-06-01T00:00Z.",
-        ge=utc(1986, 1, 1),
-    )
-    timeopt: int = Field(
-        default=1,
-        description="The time option to use, either 1 or 2, default is 1, "
-        "which uses the start and end timestamps to determine "
-        "which events to include. Option 2 uses the ``at`` timestamp "
-        "to determine which events to include.",
-        ge=1,
-        le=2,
-    )
-    wfo: ListOrCSVType = Field(
-        default=None, description="List of WFOs to include data for."
-    )
-    wfos: ListOrCSVType = Field(
-        default=None, description="Legacy parameter, update to use ``wfo``."
-    )
+    significance: Annotated[
+        ListOrCSVType,
+        Field(
+            default_factory=lambda: ["W"],
+            description="""
+            The one character VTEC significance to include, if you
+            provide more than one value, the length must correspond
+            and align with the ``phenomena`` parameter.
+            """,
+        ),
+    ]
+    states: Annotated[
+        ListOrCSVType | None,
+        Field(description="List of states to include data for."),
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The start timestamp in UTC. The format is ISO8601, "
+            "for example 2010-06-01T00:00Z.",
+            ge=utc(1986, 1, 1),
+        ),
+    ] = None
+    timeopt: Annotated[
+        int,
+        Field(
+            description="The time option to use, either 1 or 2, default is 1, "
+            "which uses the start and end timestamps to determine "
+            "which events to include. Option 2 uses the ``at`` timestamp "
+            "to determine which events to include.",
+            ge=1,
+            le=2,
+        ),
+    ] = 1
+    wfo: Annotated[
+        ListOrCSVType | None,
+        Field(description="List of WFOs to include data for."),
+    ] = None
+    wfos: Annotated[
+        ListOrCSVType | None,
+        Field(description="Legacy parameter, update to use ``wfo``."),
+    ] = None
     year1: VTEC_YEAR_FIELD_OPTIONAL = None
     year2: VTEC_YEAR_FIELD_OPTIONAL = None
     year3: VTEC_YEAR_FIELD_OPTIONAL = None
-    month1: int = Field(
-        default=None,
-        description="The start timestamp components in UTC, if you specify a "
-        "sts parameter, these are ignored.",
-        ge=1,
-        le=12,
-    )
-    month2: int = Field(
-        default=None,
-        description="The end timestamp components in UTC, if you specify a "
-        "ets parameter, these are ignored.",
-        ge=1,
-        le=12,
-    )
-    month3: int = Field(
-        default=None,
-        description=(
-            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
-            "this is used to find all events that were valid at this "
-            "time."
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    month3: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day3: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    hour3: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
+    minute3: MINUTE_FIELD = 0
+    fcster: Annotated[
+        str | None,
+        Field(
+            description="""
+            Optional forecaster filter to limit results to events
+            where the forecaster field matches this value (case-insensitive).
+            """,
+            max_length=100,
         ),
-        ge=1,
-        le=12,
-    )
-    day1: int = Field(
-        default=None,
-        description="The start timestamp components in UTC, if you specify a "
-        "sts parameter, these are ignored.",
-        ge=1,
-        le=31,
-    )
-    day2: int = Field(
-        default=None,
-        description="The end timestamp components in UTC, if you specify a "
-        "ets parameter, these are ignored.",
-        ge=1,
-        le=31,
-    )
-    day3: int = Field(
-        default=None,
-        description=(
-            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
-            "this is used to find all events that were valid at this "
-            "time."
-        ),
-        ge=1,
-        le=31,
-    )
-    hour1: int = Field(
-        default=0,
-        description="The start timestamp components in UTC, if you specify a "
-        "sts parameter, these are ignored.",
-        ge=0,
-        le=23,
-    )
-    hour2: int = Field(
-        default=0,
-        description="The end timestamp components in UTC, if you specify a "
-        "ets parameter, these are ignored.",
-        ge=0,
-        le=23,
-    )
-    hour3: int = Field(
-        default=0,
-        description=(
-            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
-            "this is used to find all events that were valid at this "
-            "time."
-        ),
-        ge=0,
-        le=23,
-    )
-    minute1: int = Field(
-        default=0,
-        description="The start timestamp components in UTC, if you specify a "
-        "sts parameter, these are ignored.",
-        ge=0,
-        le=59,
-    )
-    minute2: int = Field(
-        default=0,
-        description="The end timestamp components in UTC, if you specify a "
-        "ets parameter, these are ignored.",
-        ge=0,
-        le=59,
-    )
-    minute3: int = Field(
-        default=0,
-        description=(
-            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
-            "this is used to find all events that were valid at this "
-            "time."
-        ),
-        ge=0,
-        le=59,
-    )
-    fcster: str = Field(
-        default=None,
-        description="Optional forecaster filter to limit results to events "
-        "where the forecaster field matches this value (case-insensitive).",
-        max_length=100,
-    )
+    ] = None
 
     @model_validator(mode="after")
     def validate_timeopt(self):
@@ -452,11 +400,11 @@ def build(environ: dict) -> tuple[str, str, dict]:
         fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     else:
         if environ["at"] is None:
-            year3 = int(environ.get("year3"))
-            month3 = int(environ.get("month3"))
-            day3 = int(environ.get("day3"))
-            hour3 = int(environ.get("hour3"))
-            minute3 = int(environ.get("minute3"))
+            year3 = int(environ.get("year3", 2000))
+            month3 = int(environ.get("month3", 1))
+            day3 = int(environ.get("day3", 1))
+            hour3 = int(environ.get("hour3", 0))
+            minute3 = int(environ.get("minute3", 0))
             sts = utc(year3, month3, day3, hour3, minute3)
         else:
             sts = environ["at"]
@@ -594,11 +542,11 @@ def build(environ: dict) -> tuple[str, str, dict]:
     )
 
 
-def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
+def do_kml(sql: str, params: dict, conn: Connection):
     """Materialize as KML."""
     res = conn.execute(sql_helper(sql), params)
     # Careful that the first byte is the XML
-    yield b"""<?xml version="1.0" encoding="UTF-8"?>
+    yield """<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
 <Document>
  <name>IEM NWS WWA Export</name>
@@ -651,8 +599,8 @@ def do_kml(sql: str, params: dict, conn: Connection) -> iter[bytes]:
     {row["geo"]}
 </Placemark>
 """
-        ).encode()
-    yield b"</Document></kml>"
+        )
+    yield "</Document></kml>"
 
 
 def do_excel(sql, fmt, params):
@@ -762,7 +710,7 @@ def local_files(names):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict[str, Any], start_response: Callable):
     """Go Main Go"""
     try:
         if environ["timeopt"] != 2 and environ["sts"] is None:
@@ -772,7 +720,7 @@ def application(environ, start_response):
         start_response(
             "422 Unprocessable Content", [("Content-type", "text/plain")]
         )
-        yield str(exp).encode("ascii")
+        yield str(exp)
         return
     if environ["accept"] == "kml":
         start_response(
@@ -855,7 +803,6 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", f"attachment; filename={fn}.zip"),
         ]
-        start_response("200 OK", headers)
         zstream = stream_zip(
             local_files(
                 (
@@ -871,4 +818,5 @@ def application(environ, start_response):
                 wbits=-zlib.MAX_WBITS, level=1
             ),
         )
+        start_response("200 OK", headers)
         yield from zstream

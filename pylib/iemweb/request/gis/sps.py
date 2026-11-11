@@ -32,6 +32,13 @@ import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    VTEC_YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -44,31 +51,20 @@ class Schema(CGIModel):
         AwareDatetime | None,
         Field(description="Start timestamp for the data request"),
     ] = None
-    ets: AwareDatetime = Field(
-        None, description="End timestamp for the data request"
-    )
-    year1: int = Field(
-        None, description="Start year, when sts is not provided"
-    )
-    month1: int = Field(
-        None, description="Start month, when sts is not provided"
-    )
-    day1: int = Field(None, description="Start day, when sts is not provided")
-    hour1: int = Field(
-        None, description="Start hour, when sts is not provided"
-    )
-    minute1: int = Field(
-        None, description="Start minute, when sts is not provided"
-    )
-    year2: int = Field(None, description="End year, when ets is not provided")
-    month2: int = Field(
-        None, description="End month, when ets is not provided"
-    )
-    day2: int = Field(None, description="End day, when ets is not provided")
-    hour2: int = Field(None, description="End hour, when ets is not provided")
-    minute2: int = Field(
-        None, description="End minute, when ets is not provided"
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(description="End timestamp for the data request"),
+    ] = None
+    year1: VTEC_YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: VTEC_YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def run(ctx, start_response):
@@ -91,7 +87,7 @@ def run(ctx, start_response):
         },
     }
     with get_sqlalchemy_conn("postgis") as pgconn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             select to_char(issue {common}) as issue,
@@ -108,7 +104,7 @@ def run(ctx, start_response):
             pgconn,
             params=ctx,
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
@@ -139,6 +135,6 @@ def run(ctx, start_response):
 def application(environ, start_response):
     """Do something fun!"""
     if environ["sts"] is None or environ["ets"] is None:
-        raise IncompleteWebRequest("GET start/end timestamp params missing")
+        raise IncompleteWebRequest("Both sts and ets need to be set.")
     ctx = {"sts": environ["sts"], "ets": environ["ets"]}
-    return [run(ctx, start_response)]
+    return run(ctx, start_response)

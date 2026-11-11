@@ -8,10 +8,11 @@ app is found at `Github iemvtec repo <https://github.com/akrherz/iemvtec>`_.
 import json
 import os
 import re
-from typing import Annotated
+from collections.abc import Callable
+from typing import Annotated, Any
 
 from pydantic import Field, field_validator
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
@@ -56,13 +57,13 @@ class Schema(CGIModel):
 
     @field_validator("wfo", mode="before")
     @classmethod
-    def rectify_wfo(cls, value: str) -> str:
+    def fix_wfo(cls, value: str) -> str:
         """Ensure WFO is 4 characters."""
-        return rectify_wfo(value)
+        res = rectify_wfo(value)
+        return res if res is not None else value
 
 
-@with_sqlalchemy_conn("postgis")
-def get_data(vtecinfo: dict, conn: Connection | None = None):
+def get_data(vtecinfo: dict, conn: Connection):
     """Get aux data from the database about this event."""
     res = conn.execute(
         sql_helper(
@@ -85,13 +86,14 @@ def get_data(vtecinfo: dict, conn: Connection | None = None):
         },
     )
     row = res.fetchone()
-    vtecinfo["report"] = (
-        "" if row[0] is None else html_escape(row[0].replace("\001", ""))
-    )
-    vtecinfo["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
-    vtecinfo["is_emergency"] = row[2] == 1
-    vtecinfo["is_pds"] = row[3] == 1
-    vtecinfo["updated"] = utc() if row[4] is None else row[4]
+    if row is not None:
+        vtecinfo["report"] = (
+            "" if row[0] is None else html_escape(row[0].replace("\001", ""))
+        )
+        vtecinfo["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
+        vtecinfo["is_emergency"] = row[2] == 1
+        vtecinfo["is_pds"] = row[3] == 1
+        vtecinfo["updated"] = utc() if row[4] is None else row[4]
 
 
 def as_html(vtecinfo: dict):
@@ -152,7 +154,8 @@ def get_context(environ: dict) -> dict:
         except Exception as exp:
             error_log(environ, f"Failed to load assets.json: {exp}")
 
-    get_data(environ)
+    with get_sqlalchemy_conn("postgis") as conn:
+        get_data(environ, conn)
     as_html(environ)
     ctx["title"] = environ["ogtitle"]
     ctx["headextra"] += f"""
@@ -175,13 +178,13 @@ def get_context(environ: dict) -> dict:
 
 
 @iemapp(schema=Schema, help=__doc__)
-def application(environ, start_response):
+def application(environ: dict[str, Any], start_response: Callable):
     """Answer the bell."""
     # Force HTTPS as the openlayers map will be angry
     if environ["wsgi.url_scheme"] != "https":
         url = f"https://{environ['HTTP_HOST']}{environ['REQUEST_URI']}"
         start_response("301 Moved Permanently", [("Location", url)])
-        return [b"Redirecting"]
+        return "Redirecting"
     script_uri = environ.get("SCRIPT_URI", "")
     m = LEGACY_URL_RE.search(script_uri)
     if m:
@@ -215,13 +218,13 @@ def application(environ, start_response):
             f"{k}={v}" for k, v in urlparams.items() if v is not None
         )
         start_response("301 Moved Permanently", [("Location", url)])
-        return [b"Redirecting"]
+        return "Redirecting"
 
     # If vtec cgi param, redirect to /vtec/event/...
     if environ["vtec"] is not None:
         url = f"/vtec/event/{environ['vtec']}"
         start_response("301 Moved Permanently", [("Location", url)])
-        return [b"Redirecting"]
+        return "Redirecting"
     ctx = get_context(environ)
     start_response("200 OK", [("Content-type", "text/html")])
-    return TEMPLATE.render(ctx).encode("utf-8")
+    return TEMPLATE.render(ctx)

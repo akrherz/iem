@@ -198,6 +198,8 @@ def plotter(ctx: Params, conn: Connection | None = None):
             "\n".join(report.split("\n")[:32])
             + "\n...Text truncated due to space constraints."
         )
+    # Deal with GIGO
+    report = "".join(ch for ch in report if ch == "\n" or ch.isprintable())
     mp.fig.text(
         0.5,
         0.85,
