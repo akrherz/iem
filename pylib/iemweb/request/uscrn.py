@@ -56,17 +56,21 @@ class MyModel(CGIModel):
             pattern=r"^(csv|json|excel)$",
         ),
     ] = "csv"
-    ets: AwareDatetime = Field(
-        None,
-        description="The end time for the data request",
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The end time for the data request",
+        ),
+    ] = None
     stations: Annotated[
         ListOrCSVType, Field(description="The station identifiers")
     ]
-    sts: AwareDatetime = Field(
-        None,
-        description="The start time for the data request",
-    )
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The start time for the data request",
+        ),
+    ] = None
     year1: int = Field(
         None,
         description="The start year for the data request, when sts is not set",

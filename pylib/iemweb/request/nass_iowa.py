@@ -42,4 +42,4 @@ def application(_environ, start_response):
     bio = BytesIO()
     df.to_excel(bio, index=False)
     start_response("200 OK", headers)
-    return [bio.getvalue()]
+    return bio.getvalue()

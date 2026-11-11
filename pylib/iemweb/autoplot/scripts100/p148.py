@@ -80,7 +80,10 @@ class Params(AutoplotParams):
         str, SelectArg(label="Which variable to plot?", options=PDICT2)
     ] = "high"
     syear: Annotated[
-        int, YearArg(min=1800, label="Start year of plot (if data exists):")
+        int,
+        YearArg(
+            min=1800, label="Limit plot to this start year (if data exists):"
+        ),
     ] = 1800
 
 
@@ -177,10 +180,15 @@ def add_context(ctx: Params):
             ctx["df"] = pd.read_sql(
                 sql_helper("""
     SELECT year, high, low, day, precip, snow, snowd, temp_hour, precip_hour
-    from alldata WHERE station = :station and sday = :sday ORDER by year ASC
+    from alldata WHERE station = :station and sday = :sday
+    and year >= :syear ORDER by year ASC
                 """),
                 conn,
-                params={"station": station, "sday": thedate.strftime("%m%d")},
+                params={
+                    "syear": ctx.syear,
+                    "station": station,
+                    "sday": thedate.strftime("%m%d"),
+                },
                 index_col="year",
             )
         ctx["subtitle"] = thedate.strftime("%B %-d")
@@ -198,7 +206,7 @@ def add_context(ctx: Params):
         else:
             days = labor_days()
         ctx["subtitle"] = PDICT[dt]
-        if dtoff:
+        if dtoff is not None and offset is not None:
             ctx["subtitle"] = (
                 f"{abs(offset)} Days {'before' if offset < 0 else 'after'} "
                 f"{PDICT[dt]}"
@@ -209,17 +217,28 @@ def add_context(ctx: Params):
                 sql_helper("""
     SELECT year, high, day, low, precip, snow, snowd, temp_hour, precip_hour
     from alldata
-    WHERE station = :station and day = ANY(:days) ORDER by year ASC
+    WHERE station = :station and day = ANY(:days) and
+    year >= :syear ORDER by year ASC
                 """),
                 conn,
                 params={
                     "station": station,
                     "days": days,
+                    "syear": ctx.syear,
                 },
                 index_col="year",
             )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
+    ctx["subtitle"] += f" ({ctx['df'].index[0]}-{ctx['df'].index[-1]}) "
+    if ctx["varname"] in ["precip", "snow"]:
+        measurable = (ctx["df"][ctx["varname"]] > 0.005).sum()
+        pcp = measurable / len(ctx["df"]) * 100
+        ctx["subtitle"] += (
+            f" ({measurable}/{len(ctx['df'])} [{pcp:.1f}%] years with "
+            f"measurable {ctx['varname']})"
+        )
+
     ctx["title"] = f"{ctx.sname} :: Daily {PDICT2[ctx['varname']]}"
 
 

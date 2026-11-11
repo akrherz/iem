@@ -246,4 +246,4 @@ def application(environ, start_response):
             ("Content-disposition", "attachment;Filename=hml.csv"),
         ]
     start_response("200 OK", headers)
-    return [bio.getvalue()]
+    return bio.getvalue()
