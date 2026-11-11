@@ -50,10 +50,17 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.web.fields import TZ_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    TZ_FIELD,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -96,45 +103,29 @@ class MyModel(CGIModel):
     station: Annotated[
         ListOrCSVType,
         Field(
-            ...,
             description=(
                 "The station(s) to request data for, "
                 "either multi params or comma separated"
             ),
         ),
     ]
-    year1: Annotated[
-        int | None,
-        Field(description="The start year, if not using sts", gt=2011),
-    ] = None
-    month1: Annotated[
-        int | None, Field(description="The start month, if not using sts")
-    ] = None
-    day1: Annotated[
-        int | None, Field(description="The start day, if not using sts")
-    ] = None
-    hour1: Annotated[
-        int, Field(description="The start hour, if not using sts")
-    ] = 0
-    minute1: Annotated[
-        int, Field(description="The start minute, if not using sts")
-    ] = 0
-    year2: Annotated[
-        int | None,
-        Field(description="The end year, if not using ets", gt=2011),
-    ] = None
-    month2: Annotated[
-        int | None, Field(description="The end month, if not using ets")
-    ] = None
-    day2: Annotated[
-        int | None, Field(description="The end day, if not using ets")
-    ] = None
-    hour2: Annotated[
-        int, Field(description="The end hour, if not using ets")
-    ] = 0
-    minute2: Annotated[
-        int, Field(description="The end minute, if not using ets")
-    ] = 0
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
+
+    @model_validator(mode="after")
+    def ensure_sts_ets(self):
+        """Both sts and ets need to be set."""
+        if self.sts is None or self.ets is None:
+            raise ValueError("sts and ets must both be set")
+        return self
 
 
 def get_obs(dbconn, environ: dict) -> pd.DataFrame:

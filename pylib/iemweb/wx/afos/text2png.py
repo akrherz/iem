@@ -23,9 +23,7 @@ from datetime import UTC, datetime
 from io import BytesIO
 from typing import Annotated
 
-import PIL.ImageDraw
-import PIL.ImageFont
-import PIL.ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from pydantic import Field
 from pyiem.database import get_dbconn
 from pyiem.webutil import CGIModel, iemapp
@@ -66,7 +64,7 @@ def text_image(content):
 
     large_font = 20
     font_path = "/usr/share/fonts/liberation-mono/LiberationMono-Regular.ttf"
-    font = PIL.ImageFont.truetype(font_path, size=large_font)
+    font = ImageFont.truetype(font_path, size=large_font)
 
     # make the background image based on the combination of font and lines
     max_width_line = max(lines, key=font.getlength)
@@ -75,13 +73,13 @@ def text_image(content):
     bbox = font.getbbox(test_string)
     max_height = bbox[3] - bbox[1]
     max_width = font.getlength(max_width_line)
-    height = (max_height + 2) * len(lines)  # perfect or a little oversized
+    height = int((max_height + 2) * len(lines))
     width = round(max_width + 40)  # a little oversized
     # A limit of PIL
     if (height * width) > 90_000_000:
         width, height = 1200, 1000
-    image = PIL.Image.new(grayscale, (width, height), color=255)
-    draw = PIL.ImageDraw.Draw(image)
+    image = Image.new(grayscale, (width, height), color=255)
+    draw = ImageDraw.Draw(image)
 
     # draw each line of text
     vertical_position = 5
@@ -93,10 +91,10 @@ def text_image(content):
         )
         vertical_position += line_spacing
     # crop the text
-    c_box = PIL.ImageOps.invert(image).getbbox()
+    c_box = ImageOps.invert(image).getbbox()
     image = image.crop(c_box)
     buf = BytesIO()
-    PIL.ImageOps.expand(image, border=5, fill="white").save(buf, format="PNG")
+    ImageOps.expand(image, border=5, fill="white").save(buf, format="PNG")
     return buf.getvalue()
 
 
@@ -130,6 +128,7 @@ def get_mckey(environ: dict) -> str:
     memcachekey=get_mckey,
     content_type="image/png",
     ip_throttle_secs=1,
+    cache_control=3600,
 )
 def application(environ: dict, start_response):
     """Go Main Go"""
