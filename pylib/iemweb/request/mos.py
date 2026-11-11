@@ -150,4 +150,4 @@ def application(environ, start_response):
     ]
     payload = get_data(environ["sts"], environ["ets"], station, model, fmt)
     start_response("200 OK", headers)
-    return [payload]
+    return payload

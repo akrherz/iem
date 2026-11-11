@@ -25,6 +25,7 @@ station=AMW&network=IA_ASOS&sts=2024-01-01T00:00:00Z&ets=2024-02-01T00:00:00Z\
 
 """
 
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field
@@ -37,14 +38,17 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    ets: AwareDatetime = Field(
-        default=None, description="The end of the requested interval."
-    )
-    lalo: bool = Field(
-        default=False, description="Include the lat/lon in the output."
-    )
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(description="The end of the requested interval."),
+    ] = None
+    lalo: Annotated[
+        bool, Field(description="Include the lat/lon in the output.")
+    ] = False
     network: NETWORK_FIELD = "IA_ASOS"
-    st: bool = Field(False, description="Include the state in the output.")
+    st: Annotated[
+        bool, Field(description="Include the state in the output.")
+    ] = False
     station: ListOrCSVType = Field(
         default_factory=list, description="The station(s) to request data for."
     )
@@ -101,7 +105,7 @@ def get_data(network, environ, tzinfo):
             f"{','.join([str(x) for x in row[3:]])}\n"
         )
 
-    return res.encode("ascii", "ignore")
+    return res
 
 
 @iemapp(help=__doc__, default_tz="America/Chicago", schema=Schema)
@@ -112,6 +116,7 @@ def application(environ, start_response):
         raise IncompleteWebRequest("Missing start or end time.")
     if not environ["station"]:
         raise IncompleteWebRequest("No station= was specified.")
-    start_response("200 OK", [("Content-type", "text/plain")])
     network = environ["network"]
-    return [get_data(network, environ, tzinfo)]
+    payload = get_data(network, environ, tzinfo)
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return payload
