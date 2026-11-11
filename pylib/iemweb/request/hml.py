@@ -50,8 +50,9 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
@@ -119,13 +120,6 @@ class MyModel(CGIModel):
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
-
-    @model_validator(mode="after")
-    def ensure_sts_ets(self):
-        """Both sts and ets need to be set."""
-        if self.sts is None or self.ets is None:
-            raise ValueError("sts and ets must both be set")
-        return self
 
 
 def get_obs(dbconn, environ: dict) -> pd.DataFrame:
@@ -215,6 +209,8 @@ def rect(station):
 @iemapp(help=__doc__, schema=MyModel)
 def application(environ, start_response):
     """Get stuff"""
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Both sts and ets need to be set.")
     environ["station"] = [rect(x) for x in environ["station"]]
     with get_sqlalchemy_conn("hml") as dbconn:
         if environ["kind"] == "obs":

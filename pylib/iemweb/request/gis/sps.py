@@ -29,8 +29,9 @@ from io import BytesIO
 from typing import Annotated
 
 import geopandas as gpd
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.web.fields import (
     DAY_OF_MONTH_FIELD_OPTIONAL,
     HOUR_FIELD,
@@ -64,13 +65,6 @@ class Schema(CGIModel):
     day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
-
-    @model_validator(mode="after")
-    def validate_times(self):
-        """Ensure that start and end timestamps are available."""
-        if self.sts is None or self.ets is None:
-            raise ValueError("Both sts and ets need to be set.")
-        return self
 
 
 def run(ctx, start_response):
@@ -140,5 +134,7 @@ def run(ctx, start_response):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something fun!"""
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Both sts and ets need to be set.")
     ctx = {"sts": environ["sts"], "ets": environ["ets"]}
     return run(ctx, start_response)
