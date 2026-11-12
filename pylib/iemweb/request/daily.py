@@ -198,7 +198,7 @@ def get_data(network: str, sts, ets, stations, cols, na, fmt: str):
         )
         climate = get_climate(network, stations)
         if isinstance(climate, str):
-            return climate.encode()
+            return climate
 
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
@@ -284,12 +284,9 @@ def application(environ, start_response):
     cols = environ["var"]
     na = environ["na"]
     if query.format != "excel":
-        payload = get_data(
-            network, sts, ets, stations, cols, na, query.format
-        ).encode(
-            "ascii",
-            errors="ignore",
-        )
+        payload = get_data(network, sts, ets, stations, cols, na, query.format)
+        if isinstance(payload, str):
+            payload = payload.encode("ascii", errors="ignore")
         start_response("200 OK", [("Content-type", "text/plain")])
         return [payload]
     headers = [
