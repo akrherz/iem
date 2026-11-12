@@ -270,7 +270,13 @@ def get_description() -> PlotDescription:
     )
 
 
-def get_raster(ctx: Params, conn: Connection):
+def get_raster(ctx: Params):
+    """Get a raster for the given parameters."""
+    with get_sqlalchemy_conn("postgis") as conn:
+        return really_get_raster(ctx, conn)
+
+
+def really_get_raster(ctx: Params, conn: Connection):
     """polygon workflow"""
     if ctx.geo == "ugc":
         raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
@@ -828,11 +834,11 @@ def plotter(ctx: Params):
     grid = None
     aff = None
     crs = None
-    with get_sqlalchemy_conn("postgis") as conn:
-        if geo == "ugc":
+    if geo == "ugc":
+        with get_sqlalchemy_conn("postgis") as conn:
             do_ugc(ctx, conn)
-        elif geo == "polygon":
-            grid, aff, crs = get_raster(ctx, conn)
+    elif geo == "polygon":
+        grid, aff, crs = get_raster(ctx)
 
     subtitle = f"based on IEM Archives {ctx.get('subtitle', '')}"
     if t == "cwa":

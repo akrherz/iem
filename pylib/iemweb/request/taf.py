@@ -109,14 +109,14 @@ class MyModel(CGIModel):
         Field(description="The end timestamp for the data"),
     ] = None
     station: STATION_LIST_FIELD
-    year1: YEAR_FIELD_OPTIONAL
-    month1: MONTH_FIELD_OPTIONAL
-    day1: DAY_OF_MONTH_FIELD_OPTIONAL
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour1: HOUR_FIELD = 0
     minute1: MINUTE_FIELD = 0
-    year2: YEAR_FIELD_OPTIONAL
-    month2: MONTH_FIELD_OPTIONAL
-    day2: DAY_OF_MONTH_FIELD_OPTIONAL
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
     hour2: HOUR_FIELD = 0
     minute2: MINUTE_FIELD = 0
 
@@ -166,10 +166,15 @@ def run(start_response, environ):
     bio = BytesIO()
     if environ["fmt"] == "excel":
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-            # Two less than Excel max
-            df.iloc[:1048574].to_excel(
-                writer, sheet_name="TAF Data", index=False
-            )
+            # Two less than Excel max rows per sheet
+            max_rows = 1048574
+            for start in range(0, max(len(df), 1), max_rows):
+                sheet = "TAF Data"
+                if start > 0:
+                    sheet = f"TAF Data {start // max_rows + 1}"
+                df.iloc[start : start + max_rows].to_excel(
+                    writer, sheet_name=sheet, index=False
+                )
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", "attachment;Filename=taf.xlsx"),
