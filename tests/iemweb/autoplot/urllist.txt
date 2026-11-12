@@ -528,6 +528,7 @@
 217/pid:202408011600-PAJK-WWAK87-SPSAJK::segnum:0::_r:t::dpi:100::_cb:1.png
 217/pid:606%20%20WFUS52-KTBW-%20222242%20-TORTBW-FLC053-101-222315::segnum:0::n:auto::_r:t::dpi:100.png
 218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
+218/w:today::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
 219/station:PAAA::valid:2024-08-21%200413::_r:t::dpi:100.png
 219/station:PASN::valid:2024-08-21%200413::_r:t::dpi:100.png
 219/station:PAOM::valid:2024-08-21%200413::_r:t::dpi:100.png

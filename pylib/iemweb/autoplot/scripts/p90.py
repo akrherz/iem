@@ -105,7 +105,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import get_cmap
@@ -270,8 +270,7 @@ def get_description() -> PlotDescription:
     )
 
 
-@with_sqlalchemy_conn("postgis")
-def get_raster(ctx: Params, conn: Connection | None = None):
+def get_raster(ctx: Params, conn: Connection):
     """polygon workflow"""
     if ctx.geo == "ugc":
         raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
@@ -366,7 +365,7 @@ def get_raster(ctx: Params, conn: Connection | None = None):
         "sts": sts,
         "ets": ets,
     }
-    df: pd.DataFrame = gpd.read_postgis(
+    df: pd.DataFrame = gpd.read_postgis(  # type: ignore
         sql_helper(
             """
     SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
@@ -386,7 +385,7 @@ def get_raster(ctx: Params, conn: Connection | None = None):
         params=params,
         geom_col="geom",
         index_col=None,
-    )  # type: ignore
+    )
     if df.empty:
         raise NoDataFound("No data found for query.")
     zs = zonal_stats(
@@ -502,8 +501,7 @@ def get_raster(ctx: Params, conn: Connection | None = None):
     return counts, affine, "EPSG:4326"
 
 
-@with_sqlalchemy_conn("postgis")
-def do_ugc(ctx: Params, conn: Connection | None = None):
+def do_ugc(ctx: Params, conn: Connection):
     """Do UGC based logic."""
     varname = ctx.v
     station = ctx.station[:4]
@@ -710,7 +708,7 @@ def do_ugc(ctx: Params, conn: Connection | None = None):
         ctx["title"] = f"Yearly Avg: {minv:%d %b %Y} and {maxv:%d %b %Y}"
         ctx["lblformat"] = "%.2f"
         datavar = "count"
-    else:  # period
+    else:  # period*
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
                 "and (to_char(issue, 'mmdd') >= :sday "
@@ -748,16 +746,15 @@ def do_ugc(ctx: Params, conn: Connection | None = None):
             conn,
             params=query_params,
             index_col="ugc",
+            parse_dates=["minvalid", "maxvalid"],
         )
         if df.empty:
             raise NoDataFound("No events found for query.")
-        df["minvalid"] = pd.to_datetime(df["minvalid"])
-        df["maxvalid"] = pd.to_datetime(df["maxvalid"])
         minv = df["minvalid"].min()
         maxv = df["maxvalid"].max()
         ctx["title"] = (
-            f"Yearly {aggstat} between {minv:%d %b} and {maxv:%d %b} "
-            f"[{minv.year}-{maxv.year}]"
+            f"Yearly {aggstat} between {ctx.sdate:%d %b} "
+            f"and {ctx.edate:%d %b} [{minv.year}-{maxv.year}]"
         )
         datavar = "datum"
         if varname == "periodavg":
@@ -831,10 +828,11 @@ def plotter(ctx: Params):
     grid = None
     aff = None
     crs = None
-    if geo == "ugc":
-        do_ugc(ctx)
-    elif geo == "polygon":
-        grid, aff, crs = get_raster(ctx)
+    with get_sqlalchemy_conn("postgis") as conn:
+        if geo == "ugc":
+            do_ugc(ctx, conn)
+        elif geo == "polygon":
+            grid, aff, crs = get_raster(ctx, conn)
 
     subtitle = f"based on IEM Archives {ctx.get('subtitle', '')}"
     if t == "cwa":

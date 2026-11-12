@@ -18,6 +18,7 @@ from typing import Annotated
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -254,7 +255,7 @@ def gauge(ax: Axes, row: pd.Series, col: str, params: GaugeParams):
     )
 
 
-def precip(fig, row, col):
+def precip(fig: Figure, row: dict, col: str):
     """Do the precip part."""
     ypos = 0.57 if col == "precip" else 0.11
     ax = fig.add_axes([0.47, ypos, 0.42, 0.23])
@@ -399,7 +400,7 @@ def precip(fig, row, col):
     ax.set_yticks([])
 
 
-def build_params(clsite: str, dt: dateobj):
+def build_params(clsite: str | None, dt: dateobj):
     """Figure out some metrics"""
     hp = GaugeParams()
     lp = GaugeParams()
