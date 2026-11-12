@@ -5,6 +5,7 @@ tile throughput.
 """
 
 import time
+from collections.abc import Callable
 from wsgiref.handlers import format_date_time
 
 from iemweb.c.tile import application as c_application
@@ -35,7 +36,7 @@ def _strip_head_body(environ: dict, result):
     return []
 
 
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """WSGI entry point for TileCache requests.
 
     Injects `Cache-Control` and `Expires` headers for the `/c` and

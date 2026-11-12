@@ -16,7 +16,9 @@ class _Body:
         self.closed = True
 
 
-def _stub(monkeypatch, route, headers=(), body=None):
+def _stub(
+    monkeypatch, route, headers=(("Content-Type", "image/png"),), body=None
+):
     """Install a stub handler on a route."""
 
     def handler(_environ, start_response):
@@ -42,7 +44,15 @@ def test_fallback_get_has_body(wsgi_client):
 def test_routed_head_strips_body_and_closes(wsgi_client, monkeypatch):
     """HEAD on a routed handler drops the body and closes the iterable."""
     body = _Body()
-    _stub(monkeypatch, "/c/tile.py", [("Content-Length", "4")], body)
+    _stub(
+        monkeypatch,
+        "/c/tile.py",
+        [
+            ("Content-Length", "4"),
+            ("Content-type", "image/png"),
+        ],
+        body,
+    )
     res = wsgi_client(tilecache_dispatch.application).head("/c/tile.py/x")
     assert res.get_data() == b""
     assert body.closed
@@ -79,7 +89,11 @@ def test_existing_cache_headers_preserved(wsgi_client, monkeypatch):
     _stub(
         monkeypatch,
         "/c/tile.py",
-        [("Cache-Control", "no-store"), ("Expires", "never")],
+        [
+            ("Cache-Control", "no-store"),
+            ("Expires", "never"),
+            ("Content-type", "text/plain"),
+        ],
     )
     res = wsgi_client(tilecache_dispatch.application).get("/c/tile.py")
     assert res.headers["Cache-Control"] == "no-store"
