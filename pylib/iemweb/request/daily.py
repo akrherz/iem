@@ -267,7 +267,7 @@ def application(environ, start_response):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
-        return [b"ERROR: server over capacity, please try later"]
+        return "ERROR: server over capacity, please try later"
 
     stations = environ["stations"]
     if not stations:
@@ -285,14 +285,12 @@ def application(environ, start_response):
     na = environ["na"]
     if query.format != "excel":
         payload = get_data(network, sts, ets, stations, cols, na, query.format)
-        if isinstance(payload, str):
-            payload = payload.encode("ascii", errors="ignore")
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [payload]
+        return payload
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=daily.xlsx"),
     ]
     payload = get_data(network, sts, ets, stations, cols, na, query.format)
     start_response("200 OK", headers)
-    return [payload]
+    return payload
