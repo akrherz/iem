@@ -55,7 +55,15 @@ import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
-from pyiem.web.fields import STATION_LIST_FIELD, TZ_FIELD
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    STATION_LIST_FIELD,
+    TZ_FIELD,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -101,36 +109,16 @@ class MyModel(CGIModel):
         Field(description="The end timestamp for the data"),
     ] = None
     station: STATION_LIST_FIELD
-    year1: Annotated[
-        int | None, Field(description="The start year, if not using sts")
-    ] = None
-    month1: Annotated[
-        int | None, Field(description="The start month, if not using sts")
-    ] = None
-    day1: Annotated[
-        int | None, Field(description="The start day, if not using sts")
-    ] = None
-    hour1: Annotated[
-        int, Field(description="The start hour, if not using sts")
-    ] = 0
-    minute1: Annotated[
-        int, Field(description="The start minute, if not using sts")
-    ] = 0
-    year2: Annotated[
-        int | None, Field(description="The end year, if not using ets")
-    ] = None
-    month2: Annotated[
-        int | None, Field(description="The end month, if not using ets")
-    ] = None
-    day2: Annotated[
-        int | None, Field(description="The end day, if not using ets")
-    ] = None
-    hour2: Annotated[
-        int, Field(description="The end hour, if not using ets")
-    ] = 0
-    minute2: Annotated[
-        int, Field(description="The end minute, if not using ets")
-    ] = 0
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def run(start_response, environ):
@@ -178,7 +166,15 @@ def run(start_response, environ):
     bio = BytesIO()
     if environ["fmt"] == "excel":
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-            df.to_excel(writer, sheet_name="TAF Data", index=False)
+            # Two less than Excel max rows per sheet
+            max_rows = 1048574
+            for start in range(0, max(len(df), 1), max_rows):
+                sheet = "TAF Data"
+                if start > 0:
+                    sheet = f"TAF Data {start // max_rows + 1}"
+                df.iloc[start : start + max_rows].to_excel(
+                    writer, sheet_name=sheet, index=False
+                )
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", "attachment;Filename=taf.xlsx"),

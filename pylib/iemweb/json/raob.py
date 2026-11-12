@@ -30,8 +30,9 @@ ts=2024-03-24T12:00:00Z&pressure=500
 """
 
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any
 
 import numpy as np
 import pandas as pd
@@ -44,8 +45,6 @@ from pyiem.web.fields import CALLBACK_FIELD
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.util import json_response_dict
-
-json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 class Schema(CGIModel):
@@ -180,10 +179,10 @@ def get_mckey(environ: dict) -> str:
 
 
 @iemapp(memcachekey=get_mckey, memcacheexpire=600, help=__doc__, schema=Schema)
-def application(environ, start_response):
+def application(environ: dict[str, Any], start_response: Callable):
     """Answer request."""
     data = run(environ["ts"], environ["station"], environ["pressure"])
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return data.encode("ascii")
+    return data
