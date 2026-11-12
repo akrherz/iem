@@ -546,7 +546,7 @@ def do_kml(sql: str, params: dict, conn: Connection):
     """Materialize as KML."""
     res = conn.execute(sql_helper(sql), params)
     # Careful that the first byte is the XML
-    yield """<?xml version="1.0" encoding="UTF-8"?>
+    yield b"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
 <Document>
  <name>IEM NWS WWA Export</name>
@@ -599,8 +599,8 @@ def do_kml(sql: str, params: dict, conn: Connection):
     {row["geo"]}
 </Placemark>
 """
-        )
-    yield "</Document></kml>"
+        ).encode()
+    yield b"</Document></kml>"
 
 
 def do_excel(sql, fmt, params):
