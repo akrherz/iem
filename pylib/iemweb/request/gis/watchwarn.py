@@ -713,14 +713,12 @@ def local_files(names):
 def application(environ: dict[str, Any], start_response: Callable):
     """Go Main Go"""
     try:
-        if environ["timeopt"] != 2 and environ["sts"] is None:
-            raise IncompleteWebRequest("Missing start time parameter")
         sql, fn, params = build(environ)
     except (IncompleteWebRequest, ValueError) as exp:
         start_response(
             "422 Unprocessable Content", [("Content-type", "text/plain")]
         )
-        yield str(exp)
+        yield str(exp).encode()
         return
     if environ["accept"] == "kml":
         start_response(

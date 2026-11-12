@@ -5,7 +5,6 @@ import pkgutil
 
 import pytest
 from docutils.core import publish_string
-from werkzeug.test import Client
 
 
 def get_mods_and_urls():
@@ -45,11 +44,11 @@ def test_docutils_publish_string(mod, cgi):
 
 
 @pytest.mark.parametrize(("mod", "cgi"), list(get_mods_and_urls()))
-def test_urls(mod, cgi):
+def test_urls(wsgi_client, mod, cgi):
     """Test what is found via introspection."""
     if not hasattr(mod, "application"):
         return
-    c = Client(mod.application)
+    c = wsgi_client(mod.application)
     res = c.get(cgi, headers={"Referer": "http://iem.local"})
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]

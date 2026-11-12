@@ -4,7 +4,6 @@ import pathlib
 
 import pytest
 from iemweb.autoplot.autoplot import application
-from werkzeug.test import Client
 
 
 def get_test_urls():
@@ -25,9 +24,9 @@ def get_test_urls():
 
 
 @pytest.mark.parametrize("url", get_test_urls())
-def test_urls(url: str):
+def test_urls(wsgi_client, url: str):
     """Run the test."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get(url)
     assert res.status_code in [200, 400]
 

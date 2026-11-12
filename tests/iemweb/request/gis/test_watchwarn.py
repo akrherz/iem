@@ -3,12 +3,11 @@
 import xml.etree.ElementTree as ET
 
 from iemweb.request.gis.watchwarn import application
-from werkzeug.test import Client
 
 
-def test_valid_kml():
+def test_valid_kml(wsgi_client):
     """Test that we get back an empty CSV result."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get(
         "?accept=kml&at=2024-05-21T21:20Z&timeopt=2&limitps=1"
         "&phenomena=TO&significance=W"

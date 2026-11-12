@@ -205,5 +205,11 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/html")])
         return payload
     redirect_to = handler(qclean)
-    start_response("302 Found", [("Location", redirect_to)])
-    return []
+    start_response(
+        "302 Found",
+        [
+            ("Location", redirect_to),
+            ("Content-type", "text/plain"),
+        ],
+    )
+    return [f"Redirecting to {redirect_to}".encode()]

@@ -4,23 +4,22 @@ import responses
 from iemweb.projects.iembot.mastodon.index import (
     application,
 )
-from werkzeug.test import Client
 
 # iem-database has a test entry for this.
 TEST_HOST = "masto.globaleas.org"
 
 
-def test_no_server_provided():
+def test_no_server_provided(wsgi_client):
     """Test request without a server set."""
-    client = Client(application)
+    client = wsgi_client(application)
     resp = client.get("/projects/iembot/mastodon/")
     assert resp.status_code == 200
     assert b"Enter your Mastodon" in resp.data
 
 
-def test_simple():
+def test_simple(wsgi_client):
     """Walk before we run here."""
-    client = Client(application)
+    client = wsgi_client(application)
     with responses.RequestsMock() as rsps:
         rsps.add(
             responses.GET,
@@ -37,9 +36,9 @@ def test_simple():
         assert resp.status_code == 307
 
 
-def test_oauth_code():
+def test_oauth_code(wsgi_client):
     """Test the callback when oauth is done."""
-    client = Client(application)
+    client = wsgi_client(application)
     with responses.RequestsMock() as rsps:
         rsps.add(
             responses.GET,

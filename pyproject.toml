@@ -4,6 +4,10 @@ filterwarnings = [
     "error::pandas.errors.Pandas4Warning",
     "ignore:numpy.ndarray size changed:RuntimeWarning",
 ]
+# Prevent tests from hanging indefinitely
+timeout = 60
+timeout_method = "signal"
+timeout_func_only = true
 
 [tool.ruff]
 line-length = 79

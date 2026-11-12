@@ -4,7 +4,6 @@ import importlib
 import pkgutil
 
 import pytest
-from werkzeug.test import Client
 
 
 def get_services(package_name):
@@ -22,9 +21,9 @@ def get_services(package_name):
 @pytest.mark.parametrize(
     ("application", "appname"), list(get_services("iemweb"))
 )
-def test_all(application, appname: str):
+def test_all(wsgi_client, application, appname: str):
     """Test all apps."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get()
     # appname is useful for the pytest failure message, this appeases linters
     assert appname.startswith("iemweb")

@@ -1,12 +1,11 @@
 """Test iemweb.request.metars module."""
 
 from iemweb.request import metars
-from werkzeug.test import Client
 
 
-def test_load():
+def test_load(wsgi_client):
     """Test the requests."""
-    c = Client(metars.application)
+    c = wsgi_client(metars.application)
     metars.SIMULTANEOUS_REQUESTS = -1
     resp = c.get("/request/metars.py?valid=2020070100")
     metars.SIMULTANEOUS_REQUESTS = 10

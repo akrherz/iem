@@ -140,7 +140,8 @@ def overloaded(environ: dict):
     with get_dbconn("iem") as pgconn:
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
-        val = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        val = 0 if row is None else row[0]
     if val > 50:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/daily.py over cpu thres: {val}")
     return val > 40
@@ -266,7 +267,7 @@ def application(environ, start_response):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
-        return [b"ERROR: server over capacity, please try later"]
+        return "ERROR: server over capacity, please try later"
 
     stations = environ["stations"]
     if not stations:
@@ -283,18 +284,13 @@ def application(environ, start_response):
     cols = environ["var"]
     na = environ["na"]
     if query.format != "excel":
-        payload = get_data(
-            network, sts, ets, stations, cols, na, query.format
-        ).encode(
-            "ascii",
-            errors="ignore",
-        )
+        payload = get_data(network, sts, ets, stations, cols, na, query.format)
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [payload]
+        return payload
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=daily.xlsx"),
     ]
     payload = get_data(network, sts, ets, stations, cols, na, query.format)
     start_response("200 OK", headers)
-    return [payload]
+    return payload

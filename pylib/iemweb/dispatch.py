@@ -1,6 +1,7 @@
 """Shared dispatch logic for /json and /geojson endpoints."""
 
 import re
+from collections.abc import Callable
 from importlib import import_module
 from urllib.parse import parse_qsl, urlencode
 
@@ -86,10 +87,13 @@ def add_query(environ: dict, **params) -> None:
     environ["QUERY_STRING"] = urlencode(current)
 
 
-def not_found(start_response: callable) -> list[bytes]:
+def not_found(start_response: Callable) -> list[bytes]:
     """Redirect missing content to the API docs page."""
-    start_response("301 Found", [("Location", "/api/")])
-    return []
+    start_response(
+        "301 Found",
+        [("Location", "/api/"), ("Content-type", "text/plain")],
+    )
+    return [b"Redirecting to /api/"]
 
 
 def normalize_path(path: str, suffixes: tuple[str, ...]) -> str | None:
@@ -154,10 +158,11 @@ def dispatch_namespace(
                 (
                     "Location",
                     f"{REDIRECTS[path]}?{environ.get('QUERY_STRING', '')}",
-                )
+                ),
+                ("Content-type", "text/plain"),
             ],
         )
-        return []
+        return [f"Redirecting to {REDIRECTS[path]}".encode()]
 
     endpoint = normalize_path(path, SUFFIXES[namespace])
     if endpoint is None:
@@ -171,7 +176,7 @@ def dispatch_namespace(
     return handler.application(environ, start_response)
 
 
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """WSGI entry point for the consolidated dispatcher."""
     namespace = detect_namespace(environ)
     if namespace is None:

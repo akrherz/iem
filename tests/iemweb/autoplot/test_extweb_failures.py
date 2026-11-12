@@ -2,10 +2,9 @@
 
 import responses
 from iemweb.autoplot.autoplot import application
-from werkzeug.test import Client
 
 
-def test_ap17():
+def test_ap17(wsgi_client):
     """Test a failure found in prod."""
     with responses.RequestsMock() as rsps:
         rsps.add(
@@ -13,6 +12,6 @@ def test_ap17():
             url="http://mesonet.agron.iastate.edu/api/1/daily.json",
             status=404,
         )
-        c = Client(application)
+        c = wsgi_client(application)
         res = c.get("?p=17&q=_cb:1")
         assert res.status_code == 400

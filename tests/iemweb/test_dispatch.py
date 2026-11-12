@@ -1,12 +1,11 @@
 """Tests for the shared /json, /geojson, and /search dispatcher."""
 
 from iemweb.dispatch import application
-from werkzeug.test import Client
 
 
-def test_shared_json_mount():
+def test_shared_json_mount(wsgi_client):
     """Ensure the shared handler dispatches /json via SCRIPT_NAME."""
-    client = Client(application, response_wrapper=None)
+    client = wsgi_client(application)
     response = client.get(
         "/stage4/-97.5/40.0/2026-03-01",
         environ_overrides={"SCRIPT_NAME": "/json"},
@@ -15,9 +14,9 @@ def test_shared_json_mount():
     assert "gridi" in response.get_json()
 
 
-def test_shared_geojson_mount():
+def test_shared_geojson_mount(wsgi_client):
     """Ensure the shared handler dispatches /geojson via SCRIPT_NAME."""
-    client = Client(application, response_wrapper=None)
+    client = wsgi_client(application)
     response = client.get(
         "/network_obs.php",
         environ_overrides={"SCRIPT_NAME": "/geojson"},
@@ -25,8 +24,8 @@ def test_shared_geojson_mount():
     assert response.status_code == 302
 
 
-def test_direct_search_route():
+def test_direct_search_route(wsgi_client):
     """Ensure /search dispatches directly to iemweb.search via PATH_INFO."""
-    client = Client(application, response_wrapper=None)
+    client = wsgi_client(application)
     response = client.get("/search?q=DSM")
     assert response.status_code == 302

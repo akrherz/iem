@@ -18,7 +18,7 @@ from iemweb.autoplot.index import (
     set_cookie,
 )
 from pyiem.exceptions import BadWebRequest
-from werkzeug.test import Client, EnvironBuilder
+from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 
@@ -41,16 +41,16 @@ def get_test_urls() -> list[str]:
 
 
 @pytest.mark.parametrize("url", get_test_urls())
-def test_urls(url):
+def test_urls(wsgi_client, url):
     """Run the test."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get(url)
     assert res.status_code == 200
 
 
-def test_cookie_set_to_all():
+def test_cookie_set_to_all(wsgi_client):
     """Test handling of when cookie is set to _ALL."""
-    cl = Client(application)
+    cl = wsgi_client(application)
     cl.set_cookie("station_WFO", "_ALL")
     res = cl.get("?q=72")
     assert res.status_code == 200
