@@ -110,17 +110,6 @@ def gauge(ax: Axes, row: pd.Series, col: str, params: GaugeParams):
         if pd.notna(row["low_normal"]):
             params.avgval = row["low_normal"]
 
-    if (
-        params.avgval is None
-        or params.stddev is None
-        or params.maxval is None
-        or params.minval is None
-        or params.ptiles is None
-        or params.calc_max_low_years is None
-        or params.calc_min_high_years is None
-    ):
-        return
-
     # Polar coordinates, so 0 is maxval and pi is minval
     colors = ["#BE0000", "#E48900", "#B6EB7A", "#0F4CBB", "#1B262C"]
     # Okay, the chart will go from maxval (rad=pi) to maxval (rad=0)
