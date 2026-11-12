@@ -183,7 +183,10 @@ def application(environ: dict[str, Any], start_response: Callable):
     # Force HTTPS as the openlayers map will be angry
     if environ["wsgi.url_scheme"] != "https":
         url = f"https://{environ['HTTP_HOST']}{environ['REQUEST_URI']}"
-        start_response("301 Moved Permanently", [("Location", url)])
+        start_response(
+            "301 Moved Permanently",
+            [("Location", url), ("Content-type", "text/plain")],
+        )
         return "Redirecting"
     script_uri = environ.get("SCRIPT_URI", "")
     m = LEGACY_URL_RE.search(script_uri)
@@ -217,13 +220,19 @@ def application(environ: dict[str, Any], start_response: Callable):
         url = "/vtec/?" + "&".join(
             f"{k}={v}" for k, v in urlparams.items() if v is not None
         )
-        start_response("301 Moved Permanently", [("Location", url)])
+        start_response(
+            "301 Moved Permanently",
+            [("Location", url), ("Content-type", "text/plain")],
+        )
         return "Redirecting"
 
     # If vtec cgi param, redirect to /vtec/event/...
     if environ["vtec"] is not None:
         url = f"/vtec/event/{environ['vtec']}"
-        start_response("301 Moved Permanently", [("Location", url)])
+        start_response(
+            "301 Moved Permanently",
+            [("Location", url), ("Content-type", "text/plain")],
+        )
         return "Redirecting"
     ctx = get_context(environ)
     start_response("200 OK", [("Content-type", "text/html")])

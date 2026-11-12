@@ -83,6 +83,8 @@ dependencies:
   - pytest-cov
   - pytest-mpl
   - pytest-runner
+  # So that pyproject.toml timeouts work
+  - pytest-timeout
   - pytest-xdist
   - qrcode
   # various places

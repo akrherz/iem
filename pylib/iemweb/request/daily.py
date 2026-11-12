@@ -140,7 +140,8 @@ def overloaded(environ: dict):
     with get_dbconn("iem") as pgconn:
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
-        val = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        val = 0 if row is None else row[0]
     if val > 50:  # Cut back on logging
         error_log(environ, f"/cgi-bin/request/daily.py over cpu thres: {val}")
     return val > 40
@@ -197,7 +198,7 @@ def get_data(network: str, sts, ets, stations, cols, na, fmt: str):
         )
         climate = get_climate(network, stations)
         if isinstance(climate, str):
-            return climate
+            return climate.encode()
 
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(

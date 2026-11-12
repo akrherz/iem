@@ -297,7 +297,7 @@ def application(environ: dict, start_response: callable):
     mapp, redirect_uri = get_mastodon_app(server)
     # oauth step
     if environ.get("code") is None:
-        headers = [("Location", redirect_uri)]
+        headers = [("Location", redirect_uri), ("Content-type", "text/plain")]
         start_response("307 Temporary redirect", headers)
         return [TEMPLATE.render(res).encode("utf-8")]
     # Also sets cookie
