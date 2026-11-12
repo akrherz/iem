@@ -7,7 +7,6 @@ from iemweb.autoplot.autoplot import parser
 from iemweb.autoplot.index import application as index_app
 from iemweb.autoplot.meta import get_scriptmod_and_meta
 from pyiem.exceptions import IncompleteWebRequest
-from werkzeug.test import Client
 
 
 def genmod() -> list[int]:
@@ -33,15 +32,15 @@ def test_threecolons():
 
 
 @pytest.mark.parametrize("apid", genmod())
-def test_autoplot_calls_index(apid: int):
+def test_autoplot_calls_index(wsgi_client, apid: int):
     """Test the HTML generation via the User frontdoor."""
-    c = Client(index_app)
+    c = wsgi_client(index_app)
     resp = c.get(f"?q={apid}")
     assert resp.status_code == 200
 
 
 @pytest.mark.parametrize("apid", genmod())
-def test_autoplot_calls_via_frontend(apid: int):
+def test_autoplot_calls_via_frontend(wsgi_client, apid: int):
     """Just import things."""
     _mod, meta = get_scriptmod_and_meta(apid)
     fmts = ["png"]
@@ -54,7 +53,7 @@ def test_autoplot_calls_via_frontend(apid: int):
     if meta.get("maptable"):
         fmts.append("geojson")
     for fmt in fmts:
-        c = Client(autoplot_app)
+        c = wsgi_client(autoplot_app)
         res = c.get(f"?p={apid}&fmt={fmt}&q=_cb:1")
         # Crude check that numpy arrays are not being str rendered
         if fmt == "js":

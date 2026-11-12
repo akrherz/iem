@@ -12,7 +12,6 @@ from iemweb.util import (
     vtec_year_cache_control,
 )
 from pyiem.util import utc
-from werkzeug.test import Client
 
 
 def test_vtec_year_cache_control():
@@ -22,9 +21,9 @@ def test_vtec_year_cache_control():
     assert vtec_year_cache_control({"year": year}) is None
 
 
-def test_tms_handler_failure():
+def test_tms_handler_failure(wsgi_client):
     """Ensure we can handle when things go south."""
-    c = Client(tile_app)
+    c = wsgi_client(tile_app)
     resp = c.get("/1.0.0/uscounties/4.44/3.33/1.png")
     assert resp.status_code == 200
     assert resp.headers["X-IEM-Error"] == "InvalidTMSRequest"

@@ -5,18 +5,17 @@ from io import BytesIO
 import responses
 from iemweb.current import live
 from PIL import Image
-from werkzeug.test import Client
 
 
-def test_offline():
+def test_offline(wsgi_client):
     """Test for a webcam that is offline."""
-    client = Client(live.application)
+    client = wsgi_client(live.application)
     response = client.get("/current/live.py?id=KCRG-002")
     assert response.status_code == 200
 
 
 @responses.activate
-def test_workflow():
+def test_workflow(wsgi_client):
     """Test we can fetch an image."""
     image = Image.new("RGB", (320, 240), (73, 109, 137))
     buf = BytesIO()
@@ -28,26 +27,26 @@ def test_workflow():
         body=image_bytes,
         status=200,
     )
-    client = Client(live.application)
+    client = wsgi_client(live.application)
     response = client.get("/current/live.py?id=KCRG-032")  # is_vapix
     assert response.status_code == 200
 
 
 @responses.activate
-def test_badauth():
+def test_badauth(wsgi_client):
     """Test that we handle bad auth."""
     responses.add(
         responses.GET,
         "http://example.com",
         status=401,
     )
-    client = Client(live.application)
+    client = wsgi_client(live.application)
     response = client.get("/current/live.py?id=KCRG-003")
     assert response.status_code == 200
 
 
-def test_live_webcam_image():
-    client = Client(live.application)
+def test_live_webcam_image(wsgi_client):
+    client = wsgi_client(live.application)
     response = client.get("/current/live.py?id=KCCI-099")
     assert response.status_code == 200
     assert response.content_type == "image/jpeg"

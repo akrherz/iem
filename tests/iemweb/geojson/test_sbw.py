@@ -3,12 +3,11 @@
 import json
 
 from iemweb.geojson.sbw import application
-from werkzeug.test import Client
 
 
-def test_260410_ts_at_issue():
+def test_260410_ts_at_issue(wsgi_client):
     """Test that we get a warning issued at the given timestamp."""
-    c = Client(application)
+    c = wsgi_client(application)
     resp = c.get("?ts=2018-06-20T20:02:00Z")
     jdata = resp.get_json()
     found = False
@@ -18,9 +17,9 @@ def test_260410_ts_at_issue():
     assert found
 
 
-def test_250102_ts_not_working():
+def test_250102_ts_not_working(wsgi_client):
     """Test a failure found in prod."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get("?ts=2024-05-21T20:00:00Z")
     assert res is not None
     jdata = json.loads(res.data.decode("utf-8"))

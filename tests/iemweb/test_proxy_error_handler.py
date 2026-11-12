@@ -1,11 +1,10 @@
 """Test the handler, sort of."""
 
 from iemweb.proxy_error_handler import application
-from werkzeug.test import Client
 
 
-def test_simple():
+def test_simple(wsgi_client):
     """Test simple."""
-    c = Client(application)
+    c = wsgi_client(application)
     res = c.get("/")
     assert res.status_code == 200

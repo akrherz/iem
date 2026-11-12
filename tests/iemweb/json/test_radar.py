@@ -4,10 +4,9 @@ from pathlib import Path
 
 from iemweb.json import radar
 from pyiem.util import utc
-from werkzeug.test import Client
 
 
-def test_ridge_available(tmp_path, monkeypatch):
+def test_ridge_available(wsgi_client, tmp_path, monkeypatch):
     """Test we get products back for an availability request."""
     utcnow = utc(2010, 1, 1)
     monkeypatch.setattr(radar, "BASEDIR", str(tmp_path))
@@ -24,7 +23,7 @@ def test_ridge_available(tmp_path, monkeypatch):
     )
     Path(n0qfn).parent.mkdir(parents=True, exist_ok=True)
     Path(n0qfn).write_text("foo", encoding="ascii")
-    c = Client(radar.application)
+    c = wsgi_client(radar.application)
     # 1. List RADARs
     resp = c.get("?operation=available&start=2010-01-01T00:00Z")
     assert resp.status_code == 200

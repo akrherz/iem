@@ -4,7 +4,6 @@ import importlib
 import os
 
 import pytest
-from werkzeug.test import Client
 
 
 def get_mods_and_urls(extra="") -> list[tuple[str, str]]:
@@ -29,19 +28,27 @@ def get_mods_and_urls(extra="") -> list[tuple[str, str]]:
 
 
 @pytest.mark.parametrize(("modname", "cgistr"), get_mods_and_urls())
-def test_urls(modname: str, cgistr: str):
+def test_urls(wsgi_client, modname: str, cgistr: str):
     """Test what urls.txt tells us to."""
     app = importlib.import_module(modname).application
-    c = Client(app)
+    c = wsgi_client(app)
     res = c.get(cgistr)
-    # Allow apps that redirect to check OK
-    assert res.status_code in [200, 301, 302]
+    try:
+        # Allow apps that redirect to check OK
+        assert res.status_code in [200, 301, 302]
+        res.get_data()
+    finally:
+        res.close()
 
 
 @pytest.mark.parametrize(("modname", "cgistr"), get_mods_and_urls("422"))
-def test_urls422(modname: str, cgistr: str):
+def test_urls422(wsgi_client, modname: str, cgistr: str):
     """Test what urls422.txt tells us to."""
     app = importlib.import_module(modname).application
-    c = Client(app)
+    c = wsgi_client(app)
     res = c.get(cgistr)
-    assert res.status_code == 422
+    try:
+        assert res.status_code == 422
+        res.get_data()
+    finally:
+        res.close()
