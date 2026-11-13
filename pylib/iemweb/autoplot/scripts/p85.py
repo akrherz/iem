@@ -89,7 +89,7 @@ def get_description() -> PlotDescription:
 def plotter(ctx: Params):
     """Go"""
     station = ctx.zstation
-    month = int(ctx.month)
+    month = ctx.month
     thres = ctx.t
     mydir = ctx.dir
     varname = ctx.varname
@@ -103,7 +103,8 @@ def plotter(ctx: Params):
             SELECT valid at time zone :tzname  + '10 minutes'::interval as v,
             {varname}::{cst} as datum
             from alldata where station = :station and {varname} is not null
-            and extract(month from valid) = :month and report_type = 3)
+            and extract(month from valid at time zone :tzname
+                + '10 minutes'::interval) = :month and report_type = 3)
 
         SELECT extract(hour from v) as hour,
         min(v) as min_valid,
@@ -135,8 +136,8 @@ def plotter(ctx: Params):
     df["below_freq"] = df["below"].values.astype("f") / df["count"] * 100.0
     df["above_freq"] = df["above"].values.astype("f") / df["count"] * 100.0
 
-    freq = df[mydir + "_freq"].values
-    hours = df.index.values
+    freq = df[f"{mydir}_freq"].to_numpy()
+    hours = df.index.to_numpy()
     title = (
         f"({df['min_valid'].min().year} - {df['max_valid'].max().year}) "
         f"{ctx.sname}\n"
@@ -159,7 +160,7 @@ def plotter(ctx: Params):
     for i, row in df.iterrows():
         dt = row[f"last_{mydir}_valid"]
         dt = "N/A" if pd.isna(dt) else dt.strftime("%d %b %Y")
-        hr = datetime(2000, 1, 1, int(i)).strftime("%-I %p")
+        hr = datetime(2000, 1, 1, int(i)).strftime("%-I %p")  # type: ignore
         labels.append(
             f"{hr:5s} | {dt} | {row[mydir]:,} | "
             f"{row['count']:,} | "
