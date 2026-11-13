@@ -258,7 +258,7 @@ def gauge(ax: Axes, row: pd.Series, col: str, params: GaugeParams):
 def precip(fig: Figure, row: dict, col: str):
     """Do the precip part."""
     ypos = 0.57 if col == "precip" else 0.11
-    ax = fig.add_axes([0.47, ypos, 0.42, 0.23])
+    ax = fig.add_axes((0.47, ypos, 0.42, 0.23))
     for side in ["left", "top", "right"]:
         ax.spines[side].set_visible(False)
     ax.spines["bottom"].set_alpha(0.35)

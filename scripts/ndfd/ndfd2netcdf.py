@@ -3,13 +3,15 @@
 Called from RUN_10_AFTER.sh
 """
 
-import os
+import sys
 from datetime import datetime, timedelta
 
 import click
 import numpy as np
 import pygrib
-from pyiem.util import ncopen, utc
+from pyiem.util import archive_fetch, logger, ncopen, utc
+
+LOG = logger()
 
 
 def create_netcdf(ts):
@@ -20,13 +22,15 @@ def create_netcdf(ts):
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = "%s Generated" % (utc().strftime("%Y-%m-%dT%H:%MZ"),)
 
-    grbs = pygrib.open(  # type: ignore
-        "/mesonet/ARCHIVE/data/2019/05/06/model/"
-        "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
-    )
-    grb = grbs[1]
-    shape = grb.values.shape
-    lats, lons = grb.latlons()
+    ppath = "2019/05/06/model/ndfd/00/ndfd.t00z.awp2p5f001.grib2"
+    with archive_fetch(ppath) as fh:
+        if fh is None:
+            LOG.warning("FATAL: Failed to get template %s", ppath)
+            sys.exit(2)
+        with pygrib.open(fh) as grbs:  # type: ignore
+            grb = grbs[1]
+            shape = grb.values.shape
+            lats, lons = grb.latlons()
     # Setup dimensions
     nc.createDimension("lat", shape[0])
     nc.createDimension("lon", shape[1])
@@ -90,42 +94,42 @@ def merge_grib(ts, nc):
     for fhour in range(6, 169, 6):
         fts = ts + timedelta(hours=fhour)
         fhourstr = "%03i" % (fhour,)
-        gribfn = ts.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ndfd/"
-            f"%H/ndfd.t%Hz.awp2p5f{fhourstr}.grib2"
+        ppath = ts.strftime(
+            f"%Y/%m/%d/model/ndfd/%H/ndfd.t%Hz.awp2p5f{fhourstr}.grib2"
         )
-        if not os.path.isfile(gribfn):
-            print("ndfd2netcdf missing %s" % (gribfn,))
-            continue
-        grbs = pygrib.open(gribfn)  # type: ignore
-        for grb in grbs:
-            if (
-                grb.valid_key("parameterName")
-                and grb["parameterName"] == "Minimum temperature"
-            ):
-                # This is 12z
-                days = int((fts - ts).total_seconds() / 86400)
-                nc.variables["low_tmpk"][days, :, :] = grb.values
-            elif (
-                grb.valid_key("parameterName")
-                and grb["parameterName"] == "Maximum temperature"
-            ):
-                # This is 0z
-                days = int((fts - ts).total_seconds() / 86400) - 1
-                nc.variables["high_tmpk"][days, :, :] = grb.values
-            elif (
-                grb.valid_key("parameterName")
-                and grb["parameterName"] == "Total precipitation"
-            ):
-                # This is tricky
-                days = (fhour - 6) / 24
-                if days < 0:
-                    continue
-                current = nc.variables["p01d"][days, :, :]
-                if current.mask.all():
-                    nc.variables["p01d"][days, :, :] = grb.values
-                else:
-                    nc.variables["p01d"][days, :, :] = current + grb.values
+        with archive_fetch(ppath) as fh:
+            if fh is None:
+                LOG.warning("missing %s", ppath)
+                continue
+            with pygrib.open(fh) as grbs:  # type: ignore
+                for grb in grbs:
+                    if (
+                        grb.valid_key("parameterName")
+                        and grb["parameterName"] == "Minimum temperature"
+                    ):
+                        # This is 12z
+                        days = int((fts - ts).total_seconds() / 86400)
+                        nc.variables["low_tmpk"][days] = grb.values
+                    elif (
+                        grb.valid_key("parameterName")
+                        and grb["parameterName"] == "Maximum temperature"
+                    ):
+                        # This is 0z
+                        days = int((fts - ts).total_seconds() / 86400) - 1
+                        nc.variables["high_tmpk"][days] = grb.values
+                    elif (
+                        grb.valid_key("parameterName")
+                        and grb["parameterName"] == "Total precipitation"
+                    ):
+                        # This is tricky
+                        days = int((fhour - 6) / 24)
+                        if days < 0:
+                            continue
+                        current = nc.variables["p01d"][days]
+                        if current.mask.all():
+                            nc.variables["p01d"][days] = grb.values
+                        else:
+                            nc.variables["p01d"][days] = current + grb.values
 
 
 def workflow(ts):
