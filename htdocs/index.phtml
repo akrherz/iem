@@ -39,6 +39,8 @@ EOM;
 } else {
     $feature = gen_feature($t);
 }
+
+/** @disregard */
 $iemperf = $get_website_stats();
 $lsr_snow = get_iemprop("homepage.lsrmap.on");
 
@@ -71,6 +73,7 @@ if ($lsr_snow == 'true'){
 EOM;
 }
 
+/** @disregard */
 $news = $get_recent_news();
 
 $nounce = time();
@@ -167,7 +170,7 @@ $t->content = <<<EOM
     <div class="col-md-4">
         <div class="text-center">
             <h3>Current Data</h3>
-            <a href="/timemachine/?product=1"><img src="/data/mesonet.gif" class="img-fluid rounded shadow-sm" /></a>
+            <a href="/timemachine/?product=1"><img src="/data/mesonet.gif?{$nounce}" class="img-fluid rounded shadow-sm" /></a>
             <p class="mt-3">The IEM combines data from participating networks into products
             like maps shown above and web applications to analyze the data.</p>
             <p><a href="/current/">More current products &raquo;</a></p>

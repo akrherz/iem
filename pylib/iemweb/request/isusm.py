@@ -57,7 +57,7 @@ import re
 import warnings
 from datetime import timedelta
 from io import BytesIO, StringIO
-from typing import Annotated, Any
+from typing import Annotated, Any, LiteralString
 
 import numpy as np
 import pandas as pd
@@ -80,6 +80,7 @@ warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 LEGACY_STS = re.compile(r"sts=[A-Z]")
+SV_RE = re.compile(r"sv(\d+)")
 MISSING = {"", "M", "-99"}
 SV_DEPTHS = [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]
 DELIMITERS = {"comma": ",", "tab": "\t"}
@@ -169,21 +170,20 @@ class Schema(CGIModel):
     minute2: MINUTE_FIELD = 0
 
 
-def fetch_daily(environ: dict, cols: list[str]):
+def fetch_daily(environ: dict, cols: list[str | LiteralString]):
     """Return a fetching of daily data"""
-    stations: list = environ["station"]
+    stations: list[str] = environ["station"]
 
     if not cols:
-        cols = (
-            "station valid high low rh_min rh rh_max gdd50 solar precip "
+        cols = (  # type: ignore
+            "high low rh_min rh rh_max gdd50 solar precip "
             "speed gust et soil04t soil12t soil24t soil50t soil12vwc "
             "soil24vwc soil50vwc"
         ).split()
-    else:
-        cols.insert(0, "valid")
-        cols.insert(0, "station")
+    cols.insert(0, "valid")
+    cols.insert(0, "station")
     if environ["qcflags"]:
-        newcols = cols[:2]
+        newcols = list(cols[:2])
         for col in cols[2:]:
             newcols.extend([col, f"{col}_f"])
         cols = newcols
@@ -379,9 +379,9 @@ def fetch_hourly(environ: dict, cols: list):
         cols.insert(0, "valid")
         cols.insert(0, "station")
     if environ["qcflags"]:
-        newcols = cols[:2]
+        newcols = list(cols[:2])
         for col in cols[2:]:
-            newcols.extend([col, f"{col}_f"])
+            newcols.extend([col, f"{col}_f"])  # type: ignore
         cols = newcols
 
     table = "sm_hourly"
@@ -393,17 +393,17 @@ def fetch_hourly(environ: dict, cols: list):
         # SoilVue 10 data
         for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
-                cols.append(f"sv_{c2}{depth}")
+                cols.append(f"sv_{c2}{depth}")  # type: ignore
                 if environ["qcflags"]:
-                    cols.append(f"sv_{c2}{depth}_f")
+                    cols.append(f"sv_{c2}{depth}_f")  # type: ignore
     else:
         for col in list(cols):
-            if col.startswith("sv") and len(col) > 2:
+            if SV_RE.match(col):
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
-                    cols.append(f"sv_{c2}{depth}")
+                    cols.append(f"sv_{c2}{depth}")  # type: ignore
                     if environ["qcflags"]:
-                        cols.append(f"sv_{c2}{depth}_f")
+                        cols.append(f"sv_{c2}{depth}_f")  # type: ignore
                 # remove the proxy column
                 cols.remove(col)
     with get_sqlalchemy_conn("isuag") as conn:
@@ -513,6 +513,8 @@ def fetch_hourly(environ: dict, cols: list):
         cols.remove("sv")
     else:
         for col in cols:
+            if f"{col}_qc" not in df.columns:
+                continue
             if col.startswith("sv_t"):
                 df[col] = convert_value(df[f"{col}_qc"].values, "degC", "degF")
             elif col.startswith("sv_vwc"):
