@@ -398,7 +398,7 @@ def fetch_hourly(environ: dict, cols: list):
                     cols.append(f"sv_{c2}{depth}_f")  # type: ignore
     else:
         for col in list(cols):
-            if SV_RE.match(col):
+            if SV_RE.fullmatch(col):
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
                     cols.append(f"sv_{c2}{depth}")  # type: ignore
