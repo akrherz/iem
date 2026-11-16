@@ -27,7 +27,9 @@
 16/network:IA_ASOS::zstation:AMW::month:winter::syear:1900::eyear:2025::opt:dwpf_below::threshold:60::r:40::_r:88::dpi:100.png
 16/network:IA_ASOS::zstation:AMW::month:winter::syear:1900::eyear:2025::opt:relh_above::threshold:60::r:40::_r:88::dpi:100.png
 16/network:IA_ASOS::zstation:AMW::month:winter::syear:1900::eyear:2025::opt:relh_below::threshold:60::r:40::_r:88::dpi:100.png
-16/network:IA_ASOS::zstation:IKV::month:winter::syear:1900::eyear:2025::opt:relh_below::threshold:60::r:40::_r:88::dpi:100.png
+16/network:IA_ASOS::zstation:AMW::month:winter::syear:1900::eyear:2025::opt:relh_below::threshold:60::r:40::_r:88::dpi:100.png
+16/network:IA_ASOS::zstation:AMW::month:winter::syear:1900::eyear:2025::opt:vfr::threshold:60::r:40::_r:88::dpi:100.png
+16/network:IA_ASOS::zstation:AMW::month:jun::syear:1900::eyear:2025::opt:lifr::threshold:60::r:40::_r:88::dpi:100.png
 16/network:IA_ASOS::zstation:IKV::month:winter::syear:1900::eyear:2025::opt:sn::threshold:60::r:40::_r:88::dpi:100.png
 16/network:IA_ASOS::zstation:IKV::month:winter::syear:1900::eyear:2025::opt:ra::threshold:60::r:40::_r:88::dpi:100.png
 16/network:IA_ASOS::zstation:IKV::month:winter::syear:1900::eyear:2025::opt:p01i::threshold:60::r:40::_r:88::dpi:100.png

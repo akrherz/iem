@@ -1,10 +1,11 @@
 """
 This application generates a wind rose for a given
 criterion being meet. A wind rose plot is a convenient way of summarizing
-wind speed and direction.
+wind speed and direction.</p>
 
 <p>You can select a year range to limit the considered data to, but the station
-may not have data for the entire range you select.
+may not have data for the entire range you select.  Only the routine / top of
+the hour reports are considered for this visualization.</p>
 """
 
 from datetime import date
@@ -15,6 +16,7 @@ import pandas as pd
 from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
+from pyiem.meteorology import flight_rule
 from pyiem.plot.windrose import WindrosePlot, histogram
 from pyiem.util import drct2text
 
@@ -32,6 +34,10 @@ PDICT = {
     "ts": "Thunderstorm (TS) Reported",
     "ra": "Rain (RA) Reported",
     "sn": "Snow (SN) Reported",
+    "mvfr": "Marginal Visual Flight Rules (MVFR) Reported",
+    "vfr": "Visual Flight Rules (VFR) Reported",
+    "ifr": "Instrument Flight Rules (IFR) Reported",
+    "lifr": "Low Instrument Flight Rules (LIFR) Reported",
     "p01i": "Measurable Precipitation Reported",
     "p01i_above": "Precipitation Above Threshold (inch)",
     "tmpf_above": "Temperature At or Above Threshold (°F)",
@@ -248,6 +254,7 @@ def add_ctx(ctx: Params):
         "months": months,
         "sdate": date(ctx.syear, 1, 1),
         "edate": date(ctx.eyear + 1, 1, 1),
+        "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
     }
     if ctx.opt == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
@@ -279,15 +286,20 @@ def add_ctx(ctx: Params):
     elif ctx.opt == "p01i_above":
         limiter = "p01i > :thres"
         title = f"Precipitation Above {ctx.threshold} inches"
+    else:  # These are the flight rule options
+        limiter = "1 = 1"
+        title = PDICT[ctx.opt]
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
             sql_helper(
                 """
             SELECT valid at time zone 'UTC' as valid,
-            drct, sknt * 1.15 as smph from alldata
-            where station = :station and {limiter} and sknt > 0
-            and drct >= 0 and
-            drct <= 360 and extract(month from valid) = ANY(:months)
+            drct, sknt * 1.15 as smph, vsby, skyc1, skyc2, skyc3, skyc4,
+            skyl1, skyl2, skyl3, skyl4 from alldata
+            where station = :station and report_type = 3 and
+            {limiter} and sknt > 0 and drct >= 0 and
+            drct <= 360 and
+            extract(month from valid at time zone :tzname) = ANY(:months)
             and valid >= :sdate and valid <= :edate
             """,
                 limiter=limiter,
@@ -298,6 +310,13 @@ def add_ctx(ctx: Params):
         )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
+
+    if ctx.opt in ["vfr", "mvfr", "ifr", "lifr"]:
+        ctx["df"]["flstatus"] = ctx["df"].apply(flight_rule, axis=1)
+        ctx["df"] = ctx["df"][ctx["df"]["flstatus"] == ctx.opt.upper()]
+        if ctx["df"].empty:
+            raise NoDataFound("No data found after flight rule filter.")
+
     minvalid = ctx["df"].index.min()
     maxvalid = ctx["df"].index.max()
 

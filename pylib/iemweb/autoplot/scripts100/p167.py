@@ -19,7 +19,14 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 </tbody>
 </table>
 </tbody>
-</table>
+</table></p>
+
+<p><strong>Updated 16 Nov 2026</strong>: Improvements were made to the
+flight rule assignment algorithm resulting in slight differences with the
+generated result.  There is some ambiguity with certain cloud and visibility
+combinations that are now better matched to <a
+href="https://www.faa.gov/air_traffic/publications/aim_html/chap7_section_1.html">
+FAA AIM Chapter 7 Section 1</a>.</p>
 """
 
 from datetime import date, timedelta
@@ -32,6 +39,7 @@ import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
+from pyiem.meteorology import flight_rule
 from pyiem.plot import figure_axes
 from pyiem.util import utc
 
@@ -106,40 +114,14 @@ def plotter(ctx: Params):
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
 
-    # 0 Unknown
-    # 1 VFR: Ceiling >3000' AGL and visibility >5 statutes miles (green)
-    # 2 MVFR: 1000-3000' and/or 3-5 statute miles, inclusive (blue)
-    # 3 IFR: 500 - <1000' and/or 1 to <3 statute miles (red)
-    # 4 LIFR: < 500' AGL and/or < 1 mile (magenta)
-    lookup = {4: "LIFR", 3: "IFR", 2: "MVFR", 1: "VFR", 0: "UNKNOWN"}
+    lookup = {"LIFR": 4, "IFR": 3, "MVFR": 2, "VFR": 1, "UNKNOWN": 0}
     conds = []
     for _, row in df.iterrows():
         x = row["ts"].day - 1
         y = row["ts"].hour
-        level = 100000  # arb high number
-        coverages = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
-        if "OVC" in coverages:
-            idx = coverages.index("OVC")
-            level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
-                idx
-            ]
-        if "BKN" in coverages and level == 10000:
-            idx = coverages.index("BKN")
-            level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
-                idx
-            ]
-        if row["vsby"] > 5 and level > 3000:
-            val = 1
-        elif level < 500 or row["vsby"] < 1:
-            val = 4
-        elif level < 1000 or row["vsby"] < 3:
-            val = 3
-        elif level <= 3000 or row["vsby"] <= 5:
-            val = 2
-        else:
-            val = 0
-        data[y, x] = max(data[y, x], val)
-        conds.append(lookup[val])
+        frule_str = flight_rule(row)  # type: ignore
+        data[y, x] = max(data[y, x], lookup[frule_str])
+        conds.append(frule_str)
 
     df["flstatus"] = conds
     title = (
@@ -156,7 +138,7 @@ def plotter(ctx: Params):
     ax.imshow(
         np.flipud(data),
         aspect="auto",
-        extent=[0.5, days + 0.5, -0.5, 23.5],
+        extent=(0.5, days + 0.5, -0.5, 23.5),
         cmap=cmap,
         interpolation="nearest",
         norm=norm,
@@ -175,7 +157,7 @@ def plotter(ctx: Params):
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
     ax.set_position(
-        [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
+        (box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9)
     )
 
     ax.legend(
