@@ -249,13 +249,14 @@ def add_ctx(ctx: Params):
     # Default TS (Thunderstorm) filter for METAR data
     limiter = "array_to_string(wxcodes, '') ~* 'TS'"
     title = "Thunderstorm (TS) contained in METAR"
+    tzname = ctx["_nt"].sts[ctx["station"]]["tzname"] or "America/Chicago"
     params = {
         "thres": ctx.threshold,
         "station": ctx["station"],
         "months": months,
         "sdate": date(ctx.syear, 1, 1),
         "edate": date(ctx.eyear + 1, 1, 1),
-        "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
+        "tzname": tzname,
     }
     if ctx.opt == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
