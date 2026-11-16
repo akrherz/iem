@@ -12,6 +12,9 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2026-11-15: Stray commas found within the raw LSR text were corrupting the
+  CSV output with this service. A database correction was made to prevent it
+  from happening in the future.
 - 2026-08-21: Fix a CSV output bug when ugcname contained a comma.
 - 2026-08-17: HTTP `OPTIONS` requests should be properly handled now.
 - 2026-03-19: A `magge` parameter was added, representing a filter for reports
@@ -61,6 +64,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 """
 
 import zipfile
+from collections.abc import Callable
 from datetime import timedelta
 from io import BytesIO, StringIO
 from typing import Annotated
@@ -73,7 +77,15 @@ from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
-from pyiem.web.fields import LATITUDE_FIELD_OPTIONAL, LONGITUDE_FIELD_OPTIONAL
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    LATITUDE_FIELD_OPTIONAL,
+    LONGITUDE_FIELD_OPTIONAL,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 from iemweb.mlib import unrectify_wfo
@@ -135,62 +147,40 @@ class Schema(CGIModel):
             le=1_000_000,
         ),
     ] = None
-    state: ListOrCSVType = Field(
-        None,
-        description="Limit results to these states.",
-    )
-    sts: AwareDatetime = Field(
-        None,
-        description="The start of the period you are interested in.",
-    )
-    type: ListOrCSVType = Field(
-        None,
-        description="Limit results to these event types.",
-    )
-    wfo: ListOrCSVType = Field(
-        None,
-        description="Limit results to these WFOs.",
-    )
-    year1: int = Field(
-        None,
-        description="If sts unset, the start year value in UTC.",
-    )
-    month1: int = Field(
-        None,
-        description="If sts unset, the start month value in UTC.",
-    )
-    day1: int = Field(
-        None,
-        description="If sts unset, the start day value in UTC.",
-    )
-    hour1: int = Field(
-        0,
-        description="If sts unset, the start hour value in UTC.",
-    )
-    minute1: int = Field(
-        0,
-        description="If sts unset, the start minute value in UTC.",
-    )
-    year2: int = Field(
-        None,
-        description="If ets unset, the end year value in UTC.",
-    )
-    month2: int = Field(
-        None,
-        description="If ets unset, the end month value in UTC.",
-    )
-    day2: int = Field(
-        None,
-        description="If ets unset, the end day value in UTC.",
-    )
-    hour2: int = Field(
-        0,
-        description="If ets unset, the end hour value in UTC.",
-    )
-    minute2: int = Field(
-        0,
-        description="If ets unset, the end minute value in UTC.",
-    )
+    state: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="Limit results to these states.",
+        ),
+    ] = None
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description="The start of the period you are interested in.",
+        ),
+    ] = None
+    type: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="Limit results to these event types.",
+        ),
+    ] = None
+    wfo: Annotated[
+        ListOrCSVType | None,
+        Field(
+            description="Limit results to these WFOs.",
+        ),
+    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
     east: LONGITUDE_FIELD_OPTIONAL = None
     west: LONGITUDE_FIELD_OPTIONAL = None
     north: LATITUDE_FIELD_OPTIONAL = None
@@ -204,9 +194,9 @@ class Schema(CGIModel):
         if any(x is not None for x in vals):
             if not all(x is not None for x in vals):
                 raise ValueError("Incomplete spatial bounds provided")
-            if self.east <= self.west:
+            if self.east <= self.west:  # type: ignore
                 raise ValueError("East is less than West")
-            if self.north <= self.south:
+            if self.north <= self.south:  # type: ignore
                 raise ValueError("North is less than South")
         return self
 
@@ -228,7 +218,7 @@ def get_time_domain(form: dict):
 def do_excel_kml(fmt, params, sql_filters):
     """Export as Excel or KML."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df: gpd.GeoDataFrame = gpd.read_postgis(
+        df: gpd.GeoDataFrame = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             WITH wfos as (
@@ -256,7 +246,7 @@ def do_excel_kml(fmt, params, sql_filters):
             conn,
             params=params,
             geom_col="geom",
-        )  # type: ignore
+        )
     df = df.rename(
         {
             "office": "Office",
@@ -300,7 +290,7 @@ def do_excel_kml(fmt, params, sql_filters):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Go Main Go"""
     params = {
         "wfos": [],
@@ -338,7 +328,7 @@ def application(environ: dict, start_response: callable):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel_kml("excel", params, sql_filters)]
+        return do_excel_kml("excel", params, sql_filters)
 
     if environ["fmt"] == "kml":
         headers = [
@@ -346,7 +336,7 @@ def application(environ: dict, start_response: callable):
             ("Content-disposition", f"attachment; Filename={fn}.kml"),
         ]
         start_response("200 OK", headers)
-        return [do_excel_kml("kml", params, sql_filters)]
+        return do_excel_kml("kml", params, sql_filters)
 
     csv = StringIO()
     csv.write(
@@ -431,6 +421,8 @@ def application(environ: dict, start_response: callable):
                 qualify = (
                     row["qualifier"] if row["qualifier"] is not None else ""
                 )
+                # city, county, typetext and source are db enforced to not
+                # have commas
                 csv.write(
                     f"{row['dvalid']},{row['dvalid2']},{row['lat']:.2f},"
                     f"{row['lon']:.2f},{row['magnitude']},"
@@ -447,7 +439,7 @@ def application(environ: dict, start_response: callable):
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        return [csv.getvalue().encode("ascii", "ignore")]
+        return csv.getvalue()
 
     zio = BytesIO()
     with zipfile.ZipFile(
@@ -464,4 +456,4 @@ def application(environ: dict, start_response: callable):
         ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
-    return [zio.getvalue()]
+    return zio.getvalue()
