@@ -246,6 +246,7 @@ def add_ctx(ctx: Params):
     ctx["station"] = ctx.zstation
     months = month2months(ctx.month)
 
+    # Default TS (Thunderstorm) filter for METAR data
     limiter = "array_to_string(wxcodes, '') ~* 'TS'"
     title = "Thunderstorm (TS) contained in METAR"
     params = {
@@ -286,7 +287,7 @@ def add_ctx(ctx: Params):
     elif ctx.opt == "p01i_above":
         limiter = "p01i > :thres"
         title = f"Precipitation Above {ctx.threshold} inches"
-    else:  # These are the flight rule options
+    elif ctx.opt in ["vfr", "mvfr", "ifr", "lifr"]:  # Flight rule options
         limiter = "1 = 1"
         title = PDICT[ctx.opt]
     with get_sqlalchemy_conn("asos") as conn:
