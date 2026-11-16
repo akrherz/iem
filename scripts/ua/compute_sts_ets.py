@@ -30,23 +30,39 @@ def main():
             (stations,),
         )
         row = pcursor.fetchone()
+        if row is None:
+            progress.write(f"{station} returned no data?!?")
+            continue
         current_sts = nt.sts[station]["archive_begin"]
         current_ets = nt.sts[station]["archive_end"]
+        current_online = nt.sts[station]["online"]
         sts = row[0]
         ets = row[1]
-        if (sts is not None and current_sts is None) or current_sts != sts:
+        if sts is None or ets is None:
+            progress.write(f"{station} has no valid sts or ets?!?!")
+            continue
+        if current_sts is None or current_sts != sts:
             progress.write(f"{station} sts {current_sts}->{sts}")
             mcursor.execute(
                 "UPDATE stations SET archive_begin = %s where id = %s and "
                 "network = 'RAOB'",
                 (sts, station),
             )
-        if ets is not None and current_ets is None and ets.year < OFFLINE_YR:
+        if ets.year < OFFLINE_YR and (
+            current_ets is None or current_ets != ets
+        ):
             progress.write(f"{station} ets {current_ets}->{ets}")
             mcursor.execute(
-                "UPDATE stations SET archive_end = %s where id = %s and "
-                "network = 'RAOB'",
+                "UPDATE stations SET archive_end = %s, online = 'f' "
+                "where id = %s and network = 'RAOB'",
                 (ets, station),
+            )
+        if ets.year > OFFLINE_YR and not current_online:
+            progress.write(f"{station} online status updated to 't'")
+            mcursor.execute(
+                "UPDATE stations SET online = 't', archive_end = null "
+                "where id = %s and network = 'RAOB'",
+                (station,),
             )
 
     mcursor.close()

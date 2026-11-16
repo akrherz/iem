@@ -28,6 +28,20 @@ backfilled eventually with data from the NCEI archive.</p>
  data are vertical profiles of the atmosphere taken from weather balloons released
  twice daily.</p>
 
+<h4>Service Changelog</h4>
+
+<ul>
+    <li>
+    <strong>16 Nov 2026</strong>: Some ugly station id rectifying was done
+    which changed some IDs, removed others, and generally made a mess.  Sigh.
+    The intent of the virtual station IDs prefixed by a <code>_</code> is to
+    thread together stations that have different NCEI IGRA2 identifiers. Some
+    of the virtual IDs the IEM was carrying have no metadata difference at
+    NCEI IGRA2, so they were removed.  Additionally, the ICAOs used by the IEM
+    were updated to match what the SPC website does.  Sorry about this...
+    </li>
+</ul>
+
 <div class="card mb-4">
     <div class="card-header">
         <h4 class="card-title mb-0">Available Tools</h4>
