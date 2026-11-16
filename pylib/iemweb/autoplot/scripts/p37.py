@@ -36,7 +36,7 @@ from iemweb.autoplot.description import (
 from iemweb.autoplot.params import AutoplotParams
 
 PDICT = {
-    "NAM": "NAM (9 Dec 2008 - current)",
+    "NAM": "NAM (9 Dec 2008 - 3 Nov 2026)",
     "GFS": "GFS (16 Dec 2003 - current)",
     "LAV": "GFS LAMP (23 Jul 2020 - current)",
     "MEX": "GFS Extended (12 Jul 2020 - current)",
@@ -350,7 +350,7 @@ def plotter(ctx: Params):
                     ],
                 }
             else:
-                mosdata[row["date"]] = [
+                mosdata[row["date"]] = [  # type: ignore
                     row["morning_min"],
                     row["afternoon_max"],
                 ]
@@ -394,7 +394,7 @@ def plotter(ctx: Params):
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
     ax.set_position(
-        [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
+        (box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9)
     )
 
     # Put a legend below current axis
