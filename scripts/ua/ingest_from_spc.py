@@ -17,6 +17,13 @@ from pyiem.util import logger
 from tqdm import tqdm
 
 LOG = logger()
+# For whatever reason, SPC's website uses some different IDs for certain
+# stations, so this maps what IEM expects to what SPC uses
+ALIASES = {
+    "ALY": "ALB",
+    "EYW": "KEY",
+    "SIL": "LIX",
+}
 
 
 class RAOB:
@@ -204,10 +211,12 @@ def main(valid, station):
             if obs.loc[sid, "nullcnt"] < 10 < obs.loc[sid, "count"]:
                 continue
         progress.set_description(sid)
-        sid3 = sid.removeprefix("K")
+        spc_station = sid.removeprefix("K")
+        if spc_station in ALIASES:
+            spc_station = ALIASES[spc_station]
         uri = (
             "https://www.spc.noaa.gov/exper/soundings/"
-            f"{valid:%y%m%d%H}_OBS/{sid3}.txt"
+            f"{valid:%y%m%d%H}_OBS/{spc_station}.txt"
         )
         try:
             resp = requests.get(uri, timeout=30)
