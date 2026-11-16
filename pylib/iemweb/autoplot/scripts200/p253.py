@@ -184,14 +184,17 @@ def plotter(ctx: Params):
     nt = NetworkTable("WFO")
     tzinfo = ZoneInfo("America/Chicago")
 
-    # Get the track
-    trackgdf = gpd.read_file(
-        "https://services.dat.noaa.gov/arcgis/rest/services/"
-        "nws_damageassessmenttoolkit/DamageViewer/FeatureServer/1/query?"
-        f"where=globalid%3D%27%7B{datglobalid[1:-1]}%7D%27&"
-        "geometryType=esriGeometryPolyline&outFields=*&"
-        "returnGeometry=true&f=geojson"
-    )
+    try:
+        # Get the track
+        trackgdf = gpd.read_file(
+            "https://services.dat.noaa.gov/arcgis/rest/services/"
+            "nws_damageassessmenttoolkit/DamageViewer/FeatureServer/1/query?"
+            f"where=globalid%3D%27%7B{datglobalid[1:-1]}%7D%27&"
+            "geometryType=esriGeometryPolyline&outFields=*&"
+            "returnGeometry=true&f=geojson"
+        )
+    except Exception as exp:
+        raise NoDataFound("NOAA Dat download failed...") from exp
     if len(trackgdf.index) != 1:
         raise NoDataFound("No track found for globalid provided, ask IEM...")
     wfo = trackgdf.iloc[0]["wfo"]
