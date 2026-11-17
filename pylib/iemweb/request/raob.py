@@ -17,9 +17,9 @@ Changelog
 Example Requests
 ----------------
 
-Provide the _OAX (Omaha Area) sounding info for July 2024
+Provide the KOAX (Omaha Area) sounding info for July 2024
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=_OAX&\
+https://mesonet.agron.iastate.edu/cgi-bin/request/raob.py?station=KOAX&\
 sts=2024-07-01T00:00:00Z&ets=2024-08-01T00:00:00Z
 
 """

@@ -94,7 +94,7 @@ class Params(AutoplotParams):
 
     station: Annotated[
         str, NetworkSelectArg(network="RAOB", label="Select Station:")
-    ] = "_OAX"
+    ] = "KOAX"
     hour: Annotated[
         str, SelectArg(options=PDICT, label="Which Routine Sounding:")
     ] = "00"

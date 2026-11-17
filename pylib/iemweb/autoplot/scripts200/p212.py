@@ -81,7 +81,7 @@ class Params(AutoplotParams):
 
     station: Annotated[
         str, NetworkSelectArg(network="RAOB", label="Select Station:")
-    ] = "_OAX"
+    ] = "KOAX"
     year: Annotated[
         int,
         YearArg(

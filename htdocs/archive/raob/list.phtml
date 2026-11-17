@@ -6,7 +6,7 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "List Sounding Parameters by Year";
 
-$stationselect = networkselect("RAOB", "_OAX");
+$stationselect = networkselect("RAOB", "KOAX");
 $year = date("Y");
 $yearselect = yearSelect(1947, $year);
 $t->headextra = <<<EOM

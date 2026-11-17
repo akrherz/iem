@@ -15,7 +15,7 @@
 /cgi-bin/request/gis/watchwarn.py?timeopt=1
 /cgi-bin/request/gis/watchwarn.py?timeopt=1&year1=2025&month1=1&day1=1
 /cgi-bin/request/gis/watchwarn.py?timeopt=2
-/cgi-bin/mywindrose.py?nsector=36&station=_OAX&network=RAOB&day1=1&day2=31&month1=5&month2=5&year1=1947&year2=2018&hour1=12&hour2=12&minute1=0&minute2=0&units=mph&fmt=png&dpi=100&conv=from&monthlimit=1&justdata=true
+/cgi-bin/mywindrose.py?nsector=36&station=KOAX&network=RAOB&day1=1&day2=31&month1=5&month2=5&year1=1947&year2=2018&hour1=12&hour2=12&minute1=0&minute2=0&units=mph&fmt=png&dpi=100&conv=from&monthlimit=1&justdata=true
 /cgi-bin/request/asos.py?station=OKC%CA&data=tmpf&data=dwpf&data=relh&data=sknt&data=mslp&year1=2023&month1=1&day1=1&year2=2023&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&elev=no&missing=M&trace=T&direct=yes&report_type=3
 /cgi-bin/request/asos.py?station=OKC&network=/etc/passwd
 /cgi-bin/request/coop.py?network=%22IA%22CLIMATE&stations=%22IA%220000&year1=1988&month1=1&day1=1&year2=2024&month2=12&day2=31&vars%5B%5D=high&vars%5B%5D=highc&vars%5B%5D=low&vars%5B%5D=lowc&vars%5B%5D=precip&vars%5B%5D=precipmm&model=apsim&what=view&delim=comma&gis=no&scenario_year=2023
@@ -50,7 +50,7 @@
 /cgi-bin/request/mos.py?sts=2020-01-01T12:00Z&model=NBS&station=KDSM
 /cgi-bin/request/nlaeflux.py?syear=2000&eyear=2001&smonth=1&emonth=2&sday=1&eday=2&station=trouble*
 /cgi-bin/request/other.py?station=AAA
-/cgi-bin/request/raob.py?station=_OAX&sts=2025-07-01T12:00Z&ets=2024-01-01T00:00Z
+/cgi-bin/request/raob.py?station=KOAX&sts=2025-07-01T12:00Z&ets=2024-01-01T00:00Z
 /cgi-bin/request/raob.py?station=_XXX&sts=2024-07-01T12:00Z&ets=2025-01-01T00:00Z
 /cgi-bin/request/raster2netcdf.py?dstr=201710251200&prod=bogus
 /cgi-bin/request/rwis.py?network=IA_RWIS&stations=_ALL&sts=2020-01-01&ets=2025-01-01
