@@ -2,7 +2,7 @@
 import {TabulatorFull as Tabulator} from 'https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator_esm.min.mjs';
 import { requireElement } from '/js/iemjs/domUtils.js';
 
-let station = '_OAX';
+let station = 'KOAX';
 let year = new Date().getFullYear();
 let table = null;
 let sortby = "-";  // Sentinel value for no sort
