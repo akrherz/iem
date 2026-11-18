@@ -3,12 +3,14 @@
 import os
 import pathlib
 import re
+from collections.abc import Callable
 from datetime import date
 from io import BytesIO
 
 from matplotlib.figure import Figure
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.util import LOG
 from pyiem.webutil import iemapp
 from sqlalchemy.engine import Connection
 
@@ -47,7 +49,7 @@ def get_content_type(val):
 
 
 @iemapp()
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Process this request
 
     This should look something like "/onsite/features/2016/11/161125.png"
@@ -84,7 +86,7 @@ def application(environ: dict, start_response: callable):
         fig.savefig(ram, format="png")
         ram.seek(0)
         start_response("404 Not Found", headers)
-        return [ram.read()]
+        return ram.read()
 
     # Option 4, we can support this request.
     headers.append(get_content_type(data["suffix"]))
@@ -115,10 +117,9 @@ def application(environ: dict, start_response: callable):
     try:
         with get_sqlalchemy_conn("mesosite", rw=True) as conn:
             dblog(conn, data["yymmdd"])
-    except Exception:
-        # swallow as uninteresting
-        pass
+    except Exception as exp:
+        LOG.debug("Error logging to database: %s", exp)
     finally:
         # Swallow exception
         start_response(status, headers)
-    return [resdata[stripe]]
+    return resdata[stripe]

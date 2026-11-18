@@ -24,6 +24,7 @@ callback=gotData
 
 """
 
+from collections.abc import Callable
 from datetime import date
 from typing import Annotated
 
@@ -226,7 +227,7 @@ def get_mckey(environ: dict):
     memcachekey=get_mckey,
     memcacheexpire=300,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     station = environ["station"]
     year = environ["year"]
@@ -235,4 +236,4 @@ def application(environ: dict, start_response: callable):
     with get_sqlalchemy_conn("iem") as conn:
         data = get_data(conn, station, year, fmt)
     start_response("200 OK", [("Content-type", get_ct(environ))])
-    return data.encode("ascii")
+    return data

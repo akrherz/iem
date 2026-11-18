@@ -44,13 +44,22 @@ sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=shp
 import pathlib
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import BytesIO
+from typing import Annotated
 
 import fiona
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
@@ -60,23 +69,21 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    ets: AwareDatetime = Field(None, description="End Time")
-    format: str = Field("shp", description="Output format")
-    sts: AwareDatetime = Field(None, description="Start Time")
-    year1: int = Field(None, description="Start year when sts is not provided")
-    year2: int = Field(None, description="End year when ets is not provided")
-    month1: int = Field(
-        None, description="Start month when sts is not provided"
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
+    format: Annotated[str, Field(description="Output format")] = "shp"
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
     )
-    month2: int = Field(None, description="End month when ets is not provided")
-    day1: int = Field(None, description="Start day when sts is not provided")
-    day2: int = Field(None, description="End day when ets is not provided")
-    hour1: int = Field(0, description="Start hour when sts is not provided")
-    hour2: int = Field(0, description="End hour when ets is not provided")
-    minute1: int = Field(
-        0, description="Start minute when sts is not provided"
-    )
-    minute2: int = Field(0, description="End minute when ets is not provided")
+    year1: YEAR_FIELD_OPTIONAL = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
 def start_headers(start_response, ctx, fn):
@@ -118,7 +125,7 @@ def run(environ, start_response):
         },
     }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """select
             to_char(issued {common}) as issue,
@@ -142,7 +149,7 @@ def run(environ, start_response):
                 "ets": environ["ets"],
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
@@ -150,12 +157,12 @@ def run(environ, start_response):
     fn = f"watches_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
     start_headers(start_response, environ, fn)
     if environ["format"] == "csv":
-        return df.to_csv(index=False).encode("utf-8")
+        return df.to_csv(index=False)
     if environ["format"] == "geojson":
         with tempfile.NamedTemporaryFile("w", delete=True) as tmp:
             df.to_file(tmp.name, driver="GeoJSON")
             res = pathlib.Path(tmp.name).read_text(encoding="utf8")
-        return res.encode("utf-8")
+        return res
     if environ["format"] == "kml":
         df["NAME"] = (
             df["ISSUE"].str.slice(0, 4)
@@ -185,6 +192,6 @@ def run(environ, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
-    return [run(environ, start_response)]
+    return run(environ, start_response)
