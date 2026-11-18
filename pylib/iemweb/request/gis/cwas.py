@@ -30,6 +30,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/cwas.py\
 
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import BytesIO
 from typing import Annotated
 
@@ -73,7 +74,7 @@ class Schema(CGIModel):
     minute2: MINUTE_FIELD = 59
 
 
-def run(query: Schema, start_response: callable):
+def run(query: Schema, start_response: Callable):
     """Do something!"""
     common = "at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:00\"Z\"'"
     schema = {
@@ -88,7 +89,7 @@ def run(query: Schema, start_response: callable):
         },
     }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """select center,
             to_char(issue {common}) as issue,
@@ -105,7 +106,7 @@ def run(query: Schema, start_response: callable):
                 "ets": query.ets,
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
@@ -143,9 +144,9 @@ def run(query: Schema, start_response: callable):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
     query: Schema = environ["_cgimodel_schema"]
     if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET start time parameters missing")
-    return [run(query, start_response)]
+    return run(query, start_response)

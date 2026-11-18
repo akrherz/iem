@@ -27,6 +27,7 @@ https://mesonet.agron.iastate.edu/json/watches.py?year=2024&is_pds=1
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -102,7 +103,7 @@ def mckey(environ: dict) -> str:
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=mckey, memcacheexpire=600)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     with get_sqlalchemy_conn("postgis") as conn:
         payload = run(conn, environ["year"], environ["is_pds"])

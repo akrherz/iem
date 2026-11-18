@@ -26,6 +26,7 @@ https://mesonet.agron.iastate.edu/json/tms.json
 
 import json
 import os
+from collections.abc import Callable
 from datetime import datetime
 
 from pyiem.reference import ISO8601
@@ -82,7 +83,7 @@ def run():
     memcachekey="/json/tms.json",
     memcacheexpire=15,
 )
-def application(_environ: dict, start_response: callable):
+def application(_environ: dict, start_response: Callable):
     """Answer request."""
     res = run()
     start_response("200 OK", [("Content-type", "application/json")])
