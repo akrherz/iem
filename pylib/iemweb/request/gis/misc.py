@@ -37,6 +37,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/misc.py\
 
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import BytesIO, StringIO
 from typing import Annotated
 
@@ -71,8 +72,10 @@ class Schema(CGIModel):
             pattern="^(shp|kml|csv|excel)$",
         ),
     ] = "shp"
-    sts: AwareDatetime = Field(default=None, description="Start Time")
-    ets: AwareDatetime = Field(default=None, description="End Time")
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
+    )
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
     year1: YEAR_FIELD_OPTIONAL = None
     month1: MONTH_FIELD_OPTIONAL = None
     day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
@@ -85,10 +88,10 @@ class Schema(CGIModel):
     minute2: MINUTE_FIELD = 0
 
 
-def run(query: Schema, start_response: callable):
+def run(query: Schema, start_response: Callable):
     """Do something!"""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper("""
                 select pil, geom,
                 issue at time zone 'UTC' as issue,
@@ -103,7 +106,7 @@ def run(query: Schema, start_response: callable):
                 "ets": query.ets,
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
@@ -171,9 +174,9 @@ def run(query: Schema, start_response: callable):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
     query: Schema = environ["_cgimodel_schema"]
     if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET start or end time parameters missing")
-    return [run(query, start_response)]
+    return run(query, start_response)

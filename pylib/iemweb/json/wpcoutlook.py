@@ -48,6 +48,7 @@ https://mesonet.agron.iastate.edu/json/wpcoutlook.py\
 """
 
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from typing import Annotated
@@ -193,7 +194,7 @@ def dowork(lon, lat, day) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     time = environ.get("time")
     fmt = environ["fmt"]
@@ -213,7 +214,7 @@ def application(environ: dict, start_response: callable):
         res = json_response_dict(
             {
                 "query_params": {
-                    "time": ts.strftime(ISO8601),
+                    "time": None if ts is None else ts.strftime(ISO8601),
                     "lon": lon,
                     "lat": lat,
                     "day": day,

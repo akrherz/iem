@@ -1,5 +1,9 @@
 """autoplot static things."""
 
+from pyiem.reference import SECTORS_NAME, state_names
+
+CSECTORS = {**state_names, **SECTORS_NAME}
+
 CMAPS = {
     "Perceptually Uniform Sequential": [
         "viridis",

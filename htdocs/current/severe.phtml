@@ -3,6 +3,9 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Severe Weather Products";
+
+$nounce = time();
+
 $t->content = <<<EOM
 <div class="row">
 <div class="col-md-3">
@@ -134,7 +137,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:1C::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:1C::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 1 Outlook"></a>
 </div>
 </div>
@@ -148,7 +151,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:2C::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:2C::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 2 Outlook"></a>
 </div>
 </div>
@@ -162,7 +165,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:3C::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:3C::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 3 Outlook"></a>
 </div>
 </div>
@@ -176,7 +179,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:4C::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:4C::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 4 Outlook"></a>
 </div>
 </div>
@@ -196,7 +199,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:1E::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:1E::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 1 Outlook"></a>
 </div>
 </div>
@@ -210,7 +213,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:2E::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:2E::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 2 Outlook"></a>
 </div>
 </div>
@@ -224,7 +227,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:3E::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:3E::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 3 Outlook"></a>
 </div>
 </div>
@@ -238,7 +241,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:4E::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:4E::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 4 Outlook"></a>
 </div>
 </div>
@@ -252,7 +255,7 @@ is a simple visual diagnostic between the two.</p>
 </div>
 <div class="col-md-6">
  <a href="/plotting/auto/?q=220">
-    <img src="/plotting/auto/plot/220/which:5E::cat:categorical::t:state::csector:conus.png"
+    <img src="/plotting/auto/plot/220/which:5E::cat:categorical::t:state::csector:conus.png?{$nounce}"
     class="img-fluid" alt="IEM Day 5 Outlook"></a>
 </div>
 </div>

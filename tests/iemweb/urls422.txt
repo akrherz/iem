@@ -47,6 +47,7 @@
 /cgi-bin/request/hourlyprecip.py
 /cgi-bin/request/hourlyprecip.py?station=DSM
 /cgi-bin/request/hourlyprecip.py?tz=Etc
+/cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=REFI4&station=BOOI4&station=AMFI4&station=AHDI4&station=AEEI4&station=AHTI4&station=AKCI4&station=BNKI4&station=CNAI4&station=CIRI4&station=SBEI4&station=CHAI4&station=CRFI4&station=DONI4&station=FRUI4&station=GVNI4&station=GREI4&station=CSII4&station=DOCI4&station=KNAI4&station=OKLI4&station=MCSI4&station=TPOI4&station=NASI4&station=NWLI4&station=OSTI4&station=CAMI4&station=WMNI4&station=WTPI4&year1=2013&month1=1&day1=1&year2=2026&month2=11&day2=17&vars=tmpf&vars=relh&vars=solar&vars=precip&vars=speed&vars=drct&vars=et&vars=soil04t&vars=soil12t&vars=soil24t&vars=soil50t&vars=soil12vwc&vars=soil24vwc&vars=soil50vwc&vars=cci&vars=cci_shade&vars=bp_mb&vars=sv&vars=lwmv_1&vars=lwmv_2&vars=lwmdry_1_tot&vars=lwmcon_1_tot&vars=lwmwet_1_tot&vars=lwmdry_2_tot&vars=lwmcon_2_tot&vars=lwmwet_2_tot&vars=bpres_avg&qcflags=1&todisk=yes&format=excel&missing=M&tz=America%2FChicago
 /cgi-bin/request/mos.py?sts=2020-01-01T12:00Z&model=NBS&station=KDSM
 /cgi-bin/request/nlaeflux.py?syear=2000&eyear=2001&smonth=1&emonth=2&sday=1&eday=2&station=trouble*
 /cgi-bin/request/other.py?station=AAA

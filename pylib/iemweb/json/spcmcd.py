@@ -26,6 +26,7 @@ https://mesonet.agron.iastate.edu/json/spcmcd.py?lat=42.0&lon=-95.0&fmt=excel
 """
 
 import json
+from collections.abc import Callable
 from io import BytesIO
 from typing import Annotated
 
@@ -95,7 +96,7 @@ def clean(value):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 
@@ -127,7 +128,7 @@ def application(environ: dict, start_response: callable):
                     most_prob_gust=clean(row["most_prob_gust"]),
                 )
             )
-        payload = json.dumps(data).encode("ascii")
+        payload = json.dumps(data)
         start_response("200 OK", [("Content-type", "application/json")])
         return payload
 
@@ -146,6 +147,6 @@ def application(environ: dict, start_response: callable):
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=spcmcd.csv"),
     ]
-    payload = mcds.to_csv(index=False).encode("ascii")
+    payload = mcds.to_csv(index=False)
     start_response("200 OK", headers)
     return payload

@@ -2,6 +2,7 @@
 
 import fcntl
 import os
+from collections.abc import Callable
 from pathlib import Path
 
 from pyiem.reference import ISO8601
@@ -81,6 +82,7 @@ def acquire_slot(name: str, max_processes: int):
     """Try to acquire one of 4 processing slots using file locks."""
     lock_dir = Path("/tmp") / name
     lock_dir.mkdir(exist_ok=True)
+    fd = None
     for i in range(max_processes):
         lock_file = lock_dir / f"slot_{i}.lock"
         try:
@@ -88,11 +90,12 @@ def acquire_slot(name: str, max_processes: int):
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)  # Non-blocking
             return fd  # Successfully acquired slot i
         except OSError:
-            # Slot is busy, try next one
-            try:
-                os.close(fd)
-            except Exception:
-                pass
+            if fd is not None:
+                # Slot is busy, try next one
+                try:
+                    os.close(fd)
+                except Exception as exp:
+                    LOG.debug("Best-effort os.close(%s) failed: %s", fd, exp)
             continue
     return None  # All slots busy
 
@@ -132,7 +135,7 @@ def get_ct(environ: dict) -> str:
     return "text/plain"
 
 
-def tms_handler(environ: dict, start_response: callable, service: dict):
+def tms_handler(environ: dict, start_response: Callable, service: dict):
     """Handler for TMS requests and subsequent failures."""
     try:
         return wsgiHandler(environ, start_response, service)

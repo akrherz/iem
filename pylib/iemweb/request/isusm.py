@@ -635,10 +635,19 @@ def rewrite_cgi_params():
 )
 def application(environ, start_response):
     """Do things"""
-    if environ["sts"] is None or environ["ets"] is None:
+    query: Schema = environ["_cgimodel_schema"]
+    if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("Missing start/end time parameters")
     if environ["sts"] >= environ["ets"]:
         environ["ets"] = environ["sts"] + timedelta(days=1)
+
+    if query.format == "excel" and (
+        (len(query.station) * (environ["ets"] - environ["sts"]).days) > 10_000
+    ):
+        raise IncompleteWebRequest(
+            "Excel export too large, limited to 10_000 station days of data"
+        )
+
     mode = environ["mode"]
     cols = environ["vars"]
     if cols is None:

@@ -27,11 +27,12 @@ https://mesonet.agron.iastate.edu/json/spc_bysize.py\
 
 import json
 import time
+from collections.abc import Callable
 from datetime import date, timedelta
 from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import imgsrc_from_row
 from pyiem.reference import ISO8601
 from pyiem.web.fields import CALLBACK_FIELD, OUTLOOK_DAY_FIELD
@@ -64,8 +65,7 @@ class Schema(CGIModel):
     ]
 
 
-@with_sqlalchemy_conn("postgis")
-def dowork(environ, conn: Connection = None) -> str:
+def dowork(environ, conn: Connection) -> str:
     """Actually do stuff"""
 
     data = json_response_dict({"outlooks": []})
@@ -104,7 +104,7 @@ def dowork(environ, conn: Connection = None) -> str:
                 "date": f"{(row['e'] - timedelta(hours=13)):%Y-%m-%d}",
                 "issued": row["i"].strftime(ISO8601),
                 "area_sqkm": round(row["area_sqkm"], 2),
-                "imgsrc": imgsrc_from_row(row),
+                "imgsrc": imgsrc_from_row(row),  # type: ignore
                 "cycle": row["cycle"],
             }
         )
@@ -122,8 +122,9 @@ def get_mckey(environ: dict) -> str:
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)
-def application(environ, start_response):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
-    res = dowork(environ)
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = dowork(environ, conn)
     start_response("200 OK", [("Content-type", "application/json")])
-    return res.encode("ascii")
+    return res

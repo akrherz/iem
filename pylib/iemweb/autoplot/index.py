@@ -22,7 +22,7 @@ from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
-from pyiem.reference import SECTORS_NAME, state_names, ugc_state_names
+from pyiem.reference import state_names, ugc_state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, get_properties, html_escape, utc
 from pyiem.webutil import CGIModel, ensure_list, iemapp
@@ -32,7 +32,7 @@ from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.meta import get_scriptmod_and_meta
 from iemweb.autoplot.params import AutoplotParams
-from iemweb.autoplot.reference import CMAPS
+from iemweb.autoplot.reference import CMAPS, CSECTORS
 
 sn_contig = state_names.copy()
 for _sn in "AK HI PR VI GU AS MP".split():
@@ -46,8 +46,6 @@ DAT_GID_RE = re.compile(
 DATETIME_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2}) (\d{1,2})(\d{2})$")
 HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
-CSECTORS = state_names.copy()
-CSECTORS.update(SECTORS_NAME)
 
 
 class Schema(CGIModel):

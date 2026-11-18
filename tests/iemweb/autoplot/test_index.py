@@ -11,6 +11,7 @@ from iemweb.autoplot.index import (
     application,
     compute_dat_label,
     dat_handler,
+    generate_form,
     get_cookie_value,
     get_timing,
     networkselect_handler,
@@ -60,6 +61,20 @@ def test_bad_network():
     """Test the provision of a bad network."""
     with pytest.raises(BadWebRequest):
         networkselect_handler("XXXX<script>", {"network": ""}, {"pltvars": []})
+
+
+def test_invalid_sector_rejected_by_form(monkeypatch):
+    """The form uses the same sector validation as the plot endpoint."""
+    from iemweb.autoplot import index
+    from iemweb.autoplot.description import describe
+    from iemweb.autoplot.meta import import_script
+
+    mod = import_script(84)
+    monkeypatch.setattr(
+        index, "get_scriptmod_and_meta", lambda _: (mod, describe(mod))
+    )
+    with pytest.raises(BadWebRequest, match="Invalid sector for sector"):
+        generate_form(84, _request("sector=XX"), [])
 
 
 def test_cookie_values_are_encoded():
