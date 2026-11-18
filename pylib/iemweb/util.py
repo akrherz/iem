@@ -94,8 +94,8 @@ def acquire_slot(name: str, max_processes: int):
                 # Slot is busy, try next one
                 try:
                     os.close(fd)
-                except Exception:
-                    pass
+                except Exception as exp:
+                    LOG.debug("Best-effort os.close(%s) failed: %s", fd, exp)
             continue
     return None  # All slots busy
 

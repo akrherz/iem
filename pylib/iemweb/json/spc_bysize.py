@@ -32,7 +32,7 @@ from datetime import date, timedelta
 from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import imgsrc_from_row
 from pyiem.reference import ISO8601
 from pyiem.web.fields import CALLBACK_FIELD, OUTLOOK_DAY_FIELD
@@ -124,7 +124,7 @@ def get_mckey(environ: dict) -> str:
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)
 def application(environ: dict, start_response: Callable):
     """Answer request."""
-    with with_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis") as conn:
         res = dowork(environ, conn)
     start_response("200 OK", [("Content-type", "application/json")])
     return res
