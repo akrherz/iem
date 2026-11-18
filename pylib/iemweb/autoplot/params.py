@@ -13,8 +13,8 @@ An autoplot module may define a ``Params`` model::
 
 The one model both describes the widgets and types the context handed to the
 plotter.  Parsing of the request stays with ``get_autoplot_context``, which
-is lenient (bad values fall back to defaults), the model then validates and
-types its output.
+is generally lenient (bad values fall back to defaults), the model then
+validates and types its output. Invalid map sectors are rejected.
 """
 
 import re
@@ -23,7 +23,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from iemweb.autoplot.description import Arg, DateArg, SDayArg
+from iemweb.autoplot.description import Arg, CSectorArg, DateArg, SDayArg
+from iemweb.autoplot.reference import CSECTORS
 
 _SLASH_DATE = re.compile(r"^\d{4}[/-]\d{2}[/-]\d{2}")
 _HHMM = re.compile(r" (\d{2})(\d{2})$")
@@ -93,6 +94,19 @@ class AutoplotParams(BaseModel):
                 except ValueError:
                     pass  # let pydantic report the bad value
         return data
+
+    @model_validator(mode="after")
+    def _validate_sectors(self):
+        """Validate sector widgets against the form's choices."""
+        for name, fld in type(self).model_fields.items():
+            if not any(isinstance(m, CSectorArg) for m in fld.metadata):
+                continue
+            value = getattr(self, name)
+            if value is not None and value not in CSECTORS:
+                raise ValueError(
+                    f"Invalid sector for {fld.alias or name}: {value}"
+                )
+        return self
 
     @classmethod
     def _field_name(cls, key: str) -> str | None:

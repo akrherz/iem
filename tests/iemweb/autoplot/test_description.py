@@ -7,7 +7,9 @@ from typing import Annotated
 
 import pytest
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.autoplot import get_res_by_fmt
 from iemweb.autoplot.description import (
+    CSectorArg,
     IntArg,
     PlotDescription,
     SelectArg,
@@ -17,8 +19,10 @@ from iemweb.autoplot.description import (
 )
 from iemweb.autoplot.meta import import_script
 from iemweb.autoplot.params import AutoplotParams
-from pydantic import Field
+from iemweb.autoplot.reference import CSECTORS
+from pydantic import Field, ValidationError
 from pyiem.autoplot import get_autoplot_context
+from pyiem.exceptions import BadWebRequest
 
 
 def test_arg_to_dict_omits_defaults():
@@ -117,7 +121,7 @@ def test_p1_params_roundtrip():
     "fn", glob.glob("pylib/iemweb/autoplot/scripts*/p*.py")
 )
 def test_all_scripts_describe(fn):
-    """Every autoplot normalizes to a dict with plain-dict arguments."""
+    """Every autoplot has plain-dict arguments and valid sector defaults."""
     m = re.search(r"p(\d+)\.py", fn)
     pidx = None
     if m:
@@ -126,6 +130,9 @@ def test_all_scripts_describe(fn):
     res = describe(import_script(pidx))
     assert isinstance(res["description"], str)
     assert all(isinstance(a, dict) for a in res["arguments"])
+    for arg in res["arguments"]:
+        if arg["type"] == "csector" and arg["default"] is not None:
+            assert arg["default"] in CSECTORS
 
 
 def test_optional_widget_keeps_widget_default():
@@ -178,3 +185,46 @@ def test_p210_lazy_datetime_bounds_and_runtime_options():
     params = mod.Params.model_validate(get_autoplot_context({}, cfg))
     assert params.sts.month == 1
     assert params.cmap == "jet"
+
+
+@pytest.mark.parametrize("sector", ["IA", "conus", "midwest"])
+def test_csector_context_valid(sector):
+    """Sector values survive context parsing and model validation."""
+    mod = import_script(84)
+    ctx = get_autoplot_context({"sector": sector}, describe(mod))
+    assert mod.Params.model_validate(ctx).sector == sector
+
+
+@pytest.mark.parametrize("sector", ["XX", "invalid", "ia", ""])
+def test_csector_context_invalid(sector):
+    """Unknown sectors do not reach the plotter."""
+    mod = import_script(84)
+    ctx = get_autoplot_context({"sector": sector}, describe(mod))
+    with pytest.raises(ValidationError, match="Invalid sector for sector"):
+        mod.Params.model_validate(ctx)
+
+
+def test_csector_optional_alias_and_default():
+    """Validate aliases and defaults while allowing absent optional sectors."""
+
+    class Params(AutoplotParams):
+        region: Annotated[str | None, CSectorArg(label="Sector")] = Field(
+            default=None, alias="sector"
+        )
+
+    assert Params.model_validate({}).region is None
+    assert Params.model_validate({"sector": "IA"}).region == "IA"
+    with pytest.raises(ValidationError, match="Invalid sector for sector"):
+        Params.model_validate({"sector": "XX"})
+
+    class InvalidDefault(AutoplotParams):
+        sector: Annotated[str, CSectorArg(label="Sector")] = "XX"
+
+    with pytest.raises(ValidationError, match="Invalid sector for sector"):
+        InvalidDefault.model_validate({})
+
+
+def test_csector_rejected_by_plot_endpoint():
+    """The plot endpoint rejects an invalid sector before plotting."""
+    with pytest.raises(BadWebRequest, match="Invalid sector for sector"):
+        get_res_by_fmt(84, "png", {"sector": "XX"})
