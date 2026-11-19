@@ -23,3 +23,11 @@ repositories found here and how the fit together.
 
 - Vendor static assets used by web pages are documented in
     [docs/deployment/vendor-static-assets.md](docs/deployment/vendor-static-assets.md).
+
+For better or worse, this repo uses many hostname aliases within the .local domain. This table
+attempts to document what they are.
+
+Hostname | Purpose
+--- | ---
+iem-archive.local | Webservice providing archive flat files.
+iem-archive-backup.local | A backup of the iem-archive.local host.

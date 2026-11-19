@@ -42,3 +42,5 @@
 127.0.0.1 iem-memcached
 127.0.0.1 iem-web-services
 127.0.0.1 iem-web-services.agron.iastate.edu
+127.0.0.1 iem-archive.local
+127.0.0.1 iem-archive-backup.local
