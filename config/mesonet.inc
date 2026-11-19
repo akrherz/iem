@@ -207,6 +207,7 @@ ProxyPass /cache http://127.0.0.1:9081/cache
     # Should be able to connect fast, but sometimes reads lag
     BalancerMember "http://iem-archive.local" connectiontimeout=5 timeout=30 retry=30
     BalancerMember "http://iem-archive-backup.local" status=+H
+    ProxySet failontimeout=On
 </Proxy>
 
 <Location "/archive/data">
