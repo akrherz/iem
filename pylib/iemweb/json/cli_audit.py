@@ -41,7 +41,6 @@ from pydantic import BaseModel, Field
 from pyiem.database import (
     get_sqlalchemy_conn,
     sql_helper,
-    with_sqlalchemy_conn,
 )
 from pyiem.nws.products.cf6 import parser as cf6_parser
 from pyiem.nws.products.cli import parser as cli_parser
@@ -342,8 +341,8 @@ def add_cli_events(
     conn: Connection,
 ):
     """We now process CLI events"""
-    with get_sqlalchemy_conn("iem") as conn:
-        last_cli = find_last_product(station, dt, "cli_data", conn)
+    with get_sqlalchemy_conn("iem") as iem_conn:
+        last_cli = find_last_product(station, dt, "cli_data", iem_conn)
     if last_cli is None:
         return
     sts = utc(dt.year, dt.month, dt.day)
@@ -415,18 +414,17 @@ def add_cli_events(
             continue
 
 
-@with_sqlalchemy_conn("afos")
 def add_cf6_events(
     events: list[Event],
     environ: dict,
     station: str,
     dt: dateobj,
     tzinfo: ZoneInfo,
-    conn: Connection | None = None,
+    conn: Connection,
 ):
     """We now process CLI events"""
-    with get_sqlalchemy_conn("iem") as conn:
-        last_cf6 = find_last_product(station, dt, "cf6_data", conn)
+    with get_sqlalchemy_conn("iem") as iem_conn:
+        last_cf6 = find_last_product(station, dt, "cf6_data", iem_conn)
     if last_cf6 is None:
         return
     sts = utc(dt.year, dt.month, dt.day)
