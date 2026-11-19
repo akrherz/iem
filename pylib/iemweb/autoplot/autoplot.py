@@ -419,7 +419,8 @@ def workflow(mc, environ: dict, query: Schema) -> tuple[str, bytes | str]:
             # Need to set engine as xlsx/xls can't be inferred
             with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
                 # Write multiple sheets for the DataFrame if needed
-                for i, chunk in enumerate(range(0, len(df), max_rows)):
+                # The +1 here workaround empty dataframes
+                for i, chunk in enumerate(range(0, len(df) + 1, max_rows)):
                     df.iloc[chunk : chunk + max_rows].to_excel(
                         writer, sheet_name=f"Sheet{i + 1}"
                     )
