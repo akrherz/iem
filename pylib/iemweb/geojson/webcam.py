@@ -26,6 +26,7 @@ https://mesonet.agron.iastate.edu/geojson/webcam.geojson
 """
 
 import json
+from collections.abc import Callable
 from datetime import UTC
 from typing import Annotated
 
@@ -146,7 +147,7 @@ def get_mckey(environ):
     memcacheexpire=15,
     content_type="application/vnd.geo+json",
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do Main"""
     stamp = environ["valid"]
     if stamp is None:

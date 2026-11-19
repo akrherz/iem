@@ -180,7 +180,9 @@ def plotter(ctx: Params):
                 ),
                 conn,
                 params={"station": clstation1},
-                parse_dates="valid",
+                parse_dates=[
+                    "valid",
+                ],
                 index_col="valid",
             )
     if df.empty:
@@ -225,7 +227,9 @@ def plotter(ctx: Params):
                     ),
                     conn,
                     params={"station": clstation2},
-                    parse_dates="valid",
+                    parse_dates=[
+                        "valid",
+                    ],
                     index_col="valid",
                 )
         if df2.empty:
@@ -305,57 +309,65 @@ def plotter(ctx: Params):
                 label=f"Low {station2} ({c2label})",
             )
         delta = df[f"{var1}diff"]
-        if ctx.s != "0":
-            ax1.text(
-                0.01,
-                0.99,
-                f"** {int(ctx.s)} Day Smoother Applied",
-                transform=ax1.transAxes,
-                va="top",
-            )
-            delta = delta.rolling(window=int(ctx.s)).mean()
-        ax1.plot(
-            df.index.values,
-            delta.values,
-            color="r",
-            label=f"{var1.capitalize()} Diff {label}",
-        )
-        if var2 is not None:
-            delta = df["lowdiff"]
+        if ax1:
             if ctx.s != "0":
+                ax1.text(
+                    0.01,
+                    0.99,
+                    f"** {int(ctx.s)} Day Smoother Applied",
+                    transform=ax1.transAxes,
+                    va="top",
+                )
                 delta = delta.rolling(window=int(ctx.s)).mean()
             ax1.plot(
-                df.index.values, delta, color="b", label=f"Low Diff {label}"
+                df.index.values,
+                delta.values,
+                color="r",
+                label=f"{var1.capitalize()} Diff {label}",
             )
-        ax1.set_ylabel(f"{LABELS[varname]} Difference")
-        ax1.legend(ncol=1, loc="center", bbox_to_anchor=(0.5, -0.2))
-        ax1.grid()
-        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+            if var2 is not None:
+                delta = df["lowdiff"]
+                if ctx.s != "0":
+                    delta = delta.rolling(window=int(ctx.s)).mean()
+                ax1.plot(
+                    df.index.values,
+                    delta,
+                    color="b",
+                    label=f"Low Diff {label}",
+                )
+            ax1.set_ylabel(f"{LABELS[varname]} Difference")
+            ax1.legend(ncol=1, loc="center", bbox_to_anchor=(0.5, -0.2))
+            ax1.grid()
+            ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+            ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
 
         # Compute monthly
-        gdf = df.groupby(df.index.month).mean(numeric_only=True)
-        ax2.text(
-            0.01,
-            1.0,
-            "Monthly Average Difference",
-            transform=ax2.transAxes,
-            va="bottom",
-        )
-        ax2.bar(
-            gdf.index.values - (0.2 if var2 is not None else 0),
-            gdf[f"{var1}diff"],
-            width=0.4 if var2 is not None else 0.8,
-            color="r",
-        )
-        if var2 is not None:
-            ax2.bar(
-                gdf.index.values + 0.2, gdf["lowdiff"], width=0.4, color="b"
+        gdf = df.groupby(df.index.month).mean(numeric_only=True)  # type: ignore
+        if ax2 and f"{var1}diff" in gdf.columns:
+            ax2.text(
+                0.01,
+                1.0,
+                "Monthly Average Difference",
+                transform=ax2.transAxes,
+                va="bottom",
             )
-        ax2.set_ylabel(f"{LABELS[varname]} Difference")
-        ax2.set_xticks(range(1, 13))
-        ax2.set_xticklabels(calendar.month_abbr[1:])
-        ax2.grid()
+            ax2.bar(
+                gdf.index.values - (0.2 if var2 is not None else 0),
+                gdf[f"{var1}diff"],
+                width=0.4 if var2 is not None else 0.8,
+                color="r",
+            )
+            if var2 is not None:
+                ax2.bar(
+                    gdf.index.values + 0.2,
+                    gdf["lowdiff"],
+                    width=0.4,
+                    color="b",
+                )
+            ax2.set_ylabel(f"{LABELS[varname]} Difference")
+            ax2.set_xticks(range(1, 13))
+            ax2.set_xticklabels(calendar.month_abbr[1:])
+            ax2.grid()
 
     fitbox(fig, title, 0.08, 0.94, 0.95, 0.99)
     if subtitle is not None:

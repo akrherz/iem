@@ -26,6 +26,7 @@ sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
 
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import BytesIO
 from typing import Annotated
 
@@ -33,6 +34,13 @@ import geopandas as gpd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -45,37 +53,19 @@ class Schema(CGIModel):
         None
     )
     ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
-    year1: int = Field(
-        None, description="Start UTC Year when sts is not provided"
-    )
-    year2: int = Field(
-        None, description="End UTC Year when ets is not provided"
-    )
-    month1: int = Field(
-        None, description="Start UTC Month when sts is not provided"
-    )
-    month2: int = Field(
-        None, description="End UTC Month when ets is not provided"
-    )
-    day1: int = Field(
-        None, description="Start UTC Day when sts is not provided"
-    )
-    day2: int = Field(None, description="End UTC Day when ets is not provided")
-    hour1: int = Field(
-        None, description="Start UTC Hour when sts is not provided"
-    )
-    hour2: int = Field(
-        None, description="End UTC Hour when ets is not provided"
-    )
-    minute1: int = Field(
-        None, description="Start UTC Minute when sts is not provided"
-    )
-    minute2: int = Field(
-        None, description="End UTC Minute when ets is not provided"
-    )
+    year1: YEAR_FIELD_OPTIONAL = None
+    year2: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    hour2: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
-def run(query: Schema, start_response: callable):
+def run(query: Schema, start_response: Callable):
     """Do something!"""
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
@@ -94,7 +84,7 @@ def run(query: Schema, start_response: callable):
         },
     }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """select to_char(issue {common}) as issue,
             to_char(expire {common}) as expire,
@@ -111,10 +101,10 @@ def run(query: Schema, start_response: callable):
                 "ets": query.ets,
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
-        return b"ERROR: no results found for your query"
+        return "ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"mcd_{query.sts:%Y%m%d%H%M}_{query.ets:%Y%m%d%H%M}"
 
@@ -139,11 +129,11 @@ def run(query: Schema, start_response: callable):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
     query: Schema = environ["_cgimodel_schema"]
     if query.sts is None or query.ets is None:
         raise IncompleteWebRequest("GET sts/ets parameter not provided")
     if query.sts > query.ets:
         query.sts, query.ets = query.ets, query.sts
-    return [run(query, start_response)]
+    return run(query, start_response)

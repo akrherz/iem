@@ -1,10 +1,12 @@
 """placeholder for future work."""
 
+from collections.abc import Callable
+
 from pyiem.webutil import iemapp
 
 
 @iemapp()
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """dev."""
     # We'd want to enforce that this works, so we are getting called rightly
     try:
@@ -13,4 +15,4 @@ def application(environ: dict, start_response: callable):
         network = "IA_ASOS"
         station = "DSM"
     start_response("200 OK", [("Content-Type", "text/html")])
-    return [f"Hello World {network} {station}".encode("ascii")]
+    return f"Hello World {network} {station}"

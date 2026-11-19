@@ -21,6 +21,7 @@ https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt\
 
 import math
 import re
+from collections.abc import Callable
 from datetime import timedelta
 from io import StringIO
 from typing import Annotated
@@ -126,7 +127,7 @@ def gentext(sio, row, grversion):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Our WSGI service."""
     grversion = environ["version"]
     phenoms = ["TO", "SV"] if environ["all"] is not None else ["TO"]
@@ -169,4 +170,4 @@ def application(environ: dict, start_response: callable):
         gentext(sio, row, grversion)
     pgconn.close()
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [sio.getvalue().encode("utf-8")]
+    return sio.getvalue()

@@ -24,6 +24,7 @@ https://mesonet.agron.iastate.edu/iemre/daily.py\
 
 import json
 import os
+from collections.abc import Callable
 from datetime import date as dateobj
 from typing import Annotated
 
@@ -65,7 +66,7 @@ def myrounder(val, precision):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do Something Fun!"""
     dt: dateobj = environ["date"]
     lat = environ["lat"]
@@ -86,7 +87,7 @@ def application(environ: dict, start_response: callable):
     start_response("200 OK", headers)
 
     if not os.path.isfile(fn):
-        return [json.dumps(res).encode("ascii")]
+        return json.dumps(res)
 
     prism_precip = None
     if dt.year > 1980 and domain == "conus":
@@ -208,4 +209,4 @@ def application(environ: dict, start_response: callable):
                 ),
             }
         )
-    return [json.dumps(res).encode("ascii")]
+    return json.dumps(res)

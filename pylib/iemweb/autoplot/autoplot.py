@@ -415,9 +415,15 @@ def workflow(mc, environ: dict, query: Schema) -> tuple[str, bytes | str]:
             # Can't write to ram buffer yet, unimplmented upstream
             (_, tmpfn) = tempfile.mkstemp()
             df.index.name = None
+            max_rows = 1_048_570  # 6 lower for some space..
             # Need to set engine as xlsx/xls can't be inferred
             with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
-                df.to_excel(writer, sheet_name="Sheet1")
+                # Write multiple sheets for the DataFrame if needed
+                # The +1 here workaround empty dataframes
+                for i, chunk in enumerate(range(0, max(len(df), 1), max_rows)):
+                    df.iloc[chunk : chunk + max_rows].to_excel(
+                        writer, sheet_name=f"Sheet{i + 1}"
+                    )
             content = pathlib.Path(tmpfn).read_bytes()
             os.unlink(tmpfn)
     else:

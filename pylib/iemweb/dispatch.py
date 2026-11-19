@@ -134,7 +134,7 @@ def detect_namespace(environ: dict) -> str | None:
 
 
 def dispatch_namespace(
-    namespace: str, environ: dict, start_response: callable
+    namespace: str, environ: dict, start_response: Callable
 ):
     """Dispatch a request for one namespace."""
     path: str = environ.get("PATH_INFO", "")

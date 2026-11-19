@@ -29,15 +29,19 @@ https://mesonet.agron.iastate.edu/json/cli_audit.py\
 
 """
 
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from datetime import date as dateobj
-from datetime import datetime, timedelta
 from math import isfinite
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import simplejson as json
 from pydantic import BaseModel, Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import (
+    get_sqlalchemy_conn,
+    sql_helper,
+)
 from pyiem.nws.products.cf6 import parser as cf6_parser
 from pyiem.nws.products.cli import parser as cli_parser
 from pyiem.nws.products.dsm import parser as dsm_parser
@@ -100,12 +104,8 @@ def as_finite_float(value) -> float | None:
     return fvalue if isfinite(fvalue) else None
 
 
-@with_sqlalchemy_conn("iem")
 def find_last_product(
-    station: str,
-    dt: dateobj,
-    table: str,
-    conn: Connection | None = None,
+    station: str, dt: dateobj, table: str, conn: Connection
 ) -> str | None:
     """Figure out the last product ID for the given type."""
     res = conn.execute(
@@ -117,18 +117,16 @@ def find_last_product(
         ),
         {"valid": dt, "station": station},
     )
-    if res.rowcount == 0:
-        return None
-    return res.fetchone()[0]
+    row = res.fetchone()
+    return None if row is None else row[0]
 
 
-@with_sqlalchemy_conn("asos")
 def add_metar_events(
     events: list[Event],
     station: str,
     dt: dateobj,
     tzinfo: ZoneInfo,
-    conn: Connection | None = None,
+    conn: Connection,
 ):
     """Compute events and add to the events list."""
     dbstation = (
@@ -162,7 +160,7 @@ def add_metar_events(
         tmpf = as_finite_float(row["tmpf"])
         max_tmpf_6hr = as_finite_float(row["max_tmpf_6hr"])
         min_tmpf_6hr = as_finite_float(row["min_tmpf_6hr"])
-        utc_valid = row["utc_valid"].replace(tzinfo=ZoneInfo("UTC"))
+        utc_valid = row["utc_valid"].replace(tzinfo=UTC)
         local_valid = utc_valid.astimezone(tzinfo)
         offset = local_valid - sts
         if (
@@ -228,8 +226,7 @@ def add_metar_events(
                 running_low = tmpf
 
 
-@with_sqlalchemy_conn("mesosite")
-def get_timezone(station: str, conn: Connection | None = None):
+def get_timezone(station: str, conn: Connection):
     """Figure out something simple."""
     dbstation = (
         station.removeprefix("K") if station.startswith("K") else station
@@ -247,14 +244,13 @@ def get_timezone(station: str, conn: Connection | None = None):
     return row[0]
 
 
-@with_sqlalchemy_conn("afos")
 def add_dsm_events(
     events: list[Event],
     environ: dict,
     station: str,
     dt: dateobj,
     tzinfo: ZoneInfo,
-    conn: Connection | None = None,
+    conn: Connection,
 ):
     """We now process DSMs"""
     sts = utc(dt.year, dt.month, dt.day)
@@ -281,7 +277,7 @@ def add_dsm_events(
 {row["data"]}
 """
         try:
-            utc_valid = row["utc_entered"].replace(tzinfo=ZoneInfo("UTC"))
+            utc_valid = row["utc_entered"].replace(tzinfo=UTC)
             local_valid = utc_valid.astimezone(tzinfo)
             dsm = dsm_parser(
                 text,
@@ -332,26 +328,26 @@ def add_dsm_events(
                     )
 
         except Exception as exp:
-            error_log(environ, exp)
+            error_log(environ, str(exp))
             continue
 
 
-@with_sqlalchemy_conn("afos")
 def add_cli_events(
     events: list[Event],
     environ: dict,
     station: str,
     dt: dateobj,
     tzinfo: ZoneInfo,
-    conn: Connection | None = None,
+    conn: Connection,
 ):
     """We now process CLI events"""
-    last_cli = find_last_product(station, dt, "cli_data")
+    with get_sqlalchemy_conn("iem") as iem_conn:
+        last_cli = find_last_product(station, dt, "cli_data", iem_conn)
     if last_cli is None:
         return
     sts = utc(dt.year, dt.month, dt.day)
     ets = datetime.strptime(last_cli[:12], "%Y%m%d%H%M").replace(
-        tzinfo=ZoneInfo("UTC")
+        tzinfo=UTC
     ) + timedelta(minutes=1)
     res = conn.execute(
         sql_helper("""
@@ -370,7 +366,7 @@ def add_cli_events(
         try:
             cli = cli_parser(
                 row["data"],
-                utcnow=row["utc_entered"].replace(tzinfo=ZoneInfo("UTC")),
+                utcnow=row["utc_entered"].replace(tzinfo=UTC),
                 ugc_provider={},
             )
             for entry in cli.data:
@@ -414,26 +410,26 @@ def add_cli_events(
                     )
 
         except Exception as exp:
-            error_log(environ, exp)
+            error_log(environ, str(exp))
             continue
 
 
-@with_sqlalchemy_conn("afos")
 def add_cf6_events(
     events: list[Event],
     environ: dict,
     station: str,
     dt: dateobj,
     tzinfo: ZoneInfo,
-    conn: Connection | None = None,
+    conn: Connection,
 ):
     """We now process CLI events"""
-    last_cf6 = find_last_product(station, dt, "cf6_data")
+    with get_sqlalchemy_conn("iem") as iem_conn:
+        last_cf6 = find_last_product(station, dt, "cf6_data", iem_conn)
     if last_cf6 is None:
         return
     sts = utc(dt.year, dt.month, dt.day)
     ets = datetime.strptime(last_cf6[:12], "%Y%m%d%H%M").replace(
-        tzinfo=ZoneInfo("UTC")
+        tzinfo=UTC
     ) + timedelta(minutes=1)
     res = conn.execute(
         sql_helper("""
@@ -452,7 +448,7 @@ def add_cf6_events(
         try:
             cf6 = cf6_parser(
                 row["data"],
-                utcnow=row["utc_entered"].replace(tzinfo=ZoneInfo("UTC")),
+                utcnow=row["utc_entered"].replace(tzinfo=UTC),
                 ugc_provider={},
             )
             for valid, entry in cf6.df.iterrows():
@@ -494,7 +490,7 @@ def add_cf6_events(
                     )
 
         except Exception as exp:
-            error_log(environ, exp)
+            error_log(environ, str(exp))
             continue
 
 
@@ -511,18 +507,27 @@ def get_mckey(environ: dict):
     memcachekey=get_mckey,
     memcacheexpire=300,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
     # Create a dataframe to store events that we calculate, which then gets
     # sorted and placed into the response objects
     events: list[Event] = []
-    tzname = get_timezone(query.station)
+    with get_sqlalchemy_conn("mesosite") as conn:
+        tzname = get_timezone(query.station, conn)
     tzinfo = ZoneInfo(tzname)
-    add_metar_events(events, query.station, query.date, tzinfo)
-    add_dsm_events(events, environ, query.station, query.date, tzinfo)
-    add_cli_events(events, environ, query.station, query.date, tzinfo)
-    add_cf6_events(events, environ, query.station, query.date, tzinfo)
+    with get_sqlalchemy_conn("asos") as conn:
+        add_metar_events(events, query.station, query.date, tzinfo, conn)
+    with get_sqlalchemy_conn("afos") as conn:
+        add_dsm_events(
+            events, environ, query.station, query.date, tzinfo, conn
+        )
+        add_cli_events(
+            events, environ, query.station, query.date, tzinfo, conn
+        )
+        add_cf6_events(
+            events, environ, query.station, query.date, tzinfo, conn
+        )
 
     high_events = [e for e in events if e.varname == "high"]
     low_events = [e for e in events if e.varname == "low"]

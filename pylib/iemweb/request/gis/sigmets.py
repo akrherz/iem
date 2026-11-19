@@ -30,6 +30,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/sigmets.py\
 
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import BytesIO, StringIO
 from typing import Annotated
 
@@ -40,6 +41,13 @@ from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
@@ -57,30 +65,26 @@ class Schema(CGIModel):
             pattern="^(shp|kml|csv|excel)$",
         ),
     ] = "shp"
-    sts: AwareDatetime = Field(default=None, description="Start Time")
-    ets: AwareDatetime = Field(default=None, description="End Time")
-    year1: int = Field(default=None, description="Start Year, if sts not set")
-    month1: int = Field(
-        default=None, description="Start Month, if sts not set"
+    sts: Annotated[AwareDatetime | None, Field(description="Start Time")] = (
+        None
     )
-    day1: int = Field(default=None, description="Start Day, if sts not set")
-    hour1: int = Field(default=None, description="Start Hour, if sts not set")
-    minute1: int = Field(
-        default=None, description="Start Minute, if sts not set"
-    )
-    year2: int = Field(default=None, description="End Year, if ets not set")
-    month2: int = Field(default=None, description="End Month, if ets not set")
-    day2: int = Field(default=None, description="End Day, if ets not set")
-    hour2: int = Field(default=None, description="End Hour, if ets not set")
-    minute2: int = Field(
-        default=None, description="End Minute, if ets not set"
-    )
+    ets: Annotated[AwareDatetime | None, Field(description="End Time")] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
 
-def run(query: Schema, start_response: callable):
+def run(query: Schema, start_response: Callable):
     """Do something!"""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # type: ignore
             sql_helper("""
                 select label  || ' ' || sigmet_type as name, label,
                 sigmet_type as type,
@@ -96,7 +100,7 @@ def run(query: Schema, start_response: callable):
                 "ets": query.ets,
             },
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
