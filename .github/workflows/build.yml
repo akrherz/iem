@@ -135,6 +135,9 @@ jobs:
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
 
+        # Setup iem-archive
+        sudo cp config/iem-archive.conf /etc/apache2/sites-enabled/iem-archive.conf
+
         # ci_tooling places a mod_wsgi conf with startup disabled, we enable it
         sudo sed -i 's/# WSGIImportScript/WSGIImportScript/' /etc/apache2/sites-enabled/mod_wsgi.conf
 

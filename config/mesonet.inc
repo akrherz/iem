@@ -200,15 +200,26 @@ ProxyPass /cache http://127.0.0.1:9081/cache
     ErrorDocument 504 /api/proxy_error_handler.py
 </LocationMatch>
 
+# _____________________________________
+# Servicing of /archive/data content
+
+<Proxy "balancer://archive_cluster">
+    # Should be able to connect fast, but sometimes reads lag
+    BalancerMember "http://iem-archive.local" connectiontimeout=5 timeout=30 retry=30
+    BalancerMember "http://iem-archive-backup.local" status=+H
+    ProxySet failontimeout=On
+</Proxy>
+
 <Location "/archive/data">
-    RequestHeader set "Host" "iem-archive.local"
     ProxyPreserveHost Off
-    # Send 404s back here
-    ProxyErrorOverride On
-    # hacky to keep the paths matching in auto-index
-    ProxyPass "http://iem-archive.local/archive/data"
-    ProxyPassReverse "http://iem-archive.local/archive/data"
+    # The primary and backup carry a config to match this iem-archive.conf
+    RequestHeader set "Host" "iem-archive.local"
+
+    ProxyPass "balancer://archive_cluster/archive/data"
+    ProxyPassReverse "balancer://archive_cluster/archive/data"
 </Location>
+
+# ______________________________________
 
 <Directory "/opt/iem/htdocs/content">
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
