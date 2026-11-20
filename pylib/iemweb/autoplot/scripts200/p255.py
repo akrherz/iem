@@ -117,8 +117,10 @@ def get_obsdf(ctx: Params):
     if df.index[0].strftime("%m%d") != ctx.sday.strftime("%m%d"):
         df = df[df["year"] > df.index[0].year]
     # Forgive a 'today' request without data yet for the current day
-    if (df.index[-1].strftime("%m%d") != ctx.eday.strftime("%m%d")) and (
-        df.index[-1] + pd.Timedelta(days=1) != pd.Timestamp(date.today())
+    if (
+        (df.index[-1].strftime("%m%d") != ctx.eday.strftime("%m%d"))
+        and (df.index[-1] + pd.Timedelta(days=1) != pd.Timestamp(date.today()))
+        and (date.today().strftime("%m%d") == ctx.eday.strftime("%m%d"))
     ):
         df = df[df["year"] < df.index[-1].year]
     return df

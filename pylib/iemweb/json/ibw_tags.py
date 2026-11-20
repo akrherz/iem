@@ -35,7 +35,7 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
@@ -67,6 +67,12 @@ class Schema(CGIModel):
     year: Annotated[
         int, Field(description="Year to query", ge=2000, le=utc().year)
     ]
+
+    @field_validator("damagetag", mode="before")
+    @classmethod
+    def uppercase_damagetag(cls, v):
+        """Normalize damage tags before pattern validation."""
+        return v.upper() if isinstance(v, str) else v
 
     @model_validator(mode="after")
     def validate_wfo_or_damagetag(self):
