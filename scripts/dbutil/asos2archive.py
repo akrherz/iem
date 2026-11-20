@@ -91,21 +91,23 @@ def do_insert(source_cursor, reset_times, madis):
             f"valid = %s and report_type {'=' if madis else '!='} 1",
             (row["id"], row["valid"]),
         )
-        if cursor.rowcount > 0:
-            (metar, editable) = cursor.fetchone()
+        oldrow = cursor.fetchone()
+        if oldrow is not None:
+            oldmetar = oldrow["metar"]
+            editable = oldrow["editable"]
             if not editable:
                 locked += 1
                 continue
-            if metar == row["raw"]:
+            if oldmetar == row["raw"]:
                 skips += 1
                 continue
             # Skip if old metar is longer and new metar is not a COR
             # and old METAR is not from DS3505
             if (
-                metar is not None
-                and len(metar) > len(row["raw"])
-                and row["raw"].find(" COR ") == -1
-                and metar.find("IEM_DS3505") == -1
+                oldmetar is not None
+                and len(oldmetar) > len(row["raw"])
+                and " COR " not in row["raw"]
+                and "IEM_DS3505" not in oldmetar
             ):
                 skips += 1
                 continue
