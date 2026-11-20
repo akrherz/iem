@@ -325,7 +325,6 @@ def main(year: int | None, station: str | None, valid: datetime | None):
         valid = valid.replace(tzinfo=UTC)
         params["valid"] = valid
         valid_limiter = " and valid = :valid"
-    table = f"raob_profile_{year if valid is None else valid.year}"
     station_limiter = ""
     if station is not None:
         station_limiter = " station = :station"
@@ -338,13 +337,12 @@ def main(year: int | None, station: str | None, valid: datetime | None):
             sql_helper(
                 """
             select f.fid, f.station, pressure, tmpc, dwpc, drct, smps, height,
-            levelcode from {table} p JOIN raob_flights f
-            on (p.fid = f.fid)
+            levelcode from raob_profile p JOIN raob_flights f
+            on (p.fid = f.fid and p.valid = f.valid)
             WHERE {limiter} {station_limiter} {valid_limiter}
             and height is not null and pressure is not null and not locked
             ORDER by pressure DESC
         """,
-                table=table,
                 limiter=limiter,
                 station_limiter=station_limiter,
                 valid_limiter=valid_limiter,

@@ -135,8 +135,8 @@ def plotter(ctx: Params):
         with data as (
             select f.valid,
             p.pressure, count(*) OVER (PARTITION by p.pressure),
-            min(valid at time zone 'UTC') OVER () as min_valid,
-            max(valid at time zone 'UTC') OVER () as max_valid,
+            min(f.valid at time zone 'UTC') OVER () as min_valid,
+            max(f.valid at time zone 'UTC') OVER () as max_valid,
             p.tmpc,
             rank() OVER (PARTITION by p.pressure ORDER by p.tmpc ASC)
                 as tmpc_rank,
@@ -157,7 +157,8 @@ def plotter(ctx: Params):
                 as smps_rank,
             min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
             max(p.smps) OVER (PARTITION by p.pressure) as smps_max
-            from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
+            from raob_flights f JOIN raob_profile p on
+            (f.fid = p.fid and f.valid = p.valid)
             WHERE f.station = ANY(:stations) {hrlimit} {vlimit}
             and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
             150, 100, 70, 50, 10)  and

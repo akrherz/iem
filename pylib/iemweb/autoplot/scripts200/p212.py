@@ -150,9 +150,11 @@ def get_data(ctx: Params):
                     """
     select extract(year from f.valid at time zone 'UTC')::int as year,
     f.valid at time zone 'UTC' as utc_valid, {varname}
-    from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
+    from raob_profile p JOIN raob_flights f on
+    (p.fid = f.fid and p.valid = f.valid)
     WHERE f.station = ANY(:stations) {hlimiter}
-    and p.pressure = :level  and {varname} is not null ORDER by valid ASC
+    and p.pressure = :level  and {varname} is not null
+    ORDER by f.valid ASC
                     """,
                     varname=varname,
                     hlimiter=hlimiter,
