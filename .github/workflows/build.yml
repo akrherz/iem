@@ -148,13 +148,13 @@ jobs:
     - name: Run IEM Production checks
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
-        SERVICE=http://mesonet.agron.iastate.edu pytest -n 4 .ipc/tests/test_*.py
+        SERVICE=http://mesonet.agron.iastate.edu pytest -n 4 -o parametrize_long_str_id_strategy=legacy .ipc/tests/test_*.py
 
     - name: Run mod_wsgi smoke test
-      run: pytest -n 4 tests/test_mod_wsgi.py
+      run: pytest -n 4 -o parametrize_long_str_id_strategy=legacy tests/test_mod_wsgi.py
 
     - name: Test PHP webscripts
-      run: pytest -n 4 tests/test_php.py
+      run: pytest -n 4 -o parametrize_long_str_id_strategy=legacy tests/test_php.py
 
     # - name: Setup upterm session
     #  if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
@@ -166,7 +166,7 @@ jobs:
       if: ${{ matrix.WITH_TEST_DATA == 'test_data' }}
       run: |
         export PYTHONPATH=/opt/iem/pylib
-        python -m pytest --mpl --cov=iemweb --durations=10 -n 4 -W error::FutureWarning tests/iemweb/
+        python -m pytest --mpl --cov=iemweb --durations=10 -o parametrize_long_str_id_strategy=legacy -n 4 -W error::FutureWarning tests/iemweb/
         python -m coverage xml
 
     - name: Upload to Codecov
