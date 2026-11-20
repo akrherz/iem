@@ -1,6 +1,6 @@
 """Extract MADIS METAR information.
 
-called from RUN_20AFTER.sh
+called from RUN_20_AFTER.sh
 """
 
 import os
@@ -128,6 +128,10 @@ def workflow(fn: str):
                 .decode("ascii")
                 .rstrip("\x00")
             )
+            # A horrific MADIS bug reported to madis-support 20 Nov 2026
+            if not metar.startswith(rawid):
+                LOG.info("ignoring mismatch rawid: %s metar: %s", rawid, metar)
+                continue
             # Can't process until we get SA support in pyIEM
             if metar.find(" SA ") > -1:
                 continue
