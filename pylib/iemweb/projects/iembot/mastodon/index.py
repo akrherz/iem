@@ -2,6 +2,8 @@
 Configure iembot for mastodon, gasp.
 """
 
+from collections.abc import Callable
+
 import cryptocode
 import mastodon
 import requests
@@ -46,8 +48,8 @@ def get_mastodon_app(server):
         """,
         (server,),
     )
-    if cursor.rowcount == 1:
-        row = cursor.fetchone()
+    row = cursor.fetchone()
+    if row is not None:
         client_id = row["client_id"]
         client_secret = row["client_secret"]
     else:
@@ -95,9 +97,9 @@ def get_app4user(cookies: dict):
         """,
         (user_id,),
     )
-    if cursor.rowcount != 1:
-        return None
     row = cursor.fetchone()
+    if row is None:
+        return None
     mapp = mastodon.Mastodon(
         access_token=row["access_token"],
         api_base_url=f"https://{row['server']}",
@@ -118,8 +120,8 @@ def get_app4user(cookies: dict):
         return None
     conn.close()
     # For better or likely worse, we tag along this attribute
-    mapp.iembot_account_id = user_id
-    mapp.iembot_account_id = row["iembot_account_id"]
+    mapp.iembot_account_id = user_id  # type: ignore
+    mapp.iembot_account_id = row["iembot_account_id"]  # type: ignore
     return mapp
 
 
@@ -231,7 +233,8 @@ def save_code(mapp, server, code, headers):
         """,
         (me["username"], server),
     )
-    if cursor.rowcount == 0:
+    row = cursor.fetchone()
+    if row is None:
         cursor.execute(
             """
             insert into iembot_mastodon_oauth(appid, screen_name,
@@ -245,19 +248,21 @@ def save_code(mapp, server, code, headers):
             """,
             (server, me["username"]),
         )
-    mapp.iembot_account_id = cursor.fetchone()["id"]
-    cursor.execute(
-        """
-        update iembot_mastodon_oauth SET access_token = %s,
-        updated = now() WHERE id = %s
-        """,
-        (access_token, mapp.iembot_account_id),
-    )
+        row = cursor.fetchone()
+    if row is not None:
+        mapp.iembot_account_id = row["id"]  # type: ignore
+        cursor.execute(
+            """
+            update iembot_mastodon_oauth SET access_token = %s,
+            updated = now() WHERE id = %s
+            """,
+            (access_token, mapp.iembot_account_id),  # type: ignore
+        )
     cursor.close()
     conn.commit()
     conn.close()
     # Set a cookie
-    text = cryptocode.encrypt(str(mapp.iembot_account_id), PRIVKEY)
+    text = cryptocode.encrypt(str(mapp.iembot_account_id), PRIVKEY)  # type: ignore
     headers.append(
         (
             "Set-Cookie",
@@ -273,7 +278,7 @@ def reload_bot():
 
 
 @iemapp()
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """mod-wsgi handler."""
     cookies = Request(environ).cookies
     headers = [("Content-type", "text/html")]
@@ -303,5 +308,6 @@ def application(environ: dict, start_response: callable):
     # Also sets cookie
     mapp = save_code(mapp, server, environ.get("code"), headers)
     res["content"] += build_subui(mapp, environ)
+    payload = TEMPLATE.render(res)
     start_response("200 OK", headers)
-    return [TEMPLATE.render(res).encode("utf-8")]
+    return payload

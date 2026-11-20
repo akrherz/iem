@@ -29,7 +29,8 @@ text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
 import json
 import os
 import tempfile
-from typing import Annotated
+from collections.abc import Callable
+from typing import Annotated, Any
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
@@ -104,7 +105,7 @@ def plot_poly(fig, poly, environ: dict):
 
 def process(environ: dict):
     """Make something pretty."""
-    text = environ.get("text")
+    text = environ.get("text", "")
     text = text.replace("LAT...LON", "").replace("\n", " ")
     # Add extra whitespace to account for upstream issues
     poly = str2polygon(text + " \n")
@@ -113,7 +114,7 @@ def process(environ: dict):
         poly = Polygon(newpoints)
     fig = figure(figsize=TWITTER_RESOLUTION_INCH)
 
-    res = {}
+    res: dict[str, Any] = {}
     if poly is not None:
         plot_poly(fig, poly, environ)
         res["geojson"] = gpd.GeoSeries([poly]).__geo_interface__
@@ -127,9 +128,10 @@ def process(environ: dict):
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """The App."""
     res = process(environ)
+    payload = json.dumps(res)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return json.dumps(res)
+    return payload

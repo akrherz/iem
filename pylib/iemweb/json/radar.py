@@ -47,6 +47,7 @@ start=2024-06-30T15:20:00Z&operation=available
 import glob
 import json
 import os.path
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -320,7 +321,7 @@ def get_mcexpire(environ: dict) -> int:
     memcachekey=get_mckey,
     memcacheexpire=get_mcexpire,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 

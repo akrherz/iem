@@ -26,6 +26,7 @@ https://mesonet.agron.iastate.edu/json/current.py?station=AMW&network=IA_ASOS
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -72,9 +73,9 @@ def run(conn: Connection, query: Schema):
     """),
         {"id": query.station, "net": query.network},
     )
-    if res.rowcount == 0:
-        return "{}"
     row = res.mappings().fetchone()
+    if row is None:
+        return "{}"
     data = json_response_dict({})
     data["server_gentime"] = utc().strftime(ISO8601)
     data["id"] = query.station
@@ -125,7 +126,7 @@ def run(conn: Connection, query: Schema):
     help=__doc__,
     schema=Schema,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 
@@ -133,4 +134,4 @@ def application(environ: dict, start_response: callable):
         res = run(conn, query)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return res.encode("ascii")
+    return res

@@ -43,52 +43,61 @@ fmt=shp&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z&min_hail_size=0.5
 """
 
 import zipfile
+from collections.abc import Callable
 from io import BytesIO, StringIO
+from typing import Annotated
 
 import shapefile
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.web.fields import HOUR_FIELD_OPTIONAL, MINUTE_FIELD_OPTIONAL
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD_OPTIONAL,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD_OPTIONAL,
+    YEAR_FIELD_OPTIONAL,
+)
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 
 class Schema(CGIModel):
     """See how we are called."""
 
-    ets: AwareDatetime = Field(None, description="End of Time for request")
-    fmt: str = Field(
-        "shp", description="Format of output", pattern="^(shp|csv)$"
-    )
-    radar: ListOrCSVType = Field(
-        default_factory=list, description="Radar Sites to include"
-    )
-    sts: AwareDatetime = Field(None, description="Start of Time for request")
-    year1: int = Field(
-        None, description="Year for start of time if sts not set"
-    )
-    month1: int = Field(
-        None, description="Month for start of time if sts not set"
-    )
-    day1: int = Field(None, description="Day for start of time if sts not set")
-    hour1: HOUR_FIELD_OPTIONAL = None
-    minute1: MINUTE_FIELD_OPTIONAL = None
-    year2: int = Field(None, description="Year for end of time if ets not set")
-    month2: int = Field(
-        None, description="Month for end of time if ets not set"
-    )
-    day2: int = Field(None, description="Day for end of time if ets not set")
-    hour2: HOUR_FIELD_OPTIONAL = None
-    minute2: MINUTE_FIELD_OPTIONAL = None
-    min_hail_size: float = Field(
-        None,
-        description="Minimum hail size (inch) to include in the results.",
-        ge=0,
-        le=10,
-    )
+    ets: Annotated[
+        AwareDatetime | None, Field(description="End of Time for request")
+    ] = None
+    fmt: Annotated[
+        str, Field(description="Format of output", pattern="^(shp|csv)$")
+    ] = "shp"
+    radar: Annotated[
+        ListOrCSVType,
+        Field(default_factory=list, description="Radar Sites to include"),
+    ]
+    sts: Annotated[
+        AwareDatetime | None, Field(description="Start of Time for request")
+    ] = None
+    year1: YEAR_FIELD_OPTIONAL = None
+    month1: MONTH_FIELD_OPTIONAL = None
+    day1: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD_OPTIONAL = None
+    month2: MONTH_FIELD_OPTIONAL = None
+    day2: DAY_OF_MONTH_FIELD_OPTIONAL = None
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
+    min_hail_size: Annotated[
+        float | None,
+        Field(
+            description="Minimum hail size (inch) to include in the results.",
+            ge=0,
+            le=10,
+        ),
+    ] = None
 
 
-def run(environ, start_response):
+def run(environ, start_response: Callable):
     """Do something!"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Missing start or end time parameters.")
@@ -208,6 +217,6 @@ def run(environ, start_response):
 
 
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Do something fun!"""
-    return [run(environ, start_response)]
+    return run(environ, start_response)

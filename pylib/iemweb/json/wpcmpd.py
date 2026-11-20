@@ -21,12 +21,13 @@ https://mesonet.agron.iastate.edu/json/wpcmpd.py?lat=42.0&lon=-95.0&fmt=excel
 """
 
 import json
+from collections.abc import Callable
 from io import BytesIO
 from typing import Annotated
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.web.fields import (
     CALLBACK_FIELD,
@@ -56,8 +57,7 @@ class Schema(CGIModel):
     lon: LONGITUDE_FIELD = -95.0
 
 
-@with_sqlalchemy_conn("postgis")
-def dowork(lon, lat, conn: Connection | None = None) -> pd.DataFrame:
+def dowork(lon, lat, conn: Connection) -> pd.DataFrame:
     """Actually do stuff"""
     mpds = pd.read_sql(
         sql_helper("""
@@ -81,11 +81,12 @@ def dowork(lon, lat, conn: Connection | None = None) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
 
-    mpds = dowork(query.lon, query.lat)
+    with get_sqlalchemy_conn("postgis") as conn:
+        mpds = dowork(query.lon, query.lat, conn)
     if query.fmt == "json":
         data = json_response_dict({"mpds": []})
         for _, row in mpds.iterrows():
@@ -109,7 +110,7 @@ def application(environ: dict, start_response: callable):
                     most_prob_gust=row["most_prob_gust"],
                 )
             )
-        payload = json.dumps(data).encode("ascii")
+        payload = json.dumps(data)
         start_response("200 OK", [("Content-type", "application/json")])
         return payload
 
@@ -118,15 +119,16 @@ def application(environ: dict, start_response: callable):
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-Disposition", "attachment; filename=wpcmpd.xls"),
         ]
-        start_response("200 OK", headers)
         with BytesIO() as bio:
             mpds.to_excel(bio, index=False)
-            return bio.getvalue()
+            payload = bio.getvalue()
+        start_response("200 OK", headers)
+        return payload
 
     headers = [
         ("Content-type", "text/csv"),
         ("Content-Disposition", "attachment; filename=wpcmpd.csv"),
     ]
-    payload = mpds.to_csv(index=False).encode("ascii")
+    payload = mpds.to_csv(index=False)
     start_response("200 OK", headers)
     return payload

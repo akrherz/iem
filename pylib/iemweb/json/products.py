@@ -23,6 +23,7 @@ https://mesonet.agron.iastate.edu/json/products.py
 """
 
 import json
+from collections.abc import Callable
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.web.fields import CALLBACK_FIELD
@@ -95,7 +96,7 @@ def add_archive_products(conn: Connection, data):
     schema=Schema,
     memcacheexpire=3600,
 )
-def application(_environ: dict, start_response: callable):
+def application(_environ: dict, start_response: Callable):
     """Answer request."""
     data = json_response_dict({"products": []})
     with get_sqlalchemy_conn("mesosite") as conn:

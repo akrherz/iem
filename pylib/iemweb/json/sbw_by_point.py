@@ -46,6 +46,7 @@ https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 """
 
 import json
+from collections.abc import Callable
 from datetime import date, datetime
 from io import BytesIO, StringIO
 from typing import Annotated
@@ -89,7 +90,7 @@ class Schema(CGIModel):
     sdate: Annotated[date, Field(description="Start Date")] = date(2002, 1, 1)
     edate: Annotated[date, Field(description="End Date")] = date(2099, 1, 1)
     valid: Annotated[
-        AwareDatetime,
+        AwareDatetime | None,
         Field(
             description=(
                 "If provided, only provide results valid at this time."
@@ -219,7 +220,7 @@ def to_json(data, df):
     schema=Schema,
     parse_times=False,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
 
     fmt = environ["fmt"]
@@ -232,8 +233,9 @@ def application(environ: dict, start_response: callable):
         ]
         bio = BytesIO()
         df.to_excel(bio, index=False)
+        payload = bio.getvalue()
         start_response("200 OK", headers)
-        return [bio.getvalue()]
+        return payload
     if fmt == "csv":
         fn = f"sbw_{environ['lat']:.4f}N_{0 - environ['lon']:.4f}W.csv"
         headers = [
@@ -242,8 +244,10 @@ def application(environ: dict, start_response: callable):
         ]
         bio = StringIO()
         df.to_csv(bio, index=False)
+        payload = bio.getvalue()
         start_response("200 OK", headers)
-        return [bio.getvalue().encode("utf-8")]
+        return payload
     res = to_json(data, df)
+    payload = json.dumps(res)
     start_response("200 OK", [("Content-type", "application/json")])
-    return [json.dumps(res).encode("ascii")]
+    return payload

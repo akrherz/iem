@@ -77,6 +77,7 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Annotated
@@ -241,7 +242,7 @@ def dowork(lon: float, lat: float, day: int, cat: str) -> pd.DataFrame:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     time = environ["time"]
     cat = environ["cat"].upper()
@@ -279,7 +280,7 @@ def application(environ: dict, start_response: callable):
     else:
         outlooks = dowork(lon, lat, day, cat)
 
-    if fmt == "json" and time is not None:
+    if fmt == "json" and time is not None and ts is not None:
         res = json_response_dict(
             {
                 "query_params": {
