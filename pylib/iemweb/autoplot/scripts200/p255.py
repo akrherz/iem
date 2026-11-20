@@ -14,7 +14,7 @@ depth and loss combined.</p>
 year of the data represents the start year of the period that crosses 1 Jan.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Annotated
 
 import pandas as pd
@@ -42,21 +42,31 @@ class Params(AutoplotParams):
         date,
         SDayArg(
             label="Select end date (inclusive):",
-            default=lambda: f"{date.today():%m%d}",
+            default=lambda: f"{(date.today() - timedelta(days=1)):%m%d}",
         ),
     ]
-    depth: Annotated[float, FloatArg(label="Depth of the bucket (inch):")] = (
-        1.0
-    )
+    depth: Annotated[
+        float,
+        FloatArg(
+            label="Depth of the bucket (0.01-10) (inches):", ge=0.01, le=10.0
+        ),
+    ] = 1.0
     init: Annotated[
         float,
         FloatArg(
             label="Initial depth of the bucket (inch), must be less than "
-            "depth of bucket:"
+            "depth of bucket (0-10):",
+            ge=0,
+            le=10,
         ),
     ] = 1.0
     loss: Annotated[
-        float, FloatArg(label="Daily rate of loss/leak (inch):")
+        float,
+        FloatArg(
+            label="Daily rate of loss/leak (0.01-10) (inch):",
+            ge=0.01,
+            le=10,
+        ),
     ] = 0.15
     year: Annotated[
         int,
@@ -96,7 +106,7 @@ def get_obsdf(ctx: Params):
             },
         )
     if df.empty:
-        raise NoDataFound("No Data Found.")
+        raise NoDataFound("Insufficient database data found.")
     # See if we are crossing 1 Jan
     if ctx.eday < ctx.sday:
         # Subtract 1 year from the year column where sday < eday
@@ -106,7 +116,12 @@ def get_obsdf(ctx: Params):
     # Check the first year to see if it starts on our sday
     if df.index[0].strftime("%m%d") != ctx.sday.strftime("%m%d"):
         df = df[df["year"] > df.index[0].year]
-    if df.index[-1].strftime("%m%d") != ctx.eday.strftime("%m%d"):
+    # Forgive a 'today' request without data yet for the current day
+    if (
+        (df.index[-1].strftime("%m%d") != ctx.eday.strftime("%m%d"))
+        and (df.index[-1] + pd.Timedelta(days=1) != pd.Timestamp(date.today()))
+        and (date.today().strftime("%m%d") == ctx.eday.strftime("%m%d"))
+    ):
         df = df[df["year"] < df.index[-1].year]
     return df
 
@@ -183,7 +198,7 @@ def plotter(ctx: Params):
         color="tan",
         labelformat="%i",
     )
-    ax.set_position([0.1, 0.1, 0.7, 0.5])
+    ax.set_position((0.1, 0.1, 0.7, 0.5))
     ax.set_ylabel("Number of Days")
     ax.grid(True)
     ax.axhline(yearlyzeros["precip"].mean(), color="r", lw=2)

@@ -31,10 +31,11 @@ year=2024&state=IA&damagetag=DESTRUCTIVE
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
@@ -53,7 +54,11 @@ class Schema(CGIModel):
 
     callback: CALLBACK_FIELD = None
     damagetag: Annotated[
-        str | None, Field(description="Damage Tag", max_length=20)
+        str | None,
+        Field(
+            description="Damage Tag",
+            pattern=r"^(CONSIDERABLE|DESTRUCTIVE|CATASTROPHIC)$",
+        ),
     ] = None
     state: STATE_FIELD_OPTIONAL = None
     wfo: Annotated[
@@ -62,6 +67,12 @@ class Schema(CGIModel):
     year: Annotated[
         int, Field(description="Year to query", ge=2000, le=utc().year)
     ]
+
+    @field_validator("damagetag", mode="before")
+    @classmethod
+    def uppercase_damagetag(cls, v):
+        """Normalize damage tags before pattern validation."""
+        return v.upper() if isinstance(v, str) else v
 
     @model_validator(mode="after")
     def validate_wfo_or_damagetag(self):
@@ -80,7 +91,7 @@ def ptime(val: datetime | None) -> str | None:
     return val.strftime(ISO8601)
 
 
-def run(query: Schema) -> dict:
+def run(query: Schema) -> str:
     """Actually generate output"""
     params = {
         "wfo": query.wfo,
@@ -91,11 +102,9 @@ def run(query: Schema) -> dict:
     cbw_wfolimiter = " w.wfo = :wfo and "
     damagelimiter = ""
     if query.damagetag is not None:
-        damagetag = query.damagetag.upper()
-        assert damagetag in DAMAGE_TAGS
         sbw_wfolimiter = ""
         cbw_wfolimiter = ""
-        params["damagetag"] = damagetag
+        params["damagetag"] = query.damagetag
         damagelimiter = (
             " (damagetag = :damagetag or floodtag_damage = :damagetag) and "
         )
@@ -198,7 +207,7 @@ def run(query: Schema) -> dict:
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
     res = run(query)

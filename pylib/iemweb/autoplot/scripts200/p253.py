@@ -41,6 +41,7 @@ from pyiem.plot.geoplot import MAIN_AX_BOUNDS, MapPlot
 
 from iemweb.autoplot.description import CmapArg, DatArg, PlotDescription
 from iemweb.autoplot.params import AutoplotParams
+from iemweb.mlib import rectify_wfo
 
 
 class Params(AutoplotParams):
@@ -199,7 +200,10 @@ def plotter(ctx: Params):
         raise NoDataFound("No track found for globalid provided, ask IEM...")
     wfo = trackgdf.iloc[0]["wfo"]
     if wfo is not None and len(wfo) >= 3:
-        tzinfo = ZoneInfo(nt.sts[wfo[:3]]["tzname"])
+        first_wfo = wfo.split(",")[0]
+        tzinfo = ZoneInfo(
+            nt.sts[rectify_wfo(first_wfo).removeprefix("K")]["tzname"]
+        )
     # convert the starttime (java ticks) to a UTC datetime
     for col in ["starttime", "endtime"]:
         trackgdf[col] = pd.to_datetime(

@@ -1,12 +1,13 @@
 """Feature Voting"""
 
 import json
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 from typing import Annotated
 
 from pydantic import Field
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy.engine import Connection
 
@@ -23,8 +24,7 @@ class Schema(CGIModel):
     ] = None
 
 
-@with_sqlalchemy_conn("mesosite")
-def do(environ: dict, headers, vote, conn: Connection | None = None):
+def do(environ: dict, headers, vote, conn: Connection):
     """Do Something, yes do something"""
     cookie = SimpleCookie(environ.get("HTTP_COOKIE", ""))
     myoid = 0
@@ -36,9 +36,9 @@ def do(environ: dict, headers, vote, conn: Connection | None = None):
             "from feature WHERE valid < now() ORDER by valid DESC LIMIT 1"
         )
     )
-    if res.rowcount == 0:
-        return {"good": 0, "bad": 0, "abstain": 0, "can_vote": False}
     row = res.mappings().fetchone()
+    if row is None:
+        return {"good": 0, "bad": 0, "abstain": 0, "can_vote": False}
     foid = row["oid"]
     d = {
         "good": row["good"],
@@ -90,7 +90,7 @@ def do(environ: dict, headers, vote, conn: Connection | None = None):
 
 
 @iemapp(schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Process this request.
 
     This should look something like "/onsite/features/vote.json"
@@ -98,6 +98,7 @@ def application(environ: dict, start_response: callable):
     """
     headers = [("Content-type", "application/json")]
     vote = environ["vote"]
-    j = do(environ, headers, vote)
+    with get_sqlalchemy_conn("mesosite", rw=True) as conn:
+        payload = json.dumps(do(environ, headers, vote, conn))
     start_response("200 OK", headers)
-    return json.dumps(j)
+    return payload
