@@ -197,7 +197,7 @@ def fetch_daily(environ: dict, cols: list[str | LiteralString]):
                     cols.append(f"sv_{c2}{depth}_f")
     else:
         for col in list(cols):
-            if col.startswith("sv") and len(col) > 2:
+            if SV_RE.fullmatch(col):
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
                     cols.append(f"sv_{c2}{depth}")
