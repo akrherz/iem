@@ -6,6 +6,7 @@ Run from RUN_10AFTER.sh
 import sys
 import warnings
 from datetime import UTC, datetime
+from typing import Any
 
 import click
 import numpy as np
@@ -27,7 +28,7 @@ from metpy.calc import (
 from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger
+from pyiem.util import logger, utc
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
@@ -319,12 +320,12 @@ def main(year: int | None, station: str | None, valid: datetime | None):
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB", only_online=False)
-    params = {}
+    params: dict[str, Any] = {}
     valid_limiter = ""
     if valid is not None:
         valid = valid.replace(tzinfo=UTC)
         params["valid"] = valid
-        valid_limiter = " and valid = :valid"
+        valid_limiter = " and f.valid = :valid and p.valid = :valid "
     station_limiter = ""
     if station is not None:
         station_limiter = " station = :station"
@@ -332,6 +333,10 @@ def main(year: int | None, station: str | None, valid: datetime | None):
     limiter = "(not computed or computed is null or ingested_at > computed_at)"
     if valid is not None and station is not None:
         limiter = ""
+    if year is not None and valid is None:
+        limiter += " and f.valid >= :sts and f.valid < :ets"
+        params["sts"] = utc(year)
+        params["ets"] = utc(year + 1)
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
             sql_helper(

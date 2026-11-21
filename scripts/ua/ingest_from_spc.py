@@ -186,7 +186,7 @@ def main(valid, station):
             sum(case when smps is null then 1 else 0 end) as nullcnt from
             raob_flights f JOIN raob_profile p
             ON (f.fid = p.fid and f.valid = p.valid)
-            where valid = :valid GROUP by station, locked
+            where f.valid = :valid GROUP by station, locked
             ORDER by station ASC
             """
             ),
