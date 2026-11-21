@@ -74,7 +74,8 @@ class RAOB:
             "SELECT fid from raob_flights where station = %s and valid = %s",
             (self.station, self.valid),
         )
-        if txn.rowcount == 0:
+        row = txn.fetchone()
+        if row is None:
             txn.execute(
                 "INSERT into raob_flights (valid, station, release_time, "
                 "hydro_level, maxwd_level, tropo_level, computed) "
@@ -88,13 +89,20 @@ class RAOB:
                     self.tropo_level,
                 ),
             )
-        fid = txn.fetchone()[0]
+            row = txn.fetchone()
+            fid = row[0]
+        else:
+            fid = row[0]
+            txn.execute(
+                "DELETE from raob_profile where fid = %s and valid = %s",
+                (fid, self.valid),
+            )
         # update ingested_at timestamp
         txn.execute(
             "UPDATE raob_flights SET ingested_at = now() where fid = %s",
             (fid,),
         )
-        txn.execute("DELETE from raob_profile where fid = %s", (fid,))
+
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
             LOG.info(
                 "RAOB del %s rows for sid: %s valid: %s",
@@ -102,14 +110,15 @@ class RAOB:
                 self.station,
                 f"{self.valid:%Y-%m-%d %H}",
             )
-        table = f"raob_profile_{self.valid:%Y}"
         for d in self.profile:
             txn.execute(
-                f"INSERT into {table} (fid, ts, levelcode, pressure, height, "
+                "INSERT into raob_profile "
+                "(fid, valid, ts, levelcode, pressure, height, "
                 "tmpc, dwpc, drct, smps, bearing, range_miles) "
-                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (
                     fid,
+                    self.valid,
                     d["ts"],
                     d["levelcode"],
                     d["pressure"],
@@ -175,11 +184,11 @@ def main(valid, station):
             sql_helper(
                 """SELECT station, locked, count(*),
             sum(case when smps is null then 1 else 0 end) as nullcnt from
-            raob_flights f JOIN {table} p
-            ON (f.fid = p.fid) where valid = :valid GROUP by station, locked
+            raob_flights f JOIN raob_profile p
+            ON (f.fid = p.fid and f.valid = p.valid)
+            where f.valid = :valid GROUP by station, locked
             ORDER by station ASC
-            """,
-                table=f"raob_profile_{valid:%Y}",
+            """
             ),
             conn,
             params={"valid": valid},

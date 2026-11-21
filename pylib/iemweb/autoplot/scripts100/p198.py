@@ -184,8 +184,9 @@ def plotter(ctx: Params):
                 sql_helper(
                     """
                 select {yrcol} as year, {varname},
-                valid at time zone 'UTC' as utc_valid
-                from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
+                f.valid at time zone 'UTC' as utc_valid
+                from raob_profile p JOIN raob_flights f on
+                (p.fid = f.fid and p.valid = f.valid)
                 WHERE f.station = ANY(:stations) and p.pressure = :level
                 and {hrlimiter} extract(month from f.valid) = ANY(:months)
                 and {varname} is not null
@@ -210,7 +211,7 @@ def plotter(ctx: Params):
             dfin = pd.read_sql(
                 sql_helper(
                     """
-                select {yrcol} as year, {varname}, valid at time zone 'UTC'
+                select {yrcol} as year, {varname}, f.valid at time zone 'UTC'
                 as utc_valid from raob_flights f WHERE
                 f.station = ANY(:stations)
                 and {hrlimiter} extract(month from f.valid) = ANY(:months) and

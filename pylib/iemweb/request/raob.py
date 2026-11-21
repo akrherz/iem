@@ -101,8 +101,8 @@ def fetcher(query: Schema, conn: Connection = None):
     p.tmpc, p.dwpc, p.drct, round((p.smps * 1.94384)::numeric,0),
     p.bearing, p.range_miles, f.station from
     raob_profile p JOIN raob_flights f on
-    (f.fid = p.fid) WHERE f.station = ANY(:stations)
-    and valid >= :sts and valid < :ets
+    (f.fid = p.fid and f.valid = p.valid) WHERE f.station = ANY(:stations)
+    and f.valid >= :sts and f.valid < :ets
     """),
         {"stations": stations, "sts": query.sts, "ets": query.ets},
     )

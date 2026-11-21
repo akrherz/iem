@@ -56,7 +56,7 @@ dependencies:
   - openpyxl
   # due to join suffixes usage
   - pandas>=3.1
-  # pyiem needs this, but is installed with no-deps
+  # needed for tilecache
   - paste
   # PIL
   - pillow

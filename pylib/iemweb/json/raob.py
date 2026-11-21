@@ -125,7 +125,6 @@ def run(ts, sid, pressure):
     pressurelimiter = ""
     if pressure > 0:
         pressurelimiter = " and p.pressure = :pid "
-    table = f"raob_profile_{ts:%Y}"
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
             sql_helper(
@@ -134,12 +133,11 @@ def run(ts, sid, pressure):
             round(p.tmpc::numeric,1) as tmpc,
             round(p.dwpc::numeric,1) as dwpc, p.drct,
             round((p.smps * 1.94384)::numeric,0) as sknt
-            from {table} p JOIN raob_flights f
-                on (p.fid = f.fid)
+            from raob_profile p JOIN raob_flights f
+                on (p.fid = f.fid and p.valid = f.valid)
             WHERE {stationlimiter} f.valid = :valid {pressurelimiter}
             ORDER by f.station, p.pressure DESC
             """,
-                table=table,
                 stationlimiter=stationlimiter,
                 pressurelimiter=pressurelimiter,
             ),
