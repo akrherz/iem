@@ -1,10 +1,11 @@
 """
-Computes the frequency of having an overcast sky reported.  There
-are a number of caveats to this plot as sensors and observing techniques
-have changed over the years!  The algorithm specifically looks for the
-OVC condition to be reported in the METAR observation. For a month of a year
+This autoplot is not an exact science!  This plots monthly frequency of a given
+observation or computed flight rule. Sensing and reporting techniques have
+changed over the years, so this plot should be interpreted with caution.
+For a month of a year
 to be considered within the plot, at least 80% of the available observations
-for that month need to have sky cover reported.
+for that month need to have sky cover reported.  This autoplot only considers
+the top of the hour / routine observations.
 """
 
 import calendar
@@ -14,7 +15,9 @@ from typing import TYPE_CHECKING, Annotated
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
+from pyiem.meteorology import flight_rule
 from pyiem.plot import figure
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot.description import (
     HourArg,
@@ -33,6 +36,13 @@ PDICT = {
     "single": "Compute for single hour of the day",
     "all": "Compute over all hours of the day",
 }
+PDICT2 = {
+    "ovc": "Overcast Sky Condition",
+    "ifr": "(IFR) Instrument Flight Rules Condition",
+    "lifr": "(LIFR) Low Instrument Flight Rules Condition",
+    "mvfr": "(MVFR) Marginal Visual Flight Rules Condition",
+    "vfr": "(VFR) Visual Flight Rules Condition",
+}
 
 
 class Params(AutoplotParams):
@@ -41,6 +51,13 @@ class Params(AutoplotParams):
     zstation: Annotated[
         str, ZStationArg(label="Select Station:", network="IA_ASOS")
     ] = "DSM"
+    varname: Annotated[
+        str,
+        SelectArg(
+            label="Which metric/variable to summarize",
+            options=PDICT2,
+        ),
+    ] = "ovc"
     which: Annotated[
         str, SelectArg(label="Plot Single or All Hours", options=PDICT)
     ] = "single"
@@ -68,21 +85,14 @@ def get_description() -> PlotDescription:
     )
 
 
-def plotter(ctx: Params):
-    """Go"""
-    station = ctx.zstation
-    hour = ctx.hour
-    year = ctx.year
-    month = ctx.month
-    hr_limiter = (
-        "and extract(hour from (valid at time zone :tzname) + "
-        "'10 minutes'::interval ) = :hour"
-    )
-    tt = f"at {datetime(2000, 1, 1, hour, 0):%-I %p}"
-    if ctx.which == "all":
-        hr_limiter = ""
-        tt = "for all hours of day"
-    with get_sqlalchemy_conn("asos") as conn:
+def get_df(hr_limiter: str, ctx: Params, conn: Connection) -> pd.DataFrame:
+    """Compute the dataframe."""
+    params = {
+        "station": ctx.zstation,
+        "tzname": ctx["_nt"].sts[ctx.zstation]["tzname"],
+        "hour": ctx.hour,
+    }
+    if ctx.varname == "ovc":
         df = pd.read_sql(
             sql_helper(
                 """
@@ -98,23 +108,77 @@ def plotter(ctx: Params):
                 hr_limiter=hr_limiter,
             ),
             conn,
-            params={
-                "station": station,
-                "tzname": ctx["_nt"].sts[station]["tzname"],
-                "hour": hour,
-            },
+            params=params,
             index_col=None,
         )
+    else:
+        # Flight rules attm
+        obsdf = pd.read_sql(
+            sql_helper(
+                """
+    SELECT extract(year from (valid at time zone :tzname))::int as year,
+    extract(month from (valid at time zone :tzname))::int as month,
+    vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4
+    from alldata where station = :station and valid > '1951-01-01'
+    {hr_limiter} and report_type = 3
+        """,
+                hr_limiter=hr_limiter,
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
+        if obsdf.empty:
+            raise NoDataFound("Failed to find any observations")
+        obsdf["flight_rule"] = obsdf.apply(flight_rule, axis=1)
+        flmatch = ctx.varname.upper()
+        df = (
+            obsdf.groupby(["year", "month"])
+            .agg(
+                hits=("flight_rule", lambda x: (x == flmatch).sum()),
+                skyc1_count=("skyc1", "count"),
+                count=("flight_rule", "count"),
+            )
+            .reset_index()
+        )
+    # Compute an estimated monthly observation count possible
+    hrs = 1 if hr_limiter else 24
+    df["possible"] = df.apply(
+        lambda m: (
+            calendar.monthrange(int(m["year"]), int(m["month"]))[1] * hrs
+        ),
+        axis=1,
+    )
+    return df
+
+
+def plotter(ctx: Params):
+    """Go"""
+    hour = ctx.hour
+    year = ctx.year
+    month = ctx.month
+    hr_limiter = (
+        "and extract(hour from (valid at time zone :tzname) + "
+        "'10 minutes'::interval ) = :hour"
+    )
+    tt = f"at {datetime(2000, 1, 1, hour, 0):%-I %p}"
+    if ctx.which == "all":
+        hr_limiter = ""
+        tt = "for all hours of day"
+    with get_sqlalchemy_conn("asos") as conn:
+        df = get_df(hr_limiter, ctx, conn)
     if df.empty:
         raise NoDataFound("No Data Found.")
     # Ensure we have a reasonable quorum
-    df = df[(df["skyc1_count"] / df["count"]) > 0.8]
+    df = df[(df["skyc1_count"] / df["possible"]) > 0.8]
+    if df.empty:
+        raise NoDataFound("No Data Found after applying 80% quorum filter.")
     df["freq"] = df["hits"] / df["count"] * 100.0
     climo = df.groupby("month").sum()
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
     title = f"({df['year'].min():.0f}-{datetime.now().year}) {ctx.sname}"
-    subtitle = f"Frequency of Overcast Cloud Observation {tt}"
+    subtitle = f"Frequency of {PDICT2[ctx.varname]} {tt}"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax: list[Axes] = fig.subplots(2, 1)
     # Compute the monthly min and max value along with the years those happened
@@ -128,8 +192,8 @@ def plotter(ctx: Params):
         hi = maxes.loc[maxes["month"] == month_, "freq"].iloc[0]
         ax[0].plot([month_, month_], [lo, hi], color="0.6", lw=1, zorder=2)
     ax[0].bar(
-        climo.index.values - 0.2,
-        climo["freq"].values,
+        climo.index.to_numpy() - 0.2,
+        climo["freq"].to_numpy(),
         fc="gray",
         ec="k",
         alpha=0.7,
@@ -150,8 +214,8 @@ def plotter(ctx: Params):
     )
     for row in maxes.itertuples():
         ax[0].text(
-            row.month,
-            row.freq + 2,
+            row.month,  # type: ignore
+            row.freq + 2,  # type: ignore
             f"{row.freq:.0f}%\n{row.year:.0f}",
             ha="center",
             va="bottom",
@@ -171,8 +235,8 @@ def plotter(ctx: Params):
     )
     for row in mins.itertuples():
         ax[0].text(
-            row.month,
-            row.freq - 2,
+            row.month,  # type: ignore
+            row.freq - 2,  # type: ignore
             f"{row.freq:.0f}%\n{row.year:.0f}",
             ha="center",
             va="top",
@@ -182,7 +246,7 @@ def plotter(ctx: Params):
         )
     for i, row in climo.iterrows():
         ax[0].text(
-            i - 0.2,
+            i - 0.2,  # type: ignore
             row["freq"] + 1,
             f"{row['freq']:.0f}",
             ha="center",
@@ -193,8 +257,8 @@ def plotter(ctx: Params):
     thisyear = df[df["year"] == year]
     if not thisyear.empty:
         ax[0].bar(
-            thisyear["month"].values + 0.2,
-            thisyear["freq"].values,
+            thisyear["month"].to_numpy() + 0.2,
+            thisyear["freq"].to_numpy(),
             fc="blue",
             ec="k",
             width=0.4,
@@ -229,7 +293,10 @@ def plotter(ctx: Params):
     obs = df[df["month"] == month]
     if not obs.empty:
         ax[1].bar(
-            obs["year"].values, obs["freq"].values, fc="tan", ec="orange"
+            obs["year"].to_numpy(),
+            obs["freq"].to_numpy(),
+            fc="tan",
+            ec="orange",
         )
         ax[1].set_ylim(0, 100)
         ax[1].grid(True)

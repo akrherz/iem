@@ -758,7 +758,10 @@ mopts = [
         "label": "Largest Rise/Drop in Temp/Dew Point/Pressure over X Hours",
     },
     {"id": 18, "label": "Long term observation time series"},
-    {"id": 45, "label": "Monthly Frequency of Overcast Conditions"},
+    {
+        "id": 45,
+        "label": "Monthly Frequency of Automated Observations / Flight Rules",
+    },
     {
         "id": 170,
         "label": "Monthly Frequency of Present Weather Code in METAR Report",
