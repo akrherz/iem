@@ -142,9 +142,13 @@ def get_df(hr_limiter: str, ctx: Params, conn: Connection) -> pd.DataFrame:
             .reset_index()
         )
     # Compute an estimated monthly observation count possible
-    days_for_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     hrs = 1 if hr_limiter else 24
-    df["possible"] = df["month"].apply(lambda m: days_for_month[m - 1] * hrs)
+    df["possible"] = df.apply(
+        lambda m: (
+            calendar.monthrange(int(m["year"]), int(m["month"]))[1] * hrs
+        ),
+        axis=1,
+    )
     return df
 
 
