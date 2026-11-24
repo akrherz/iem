@@ -28,6 +28,7 @@ https://mesonet.agron.iastate.edu/json/nwstext_center_date.py?center=KDMX\
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -80,7 +81,7 @@ class Schema(CGIModel):
         ),
     ] = None
     ets: Annotated[
-        AwareDatetime,
+        AwareDatetime | None,
         Field(
             description="Optional end time for the search",
         ),
@@ -88,7 +89,7 @@ class Schema(CGIModel):
 
 
 @iemapp(help=__doc__, schema=Schema, default_tz="UTC")
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     center = environ["center"]
     if environ["date"] is not None:
@@ -127,6 +128,6 @@ def application(environ: dict, start_response: callable):
         for row in res:
             root["products"].append({"data": row.data, "entered": row.e})
 
-    payload = json.dumps(root).encode("ascii")
+    payload = json.dumps(root)
     start_response("200 OK", [("Content-type", "application/json")])
     return payload

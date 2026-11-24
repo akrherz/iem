@@ -80,6 +80,7 @@ https://mesonet.agron.iastate.edu/request/maxcsv/ahpsobs_DEWI4.txt
 """
 
 import re
+from collections.abc import Callable
 from datetime import UTC, date, timedelta
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -202,10 +203,9 @@ def do_moonphase(lon, lat):
         "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
         (lon, lat),
     )
-    if cursor.rowcount == 0:
-        tzid = "UTC"
-    else:
-        tzid = cursor.fetchone()["tzid"]
+    row = cursor.fetchone()
+    tzid = "UTC" if row is None else row["tzid"]
+    cursor.close()
     pgconn.close()
     tz = ZoneInfo(tzid)
 
@@ -256,10 +256,9 @@ def do_moon(lon, lat):
         "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
         (lon, lat),
     )
-    if cursor.rowcount == 0:
-        tzid = "UTC"
-    else:
-        tzid = cursor.fetchone()["tzid"]
+    row = cursor.fetchone()
+    tzid = "UTC" if row is None else row["tzid"]
+    cursor.close()
     pgconn.close()
     tz = ZoneInfo(tzid)
     return pd.DataFrame(
@@ -851,13 +850,13 @@ def router(appname):
     memcachekey=lambda x: f"/request/maxcsv|{x['q']}",
     memcacheexpire=60,
 )
-def application(environ, start_response):
+def application(environ, start_response: Callable):
     """Do Something"""
     appname = environ["q"]
     res = router(appname)
     if isinstance(res, pd.DataFrame):
-        payload = res.to_csv(None, index=False).encode("ascii")
+        payload = res.to_csv(None, index=False)
     else:
-        payload = res.encode("ascii")
+        payload = res
     start_response("200 OK", [("Content-type", "text/plain")])
     return payload

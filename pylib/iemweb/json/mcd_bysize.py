@@ -16,6 +16,7 @@ Changelog
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -96,9 +97,9 @@ def get_mckey(environ: dict) -> str:
 
 
 @iemapp(help=__doc__, schema=Schema, memcacheexpire=600, memcachekey=get_mckey)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
-    payload = dowork(query.count, query.sort).encode("ascii")
+    payload = dowork(query.count, query.sort)
     start_response("200 OK", [("Content-type", "application/json")])
     return payload

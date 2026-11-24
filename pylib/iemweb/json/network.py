@@ -17,6 +17,7 @@ https://mesonet.agron.iastate.edu/json/network.py?network=SCAN
 """
 
 import json
+from collections.abc import Callable
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.web.fields import CALLBACK_FIELD, NETWORK_FIELD
@@ -44,7 +45,7 @@ def get_mckey(environ):
     schema=Schema,
     memcacheexpire=3600,
 )
-def application(environ, start_response):
+def application(environ, start_response: Callable):
     """Answer request."""
     data = json_response_dict({"stations": []})
     with get_sqlalchemy_conn("mesosite") as conn:

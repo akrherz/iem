@@ -35,6 +35,7 @@ product_id=202407160452-KDMX-FXUS63-AFDDMX
 """
 
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated
 
@@ -71,7 +72,7 @@ class Schema(CGIModel):
     memcacheexpire=300,
     schema=Schema,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     pid = environ["product_id"]
     tokens = pid.split("-")
@@ -104,4 +105,4 @@ def application(environ: dict, start_response: callable):
 
     data = json.dumps(root)
     start_response("200 OK", [("Content-type", "application/json")])
-    return data.encode("ascii")
+    return data

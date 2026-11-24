@@ -25,6 +25,7 @@ https://mesonet.agron.iastate.edu/json/dcp_vars.py?station=AESI4
 """
 
 import json
+from collections.abc import Callable
 from typing import Annotated
 
 from pydantic import Field
@@ -57,7 +58,7 @@ class Schema(CGIModel):
     schema=Schema,
     memcacheexpire=3600,
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     data = json_response_dict(
         {
