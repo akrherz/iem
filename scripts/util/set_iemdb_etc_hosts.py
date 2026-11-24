@@ -46,7 +46,7 @@ LOOKUP = {
     "-portfolio": IPS[DB1],
     "-postgis": IPS[DB2],
     "-radar": IPS[DB2],
-    "-raob": IPS[DB2],
+    "-raob": IPS[DB4],
     "-rtstats": IPS[DB1],
     "-rwis": IPS[DB1],
     "-scan": IPS[DB1],
