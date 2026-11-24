@@ -77,7 +77,9 @@ def plotter(ctx: Params):
             conn,
             params={"station": ctx.station},
             index_col="day",
-            parse_dates="day",
+            parse_dates=[
+                "day",
+            ],
         )
     if df.empty:
         raise NoDataFound("Did not find any data for station!")
@@ -112,7 +114,7 @@ def plotter(ctx: Params):
     data = np.full((years, 366), np.nan)
     df2 = df[(df["year"] >= baseyear) & (df["year"] <= endyear)]
     for day, row in df2.iterrows():
-        data[day.year - baseyear, row["doy"] - 1] = row[ctx.var]
+        data[day.year - baseyear, row["doy"] - 1] = row[ctx.var]  # type: ignore
 
     title = (
         f"{ctx.sname} ({ctx.syear}-{ctx.eyear})\n"
@@ -129,12 +131,12 @@ def plotter(ctx: Params):
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:], rotation=0)
     yticks = []
-    yticklabels = []
+    yticklabels: list[str] = []
     delta = 5 if (endyear - baseyear) < 30 else 10
     for i, year in enumerate(range(baseyear, endyear + 1)):
         if year % delta == 0:
             yticks.append(i + 0.5)
-            yticklabels.append(year)
+            yticklabels.append(str(year))
     ax.set_yticks(yticks[::-1])
     ax.set_yticklabels(yticklabels[::-1], rotation=0)
     ax.xaxis.grid(True, color="k")

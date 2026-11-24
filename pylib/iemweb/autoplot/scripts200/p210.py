@@ -139,7 +139,7 @@ def plotter(ctx: Params):
     for source, row in gdf.iterrows():
         if source == "PABR":
             continue
-        key = source[1:]
+        key = str(source)[1:]
         if ctx.var == "count":
             data[key] = row["count"]
         else:

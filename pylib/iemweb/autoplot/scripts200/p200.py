@@ -94,19 +94,29 @@ ISSUANCE = {
     "3.F.21": "Day 3 Fire Weather @21z",
     "3.E.20": "Day 3 Excessive Rainfall @20z",
     "3.E.8": "Day 3 Excessive Rainfall @8z",
-    "4.C.10": "Day 4 Convective @10z",
+    "4.C.A": "Day 4 Convective",
+    "4.C.10": "Day 4 Convective @9/10z",
+    "4.C.21": "Day 4 Convective @21z",
     "4.E.20": "Day 4 Excessive Rainfall @20z",
     "4.E.8": "Day 4 Excessive Rainfall @8z",
     "4.F.21": "Day 4 Fire Weather @21z",
-    "5.C.10": "Day 5 Convective @10z",
+    "5.C.A": "Day 5 Convective",
+    "5.C.10": "Day 5 Convective @9/10z",
+    "5.C.21": "Day 5 Convective @21z",
     "5.E.20": "Day 5 Excessive Rainfall @20z",
     "5.E.8": "Day 5 Excessive Rainfall @8z",
     "5.F.21": "Day 5 Fire Weather @21z",
-    "6.C.10": "Day 6 Convective @10z",
+    "6.C.A": "Day 6 Convective",
+    "6.C.10": "Day 6 Convective @9/10z",
+    "6.C.21": "Day 6 Convective @21z",
     "6.F.21": "Day 6 Fire Weather @21z",
-    "7.C.10": "Day 7 Convective @10z",
+    "7.C.A": "Day 7 Convective",
+    "7.C.10": "Day 7 Convective @9/10z",
+    "7.C.21": "Day 7 Convective @21z",
     "7.F.21": "Day 7 Fire Weather @21z",
-    "8.C.10": "Day 8 Convective @10z",
+    "8.C.A": "Day 8 Convective",
+    "8.C.10": "Day 8 Convective @9/10z",
+    "8.C.21": "Day 8 Convective @21z",
     "8.F.21": "Day 8 Fire Weather @21z",
 }
 OUTLOOKS = {
@@ -304,7 +314,7 @@ def get_raster(ctx: Params):
     YSZ = int((GRIDNORTH - GRIDSOUTH) / griddelta)
     XSZ = int((GRIDEAST - GRIDWEST) / griddelta)
 
-    raster = np.zeros((int(YSZ), int(XSZ)))
+    raster = np.zeros((YSZ, XSZ))
 
     params = {
         "ot": p.split(".")[1],
@@ -338,7 +348,7 @@ def get_raster(ctx: Params):
                 "to_char(issue at time zone 'UTC', 'MMDD') <= :eday) "
             )
     with get_sqlalchemy_conn("postgis") as conn:
-        df: pd.DataFrame = gpd.read_postgis(
+        df: pd.DataFrame = gpd.read_postgis(  # type: ignore
             sql_helper(
                 """
             select expire, min(issue) as min_issue,
@@ -359,7 +369,7 @@ def get_raster(ctx: Params):
             params=params,
             geom_col="geom",
             index_col=None,
-        )  # type: ignore
+        )
     if df.empty:
         raise NoDataFound("No results found for query")
     # The affine is the edge and not the analysis centers
@@ -470,7 +480,7 @@ def plotter(ctx: Params):
         raster,
         affine,
         "EPSG:4326",
-        clevs=rng,
+        clevs=rng,  # type: ignore
         cmap=cmap,
         clip_on=False,
         units=UNITS[ctx.w],

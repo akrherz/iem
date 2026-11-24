@@ -21,6 +21,7 @@ https://mesonet.agron.iastate.edu/json/cf6.py?station=KDSM&year=2024
 
 """
 
+from collections.abc import Callable
 from datetime import date
 from typing import Annotated
 
@@ -172,7 +173,7 @@ def get_mckey(environ):
     memcacheexpire=60,
     content_type=get_ct,
 )
-def application(environ, start_response):
+def application(environ, start_response: Callable):
     """Answer request."""
     station = environ["station"]
     year = environ["year"]

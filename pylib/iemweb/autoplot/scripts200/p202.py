@@ -106,8 +106,8 @@ def get_description() -> PlotDescription:
 def plotter(ctx: Params):
     """Go"""
     station = ctx.zstation
-    h1 = int(ctx.h1)
-    h2 = int(ctx.h2)
+    h1 = ctx.h1
+    h2 = ctx.h2
     varname = ctx.v
 
     tzname = ctx["_nt"].sts[station]["tzname"]
@@ -206,7 +206,7 @@ def plotter(ctx: Params):
         data = H.transpose() / 7.0 / total_years
         bins = pretty_bins(0, np.max(data))
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
-        ax.set_position([0.13, 0.1, 0.71, 0.78])
+        ax.set_position((0.13, 0.1, 0.71, 0.78))
         ax.pcolormesh(
             xedges,
             yedges,
@@ -217,7 +217,7 @@ def plotter(ctx: Params):
         )
         ax.set_ylim(0 - ymax, 0 + ymax)
         cax = fig.add_axes(
-            [0.86, 0.12, 0.03, 0.75], frameon=False, yticks=[], xticks=[]
+            (0.86, 0.12, 0.03, 0.75), frameon=False, yticks=[], xticks=[]
         )
         cb = ColorbarBase(cax, norm=norm, cmap=cmap, extend="min")
         cb.set_label("Days/Year")

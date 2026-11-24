@@ -29,6 +29,7 @@ sts=2024-07-10T00:00Z&ets=2024-07-11T00:00Z
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime
 from typing import Annotated
 
@@ -105,7 +106,7 @@ def get_mckey(environ: dict) -> str:
     schema=Schema,
     default_tz="UTC",
 )
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request."""
     query: Schema = environ["_cgimodel_schema"]
     res = run(query)

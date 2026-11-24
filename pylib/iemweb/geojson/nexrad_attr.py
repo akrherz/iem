@@ -38,6 +38,7 @@ valid=2024-08-10T05:10:00Z&fmt=csv
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -200,7 +201,7 @@ def get_mckey(environ):
     memcacheexpire=60,
     default_tz="UTC",
 )
-def application(environ, start_response):
+def application(environ, start_response: Callable):
     """Do Something"""
     fmt = environ["fmt"]
     headers = [("Content-type", get_ct(environ))]
@@ -208,4 +209,4 @@ def application(environ, start_response):
     with get_sqlalchemy_conn("radar") as conn:
         res = run(environ["valid"], fmt, conn)
     start_response("200 OK", headers)
-    return res.encode("ascii")
+    return res

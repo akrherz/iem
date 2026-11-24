@@ -143,7 +143,7 @@ def get_df(ctx: Params, buf=1.0) -> pd.DataFrame:
         "north": bnds[3] + buf,
     }
     with get_sqlalchemy_conn("iem") as conn:
-        df: pd.DataFrame = gpd.read_postgis(
+        df: pd.DataFrame = gpd.read_postgis(  # type: ignore
             sql_helper("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
@@ -163,7 +163,7 @@ def get_df(ctx: Params, buf=1.0) -> pd.DataFrame:
             conn,
             params=params,
             geom_col="geom",
-        )  # type: ignore
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

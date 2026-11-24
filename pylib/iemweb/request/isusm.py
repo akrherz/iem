@@ -677,7 +677,7 @@ def application(environ, start_response):
             ("Content-disposition", "attachment; Filename=isusm.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [bio.getvalue()]
+        return bio.getvalue()
 
     delim = "," if fmt == "comma" else "\t"
     sio = StringIO()
@@ -692,4 +692,4 @@ def application(environ, start_response):
     else:
         headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)
-    return [sio.getvalue().encode("ascii")]
+    return sio.getvalue()

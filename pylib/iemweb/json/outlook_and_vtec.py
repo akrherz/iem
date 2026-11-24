@@ -31,6 +31,7 @@ cycle=8&outlook_type=E&phsig=FF.W
 
 import json
 import re
+from collections.abc import Callable
 from datetime import date
 from typing import Annotated
 
@@ -212,7 +213,7 @@ warns2 as (
         row = gdf.iloc[0]
         res["outlooks"].append(
             {
-                "date": dt.isoformat(),
+                "date": dt.isoformat(),  # type: ignore
                 "overlap_percent": round(row["overlap_percent"], 2),
                 "utc_issue": row["utc_issue"],
                 "utc_expire": row["utc_expire"],
@@ -231,7 +232,7 @@ warns2 as (
 
 
 @iemapp(help=__doc__, schema=Schema)
-def application(environ: dict, start_response: callable):
+def application(environ: dict, start_response: Callable):
     """Answer request, iemapp decorator normalizes the response"""
     query: Schema = environ["_cgimodel_schema"]
     res = json.dumps(do_query(query))

@@ -27,6 +27,7 @@ https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?poh=10&version=3.0
 """
 
 import math
+from typing import Annotated
 
 import numpy as np
 import pandas as pd
@@ -43,10 +44,12 @@ P3857 = pyproj.Proj("EPSG:3857")
 class Schema(CGIModel):
     """See how we are called"""
 
-    lon: str = Field(
-        default=None,
-        description="Longitude of radar site according to GR",
-    )
+    lon: Annotated[
+        str | None,
+        Field(
+            description="Longitude of radar site according to GR",
+        ),
+    ] = None
     max_size: float = Field(
         default=0,
         description="Minimum hail size to include",
@@ -55,12 +58,14 @@ class Schema(CGIModel):
         default=-1,
         description="Minimum MESO size to include",
     )
-    nexrad: str = Field(
-        default=None,
-        description="Three character NEXRAD Site Identifier",
-        min_length=3,
-        max_length=3,
-    )
+    nexrad: Annotated[
+        str | None,
+        Field(
+            description="Three character NEXRAD Site Identifier",
+            min_length=3,
+            max_length=3,
+        ),
+    ] = None
     poh: int = Field(
         default=0,
         description="Probability of Hail threshold",
@@ -557,4 +562,4 @@ def application(environ, start_response):
     v3 = environ["version"].startswith("3.")
     res = produce_content(nexrad, poh, meso, tvs, max_size, v3)
     start_response("200 OK", [("Content-type", "text/plain")])
-    return res.encode("ascii")
+    return res
