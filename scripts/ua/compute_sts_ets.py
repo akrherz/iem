@@ -48,21 +48,23 @@ def main():
                 "network = 'RAOB'",
                 (sts, station),
             )
-        if ets.year < OFFLINE_YR and (
-            current_ets is None or current_ets != ets
-        ):
-            progress.write(f"{station} ets {current_ets}->{ets}")
-            mcursor.execute(
-                "UPDATE stations SET archive_end = %s, online = 'f' "
-                "where id = %s and network = 'RAOB'",
-                (ets, station),
+        if current_ets is None or current_ets != ets:
+            # branch one, station is online
+            if ets.year >= OFFLINE_YR:
+                if current_online and current_ets is None:
+                    continue
+                newets = None
+                online = "t"
+            else:
+                newets = ets
+                online = "f"
+            progress.write(
+                f"{station} ets {current_ets}->{newets} set online {online}"
             )
-        if ets.year > OFFLINE_YR and not current_online:
-            progress.write(f"{station} online status updated to 't'")
             mcursor.execute(
-                "UPDATE stations SET online = 't', archive_end = null "
+                "UPDATE stations SET archive_end = %s, online = %s "
                 "where id = %s and network = 'RAOB'",
-                (station,),
+                (newets, online, station),
             )
 
     mcursor.close()
