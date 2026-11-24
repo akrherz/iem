@@ -277,8 +277,9 @@ def plotter(ctx: Params):
                 (ugc,),
             )
             name = "Unknown"
-            if cursor.rowcount == 1:
-                name = cursor.fetchone()[0]
+            row = cursor.fetchone()
+            if row is not None:
+                name = row[0]
             title2 = f"{'County' if ugc[2] == 'C' else 'Zone'} [{ugc}] {name}"
         elif ctx.w == "fema":
             table = "fema_regions"
@@ -368,7 +369,7 @@ def plotter(ctx: Params):
     for dt, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
-        data[dt.to_pydatetime().date()] = {
+        data[dt.to_pydatetime().date()] = {  # type: ignore
             "val": (
                 f"{row['threshold']}{cigref.get(row['threshold'], '')}"
                 f"{cigref.get(row['max_sign'], '')}"
