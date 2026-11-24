@@ -214,6 +214,7 @@
 90/t:cwa::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2006::year2:2025::sdate:2006-05-17%200000::edate:2025-05-04%200000::network:WFO::station:DMX::state:IA::fema:7::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 90/t:cwa::v:yearavg::ilabel:yes::geo:ugc::drawc:yes::year:2006::year2:2025::sdate:2006-05-17%200000::edate:2025-05-04%200000::network:WFO::station:DMX::state:IA::fema:7::phenomena:TO::significance:W::cmap:jet::interval:1::_r:t::dpi:100.png
 92/phenomena:TO::significance:W::e:all::edate:2025-02-03::_r:t::dpi:100::_cb:1.png
+92/limit:any::phenomena:TO::significance:W::e:all::edate:2024-02-03::_r:t::dpi:100::_cb:1.png
 93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:gust::ytd:yes::inc:no::_r:t::dpi:100.png
 93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
 93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf::ytd:custom::sday:0601::eday:0720::inc:no::_r:t::dpi:100.png
