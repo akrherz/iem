@@ -152,7 +152,7 @@ def plotter(ctx: Params):
     )
     mp.fill_cwas(
         data,
-        bins=pretty_bins(0, int(df["days"].max())),
+        bins=pretty_bins(0, max(1, int(df["days"].max()))),
         ilabel=True,
         units="Days",
         cmap=ctx.cmap,
