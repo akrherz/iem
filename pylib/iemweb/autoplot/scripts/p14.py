@@ -11,7 +11,7 @@ from typing import Annotated
 
 import numpy as np
 import pandas as pd
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from sqlalchemy.engine import Connection
@@ -40,8 +40,7 @@ def get_description() -> PlotDescription:
     )
 
 
-@with_sqlalchemy_conn("coop")
-def plotter(ctx: Params, conn: Connection | None = None):
+def do_plotter(ctx: Params, conn: Connection):
     """Go"""
     station = ctx.station
     today = datetime.now()
@@ -50,7 +49,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
     if year == today.year:
         jdaylimit = today.timetuple().tm_yday
 
-    endyear = int(datetime.now().year) + 1
+    endyear = datetime.now().year + 1
 
     res = conn.execute(
         sql_helper("""
@@ -67,12 +66,12 @@ def plotter(ctx: Params, conn: Connection | None = None):
     )
     if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
-    total = None
-    base = None
+    total = 0
+    base = 0
     bins = [0.01]
-    minyear = None
-    row = None
-    last_precip = None
+    minyear = 0
+    last_precip = 0
+    onefifth = 0
     for i, row in enumerate(res.mappings()):
         if i == 0:
             minyear = row["minyear"]
@@ -226,3 +225,9 @@ def plotter(ctx: Params, conn: Connection | None = None):
     ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 
     return fig, df
+
+
+def plotter(ctx: Params):
+    """Do plotter."""
+    with get_sqlalchemy_conn("coop") as conn:
+        return do_plotter(ctx, conn)

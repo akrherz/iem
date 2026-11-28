@@ -70,7 +70,7 @@ def plotter(ctx: Params):
     today = date.today()
     df["departure"] = df["avg"] - df["avg"].mean()
     df["plot_doy"] = df["doy"] - (0 if which == "end_summer" else 91)
-    if today.year in df.index and df.at[today.year, "doy"] < 270:
+    if today.year in df.index and df.loc[today.year, "doy"] < 270:  # type: ignore
         df = df.drop(today.year)
 
     t1 = "End" if which == "end_summer" else "Start"
@@ -104,7 +104,7 @@ def plotter(ctx: Params):
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticklabels)
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(
+    h_slope, intercept, r_value, _, _ = stats.linregress(  # type: ignore
         df.index.values, df["plot_doy"].values
     )
     ax.plot(

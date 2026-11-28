@@ -8,7 +8,7 @@ highest frequency.
 """
 
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, cast
 
 import numpy as np
 import pandas as pd
@@ -165,7 +165,8 @@ def plotter(ctx: Params):
     fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
     ypos -= 0.01
     monofont = get_monofont()
-    for q, val in ranks.items():
+    for _q, val in ranks.items():
+        q = cast("float", _q)
         if 0.02 < q < 0.98 and (q * 100.0 % 10) != 0:
             continue
         if q > 0.1 and int(q * 100) in [20, 90]:

@@ -12,7 +12,7 @@ from typing import Annotated
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
@@ -104,8 +104,7 @@ def print_top10(ax: Axes, df: pd.DataFrame):
     )
 
 
-@with_sqlalchemy_conn("coop")
-def plotter(ctx: Params, conn: Connection | None = None):
+def do_plotter(ctx: Params, conn: Connection):
     """Go"""
     station = ctx.station
     threshold = ctx.threshold
@@ -215,14 +214,16 @@ def plotter(ctx: Params, conn: Connection | None = None):
     spring = np.array(df["spring"].to_numpy(), dtype=int)
     fall = np.array(df["fall"].to_numpy(), dtype=int)
 
-    title = PDICT.get(direction, "").replace(
+    title = PDICT.get(direction, "").replace(  # type: ignore
         "Temperature", PDICT2.get(varname)
     )
     units = "°F" if not varname.startswith("snow") else "inch"
     (fig, ax) = figure_axes(
-        title=ctx.sname, subtitle=f"{title} {threshold}{units}", apctx=ctx
+        title=ctx.sname or "",
+        subtitle=f"{title} {threshold}{units}",
+        apctx=ctx,
     )
-    ax.set_position([0.08, 0.1, 0.6, 0.8])
+    ax.set_position((0.08, 0.1, 0.6, 0.8))
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
@@ -244,7 +245,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
         rotation=-90,
     )
     if len(years) > 3:
-        s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
+        s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)  # type: ignore
         ax.plot(
             years,
             years * s_slp + s_int,
@@ -264,7 +265,7 @@ def plotter(ctx: Params, conn: Connection | None = None):
         label="30yr",
     )
     if len(years) > 3:
-        f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
+        f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)  # type: ignore
         ax.plot(
             years,
             years * f_slp + f_int,
@@ -294,3 +295,9 @@ def plotter(ctx: Params, conn: Connection | None = None):
     print_top10(ax, df)
 
     return fig, df, res
+
+
+def plotter(ctx: Params):
+    """Entry."""
+    with get_sqlalchemy_conn("coop") as conn:
+        return do_plotter(ctx, conn)

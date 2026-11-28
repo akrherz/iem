@@ -353,24 +353,24 @@ def plotter(ctx: Params):
     idx = df2[col].idxmax()
     if idx != year:
         ax.text(
-            df2.at[idx, col] + 1,
-            df2.at[idx, "count"],
+            df2.loc[idx, col] + 1,  # type: ignore
+            df2.loc[idx, "count"],  # type: ignore
             f"{idx}",
             ha="left",
         )
     idx = df2[col].idxmin()
     if idx != year:
         ax.text(
-            df2.at[idx, col] - 1,
-            df2.at[idx, "count"],
+            df2.loc[idx, col] - 1,  # type: ignore
+            df2.loc[idx, "count"],  # type: ignore
             f"{idx}",
             va="bottom",
         )
     idx = df2["count"].idxmax()
     if idx != year:
         ax.text(
-            df2.at[idx, col] + 1,
-            df2.at[idx, "count"],
+            df2.loc[idx, col] + 1,  # type: ignore
+            df2.loc[idx, "count"],  # type: ignore
             f"{idx}",
             va="bottom",
         )

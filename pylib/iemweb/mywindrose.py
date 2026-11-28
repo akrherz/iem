@@ -35,57 +35,82 @@ from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.web.fields import NETWORK_FIELD_OPTIONAL
+from pyiem.util import utc
+from pyiem.web.fields import (
+    DAY_OF_MONTH_FIELD,
+    HOUR_FIELD,
+    MINUTE_FIELD,
+    MONTH_FIELD,
+    NETWORK_FIELD_OPTIONAL,
+    YEAR_FIELD,
+)
 from pyiem.webutil import CGIModel, iemapp
 from pyiem.windrose_utils import windrose
 
 
 class Schema(CGIModel):
-    bins: str = Field(
-        default=None, description="Wind Speed Bins separated by comma"
-    )
-    conv: str = Field(
-        default="from",
-        description=(
-            "Wind Convention, either from (meteorology) or to (engineering)"
+    bins: Annotated[
+        str | None, Field(description="Wind Speed Bins separated by comma")
+    ] = None
+    conv: Annotated[
+        str,
+        Field(
+            description=(
+                "Wind Convention, either from (meteorology) "
+                "or to (engineering)"
+            ),
         ),
-    )
-    dpi: int = Field(
-        default=100, description="Image Dots per inch (DPI)", ge=10, le=1000
-    )
-    ets: AwareDatetime = Field(
-        default=None,
-        description=(
-            "End time with timezone included, otherwise "
-            "{year,month,day,hour,minute}2 values used"
+    ] = "from"
+    dpi: Annotated[
+        int, Field(description="Image Dots per inch (DPI)", ge=10, le=1000)
+    ] = 100
+    ets: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "End time with timezone included, otherwise "
+                "{year,month,day,hour,minute}2 values used"
+            ),
         ),
-    )
-    fmt: str = Field(
-        default="png",
-        description="Output image format, one of png, pdf, svg",
-    )
-    hourlimit: bool = Field(
-        default=False,
-        description="Limit the data to the hour provided",
-    )
-    hourrangelimit: bool = Field(
-        default=False,
-        description="Limit the data to the hour range provided",
-    )
-    justdata: bool = Field(
-        default=False,
-        description="Return data table instead of plot",
-    )
-    level: int = Field(
-        default=None,
-        description="In the case of RAOB data, the hPa level to use",
-        ge=0,
-        le=1050,
-    )
-    limit_by_doy: bool = Field(
-        default=False,
-        description="Limit the data to the day of year range provided",
-    )
+    ] = None
+    fmt: Annotated[
+        str,
+        Field(
+            description="Output image format, one of png, pdf, svg",
+        ),
+    ] = "png"
+    hourlimit: Annotated[
+        bool,
+        Field(
+            description="Limit the data to the hour provided",
+        ),
+    ] = False
+    hourrangelimit: Annotated[
+        bool,
+        Field(
+            description="Limit the data to the hour range provided",
+        ),
+    ] = False
+    justdata: Annotated[
+        bool,
+        Field(
+            description="Return data table instead of plot",
+        ),
+    ] = False
+    level: Annotated[
+        int | None,
+        Field(
+            description="In the case of RAOB data, the hPa level to use",
+            ge=0,
+            le=1050,
+        ),
+    ] = None
+    limit_by_doy: Annotated[
+        bool,
+        Field(
+            description="Limit the data to the day of year range provided",
+        ),
+    ] = False
     monthlimit: Annotated[
         bool,
         Field(
@@ -109,43 +134,33 @@ class Schema(CGIModel):
             le=100,
         ),
     ] = None
-    station: str = Field(..., description="Station Identifier")
-    sts: AwareDatetime = Field(
-        default=None,
-        description=(
-            "Start time with timezone included, otherwise "
-            "{year,month,day,hour,minute}1 values used"
+    station: Annotated[str, Field(description="Station Identifier")]
+    sts: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "Start time with timezone included, otherwise "
+                "{year,month,day,hour,minute}1 values used"
+            ),
         ),
-    )
-    units: str = Field(
-        default="mph",
-        description="Units to use for speed, one of mph, kts, mps, kph",
-        pattern="^(mph|kts|mps|kph)$",
-    )
-    year1: int = Field(
-        default=1900, description="Start Year, if sts not provided"
-    )
-    month1: int = Field(
-        default=1, description="Start Month, if sts not provided"
-    )
-    day1: int = Field(default=1, description="Start Day, if sts not provided")
-    hour1: int = Field(
-        default=0, description="Start Hour, if sts not provided"
-    )
-    minute1: int = Field(
-        default=0, description="Start Minute, if sts not provided"
-    )
-    year2: int = Field(
-        default=2050, description="End Year, if ets not provided"
-    )
-    month2: int = Field(
-        default=1, description="End Month, if ets not provided"
-    )
-    day2: int = Field(default=1, description="End Day, if ets not provided")
-    hour2: int = Field(default=0, description="End Hour, if ets not provided")
-    minute2: int = Field(
-        default=0, description="End Minute, if ets not provided"
-    )
+    ] = None
+    units: Annotated[
+        str,
+        Field(
+            description="Units to use for speed, one of mph, kts, mps, kph",
+            pattern="^(mph|kts|mps|kph)$",
+        ),
+    ] = "mph"
+    year1: YEAR_FIELD = 1946
+    month1: MONTH_FIELD = 1
+    day1: DAY_OF_MONTH_FIELD = 1
+    hour1: HOUR_FIELD = 0
+    minute1: MINUTE_FIELD = 0
+    year2: YEAR_FIELD = utc().year
+    month2: MONTH_FIELD = 1
+    day2: DAY_OF_MONTH_FIELD = 1
+    hour2: HOUR_FIELD = 0
+    minute2: MINUTE_FIELD = 0
 
     @model_validator(mode="after")
     def validator_raob_request(self):
@@ -189,12 +204,13 @@ def guess_network(station):
             "SELECT network from stations where id = %s and not metasite",
             (station,),
         )
-        if cursor.rowcount == 0:
+        row = cursor.fetchone()
+        if row is None:
             raise IncompleteWebRequest(
                 "Failed to guess network for given station. Please provide "
                 "explicit network= to service."
             )
-        res = cursor.fetchone()[0]
+        res = row[0]
     return res
 
 
@@ -279,7 +295,7 @@ def application(environ, start_response):
     if environ["justdata"]:
         # We want text
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [res.encode("utf-8")]
+        return res
     fmt = environ["fmt"]
     if fmt == "png":
         ct = "image/png"
@@ -288,8 +304,8 @@ def application(environ, start_response):
     elif fmt == "svg":
         ct = "image/svg+xml"
     else:
-        return [send_error(environ, "Invalid fmt set", start_response)]
-    start_response("200 OK", [("Content-type", ct)])
+        return send_error(environ, "Invalid fmt set", start_response)
     bio = BytesIO()
     res.savefig(bio, format=fmt, dpi=environ["dpi"])
-    return [bio.getvalue()]
+    start_response("200 OK", [("Content-type", ct)])
+    return bio.getvalue()
