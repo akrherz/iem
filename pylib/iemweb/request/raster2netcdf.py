@@ -36,7 +36,7 @@ import netCDF4
 import numpy as np
 from PIL import Image
 from pydantic import Field, field_validator
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import archive_fetch
 from pyiem.webutil import CGIModel, iemapp
@@ -86,8 +86,7 @@ def get_gridinfo(ppath: str, xpoints, ypoints):
     return lons, lats
 
 
-@with_sqlalchemy_conn("mesosite")
-def get_table(prod: str, conn: Connection | None = None):
+def get_table(prod: str, conn: Connection):
     """Return our lookup table"""
     res = conn.execute(
         sql_helper("""
@@ -97,12 +96,15 @@ def get_table(prod: str, conn: Connection | None = None):
         {"prod": prod},
     )
     rid = None
+    template = None
+    units = None
+    long_name = None
     for row in res.mappings():
         rid = row["id"]
         template = row["filename_template"]
         units = row["units"]
         long_name = row["cf_long_name"]
-    if rid is None:
+    if rid is None or template is None or units is None or long_name is None:
         raise IncompleteWebRequest("Unknown prod")
     res = conn.execute(
         sql_helper("""
@@ -139,7 +141,8 @@ def make_netcdf(xpoints, ypoints, lons, lats):
 def do_work(valid: datetime, prod: str, start_response):
     """Our workflow"""
     # Get lookup table
-    xref, template, units, long_name = get_table(prod)
+    with get_sqlalchemy_conn("mesosite") as conn:
+        xref, template, units, long_name = get_table(prod, conn)
     # Get RASTER
     ppath = valid.strftime(template).replace("/mesonet/ARCHIVE/data", "")
     with archive_fetch(ppath) as fh:
@@ -179,7 +182,7 @@ def do_work(valid: datetime, prod: str, start_response):
     return bio.getvalue()
 
 
-@iemapp(help=__doc__, schema=Schema)
+@iemapp(help=__doc__, schema=Schema, ip_throttle_secs=1)
 def application(environ, start_response):
     """Do great things"""
     slot_fd = acquire_slot("raster2netcdf", 4)

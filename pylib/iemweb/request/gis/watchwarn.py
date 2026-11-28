@@ -141,6 +141,7 @@ class Schema(CGIModel):
                 "The timestamp to use when ``timeopt=2``, which the service "
                 "provides events valid at the specified time."
             ),
+            ge=utc(1986, 1, 1),
         ),
     ] = None
     addsvs: Annotated[

@@ -270,7 +270,7 @@ def plotter(ctx: Params):
     )
     ax.grid(True)
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(
+    h_slope, intercept, r_value, _, _ = stats.linregress(  # type: ignore
         xdata.to_numpy(), ydata.to_numpy()
     )
     y = h_slope * np.arange(xdata.min(), xdata.max()) + intercept
@@ -300,7 +300,7 @@ def plotter(ctx: Params):
 
     box = ax.get_position()
     ax.set_position(
-        [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
+        (box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95)
     )
     ax.axhline(y, linestyle="--", color="g")
     ax.axvline(x, linestyle="--", color="g")
